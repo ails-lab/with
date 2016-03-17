@@ -11,6 +11,7 @@ html
 	// body
 	body
 
+		// header
 		header
 			.wrap
 				.container
@@ -25,11 +26,18 @@ html
 								a(href="search-view.html" title="home") EXPLORE
 							li
 								a(href="about.html" title="home") ABOUT
-							li
-								a(href="search-view.html" title="home") SEARCH
+							li.mobile
+								a( href="login.html" class="login") SIGN IN
+								a( href="register.html" class="register") REGISTER
+
+					// login
 					section.login-section
 						a( href="login.html" class="login") SIGN IN
 						a( href="register.html" class="register") REGISTER
+
+					// mobile menu trigger
+					a.mobile-trigger( href="#" )
+						.burger
 
 		// main
 		div( role="main" )

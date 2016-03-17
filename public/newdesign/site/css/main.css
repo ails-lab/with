@@ -188,6 +188,9 @@ a {
 .listing.itemlistview .grid .item .info .title {
   margin-bottom: 0;
 }
+.listing.itemlistview .grid .item.selected::after {
+  background: #4f7979;
+}
 .listing.itemlistview .action-group {
   position: relative;
   text-align: right;
@@ -210,7 +213,7 @@ a {
   height: 1px;
   background-color: #ccc;
   position: absolute;
-  top: 14px;
+  top: 12px;
   left: 0;
 }
 .listing.itemlistview .action-group .wrap .links {
@@ -256,8 +259,6 @@ a {
   color: #e46667  !important;
 }
 .listing.itemlistview .action-group .wrap ul li .selectitem {
-  position: relative;
-  top: 1px;
   cursor: pointer;
 }
 body .popover {
@@ -737,52 +738,64 @@ body div[role='main'] {
   /* equal to footer height */
   margin-bottom: -109px;
 }
-body div[role='main'].homepage {
-  padding-top: 72px;
-}
-body div[role='main'].homepage:before,
-body div[role='main'].homepage:after {
-  content: " ";
-  display: table;
-}
-body div[role='main'].homepage:after {
-  clear: both;
-}
-body div[role='main'].homepage section.hero {
+body div[role='main'] section.hero {
   padding: 40px 0;
   text-align: center;
 }
-body div[role='main'].homepage section.hero .hero-img {
+body div[role='main'] section.hero .hero-img {
   width: 50px;
   margin-bottom: 15px;
 }
-body div[role='main'].homepage section.hero .hero-heading {
+body div[role='main'] section.hero .hero-heading {
   font-size: 20px;
   margin-bottom: 5px;
 }
-body div[role='main'].homepage section.hero .hero-desc {
+body div[role='main'] section.hero .hero-desc {
   margin: auto;
   font-style: italic;
   width: 50%;
   line-height: 1.4em;
 }
-body div[role='main'].homepage section.selection {
-  border-top: 1px solid #d7d7d7;
-  border-bottom: 1px solid #d7d7d7;
+body div[role='main'] section.hero .hero-longdesc {
+  text-align: justify;
+  margin-top: 30px;
+  line-height: 1.9em;
 }
-body div[role='main'].homepage section.selection ul {
-  margin: 0;
-  padding: 0;
-}
-body div[role='main'].homepage section.selection ul:before,
-body div[role='main'].homepage section.selection ul:after {
+body div[role='main'] section.hero .hero-longdesc:before,
+body div[role='main'] section.hero .hero-longdesc:after {
   content: " ";
   display: table;
 }
-body div[role='main'].homepage section.selection ul:after {
+body div[role='main'] section.hero .hero-longdesc:after {
   clear: both;
 }
-body div[role='main'].homepage section.selection ul li {
+body div[role='main'] section.hero .hero-longdesc .left {
+  float: left;
+  width: 50%;
+  padding-right: 15px;
+}
+body div[role='main'] section.hero .hero-longdesc .right {
+  float: left;
+  width: 50%;
+  padding-left: 15px;
+}
+body div[role='main'] section.selection {
+  border-top: 1px solid #d7d7d7;
+  border-bottom: 1px solid #d7d7d7;
+}
+body div[role='main'] section.selection ul {
+  margin: 0;
+  padding: 0;
+}
+body div[role='main'] section.selection ul:before,
+body div[role='main'] section.selection ul:after {
+  content: " ";
+  display: table;
+}
+body div[role='main'] section.selection ul:after {
+  clear: both;
+}
+body div[role='main'] section.selection ul li {
   list-style: none;
   float: left;
   width: 16.66666667%;
@@ -790,17 +803,17 @@ body div[role='main'].homepage section.selection ul li {
   height: 174px;
   position: relative;
 }
-body div[role='main'].homepage section.selection ul li:first-child {
+body div[role='main'] section.selection ul li:first-child {
   border-left: 1px solid #d7d7d7;
 }
-body div[role='main'].homepage section.selection ul li:hover .select-hover {
+body div[role='main'] section.selection ul li:hover .select-hover {
   opacity: 1;
 }
-body div[role='main'].homepage section.selection ul li:hover .select-idle {
+body div[role='main'] section.selection ul li:hover .select-idle {
   opacity: 0;
   visibility: hidden;
 }
-body div[role='main'].homepage section.selection ul li .select-hover {
+body div[role='main'] section.selection ul li .select-hover {
   position: relative;
   opacity: 0;
   height: inherit;
@@ -812,14 +825,14 @@ body div[role='main'].homepage section.selection ul li .select-hover {
   -o-transition: all 0.3s;
   transition: all 0.3s;
 }
-body div[role='main'].homepage section.selection ul li .select-hover p {
+body div[role='main'] section.selection ul li .select-hover p {
   color: inherit;
   margin-bottom: 15px;
   font-size: 14px;
   max-height: 70px;
   overflow: hidden;
 }
-body div[role='main'].homepage section.selection ul li .select-hover a {
+body div[role='main'] section.selection ul li .select-hover a {
   color: #e6e6e6;
   width: 100%;
   border: 1px solid ;
@@ -835,61 +848,61 @@ body div[role='main'].homepage section.selection ul li .select-hover a {
   padding: 3px 0;
   letter-spacing: 1.3px;
 }
-body div[role='main'].homepage section.selection ul li .select-hover a div {
+body div[role='main'] section.selection ul li .select-hover a div {
   position: absolute;
   background: white;
   -webkit-transition: all 0.3s;
   -o-transition: all 0.3s;
   transition: all 0.3s;
 }
-body div[role='main'].homepage section.selection ul li .select-hover a div.left {
+body div[role='main'] section.selection ul li .select-hover a div.left {
   left: -1px;
   bottom: 0;
   width: 2px;
   height: 0;
 }
-body div[role='main'].homepage section.selection ul li .select-hover a div.right {
+body div[role='main'] section.selection ul li .select-hover a div.right {
   right: -1px;
   top: 0;
   width: 2px;
   height: 0;
 }
-body div[role='main'].homepage section.selection ul li .select-hover a div.bot {
+body div[role='main'] section.selection ul li .select-hover a div.bot {
   height: 2px;
   width: 0;
   right: 0;
   bottom: -1px;
 }
-body div[role='main'].homepage section.selection ul li .select-hover a div.top {
+body div[role='main'] section.selection ul li .select-hover a div.top {
   height: 2px;
   width: 0;
   left: 0;
   top: -1px;
 }
-body div[role='main'].homepage section.selection ul li .select-hover a:hover div.left {
+body div[role='main'] section.selection ul li .select-hover a:hover div.left {
   height: 100%;
 }
-body div[role='main'].homepage section.selection ul li .select-hover a:hover div.right {
+body div[role='main'] section.selection ul li .select-hover a:hover div.right {
   height: 100%;
 }
-body div[role='main'].homepage section.selection ul li .select-hover a:hover div.bot {
+body div[role='main'] section.selection ul li .select-hover a:hover div.bot {
   width: 100%;
 }
-body div[role='main'].homepage section.selection ul li .select-hover a:hover div.top {
+body div[role='main'] section.selection ul li .select-hover a:hover div.top {
   width: 100%;
 }
-body div[role='main'].homepage section.selection ul li .select-hover a:hover {
+body div[role='main'] section.selection ul li .select-hover a:hover {
   color: white;
   background: #598080;
 }
-body div[role='main'].homepage section.selection ul li .select-idle {
+body div[role='main'] section.selection ul li .select-idle {
   position: absolute;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
 }
-body div[role='main'].homepage section.selection ul li .select-idle::after {
+body div[role='main'] section.selection ul li .select-idle::after {
   content: '';
   position: absolute;
   right: -3px;
@@ -903,18 +916,222 @@ body div[role='main'].homepage section.selection ul li .select-idle::after {
   -webkit-transform: rotate(45deg);
   -ms-transform: rotate(45deg);
 }
-body div[role='main'].homepage section.selection ul li .select-idle .icon {
+body div[role='main'] section.selection ul li .select-idle .icon {
   display: table;
   height: 35px;
   margin: 50px auto 22px;
 }
-body div[role='main'].homepage section.selection ul li .select-idle .select-heading {
+body div[role='main'] section.selection ul li .select-idle .select-heading {
   display: table;
   margin: auto;
   text-transform: uppercase;
   font-size: 12px;
   font-weight: 600;
   letter-spacing: 1px;
+}
+body div[role='main'].about {
+  padding-top: 72px;
+}
+body div[role='main'].about .selection ul li:hover .select-idle {
+  visibility: visible;
+  opacity: 1;
+}
+body div[role='main'].about .selection ul li:hover .select-idle::after {
+  opacity: 1;
+}
+body div[role='main'].about .selection ul li .select-idle a {
+  color: inherit;
+}
+body div[role='main'].about .selection ul li .select-idle a:hover {
+  text-decoration: none;
+}
+body div[role='main'].about .selection ul li .select-idle::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  bottom: 0px;
+  background: #4f7979;
+  width: 100%;
+  height: 5px;
+  border: 0;
+  transform: rotate(0deg);
+  -webkit-transform: rotate(0deg);
+  -ms-transform: rotate(0deg);
+  opacity: 0;
+  filter: alpha(opacity=0);
+  -webkit-transition: opacity 0.3s;
+  -o-transition: opacity 0.3s;
+  transition: opacity 0.3s;
+}
+body div[role='main'].about .selectioncontent {
+  padding: 40px 0 40px 0;
+  overflow: hidden;
+}
+body div[role='main'].about .selectioncontent .content {
+  padding: 40px 0 40px 0;
+}
+body div[role='main'].about .selectioncontent .content:before,
+body div[role='main'].about .selectioncontent .content:after {
+  content: " ";
+  display: table;
+}
+body div[role='main'].about .selectioncontent .content:after {
+  clear: both;
+}
+body div[role='main'].about .selectioncontent .content h1 {
+  font-size: 2.4rem;
+  margin: 0 0 20px 0;
+  color: #4f7979;
+  text-align: left;
+  width: 70%;
+  margin-top: 60px;
+}
+body div[role='main'].about .selectioncontent .content p {
+  color: #757575;
+  text-align: left;
+  width: 80%;
+}
+body div[role='main'].about .selectioncontent .content .thumbwide {
+  box-shadow: 10px;
+  -webkit-box-shadow: 0px 0px 34px 0px rgba(0, 0, 0, 0.2);
+  -moz-box-shadow: 0px 0px 34px 0px rgba(0, 0, 0, 0.2);
+  box-shadow: 0px 0px 34px 0px rgba(0, 0, 0, 0.2);
+  position: static;
+  overflow: hidden;
+  max-width: 300%;
+  float: left;
+  border-radius: 5px;
+}
+body div[role='main'].about .selectioncontent .content .thumbwide.left {
+  float: right;
+}
+body div[role='main'].about .selectioncontent .content .thumbs {
+  box-shadow: 10px;
+  -webkit-box-shadow: 0px 0px 34px 0px rgba(0, 0, 0, 0.2);
+  -moz-box-shadow: 0px 0px 34px 0px rgba(0, 0, 0, 0.2);
+  box-shadow: 0px 0px 34px 0px rgba(0, 0, 0, 0.2);
+  border-radius: 5px;
+}
+body div[role='main'].about .selectioncontent .content .left {
+  width: 50%;
+  float: left;
+  padding-right: 20px;
+  position: relative;
+  text-align: center;
+}
+body div[role='main'].about .selectioncontent .content .right {
+  width: 50%;
+  float: left;
+  padding-left: 20px;
+  position: relative;
+  text-align: center;
+}
+body div[role='main'].about .aboutlink {
+  border-top: 1px solid #d7d7d7;
+  padding: 20px 0 20px 0;
+}
+body div[role='main'].about .aboutlink:before,
+body div[role='main'].about .aboutlink:after {
+  content: " ";
+  display: table;
+}
+body div[role='main'].about .aboutlink:after {
+  clear: both;
+}
+body div[role='main'].about .aboutlink .left {
+  float: left;
+}
+body div[role='main'].about .aboutlink .left ul {
+  margin: 0;
+  padding: 5px 0 0 0;
+}
+body div[role='main'].about .aboutlink .left ul li {
+  list-style-type: none;
+  display: inline-block;
+  margin: 0 15px 0 0;
+}
+body div[role='main'].about .aboutlink .left ul li a {
+  font-size: 1.4rem;
+}
+body div[role='main'].about .aboutlink .right {
+  float: right;
+}
+body div[role='main'].about .aboutlink .right .register {
+  padding: 5px 30px;
+  font-size: 12px;
+  letter-spacing: 1.3px;
+  text-transform: uppercase;
+  color: #b5b5b5;
+  display: block;
+  border: 1px solid #b5b5b5;
+  text-decoration: none;
+  position: relative;
+  -webkit-transition: all 0.3s;
+  -o-transition: all 0.3s;
+  transition: all 0.3s;
+  font-weight: 600;
+  clear: both;
+  display: table;
+  margin: 0 auto;
+  width: 200px;
+  text-align: center;
+}
+body div[role='main'].about .aboutlink .right .register:hover {
+  color: #828282;
+}
+body div[role='main'].about .aboutlink .right .register div {
+  position: absolute;
+  background: #9c9c9c;
+  -webkit-transition: all 0.3s;
+  -o-transition: all 0.3s;
+  transition: all 0.3s;
+}
+body div[role='main'].about .aboutlink .right .register div.left {
+  left: -1px;
+  bottom: 0;
+  width: 2px;
+  height: 0;
+}
+body div[role='main'].about .aboutlink .right .register div.right {
+  right: -1px;
+  top: 0;
+  width: 2px;
+  height: 0;
+}
+body div[role='main'].about .aboutlink .right .register div.bot {
+  height: 2px;
+  width: 0;
+  right: 0;
+  bottom: -1px;
+}
+body div[role='main'].about .aboutlink .right .register div.top {
+  height: 2px;
+  width: 0;
+  left: 0;
+  top: -1px;
+}
+body div[role='main'].about .aboutlink .right .register:hover div.left {
+  height: 100%;
+}
+body div[role='main'].about .aboutlink .right .register:hover div.right {
+  height: 100%;
+}
+body div[role='main'].about .aboutlink .right .register:hover div.bot {
+  width: 100%;
+}
+body div[role='main'].about .aboutlink .right .register:hover div.top {
+  width: 100%;
+}
+body div[role='main'].homepage {
+  padding-top: 72px;
+}
+body div[role='main'].homepage:before,
+body div[role='main'].homepage:after {
+  content: " ";
+  display: table;
+}
+body div[role='main'].homepage:after {
+  clear: both;
 }
 body div[role='main'].homepage section.featured {
   padding: 45px 0 40px;
@@ -1462,13 +1679,32 @@ body div[role='main'] .wrapper .alert .close {
   right: -16px;
 }
 body div[role='main'] .wrapper aside {
-  width: 20%;
+  width: 101px;
   float: left;
   position: fixed;
+  z-index: 10;
   bottom: 0;
-  top: 74px;
+  top: 75px;
   background: #f4f4f4;
-  padding: 35px 30px;
+  padding: 35px 0px 35px 30px;
+  -webkit-transition: all 0.5s;
+  -o-transition: all 0.5s;
+  transition: all 0.5s;
+}
+body div[role='main'] .wrapper aside:hover {
+  width: 280px;
+}
+body div[role='main'] .wrapper aside:hover .site {
+  display: block;
+}
+body div[role='main'] .wrapper aside:hover .app ul li a .text {
+  left: 50px;
+}
+body div[role='main'] .wrapper aside:hover .app ul li a .counter {
+  left: auto;
+  right: 0px;
+  opacity: 1;
+  filter: alpha(opacity=100);
 }
 body div[role='main'] .wrapper aside label.header {
   font-size: 11px;
@@ -1485,6 +1721,7 @@ body div[role='main'] .wrapper aside .app ul li {
   list-style: none;
   font-size: 14px;
   margin-bottom: 1px;
+  margin-bottom: 2px;
 }
 body div[role='main'] .wrapper aside .app ul li a {
   color: #878787;
@@ -1492,17 +1729,38 @@ body div[role='main'] .wrapper aside .app ul li a {
   padding: 4px 0 4px 0;
   border-top-right-radius: 3px;
   border-bottom-right-radius: 3px;
+  height: 40px;
+  position: relative;
+}
+body div[role='main'] .wrapper aside .app ul li a:before,
+body div[role='main'] .wrapper aside .app ul li a:after {
+  content: " ";
+  display: table;
+}
+body div[role='main'] .wrapper aside .app ul li a:after {
+  clear: both;
 }
 body div[role='main'] .wrapper aside .app ul li a .icon {
   float: left;
   width: 20px;
   text-align: center;
   margin: 1px 10px 0 0;
+  font-size: 2rem;
+  border: 1px solid #d7d7d7;
+  border-radius: 3px;
+  width: 40px;
+  color: #999;
+  background: #fff;
+}
+body div[role='main'] .wrapper aside .app ul li a .text {
+  position: absolute;
+  left: -200px;
+  top: 12px;
 }
 body div[role='main'] .wrapper aside .app ul li a .counter {
   float: right;
   margin-right: 15px;
-  margin-top: 2px;
+  top: 13px;
   border-radius: 20px;
   display: block;
   border: 1px solid #9a9a9a;
@@ -1513,24 +1771,58 @@ body div[role='main'] .wrapper aside .app ul li a .counter {
   font-size: 11px;
   line-height: 10px;
   height: 20px;
+  position: absolute;
+  opacity: 0;
+  filter: alpha(opacity=0);
+  -webkit-transition: opacity 0.6s;
+  -o-transition: opacity 0.6s;
+  transition: opacity 0.6s;
+  left: -200px;
 }
-body div[role='main'] .wrapper aside .app ul li:hover a,
-body div[role='main'] .wrapper aside .app ul li.active a {
-  background: #7f9d9d;
-  color: #fff;
-  margin-left: -30px;
-  padding-left: 30px;
+body div[role='main'] .wrapper aside .app ul li:hover a {
   text-decoration: none;
 }
-body div[role='main'] .wrapper aside .app ul li:hover a .counter,
-body div[role='main'] .wrapper aside .app ul li.active a .counter {
-  background: #4f7979;
+body div[role='main'] .wrapper aside .app ul li:hover a .icon {
+  background: #7f9d9d;
+  border: 1px solid #7f9d9d;
   color: #fff;
-  border: 1px solid #4f7979;
+}
+body div[role='main'] .wrapper aside .app ul li:hover a .text {
+  color: #4f7979;
+  display: block;
+}
+body div[role='main'] .wrapper aside .app ul li.active {
+  /* anchor
+								a {
+									background: #7f9d9d;
+									color: #fff;
+									margin-left: -30px;
+									padding-left: 30px;
+									text-decoration: none;
+
+									// counter
+									.counter {
+										background: @brand-dashboard;
+										color: #fff;
+										border: 1px solid @brand-dashboard;
+									}
+								}*/
+}
+body div[role='main'] .wrapper aside .app ul li.active a {
+  text-decoration: none;
+}
+body div[role='main'] .wrapper aside .app ul li.active a .icon {
+  background: #7f9d9d;
+  border: 1px solid #7f9d9d;
+  color: #fff;
+}
+body div[role='main'] .wrapper aside .app ul li.active a .text {
+  color: #4f7979;
 }
 body div[role='main'] .wrapper aside .site {
   position: absolute;
   bottom: 35px;
+  display: none;
 }
 body div[role='main'] .wrapper aside .site ul {
   margin: 0;
@@ -1553,9 +1845,9 @@ body div[role='main'] .wrapper aside .site ul li a:hover {
   text-decoration: none;
 }
 body div[role='main'] .wrapper main {
-  width: 80%;
+  width: calc(100% - 101px);
   float: left;
-  margin-left: 20%;
+  margin-left: 101px;
   padding: 35px 30px 35px 35px;
 }
 body div[role='main'] .wrapper main.full-page {
@@ -2166,6 +2458,7 @@ body div[role='main'] .wrapper main section.exhibition section.exhibition-list .
 body div[role='main'] .wrapper main section.project section.exhibition-list .list-body.list li .thumbnails .wrap,
 body div[role='main'] .wrapper main section.favorite section.exhibition-list .list-body.list li .thumbnails .wrap {
   width: 100%;
+  overflow: hidden;
 }
 body div[role='main'] .wrapper main section.collection section.exhibition-list .list-body.list li .thumbnails .wrap::after,
 body div[role='main'] .wrapper main section.exhibition section.exhibition-list .list-body.list li .thumbnails .wrap::after,
@@ -2241,6 +2534,7 @@ body div[role='main'] .wrapper main section.exhibition section.project-list .lis
 body div[role='main'] .wrapper main section.project section.project-list .list-body.list li .thumbnails .wrap,
 body div[role='main'] .wrapper main section.favorite section.project-list .list-body.list li .thumbnails .wrap {
   width: 100%;
+  overflow: hidden;
 }
 body div[role='main'] .wrapper main section.collection section.project-list .list-body.list li .thumbnails .wrap.small,
 body div[role='main'] .wrapper main section.exhibition section.project-list .list-body.list li .thumbnails .wrap.small,
@@ -2889,6 +3183,7 @@ body div[role='main'] .wrapper main section.favorite section.hero .meta {
   float: left;
   width: 70%;
   padding: 0 20px 0 0;
+  text-align: left;
 }
 body div[role='main'] .wrapper main section.collection section.hero .meta .top-info,
 body div[role='main'] .wrapper main section.exhibition section.hero .meta .top-info,
@@ -3496,7 +3791,7 @@ body div[role='main'] .wrapper main section.exhibition .editorbox .wrap {
   height: 100%;
 }
 body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .scroll {
-  width: 2000px;
+  width: 3500px;
   padding: 20px;
   height: 100%;
 }
@@ -3507,12 +3802,11 @@ body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .scroll 
   float: left;
   margin-right: 20px;
   background: #fff;
-  overflow: auto;
   padding: 40px;
 }
 body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .scroll .box.fill,
 body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .scroll .add.fill {
-  width: 580px;
+  width: 750px;
   padding: 20px 20px 20px 20px;
 }
 body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .scroll .box.fill:before,
@@ -3529,13 +3823,89 @@ body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .scroll 
 body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .scroll .box.fill .left,
 body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .scroll .add.fill .left {
   float: left;
-  width: 50%;
+  width: 35%;
   padding: 0 20px 0 0;
 }
 body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .scroll .box.fill .right,
 body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .scroll .add.fill .right {
-  float: right;
+  float: left;
   width: 50%;
+  padding: 0 20px 0 0;
+}
+body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .scroll .box.fill .video,
+body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .scroll .add.fill .video {
+  float: left;
+  width: 15%;
+  height: 280px;
+  border: 1px solid #c6c6c6;
+  padding: 10px;
+  position: relative;
+}
+body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .scroll .box.fill .video .embed-responsive,
+body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .scroll .add.fill .video .embed-responsive {
+  background: #dedede;
+}
+body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .scroll .box.fill .video .imginfo,
+body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .scroll .add.fill .video .imginfo {
+  height: 132px;
+  overflow: auto;
+}
+body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .scroll .box.fill .video .addvideo,
+body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .scroll .add.fill .video .addvideo {
+  width: 100%;
+  height: 100%;
+  display: block;
+  text-align: center;
+}
+body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .scroll .box.fill .video .addvideo img,
+body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .scroll .add.fill .video .addvideo img {
+  margin-top: 113px;
+}
+body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .scroll .box.fill .video .addvideo:hover,
+body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .scroll .add.fill .video .addvideo:hover {
+  background: #f9f9f9;
+}
+body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .scroll .box.fill .video .action,
+body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .scroll .add.fill .video .action {
+  position: absolute;
+  bottom: -27px;
+  left: -1px;
+  margin: 0px;
+  padding: 0;
+}
+body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .scroll .box.fill .video .action li,
+body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .scroll .add.fill .video .action li {
+  list-style-type: none;
+  float: left;
+  margin-right: -1px;
+  border: 1px solid #c6c6c6;
+  background: #fff;
+}
+body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .scroll .box.fill .video .action li a,
+body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .scroll .add.fill .video .action li a {
+  display: inline-block;
+  width: 25px;
+  height: 25px;
+  text-align: center;
+  position: relative;
+  background: #fff;
+}
+body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .scroll .box.fill.videoadded .left,
+body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .scroll .add.fill.videoadded .left {
+  float: left;
+  width: 35%;
+  padding: 0 20px 0 0;
+}
+body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .scroll .box.fill.videoadded .right,
+body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .scroll .add.fill.videoadded .right {
+  float: left;
+  width: 40%;
+  padding: 0 20px 0 0;
+}
+body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .scroll .box.fill.videoadded .video,
+body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .scroll .add.fill.videoadded .video {
+  float: left;
+  width: 25%;
 }
 body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .scroll .box.fill .imgwrap,
 body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .scroll .add.fill .imgwrap {
@@ -4080,6 +4450,19 @@ body div[role='main'] .wrapper .search .searchfilter .providerselection {
 body div[role='main'] .wrapper .search .searchresults {
   padding-top: 99px;
   height: 100%;
+  position: relative;
+  -webkit-transition: all 0.3s;
+  -o-transition: all 0.3s;
+  transition: all 0.3s;
+}
+body div[role='main'] .wrapper .search .searchresults.openfilter {
+  padding-right: 400px;
+}
+body div[role='main'] .wrapper .search .searchresults.openfilter .container {
+  width: 100%;
+}
+body div[role='main'] .wrapper .search .searchresults.openfilter .multiplecollect {
+  right: 430px;
 }
 body div[role='main'] .wrapper .search .searchresults .pointer {
   position: absolute;
@@ -4089,8 +4472,36 @@ body div[role='main'] .wrapper .search .searchresults .pointer {
   filter: alpha(opacity=50);
   display: none;
 }
+body div[role='main'] .wrapper .search .searchresults .multiplecollect {
+  position: fixed;
+  top: 203px;
+  right: 30px;
+  display: block;
+  padding: 8px 20px 8px 20px;
+  background: #4f7979;
+  color: #fff;
+  text-align: center;
+  font-size: 1.2rem;
+  letter-spacing: 1px;
+  opacity: 0;
+  filter: alpha(opacity=0);
+  z-index: 1;
+  -webkit-transition: all 0.3s;
+  -o-transition: all 0.3s;
+  transition: all 0.3s;
+}
+body div[role='main'] .wrapper .search .searchresults .multiplecollect.show {
+  opacity: 0.8;
+  filter: alpha(opacity=80);
+}
+body div[role='main'] .wrapper .search .searchresults .multiplecollect.show:hover {
+  opacity: 1;
+  filter: alpha(opacity=100);
+  text-decoration: none;
+}
 body div[role='main'] .wrapper .search .gridlist {
   display: none;
+  position: relative;
 }
 body div[role='main'] .wrapper .search .gridlist.active {
   display: block;
@@ -4366,7 +4777,7 @@ body div[role='main'] .wrapper .itemview {
   left: 0;
   right: 0;
   background: #f4f4f4;
-  z-index: 9;
+  z-index: 11;
   position: fixed;
   display: none;
 }
@@ -4814,6 +5225,32 @@ body div[role='main'] .wrapper section.action.active {
 body div[role='main'] .wrapper section.action.access .action-body {
   padding: 25px 0 0;
 }
+body div[role='main'] .wrapper section.action.access .auto {
+  position: relative;
+}
+body div[role='main'] .wrapper section.action.access .autocomplete-suggestions {
+  border: 1px solid #ccc;
+  background: white;
+}
+body div[role='main'] .wrapper section.action.access .autocomplete-suggestions > .autocomplete-selected {
+  background-color: #dedede;
+}
+body div[role='main'] .wrapper section.action.access .autocomplete-suggestions-extra {
+  font-size: 12pt;
+}
+body div[role='main'] .wrapper section.action.access .autocomplete-suggestion-extra {
+  background-color: #FAFAFA;
+  cursor: pointer;
+  padding: 3px 8px 3px 8px;
+}
+body div[role='main'] .wrapper section.action.access .autocomplete-suggestion-extra:hover {
+  background: #e3e3e3;
+}
+body div[role='main'] .wrapper section.action.access .autocomplete-suggestion-extra .label {
+  background-color: #f39e31;
+  border-radius: 8px;
+  margin: 5px 0;
+}
 body div[role='main'] .wrapper section.action.collect .action-body textarea {
   height: 150px;
 }
@@ -5215,6 +5652,12 @@ body div[role='main'] .wrapper section.action .action-body select:focus {
   box-shadow: none;
   border: 1px solid #4f7979;
 }
+body div[role='main'] .wrapper section.action .action-body .info {
+  display: block;
+  font-size: 1.4rem;
+  color: #8f8f8f;
+  font-style: italic;
+}
 body div[role='main'] .wrapper section.action .action-body textarea {
   height: 110px;
   padding: 10px;
@@ -5315,7 +5758,7 @@ body div[role='main'] .wrapper section.action .action-body ul.access-list:after 
 body div[role='main'] .wrapper section.action .action-body ul.access-list li {
   float: left;
   padding-bottom: 20px;
-  margin: 0 10px 10px;
+  margin: 0 5px 10px;
   position: relative;
 }
 body div[role='main'] .wrapper section.action .action-body ul.access-list li:hover .toggle {
@@ -5375,7 +5818,7 @@ body div[role='main'] .wrapper section.action .action-body ul.access-list li .tr
 }
 body div[role='main'] .wrapper section.action .action-body ul.access-list li .toggle {
   bottom: 0;
-  left: 10px;
+  left: 13px;
   position: absolute;
   display: none;
 }
@@ -5869,6 +6312,7 @@ body div[role='main'] .viewer section.hero .meta {
   float: left;
   width: 70%;
   padding: 0 20px 0 0;
+  text-align: left;
 }
 body div[role='main'] .viewer section.hero .meta .top-info {
   margin-bottom: 30px;
@@ -5916,6 +6360,10 @@ body div[role='main'] .viewer section.hero .meta .top-info .header .location {
 body div[role='main'] .viewer section.hero .meta .top-info .header a {
   color: white;
   line-height: 1;
+}
+body div[role='main'] .viewer section.hero .meta .description {
+  height: 86px;
+  overflow: auto;
 }
 body div[role='main'] .viewer section.hero .map {
   height: 200px;
@@ -6254,18 +6702,36 @@ body div[role='main'] section.entrance .input-group:after {
 body div[role='main'] section.entrance .input-group:after {
   clear: both;
 }
+body div[role='main'] section.entrance .input-group .left,
+body div[role='main'] section.entrance .input-group .right {
+  float: left;
+  width: 49%;
+  margin-right: 1%;
+  margin-bottom: 10px;
+}
+body div[role='main'] section.entrance .input-group .right {
+  float: left;
+  margin-left: 1%;
+  margin-right: 0;
+  width: 49%;
+}
+body div[role='main'] section.entrance .input-group .errormsg {
+  color: #9c3b3b;
+  line-height: 1.3em;
+  text-align: right;
+  display: block;
+  padding: 3px 0 0 0;
+  font-style: italic;
+}
 body div[role='main'] section.entrance .input-group input[type="text"],
 body div[role='main'] section.entrance .input-group input[type="password"] {
   padding: 11px 20px;
-  width: 49%;
-  float: left;
   border: none;
   border: 1px solid #cfcfcf;
-  margin-bottom: 10px;
+  width: 100%;
   -webkit-transition: all 0.3s;
   -o-transition: all 0.3s;
   transition: all 0.3s;
-  margin-right: 1%;
 }
 body div[role='main'] section.entrance .input-group input[type="text"]:hover,
 body div[role='main'] section.entrance .input-group input[type="password"]:hover,
@@ -6274,12 +6740,9 @@ body div[role='main'] section.entrance .input-group input[type="password"]:focus
   outline: none;
   border: 1px solid #4f7979;
 }
-body div[role='main'] section.entrance .input-group input[type="text"] + input[type="text"],
-body div[role='main'] section.entrance .input-group input[type="password"] + input[type="text"],
-body div[role='main'] section.entrance .input-group input[type="text"] + input[type="password"],
-body div[role='main'] section.entrance .input-group input[type="password"] + input[type="password"] {
-  margin-left: 1%;
-  margin-right: 0;
+body div[role='main'] section.entrance .input-group input[type="text"].error,
+body div[role='main'] section.entrance .input-group input[type="password"].error {
+  border: 1px solid #9c3b3b;
 }
 body div[role='main'] section.entrance .input-group select {
   border-radius: 0;
@@ -6557,6 +7020,179 @@ body div[role='main']::after {
   display: block;
   height: 109px;
 }
+body div[role='main'] .static {
+  padding-top: 72px;
+}
+body div[role='main'] .static:before,
+body div[role='main'] .static:after {
+  content: " ";
+  display: table;
+}
+body div[role='main'] .static:after {
+  clear: both;
+}
+body div[role='main'] .static aside {
+  float: left;
+  width: 20%;
+  padding: 40px 0px 30px 0px;
+}
+body div[role='main'] .static aside ul {
+  margin: 0;
+  padding: 0;
+}
+body div[role='main'] .static aside ul li {
+  list-style-type: none;
+  display: block;
+  margin-bottom: 1px;
+}
+body div[role='main'] .static aside ul li a {
+  display: block;
+  text-align: right;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  padding: 7px 30px 7px 0;
+  position: relative;
+  right: -1px;
+  color: #999;
+  font-size: 1.4rem;
+  border-top-left-radius: 3px;
+  border-bottom-left-radius: 3px;
+  -webkit-transition: all 0.3s;
+  -o-transition: all 0.3s;
+  transition: all 0.3s;
+}
+body div[role='main'] .static aside ul li a:hover {
+  background: #7f9d9d;
+  color: #fff;
+  text-decoration: none;
+}
+body div[role='main'] .static aside ul li.active a {
+  background: #7f9d9d;
+  color: #fff;
+}
+body div[role='main'] .static .staticcontent {
+  float: left;
+  width: 80%;
+  padding: 40px 0 30px 30px;
+  border-left: 1px solid #d7d7d7;
+}
+body div[role='main'] .static .staticcontent h1 {
+  margin-top: 0;
+}
+body div[role='main'] .static .staticcontent .panel-group .panel {
+  background: none;
+  border-radius: 0;
+  border: 0;
+  box-shadow: none;
+  margin-bottom: 10px;
+}
+body div[role='main'] .static .staticcontent .panel-group .panel .panel-heading {
+  background: none;
+  padding: 0 0 10px 0;
+  border-bottom: 1px solid #eeeeee;
+}
+body div[role='main'] .static .staticcontent .panel-group .panel .panel-heading a {
+  font-size: 2rem;
+  font-weight: normal;
+  color: #8f8f8f;
+}
+body div[role='main'] .static .staticcontent .panel-group .panel .panel-heading a:hover,
+body div[role='main'] .static .staticcontent .panel-group .panel .panel-heading a:visited,
+body div[role='main'] .static .staticcontent .panel-group .panel .panel-heading a:focus {
+  text-decoration: none;
+}
+body div[role='main'] .static .staticcontent .panel-group .panel .panel-heading a .arrow {
+  display: inline-block;
+  float: right;
+  width: 10px;
+  height: 7px;
+  margin-top: 15px;
+  background: url('../img/ui/ic-arrow-dark.png');
+  background-position: 0 -7px;
+  opacity: 0.8;
+  filter: alpha(opacity=80);
+  -webkit-transition: all 0.3s;
+  -o-transition: all 0.3s;
+  transition: all 0.3s;
+}
+body div[role='main'] .static .staticcontent .panel-group .panel .panel-heading a.collapsed .arrow {
+  background-position: 0 0px;
+}
+body div[role='main'] .static .staticcontent .panel-group .panel .panel-body {
+  margin-top: 10px;
+  padding-left: 0;
+  border: 0;
+  padding-top: 10px;
+}
+body div[role='main'] .static .staticcontent .btn-contact {
+  padding: 5px 30px;
+  font-size: 12px;
+  letter-spacing: 1.3px;
+  text-transform: uppercase;
+  color: #b5b5b5;
+  display: block;
+  border: 1px solid #b5b5b5;
+  text-decoration: none;
+  position: relative;
+  -webkit-transition: all 0.3s;
+  -o-transition: all 0.3s;
+  transition: all 0.3s;
+  font-weight: 600;
+  clear: both;
+  display: inline-block;
+  margin: 0 auto;
+  padding: 8px 25px 6px 25px;
+  text-align: center;
+  border-radius: 0;
+  font-size: 1.3rem;
+  font-weight: normal;
+}
+body div[role='main'] .static .staticcontent .btn-contact:hover {
+  color: #828282;
+}
+body div[role='main'] .static .staticcontent .btn-contact div {
+  position: absolute;
+  background: #9c9c9c;
+  -webkit-transition: all 0.3s;
+  -o-transition: all 0.3s;
+  transition: all 0.3s;
+}
+body div[role='main'] .static .staticcontent .btn-contact div.left {
+  left: -1px;
+  bottom: 0;
+  width: 2px;
+  height: 0;
+}
+body div[role='main'] .static .staticcontent .btn-contact div.right {
+  right: -1px;
+  top: 0;
+  width: 2px;
+  height: 0;
+}
+body div[role='main'] .static .staticcontent .btn-contact div.bot {
+  height: 2px;
+  width: 0;
+  right: 0;
+  bottom: -1px;
+}
+body div[role='main'] .static .staticcontent .btn-contact div.top {
+  height: 2px;
+  width: 0;
+  left: 0;
+  top: -1px;
+}
+body div[role='main'] .static .staticcontent .btn-contact:hover div.left {
+  height: 100%;
+}
+body div[role='main'] .static .staticcontent .btn-contact:hover div.right {
+  height: 100%;
+}
+body div[role='main'] .static .staticcontent .btn-contact:hover div.bot {
+  width: 100%;
+}
+body div[role='main'] .static .staticcontent .btn-contact:hover div.top {
+  width: 100%;
+}
 body footer {
   padding: 30px 0;
   color: #b5b5b5;
@@ -6594,7 +7230,7 @@ body footer .sosmed a {
   width: 30px;
   height: 30px;
   display: inline-block;
-  margin-left: 5px;
+  margin-left: 10px;
   border-radius: 50%;
   border: 2px solid #8f8f8f;
   color: #8f8f8f;
@@ -6609,6 +7245,14 @@ body footer .sosmed a:hover {
   color: white;
 }
 /* Large devices (tablet landscape, 1200px) */
+@media (max-width: 1199px) {
+  body div[role='main'] .wrapper aside .app ul li a .counter {
+    margin-right: 0;
+  }
+  body div[role='main'] section.entrance {
+    width: 70%;
+  }
+}
 /* Medium devices (tablet portrait, 991px) */
 @media (max-width: 991px) {
   body header .main .menu li a {
@@ -6631,16 +7275,87 @@ body footer .sosmed a:hover {
     border-left: 1px solid #d7d7d7;
   }
   body div[role='main'].homepage section.featured .featured-box.space {
-    font-size: 0.8em;
+    font-size: 1em;
   }
   body div[role='main'].homepage section.featured .featured-box.exhibition .img-exhibition {
     margin-top: -20px;
+    display: none;
   }
   body div[role='main'].homepage section.featured .featured-box.collection .featured-meta {
     padding-top: 100px;
   }
   body div[role='main'].homepage section.partners ul li img {
     margin-right: 10px;
+  }
+  body div[role='main'] .wrapper main section.dashboard section.notification {
+    width: 100%;
+  }
+  body div[role='main'] .wrapper main section.project .list-body.list li .meta .other-info .user,
+  body div[role='main'] .wrapper main section.exhibition .list-body.list li .meta .other-info .user,
+  body div[role='main'] .wrapper main section.collection .list-body.list li .meta .other-info .user,
+  body div[role='main'] .wrapper main section.project .list-body.list li .meta .other-info .date,
+  body div[role='main'] .wrapper main section.exhibition .list-body.list li .meta .other-info .date,
+  body div[role='main'] .wrapper main section.collection .list-body.list li .meta .other-info .date,
+  body div[role='main'] .wrapper main section.project .list-body.list li .meta .other-info .count,
+  body div[role='main'] .wrapper main section.exhibition .list-body.list li .meta .other-info .count,
+  body div[role='main'] .wrapper main section.collection .list-body.list li .meta .other-info .count {
+    font-size: 1.1rem;
+    margin-right: 0;
+  }
+  body div[role='main'] .wrapper main section.exhibition section.exhibition-list .list-body.list li .thumbnails {
+    width: 50%;
+  }
+  body div[role='main'] .wrapper main section.exhibition section.exhibition-list .list-body.list li .meta {
+    width: 50%;
+  }
+  body div[role='main'] .wrapper aside .app ul li a {
+    display: block;
+  }
+  body div[role='main'] .wrapper aside .app ul li a:before,
+  body div[role='main'] .wrapper aside .app ul li a:after {
+    content: " ";
+    display: table;
+  }
+  body div[role='main'] .wrapper aside .app ul li a:after {
+    clear: both;
+  }
+  body div[role='main'] .wrapper aside .app ul li a span.text {
+    display: none;
+  }
+  body div[role='main'] .wrapper aside .app ul li a span.icon {
+    display: inline-block;
+  }
+  body div[role='main'] .wrapper aside .app ul li a span.counter {
+    display: inline-block;
+    float: none;
+  }
+  body div[role='main'].about .selectioncontent .content .left .thumbs {
+    max-width: 100%;
+  }
+  body div[role='main'].about .selectioncontent .content h1 {
+    margin-top: 0;
+  }
+  body div[role='main'] section.entrance {
+    width: 70%;
+  }
+  body div[role='main'] .static aside {
+    width: 30%;
+  }
+  body div[role='main'] .static aside ul li a {
+    font-size: 1.3rem;
+    padding-right: 15px;
+  }
+  body div[role='main'] .static .staticcontent {
+    width: 70%;
+  }
+  body div[role='main'] .viewer section.isotope .listing .grid {
+    margin: 0 -10px 0 -10px;
+  }
+  body div[role='main'] .viewer section.isotope .listing .grid .sizer,
+  body div[role='main'] .viewer section.isotope .listing .grid .item {
+    width: 33.3333%;
+    padding: 0 10px;
+    margin-bottom: 20px;
   }
   .listing .grid {
     margin: 0;
@@ -6654,6 +7369,9 @@ body footer .sosmed a:hover {
   .listing .grid .sizer .wrap .info,
   .listing .grid .item .wrap .info {
     padding: 15px;
+  }
+  .listing.itemlistview .action-group {
+    padding: 0 15px 15px 15px !important;
   }
 }
 /* Small devices (landscape mobiles, 767px) */
@@ -6830,6 +7548,198 @@ body footer .sosmed a:hover {
   body div[role='main'] .filter .wrap .dropdown.select-filter .dropdown-menu li a::after {
     display: none;
   }
+  body div[role='main'].about .selectioncontent .content .left .thumbs {
+    max-width: 100%;
+  }
+  body div[role='main'].about .selectioncontent .content h1 {
+    margin-top: 0;
+  }
+  body div[role='main'] section.hero .hero-longdesc .left,
+  body div[role='main'] section.hero .hero-longdesc .right {
+    float: none;
+    width: 100%;
+    padding: 0 30px 0 30px;
+  }
+  body div[role='main'] section.entrance {
+    padding: 30px 30px 30px 30px;
+    width: 100%;
+  }
+  body div[role='main'] section.entrance .fb,
+  body div[role='main'] section.entrance .gplus {
+    width: 100%;
+    float: none;
+    margin-right: 0;
+    margin-left: 0;
+  }
+  body div[role='main'] section.entrance .input-group .left,
+  body div[role='main'] section.entrance .input-group .right {
+    width: 100%;
+    margin-right: 0;
+    margin-left: 0;
+  }
+  body div[role='main'] .static .staticcontent .panel-group .panel .panel-heading a {
+    font-size: 1.7rem;
+  }
+  body div[role='main'] .viewer section.isotope .listing .grid {
+    margin: 0 -10px 0 -10px;
+  }
+  body div[role='main'] .viewer section.isotope .listing .grid .sizer,
+  body div[role='main'] .viewer section.isotope .listing .grid .item {
+    width: 50%;
+  }
+  body div[role='main'] .viewer .collectioninfo .description {
+    width: 80%;
+  }
+  body div[role='main'] .viewer section.hero {
+    padding: 20px 0 20px 0;
+  }
+  body div[role='main'] .viewer section.hero .meta .top-info {
+    margin-bottom: 10px;
+  }
+  body div[role='main'] .viewer section.hero .meta .description {
+    height: 145px;
+  }
+  body div[role='main'] .wrapper section.exhibitionviewer .titlebar {
+    display: none;
+  }
+  body div[role='main'] .wrapper section.exhibitionviewer .exhibitionplayer {
+    padding-top: 1px;
+  }
+  body div[role='main'] .wrapper section.exhibitionviewer .exhibitionplayer .carouselexhibition .slick-prev,
+  body div[role='main'] .wrapper section.exhibitionviewer .exhibitionplayer .carouselexhibition .slick-next {
+    display: none !important;
+  }
+  body div[role='main'] .wrapper section.exhibitionviewer .exhibitionplayer .carouselexhibition .slick-list {
+    height: 90%;
+  }
+  body div[role='main'] .wrapper section.exhibitionviewer .exhibitionplayer .carouselexhibition .slick-dots {
+    height: 10%;
+    background: #fff;
+    bottom: 40px;
+    margin: 0;
+    padding: 0px 0 0 0px;
+    position: static;
+  }
+  body div[role='main'] .wrapper section.exhibitionviewer .exhibitionplayer .carouselexhibition .slick-dots li {
+    display: block;
+    float: left;
+    height: 100%;
+    width: 10px;
+    position: relative;
+    margin: 0 5px 0 5px;
+  }
+  body div[role='main'] .wrapper section.exhibitionviewer .exhibitionplayer .carouselexhibition .slick-dots li button {
+    background: #4f7979;
+    position: absolute;
+    top: 50%;
+    margin-top: -5px;
+  }
+  body div[role='main'] .wrapper section.exhibitionviewer .exhibitionplayer .carouselexhibition .item {
+    position: relative;
+  }
+  body div[role='main'] .wrapper section.exhibitionviewer .exhibitionplayer .carouselexhibition .item .container {
+    padding: 15px 15px 0 15px;
+  }
+  body div[role='main'] .wrapper section.exhibitionviewer .exhibitionplayer .carouselexhibition .item .container .title {
+    margin: 30px 0 0 0;
+    width: 100%;
+    font-size: 2.4rem;
+  }
+  body div[role='main'] .wrapper section.exhibitionviewer .exhibitionplayer .carouselexhibition .item .container .description {
+    width: 100%;
+  }
+  body div[role='main'] .wrapper section.exhibitionviewer .exhibitionplayer .carouselexhibition .item.style1 .container,
+  body div[role='main'] .wrapper section.exhibitionviewer .exhibitionplayer .carouselexhibition .item.style2 .container,
+  body div[role='main'] .wrapper section.exhibitionviewer .exhibitionplayer .carouselexhibition .item.style3 .container {
+    padding: 15px 15px 0 15px;
+  }
+  body div[role='main'] .wrapper section.exhibitionviewer .exhibitionplayer .carouselexhibition .item.style1 .container .title,
+  body div[role='main'] .wrapper section.exhibitionviewer .exhibitionplayer .carouselexhibition .item.style2 .container .title,
+  body div[role='main'] .wrapper section.exhibitionviewer .exhibitionplayer .carouselexhibition .item.style3 .container .title {
+    margin: 30px 0 0 0;
+    width: 100%;
+    font-size: 2.4rem;
+  }
+  body div[role='main'] .wrapper section.exhibitionviewer .exhibitionplayer .carouselexhibition .item.style1 .container .description,
+  body div[role='main'] .wrapper section.exhibitionviewer .exhibitionplayer .carouselexhibition .item.style2 .container .description,
+  body div[role='main'] .wrapper section.exhibitionviewer .exhibitionplayer .carouselexhibition .item.style3 .container .description {
+    width: 100%;
+  }
+  body div[role='main'] .wrapper section.exhibitionviewer .exhibitionplayer .carouselexhibition .item.style1 .container .imagewrap,
+  body div[role='main'] .wrapper section.exhibitionviewer .exhibitionplayer .carouselexhibition .item.style2 .container .imagewrap,
+  body div[role='main'] .wrapper section.exhibitionviewer .exhibitionplayer .carouselexhibition .item.style3 .container .imagewrap {
+    height: 75%;
+    padding-bottom: 60px;
+    float: none;
+    width: 100%;
+    position: static;
+  }
+  body div[role='main'] .wrapper section.exhibitionviewer .exhibitionplayer .carouselexhibition .item.style1 .container .imagewrap img,
+  body div[role='main'] .wrapper section.exhibitionviewer .exhibitionplayer .carouselexhibition .item.style2 .container .imagewrap img,
+  body div[role='main'] .wrapper section.exhibitionviewer .exhibitionplayer .carouselexhibition .item.style3 .container .imagewrap img {
+    max-width: 100%;
+    max-height: 100%;
+    height: auto;
+  }
+  body div[role='main'] .wrapper section.exhibitionviewer .exhibitionplayer .carouselexhibition .item.style1 .container .textbox,
+  body div[role='main'] .wrapper section.exhibitionviewer .exhibitionplayer .carouselexhibition .item.style2 .container .textbox,
+  body div[role='main'] .wrapper section.exhibitionviewer .exhibitionplayer .carouselexhibition .item.style3 .container .textbox {
+    position: absolute;
+    top: auto;
+    height: 25%;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
+    background: rgba(0, 0, 0, 0.75);
+    padding: 20px;
+    color: #fff;
+    -webkit-transition: all 0.3s;
+    -o-transition: all 0.3s;
+    transition: all 0.3s;
+  }
+  body div[role='main'] .wrapper section.exhibitionviewer .exhibitionplayer .carouselexhibition .item.style1 .container .textbox.expanded,
+  body div[role='main'] .wrapper section.exhibitionviewer .exhibitionplayer .carouselexhibition .item.style2 .container .textbox.expanded,
+  body div[role='main'] .wrapper section.exhibitionviewer .exhibitionplayer .carouselexhibition .item.style3 .container .textbox.expanded {
+    height: 75%;
+  }
+  body div[role='main'] .wrapper section.exhibitionviewer .exhibitionplayer .carouselexhibition .item.style1 .container .textbox .wrap,
+  body div[role='main'] .wrapper section.exhibitionviewer .exhibitionplayer .carouselexhibition .item.style2 .container .textbox .wrap,
+  body div[role='main'] .wrapper section.exhibitionviewer .exhibitionplayer .carouselexhibition .item.style3 .container .textbox .wrap {
+    overflow: auto;
+  }
+  body div[role='main'] .wrapper section.exhibitionviewer .exhibitionplayer .carouselexhibition .item.style1 .container .textbox .expand,
+  body div[role='main'] .wrapper section.exhibitionviewer .exhibitionplayer .carouselexhibition .item.style2 .container .textbox .expand,
+  body div[role='main'] .wrapper section.exhibitionviewer .exhibitionplayer .carouselexhibition .item.style3 .container .textbox .expand {
+    display: block;
+    position: absolute;
+    top: -30px;
+    right: 10px;
+  }
+  body div[role='main'] .wrapper section.exhibitionviewer .exhibitionplayer .carouselexhibition .item.style1 .container .textbox .expand a,
+  body div[role='main'] .wrapper section.exhibitionviewer .exhibitionplayer .carouselexhibition .item.style2 .container .textbox .expand a,
+  body div[role='main'] .wrapper section.exhibitionviewer .exhibitionplayer .carouselexhibition .item.style3 .container .textbox .expand a {
+    color: #fff;
+    background: rgba(0, 0, 0, 0.75);
+    display: block;
+    padding: 5px 20px 0 20px;
+    height: 30px;
+  }
+  body footer {
+    text-align: center;
+  }
+  body footer .copyright {
+    float: none;
+    display: inline;
+  }
+  body footer .copyright img {
+    float: none;
+  }
+  body footer .sosmed {
+    float: none;
+    display: inline-block;
+    padding-bottom: 20px;
+  }
   .listing .grid .sizer,
   .listing .grid .item {
     width: 50%;
@@ -6866,6 +7776,52 @@ body footer .sosmed a:hover {
 }
 /* Extra small devices (potrait mobiles, 480px) */
 @media (max-width: 480px) {
+  body div[role='main'] section.hero .hero-longdesc .left,
+  body div[role='main'] section.hero .hero-longdesc .right {
+    padding: 0;
+  }
+  body div[role='main'] .selection {
+    display: none;
+  }
+  body div[role='main'].about .selectioncontent {
+    padding: 0 0 40px 0;
+    border-top: 1px solid #d7d7d7;
+  }
+  body div[role='main'].about .selectioncontent .content {
+    padding-bottom: 0;
+  }
+  body div[role='main'].about .selectioncontent .content .left,
+  body div[role='main'].about .selectioncontent .content .right {
+    float: none;
+    width: 100%;
+    padding: 0;
+  }
+  body div[role='main'].about .selectioncontent .content .thumbs,
+  body div[role='main'].about .selectioncontent .content .thumbwide {
+    display: none;
+  }
+  body div[role='main'].about .selectioncontent .content h1,
+  body div[role='main'].about .selectioncontent .content p {
+    width: 100%;
+  }
+  body div[role='main'].about .aboutlink {
+    padding-bottom: 25px;
+  }
+  body div[role='main'].about .aboutlink .left {
+    float: none;
+  }
+  body div[role='main'].about .aboutlink .left ul {
+    padding: 0;
+    text-align: center;
+  }
+  body div[role='main'].about .aboutlink .left ul li a {
+    font-size: 1.6rem;
+  }
+  body div[role='main'].about .aboutlink .right {
+    float: none;
+    margin-top: 20px;
+    text-align: center;
+  }
   body div[role='main'].homepage section.partners ul li {
     display: inline-block;
     float: none;
@@ -6877,6 +7833,9 @@ body footer .sosmed a:hover {
     margin: 0 0 10px;
     display: inline-block;
   }
+  body div[role='main'].homepage section.partners .section-desc {
+    width: 100%;
+  }
   body div[role='main'].homepage section.api ul li {
     width: 49%;
     margin: 0 0 10px;
@@ -6884,16 +7843,73 @@ body footer .sosmed a:hover {
   body div[role='main'].homepage section.api ul li:nth-child(odd) {
     margin-right: 2%;
   }
-  body div[role='main'] footer .copyright {
+  body div[role='main'].homepage section.api .section-desc {
+    width: 100%;
+  }
+  body div[role='main'] section.entrance .input-group.ack input {
+    float: left;
+  }
+  body div[role='main'] section.entrance .input-group.ack label {
+    float: left;
+    margin-left: 15px;
+    width: 85%;
+  }
+  body div[role='main'] .static aside {
+    display: none;
+  }
+  body div[role='main'] .static .staticcontent {
+    width: 100%;
+    float: none;
+    padding: 30px 0 30px 0;
+    border: 0;
+  }
+  body div[role='main'] .static .staticcontent .btn-contact {
+    width: 100%;
+    word-break: break-all;
+  }
+  body div[role='main'] .viewer .collectioninfo .description {
+    width: 100%;
+  }
+  body div[role='main'] .viewer section.hero .map {
+    display: none;
+  }
+  body div[role='main'] .viewer section.hero .meta {
+    width: 100%;
+    padding: 0;
+  }
+  body footer .copyright {
     float: none;
     text-align: center;
   }
-  body div[role='main'] footer .copyright img {
+  body footer .copyright img {
+    float: none;
+    margin: 0;
+  }
+  body footer .sosmed {
+    float: none;
+    margin: 0 auto;
+  }
+  body footer .sosmed a {
+    margin: 0 5px 0 5px;
+  }
+}
+/* Extra small devices (potrait mobiles, 320x) */
+@media (max-width: 320px) {
+  body div[role='main'] .viewer section.isotope .listing .grid {
+    margin: 0px;
+  }
+  body div[role='main'] .viewer section.isotope .listing .grid .sizer,
+  body div[role='main'] .viewer section.isotope .listing .grid .item {
+    width: 100%;
+  }
+  body div[role='main'] .viewer section.hero {
+    height: auto;
+  }
+  body div[role='main'] .viewer section.hero .meta .top-info .thumbnails {
     float: none;
   }
-  body div[role='main'] footer .sosmed {
+  body div[role='main'] .viewer section.hero .meta .top-info .header {
     float: none;
-    display: table;
-    margin: 0 auto;
+    margin-top: 20px;
   }
 }

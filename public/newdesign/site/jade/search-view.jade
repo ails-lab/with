@@ -21,12 +21,10 @@ html
 						ul
 							li
 								a(href="index.html" title="home") HOME
-							li
+							li.active
 								a(href="search-view.html" title="home") EXPLORE
 							li
 								a(href="about.html" title="home") ABOUT
-							li
-								a(href="search-view.html" title="home") SEARCH
 					section.login-section
 						a( href="login.html" class="login") SIGN IN
 						a( href="register.html" class="register") REGISTER
@@ -117,6 +115,11 @@ html
 
 							// search result grid
 							section.gridlist#gridlist
+
+								// collect button
+								a.multiplecollect#multiplecollect( href="#" ) COLLECT MULTIPLE ITEMS
+
+								// listing
 								section.listing.itemlistview
 									.container
 										// grid
@@ -325,9 +328,6 @@ html
 																li
 																	input.selectitem( type="checkbox" )
 														
-														
-
-
 							// search result
 							section.searchlist.active#columnlist
 								.container-fluid
@@ -900,6 +900,21 @@ html
 							a(href="#").btn-green-o.cancel Cancel
 							a(href="#").btn-green Add to collection
 
+					// collection give access
+					section.action.collectmultiple
+						.action-header
+							.title Collect multiple items
+
+						.action-body
+							select.form-control
+								option Select a collection
+								option Select a collection
+								option Select a collection
+
+						.button-group
+							a(href="#").btn-green-o.cancel Cancel
+							a(href="#").btn-green Add items to collection
+
 					// search filter
 					section.action.searchfilter
 						.action-header
@@ -911,8 +926,7 @@ html
 							include ./includes/search.setting.jade
 
 						.button-group
-							a(href="#").btn-green-o.cancel Cancel
-							a(href="#").btn-green Apply
+							a(href="#").btn-green.cancel Close
 
 	// script
 	include ./includes/script.inc.jade

@@ -597,6 +597,7 @@ define(['bridget', 'knockout', 'text!./_collection-view.html', 'isotope', 'image
 				// un-hide item
 				$item.show();
 				iso.appended($item);
+				self.$container.isotope('layout');
 				var scrollpos = sessionStorage.getItem("collection-viewscroll" + self.id());
 				if (scrollpos && $(".grid#" + self.id()).height() > scrollpos) {
 					$(window).scrollTop(scrollpos);

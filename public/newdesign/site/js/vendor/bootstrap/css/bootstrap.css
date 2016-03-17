@@ -1086,12 +1086,12 @@ textarea {
   line-height: inherit;
 }
 a {
-  color: #009edf;
+  color: #4f7979;
   text-decoration: none;
 }
 a:hover,
 a:focus {
-  color: #007aac;
+  color: #3b5a5a;
   text-decoration: underline;
 }
 a:focus {
@@ -1173,7 +1173,7 @@ h6,
 .h4,
 .h5,
 .h6 {
-  font-family: "DIN", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-family: "Proxima Nova", "Helvetica Neue", Helvetica, Arial, sans-serif;
   font-weight: 500;
   line-height: 1.2;
   color: inherit;
@@ -3438,7 +3438,7 @@ fieldset[disabled] .btn-danger.active {
   background-color: #ffffff;
 }
 .btn-link {
-  color: #009edf;
+  color: #4f7979;
   font-weight: normal;
   border-radius: 0;
 }
@@ -3459,7 +3459,7 @@ fieldset[disabled] .btn-link {
 }
 .btn-link:hover,
 .btn-link:focus {
-  color: #007aac;
+  color: #3b5a5a;
   text-decoration: underline;
   background-color: transparent;
 }
@@ -4033,7 +4033,7 @@ select[multiple].input-group-sm > .input-group-btn > .btn {
 .nav .open > a:hover,
 .nav .open > a:focus {
   background-color: #eeeeee;
-  border-color: #009edf;
+  border-color: #4f7979;
 }
 .nav .nav-divider {
   height: 1px;
@@ -4742,7 +4742,7 @@ fieldset[disabled] .navbar-inverse .btn-link:focus {
   padding: 6px 12px;
   line-height: 1.7;
   text-decoration: none;
-  color: #009edf;
+  color: #4f7979;
   background-color: #ffffff;
   border: 1px solid #dddddd;
   margin-left: -1px;
@@ -4763,7 +4763,7 @@ fieldset[disabled] .navbar-inverse .btn-link:focus {
 .pagination > li > a:focus,
 .pagination > li > span:focus {
   z-index: 3;
-  color: #007aac;
+  color: #3b5a5a;
   background-color: #eeeeee;
   border-color: #dddddd;
 }
@@ -4961,7 +4961,7 @@ a.badge:focus {
 }
 .list-group-item.active > .badge,
 .nav-pills > .active > a > .badge {
-  color: #009edf;
+  color: #4f7979;
   background-color: #ffffff;
 }
 .list-group-item > .badge {
@@ -5034,7 +5034,7 @@ a.badge:focus {
 a.thumbnail:hover,
 a.thumbnail:focus,
 a.thumbnail.active {
-  border-color: #009edf;
+  border-color: #4f7979;
 }
 .thumbnail .caption {
   padding: 9px;

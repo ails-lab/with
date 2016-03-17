@@ -25,6 +25,7 @@
   </head>
   <!-- body-->
   <body>
+    <!-- header-->
     <header>
       <div class="wrap">
         <div class="container"><a href="index.html" class="logo"><img src="img/ui/logo.png"></a>
@@ -33,10 +34,13 @@
               <li><a href="index.html" title="home">HOME</a></li>
               <li><a href="search-view.html" title="home">EXPLORE</a></li>
               <li><a href="about.html" title="home">ABOUT</a></li>
-              <li><a href="search-view.html" title="home">SEARCH</a></li>
+              <li class="mobile"><a href="login.html" class="login">SIGN IN</a><a href="register.html" class="register">REGISTER</a></li>
             </ul>
           </nav>
+          <!-- login-->
           <section class="login-section"><a href="login.html" class="login">SIGN IN</a><a href="register.html" class="register">REGISTER</a></section>
+          <!-- mobile menu trigger--><a href="#" class="mobile-trigger">
+            <div class="burger"></div></a>
         </div>
       </div>
     </header>
@@ -50,16 +54,28 @@
           </div>
           <div class="section-body">
             <div class="input-group">
-              <input type="text" placeholder="Email">
-              <input type="text" placeholder="Username">
+              <div class="left">
+                <input type="text" placeholder="Email" class="error"><span class="errormsg">Wrong email format</span>
+              </div>
+              <div class="right">
+                <input type="text" placeholder="Username">
+              </div>
             </div>
             <div class="input-group">
-              <input type="password" placeholder="Password">
-              <input type="password" placeholder="Repeat Password">
+              <div class="left">
+                <input type="password" placeholder="Password">
+              </div>
+              <div class="right">
+                <input type="password" placeholder="Repeat Password">
+              </div>
             </div>
             <div class="input-group">
-              <input type="text" placeholder="First name">
-              <input type="text" placeholder="Last name">
+              <div class="left">
+                <input type="text" placeholder="First name">
+              </div>
+              <div class="right">
+                <input type="text" placeholder="Last name">
+              </div>
             </div>
             <div class="input-group">
               <select>

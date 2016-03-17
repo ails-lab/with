@@ -96,7 +96,12 @@ html
 												a(href="dashboard-organizations-space.html" data-toggle="tooltip" data-placement="top" title="Edit organization space" ).fa.fa-pencil
 												a(href="#" data-toggle="tooltip" data-placement="top" title="Manage members").fa.fa-user.members
 
-								a(href="#").loadmore load more
+								a(href="#").loadmore 
+									| load more
+									.left
+									.right
+									.top
+									.bot
 
 							// collection new
 							section.action.new
@@ -140,7 +145,21 @@ html
 								.action-body
 									.group
 										.title Users access
-										input(type="text" placeholder="Start typing username")
+										.auto
+											input(type="text" placeholder="Start typing username" value="Lewis" )
+											.autocomplete-suggestions(style='position: absolute; max-height: 300px; z-index: 9999; top: 44px; left: 0; width: 329px;')
+												.autocomplete-suggestion.autocomplete-suggestion-extra(data-index='0')
+													strong Lewis 
+													| Kaldeli
+													span.label.pull-right user
+												.autocomplete-suggestion.autocomplete-suggestion-extra(data-index='1')
+													strong Lewis 
+													| Mike
+													span.label.pull-right user
+												.autocomplete-suggestion.autocomplete-suggestion-extra(data-index='2')
+													strong Lewis 
+													| Robert
+													span.label.pull-right user
 										ul.access-list
 											li
 												.thumbnails

@@ -171,6 +171,15 @@ a {
 						margin-bottom: 0;
 					}
 				}
+
+				// selected
+				&.selected {
+
+					// after
+					&::after {
+						background: @brand-dashboard;
+					}
+				}
 			}
 		}
 
@@ -192,7 +201,7 @@ a {
 					height: 1px;
 					background-color: #ccc;
 					position: absolute;
-					top: 14px;
+					top: 12px;
 					left: 0;
 				}
 
@@ -249,8 +258,6 @@ a {
 
 						// action
 						.selectitem {
-							position: relative;
-							top: 1px;
 							cursor: pointer;
 						}
 					}

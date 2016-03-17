@@ -100,6 +100,11 @@ html
 
 							// search result grid
 							section.gridlist#gridlist
+
+								// collect button
+								a.multiplecollect#multiplecollect( href="#" ) COLLECT MULTIPLE ITEMS
+
+								// listing
 								section.listing.itemlistview
 									.container
 										// grid
@@ -308,10 +313,7 @@ html
 																		a(href="#" data-toggle="tooltip" data-placement="top" title="Collect it" ).fa.fa-download.collectbutton
 																	li
 																		input.selectitem( type="checkbox" )
-														
-														
-
-
+		
 							// search result
 							section.searchlist.active#columnlist
 								.container-fluid
@@ -884,6 +886,21 @@ html
 							a(href="#").btn-green-o.cancel Cancel
 							a(href="#").btn-green Add to collection
 
+					// collection give access
+					section.action.collectmultiple
+						.action-header
+							.title Collect multiple items
+
+						.action-body
+							select.form-control
+								option Select a collection
+								option Select a collection
+								option Select a collection
+
+						.button-group
+							a(href="#").btn-green-o.cancel Cancel
+							a(href="#").btn-green Add items to collection
+
 					// search filter
 					section.action.searchfilter
 						.action-header
@@ -895,7 +912,6 @@ html
 							include ./includes/search.setting.jade
 
 						.button-group
-							a(href="#").btn-green-o.cancel Cancel
-							a(href="#").btn-green Apply
+							a(href="#").btn-green.cancel Close
 	// script
 	include ./includes/script.inc.jade

@@ -41,7 +41,7 @@ html
 
 								// control
 								.list-control
-									a(class="fa fa-eye" title="" data-placement="top" data-toggle="tooltip" href="dashboard-exhibition-viewer.html" data-original-title="Preview Exhibition")
+									a(class="fa fa-eye" title="" data-placement="top" data-toggle="tooltip" href="exhibition-view.html" data-original-title="Preview Exhibition")
 									a(href="#" data-toggle="tooltip" data-placement="top" title="Upload background image").fa.fa-image.upload.exhibition
 									.toggle
 										input(type='checkbox')#toggle2
@@ -94,6 +94,112 @@ html
 													p 
 
 														| The path of a cosmonaut is not an easy, triumphant march to glory. You have to get to know the meaning not just of joy but also of grief, before being allowed in the spacecraft cabin.
+
+											.video
+												a.addvideo( href="#" data-toggle="tooltip" data-placement="top" title="Add video" )
+													img( src="img/ui/ic-add.png" )
+
+										// add
+										.add
+											span
+												a( href="#" data-toggle="tooltip" data-placement="top" title="Drag your media here" )
+													img( src="img/ui/ic-add.png" )
+
+										// box
+										.box.fill.videoadded
+											.boxaction
+												ul
+													li
+														a.editbox( href="#" data-toggle="tooltip" data-placement="top" title="Edit section" ) 
+															i.fa.fa-pencil-square-o
+													li
+														a( href="#" data-toggle="tooltip" data-placement="top" title="Delete section" ) 
+															i.fa.fa-trash-o
+
+											.left
+												.imgwrap
+													img( src="img/content/img-editor.jpg" )
+												.imginfo
+													span.mediatitle Across the sea of space, the stars are 
+													br
+													span.mediasource Digitalnz.org
+
+											.right
+												.boxtitle
+													p
+														| As I stand out here in the wonders of the unknown at Hadley, I sort of realize there’s a fundamental truth to our nature, Man must explore and this is exploration at its greatest.
+													p 
+
+														| The path of a cosmonaut is not an easy, triumphant march to glory. You have to get to know the meaning not just of joy but also of grief, before being allowed in the spacecraft cabin.
+											.video
+												.imgwrap
+													.embed-responsive.embed-responsive-4by3
+														iframe.embed-responsive-item( src="https://www.youtube.com/embed/YykjpeuMNEk" frameborder="0" allowfullscreen)
+													
+												.imginfo
+													span.mediatitle
+														| As I stand out here in the wonders of the unknown at Hadley, I sort of realize there’s a fundamental truth to our nature, Man must explore and this is exploration at its greatest.
+												ul.action
+													li
+														a( href="#" data-toggle="tooltip" data-placement="top" title="Edit video" )
+															i.fa.fa-pencil
+													li
+														a( href="#" data-toggle="tooltip" data-placement="top" title="Delete video" )
+															i.fa.fa-trash-o
+
+										// add
+										.add
+											span
+												a( href="#" data-toggle="tooltip" data-placement="top" title="Drag your media here" )
+													img( src="img/ui/ic-add.png" )
+
+										// box
+										.box.fill.videoadded
+											.boxaction
+												ul
+													li
+														a.editbox( href="#" data-toggle="tooltip" data-placement="top" title="Edit section" ) 
+															i.fa.fa-pencil-square-o
+													li
+														a( href="#" data-toggle="tooltip" data-placement="top" title="Delete section" ) 
+															i.fa.fa-trash-o
+
+											.left
+												.imgwrap
+													img( src="img/content/img-editor.jpg" )
+												.imginfo
+													span.mediatitle Across the sea of space, the stars are 
+													br
+													span.mediasource Digitalnz.org
+
+											.right
+												.boxtitle
+													p
+														| As I stand out here in the wonders of the unknown at Hadley, I sort of realize there’s a fundamental truth to our nature, Man must explore and this is exploration at its greatest.
+													p 
+
+														| The path of a cosmonaut is not an easy, triumphant march to glory. You have to get to know the meaning not just of joy but also of grief, before being allowed in the spacecraft cabin.
+											.video
+												.imgwrap
+													.embed-responsive.embed-responsive-4by3
+														
+													
+												.imginfo
+													span.mediatitle
+														| As I stand out here in the wonders of the unknown at Hadley, I sort of realize there’s a fundamental truth to our nature, Man must explore and this is exploration at its greatest.
+												ul.action
+													li
+														a( href="#" data-toggle="tooltip" data-placement="top" title="Edit video" )
+															i.fa.fa-pencil
+													li
+														a( href="#" data-toggle="tooltip" data-placement="top" title="Delete video" )
+															i.fa.fa-trash-o
+
+										// add
+										.add
+											span
+												a( href="#" data-toggle="tooltip" data-placement="top" title="Drag your media here" )
+													img( src="img/ui/ic-add.png" )
 
 							// assets
 							.assets
@@ -157,6 +263,9 @@ html
 							.action-body
 								img(src="img/ui/upload-placeholder.png").upload-img
 								span.progress( style="width:40%;" )
+
+								p.info
+									| Background image will be used as a decorative element behind exhibition, it will be stretched accordingly.
 
 							.button-group
 								a(href="#").btn-green-o.cancel Cancel

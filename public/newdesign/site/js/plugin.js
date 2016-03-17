@@ -89,6 +89,15 @@ WITHApp.ui = function( custom ){
 
 		// init show more info
 		initShowMore();
+
+		// init itemselect on search grid
+		initMultipleSelect();
+
+		// init smoothscroll
+		initSmoothScroll();
+
+		// init expand on exhibition
+		initExpandExhibitionText();
 	};
 
 	// method to toggle search view mode
@@ -217,6 +226,12 @@ WITHApp.ui = function( custom ){
 				e.preventDefault();
 				$( '.action' ).removeClass( 'active' );
 
+				// check
+				if( $( '.searchresults' ).length > 0 ) {
+					if( $( '.searchresults' ).hasClass( 'openfilter' ) ) {
+						$( '.searchresults' ).removeClass( 'openfilter' );
+					}
+				}
 			});
 		}
 
@@ -329,6 +344,7 @@ WITHApp.ui = function( custom ){
 
 			$( '.action' ).removeClass( 'active' );
 			$( '.action.searchfilter' ).addClass( 'active' );
+			$( '.searchresults' ).addClass( 'openfilter');
 		});
 
 		// profile
@@ -351,6 +367,15 @@ WITHApp.ui = function( custom ){
 			$( '.action' ).removeClass( 'active' );
 			$( '.action.editsection' ).addClass( 'active' );
 
+		});
+
+		// multiple select
+		$( '#multiplecollect' ).click( function( e ){
+			// prevent
+			e.preventDefault();
+
+			$( '.action' ).removeClass( 'active' );
+			$( '.action.collectmultiple' ).addClass( 'active' );
 		});
 	};
 
@@ -523,14 +548,15 @@ WITHApp.ui = function( custom ){
 		logger( 'info', 'plugin.js / initMobileMenu');
 
 		// check
-		if ( settings.mobile && $( settings.mobileTrigger ).length !== 0 ) {
+		$( settings.mobileTrigger ).click( function( e ){
 
-			$( settings.mobileTrigger ).click( function( e ){
+			// preventr
+			e.preventDefault();
 
-				$( this ).toggleClass( 'active' );
-				$( 'nav' ).toggleClass( 'active' );
-			});
-		}
+			// set
+			$( this ).toggleClass( 'active' );
+			$( 'nav' ).toggleClass( 'active' );
+		});
 	};
 
 	// method to wrap filter with dropdown menu in mobile view
@@ -642,7 +668,6 @@ WITHApp.ui = function( custom ){
 				$('body').css('overflow','visible');
 			});
 		}
-
 	};
 
 	// method to minimize header on homepage
@@ -708,5 +733,99 @@ WITHApp.ui = function( custom ){
 				});
 			});
 		}	
+	};
+
+	// method to initialize multiple select on search
+	var initMultipleSelect = function(){
+
+		// log
+		logger( 'info','plugins.js / initShowMore' );
+
+		// check
+		if( $( '.selectitem' ).length > 0 ) {
+
+			// on click
+			$( '.selectitem' ).each( function(){
+
+				// on click
+				$( this ).click( function() {
+
+					// save
+					var $this = $(this);
+
+					// check 
+					if ($this.is(':checked')) {
+						
+						// set selected
+						$this.closest( '.item' ).addClass( 'selected' );
+
+						// show
+						showHideCollectButton();
+					} else {
+						// set selected
+						$this.closest( '.item' ).removeClass( 'selected' );
+
+						// show
+						showHideCollectButton();
+					}
+				});
+			});
+		}
+
+		// function
+		function showHideCollectButton() {
+
+			// check
+			if( $( '.item.selected').length > 0 ) {
+				$( '#multiplecollect').addClass( 'show' );
+			} else {
+				$( '#multiplecollect').removeClass( 'show' );
+			}
+		}
+	};
+
+	// init smoothscroll
+	var initSmoothScroll = function(){
+
+		// log
+		logger( 'info','plugins.js / initSmoothScroll' );
+
+		// check
+		if( $( '.about' ).length > 0 ) {
+			// init
+			$('a[href*="#"]:not([href="#"])').click(function() {
+				if (location.pathname.replace(/^\//,'') == this.pathname.replace(/^\//,'') && location.hostname == this.hostname) {
+					var target = $(this.hash);
+					target = target.length ? target : $('[name=' + this.hash.slice(1) +']');
+					if (target.length) {
+						$('html, body').animate({
+							scrollTop: target.offset().top - 72
+						}, 1000);
+						return false;
+					}
+				}
+			});
+		}
+	};
+
+	// method to expand text on exhibition
+	var initExpandExhibitionText = function(){
+
+		// log
+		logger( 'info','plugins.js / initExpandExhibitionText' );
+
+		// check
+		if( $( '.exhibitionplayer .expand' ).length > 0 ) {
+
+			// each
+			$( '.exhibitionplayer .expand a').on( 'click', function( e ){
+
+				// prevent
+				e.preventDefault();
+
+				// set
+				$( this ).parent().parent().parent().toggleClass( 'expanded' );
+			});
+		}
 	};
 };

@@ -2,22 +2,23 @@
 	<label class="header">NAVIGATE</label>
 	<nav class="app">
 		<ul>
-			<li data-bind="css: { active: checkRoute('#dashboard') }"><a href="#dashboard"><span class="icon"><i class="fa fa-home"></i></span>Dashboard</a></li>
-			<li data-bind="css: { active: checkRoute('#mycollections') || checkRoute('#collectionview') }"><a href="#mycollections"><span class="counter" data-bind="text: collectionCount"></span><span class="icon"><i class="fa fa-clone"></i></span>My Collections</a></li>
-			<li data-bind="css: { active: checkRoute('#myexhibitions') || checkRoute('#exhibitionview') || checkRoute('#exhibition-edit') }"><a href="#myexhibitions"><span class="counter" data-bind="text: exhibitionCount"></span><span class="icon"><i class="fa fa-television"></i></span>My Exhibitions</a></li>
-			<li data-bind="css: { active: checkRoute('#myfavorites') }"><a href="#myfavorites"><span class="counter" data-bind="text: favoritesCount"></span><span class="icon"><i class="fa fa-heart-o"></i></span>My Favorites</a></li>
-			<li data-bind="css: { active: checkRoute('#organizations') || checkRoute('#organization') }"><a href="#organizations"><span class="icon"><i class="fa fa-bookmark-o"></i></span>Organizations</a></li>
-			<li data-bind="css: { active: checkRoute('#projects') || checkRoute('#project')}"><a href="#projects"><span class="icon"><i class="fa fa-comment-o"></i></span>Projects</a></li>
+			<li data-bind="css: { active: checkRoute('#dashboard') }"><a href="#dashboard"><span class="icon"><i class="fa fa-home"></i></span><span class="text">Dashboard</span></a></li>
+			<li data-bind="css: { active: checkRoute('#mycollections') || checkRoute('#collectionview') }"><a href="#mycollections"><span class="counter" data-bind="text: collectionCount"></span><span class="icon"><i class="fa fa-clone"></i></span><span class="text">My Collections</span></a></li>
+			<li data-bind="css: { active: checkRoute('#myexhibitions') || checkRoute('#exhibitionview') || checkRoute('#exhibition-edit') }"><a href="#myexhibitions"><span class="counter" data-bind="text: exhibitionCount"></span><span class="icon"><i class="fa fa-television"></i></span><span class="text">My Exhibitions</span></a></li>
+			<li data-bind="css: { active: checkRoute('#myfavorites') }"><a href="#myfavorites"><span class="counter" data-bind="text: favoritesCount"></span><span class="icon"><i class="fa fa-heart-o"></i></span><span class="text">My Favorites</span></a></li>
+			<li data-bind="css: { active: checkRoute('#organizations') || checkRoute('#organization') }"><a href="#organizations"><span class="icon"><i class="fa fa-bookmark-o"></i></span><span class="text">Organizations</span></a></li>
+			<li data-bind="css: { active: checkRoute('#projects') || checkRoute('#project')}"><a href="#projects"><span class="icon"><i class="fa fa-comment-o"></i></span><span class="text">Projects</span></a></li>
 		</ul>
 	</nav>
 	<nav class="site">
 		<ul>
-			<li><a href="#">Help</a></li>
-			<li><a href="#">Frequently Asked Questions</a></li>
-			<li><a href="#">About WITH</a></li>
-			<li><a href="#">WITH API</a></li>
-			<li><a href="#">Feedback</a></li>
-		</ul>
+			<li><a href="#about">About WITH</a></li>
+            <li><a href="#faq">Frequently Asked Questions</a></li>
+            <li><a href="assets/developers-lite.html" target="_blank">WITH API</a></li>
+            <li><a href="#privacy">Privacy Policy</a></li>
+            <li><a href="#terms">Terms of Condition</a></li>
+            <li><a href="#feedback">Feedback &amp; Contact</a></li>
+       </ul>
 	</nav>
 </aside>
 

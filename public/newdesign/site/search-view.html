@@ -31,9 +31,8 @@
           <nav>
             <ul>
               <li><a href="index.html" title="home">HOME</a></li>
-              <li><a href="search-view.html" title="home">EXPLORE</a></li>
+              <li class="active"><a href="search-view.html" title="home">EXPLORE</a></li>
               <li><a href="about.html" title="home">ABOUT</a></li>
-              <li><a href="search-view.html" title="home">SEARCH</a></li>
             </ul>
           </nav>
           <section class="login-section"><a href="login.html" class="login">SIGN IN</a><a href="register.html" class="register">REGISTER</a></section>
@@ -87,6 +86,8 @@
             <div class="searchresults">
               <!-- search result grid-->
               <section id="gridlist" class="gridlist">
+                <!-- collect button--><a id="multiplecollect" href="#" class="multiplecollect">COLLECT MULTIPLE ITEMS</a>
+                <!-- listing-->
                 <section class="listing itemlistview">
                   <div class="container">
                     <!-- grid-->
@@ -668,6 +669,20 @@
             </div>
             <div class="button-group"><a href="#" class="btn-green-o cancel">Cancel</a><a href="#" class="btn-green">Add to collection</a></div>
           </section>
+          <!-- collection give access-->
+          <section class="action collectmultiple">
+            <div class="action-header">
+              <div class="title">Collect multiple items</div>
+            </div>
+            <div class="action-body">
+              <select class="form-control">
+                <option>Select a collection</option>
+                <option>Select a collection</option>
+                <option>Select a collection</option>
+              </select>
+            </div>
+            <div class="button-group"><a href="#" class="btn-green-o cancel">Cancel</a><a href="#" class="btn-green">Add items to collection</a></div>
+          </section>
           <!-- search filter-->
           <section class="action searchfilter">
             <div class="action-header">
@@ -840,7 +855,7 @@
                 </div>
               </div>
             </div>
-            <div class="button-group"><a href="#" class="btn-green-o cancel">Cancel</a><a href="#" class="btn-green">Apply</a></div>
+            <div class="button-group"><a href="#" class="btn-green cancel">Close</a></div>
           </section>
         </div>
       </div>
