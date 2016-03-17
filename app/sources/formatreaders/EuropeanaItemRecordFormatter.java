@@ -16,10 +16,7 @@
 
 package sources.formatreaders;
 
-import java.util.Arrays;
 import java.util.List;
-
-import com.fasterxml.jackson.databind.JsonNode;
 
 import model.EmbeddedMediaObject;
 import model.EmbeddedMediaObject.MediaVersion;
@@ -104,10 +101,11 @@ public class EuropeanaItemRecordFormatter extends CulturalRecordFormatter {
 
 		rec.exitContext();
 		rec.enterContext("aggregations[0]");
-		LiteralOrResource rights = rec.getLiteralOrResourceValue("edmRights");
-		WithMediaRights withMediaRights = (WithMediaRights)
-				 getValuesMap().translateToCommon(CommonFilters.RIGHTS.getId(),
-						 rec.getLiteralOrResourceValue("edmRights").getURI()).get(0);
+		LiteralOrResource rightsLiteral = rec.getLiteralOrResourceValue("edmRights");
+		LiteralOrResource rights = rightsLiteral;
+		WithMediaRights withMediaRights = (!Utils.hasInfo(rightsLiteral))?null:
+			(WithMediaRights.getRighs(getValuesMap().translateToCommon(CommonFilters.RIGHTS.getId(),
+					 rightsLiteral.getURI()).get(0).toString()));
 
 		model.setIsShownAt(rec.getLiteralOrResourceValue("edmIsShownAt"));
 		model.setIsShownBy(rec.getLiteralOrResourceValue("edmIsShownBy"));
