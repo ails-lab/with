@@ -22,7 +22,7 @@ define(['bridget','knockout', 'text!./facets.html','inputtags','liveFilter', 'ba
     
     
     self.initFacets=function(){
-    	self.visiblePanel(false);
+    	//self.visiblePanel(false);
     	self.filters.removeAll();
     	$("#facet_tags").tagsinput('removeAll');
     	var selsources=ko.contextFor(withsearchid).$data.sources();
@@ -53,18 +53,22 @@ define(['bridget','knockout', 'text!./facets.html','inputtags','liveFilter', 'ba
     	e.preventDefault();
     	if(self.visiblePanel()==false){
     	    self.visiblePanel(true);
+    	    $( '.searchresults' ).addClass( 'openfilter');
     	    $('.chart').horizBarChart({
   	          selector: '.bar',
   	          speed: 1000
   	        });
   		
     	}
-    	else
+    	else{
     		self.visiblePanel(false);
+    		$( '.searchresults' ).removeClass( 'openfilter');
+    	}
     }
     
     self.close=function(){
     	$( '.action' ).removeClass( 'active' );
+    	$( '.searchresults' ).removeClass( 'openfilter');
     }
     
     self.calcdates=function(){
@@ -242,6 +246,7 @@ define(['bridget','knockout', 'text!./facets.html','inputtags','liveFilter', 'ba
     self.listSelect=function(id,newvalue){
     	var exists=false;
     	var filterfound=ko.utils.arrayFirst(self.filters()[0].filters, function(item) {
+    		    item.filterID=item.filterID.replace(/\./g, '_');
     		    if(item.filterID===id && id!="dates"){
     		    	if($.inArray(newvalue, item.values)>-1){
     		    		//value is already there 

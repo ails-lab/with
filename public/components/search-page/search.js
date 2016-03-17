@@ -217,19 +217,29 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
 				
 				self.sourceview(false);
 				
-			   $container.isotope({
+			  /* $container.isotope({
 					itemSelector: '.media',
 					masonry: {
 						columnWidth		: '.sizer',
 						percentPosition	: true
 					}
 				});
-			   $container.isotope("layout");
+			   $container.isotope("layout");*/
 					
 			}
 			$( '.searchbar .view li').removeClass( 'active' );
 			$(event.currentTarget).addClass( 'active' );
+			
 
+			var data = $(event.currentTarget).find("a").attr('data-view')
+
+		/*	$( '.searchresults').find( 'section' ).removeClass( 'active' );
+			$( '.searchresults #'+ data + 'list' ).toggleClass( 'active' );*/
+
+			if ( data === 'grid' ) {
+				
+				$container.isotope();
+			}
 
 		};
 
@@ -244,6 +254,7 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
 			self.next(-1);
 			self.mixresults([]);
 			self.results([]);
+			$( '.searchresults' ).removeClass( 'openfilter');
 			if ($container.data('isotope')){
 				 $container.isotope( 'remove', $(".media"));}
 			$container.isotope({
@@ -508,6 +519,7 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
     	   self.filterselect(true);
     	   self.results.removeAll();
 			self.mixresults.removeAll();
+			$( '.searchresults' ).removeClass( 'openfilter');
 			if ($container.data('isotope')){
 				 $container.isotope( 'remove', $(".media"));}
 				
@@ -549,6 +561,7 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
 							percentPosition	: true
 						}
 					});
+			$( '.searchresults' ).removeClass( 'openfilter');
 			self.page(1);
 			self.next(1);
 			self.previous(0);

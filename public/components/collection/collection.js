@@ -401,6 +401,7 @@ define(['knockout', 'text!./collection.html', 'selectize', 'app', 'knockout-vali
 			$('textarea').hide();
 			$('.add').show();
 			$( '.action' ).removeClass( 'active' );
+			$( '.searchresults' ).removeClass( 'openfilter');
 		};
 
 		

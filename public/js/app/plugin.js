@@ -258,13 +258,13 @@ WITHApp.ui = function( custom ){
 			$( '.cancel' ).on("click", function( e ) {
 				e.preventDefault();
 				$( '.action' ).removeClass( 'active' );
-				
+				$( '.searchresults' ).removeClass( 'openfilter');
 				// check
-				if( $( '.searchresults' ).length > 0 ) {
+				/*if( $( '.searchresults' ).length > 0 ) {
 					if( $( '.searchresults' ).hasClass( 'openfilter' ) ) {
 						$( '.searchresults' ).removeClass( 'openfilter' );
 					}
-				}
+				}*/
 
 			});
 		
@@ -364,7 +364,7 @@ WITHApp.ui = function( custom ){
 		}
 		
 		// search settings
-		/*this might need to be removed*/
+		/*this might need to be removed
 		$( '.searchbar .settings > a' ).click( function( e ) {
 
 			// prevent
@@ -373,7 +373,7 @@ WITHApp.ui = function( custom ){
 			$( '.action' ).removeClass( 'active' );
 			$( '.action.searchfilter' ).addClass( 'active' );
 			$( '.searchresults' ).addClass( 'openfilter');
-		});
+		});*/
 
 		// profile
 		$( '.showprofile' ).on('click', function(e) {

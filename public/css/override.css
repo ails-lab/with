@@ -8,7 +8,7 @@ a {
   z-index: 60;
 }
 .listing {
-  padding: 0px 0 30px 0;
+  padding: 30px 0 30px 0;
   background: #f6f6f6;
   border-bottom: 1px solid #d7d7d7;
 }
@@ -21,6 +21,17 @@ a {
   margin-bottom: 30px;
   padding: 0 15px 0 15px;
 }
+.listing .grid .sizer::after,
+.listing .grid .item::after {
+  width: 100%;
+  height: 4px;
+  background: #ffffff;
+  -webkit-transition: all 0.3s;
+  -o-transition: all 0.3s;
+  transition: all 0.3s;
+  content: "";
+  display: block;
+}
 .listing .grid .sizer .wrap,
 .listing .grid .item .wrap {
   width: 100%;
@@ -32,23 +43,28 @@ a {
 .listing .grid .sizer .wrap a,
 .listing .grid .item .wrap a {
   display: block;
-  opacity: 0.8;
-  filter: alpha(opacity=80);
-  -webkit-transition: opacity 0.3s;
-  -o-transition: opacity 0.3s;
-  transition: opacity 0.3s;
 }
 .listing .grid .sizer .wrap a:hover,
 .listing .grid .item .wrap a:hover,
 .listing .grid .sizer .wrap a:focus,
 .listing .grid .item .wrap a:focus {
   text-decoration: none;
-  opacity: 1;
-  filter: alpha(opacity=100);
 }
 .listing .grid .sizer .wrap .thumb,
 .listing .grid .item .wrap .thumb {
   position: relative;
+}
+.listing .grid .sizer .wrap .thumb .counter,
+.listing .grid .item .wrap .thumb .counter {
+  background: #4f7979;
+  color: white;
+  font-size: 1.1rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  padding: 5px 15px;
+  position: absolute;
+  top: 0;
+  left: 0;
 }
 .listing .grid .sizer .wrap .thumb img,
 .listing .grid .item .wrap .thumb img {
@@ -90,6 +106,18 @@ a {
   line-height: 1.5em;
   display: block;
   margin-left: 0px;
+}
+.listing .grid .sizer:hover,
+.listing .grid .item:hover,
+.listing .grid .sizer:focus,
+.listing .grid .item:focus {
+  text-decoration: none;
+}
+.listing .grid .sizer:hover::after,
+.listing .grid .item:hover::after,
+.listing .grid .sizer:focus::after,
+.listing .grid .item:focus::after {
+  background: #4f7979;
 }
 .listing .loadmore {
   padding: 5px 30px;
@@ -153,6 +181,85 @@ a {
 }
 .listing .loadmore:hover div.top {
   width: 100%;
+}
+.listing.itemlistview .grid .item .info {
+  padding-bottom: 10px;
+}
+.listing.itemlistview .grid .item .info .title {
+  margin-bottom: 0;
+}
+.listing.itemlistview .grid .item.selected::after {
+  background: #4f7979;
+}
+.listing.itemlistview .action-group {
+  position: relative;
+  text-align: right;
+  padding: 0 30px 30px 30px !important;
+}
+.listing.itemlistview .action-group:before,
+.listing.itemlistview .action-group:after {
+  content: " ";
+  display: table;
+}
+.listing.itemlistview .action-group:after {
+  clear: both;
+}
+.listing.itemlistview .action-group .wrap {
+  position: relative;
+}
+.listing.itemlistview .action-group .wrap::before {
+  content: '';
+  width: 100%;
+  height: 1px;
+  background-color: #ccc;
+  position: absolute;
+  top: 12px;
+  left: 0;
+}
+.listing.itemlistview .action-group .wrap .links {
+  color: #4f7979;
+  float: left;
+  text-align: left;
+  padding: 0 10px 0 0;
+  max-width: 50%;
+  position: relative;
+  z-index: 0;
+  background: #fff;
+}
+.listing.itemlistview .action-group .wrap .links:hover {
+  color: #273b3b;
+}
+.listing.itemlistview .action-group .wrap ul {
+  margin: 0;
+  padding: 0;
+  z-index: 0;
+  position: relative;
+  float: right;
+  text-align: right;
+  background-color: white;
+}
+.listing.itemlistview .action-group .wrap ul li {
+  list-style: none;
+  display: inline-block;
+  margin-left: 10px;
+}
+.listing.itemlistview .action-group .wrap ul li a {
+  text-decoration: none;
+  font-size: 1.5rem;
+  color: #a4a4a4  !important;
+  -webkit-transition: color 0.3s;
+  -o-transition: color 0.3s;
+  transition: color 0.3s;
+  padding: 0 !important;
+}
+.listing.itemlistview .action-group .wrap ul li a:hover {
+  color: #444;
+}
+.listing.itemlistview .action-group .wrap ul li a:hover.fa-heart {
+  color: #e46667  !important;
+}
+.listing.itemlistview .action-group .wrap ul li .selectitem {
+  cursor: pointer;
 }
 body .popover {
   border-radius: 0px;
@@ -610,60 +717,85 @@ body header .notification .dropdown-menu a.viewall:hover {
   color: #395c5c;
   text-decoration: none;
 }
-body div[role='main'] .more {
-  bottom: 100px;
-  right: 40px;
-  padding: 5px;
-  position: fixed;
-  z-index: 1032;
-  font-size: 25px;
+body header .home {
+  float: right;
+  margin: 1px 20px 0 0;
+  position: relative;
 }
-body div[role='main'].homepage {
-  margin-top: 72px;
+body header .home a {
+  opacity: 0.5;
+  filter: alpha(opacity=50);
+  -webkit-transition: opacity 0.3s;
+  -o-transition: opacity 0.3s;
+  transition: opacity 0.3s;
 }
-body div[role='main'].homepage:before,
-body div[role='main'].homepage:after {
-  content: " ";
-  display: table;
+body header .home a:hover {
+  opacity: 1;
+  filter: alpha(opacity=100);
 }
-body div[role='main'].homepage:after {
-  clear: both;
+body div[role='main'] {
+  min-height: 100%;
+  /* equal to footer height */
+  margin-bottom: -109px;
 }
-body div[role='main'].homepage section.hero {
+body div[role='main'] section.hero {
   padding: 40px 0;
   text-align: center;
 }
-body div[role='main'].homepage section.hero .hero-img {
+body div[role='main'] section.hero .hero-img {
   width: 50px;
   margin-bottom: 15px;
 }
-body div[role='main'].homepage section.hero .hero-heading {
+body div[role='main'] section.hero .hero-heading {
   font-size: 20px;
   margin-bottom: 5px;
 }
-body div[role='main'].homepage section.hero .hero-desc {
+body div[role='main'] section.hero .hero-desc {
   margin: auto;
   font-style: italic;
   width: 50%;
   line-height: 1.4em;
 }
-body div[role='main'].homepage section.selection {
-  border-top: 1px solid #d7d7d7;
-  border-bottom: 1px solid #d7d7d7;
+body div[role='main'] section.hero .hero-longdesc {
+  text-align: justify;
+  margin-top: 30px;
+  line-height: 1.9em;
 }
-body div[role='main'].homepage section.selection ul {
-  margin: 0;
-  padding: 0;
-}
-body div[role='main'].homepage section.selection ul:before,
-body div[role='main'].homepage section.selection ul:after {
+body div[role='main'] section.hero .hero-longdesc:before,
+body div[role='main'] section.hero .hero-longdesc:after {
   content: " ";
   display: table;
 }
-body div[role='main'].homepage section.selection ul:after {
+body div[role='main'] section.hero .hero-longdesc:after {
   clear: both;
 }
-body div[role='main'].homepage section.selection ul li {
+body div[role='main'] section.hero .hero-longdesc .left {
+  float: left;
+  width: 50%;
+  padding-right: 15px;
+}
+body div[role='main'] section.hero .hero-longdesc .right {
+  float: left;
+  width: 50%;
+  padding-left: 15px;
+}
+body div[role='main'] section.selection {
+  border-top: 1px solid #d7d7d7;
+  border-bottom: 1px solid #d7d7d7;
+}
+body div[role='main'] section.selection ul {
+  margin: 0;
+  padding: 0;
+}
+body div[role='main'] section.selection ul:before,
+body div[role='main'] section.selection ul:after {
+  content: " ";
+  display: table;
+}
+body div[role='main'] section.selection ul:after {
+  clear: both;
+}
+body div[role='main'] section.selection ul li {
   list-style: none;
   float: left;
   width: 16.66666667%;
@@ -671,17 +803,17 @@ body div[role='main'].homepage section.selection ul li {
   height: 174px;
   position: relative;
 }
-body div[role='main'].homepage section.selection ul li:first-child {
+body div[role='main'] section.selection ul li:first-child {
   border-left: 1px solid #d7d7d7;
 }
-body div[role='main'].homepage section.selection ul li:hover .select-hover {
+body div[role='main'] section.selection ul li:hover .select-hover {
   opacity: 1;
 }
-body div[role='main'].homepage section.selection ul li:hover .select-idle {
+body div[role='main'] section.selection ul li:hover .select-idle {
   opacity: 0;
   visibility: hidden;
 }
-body div[role='main'].homepage section.selection ul li .select-hover {
+body div[role='main'] section.selection ul li .select-hover {
   position: relative;
   opacity: 0;
   height: inherit;
@@ -693,14 +825,14 @@ body div[role='main'].homepage section.selection ul li .select-hover {
   -o-transition: all 0.3s;
   transition: all 0.3s;
 }
-body div[role='main'].homepage section.selection ul li .select-hover p {
+body div[role='main'] section.selection ul li .select-hover p {
   color: inherit;
   margin-bottom: 15px;
   font-size: 14px;
   max-height: 70px;
   overflow: hidden;
 }
-body div[role='main'].homepage section.selection ul li .select-hover a {
+body div[role='main'] section.selection ul li .select-hover a {
   color: #e6e6e6;
   width: 100%;
   border: 1px solid ;
@@ -716,61 +848,61 @@ body div[role='main'].homepage section.selection ul li .select-hover a {
   padding: 3px 0;
   letter-spacing: 1.3px;
 }
-body div[role='main'].homepage section.selection ul li .select-hover a div {
+body div[role='main'] section.selection ul li .select-hover a div {
   position: absolute;
   background: white;
   -webkit-transition: all 0.3s;
   -o-transition: all 0.3s;
   transition: all 0.3s;
 }
-body div[role='main'].homepage section.selection ul li .select-hover a div.left {
+body div[role='main'] section.selection ul li .select-hover a div.left {
   left: -1px;
   bottom: 0;
   width: 2px;
   height: 0;
 }
-body div[role='main'].homepage section.selection ul li .select-hover a div.right {
+body div[role='main'] section.selection ul li .select-hover a div.right {
   right: -1px;
   top: 0;
   width: 2px;
   height: 0;
 }
-body div[role='main'].homepage section.selection ul li .select-hover a div.bot {
+body div[role='main'] section.selection ul li .select-hover a div.bot {
   height: 2px;
   width: 0;
   right: 0;
   bottom: -1px;
 }
-body div[role='main'].homepage section.selection ul li .select-hover a div.top {
+body div[role='main'] section.selection ul li .select-hover a div.top {
   height: 2px;
   width: 0;
   left: 0;
   top: -1px;
 }
-body div[role='main'].homepage section.selection ul li .select-hover a:hover div.left {
+body div[role='main'] section.selection ul li .select-hover a:hover div.left {
   height: 100%;
 }
-body div[role='main'].homepage section.selection ul li .select-hover a:hover div.right {
+body div[role='main'] section.selection ul li .select-hover a:hover div.right {
   height: 100%;
 }
-body div[role='main'].homepage section.selection ul li .select-hover a:hover div.bot {
+body div[role='main'] section.selection ul li .select-hover a:hover div.bot {
   width: 100%;
 }
-body div[role='main'].homepage section.selection ul li .select-hover a:hover div.top {
+body div[role='main'] section.selection ul li .select-hover a:hover div.top {
   width: 100%;
 }
-body div[role='main'].homepage section.selection ul li .select-hover a:hover {
+body div[role='main'] section.selection ul li .select-hover a:hover {
   color: white;
   background: #598080;
 }
-body div[role='main'].homepage section.selection ul li .select-idle {
+body div[role='main'] section.selection ul li .select-idle {
   position: absolute;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
 }
-body div[role='main'].homepage section.selection ul li .select-idle::after {
+body div[role='main'] section.selection ul li .select-idle::after {
   content: '';
   position: absolute;
   right: -3px;
@@ -784,18 +916,222 @@ body div[role='main'].homepage section.selection ul li .select-idle::after {
   -webkit-transform: rotate(45deg);
   -ms-transform: rotate(45deg);
 }
-body div[role='main'].homepage section.selection ul li .select-idle .icon {
+body div[role='main'] section.selection ul li .select-idle .icon {
   display: table;
   height: 35px;
   margin: 50px auto 22px;
 }
-body div[role='main'].homepage section.selection ul li .select-idle .select-heading {
+body div[role='main'] section.selection ul li .select-idle .select-heading {
   display: table;
   margin: auto;
   text-transform: uppercase;
   font-size: 12px;
   font-weight: 600;
   letter-spacing: 1px;
+}
+body div[role='main'].about {
+  padding-top: 72px;
+}
+body div[role='main'].about .selection ul li:hover .select-idle {
+  visibility: visible;
+  opacity: 1;
+}
+body div[role='main'].about .selection ul li:hover .select-idle::after {
+  opacity: 1;
+}
+body div[role='main'].about .selection ul li .select-idle a {
+  color: inherit;
+}
+body div[role='main'].about .selection ul li .select-idle a:hover {
+  text-decoration: none;
+}
+body div[role='main'].about .selection ul li .select-idle::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  bottom: 0px;
+  background: #4f7979;
+  width: 100%;
+  height: 5px;
+  border: 0;
+  transform: rotate(0deg);
+  -webkit-transform: rotate(0deg);
+  -ms-transform: rotate(0deg);
+  opacity: 0;
+  filter: alpha(opacity=0);
+  -webkit-transition: opacity 0.3s;
+  -o-transition: opacity 0.3s;
+  transition: opacity 0.3s;
+}
+body div[role='main'].about .selectioncontent {
+  padding: 40px 0 40px 0;
+  overflow: hidden;
+}
+body div[role='main'].about .selectioncontent .content {
+  padding: 40px 0 40px 0;
+}
+body div[role='main'].about .selectioncontent .content:before,
+body div[role='main'].about .selectioncontent .content:after {
+  content: " ";
+  display: table;
+}
+body div[role='main'].about .selectioncontent .content:after {
+  clear: both;
+}
+body div[role='main'].about .selectioncontent .content h1 {
+  font-size: 2.4rem;
+  margin: 0 0 20px 0;
+  color: #4f7979;
+  text-align: left;
+  width: 70%;
+  margin-top: 60px;
+}
+body div[role='main'].about .selectioncontent .content p {
+  color: #757575;
+  text-align: left;
+  width: 80%;
+}
+body div[role='main'].about .selectioncontent .content .thumbwide {
+  box-shadow: 10px;
+  -webkit-box-shadow: 0px 0px 34px 0px rgba(0, 0, 0, 0.2);
+  -moz-box-shadow: 0px 0px 34px 0px rgba(0, 0, 0, 0.2);
+  box-shadow: 0px 0px 34px 0px rgba(0, 0, 0, 0.2);
+  position: static;
+  overflow: hidden;
+  max-width: 300%;
+  float: left;
+  border-radius: 5px;
+}
+body div[role='main'].about .selectioncontent .content .thumbwide.left {
+  float: right;
+}
+body div[role='main'].about .selectioncontent .content .thumbs {
+  box-shadow: 10px;
+  -webkit-box-shadow: 0px 0px 34px 0px rgba(0, 0, 0, 0.2);
+  -moz-box-shadow: 0px 0px 34px 0px rgba(0, 0, 0, 0.2);
+  box-shadow: 0px 0px 34px 0px rgba(0, 0, 0, 0.2);
+  border-radius: 5px;
+}
+body div[role='main'].about .selectioncontent .content .left {
+  width: 50%;
+  float: left;
+  padding-right: 20px;
+  position: relative;
+  text-align: center;
+}
+body div[role='main'].about .selectioncontent .content .right {
+  width: 50%;
+  float: left;
+  padding-left: 20px;
+  position: relative;
+  text-align: center;
+}
+body div[role='main'].about .aboutlink {
+  border-top: 1px solid #d7d7d7;
+  padding: 20px 0 20px 0;
+}
+body div[role='main'].about .aboutlink:before,
+body div[role='main'].about .aboutlink:after {
+  content: " ";
+  display: table;
+}
+body div[role='main'].about .aboutlink:after {
+  clear: both;
+}
+body div[role='main'].about .aboutlink .left {
+  float: left;
+}
+body div[role='main'].about .aboutlink .left ul {
+  margin: 0;
+  padding: 5px 0 0 0;
+}
+body div[role='main'].about .aboutlink .left ul li {
+  list-style-type: none;
+  display: inline-block;
+  margin: 0 15px 0 0;
+}
+body div[role='main'].about .aboutlink .left ul li a {
+  font-size: 1.4rem;
+}
+body div[role='main'].about .aboutlink .right {
+  float: right;
+}
+body div[role='main'].about .aboutlink .right .register {
+  padding: 5px 30px;
+  font-size: 12px;
+  letter-spacing: 1.3px;
+  text-transform: uppercase;
+  color: #b5b5b5;
+  display: block;
+  border: 1px solid #b5b5b5;
+  text-decoration: none;
+  position: relative;
+  -webkit-transition: all 0.3s;
+  -o-transition: all 0.3s;
+  transition: all 0.3s;
+  font-weight: 600;
+  clear: both;
+  display: table;
+  margin: 0 auto;
+  width: 200px;
+  text-align: center;
+}
+body div[role='main'].about .aboutlink .right .register:hover {
+  color: #828282;
+}
+body div[role='main'].about .aboutlink .right .register div {
+  position: absolute;
+  background: #9c9c9c;
+  -webkit-transition: all 0.3s;
+  -o-transition: all 0.3s;
+  transition: all 0.3s;
+}
+body div[role='main'].about .aboutlink .right .register div.left {
+  left: -1px;
+  bottom: 0;
+  width: 2px;
+  height: 0;
+}
+body div[role='main'].about .aboutlink .right .register div.right {
+  right: -1px;
+  top: 0;
+  width: 2px;
+  height: 0;
+}
+body div[role='main'].about .aboutlink .right .register div.bot {
+  height: 2px;
+  width: 0;
+  right: 0;
+  bottom: -1px;
+}
+body div[role='main'].about .aboutlink .right .register div.top {
+  height: 2px;
+  width: 0;
+  left: 0;
+  top: -1px;
+}
+body div[role='main'].about .aboutlink .right .register:hover div.left {
+  height: 100%;
+}
+body div[role='main'].about .aboutlink .right .register:hover div.right {
+  height: 100%;
+}
+body div[role='main'].about .aboutlink .right .register:hover div.bot {
+  width: 100%;
+}
+body div[role='main'].about .aboutlink .right .register:hover div.top {
+  width: 100%;
+}
+body div[role='main'].homepage {
+  padding-top: 72px;
+}
+body div[role='main'].homepage:before,
+body div[role='main'].homepage:after {
+  content: " ";
+  display: table;
+}
+body div[role='main'].homepage:after {
+  clear: both;
 }
 body div[role='main'].homepage section.featured {
   padding: 45px 0 40px;
@@ -1096,8 +1432,6 @@ body div[role='main'].homepage section.partners ul li:last-child img {
 body div[role='main'].homepage section.api {
   padding: 40px 0;
   text-align: center;
-  border-bottom: 1px solid #d7d7d7
-				;
 }
 body div[role='main'].homepage section.api .section-heading {
   display: table;
@@ -1303,9 +1637,16 @@ body div[role='main'].exhibitionviewer .container-fluid .wrapper,
 body div[role='main'].searchpage .container-fluid .wrapper {
   height: 100%;
 }
+body div[role='main'].exhibitionviewer::after,
+body div[role='main'].searchpage::after {
+  height: auto;
+}
 body div[role='main'].exhibitionviewer footer,
 body div[role='main'].searchpage footer {
   display: none;
+}
+body div[role='main'].collectionviewer {
+  background: #f6f6f6;
 }
 body div[role='main'] .wrapper {
   margin-left: -15px;
@@ -1338,13 +1679,32 @@ body div[role='main'] .wrapper .alert .close {
   right: -16px;
 }
 body div[role='main'] .wrapper aside {
-  width: 20%;
+  width: 101px;
   float: left;
   position: fixed;
+  z-index: 10;
   bottom: 0;
-  top: 74px;
+  top: 75px;
   background: #f4f4f4;
-  padding: 35px 30px;
+  padding: 35px 0px 35px 30px;
+  -webkit-transition: all 0.5s;
+  -o-transition: all 0.5s;
+  transition: all 0.5s;
+}
+body div[role='main'] .wrapper aside:hover {
+  width: 280px;
+}
+body div[role='main'] .wrapper aside:hover .site {
+  display: block;
+}
+body div[role='main'] .wrapper aside:hover .app ul li a .text {
+  left: 50px;
+}
+body div[role='main'] .wrapper aside:hover .app ul li a .counter {
+  left: auto;
+  right: 0px;
+  opacity: 1;
+  filter: alpha(opacity=100);
 }
 body div[role='main'] .wrapper aside label.header {
   font-size: 11px;
@@ -1361,6 +1721,7 @@ body div[role='main'] .wrapper aside .app ul li {
   list-style: none;
   font-size: 14px;
   margin-bottom: 1px;
+  margin-bottom: 2px;
 }
 body div[role='main'] .wrapper aside .app ul li a {
   color: #878787;
@@ -1368,17 +1729,38 @@ body div[role='main'] .wrapper aside .app ul li a {
   padding: 4px 0 4px 0;
   border-top-right-radius: 3px;
   border-bottom-right-radius: 3px;
+  height: 40px;
+  position: relative;
+}
+body div[role='main'] .wrapper aside .app ul li a:before,
+body div[role='main'] .wrapper aside .app ul li a:after {
+  content: " ";
+  display: table;
+}
+body div[role='main'] .wrapper aside .app ul li a:after {
+  clear: both;
 }
 body div[role='main'] .wrapper aside .app ul li a .icon {
   float: left;
   width: 20px;
   text-align: center;
   margin: 1px 10px 0 0;
+  font-size: 2rem;
+  border: 1px solid #d7d7d7;
+  border-radius: 3px;
+  width: 40px;
+  color: #999;
+  background: #fff;
+}
+body div[role='main'] .wrapper aside .app ul li a .text {
+  position: absolute;
+  left: -200px;
+  top: 12px;
 }
 body div[role='main'] .wrapper aside .app ul li a .counter {
   float: right;
   margin-right: 15px;
-  margin-top: 2px;
+  top: 13px;
   border-radius: 20px;
   display: block;
   border: 1px solid #9a9a9a;
@@ -1389,24 +1771,58 @@ body div[role='main'] .wrapper aside .app ul li a .counter {
   font-size: 11px;
   line-height: 10px;
   height: 20px;
+  position: absolute;
+  opacity: 0;
+  filter: alpha(opacity=0);
+  -webkit-transition: opacity 0.6s;
+  -o-transition: opacity 0.6s;
+  transition: opacity 0.6s;
+  left: -200px;
 }
-body div[role='main'] .wrapper aside .app ul li:hover a,
-body div[role='main'] .wrapper aside .app ul li.active a {
-  background: #7f9d9d;
-  color: #fff;
-  margin-left: -30px;
-  padding-left: 30px;
+body div[role='main'] .wrapper aside .app ul li:hover a {
   text-decoration: none;
 }
-body div[role='main'] .wrapper aside .app ul li:hover a .counter,
-body div[role='main'] .wrapper aside .app ul li.active a .counter {
-  background: #4f7979;
+body div[role='main'] .wrapper aside .app ul li:hover a .icon {
+  background: #7f9d9d;
+  border: 1px solid #7f9d9d;
   color: #fff;
-  border: 1px solid #4f7979;
+}
+body div[role='main'] .wrapper aside .app ul li:hover a .text {
+  color: #4f7979;
+  display: block;
+}
+body div[role='main'] .wrapper aside .app ul li.active {
+  /* anchor
+								a {
+									background: #7f9d9d;
+									color: #fff;
+									margin-left: -30px;
+									padding-left: 30px;
+									text-decoration: none;
+
+									// counter
+									.counter {
+										background: @brand-dashboard;
+										color: #fff;
+										border: 1px solid @brand-dashboard;
+									}
+								}*/
+}
+body div[role='main'] .wrapper aside .app ul li.active a {
+  text-decoration: none;
+}
+body div[role='main'] .wrapper aside .app ul li.active a .icon {
+  background: #7f9d9d;
+  border: 1px solid #7f9d9d;
+  color: #fff;
+}
+body div[role='main'] .wrapper aside .app ul li.active a .text {
+  color: #4f7979;
 }
 body div[role='main'] .wrapper aside .site {
   position: absolute;
   bottom: 35px;
+  display: none;
 }
 body div[role='main'] .wrapper aside .site ul {
   margin: 0;
@@ -1429,9 +1845,9 @@ body div[role='main'] .wrapper aside .site ul li a:hover {
   text-decoration: none;
 }
 body div[role='main'] .wrapper main {
-  width: 80%;
+  width: calc(100% - 101px);
   float: left;
-  margin-left: 20%;
+  margin-left: 101px;
   padding: 35px 30px 35px 35px;
 }
 body div[role='main'] .wrapper main.full-page {
@@ -1603,10 +2019,15 @@ body div[role='main'] .wrapper main section.header .new .text {
 body div[role='main'] .wrapper main section.header .title {
   color: #4f7979;
   float: left;
+  font-size: 1.6rem;
 }
 body div[role='main'] .wrapper main section.header .item-count {
   color: #4f7979;
   float: right;
+  border: 1px solid #4f7979;
+  border-radius: 15px;
+  padding: 0 15px 0 15px;
+  font-size: 1.4rem;
 }
 body div[role='main'] .wrapper main section.header .description {
   clear: both;
@@ -1911,6 +2332,13 @@ body div[role='main'] .wrapper main section.project .list-head .upload,
 body div[role='main'] .wrapper main section.favorite .list-head .upload {
   color: #4f7979;
   text-decoration: none;
+  padding-left: 10px;
+}
+body div[role='main'] .wrapper main section.collection .list-head .upload.exhibition,
+body div[role='main'] .wrapper main section.exhibition .list-head .upload.exhibition,
+body div[role='main'] .wrapper main section.project .list-head .upload.exhibition,
+body div[role='main'] .wrapper main section.favorite .list-head .upload.exhibition {
+  padding-left: 0;
   padding-right: 10px;
 }
 body div[role='main'] .wrapper main section.collection .list-head .upload .plus,
@@ -2030,6 +2458,7 @@ body div[role='main'] .wrapper main section.exhibition section.exhibition-list .
 body div[role='main'] .wrapper main section.project section.exhibition-list .list-body.list li .thumbnails .wrap,
 body div[role='main'] .wrapper main section.favorite section.exhibition-list .list-body.list li .thumbnails .wrap {
   width: 100%;
+  overflow: hidden;
 }
 body div[role='main'] .wrapper main section.collection section.exhibition-list .list-body.list li .thumbnails .wrap::after,
 body div[role='main'] .wrapper main section.exhibition section.exhibition-list .list-body.list li .thumbnails .wrap::after,
@@ -2105,6 +2534,7 @@ body div[role='main'] .wrapper main section.exhibition section.project-list .lis
 body div[role='main'] .wrapper main section.project section.project-list .list-body.list li .thumbnails .wrap,
 body div[role='main'] .wrapper main section.favorite section.project-list .list-body.list li .thumbnails .wrap {
   width: 100%;
+  overflow: hidden;
 }
 body div[role='main'] .wrapper main section.collection section.project-list .list-body.list li .thumbnails .wrap.small,
 body div[role='main'] .wrapper main section.exhibition section.project-list .list-body.list li .thumbnails .wrap.small,
@@ -2577,6 +3007,7 @@ body div[role='main'] .wrapper main section.exhibition .list-body.list li .meta 
 body div[role='main'] .wrapper main section.project .list-body.list li .meta .action-group,
 body div[role='main'] .wrapper main section.favorite .list-body.list li .meta .action-group {
   margin-top: 2px;
+  margin-left: 1px;
 }
 body div[role='main'] .wrapper main section.collection .list-body.list li .meta .action-group:before,
 body div[role='main'] .wrapper main section.exhibition .list-body.list li .meta .action-group:before,
@@ -2609,6 +3040,7 @@ body div[role='main'] .wrapper main section.favorite .list-body.list li .meta .a
   -webkit-transition: all 0.3s;
   -o-transition: all 0.3s;
   transition: all 0.3s;
+  margin-left: -1px;
 }
 body div[role='main'] .wrapper main section.collection .list-body.list li .meta .action-group a:hover,
 body div[role='main'] .wrapper main section.exhibition .list-body.list li .meta .action-group a:hover,
@@ -2616,26 +3048,6 @@ body div[role='main'] .wrapper main section.project .list-body.list li .meta .ac
 body div[role='main'] .wrapper main section.favorite .list-body.list li .meta .action-group a:hover {
   background-color: #4f7979;
   color: white;
-}
-body div[role='main'] .wrapper main section.collection .list-body.list li .meta .action-group a + a,
-body div[role='main'] .wrapper main section.exhibition .list-body.list li .meta .action-group a + a,
-body div[role='main'] .wrapper main section.project .list-body.list li .meta .action-group a + a,
-body div[role='main'] .wrapper main section.favorite .list-body.list li .meta .action-group a + a {
-  border-left: 0;
-}
-body div[role='main'] .wrapper main section.collection .list-body.list li .meta .action-group a:first-child,
-body div[role='main'] .wrapper main section.exhibition .list-body.list li .meta .action-group a:first-child,
-body div[role='main'] .wrapper main section.project .list-body.list li .meta .action-group a:first-child,
-body div[role='main'] .wrapper main section.favorite .list-body.list li .meta .action-group a:first-child {
-  border-top-left-radius: 4px;
-  border-bottom-left-radius: 4px;
-}
-body div[role='main'] .wrapper main section.collection .list-body.list li .meta .action-group a:last-child,
-body div[role='main'] .wrapper main section.exhibition .list-body.list li .meta .action-group a:last-child,
-body div[role='main'] .wrapper main section.project .list-body.list li .meta .action-group a:last-child,
-body div[role='main'] .wrapper main section.favorite .list-body.list li .meta .action-group a:last-child {
-  border-top-right-radius: 4px;
-  border-bottom-right-radius: 4px;
 }
 body div[role='main'] .wrapper main section.collection .loadmore,
 body div[role='main'] .wrapper main section.exhibition .loadmore,
@@ -2771,6 +3183,7 @@ body div[role='main'] .wrapper main section.favorite section.hero .meta {
   float: left;
   width: 70%;
   padding: 0 20px 0 0;
+  text-align: left;
 }
 body div[role='main'] .wrapper main section.collection section.hero .meta .top-info,
 body div[role='main'] .wrapper main section.exhibition section.hero .meta .top-info,
@@ -2873,25 +3286,7 @@ body div[role='main'] .wrapper main section.collection section.isotope .listing 
 body div[role='main'] .wrapper main section.exhibition section.isotope .listing .grid .item,
 body div[role='main'] .wrapper main section.project section.isotope .listing .grid .item,
 body div[role='main'] .wrapper main section.favorite section.isotope .listing .grid .item {
-  width: 33.33333333%;
-}
-body div[role='main'] .wrapper main section.collection section.isotope .listing .grid .sizer a .thumb .counter,
-body div[role='main'] .wrapper main section.exhibition section.isotope .listing .grid .sizer a .thumb .counter,
-body div[role='main'] .wrapper main section.project section.isotope .listing .grid .sizer a .thumb .counter,
-body div[role='main'] .wrapper main section.favorite section.isotope .listing .grid .sizer a .thumb .counter,
-body div[role='main'] .wrapper main section.collection section.isotope .listing .grid .item a .thumb .counter,
-body div[role='main'] .wrapper main section.exhibition section.isotope .listing .grid .item a .thumb .counter,
-body div[role='main'] .wrapper main section.project section.isotope .listing .grid .item a .thumb .counter,
-body div[role='main'] .wrapper main section.favorite section.isotope .listing .grid .item a .thumb .counter {
-  background: #4f7979;
-  color: white;
-  font-size: 1.1rem;
-  font-weight: 500;
-  text-transform: uppercase;
-  padding: 5px 15px;
-  position: absolute;
-  top: 0;
-  left: 0;
+  width: 25%;
 }
 body div[role='main'] .wrapper main section.collection section.isotope .listing .grid .sizer a .info,
 body div[role='main'] .wrapper main section.exhibition section.isotope .listing .grid .sizer a .info,
@@ -2914,6 +3309,103 @@ body div[role='main'] .wrapper main section.exhibition section.isotope .listing 
 body div[role='main'] .wrapper main section.project section.isotope .listing .grid .item a .info .title,
 body div[role='main'] .wrapper main section.favorite section.isotope .listing .grid .item a .info .title {
   margin-bottom: 0;
+}
+body div[role='main'] .wrapper main section.collection section.isotope .listing {
+  background-color: white;
+  border: 0;
+}
+body div[role='main'] .wrapper main section.collection section.isotope .listing .grid .sizer a .info,
+body div[role='main'] .wrapper main section.collection section.isotope .listing .grid .item a .info {
+  border-left: 1px solid #ccc;
+  border-right: 1px solid #ccc;
+  border-bottom: 0;
+  padding-bottom: 0px;
+}
+body div[role='main'] .wrapper main section.collection section.isotope .listing .grid .sizer a .info .title,
+body div[role='main'] .wrapper main section.collection section.isotope .listing .grid .item a .info .title {
+  margin-bottom: 0;
+}
+body div[role='main'] .wrapper main section.collection section.isotope .listing .grid .sizer .action-group,
+body div[role='main'] .wrapper main section.collection section.isotope .listing .grid .item .action-group {
+  border-left: 1px solid #ccc;
+  border-right: 1px solid #ccc;
+  border-bottom: 1px solid #ccc;
+  position: relative;
+  padding: 10px 30px 30px 30px;
+}
+body div[role='main'] .wrapper main section.collection section.isotope .listing .grid .sizer .action-group:before,
+body div[role='main'] .wrapper main section.collection section.isotope .listing .grid .item .action-group:before,
+body div[role='main'] .wrapper main section.collection section.isotope .listing .grid .sizer .action-group:after,
+body div[role='main'] .wrapper main section.collection section.isotope .listing .grid .item .action-group:after {
+  content: " ";
+  display: table;
+}
+body div[role='main'] .wrapper main section.collection section.isotope .listing .grid .sizer .action-group:after,
+body div[role='main'] .wrapper main section.collection section.isotope .listing .grid .item .action-group:after {
+  clear: both;
+}
+body div[role='main'] .wrapper main section.collection section.isotope .listing .grid .sizer .action-group .wrap,
+body div[role='main'] .wrapper main section.collection section.isotope .listing .grid .item .action-group .wrap {
+  position: relative;
+}
+body div[role='main'] .wrapper main section.collection section.isotope .listing .grid .sizer .action-group .wrap::before,
+body div[role='main'] .wrapper main section.collection section.isotope .listing .grid .item .action-group .wrap::before {
+  content: '';
+  width: 100%;
+  height: 1px;
+  background-color: #ccc;
+  position: absolute;
+  top: 14px;
+  left: 0;
+}
+body div[role='main'] .wrapper main section.collection section.isotope .listing .grid .sizer .action-group .wrap .links,
+body div[role='main'] .wrapper main section.collection section.isotope .listing .grid .item .action-group .wrap .links {
+  color: #4f7979;
+  float: left;
+  text-align: left;
+  padding: 0 10px 0 0;
+  max-width: 50%;
+  position: relative;
+  z-index: 0;
+  background: #fff;
+}
+body div[role='main'] .wrapper main section.collection section.isotope .listing .grid .sizer .action-group .wrap .links:hover,
+body div[role='main'] .wrapper main section.collection section.isotope .listing .grid .item .action-group .wrap .links:hover {
+  color: #273b3b;
+}
+body div[role='main'] .wrapper main section.collection section.isotope .listing .grid .sizer .action-group .wrap ul,
+body div[role='main'] .wrapper main section.collection section.isotope .listing .grid .item .action-group .wrap ul {
+  margin: 0;
+  padding: 0;
+  z-index: 0;
+  position: relative;
+  float: right;
+  text-align: right;
+  background-color: white;
+}
+body div[role='main'] .wrapper main section.collection section.isotope .listing .grid .sizer .action-group .wrap ul li,
+body div[role='main'] .wrapper main section.collection section.isotope .listing .grid .item .action-group .wrap ul li {
+  list-style: none;
+  display: inline-block;
+  margin-left: 10px;
+}
+body div[role='main'] .wrapper main section.collection section.isotope .listing .grid .sizer .action-group .wrap ul li a,
+body div[role='main'] .wrapper main section.collection section.isotope .listing .grid .item .action-group .wrap ul li a {
+  text-decoration: none;
+  font-size: 1.5rem;
+  color: #a4a4a4  !important;
+  -webkit-transition: color 0.3s;
+  -o-transition: color 0.3s;
+  transition: color 0.3s;
+  padding: 0 !important;
+}
+body div[role='main'] .wrapper main section.collection section.isotope .listing .grid .sizer .action-group .wrap ul li a:hover,
+body div[role='main'] .wrapper main section.collection section.isotope .listing .grid .item .action-group .wrap ul li a:hover {
+  color: #444;
+}
+body div[role='main'] .wrapper main section.collection section.isotope .listing .grid .sizer .action-group .wrap ul li a:hover.fa-heart,
+body div[role='main'] .wrapper main section.collection section.isotope .listing .grid .item .action-group .wrap ul li a:hover.fa-heart {
+  color: #e46667  !important;
 }
 body div[role='main'] .wrapper main section.favorite {
   padding-top: 0;
@@ -3299,7 +3791,7 @@ body div[role='main'] .wrapper main section.exhibition .editorbox .wrap {
   height: 100%;
 }
 body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .scroll {
-  width: 2000px;
+  width: 3500px;
   padding: 20px;
   height: 100%;
 }
@@ -3310,8 +3802,174 @@ body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .scroll 
   float: left;
   margin-right: 20px;
   background: #fff;
-  overflow: auto;
   padding: 40px;
+}
+body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .scroll .box.fill,
+body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .scroll .add.fill {
+  width: 750px;
+  padding: 20px 20px 20px 20px;
+}
+body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .scroll .box.fill:before,
+body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .scroll .add.fill:before,
+body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .scroll .box.fill:after,
+body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .scroll .add.fill:after {
+  content: " ";
+  display: table;
+}
+body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .scroll .box.fill:after,
+body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .scroll .add.fill:after {
+  clear: both;
+}
+body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .scroll .box.fill .left,
+body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .scroll .add.fill .left {
+  float: left;
+  width: 35%;
+  padding: 0 20px 0 0;
+}
+body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .scroll .box.fill .right,
+body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .scroll .add.fill .right {
+  float: left;
+  width: 50%;
+  padding: 0 20px 0 0;
+}
+body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .scroll .box.fill .video,
+body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .scroll .add.fill .video {
+  float: left;
+  width: 15%;
+  height: 280px;
+  border: 1px solid #c6c6c6;
+  padding: 10px;
+  position: relative;
+}
+body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .scroll .box.fill .video .embed-responsive,
+body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .scroll .add.fill .video .embed-responsive {
+  background: #dedede;
+}
+body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .scroll .box.fill .video .imginfo,
+body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .scroll .add.fill .video .imginfo {
+  height: 132px;
+  overflow: auto;
+}
+body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .scroll .box.fill .video .addvideo,
+body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .scroll .add.fill .video .addvideo {
+  width: 100%;
+  height: 100%;
+  display: block;
+  text-align: center;
+}
+body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .scroll .box.fill .video .addvideo img,
+body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .scroll .add.fill .video .addvideo img {
+  margin-top: 113px;
+}
+body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .scroll .box.fill .video .addvideo:hover,
+body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .scroll .add.fill .video .addvideo:hover {
+  background: #f9f9f9;
+}
+body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .scroll .box.fill .video .action,
+body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .scroll .add.fill .video .action {
+  position: absolute;
+  bottom: -27px;
+  left: -1px;
+  margin: 0px;
+  padding: 0;
+}
+body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .scroll .box.fill .video .action li,
+body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .scroll .add.fill .video .action li {
+  list-style-type: none;
+  float: left;
+  margin-right: -1px;
+  border: 1px solid #c6c6c6;
+  background: #fff;
+}
+body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .scroll .box.fill .video .action li a,
+body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .scroll .add.fill .video .action li a {
+  display: inline-block;
+  width: 25px;
+  height: 25px;
+  text-align: center;
+  position: relative;
+  background: #fff;
+}
+body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .scroll .box.fill.videoadded .left,
+body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .scroll .add.fill.videoadded .left {
+  float: left;
+  width: 35%;
+  padding: 0 20px 0 0;
+}
+body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .scroll .box.fill.videoadded .right,
+body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .scroll .add.fill.videoadded .right {
+  float: left;
+  width: 40%;
+  padding: 0 20px 0 0;
+}
+body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .scroll .box.fill.videoadded .video,
+body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .scroll .add.fill.videoadded .video {
+  float: left;
+  width: 25%;
+}
+body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .scroll .box.fill .imgwrap,
+body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .scroll .add.fill .imgwrap {
+  width: 100%;
+  max-height: 220px;
+  overflow: hidden;
+}
+body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .scroll .box.fill .imgwrap img,
+body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .scroll .add.fill .imgwrap img {
+  max-width: 100%;
+}
+body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .scroll .box.fill .imginfo,
+body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .scroll .add.fill .imginfo {
+  font-size: 1.4rem;
+  font-style: italic;
+  line-height: 1.5em;
+  margin-top: 10px;
+}
+body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .scroll .box.fill .imginfo .mediatitle,
+body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .scroll .add.fill .imginfo .mediatitle {
+  color: #8e8e8e;
+}
+body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .scroll .box.fill .imginfo .mediasource,
+body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .scroll .add.fill .imginfo .mediasource {
+  color: #2a2a2a;
+}
+body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .scroll .box.fill .boxtitle,
+body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .scroll .add.fill .boxtitle {
+  overflow: auto;
+  color: #1a1a1a;
+  line-height: 1.6em;
+  font-size: 1.5rem;
+  max-height: 280px;
+}
+body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .scroll .box.fill .boxaction,
+body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .scroll .add.fill .boxaction {
+  margin-bottom: 10px;
+}
+body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .scroll .box.fill .boxaction:before,
+body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .scroll .add.fill .boxaction:before,
+body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .scroll .box.fill .boxaction:after,
+body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .scroll .add.fill .boxaction:after {
+  content: " ";
+  display: table;
+}
+body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .scroll .box.fill .boxaction:after,
+body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .scroll .add.fill .boxaction:after {
+  clear: both;
+}
+body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .scroll .box.fill .boxaction ul,
+body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .scroll .add.fill .boxaction ul {
+  margin: 0;
+  padding: 0;
+  float: right;
+}
+body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .scroll .box.fill .boxaction ul li,
+body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .scroll .add.fill .boxaction ul li {
+  list-style: none;
+  display: inline-block;
+  margin-left: 10px;
+}
+body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .scroll .box.fill .boxaction ul li a,
+body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .scroll .add.fill .boxaction ul li a {
+  color: #a4a4a4;
 }
 body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .scroll .add {
   background: none;
@@ -3338,6 +3996,41 @@ body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .scroll 
 body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .scroll p {
   color: #6c6c6c;
   font-size: 1.5rem;
+}
+body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .scroll .editortext {
+  width: 100%;
+  font-size: 2rem;
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  color: #888;
+  border: 1px solid #f4f4f4;
+  padding: 5px 0 5px 10px;
+  -webkit-transition: all 0.3s;
+  -o-transition: all 0.3s;
+  transition: all 0.3s;
+}
+body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .scroll .editortext:hover {
+  border: 1px solid #c3c3c3;
+}
+body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .scroll .editortext:focus,
+body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .scroll .editortext:active {
+  border: 1px solid #4f7979;
+  color: #666;
+}
+body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .scroll .editortextarea {
+  width: 100%;
+  height: 200px;
+  margin-top: 10px;
+  border: 1px solid #f4f4f4;
+  padding: 5px 0 0px 10px;
+  color: #888;
+}
+body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .scroll .editortextarea:hover {
+  border: 1px solid #c3c3c3;
+}
+body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .scroll .editortextarea:focus,
+body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .scroll .editortextarea:active {
+  border: 1px solid #4f7979;
+  color: #666;
 }
 body div[role='main'] .wrapper main section.exhibition .assets {
   margin-top: 30px;
@@ -3455,7 +4148,7 @@ body div[role='main'] .wrapper main .searchlabel {
   position: fixed;
   top: 122px;
   height: 30px;
-  z-index: 1;
+  z-index: 2;
 }
 body div[role='main'] .wrapper main .searchlabel .container {
   padding-top: 2px;
@@ -3543,129 +4236,6 @@ body div[role='main'] .wrapper .search .searchbar .settings a {
 body div[role='main'] .wrapper .search .searchbar .settings a:hover {
   opacity: 1;
   filter: alpha(opacity=100);
-}
-body div[role='main'] .wrapper .search .searchbar .settings .searchsetting {
-  position: absolute;
-  width: 320px;
-  background: #fff;
-  color: #555555;
-  z-index: 2;
-  top: 40px;
-  -webkit-box-shadow: 0px 0px 14px -1px rgba(0, 0, 0, 0.52);
-  -moz-box-shadow: 0px 0px 14px -1px rgba(0, 0, 0, 0.52);
-  box-shadow: 0px 0px 14px -1px rgba(0, 0, 0, 0.52);
-  display: none;
-  left: -15px;
-  height: 383px;
-}
-body div[role='main'] .wrapper .search .searchbar .settings .searchsetting:before,
-body div[role='main'] .wrapper .search .searchbar .settings .searchsetting:after {
-  content: " ";
-  display: table;
-}
-body div[role='main'] .wrapper .search .searchbar .settings .searchsetting:after {
-  clear: both;
-}
-body div[role='main'] .wrapper .search .searchbar .settings .searchsetting .filtertext {
-  background: #4f7979;
-  text-align: right;
-  height: 40px;
-  padding: 0px 7px 0px 7px;
-}
-body div[role='main'] .wrapper .search .searchbar .settings .searchsetting .filtertext .label {
-  font-size: 0.8em;
-  color: #fff;
-  font-style: italic;
-}
-body div[role='main'] .wrapper .search .searchbar .settings .searchsetting .filtertext .filterinput {
-  width: 100%;
-  height: 26px;
-  border: 0;
-  margin-top: 7px;
-  padding: 0 0 0 5px;
-  font-size: 0.9em;
-  color: #4f7979;
-}
-body div[role='main'] .wrapper .search .searchbar .settings .searchsetting .filtertext .filterimg {
-  float: right;
-  margin: 13px 10px 0 0;
-  display: none;
-}
-body div[role='main'] .wrapper .search .searchbar .settings .searchsetting > ul {
-  width: 35%;
-  float: left;
-  border-bottom: 0px;
-  height: 400px;
-  background: #4f7979;
-  height: 343px;
-  overflow: auto;
-}
-body div[role='main'] .wrapper .search .searchbar .settings .searchsetting > ul > li {
-  display: block;
-  float: none;
-  border-bottom: 0px;
-  border-bottom: 1px solid #558282;
-}
-body div[role='main'] .wrapper .search .searchbar .settings .searchsetting > ul > li > a {
-  font-family: "PT Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
-  font-size: 0.800em;
-  opacity: 1;
-  filter: alpha(opacity=100);
-  margin: 0;
-  color: #fff;
-  text-align: right;
-  font-weight: bold;
-  padding-right: 20px;
-}
-body div[role='main'] .wrapper .search .searchbar .settings .searchsetting > ul > li:last-child {
-  border-bottom: 0px;
-}
-body div[role='main'] .wrapper .search .searchbar .settings .searchsetting > ul > li.active a {
-  background: #ffffff;
-  color: #4f7979;
-}
-body div[role='main'] .wrapper .search .searchbar .settings .searchsetting .tab-content {
-  float: left;
-  width: 65%;
-  height: 365px;
-  overflow: auto;
-  height: 340px;
-}
-body div[role='main'] .wrapper .search .searchbar .settings .searchsetting .tab-content ul.list {
-  margin: 0;
-  padding: 20px;
-}
-body div[role='main'] .wrapper .search .searchbar .settings .searchsetting .tab-content ul.list li {
-  list-style: none;
-  display: block;
-  width: 100%;
-  color: #555555;
-  border-bottom: 1px solid #ffffff;
-}
-body div[role='main'] .wrapper .search .searchbar .settings .searchsetting .tab-content ul.list li label,
-body div[role='main'] .wrapper .search .searchbar .settings .searchsetting .tab-content ul.list li a {
-  display: block;
-  font-weight: normal;
-  text-align: left;
-  cursor: pointer;
-  padding: 10px 0 10px 0;
-  margin: 0;
-}
-body div[role='main'] .wrapper .search .searchbar .settings .searchsetting .tab-content ul.list li label input,
-body div[role='main'] .wrapper .search .searchbar .settings .searchsetting .tab-content ul.list li a input {
-  float: right;
-  margin-top: 7px;
-}
-body div[role='main'] .wrapper .search .searchbar .settings .searchsetting .tab-content ul.list li a {
-  color: #555555;
-}
-body div[role='main'] .wrapper .search .searchbar .settings .searchsetting .tab-content ul.list li:hover label,
-body div[role='main'] .wrapper .search .searchbar .settings .searchsetting .tab-content ul.list li:hover a {
-  color: #4f7979;
-  text-decoration: none;
-}
-body div[role='main'] .wrapper .search .searchbar .settings .searchsetting .tab-content ul.list li:last-child {
-  border-bottom: 0px;
 }
 body div[role='main'] .wrapper .search .searchbar .settings.active a {
   opacity: 1;
@@ -3880,9 +4450,58 @@ body div[role='main'] .wrapper .search .searchfilter .providerselection {
 body div[role='main'] .wrapper .search .searchresults {
   padding-top: 99px;
   height: 100%;
+  position: relative;
+  -webkit-transition: all 0.3s;
+  -o-transition: all 0.3s;
+  transition: all 0.3s;
+}
+body div[role='main'] .wrapper .search .searchresults.openfilter {
+  padding-right: 400px;
+}
+body div[role='main'] .wrapper .search .searchresults.openfilter .container {
+  width: 100%;
+}
+body div[role='main'] .wrapper .search .searchresults.openfilter .multiplecollect {
+  right: 430px;
+}
+body div[role='main'] .wrapper .search .searchresults .pointer {
+  position: absolute;
+  right: 20px;
+  bottom: 20px;
+  opacity: 0.5;
+  filter: alpha(opacity=50);
+  display: none;
+}
+body div[role='main'] .wrapper .search .searchresults .multiplecollect {
+  position: fixed;
+  top: 203px;
+  right: 30px;
+  display: block;
+  padding: 8px 20px 8px 20px;
+  background: #4f7979;
+  color: #fff;
+  text-align: center;
+  font-size: 1.2rem;
+  letter-spacing: 1px;
+  opacity: 0;
+  filter: alpha(opacity=0);
+  z-index: 1;
+  -webkit-transition: all 0.3s;
+  -o-transition: all 0.3s;
+  transition: all 0.3s;
+}
+body div[role='main'] .wrapper .search .searchresults .multiplecollect.show {
+  opacity: 0.8;
+  filter: alpha(opacity=80);
+}
+body div[role='main'] .wrapper .search .searchresults .multiplecollect.show:hover {
+  opacity: 1;
+  filter: alpha(opacity=100);
+  text-decoration: none;
 }
 body div[role='main'] .wrapper .search .gridlist {
   display: none;
+  position: relative;
 }
 body div[role='main'] .wrapper .search .gridlist.active {
   display: block;
@@ -4051,6 +4670,7 @@ body div[role='main'] .wrapper .search .searchlist .column {
   width: 220px;
   float: none;
   display: inline-block;
+  margin-left: -4px;
 }
 body div[role='main'] .wrapper .search .searchlist .column .wrap {
   height: 100%;
@@ -4092,7 +4712,7 @@ body div[role='main'] .wrapper .search .searchlist .column .header a .link {
 body div[role='main'] .wrapper .search .searchlist .column .header a .loading {
   margin-top: 0px;
   margin-right: 7px;
-  display: none;
+  /*display: none;*/
 }
 body div[role='main'] .wrapper .search .searchlist .column .header a:hover .link {
   opacity: 1;
@@ -4157,7 +4777,7 @@ body div[role='main'] .wrapper .itemview {
   left: 0;
   right: 0;
   background: #f4f4f4;
-  z-index: 9;
+  z-index: 11;
   position: fixed;
   display: none;
 }
@@ -4186,8 +4806,9 @@ body div[role='main'] .wrapper .itemview .header .actions {
   position: relative;
   background: #fff;
   padding: 0 0 0 15px;
+  font-size: 1.6rem;
 }
-body div[role='main'] .wrapper .itemview .header .actions .collect {
+body div[role='main'] .wrapper .itemview .header .actions .collectbutton {
   position: relative;
   top: 2px;
   color: #999;
@@ -4248,15 +4869,18 @@ body div[role='main'] .wrapper .itemview .mediacontent .container-fluid .wrap .m
   background: #fff;
 }
 body div[role='main'] .wrapper .itemview .mediacontent .container-fluid .wrap .metadata .infowrap {
-  overflow: auto;
   padding: 30px;
-  height: 80%;
+  height: 100%;
 }
 body div[role='main'] .wrapper .itemview .mediacontent .container-fluid .wrap .metadata .infowrap h1 {
   font-size: 1.8rem;
   color: #4f7979;
   font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
   margin: 0 0 0px 0;
+}
+body div[role='main'] .wrapper .itemview .mediacontent .container-fluid .wrap .metadata .infowrap .tab-content {
+  overflow: auto;
+  height: 80%;
 }
 body div[role='main'] .wrapper .itemview .mediacontent .container-fluid .wrap .metadata .infowrap .owner a {
   color: #777777;
@@ -4265,11 +4889,49 @@ body div[role='main'] .wrapper .itemview .mediacontent .container-fluid .wrap .m
   line-height: 1em;
   display: inline-block;
 }
+body div[role='main'] .wrapper .itemview .mediacontent .container-fluid .wrap .metadata .infowrap .top:before,
+body div[role='main'] .wrapper .itemview .mediacontent .container-fluid .wrap .metadata .infowrap .top:after {
+  content: " ";
+  display: table;
+}
+body div[role='main'] .wrapper .itemview .mediacontent .container-fluid .wrap .metadata .infowrap .top:after {
+  clear: both;
+}
+body div[role='main'] .wrapper .itemview .mediacontent .container-fluid .wrap .metadata .infowrap .top .infotitle {
+  float: left;
+  width: 70%;
+}
+body div[role='main'] .wrapper .itemview .mediacontent .container-fluid .wrap .metadata .infowrap .top .infocollect {
+  float: right;
+  padding: 6px 15px 5px 15px;
+  border: 1px solid #c1c1c1;
+  color: #c1c1c1;
+  font-size: 12px;
+  letter-spacing: 1px;
+  display: block;
+  -webkit-transition: all 0.3s;
+  -o-transition: all 0.3s;
+  transition: all 0.3s;
+}
+body div[role='main'] .wrapper .itemview .mediacontent .container-fluid .wrap .metadata .infowrap .top .infocollect:hover {
+  background: #4f7979;
+  color: #fff;
+  border: 1px solid #4f7979;
+  text-decoration: none;
+}
 body div[role='main'] .wrapper .itemview .mediacontent .container-fluid .wrap .metadata .infowrap ul.nav {
   margin: 0;
   padding: 0;
   font-size: 1.2rem;
   margin-top: 10px;
+}
+body div[role='main'] .wrapper .itemview .mediacontent .container-fluid .wrap .metadata .infowrap ul.nav:before,
+body div[role='main'] .wrapper .itemview .mediacontent .container-fluid .wrap .metadata .infowrap ul.nav:after {
+  content: " ";
+  display: table;
+}
+body div[role='main'] .wrapper .itemview .mediacontent .container-fluid .wrap .metadata .infowrap ul.nav:after {
+  clear: both;
 }
 body div[role='main'] .wrapper .itemview .mediacontent .container-fluid .wrap .metadata .infowrap ul.nav li {
   margin: 0;
@@ -4375,23 +5037,46 @@ body div[role='main'] .wrapper .itemview .mediacontent .container-fluid .wrap .m
 body div[role='main'] .wrapper .itemview .mediacontent .container-fluid .wrap .metadata .infowrap .tab-content .tab-pane {
   padding: 20px 0 0 0;
 }
-body div[role='main'] .wrapper .itemview .mediacontent .container-fluid .wrap .metadata .infowrap .tab-content ul.meta {
+body div[role='main'] .wrapper .itemview .mediacontent .container-fluid .wrap .metadata .infowrap .tab-content .meta {
   margin: 0;
   padding: 0;
 }
-body div[role='main'] .wrapper .itemview .mediacontent .container-fluid .wrap .metadata .infowrap .tab-content ul.meta li {
-  list-style: none;
+body div[role='main'] .wrapper .itemview .mediacontent .container-fluid .wrap .metadata .infowrap .tab-content .meta .list {
   margin-bottom: 15px;
 }
-body div[role='main'] .wrapper .itemview .mediacontent .container-fluid .wrap .metadata .infowrap .tab-content ul.meta .field p {
+body div[role='main'] .wrapper .itemview .mediacontent .container-fluid .wrap .metadata .infowrap .tab-content .meta .field p {
   margin: 0;
 }
-body div[role='main'] .wrapper .itemview .mediacontent .container-fluid .wrap .metadata .infowrap .tab-content ul.meta a {
+body div[role='main'] .wrapper .itemview .mediacontent .container-fluid .wrap .metadata .infowrap .tab-content .meta a {
   color: #4f7979;
   text-decoration: none;
 }
-body div[role='main'] .wrapper .itemview .mediacontent .container-fluid .wrap .metadata .infowrap .tab-content ul.meta a:hover {
+body div[role='main'] .wrapper .itemview .mediacontent .container-fluid .wrap .metadata .infowrap .tab-content .meta a:hover {
   color: #273b3b;
+}
+body div[role='main'] .wrapper .itemview .mediacontent .container-fluid .wrap .metadata .infowrap .tab-content .meta .listhide {
+  display: none;
+}
+body div[role='main'] .wrapper .itemview .mediacontent .container-fluid .wrap .metadata .infowrap .tab-content .meta .listhide.show {
+  display: inline;
+}
+body div[role='main'] .wrapper .itemview .mediacontent .container-fluid .wrap .metadata .infowrap .tab-content .meta .listmore {
+  display: inline-block;
+  font-size: 1.2rem;
+  letter-spacing: 1px;
+  padding: 6px 15px 5px 15px;
+  border: 1px solid #dedede;
+  color: #8f8f8f;
+  margin-top: 10px;
+  -webkit-transition: all 0.3s;
+  -o-transition: all 0.3s;
+  transition: all 0.3s;
+  margin-bottom: 20px;
+}
+body div[role='main'] .wrapper .itemview .mediacontent .container-fluid .wrap .metadata .infowrap .tab-content .meta .listmore:hover {
+  background: #4f7979;
+  color: #fff;
+  border: 1px solid #4f7979;
 }
 body div[role='main'] .wrapper .itemview .mediacontent .container-fluid .wrap .metadata .infowrap .tab-content ul.related {
   margin: 10px 0 20px 0;
@@ -4540,6 +5225,32 @@ body div[role='main'] .wrapper section.action.active {
 body div[role='main'] .wrapper section.action.access .action-body {
   padding: 25px 0 0;
 }
+body div[role='main'] .wrapper section.action.access .auto {
+  position: relative;
+}
+body div[role='main'] .wrapper section.action.access .autocomplete-suggestions {
+  border: 1px solid #ccc;
+  background: white;
+}
+body div[role='main'] .wrapper section.action.access .autocomplete-suggestions > .autocomplete-selected {
+  background-color: #dedede;
+}
+body div[role='main'] .wrapper section.action.access .autocomplete-suggestions-extra {
+  font-size: 12pt;
+}
+body div[role='main'] .wrapper section.action.access .autocomplete-suggestion-extra {
+  background-color: #FAFAFA;
+  cursor: pointer;
+  padding: 3px 8px 3px 8px;
+}
+body div[role='main'] .wrapper section.action.access .autocomplete-suggestion-extra:hover {
+  background: #e3e3e3;
+}
+body div[role='main'] .wrapper section.action.access .autocomplete-suggestion-extra .label {
+  background-color: #f39e31;
+  border-radius: 8px;
+  margin: 5px 0;
+}
 body div[role='main'] .wrapper section.action.collect .action-body textarea {
   height: 150px;
 }
@@ -4614,6 +5325,200 @@ body div[role='main'] .wrapper section.action.new .button-group .btn-green {
 body div[role='main'] .wrapper section.action.new .button-group .btn-green-o {
   padding: 5px 0;
   margin-right: 10px;
+}
+body div[role='main'] .wrapper section.action.searchfilter .filtertext {
+  position: relative;
+}
+body div[role='main'] .wrapper section.action.searchfilter .filtertext .filterimg {
+  position: absolute;
+  right: 10px;
+  top: 15px;
+}
+body div[role='main'] .wrapper section.action.searchfilter .wraps {
+  border-top: 1px solid #ccc;
+  margin-top: 10px;
+}
+body div[role='main'] .wrapper section.action.searchfilter .wraps:before,
+body div[role='main'] .wrapper section.action.searchfilter .wraps:after {
+  content: " ";
+  display: table;
+}
+body div[role='main'] .wrapper section.action.searchfilter .wraps:after {
+  clear: both;
+}
+body div[role='main'] .wrapper section.action.searchfilter .wraps .nav-tabs {
+  width: 33%;
+  float: left;
+  border-right: 1px solid #ccc;
+  border-bottom: 0px;
+  padding: 20px 0 20px 0;
+}
+body div[role='main'] .wrapper section.action.searchfilter .wraps .nav-tabs li {
+  display: block;
+  width: 100%;
+}
+body div[role='main'] .wrapper section.action.searchfilter .wraps .nav-tabs li a {
+  display: block;
+  color: #888;
+  padding-left: 10px;
+  font-size: 1.3rem;
+  margin: 0;
+}
+body div[role='main'] .wrapper section.action.searchfilter .wraps .nav-tabs li.active a {
+  background: #dedede;
+  color: #555;
+}
+body div[role='main'] .wrapper section.action.searchfilter .wraps .tab-content {
+  width: 67%;
+  float: left;
+}
+body div[role='main'] .wrapper section.action.searchfilter .wraps .tab-content .tab-pane {
+  padding: 20px 0 0 20px;
+}
+body div[role='main'] .wrapper section.action.searchfilter .wraps .tab-content ul {
+  margin: 0;
+  padding: 0;
+}
+body div[role='main'] .wrapper section.action.searchfilter .wraps .tab-content ul li {
+  list-style-type: none;
+  margin-bottom: 5px;
+}
+body div[role='main'] .wrapper section.action.searchfilter .wraps .tab-content ul li label {
+  display: block;
+  cursor: pointer;
+}
+body div[role='main'] .wrapper section.action.searchfilter .wraps .tab-content ul li label span {
+  font-weight: normal;
+  color: #777;
+}
+body div[role='main'] .wrapper section.action.searchfilter .wraps .tab-content ul li input {
+  float: right;
+}
+body div[role='main'] .wrapper section.action.searchfilter .wraps .tab-content ul li a {
+  color: #4f7979;
+}
+body div[role='main'] .wrapper section.action.editsection .sectionside {
+  position: relative;
+}
+body div[role='main'] .wrapper section.action.editsection .sectionside .head {
+  font-size: 1.4rem;
+  position: relative;
+  margin-bottom: 10px;
+  display: inline-block;
+  padding-right: 10px;
+  background-color: white;
+}
+body div[role='main'] .wrapper section.action.editsection .sectionside:before {
+  content: '';
+  position: absolute;
+  width: 100%;
+  height: 1px;
+  background-color: #ccc;
+  top: 13px;
+  left: 0;
+}
+body div[role='main'] .wrapper section.action.editsection .sectionside .toggle {
+  z-index: 1;
+  margin-top: 4px;
+  background: #fff;
+  padding-left: 45px;
+}
+body div[role='main'] .wrapper section.action.editsection .sectionside .toggle .private {
+  left: 14px !important;
+}
+body div[role='main'] .wrapper section.action.editsection .sectionside .toggle label {
+  margin: 2px 5px 0 0 !important;
+}
+body div[role='main'] .wrapper section.action.profile .profilepicture {
+  background: #fcfcfc;
+  border: 1px solid #cfcfcf;
+  padding: 20px;
+  margin-bottom: 20px;
+}
+body div[role='main'] .wrapper section.action.profile .profilepicture:before,
+body div[role='main'] .wrapper section.action.profile .profilepicture:after {
+  content: " ";
+  display: table;
+}
+body div[role='main'] .wrapper section.action.profile .profilepicture:after {
+  clear: both;
+}
+body div[role='main'] .wrapper section.action.profile .profilepicture .boxwrap {
+  height: 78px;
+  width: 78px;
+  border-radius: 39px;
+  background: #fff;
+  border: 1px solid #cfcfcf;
+  position: relative;
+  float: left;
+  margin-right: 20px;
+}
+body div[role='main'] .wrapper section.action.profile .profilepicture .boxwrap a.hue {
+  display: block;
+  height: 70px;
+  width: 70px;
+  border-radius: 35px;
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  opacity: 0;
+  filter: alpha(opacity=0);
+  -webkit-transition: all 0.3s;
+  -o-transition: all 0.3s;
+  transition: all 0.3s;
+  background: rgba(172, 60, 60, 0.6);
+  color: #fff;
+  text-align: center;
+  font-size: 1.9rem;
+}
+body div[role='main'] .wrapper section.action.profile .profilepicture .boxwrap a.hue i {
+  margin-top: 27px;
+}
+body div[role='main'] .wrapper section.action.profile .profilepicture .boxwrap a.hue:hover {
+  opacity: 1;
+  filter: alpha(opacity=100);
+}
+body div[role='main'] .wrapper section.action.profile .profilepicture .boxwrap img {
+  height: 70px;
+  width: 70px;
+  border-radius: 35px;
+  margin: 3px 0 0 3px;
+}
+body div[role='main'] .wrapper section.action.profile .profilepicture .profileaction {
+  padding-top: 6px;
+}
+body div[role='main'] .wrapper section.action.profile .profilepicture .profileaction span {
+  color: #a0a0a0;
+}
+body div[role='main'] .wrapper section.action.profile .profilepicture .profileaction ul {
+  margin: 0;
+  padding: 0;
+}
+body div[role='main'] .wrapper section.action.profile .profilepicture .profileaction ul li {
+  list-style: none;
+  display: inline-block;
+}
+body div[role='main'] .wrapper section.action.profile .profilepicture .profileaction ul li a {
+  width: 34px;
+  height: 34px;
+  display: block;
+  background: #fff;
+  border: 1px solid #cfcfcf;
+  border-radius: 2px;
+  text-align: center;
+  color: #6f6f6f;
+  padding-top: 5px;
+  -webkit-transition: all 0.3s;
+  -o-transition: all 0.3s;
+  transition: all 0.3s;
+}
+body div[role='main'] .wrapper section.action.profile .profilepicture .profileaction ul li a:hover {
+  background: #6f6f6f;
+  border: 1px solid #6f6f6f;
+  color: #fff;
+}
+body div[role='main'] .wrapper section.action.profile textarea.about {
+  margin-bottom: 0px;
 }
 body div[role='main'] .wrapper section.action .toggle {
   margin-top: 2px;
@@ -4692,7 +5597,7 @@ body div[role='main'] .wrapper section.action .toggle input:checked + label {
   background: #9FD6AE;
 }
 body div[role='main'] .wrapper section.action .action-header {
-  padding: 0 0 20px;
+  padding: 0 0 10px;
   border-bottom: 1px solid #ccc;
 }
 body div[role='main'] .wrapper section.action .action-header:before,
@@ -4746,6 +5651,12 @@ body div[role='main'] .wrapper section.action .action-body select:focus {
   outline: none;
   box-shadow: none;
   border: 1px solid #4f7979;
+}
+body div[role='main'] .wrapper section.action .action-body .info {
+  display: block;
+  font-size: 1.4rem;
+  color: #777777;
+  font-style: italic;
 }
 body div[role='main'] .wrapper section.action .action-body textarea {
   height: 110px;
@@ -4847,7 +5758,7 @@ body div[role='main'] .wrapper section.action .action-body ul.access-list:after 
 body div[role='main'] .wrapper section.action .action-body ul.access-list li {
   float: left;
   padding-bottom: 20px;
-  margin: 0 10px 10px;
+  margin: 0 5px 10px;
   position: relative;
 }
 body div[role='main'] .wrapper section.action .action-body ul.access-list li:hover .toggle {
@@ -4907,7 +5818,7 @@ body div[role='main'] .wrapper section.action .action-body ul.access-list li .tr
 }
 body div[role='main'] .wrapper section.action .action-body ul.access-list li .toggle {
   bottom: 0;
-  left: 10px;
+  left: 13px;
   position: absolute;
   display: none;
 }
@@ -4976,16 +5887,6 @@ body div[role='main'] .wrapper section.exhibitionviewer .titlebar {
   top: 75px;
   height: 65px;
   z-index: 2;
-}
-body div[role='main'] .wrapper section.exhibitionviewer .titlebar::before {
-  height: 1px;
-  background: #dfdfdf;
-  position: absolute;
-  z-index: -1;
-  content: "";
-  top: 32px;
-  left: 30px;
-  right: 30px;
 }
 body div[role='main'] .wrapper section.exhibitionviewer .titlebar .title {
   margin: 20px 0 0 0;
@@ -5355,8 +6256,41 @@ body div[role='main'] .wrapper section.exhibitionviewer .exhibitionplayer .carou
   opacity: 0.6;
   filter: alpha(opacity=60);
 }
+body div[role='main'] .wrapper .limitchar .limithide {
+  display: none;
+}
+body div[role='main'] .wrapper .limitchar.show .limithide {
+  display: inline;
+}
+body div[role='main'] .wrapper .limitchar.show .limitdot {
+  display: none;
+}
+body div[role='main'] .wrapper .limitchar.show .limittoggle {
+  display: block;
+}
 body div[role='main'] .viewer {
-  margin-top: 75px;
+  padding-top: 75px;
+}
+body div[role='main'] .viewer .collectioninfo {
+  padding: 30px 0 20px 0;
+  background: #fff;
+}
+body div[role='main'] .viewer .collectioninfo .title {
+  color: #4f7979;
+  float: left;
+  font-size: 1.6rem;
+}
+body div[role='main'] .viewer .collectioninfo .item-count {
+  color: #4f7979;
+  float: right;
+  border: 1px solid #4f7979;
+  border-radius: 15px;
+  padding: 0 15px 0 15px;
+  font-size: 1.4rem;
+}
+body div[role='main'] .viewer .collectioninfo .description {
+  clear: both;
+  width: 60%;
 }
 body div[role='main'] .viewer section.hero {
   background: url('../img/content/background-space.png') no-repeat;
@@ -5378,6 +6312,7 @@ body div[role='main'] .viewer section.hero .meta {
   float: left;
   width: 70%;
   padding: 0 20px 0 0;
+  text-align: left;
 }
 body div[role='main'] .viewer section.hero .meta .top-info {
   margin-bottom: 30px;
@@ -5425,6 +6360,10 @@ body div[role='main'] .viewer section.hero .meta .top-info .header .location {
 body div[role='main'] .viewer section.hero .meta .top-info .header a {
   color: white;
   line-height: 1;
+}
+body div[role='main'] .viewer section.hero .meta .description {
+  height: 86px;
+  overflow: auto;
 }
 body div[role='main'] .viewer section.hero .map {
   height: 200px;
@@ -5679,24 +6618,13 @@ body div[role='main'] .viewer section.search .list-body .search-listing .parent 
 body div[role='main'] .viewer .section-head {
   position: relative;
 }
-body div[role='main'] .viewer section.entrance {
-  width: 550px;
+body div[role='main'] section.entrance {
+  width: 50%;
   display: table;
   margin: 0 auto;
-  min-height: calc(100vh - 185px);
   padding-top: 100px;
 }
-body div[role='main'] .viewer section.entrance::after {
-  content: '';
-  display: block;
-  position: absolute;
-  bottom: 100px;
-  left: 0;
-  width: 100%;
-  height: 1px;
-  background-color: #ccc;
-}
-body div[role='main'] .viewer section.entrance .btn-green-o {
+body div[role='main'] section.entrance .btn-green-o {
   display: block;
   padding: 5px 30px;
   border: 1px solid #4f7979;
@@ -5714,10 +6642,10 @@ body div[role='main'] .viewer section.entrance .btn-green-o {
   font-size: 1.4rem;
   letter-spacing: 0px;
 }
-body div[role='main'] .viewer section.entrance .btn-green-o:hover {
+body div[role='main'] section.entrance .btn-green-o:hover {
   color: #3b5a5a;
 }
-body div[role='main'] .viewer section.entrance .btn-green {
+body div[role='main'] section.entrance .btn-green {
   display: block;
   padding: 5px 30px;
   border: 1px solid white;
@@ -5735,23 +6663,24 @@ body div[role='main'] .viewer section.entrance .btn-green {
   font-size: 1.4rem;
   letter-spacing: 0px;
 }
-body div[role='main'] .viewer section.entrance .btn-green:hover {
+body div[role='main'] section.entrance .btn-green:hover {
   color: white;
 }
-body div[role='main'] .viewer section.entrance .btn-green:hover {
+body div[role='main'] section.entrance .btn-green:hover {
   background-color: #3b5a5a;
 }
-body div[role='main'] .viewer section.entrance .section-header {
+body div[role='main'] section.entrance .section-header {
   color: #4f7979;
   position: relative;
   margin-bottom: 10px;
 }
-body div[role='main'] .viewer section.entrance .section-header .text {
+body div[role='main'] section.entrance .section-header .text {
   display: inline-block;
   padding-right: 10px;
   background-color: white;
+  font-size: 1.6rem;
 }
-body div[role='main'] .viewer section.entrance .section-header::after {
+body div[role='main'] section.entrance .section-header::after {
   content: '';
   z-index: -1;
   position: absolute;
@@ -5762,48 +6691,60 @@ body div[role='main'] .viewer section.entrance .section-header::after {
   display: block;
   left: 0;
 }
-body div[role='main'] .viewer section.entrance .input-group {
+body div[role='main'] section.entrance .input-group {
   display: block;
 }
-body div[role='main'] .viewer section.entrance .input-group:before,
-body div[role='main'] .viewer section.entrance .input-group:after {
+body div[role='main'] section.entrance .input-group:before,
+body div[role='main'] section.entrance .input-group:after {
   content: " ";
   display: table;
 }
-body div[role='main'] .viewer section.entrance .input-group:after {
+body div[role='main'] section.entrance .input-group:after {
   clear: both;
 }
-body div[role='main'] .viewer section.entrance .input-group input[type="text"],
-body div[role='main'] .viewer section.entrance .input-group input[type="password"] {
-  line-height: 25px;
-  height: 45px;
-  padding: 0 10px;
-  width: 49%;
+body div[role='main'] section.entrance .input-group .left,
+body div[role='main'] section.entrance .input-group .right {
   float: left;
+  width: 49%;
+  margin-right: 1%;
+  margin-bottom: 10px;
+}
+body div[role='main'] section.entrance .input-group .right {
+  float: left;
+  margin-left: 1%;
+  margin-right: 0;
+  width: 49%;
+}
+body div[role='main'] section.entrance .input-group .errormsg {
+  color: #9c3b3b;
+  line-height: 1.3em;
+  text-align: right;
+  display: block;
+  padding: 3px 0 0 0;
+  font-style: italic;
+}
+body div[role='main'] section.entrance .input-group input[type="text"],
+body div[role='main'] section.entrance .input-group input[type="password"] {
+  padding: 11px 20px;
   border: none;
   border: 1px solid #cfcfcf;
-  margin-bottom: 10px;
+  width: 100%;
   -webkit-transition: all 0.3s;
   -o-transition: all 0.3s;
   transition: all 0.3s;
-  padding-top: 2px;
-  margin-right: 1%;
 }
-body div[role='main'] .viewer section.entrance .input-group input[type="text"]:hover,
-body div[role='main'] .viewer section.entrance .input-group input[type="password"]:hover,
-body div[role='main'] .viewer section.entrance .input-group input[type="text"]:focus,
-body div[role='main'] .viewer section.entrance .input-group input[type="password"]:focus {
+body div[role='main'] section.entrance .input-group input[type="text"]:hover,
+body div[role='main'] section.entrance .input-group input[type="password"]:hover,
+body div[role='main'] section.entrance .input-group input[type="text"]:focus,
+body div[role='main'] section.entrance .input-group input[type="password"]:focus {
   outline: none;
   border: 1px solid #4f7979;
 }
-body div[role='main'] .viewer section.entrance .input-group input[type="text"] + input[type="text"],
-body div[role='main'] .viewer section.entrance .input-group input[type="password"] + input[type="text"],
-body div[role='main'] .viewer section.entrance .input-group input[type="text"] + input[type="password"],
-body div[role='main'] .viewer section.entrance .input-group input[type="password"] + input[type="password"] {
-  margin-left: 1%;
-  margin-right: 0;
+body div[role='main'] section.entrance .input-group input[type="text"].error,
+body div[role='main'] section.entrance .input-group input[type="password"].error {
+  border: 1px solid #9c3b3b;
 }
-body div[role='main'] .viewer section.entrance .input-group select {
+body div[role='main'] section.entrance .input-group select {
   border-radius: 0;
   padding: 0 10px;
   margin-bottom: 10px;
@@ -5812,23 +6753,25 @@ body div[role='main'] .viewer section.entrance .input-group select {
   height: 45px;
   border: 1px solid #cfcfcf;
 }
-body div[role='main'] .viewer section.entrance .input-group select:hover,
-body div[role='main'] .viewer section.entrance .input-group select:focus {
+body div[role='main'] section.entrance .input-group select:hover,
+body div[role='main'] section.entrance .input-group select:focus {
   outline: none;
   box-shadow: none;
   border: 1px solid #4f7979;
 }
-body div[role='main'] .viewer section.entrance .input-group.ack {
+body div[role='main'] section.entrance .input-group.ack {
   border-top: 1px solid #ccc;
   border-bottom: 1px solid #ccc;
-  padding: 10px 0;
+  padding: 13px 0 10px 0;
   margin-bottom: 10px;
 }
-body div[role='main'] .viewer section.entrance .input-group.ack label {
+body div[role='main'] section.entrance .input-group.ack label {
   font-weight: 300;
+  cursor: pointer;
   color: #bebebe;
+  margin-left: 5px;
 }
-body div[role='main'] .viewer section.entrance .input-group.ack label a {
+body div[role='main'] section.entrance .input-group.ack label a {
   font-weight: 300;
   text-decoration: none;
   color: inherit;
@@ -5836,24 +6779,30 @@ body div[role='main'] .viewer section.entrance .input-group.ack label a {
   -o-transition: color 0.3s;
   transition: color 0.3s;
 }
-body div[role='main'] .viewer section.entrance .input-group.ack label a:hover,
-body div[role='main'] .viewer section.entrance .input-group.ack label a:focus {
+body div[role='main'] section.entrance .input-group.ack label a:hover,
+body div[role='main'] section.entrance .input-group.ack label a:focus {
   color: #4f7979;
 }
-body div[role='main'] .viewer section.entrance .button-group {
+body div[role='main'] section.entrance .button-group {
   text-align: right;
 }
-body div[role='main'] .viewer section.entrance .or {
+body div[role='main'] section.entrance .button-group .btn-register {
+  width: 100%;
+  padding: 11px 20px;
+  text-align: center;
+}
+body div[role='main'] section.entrance .or {
   clear: both;
   position: relative;
   text-align: center;
+  margin-bottom: 8px;
 }
-body div[role='main'] .viewer section.entrance .or span.text {
+body div[role='main'] section.entrance .or span.text {
   display: inline-block;
   padding: 0 10px;
   background-color: white;
 }
-body div[role='main'] .viewer section.entrance .or::before {
+body div[role='main'] section.entrance .or::before {
   content: '';
   z-index: -1;
   width: 100%;
@@ -5864,8 +6813,8 @@ body div[role='main'] .viewer section.entrance .or::before {
   height: 1px;
   background-color: #ccc;
 }
-body div[role='main'] .viewer section.entrance .fb,
-body div[role='main'] .viewer section.entrance .gplus {
+body div[role='main'] section.entrance .fb,
+body div[role='main'] section.entrance .gplus {
   display: block;
   float: left;
   width: 49%;
@@ -5873,49 +6822,51 @@ body div[role='main'] .viewer section.entrance .gplus {
   color: white;
   font-size: 1.4rem;
   margin-bottom: 10px;
-  padding: 8px 20px;
+  padding: 11px 20px;
   text-decoration: none;
   -webkit-transition: all 0.3s;
   -o-transition: all 0.3s;
   transition: all 0.3s;
+  text-align: center;
 }
-body div[role='main'] .viewer section.entrance .fb i,
-body div[role='main'] .viewer section.entrance .gplus i {
+body div[role='main'] section.entrance .fb i,
+body div[role='main'] section.entrance .gplus i {
   font-size: 2rem;
   vertical-align: middle;
   display: inline-block;
 }
-body div[role='main'] .viewer section.entrance .fb .text,
-body div[role='main'] .viewer section.entrance .gplus .text {
+body div[role='main'] section.entrance .fb .text,
+body div[role='main'] section.entrance .gplus .text {
   margin-left: 10px;
   vertical-align: middle;
   display: inline-block;
   line-height: 1;
 }
-body div[role='main'] .viewer section.entrance .fb {
+body div[role='main'] section.entrance .fb {
   background-color: #3b5997;
   margin-right: 1%;
 }
-body div[role='main'] .viewer section.entrance .fb:hover {
+body div[role='main'] section.entrance .fb:hover {
   background-color: #2d4372;
 }
-body div[role='main'] .viewer section.entrance .gplus {
+body div[role='main'] section.entrance .gplus {
   margin-left: 1%;
   background-color: #cc3333;
 }
-body div[role='main'] .viewer section.entrance .gplus:hover {
+body div[role='main'] section.entrance .gplus:hover {
   background-color: #a32929;
 }
-body div[role='main'] .viewer section.entrance.login .input-group input[type="text"],
-body div[role='main'] .viewer section.entrance.login .input-group input[type="password"] {
+body div[role='main'] section.entrance.login .input-group input[type="text"],
+body div[role='main'] section.entrance.login .input-group input[type="password"] {
   width: 100%;
   margin: 0 0 10px 0 !important;
 }
-body div[role='main'] .viewer section.entrance.login .input-group label {
+body div[role='main'] section.entrance.login .input-group label {
   font-weight: 300;
   color: #bebebe;
+  cursor: pointer;
 }
-body div[role='main'] .viewer section.entrance.login .input-group label a {
+body div[role='main'] section.entrance.login .input-group label a {
   font-weight: 300;
   text-decoration: none;
   color: inherit;
@@ -5923,8 +6874,8 @@ body div[role='main'] .viewer section.entrance.login .input-group label a {
   -o-transition: color 0.3s;
   transition: color 0.3s;
 }
-body div[role='main'] .viewer section.entrance.login .input-group label a:hover,
-body div[role='main'] .viewer section.entrance.login .input-group label a:focus {
+body div[role='main'] section.entrance.login .input-group label a:hover,
+body div[role='main'] section.entrance.login .input-group label a:focus {
   color: #4f7979;
 }
 body div[role='main'] .filter {
@@ -6064,41 +7015,222 @@ body div[role='main'] .filter .wrap .dropdown.open .dropdown-toggle span {
 body div[role='main'] .filter.unstick {
   top: -50px !important;
 }
-body div[role='main'] footer {
-  padding: 30px 0;
-  color: #b5b5b5;
+body div[role='main']::after {
+  content: "";
+  display: block;
+  height: 109px;
 }
-body div[role='main'] footer:before,
-body div[role='main'] footer:after {
+body div[role='main'] .static {
+  padding-top: 72px;
+}
+body div[role='main'] .static:before,
+body div[role='main'] .static:after {
   content: " ";
   display: table;
 }
-body div[role='main'] footer:after {
+body div[role='main'] .static:after {
   clear: both;
 }
-body div[role='main'] footer .copyright {
+body div[role='main'] .static aside {
+  float: left;
+  width: 20%;
+  padding: 40px 0px 30px 0px;
+}
+body div[role='main'] .static aside ul {
+  margin: 0;
+  padding: 0;
+}
+body div[role='main'] .static aside ul li {
+  list-style-type: none;
+  display: block;
+  margin-bottom: 1px;
+}
+body div[role='main'] .static aside ul li a {
+  display: block;
+  text-align: right;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  padding: 7px 30px 7px 0;
+  position: relative;
+  right: -1px;
+  color: #999;
+  font-size: 1.4rem;
+  border-top-left-radius: 3px;
+  border-bottom-left-radius: 3px;
+  -webkit-transition: all 0.3s;
+  -o-transition: all 0.3s;
+  transition: all 0.3s;
+}
+body div[role='main'] .static aside ul li a:hover {
+  background: #7f9d9d;
+  color: #fff;
+  text-decoration: none;
+}
+body div[role='main'] .static aside ul li.active a {
+  background: #7f9d9d;
+  color: #fff;
+}
+body div[role='main'] .static .staticcontent {
+  float: left;
+  width: 80%;
+  padding: 40px 0 30px 30px;
+  border-left: 1px solid #d7d7d7;
+}
+body div[role='main'] .static .staticcontent h1 {
+  margin-top: 0;
+}
+body div[role='main'] .static .staticcontent .panel-group .panel {
+  background: none;
+  border-radius: 0;
+  border: 0;
+  box-shadow: none;
+  margin-bottom: 10px;
+}
+body div[role='main'] .static .staticcontent .panel-group .panel .panel-heading {
+  background: none;
+  padding: 0 0 10px 0;
+  border-bottom: 1px solid #eeeeee;
+}
+body div[role='main'] .static .staticcontent .panel-group .panel .panel-heading a {
+  font-size: 2rem;
+  font-weight: normal;
+  color: #777777;
+}
+body div[role='main'] .static .staticcontent .panel-group .panel .panel-heading a:hover,
+body div[role='main'] .static .staticcontent .panel-group .panel .panel-heading a:visited,
+body div[role='main'] .static .staticcontent .panel-group .panel .panel-heading a:focus {
+  text-decoration: none;
+}
+body div[role='main'] .static .staticcontent .panel-group .panel .panel-heading a .arrow {
+  display: inline-block;
+  float: right;
+  width: 10px;
+  height: 7px;
+  margin-top: 15px;
+  background: url('../img/ui/ic-arrow-dark.png');
+  background-position: 0 -7px;
+  opacity: 0.8;
+  filter: alpha(opacity=80);
+  -webkit-transition: all 0.3s;
+  -o-transition: all 0.3s;
+  transition: all 0.3s;
+}
+body div[role='main'] .static .staticcontent .panel-group .panel .panel-heading a.collapsed .arrow {
+  background-position: 0 0px;
+}
+body div[role='main'] .static .staticcontent .panel-group .panel .panel-body {
+  margin-top: 10px;
+  padding-left: 0;
+  border: 0;
+  padding-top: 10px;
+}
+body div[role='main'] .static .staticcontent .btn-contact {
+  padding: 5px 30px;
+  font-size: 12px;
+  letter-spacing: 1.3px;
+  text-transform: uppercase;
+  color: #b5b5b5;
+  display: block;
+  border: 1px solid #b5b5b5;
+  text-decoration: none;
+  position: relative;
+  -webkit-transition: all 0.3s;
+  -o-transition: all 0.3s;
+  transition: all 0.3s;
+  font-weight: 600;
+  clear: both;
+  display: inline-block;
+  margin: 0 auto;
+  padding: 8px 25px 6px 25px;
+  text-align: center;
+  border-radius: 0;
+  font-size: 1.3rem;
+  font-weight: normal;
+}
+body div[role='main'] .static .staticcontent .btn-contact:hover {
+  color: #828282;
+}
+body div[role='main'] .static .staticcontent .btn-contact div {
+  position: absolute;
+  background: #9c9c9c;
+  -webkit-transition: all 0.3s;
+  -o-transition: all 0.3s;
+  transition: all 0.3s;
+}
+body div[role='main'] .static .staticcontent .btn-contact div.left {
+  left: -1px;
+  bottom: 0;
+  width: 2px;
+  height: 0;
+}
+body div[role='main'] .static .staticcontent .btn-contact div.right {
+  right: -1px;
+  top: 0;
+  width: 2px;
+  height: 0;
+}
+body div[role='main'] .static .staticcontent .btn-contact div.bot {
+  height: 2px;
+  width: 0;
+  right: 0;
+  bottom: -1px;
+}
+body div[role='main'] .static .staticcontent .btn-contact div.top {
+  height: 2px;
+  width: 0;
+  left: 0;
+  top: -1px;
+}
+body div[role='main'] .static .staticcontent .btn-contact:hover div.left {
+  height: 100%;
+}
+body div[role='main'] .static .staticcontent .btn-contact:hover div.right {
+  height: 100%;
+}
+body div[role='main'] .static .staticcontent .btn-contact:hover div.bot {
+  width: 100%;
+}
+body div[role='main'] .static .staticcontent .btn-contact:hover div.top {
+  width: 100%;
+}
+body footer {
+  padding: 30px 0;
+  color: #b5b5b5;
+  height: 109px;
+  border-top: 1px solid #d7d7d7;
+  background: #fff;
+}
+body footer:before,
+body footer:after {
+  content: " ";
+  display: table;
+}
+body footer:after {
+  clear: both;
+}
+body footer .copyright {
   float: left;
 }
-body div[role='main'] footer .copyright img {
+body footer .copyright img {
   display: inline-block;
   margin-right: 10px;
   margin-top: 5px;
   float: left;
 }
-body div[role='main'] footer .copyright p {
+body footer .copyright p {
   display: inline-block;
   color: inherit;
   margin-top: 12px;
 }
-body div[role='main'] footer .sosmed {
+body footer .sosmed {
   float: right;
   margin-top: 12px;
 }
-body div[role='main'] footer .sosmed a {
+body footer .sosmed a {
   width: 30px;
   height: 30px;
   display: inline-block;
-  margin-left: 5px;
+  margin-left: 10px;
   border-radius: 50%;
   border: 2px solid #777777;
   color: #777777;
@@ -6108,11 +7240,19 @@ body div[role='main'] footer .sosmed a {
   -o-transition: all 0.3s;
   transition: all 0.3s;
 }
-body div[role='main'] footer .sosmed a:hover {
+body footer .sosmed a:hover {
   background: #777777;
   color: white;
 }
 /* Large devices (tablet landscape, 1200px) */
+@media (max-width: 1199px) {
+  body div[role='main'] .wrapper aside .app ul li a .counter {
+    margin-right: 0;
+  }
+  body div[role='main'] section.entrance {
+    width: 70%;
+  }
+}
 /* Medium devices (tablet portrait, 991px) */
 @media (max-width: 991px) {
   body header .main .menu li a {
@@ -6135,16 +7275,87 @@ body div[role='main'] footer .sosmed a:hover {
     border-left: 1px solid #d7d7d7;
   }
   body div[role='main'].homepage section.featured .featured-box.space {
-    font-size: 0.8em;
+    font-size: 1em;
   }
   body div[role='main'].homepage section.featured .featured-box.exhibition .img-exhibition {
     margin-top: -20px;
+    display: none;
   }
   body div[role='main'].homepage section.featured .featured-box.collection .featured-meta {
     padding-top: 100px;
   }
   body div[role='main'].homepage section.partners ul li img {
     margin-right: 10px;
+  }
+  body div[role='main'] .wrapper main section.dashboard section.notification {
+    width: 100%;
+  }
+  body div[role='main'] .wrapper main section.project .list-body.list li .meta .other-info .user,
+  body div[role='main'] .wrapper main section.exhibition .list-body.list li .meta .other-info .user,
+  body div[role='main'] .wrapper main section.collection .list-body.list li .meta .other-info .user,
+  body div[role='main'] .wrapper main section.project .list-body.list li .meta .other-info .date,
+  body div[role='main'] .wrapper main section.exhibition .list-body.list li .meta .other-info .date,
+  body div[role='main'] .wrapper main section.collection .list-body.list li .meta .other-info .date,
+  body div[role='main'] .wrapper main section.project .list-body.list li .meta .other-info .count,
+  body div[role='main'] .wrapper main section.exhibition .list-body.list li .meta .other-info .count,
+  body div[role='main'] .wrapper main section.collection .list-body.list li .meta .other-info .count {
+    font-size: 1.1rem;
+    margin-right: 0;
+  }
+  body div[role='main'] .wrapper main section.exhibition section.exhibition-list .list-body.list li .thumbnails {
+    width: 50%;
+  }
+  body div[role='main'] .wrapper main section.exhibition section.exhibition-list .list-body.list li .meta {
+    width: 50%;
+  }
+  body div[role='main'] .wrapper aside .app ul li a {
+    display: block;
+  }
+  body div[role='main'] .wrapper aside .app ul li a:before,
+  body div[role='main'] .wrapper aside .app ul li a:after {
+    content: " ";
+    display: table;
+  }
+  body div[role='main'] .wrapper aside .app ul li a:after {
+    clear: both;
+  }
+  body div[role='main'] .wrapper aside .app ul li a span.text {
+    display: none;
+  }
+  body div[role='main'] .wrapper aside .app ul li a span.icon {
+    display: inline-block;
+  }
+  body div[role='main'] .wrapper aside .app ul li a span.counter {
+    display: inline-block;
+    float: none;
+  }
+  body div[role='main'].about .selectioncontent .content .left .thumbs {
+    max-width: 100%;
+  }
+  body div[role='main'].about .selectioncontent .content h1 {
+    margin-top: 0;
+  }
+  body div[role='main'] section.entrance {
+    width: 70%;
+  }
+  body div[role='main'] .static aside {
+    width: 30%;
+  }
+  body div[role='main'] .static aside ul li a {
+    font-size: 1.3rem;
+    padding-right: 15px;
+  }
+  body div[role='main'] .static .staticcontent {
+    width: 70%;
+  }
+  body div[role='main'] .viewer section.isotope .listing .grid {
+    margin: 0 -10px 0 -10px;
+  }
+  body div[role='main'] .viewer section.isotope .listing .grid .sizer,
+  body div[role='main'] .viewer section.isotope .listing .grid .item {
+    width: 33.3333%;
+    padding: 0 10px;
+    margin-bottom: 20px;
   }
   .listing .grid {
     margin: 0;
@@ -6158,6 +7369,9 @@ body div[role='main'] footer .sosmed a:hover {
   .listing .grid .sizer .wrap .info,
   .listing .grid .item .wrap .info {
     padding: 15px;
+  }
+  .listing.itemlistview .action-group {
+    padding: 0 15px 15px 15px !important;
   }
 }
 /* Small devices (landscape mobiles, 767px) */
@@ -6334,6 +7548,198 @@ body div[role='main'] footer .sosmed a:hover {
   body div[role='main'] .filter .wrap .dropdown.select-filter .dropdown-menu li a::after {
     display: none;
   }
+  body div[role='main'].about .selectioncontent .content .left .thumbs {
+    max-width: 100%;
+  }
+  body div[role='main'].about .selectioncontent .content h1 {
+    margin-top: 0;
+  }
+  body div[role='main'] section.hero .hero-longdesc .left,
+  body div[role='main'] section.hero .hero-longdesc .right {
+    float: none;
+    width: 100%;
+    padding: 0 30px 0 30px;
+  }
+  body div[role='main'] section.entrance {
+    padding: 30px 30px 30px 30px;
+    width: 100%;
+  }
+  body div[role='main'] section.entrance .fb,
+  body div[role='main'] section.entrance .gplus {
+    width: 100%;
+    float: none;
+    margin-right: 0;
+    margin-left: 0;
+  }
+  body div[role='main'] section.entrance .input-group .left,
+  body div[role='main'] section.entrance .input-group .right {
+    width: 100%;
+    margin-right: 0;
+    margin-left: 0;
+  }
+  body div[role='main'] .static .staticcontent .panel-group .panel .panel-heading a {
+    font-size: 1.7rem;
+  }
+  body div[role='main'] .viewer section.isotope .listing .grid {
+    margin: 0 -10px 0 -10px;
+  }
+  body div[role='main'] .viewer section.isotope .listing .grid .sizer,
+  body div[role='main'] .viewer section.isotope .listing .grid .item {
+    width: 50%;
+  }
+  body div[role='main'] .viewer .collectioninfo .description {
+    width: 80%;
+  }
+  body div[role='main'] .viewer section.hero {
+    padding: 20px 0 20px 0;
+  }
+  body div[role='main'] .viewer section.hero .meta .top-info {
+    margin-bottom: 10px;
+  }
+  body div[role='main'] .viewer section.hero .meta .description {
+    height: 145px;
+  }
+  body div[role='main'] .wrapper section.exhibitionviewer .titlebar {
+    display: none;
+  }
+  body div[role='main'] .wrapper section.exhibitionviewer .exhibitionplayer {
+    padding-top: 1px;
+  }
+  body div[role='main'] .wrapper section.exhibitionviewer .exhibitionplayer .carouselexhibition .slick-prev,
+  body div[role='main'] .wrapper section.exhibitionviewer .exhibitionplayer .carouselexhibition .slick-next {
+    display: none !important;
+  }
+  body div[role='main'] .wrapper section.exhibitionviewer .exhibitionplayer .carouselexhibition .slick-list {
+    height: 90%;
+  }
+  body div[role='main'] .wrapper section.exhibitionviewer .exhibitionplayer .carouselexhibition .slick-dots {
+    height: 10%;
+    background: #fff;
+    bottom: 40px;
+    margin: 0;
+    padding: 0px 0 0 0px;
+    position: static;
+  }
+  body div[role='main'] .wrapper section.exhibitionviewer .exhibitionplayer .carouselexhibition .slick-dots li {
+    display: block;
+    float: left;
+    height: 100%;
+    width: 10px;
+    position: relative;
+    margin: 0 5px 0 5px;
+  }
+  body div[role='main'] .wrapper section.exhibitionviewer .exhibitionplayer .carouselexhibition .slick-dots li button {
+    background: #4f7979;
+    position: absolute;
+    top: 50%;
+    margin-top: -5px;
+  }
+  body div[role='main'] .wrapper section.exhibitionviewer .exhibitionplayer .carouselexhibition .item {
+    position: relative;
+  }
+  body div[role='main'] .wrapper section.exhibitionviewer .exhibitionplayer .carouselexhibition .item .container {
+    padding: 15px 15px 0 15px;
+  }
+  body div[role='main'] .wrapper section.exhibitionviewer .exhibitionplayer .carouselexhibition .item .container .title {
+    margin: 30px 0 0 0;
+    width: 100%;
+    font-size: 2.4rem;
+  }
+  body div[role='main'] .wrapper section.exhibitionviewer .exhibitionplayer .carouselexhibition .item .container .description {
+    width: 100%;
+  }
+  body div[role='main'] .wrapper section.exhibitionviewer .exhibitionplayer .carouselexhibition .item.style1 .container,
+  body div[role='main'] .wrapper section.exhibitionviewer .exhibitionplayer .carouselexhibition .item.style2 .container,
+  body div[role='main'] .wrapper section.exhibitionviewer .exhibitionplayer .carouselexhibition .item.style3 .container {
+    padding: 15px 15px 0 15px;
+  }
+  body div[role='main'] .wrapper section.exhibitionviewer .exhibitionplayer .carouselexhibition .item.style1 .container .title,
+  body div[role='main'] .wrapper section.exhibitionviewer .exhibitionplayer .carouselexhibition .item.style2 .container .title,
+  body div[role='main'] .wrapper section.exhibitionviewer .exhibitionplayer .carouselexhibition .item.style3 .container .title {
+    margin: 30px 0 0 0;
+    width: 100%;
+    font-size: 2.4rem;
+  }
+  body div[role='main'] .wrapper section.exhibitionviewer .exhibitionplayer .carouselexhibition .item.style1 .container .description,
+  body div[role='main'] .wrapper section.exhibitionviewer .exhibitionplayer .carouselexhibition .item.style2 .container .description,
+  body div[role='main'] .wrapper section.exhibitionviewer .exhibitionplayer .carouselexhibition .item.style3 .container .description {
+    width: 100%;
+  }
+  body div[role='main'] .wrapper section.exhibitionviewer .exhibitionplayer .carouselexhibition .item.style1 .container .imagewrap,
+  body div[role='main'] .wrapper section.exhibitionviewer .exhibitionplayer .carouselexhibition .item.style2 .container .imagewrap,
+  body div[role='main'] .wrapper section.exhibitionviewer .exhibitionplayer .carouselexhibition .item.style3 .container .imagewrap {
+    height: 75%;
+    padding-bottom: 60px;
+    float: none;
+    width: 100%;
+    position: static;
+  }
+  body div[role='main'] .wrapper section.exhibitionviewer .exhibitionplayer .carouselexhibition .item.style1 .container .imagewrap img,
+  body div[role='main'] .wrapper section.exhibitionviewer .exhibitionplayer .carouselexhibition .item.style2 .container .imagewrap img,
+  body div[role='main'] .wrapper section.exhibitionviewer .exhibitionplayer .carouselexhibition .item.style3 .container .imagewrap img {
+    max-width: 100%;
+    max-height: 100%;
+    height: auto;
+  }
+  body div[role='main'] .wrapper section.exhibitionviewer .exhibitionplayer .carouselexhibition .item.style1 .container .textbox,
+  body div[role='main'] .wrapper section.exhibitionviewer .exhibitionplayer .carouselexhibition .item.style2 .container .textbox,
+  body div[role='main'] .wrapper section.exhibitionviewer .exhibitionplayer .carouselexhibition .item.style3 .container .textbox {
+    position: absolute;
+    top: auto;
+    height: 25%;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
+    background: rgba(0, 0, 0, 0.75);
+    padding: 20px;
+    color: #fff;
+    -webkit-transition: all 0.3s;
+    -o-transition: all 0.3s;
+    transition: all 0.3s;
+  }
+  body div[role='main'] .wrapper section.exhibitionviewer .exhibitionplayer .carouselexhibition .item.style1 .container .textbox.expanded,
+  body div[role='main'] .wrapper section.exhibitionviewer .exhibitionplayer .carouselexhibition .item.style2 .container .textbox.expanded,
+  body div[role='main'] .wrapper section.exhibitionviewer .exhibitionplayer .carouselexhibition .item.style3 .container .textbox.expanded {
+    height: 75%;
+  }
+  body div[role='main'] .wrapper section.exhibitionviewer .exhibitionplayer .carouselexhibition .item.style1 .container .textbox .wrap,
+  body div[role='main'] .wrapper section.exhibitionviewer .exhibitionplayer .carouselexhibition .item.style2 .container .textbox .wrap,
+  body div[role='main'] .wrapper section.exhibitionviewer .exhibitionplayer .carouselexhibition .item.style3 .container .textbox .wrap {
+    overflow: auto;
+  }
+  body div[role='main'] .wrapper section.exhibitionviewer .exhibitionplayer .carouselexhibition .item.style1 .container .textbox .expand,
+  body div[role='main'] .wrapper section.exhibitionviewer .exhibitionplayer .carouselexhibition .item.style2 .container .textbox .expand,
+  body div[role='main'] .wrapper section.exhibitionviewer .exhibitionplayer .carouselexhibition .item.style3 .container .textbox .expand {
+    display: block;
+    position: absolute;
+    top: -30px;
+    right: 10px;
+  }
+  body div[role='main'] .wrapper section.exhibitionviewer .exhibitionplayer .carouselexhibition .item.style1 .container .textbox .expand a,
+  body div[role='main'] .wrapper section.exhibitionviewer .exhibitionplayer .carouselexhibition .item.style2 .container .textbox .expand a,
+  body div[role='main'] .wrapper section.exhibitionviewer .exhibitionplayer .carouselexhibition .item.style3 .container .textbox .expand a {
+    color: #fff;
+    background: rgba(0, 0, 0, 0.75);
+    display: block;
+    padding: 5px 20px 0 20px;
+    height: 30px;
+  }
+  body footer {
+    text-align: center;
+  }
+  body footer .copyright {
+    float: none;
+    display: inline;
+  }
+  body footer .copyright img {
+    float: none;
+  }
+  body footer .sosmed {
+    float: none;
+    display: inline-block;
+    padding-bottom: 20px;
+  }
   .listing .grid .sizer,
   .listing .grid .item {
     width: 50%;
@@ -6370,6 +7776,52 @@ body div[role='main'] footer .sosmed a:hover {
 }
 /* Extra small devices (potrait mobiles, 480px) */
 @media (max-width: 480px) {
+  body div[role='main'] section.hero .hero-longdesc .left,
+  body div[role='main'] section.hero .hero-longdesc .right {
+    padding: 0;
+  }
+  body div[role='main'] .selection {
+    display: none;
+  }
+  body div[role='main'].about .selectioncontent {
+    padding: 0 0 40px 0;
+    border-top: 1px solid #d7d7d7;
+  }
+  body div[role='main'].about .selectioncontent .content {
+    padding-bottom: 0;
+  }
+  body div[role='main'].about .selectioncontent .content .left,
+  body div[role='main'].about .selectioncontent .content .right {
+    float: none;
+    width: 100%;
+    padding: 0;
+  }
+  body div[role='main'].about .selectioncontent .content .thumbs,
+  body div[role='main'].about .selectioncontent .content .thumbwide {
+    display: none;
+  }
+  body div[role='main'].about .selectioncontent .content h1,
+  body div[role='main'].about .selectioncontent .content p {
+    width: 100%;
+  }
+  body div[role='main'].about .aboutlink {
+    padding-bottom: 25px;
+  }
+  body div[role='main'].about .aboutlink .left {
+    float: none;
+  }
+  body div[role='main'].about .aboutlink .left ul {
+    padding: 0;
+    text-align: center;
+  }
+  body div[role='main'].about .aboutlink .left ul li a {
+    font-size: 1.6rem;
+  }
+  body div[role='main'].about .aboutlink .right {
+    float: none;
+    margin-top: 20px;
+    text-align: center;
+  }
   body div[role='main'].homepage section.partners ul li {
     display: inline-block;
     float: none;
@@ -6381,6 +7833,9 @@ body div[role='main'] footer .sosmed a:hover {
     margin: 0 0 10px;
     display: inline-block;
   }
+  body div[role='main'].homepage section.partners .section-desc {
+    width: 100%;
+  }
   body div[role='main'].homepage section.api ul li {
     width: 49%;
     margin: 0 0 10px;
@@ -6388,17 +7843,74 @@ body div[role='main'] footer .sosmed a:hover {
   body div[role='main'].homepage section.api ul li:nth-child(odd) {
     margin-right: 2%;
   }
-  body div[role='main'] footer .copyright {
+  body div[role='main'].homepage section.api .section-desc {
+    width: 100%;
+  }
+  body div[role='main'] section.entrance .input-group.ack input {
+    float: left;
+  }
+  body div[role='main'] section.entrance .input-group.ack label {
+    float: left;
+    margin-left: 15px;
+    width: 85%;
+  }
+  body div[role='main'] .static aside {
+    display: none;
+  }
+  body div[role='main'] .static .staticcontent {
+    width: 100%;
+    float: none;
+    padding: 30px 0 30px 0;
+    border: 0;
+  }
+  body div[role='main'] .static .staticcontent .btn-contact {
+    width: 100%;
+    word-break: break-all;
+  }
+  body div[role='main'] .viewer .collectioninfo .description {
+    width: 100%;
+  }
+  body div[role='main'] .viewer section.hero .map {
+    display: none;
+  }
+  body div[role='main'] .viewer section.hero .meta {
+    width: 100%;
+    padding: 0;
+  }
+  body footer .copyright {
     float: none;
     text-align: center;
   }
-  body div[role='main'] footer .copyright img {
+  body footer .copyright img {
+    float: none;
+    margin: 0;
+  }
+  body footer .sosmed {
+    float: none;
+    margin: 0 auto;
+  }
+  body footer .sosmed a {
+    margin: 0 5px 0 5px;
+  }
+}
+/* Extra small devices (potrait mobiles, 320x) */
+@media (max-width: 320px) {
+  body div[role='main'] .viewer section.isotope .listing .grid {
+    margin: 0px;
+  }
+  body div[role='main'] .viewer section.isotope .listing .grid .sizer,
+  body div[role='main'] .viewer section.isotope .listing .grid .item {
+    width: 100%;
+  }
+  body div[role='main'] .viewer section.hero {
+    height: auto;
+  }
+  body div[role='main'] .viewer section.hero .meta .top-info .thumbnails {
     float: none;
   }
-  body div[role='main'] footer .sosmed {
+  body div[role='main'] .viewer section.hero .meta .top-info .header {
     float: none;
-    display: table;
-    margin: 0 auto;
+    margin-top: 20px;
   }
 }
 #uploaded-image > input {
@@ -6406,6 +7918,9 @@ body div[role='main'] footer .sosmed a:hover {
 }
 .has-error {
   color: #a94442!important;
+}
+a.redheart {
+  color: #ec5a62!important;
 }
 .closemedia {
   cursor: pointer;
@@ -6418,29 +7933,75 @@ body div[role='main'] .more {
   z-index: 1032;
   font-size: 25px;
 }
+/* Collection View
 body div[role="main"] .wrapper main section.collection .list-head .upload,
 body div[role="main"] .wrapper main section.exhibition .list-head .upload,
 body div[role="main"] .wrapper main section.favorite .list-head .upload,
 body div[role="main"] .wrapper main section.project .list-head .upload {
-  padding-left: 10px;
-  cursor: pointer;
+    padding-left: 10px;
+	cursor: pointer;
 }
+
 body div[role='main'] .wrapper main section.favorite .list-head .list-control .fa {
-  cursor: pointer;
+	cursor:pointer
 }
 body div[role='main'] .wrapper main section.collection .list-body.grids li.sizer {
-  width: 25%;
-  margin-left: 0;
+	width: 25%; margin-left:0;
 }
+
 body div[role='main'] .wrapper main section.collection .list-body.grids li.item {
-  width: 25%;
-  padding: 0 15px 0 15px;
-  float: none;
-  margin-left: 0;
+	width: 25%; padding: 0 15px 0 15px;float:none;margin-left:0;
 }
-body div[role='main'] .wrapper section.action .button-group {
+*/
+body div[role='main'] .wrapper section.action .button-group,
+.list-control a,
+.action-group a {
   cursor: pointer;
 }
-body div[role="main"] .viewer section.hero .map {
+body div[role="main"] .wrapper main section.project section.project-list .list-body.list li .thumbnails .wrap.small {
+  width: 100px;
+}
+body div[role="main"] .wrapper main section.collection .list-body.list li .thumbnails .wrap,
+body div[role="main"] .wrapper main section.exhibition .list-body.list li .thumbnails .wrap {
+  overflow: hidden;
+}
+body div[role="main"] .wrapper main section.collection section.hero .map,
+body div[role="main"] .wrapper main section.exhibition section.hero .map,
+body div[role="main"] .wrapper main section.favorite section.hero .map,
+body div[role="main"] .wrapper main section.project section.hero .map {
   background: none;
+}
+body div[role='main'] .wrapper .search .searchlabel .label {
+  font-weight: 400!important;
+  cursor: pointer;
+}
+#uploaded-logo img {
+  cursor: pointer;
+}
+.hiddenfile {
+  width: 0px;
+  height: 0px;
+  overflow: hidden;
+}
+.autocomplete-suggestions {
+  border: 1px solid #ccc;
+  -webkit-box-shadow: 2px 2px 2px 0px rgba(128, 128, 128, 0.75);
+  -moz-box-shadow: 2px 2px 2px 0px rgba(128, 128, 128, 0.75);
+  box-shadow: 2px 2px 2px 0px rgba(128, 128, 128, 0.75);
+  background: white;
+}
+.autocomplete-suggestions > .autocomplete-selected {
+  background-color: #cccccc;
+}
+.autocomplete-suggestions-extra {
+  font-size: 12pt;
+}
+.autocomplete-suggestion-extra {
+  background-color: #FAFAFA;
+  cursor: default;
+  padding: 2px 4px 2px 8px;
+}
+- .autocomplete-suggestion-extra .label {
+  background-color: #ec5a62;
+  margin: 2px 0;
 }
