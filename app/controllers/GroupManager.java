@@ -172,26 +172,6 @@ public class GroupManager extends Controller {
 	public static Result editGroup(String groupId) {
 		JsonNode json = request().body().asJson();
 		ObjectNode result = Json.newObject();
-<<<<<<< HEAD
-		ObjectId groupDbId = new ObjectId(groupId);
-		UserGroup group = DB.getUserGroupDAO().get(groupDbId);
-		if (group == null) {
-			result.put("error", "Cannot retrieve group from database.");
-			return internalServerError(result);
-		}
-		ObjectId userId = new ObjectId(AccessManager.effectiveUserIds(
-				session().get("effectiveUserIds")).get(0));
-		User user = DB.getUserDAO().get(userId);
-		Set<ObjectId> groupAdmins = group.getAdminIds();
-		if (!groupAdmins.contains(userId) && !user.isSuperUser()) {
-			result.put("error",
-					"Only an admin of the group has the right to edit the group.");
-			return forbidden(result);
-		}
-		if (json.has("username") && json.get("username") != null
-				&& !group.getUsername().equals(json.get("username").asText())) {
-			if (!uniqueGroupName(json.get("username").asText())) {
-=======
 		UserGroup group = DB.getUserGroupDAO().get(new ObjectId(groupId));
 		if (group != null) {
 			ObjectId userId = new ObjectId(AccessManager
@@ -287,7 +267,6 @@ public class GroupManager extends Controller {
 					return internalServerError(e.getMessage());
 				}
 			} else {
->>>>>>> remodel/newDataModel
 				result.put("error",
 						"Group name already exists! Please specify another name.");
 				return badRequest(result);
