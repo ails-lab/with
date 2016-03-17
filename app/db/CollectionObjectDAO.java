@@ -479,7 +479,8 @@ public class CollectionObjectDAO extends WithResourceDAO<CollectionObject> {
 
 	// it may happen that e.g. the thumbnail of the 4th instead of the 3d record
 	// of the media appears in the collections's (3) media
-	public void addCollectionMedia(ObjectId collectionId, ObjectId recordId, int position) {
+	public void addCollectionMedia(ObjectId collectionId, ObjectId recordId,
+			int position) {
 		CollectionObject collection = this.getById(collectionId,
 				Arrays.asList("media"));
 		if (position > 4)
@@ -517,26 +518,31 @@ public class CollectionObjectDAO extends WithResourceDAO<CollectionObject> {
 						.disableValidation();
 				Query<CollectionObject> cq = DB.getCollectionObjectDAO()
 						.createQuery().field("_id").equal(collectionId);
-				collectionUpdate.set("media" , collectionMedia.size() < 5 ? collectionMedia : collectionMedia.subList(0, 5));
+				collectionUpdate.set("media",
+						collectionMedia.size() < 5 ? collectionMedia
+								: collectionMedia.subList(0, 5));
 				this.update(cq, collectionUpdate);
 			}
 		}
 
 	}
 
-	/*
-	 * public void updateContextData(ContextData contextData) { ObjectId colId =
-	 * contextData.getTarget().getCollectionId(); int position =
-	 * contextData.getTarget().getPosition(); Query<RecordResource> q =
-	 * this.createQuery().field("collectedIn") .hasThisElement(new
-	 * CollectionInfo(colId, position)); UpdateOperations<RecordResource>
-	 * recordUpdate1 = this .createUpdateOperations(); recordUpdate1
-	 * .removeAll("contextData", new ContextData(colId, position));
-	 * this.update(q, recordUpdate1); UpdateOperations<RecordResource>
-	 * recordUpdate2 = this .createUpdateOperations();
-	 * recordUpdate2.add("contextData", contextData); this.update(q,
-	 * recordUpdate2); }
-	 */
+	public void updateContextData(ContextData contextData, int position) throws Exception {
+
+		ObjectId collectionId = contextData.getTarget().getCollectionId();
+		ObjectId recordId = contextData.getTarget().getRecordId();
+		List<ContextData<ContextDataBody>> collectedResources = this.getById(
+				collectionId, Arrays.asList("collectedResources"))
+				.getCollectedResources();
+		if (!collectedResources.get(position).getTarget().getRecordId().equals(recordId))
+			throw new Exception("Invalid record position");
+		Query<CollectionObject> q = this.createQuery().field("_id").equal(collectionId);
+		UpdateOperations<CollectionObject> updateOps = this
+				.createUpdateOperations();
+		updateFields("contextData." + position, Json.toJson(contextData), updateOps);
+		updateOps.set("administrative.lastModified", new Date());
+		this.update(q, updateOps);
+	}
 
 	/*
 	 * public void addCollectionMediaAsync(ObjectId collectionId, ObjectId
@@ -546,7 +552,6 @@ public class CollectionObjectDAO extends WithResourceDAO<CollectionObject> {
 	 * 
 	 * }; ParallelAPICall.createPromise(methodQuery, collectionId, recordId); }
 	 */
-
 	public void removeCollectionMedia(ObjectId collectionId, int position) {
 		if (position > 4)
 			return;

@@ -20,10 +20,19 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
+
+import model.DescriptiveData;
+import model.EmbeddedMediaObject;
+import model.EmbeddedMediaObject.MediaVersion;
+import model.annotations.Annotation;
+import model.annotations.ContextData;
+import model.basicDataTypes.CollectionInfo;
+import model.basicDataTypes.ProvenanceInfo;
+import model.basicDataTypes.WithAccess;
+import model.basicDataTypes.WithAccess.Access;
+import model.usersAndGroups.User;
 
 import org.bson.types.ObjectId;
 import org.mongodb.morphia.annotations.Embedded;
@@ -36,6 +45,9 @@ import org.mongodb.morphia.annotations.Indexes;
 import org.mongodb.morphia.annotations.Version;
 import org.mongodb.morphia.utils.IndexType;
 
+import utils.Deserializer;
+import utils.Serializer;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -44,18 +56,6 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 import db.DB;
 import elastic.ElasticUtils;
-import model.DescriptiveData;
-import model.EmbeddedMediaObject;
-import model.EmbeddedMediaObject.MediaVersion;
-import model.annotations.Annotation;
-import model.annotations.ContextData;
-import model.basicDataTypes.CollectionInfo;
-import model.basicDataTypes.ProvenanceInfo;
-import model.basicDataTypes.WithAccess;
-import model.basicDataTypes.WithAccess.Access;
-import model.usersAndGroups.User;
-import utils.Deserializer;
-import utils.Serializer;
 
 @SuppressWarnings("rawtypes")
 @JsonIgnoreProperties(ignoreUnknown = true)

@@ -23,7 +23,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
@@ -32,29 +31,22 @@ import model.EmbeddedMediaObject;
 import model.EmbeddedMediaObject.MediaVersion;
 import model.EmbeddedMediaObject.WithMediaRights;
 import model.MediaObject;
-import model.basicDataTypes.CollectionInfo;
+import model.annotations.ContextData;
+import model.annotations.ContextData.ContextDataBody;
+import model.annotations.ContextData.ContextDataTarget;
+import model.annotations.ContextData.ContextDataType;
 import model.basicDataTypes.Language;
 import model.basicDataTypes.MultiLiteral;
 import model.basicDataTypes.ProvenanceInfo;
 import model.basicDataTypes.ProvenanceInfo.Sources;
-import model.basicDataTypes.WithAccess;
-import model.resources.CollectionObject;
-import model.resources.CulturalObject;
 import model.resources.CulturalObject.CulturalObjectData;
 import model.resources.RecordResource;
-import model.resources.WithResource;
 import model.resources.WithResource.WithResourceType;
-import model.annotations.ContextData;
-import model.annotations.ContextData.ContextDataTarget;
-import model.annotations.ContextData.ContextDataBody;
-import model.annotations.ContextData.ContextDataType;
-import model.annotations.ExhibitionData;
 
 import org.bson.types.ObjectId;
 
 import play.Logger;
 import play.Logger.ALogger;
-import play.api.i18n.Lang;
 import play.libs.F.Option;
 import play.libs.Json;
 import play.mvc.Controller;
@@ -65,17 +57,13 @@ import sources.core.RecordJSONMetadata;
 import utils.AccessManager;
 import utils.AccessManager.Action;
 import utils.Locks;
-import utils.Tuple;
 
-import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
-import controllers.parameterTypes.StringTuple;
 import db.DB;
 import db.WithResourceDAO;
 
