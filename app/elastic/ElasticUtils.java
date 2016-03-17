@@ -26,6 +26,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import model.EmbeddedMediaObject;
+import model.EmbeddedMediaObject.MediaVersion;
 import model.basicDataTypes.WithAccess.AccessEntry;
 import model.basicDataTypes.WithDate;
 import model.resources.WithResource;
@@ -240,30 +241,32 @@ public class ElasticUtils {
 		if( (rr.getMedia() != null) && !rr.getMedia().isEmpty()
 				&& (rr.getMedia().get(0)!=null) && (!rr.getMedia().get(0).isEmpty())  ) {
 			// take care about all EmbeddedMediaObjects
-			EmbeddedMediaObject emo = rr.getMedia().get(0).values().toArray(new EmbeddedMediaObject[1])[0];
-				ObjectNode media = Json.newObject();
-				media.put("withRights", Json.toJson(emo.getWithRights()));
-				//TODO: why withMediaType and not type, like in EmbeddedMedia? media.type
-				media.put("type", Json.toJson(emo.getType()));
-				media.put("originalRights", Json.toJson(emo.getOriginalRights()));
-				media.put("mimeType", Json.toJson(emo.getMimeType().toString()));
-				media.put("url", Json.toJson(emo.getUrl()));
-				media.put("quality", Json.toJson(emo.getQuality()));
-				media.put("width", emo.getWidth());
-				media.put("height", emo.getHeight());
-				media_objects.add(media);
-
-				/*
-				 * Eliminate null values from Media json structures
-				 */
-				ObjectNode media_copy = media.deepCopy();
-				Iterator<String> fieldNames = media_copy.fieldNames();
-				while(fieldNames.hasNext()) {
-					String fName = fieldNames.next();
-					if(media_copy.get(fName).isNull() ) {
-						media.remove(fName);
+			ObjectNode media = Json.newObject();
+			for(HashMap<MediaVersion, EmbeddedMediaObject> mediaobj: rr.getMedia()) {
+				for(EmbeddedMediaObject emo: mediaobj.values()) {
+					media.put("withRights", Json.toJson(emo.getWithRights()));
+					//TODO: why withMediaType and not type, like in EmbeddedMedia? media.type
+					media.put("type", Json.toJson(emo.getType()));
+					media.put("originalRights", Json.toJson(emo.getOriginalRights()));
+					//media.put("mimeType", Json.toJson(emo.getMimeType()));
+					media.put("url", Json.toJson(emo.getUrl()));
+					media.put("quality", Json.toJson(emo.getQuality()));
+					media.put("width", emo.getWidth());
+					media.put("height", emo.getHeight());
+					/*
+					 * Eliminate null values from Media json structures
+					 */
+					ObjectNode media_copy = media.deepCopy();
+					Iterator<String> fieldNames = media_copy.fieldNames();
+					while(fieldNames.hasNext()) {
+						String fName = fieldNames.next();
+						if(media_copy.get(fName).isNull() ) {
+							media.remove(fName);
+						}
 					}
+					media_objects.add(media);
 				}
+			}
 			idx_doc.put("media", media_objects);
 		}
 

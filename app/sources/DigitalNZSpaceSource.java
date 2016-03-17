@@ -70,7 +70,7 @@ public class DigitalNZSpaceSource extends ISpaceSource {
 	private Function<List<String>, Pair<String>> fwriter(String parameter) {
 
 		Function<String, String> function = (String s) -> {
-			return Utils.spacesFormatQuery(s, "%20");
+			return s;
 		};
 		return new Function<List<String>, Pair<String>>() {
 			@Override
@@ -125,7 +125,7 @@ public class DigitalNZSpaceSource extends ISpaceSource {
 
 		if (checkFilters(q)) {
 			try {
-				response = HttpConnector.getURLContent(httpQuery);
+				response = getHttpConnector().getURLContent(httpQuery);
 
 				JsonNode o = response.path("search");
 				// System.out.print(o.path("name").asText() + " ");
@@ -185,7 +185,7 @@ public class DigitalNZSpaceSource extends ISpaceSource {
 		ArrayList<RecordJSONMetadata> jsonMetadata = new ArrayList<RecordJSONMetadata>();
 		JsonNode response;
 		try {
-			response = HttpConnector
+			response = getHttpConnector()
 					.getURLContent("http://api.digitalnz.org/v3/records/" + recordId + ".json?api_key=" + apiKey);
 			JsonNode record = response;
 			if (record!=null){
@@ -193,7 +193,7 @@ public class DigitalNZSpaceSource extends ISpaceSource {
 				String json = Json.toJson(formatreader.readObjectFrom(record)).toString();
 				jsonMetadata.add(new RecordJSONMetadata(Format.JSON_WITH, json));
 			}
-			Document xmlResponse = HttpConnector
+			Document xmlResponse = getHttpConnector()
 					.getURLContentAsXML("http://api.digitalnz.org/v3/records/" + recordId + ".xml?api_key=" + apiKey);
 			jsonMetadata.add(new RecordJSONMetadata(Format.XML_DNZ, Serializer.serializeXML(xmlResponse)));
 			return jsonMetadata;

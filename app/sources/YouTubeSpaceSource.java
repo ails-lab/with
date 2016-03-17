@@ -199,7 +199,7 @@ public class YouTubeSpaceSource extends ISpaceSource {
 		ArrayList<RecordJSONMetadata> jsonMetadata = new ArrayList<RecordJSONMetadata>();
 		JsonNode response;
 		try {
-			response = HttpConnector
+			response = getHttpConnector()
 					.getURLContent("https://www.googleapis.com/youtube/v3/videos?id="
 							+ recordId + "&part=snippet&key=" + getKey());
 			JsonNode record = response.get("items").get(0);

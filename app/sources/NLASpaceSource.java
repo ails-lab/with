@@ -67,20 +67,20 @@ public class NLASpaceSource extends ISpaceSource {
 				if (t.size() > 1) {
 					b = t.get(1);
 				}
-				return new AdditionalQueryModifier("%20date:%5B" + a + "%20TO%20" + b + "%5D");
+				return new AdditionalQueryModifier(" date:[" + a + " TO " + b + "]");
 			}
 		};
 	}
 
 	private Function<List<String>, QueryModifier> qfwriter(String parameter) {
 		Function<String, String> function = (String s) -> {
-			return Utils.spacesFormatQuery(s, "%20");
+			return s;
 		};
 		return new Function<List<String>, QueryModifier>() {
 			@Override
 			public AdditionalQueryModifier apply(List<String> t) {
 				return new AdditionalQueryModifier(
-						"%20" + parameter + ":%28" + Utils.getORList(ListUtils.transform(t, function), false) + "%29");
+						" " + parameter + ":(" + Utils.getORList(ListUtils.transform(t, function), false) + ")");
 			}
 		};
 	}
@@ -88,7 +88,7 @@ public class NLASpaceSource extends ISpaceSource {
 	private Function<List<String>, Pair<String>> fwriter(String parameter) {
 
 		Function<String, String> function = (String s) -> {
-			return Utils.spacesFormatQuery(s, "%20");
+			return s;
 		};
 		return new Function<List<String>, Pair<String>>() {
 			@Override
@@ -127,7 +127,7 @@ public class NLASpaceSource extends ISpaceSource {
 
 		if (checkFilters(q)) {
 			try {
-				response = HttpConnector.getURLContent(httpQuery);
+				response = getHttpConnector().getURLContent(httpQuery);
 				// System.out.println(response.toString());
 				JsonNode pa = response.path("response").path("zone");
 				ArrayList<WithResource<?, ?>> a = new ArrayList<>();
@@ -200,7 +200,7 @@ public class NLASpaceSource extends ISpaceSource {
 		ArrayList<RecordJSONMetadata> jsonMetadata = new ArrayList<RecordJSONMetadata>();
 		JsonNode response;
 		try {
-			response = HttpConnector.getURLContent(
+			response = getHttpConnector().getURLContent(
 					"http://api.trove.nla.gov.au/work/" + recordId + "?key=" + apiKey + "&encoding=json&reclevel=full");
 			JsonNode record = response;
 			if (record != null) {
@@ -208,7 +208,7 @@ public class NLASpaceSource extends ISpaceSource {
 				String json = Json.toJson(formatreader.readObjectFrom(record)).toString();
 				jsonMetadata.add(new RecordJSONMetadata(Format.JSON_WITH, json));
 			}
-			Document xmlResponse = HttpConnector.getURLContentAsXML(
+			Document xmlResponse = getHttpConnector().getURLContentAsXML(
 					"http://api.trove.nla.gov.au/work/" + recordId + "?key=" + apiKey + "&encoding=xml&reclevel=full");
 			jsonMetadata.add(new RecordJSONMetadata(Format.XML_NLA, Serializer.serializeXML(xmlResponse)));
 			return jsonMetadata;

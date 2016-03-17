@@ -40,6 +40,7 @@ define(['jquery','knockout', './router', './app','knockout-mapping', 'bootstrap'
 	});
 
 	ko.components.register('testsearch', { require: 'components/testsearch/testsearch' });
+	ko.components.register('import-collections', { require: 'components/import-collections/import-collections' });
 
 	ko.components.register('itemview', {
 		viewModel: { require: 'components/item-view/item' },

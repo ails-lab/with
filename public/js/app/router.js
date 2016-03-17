@@ -31,6 +31,7 @@ define(["knockout", "crossroads", "hasher"], function (ko, crossroads, hasher) {
 			{ url: 'exhibition-edit/{id}',     params: { page: 'exhibition-edit',    title: 'Exhibition Edit' } },
 			{ url: 'apidoc', params: { page: 'api-docu', title: 'API Documentation' } },
 			{ url: 'testsearch', params: { page: 'testsearch', title: 'testsearch' } },
+			{ url: 'import-collections', params: { page: 'import-collections', title: 'import-collections' } },
 			{ url: 'myfavorites', params: { page: 'collection-view', title: 'My Favorites', type: 'favorites' } },
 			{ url: 'gallery/{id}/{skin}',     params: { page: '3DRoom',    title: 'Gallery View' } },
 			{ url: 'organization/{id}', params: { page: 'group-page', title: 'Organization', 'type': 'organization' } },

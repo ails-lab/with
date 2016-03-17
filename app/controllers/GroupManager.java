@@ -172,6 +172,7 @@ public class GroupManager extends Controller {
 	public static Result editGroup(String groupId) {
 		JsonNode json = request().body().asJson();
 		ObjectNode result = Json.newObject();
+<<<<<<< HEAD
 		ObjectId groupDbId = new ObjectId(groupId);
 		UserGroup group = DB.getUserGroupDAO().get(groupDbId);
 		if (group == null) {
@@ -190,6 +191,103 @@ public class GroupManager extends Controller {
 		if (json.has("username") && json.get("username") != null
 				&& !group.getUsername().equals(json.get("username").asText())) {
 			if (!uniqueGroupName(json.get("username").asText())) {
+=======
+		UserGroup group = DB.getUserGroupDAO().get(new ObjectId(groupId));
+		if (group != null) {
+			ObjectId userId = new ObjectId(AccessManager
+					.effectiveUserIds(session().get("effectiveUserIds")).get(0));
+			User user = DB.getUserDAO().get(userId);
+			Set<ObjectId> groupAdmins = group.getAdminIds();
+			if (groupAdmins.contains(userId) || user.isSuperUser()) {
+				try {
+					if (json.has("username")) {
+						if (json.get("username") != null) {
+							if (!group.getUsername().equals(
+									json.get("username").asText())) {
+								if (!uniqueGroupName(json.get("username").asText())) {
+									return badRequest("Group name already exists! Please specify another name.");
+								}
+							}
+						}
+					}
+					// Update user page
+					if (json.has("page")
+							&& ((group instanceof Organization) || (group instanceof Project))) {
+						String address = null, city = null, country = null;
+						Page oldPage = null;
+						JsonNode newPage = json.get("page");
+						// Keep previous page fields
+						if (group instanceof Organization) {
+							oldPage = ((Organization) group).getPage();
+						} else if (group instanceof Project) {
+							oldPage = ((Project) group).getPage();
+						}
+						// Update Page
+						ObjectMapper pageObjectMapper = new ObjectMapper();
+						ObjectReader pageUpdator = pageObjectMapper
+								.readerForUpdating(oldPage);
+						Page page;
+						page = pageUpdator.readValue(newPage);
+						// In case that the location has changed we need to calculate
+						// the new coordinates
+						if (((json.get("page").get("address") != null)
+								|| (json.get("page").get("city") != null) || (json.get(
+								"page").get("country") != null))) {
+							address = page.getAddress();
+							city = page.getCity();
+							country = page.getCountry();
+							String fullAddress = ((address == null) ? "" : address)
+									+ "," + ((city == null) ? "" : city) + ","
+									+ ((country == null) ? "" : country);
+							fullAddress = fullAddress.replace(" ", "+");
+							try {
+								JsonNode response = HttpConnector.getWSHttpConnector()
+										.getURLContent("https://maps.googleapis.com/maps/api/geocode/json?address="
+												+ fullAddress);
+								Point coordinates = GeoJson.point(
+										response.get("results").get(0).get("geometry")
+												.get("location").get("lat").asDouble(),
+										response.get("results").get(0).get("geometry")
+												.get("location").get("lng").asDouble());
+								page.setCoordinates(coordinates);
+							} catch (Exception e) {
+								log.error("Cannot update coordinates of group Page", e);
+								page.setCoordinates(null);
+							}
+						}
+						json.remove("page");
+						if (group instanceof Organization) {
+							((Organization) group).setPage(page);
+						} else if (group instanceof Project) {
+							((Project) group).setPage(page);
+						}
+					}
+					UserGroup oldVersion = group;
+					ObjectMapper objectMapper = new ObjectMapper();
+					ObjectReader updator = objectMapper.readerForUpdating(oldVersion);
+					UserGroup newVersion;
+					newVersion = updator.readValue(json);
+					Set<ConstraintViolation<UserGroup>> violations = Validation
+							.getValidator().validate(newVersion);
+					if (!violations.isEmpty()) {
+						ArrayNode properties = Json.newObject().arrayNode();
+						for (ConstraintViolation<UserGroup> cv : violations) {
+							properties.add(Json.parse("{\"" + cv.getPropertyPath()
+									+ "\":\"" + cv.getMessage() + "\"}"));
+						}
+						result.put("error", properties);
+						return badRequest(result);
+					}
+
+					// update group on mongo
+					DB.getUserGroupDAO().makePermanent(newVersion);
+					return ok(Json.toJson(newVersion));
+				} catch (IOException e) {
+					e.printStackTrace();
+					return internalServerError(e.getMessage());
+				}
+			} else {
+>>>>>>> remodel/newDataModel
 				result.put("error",
 						"Group name already exists! Please specify another name.");
 				return badRequest(result);
