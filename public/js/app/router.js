@@ -59,6 +59,23 @@ define(["knockout", "crossroads", "hasher"], function (ko, crossroads, hasher) {
 
 	function activateCrossroads() {
 		//temp fix: scrollbar moves to top when route changes
+		function resetMenu(){
+			/*in case we changed from item view without closing */
+			$("div[role='main']").removeClass("itemopen");
+			$('body').css('overflow','visible');
+			//now reset mobile menu
+			var $menu = $( '.main .menu');
+			
+	          if($menu.hasClass("visible")){
+	        	  $menu.toggleClass( 'visible' );
+
+					// toggle button
+					$( '.mobilemenu' ).toggleClass( 'active' );
+	          }
+	         
+	     	 
+		}
+		
 		function resetScroll() {
 			document.body.scrollTop = document.documentElement.scrollTop = 0;
 		}
@@ -87,6 +104,7 @@ define(["knockout", "crossroads", "hasher"], function (ko, crossroads, hasher) {
 		crossroads.normalizeFn = crossroads.NORM_AS_OBJECT;
 		hasher.initialized.add(parseHash);
 		hasher.changed.add(parseHash);
+		hasher.changed.add(resetMenu);
 		hasher.changed.add(resetScroll);
 
 		hasher.init();
