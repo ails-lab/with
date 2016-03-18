@@ -16,8 +16,7 @@ define(['knockout', 'text!./dashboard.html', 'app'], function (ko, template, app
 			});
 		});
 
-		$("div[role='main']").toggleClass("homepage", false);
-
+		WITHApp.initTooltip();
 		self.hideMessage = function () {
 			$("section.message").toggle();
 		};

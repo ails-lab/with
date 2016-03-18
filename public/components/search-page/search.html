@@ -11,7 +11,7 @@
                 <!-- wrap-->
                 <div class="wrap">
                   <!-- settings bar-->
-                  <div class="settings"><a href="#" title="#" data-bind="event : {click: function(data, event) {showfacets(event)}}" data-bind="disable:$parent.searching"><img src="img/ui/ic-setting.png" alt="settings"></a></div>
+                  <div class="settings"><a href="#" title="Filter settings" data-toggle="tooltip" data-placement="left" data-bind="event : {click: function(data, event) {showfacets(event)}}" data-bind="disable:$parent.searching"><img src="img/ui/ic-setting.png" alt="settings"></a></div>
                   <!-- input-->
                   <div class="searchbox" id="withsearchid"><img src="img/ui/ic-mag.png" alt="Search" class="icon" data-bind="attr: {src: searching()==true ? 'img/ui/ic-loading.gif' : 'img/ui/ic-mag.png'}, click: function() { search(true,true); }">
                     <input type="text" data-bind="value: term" placeholder="Search media" class="searchinput">
@@ -25,11 +25,11 @@
                   </div>
                   <!-- view setting-->
                   <ul class="view">
-                       <li class="active" data-bind="event: {click: toggleSourceview}, enable: searching()==false"><a href="#" title="Column View" data-view="column"><img src="img/ui/ic-list.png" alt="list"></a></li>
-                       <li data-bind="event: {click: toggleSourceview}, enable: searching()==false"><a href="#" title="Grid View" data-view="grid"><img src="img/ui/ic-grid.png" alt="grid"></a></li>
+                       <li class="active" data-bind="event: {click: toggleSourceview}, enable: searching()==false"><a href="#" title="Column View" data-view="column" data-toggle="tooltip" data-placement="left"><img src="img/ui/ic-list.png" alt="list"></a></li>
+                       <li data-bind="event: {click: toggleSourceview}, enable: searching()==false"><a href="#" title="Grid View" data-view="grid" data-toggle="tooltip" data-placement="right"><img src="img/ui/ic-grid.png" alt="grid"></a></li>
                   </ul>
                 </div>
-                <!-- close search--><a href="#" title="Close Search" class="close"><img src="img/ui/ic-close.png"></a>
+                <!-- close search--><a href="#" title="Close Search" class="close" data-toggle="tooltip" data-placement="left"><img src="img/ui/ic-close.png"></a>
               </div>
             </section>
             <!-- search filter-->

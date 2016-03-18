@@ -411,6 +411,8 @@ WITHApp.ui = function( custom ){
 			$( '.action.collectmultiple' ).addClass( 'active' );
 		});
 		
+		initTooltip();
+		
 	};
 	
 	// method to initialize isotope

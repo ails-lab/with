@@ -99,6 +99,7 @@ define(['knockout', 'text!./_exhibition-view.html', 'app', 'magnific-popup', 'sl
 		self.showCarousel = ko.observable(false);
 
 		self.initCarousel = function () {
+			WITHApp.initTooltip();
 			WITHApp.initCarousel();
 			WITHApp.initExpandExhibitionText();
 			WITHApp.initImageZoom();

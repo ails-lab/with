@@ -8,6 +8,7 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
 		  
 		  // append to container
 		  this.append( $items );
+		  WITHApp.tabAction();
 		// hide by default
 		  $items.hide();
 		  $items.imagesLoaded().progress( function( imgLoad, image ) {
