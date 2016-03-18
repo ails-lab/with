@@ -33,15 +33,11 @@
 								</div>
 								<!-- add-->
 								<!-- ko template: { foreach: collectionItemsArray, beforeRemove: removeItem, afterAdd: showNewItem } -->
-								<div class="add droppable" 
-								data-bind="{event: {dragover: function(event){event.preventDefault();},
-                          dragenter: function(event){event.target.addClass('dragover'); event.preventDefault();},
-                          dragleave: function(event){event.target.removeClass('dragover'); event.preventDefault();}}, 
-                          drop: $parent.drop.bind($data, $index)}">
-									<span><a href="#" data-toggle="tooltip" data-placement="top" title="Drag an item here"><img src="img/ui/ic-add.png" /></a></span>
+								<div class="add" data-bind="drop: {index: $index}">
+									<span><a data-toggle="tooltip" data-placement="top" title="Drag an item here"><img src="img/ui/ic-add.png" /></a></span>
 								</div>
 								<!-- box-->
-								<div class="box fill" data-bind="drag: { item: $data, move: true }">
+								<div class="box fill" data-bind="drag: {item: $data, move: true}">
 									<div class="boxaction">
 										<ul>
 											<li>
@@ -54,7 +50,7 @@
 									</div>
 									<div class="left">
 										<div class="imgwrap">
-											<img data-bind="attr: { src: media()[0].Thumbnail.url }" />
+											<img data-bind="attr: { src: thumbnailUrl }" class="itemImage"/>
 										</div>
 										<div class="imginfo">
 											<span class="mediatitle" data-bind="text: title"></span><br />
@@ -66,10 +62,11 @@
 									</div>
 								</div>
 								<!-- /ko -->
-								<div class="add droppable">
-									<span><a href="#" data-toggle="tooltip" data-placement="top" title="Drag an item here">
+								<div class="add">
+									<span><a data-toggle="tooltip" data-bind="drop: {index: collectionItemsArray().length}" data-placement="top" title="Drag an item here">
 										<img src="img/ui/ic-add.png" /></a></span>
 								</div>
+								<!--<div id="loadingIcon"><i class="fa fa-spinner fa-pulse"></i></div>-->
 							</div>
 						</div>
 					</div>
@@ -87,15 +84,13 @@
 							<div class="notification">Select items from your collections and drag them to your exhibition</div>
 						</div>
 						<!-- listing-->
-						<div class="assetlisting">
+						<div class="assetlisting" id="outer-bottom">
 							<ul data-bind="foreach: userSavedItemsArray">
 								<li>
-									<a href="#" data-toggle="tooltip" data-placement="top" draggable="true"
-									data-bind="{event:{ dragstart: $parent.dragStart.bind($data, false), 
-										dragend: function(event){console.log("2");document.getElementsByClassName('dragover')[0].removeClass('dragover')}},
-										attr: { title: title }}}">
+									<a id="bottom-box" href="#" data-toggle="tooltip" data-placement="top" 
+									data-bind="{drag: {item: $data, move: false}, attr: {title: title}}">
 										<div class="hue">
-											<img data-bind="attr: { src: media()[0].thumbnailUrl }" />
+											<img data-bind="attr: { src: thumbnailUrl }" class="itemImage"/>
 											<div class="color"></div>
 										</div>
 									</a>
