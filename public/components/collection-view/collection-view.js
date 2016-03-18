@@ -343,7 +343,7 @@ define(['bridget', 'knockout', 'text!./_collection-view.html', 'isotope', 'image
 				}
 			});
 		};
-
+		WITHApp.initTooltip();
 		self.loadCollection();
 		self.isOwner = ko.pureComputed(function () {
 			if (app.currentUser._id() == self.withCreator) {
