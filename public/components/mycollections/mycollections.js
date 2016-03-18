@@ -1,5 +1,11 @@
-define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','app', 'knockout-validation'], function (bootstrap, ko, template, KnockoutElse, app) {
+define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else', 'app', 'knockout-validation'], function (bootstrap, ko, template, KnockoutElse, app) {
 
+	ko.validation.init({
+		errorElementClass: 'error',
+		errorMessageClass: 'errormsg',
+		decorateInputElement: true
+	});
+	
 	count = 6;
 	accessLevels = {
 		READ : 0,
@@ -20,12 +26,6 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 			window.location = '#login';
 		}
 	};
-
-	ko.validation.init({
-		errorElementClass: 'error',
-		errorMessageClass: 'errormsg',
-		decorateInputElement: true
-	});
 
 	function getCollectionsSharedWithMe(isExhibition, offset, count) {
 		return $.ajax({
@@ -649,9 +649,12 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 			self.isPublicToEdit();
 			self.titleToEdit();
 			self.descriptionToEdit();
-			$('textarea').hide();
+			// $('textarea').hide();
 			//$('.add').show();
 			$('.action').removeClass('active');
+
+			// Hide errors
+			self.validationModel.errors.showAllMessages(false);
 		};
 
 		self.updateCollectionData = function (collectionSet, collIndex) {
