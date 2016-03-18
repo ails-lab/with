@@ -35,7 +35,7 @@
                                     "default": 20
                                 },
                                 "source": {
-                                    "description": "Different values can be Europeana, DPLA, DigitalNZ, Rijksmuseum, WITHin, The British Library. Results from WITHin correspond to internal records.",
+                                    "description": "Different values such as Europeana, DPLA, DigitalNZ, Rijksmuseum, WITHin, and others.  Results from WITHin correspond to internal records.",
                                     "type": "array",
                                     "items": {
                                         "type": "string",
@@ -82,7 +82,7 @@
                     "Search"
                 ],
                 "summary": "Advanced search with filters (faceted sarch).",
-                "description": "An extension of the simple search to include filters for search with facets. The values of the filters are NOT preset. To see what filters you can use, you need to check the response from a search without filters. Then you can send another query with some values of all the possible filters. To get a better understanding we suggest you use the inspector console of your favourite browser and observe the network activity while performing a search from the frontend, using different filter values.",
+                "description": "An extension of the simple search to include filters for search with facets. The values of the filters are NOT preset. To see what filters you can use, you should use the ```/api/intialfeatures``` call. Then you can send another query with some values of all the possible filters. To get a better understanding we suggest you use the inspector console of your favourite browser and observe the network activity while performing a search from the frontend, using different filter values.",
                 "parameters": [
                     {
                         "in": "body",
@@ -105,7 +105,7 @@
                                     "default": 10
                                 },
                                 "source": {
-                                    "description": "Different values can be Europeana, DPLA, DigitalNZ, Rijksmuseum, WITHin, The British Library. Results from WITHin correspond to internal records.",
+                                    "description": "Different values such as Europeana, DPLA, DigitalNZ, Rijksmuseum, WITHin, and others.  Results from WITHin correspond to internal records.",
                                     "type": "array",
                                     "items": {
                                         "type": "string",
@@ -115,7 +115,10 @@
                                             "DigitalNZ",
                                             "Rijksmuseum",
                                             "WITHin",
-                                            "The British Library"
+                                            "BritishLibrary",
+                                            "NLA",
+                                            "DDB",
+                                            "InternetArchive"
                                         ]
                                     }
                                 },
@@ -150,6 +153,97 @@
                             "type": "array",
                             "items": {
                                 "$ref": "#/definitions/Search"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request (invalid json)",
+                        "schema": {
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/initialfilters": {
+            "post": {
+                "summary": "Retrieve initial filters for a search.",
+                "description": "Retrieve a JSON with the filters you can use for faceted search in the query. This call requires a body parameter with the sources you will need to process.",
+                "parameters": [
+                    {
+                        "in": "body",
+                        "name": "body",
+                        "required": true,
+                        "description": "Sources.",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "source": {
+                                    "description": "Different values such as Europeana, DPLA, DigitalNZ, Rijksmuseum, WITHin, and others.  Results from WITHin correspond to internal records.",
+                                    "type": "array",
+                                    "items": {
+                                        "type": "string",
+                                        "enum": [
+                                            "Europeana",
+                                            "DPLA",
+                                            "DigitalNZ",
+                                            "Rijksmuseum",
+                                            "WITHin",
+                                            "BritishLibrary",
+                                            "NLA",
+                                            "DDB",
+                                            "InternetArchive"
+                                        ]
+                                    }
+                                }
+                            }
+                        }
+                    }
+                ],
+                "tags": [
+                    "Search"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/Filters"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request (invalid json)",
+                        "schema": {
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/searchsources": {
+            "get": {
+                "summary": "Retrieve the list of available search sources.",
+                "description": "Retrieve a JSON with the list of sources that WITH currently supports for federated searches.",
+                "tags": [
+                    "Search"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
                             }
                         }
                     },
