@@ -93,8 +93,8 @@
 			  <div class="action-header">
 			    <div class="title">Edit Collection</div>
 			  </div>
-			  <div class="action-body">
-				<input type="text" data-bind="{value: titleToEdit, validationElement: titleToEdit,
+			  <div class="action-body" data-bind="validationElement: titleToEdit">
+				<input type="text" data-bind="{value: titleToEdit, valueUpdate: 'afterkeypress', hasFocus: true
 				      attr: {placeholder: titleToEdit}}">
 				<textarea data-bind="{value: descriptionToEdit,
 					  attr: {placeholder: descriptionToEdit}"></textarea>

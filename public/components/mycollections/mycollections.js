@@ -649,9 +649,12 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 			self.isPublicToEdit();
 			self.titleToEdit();
 			self.descriptionToEdit();
-			$('textarea').hide();
+			// $('textarea').hide();
 			//$('.add').show();
 			$('.action').removeClass('active');
+
+			// Hide errors
+			self.validationModel.errors.showAllMessages(false);
 		};
 
 		self.updateCollectionData = function (collectionSet, collIndex) {
