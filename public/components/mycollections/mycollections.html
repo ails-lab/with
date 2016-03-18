@@ -258,12 +258,7 @@
 						<!-- /ko -->
 						<!-- /ko -->
 						<!--  ko if: (myAccess() ==  "OWN" || myAccess() == "WRITE")-->
-						<!-- ko if: $parent.showsExhibitions -->
-						<a data-toggle="tooltip" data-bind="attr: {href: 'index.html#exhibition-edit/'+dbId()}" data-placement="top" title="Edit exhibition" class="fa fa-pencil editaction"></a>
-						<!-- /ko -->
-						<!-- ko else -->
 						<a data-toggle="tooltip" data-bind="click: $parent.prepareForEditCollection" data-placement="top" title="Edit collection" class="fa fa-pencil editaction"></a>
-						<!-- /ko -->
 						<!-- /ko -->
 						<span data-bind="visible: myAccess() == 'READ'">&nbsp;</span>
 					</div>

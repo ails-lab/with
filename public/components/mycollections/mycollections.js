@@ -581,14 +581,18 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 			var context = ko.contextFor(event.target);
 			var collIndex = context.$index();
 			self.index(collIndex);
-			if (self.collectionSet() == "my") {
-				//self.collectionSet("my");
-				self.titleToEdit(self.myCollections()[collIndex].title());
-				self.descriptionToEdit(self.myCollections()[collIndex].description());
-			} else {
-				//self.collectionSet("shared");
-				self.titleToEdit(self.sharedCollections()[collIndex].title());
-				self.descriptionToEdit(self.sharedCollections()[collIndex].description());
+			if (self.showsExhibitions)
+				window.location = '#exhibition-edit/' + collection.dbId();
+			else {
+				if (self.collectionSet() == "my") {
+					//self.collectionSet("my");
+					self.titleToEdit(self.myCollections()[collIndex].title());
+					self.descriptionToEdit(self.myCollections()[collIndex].description());
+				} else {
+					//self.collectionSet("shared");
+					self.titleToEdit(self.sharedCollections()[collIndex].title());
+					self.descriptionToEdit(self.sharedCollections()[collIndex].description());
+				}
 			}
 		};
 
