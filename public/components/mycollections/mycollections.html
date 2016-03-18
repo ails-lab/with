@@ -184,16 +184,10 @@
 				<div class="group">
 				  <div class="title">Groups access</div>
 				  <input type="text" id="usernameOrEmail" data-bind="autocompleteUsername1: myUsername, category:2" placeholder="Start typing group name">
-				  <ul class="access-list">
-				  	<!-- ko foreach: userGroupsToShare -->
-				  	<li>
-					 <!-- ko if: $data.image -->
-					 	 <div class="thumbnails"><img data-bind="attr: {src: image}"></div>
-					  <!--/ko-->
-					  <!-- ko else -->
-					  	<div class="thumbnails"><img src="images/user.png"></div>
-					  <!-- /ko -->
-					  <a data-toggle="tooltip" data-placement="top" style="cursor:pointer;" data-bind="{attr: {title: username}, click: $parent.removeRights}" class="trash">
+				  <ul class="access-list" data-bind="foreach: userGroupsToShare">				  	
+				  	<li class="blue">
+					    <span class="text" data-bind="text: username().substring(0,2).toUpperCase()"></span>
+						<a data-toggle="tooltip" data-placement="top" style="cursor:pointer;" data-bind="{attr: {title: username}, click: $parent.removeRights}" class="trash">
 					  	<i class="fa fa-trash"></i></a>
 					  <div class="toggle">
 						<input type="checkbox" id="u2" data-bind="{attr: {id: username}, checked: accessChecked, click: $parent.changeRights}">
@@ -202,7 +196,6 @@
 						<span class="public">co-edit</span>
 					  </div>
 					</li>
-					<!-- /ko -->
 				  </ul>
 				</div>
 			  </div>
