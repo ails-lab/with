@@ -79,25 +79,24 @@ public class HttpConnector {
 		}
 	}
 	
-	public  <T> T getContentAsFile(String url) throws Exception {
+	public  File getContentAsFile(String url) throws Exception {
 		try {
 			Logger.debug("calling: " + url);
 			long time = System.currentTimeMillis();
 			String url1 = Utils.replaceQuotes(url);
 			
-			Promise<T> filePromise = WS.url(url1).get().map(new Function<WSResponse, T>() {
-				public T apply(WSResponse response) throws IOException {
+			Promise<File> filePromise = WS.url(url1).get().map(new Function<WSResponse, File>() {
+				public File apply(WSResponse response) throws IOException {
 //					System.out.println(response.getBody());
 					File tmp = new File("temp");
 					FileUtils.writeByteArrayToFile(tmp, response.asByteArray());
 					//T file = (T) response.asByteArray();
-					T file = (T) tmp;
 					long ftime = (System.currentTimeMillis() - time)/1000;
 					Logger.debug("waited "+ftime+" sec for: " + url);
-					return file;
+					return tmp;
 				}
 			});
-			return (T) filePromise.get(TIMEOUT_CONNECTION);
+			return filePromise.get(TIMEOUT_CONNECTION);
 		} catch (Exception e) {
 			Logger.error("calling: " + url);
 			Logger.error("msg: " + e.getMessage());
