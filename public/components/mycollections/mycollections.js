@@ -208,7 +208,6 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 
 
 		self.createCollection = function (collectionType) {
-			console.log(self.validationModel.isValid());
 			var jsondata = JSON.stringify({
 				administrative: {
 					access: {
