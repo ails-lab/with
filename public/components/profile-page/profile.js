@@ -44,10 +44,8 @@ define(['knockout', 'text!./profile.html', 'app', 'knockout-validation', 'jquery
 		});
 
 		self.checkLogged = function () {
-			if (isLogged() === false) {
-
-				window.location = '#login';
-				return;
+			if (localStorage.getItem('logged_in') != "true") {
+				window.location.href = "#login";
 			}
 		};
 

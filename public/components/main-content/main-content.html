@@ -1,4 +1,4 @@
-      
+
 <div role="main" class="homepage">
 			<!-- hero -->
 			<section class="hero">
@@ -170,7 +170,7 @@
 					</div>
 
 
-       
+
 
 					<!-- featured box -->
 					<div class="featured-box exhibition" data-bind="with: featuredExhibition">
@@ -187,13 +187,13 @@
 								<!-- meta -->
 								<div class="featured-meta">
 
-								
+
 									<p class="category">Featured exhibition</p>
 									<h2 class="title"><b><!-- ko text:data.title --><!-- /ko --></b></h2>
 									<ul class="img-exhibition">
 										<li>
 											<img data-bind="attr: { src: data.media[0].Thumbnail.url}" alt="exb 1" title="exb 1">
-											
+
 										</li>
 										<li>
 											<img data-bind="attr: { src: data.media[1].Thumbnail.url}" alt="exb 1" title="exb 1">
@@ -215,7 +215,7 @@
 
 							<!-- anchor -->
 							<a data-bind="attr: {href: data.url()}"  title="VIEW COLLECTION">
-								
+
 								<!-- thumbnail -->
 								<div class="featured-hero">
 									<img data-bind="attr: { src: data.media[0].Thumbnail.url}">
@@ -226,11 +226,11 @@
 								<div class="featured-hero">
 									<img data-bind="attr: { src: data.media[2].Thumbnail.url}">
 								</div>
-								
+
 								<div class="featured-hero">
 									<img data-bind="attr: { src: data.media[1].Thumbnail.url}">
 								</div>
-								
+
 								<!-- meta -->
 								<div class="featured-meta">
 									<p class="category">Featured collection</p>
@@ -287,7 +287,7 @@
 	                  </a>
 	              </div>
 	            </div>
-	            
+
 	          </div>
 
 
@@ -302,7 +302,7 @@
 					</a>
 					<div class="more" data-bind="visible: loading"> <i class="fa fa-spinner fa-pulse"></i></div>
                   </div>
-				
+
 			</section>
 
 			<!-- partners -->
@@ -348,7 +348,7 @@
 
 					<!-- section description -->
 					<p class="section-desc">
-					Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod temporincididunt ut labore et dolore magna aliqua. 
+					Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod temporincididunt ut labore et dolore magna aliqua.
 					</p>
 					<ul>
 						<li>
@@ -407,6 +407,10 @@
 					</a>
 				</div>
 			</section>
+
+			<div class="wrapper" data-bind="if: isLogged()">
+				<!-- ko component: "profile" --><!-- /ko -->
+			</div>
 </div>
 			<footer>
 				<div class="container">
@@ -430,13 +434,13 @@
 						</a>
 					</section>
 				</div>
-			</footer>		
-			
-			
-			
-			
-				
-		 						
-		 					
-		 
-					  
+			</footer>
+
+
+
+
+
+
+
+
+
