@@ -473,7 +473,8 @@ define("app", ['knockout', 'facebook', 'imagesloaded', 'moment', './js/app/plugi
 		data.pending = ko.observable(data.pendingResponse);
 		data.unread = ko.observable(data.readAt === null || data.readAt == undefined);
 
-		if (data.unread()) {
+		// Only pending notifications are displayed in the counter
+		if (data.pending()) {
 			self.currentUser.notifications.unread(self.currentUser.notifications.unread() + 1);
 		}
 
@@ -880,7 +881,7 @@ define("app", ['knockout', 'facebook', 'imagesloaded', 'moment', './js/app/plugi
 	};
 
 	self.checkLogged();
-	
+
 	self.findByLang=function(val, language) {
 		if (language == undefined || language == null)
 			language = "default";
