@@ -1,7 +1,7 @@
  
         <div class="container-fluid">
           <!-- logo-->
-          <a href="javascript:void(0)" data-bind="event :{ click: function(data,event){goToPage('#home',event);}}" class="logo" title="WITH home" data-toggle="tooltip" data-placement="right">
+          <a href="javascript:void(0)" data-bind="event :{ click: function(data,event){goToPage('#home',event);}}" class="logo" title="WITH home">
 		<img src="img/ui/logo.png">
 		</a>
           <!-- sign in-->
@@ -15,7 +15,7 @@
           </section>
           <!-- notification-->
           <section class="notification">
-            <!-- button--><a id="notificationbutton" href="#" title="Your notifications" data-toggle="tooltip" data-placement="bottom" data-toggle="dropdown"><img src="img/ui/ic-notification.png"><span class="counter" data-bind="visible: noticount()>0"><!-- ko text: noticount --><!-- /ko --></span></a>
+            <!-- button--><a id="notificationbutton" href="#"  data-toggle="tooltip" data-placement="bottom" data-toggle="dropdown"  data-bind="click: notificationShow"><img src="img/ui/ic-notification.png"><span class="counter" data-bind="visible: noticount()>0"><!-- ko text: noticount --><!-- /ko --></span></a>
             <!-- dropdown menu-->
             <div aria-labelledby="notificationbutton" class="dropdown-menu">
               <!-- header-->

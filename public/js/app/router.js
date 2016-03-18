@@ -63,6 +63,8 @@ define(["knockout", "crossroads", "hasher"], function (ko, crossroads, hasher) {
 			/*in case we changed from item view without closing */
 			$("div[role='main']").removeClass("itemopen");
 			$('body').css('overflow','visible');
+			$('section.notification').removeClass('open');
+			$( '.action' ).removeClass( 'active' );
 			//now reset mobile menu
 			var $menu = $( '.main .menu');
 			
