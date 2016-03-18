@@ -171,21 +171,18 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 		        	newRecord.description = ko.observable("");
 		        else
 		        	newRecord.description = ko.observable(app.findByLang(dbDescription));
-		        $.each(newRecord.media(), function (index, value) {
-					//withUrl = value.Thumbnail.withUrl(); still not fully working
-					withUrl = value.Thumbnail.url();
-					if (withUrl != "empty") {
-						if (withUrl == "")
-							newRecord.media()[index].thumbnailUrl = "img/content/thumb-empty.png";
-						else {
-							if (withUrl.indexOf("/media") == 0) {
-								newRecord.media()[index].thumbnailUrl = window.location.origin + withUrl;
-							} else {
-								newRecord.media()[index].thumbnailUrl = withUrl;
-							}
+		        var withUrl = newRecord.media()[0].Thumbnail.url();
+		        if (withUrl != "empty") {
+					if (withUrl == "")
+						newRecord.thumbnailUrl = ko.observable("img/content/thumb-empty.png");
+					else {
+						if (withUrl.indexOf("/media") == 0) {
+							newRecord.thumbnailUrl = ko.observable(window.location.origin + withUrl);
+						} else {
+							newRecord.thumbnailUrl = ko.observable(withUrl);
 						}
 					}
-				});
+				}
 		        return newRecord;
 		    }
 		}
@@ -323,7 +320,7 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 
 		self.showNewItem = function (elem, index, record) {
 			$(elem).hide().fadeIn(500);
-			if ($(elem).hasClass('boxBasic boxItem')) { //it gets called for all elements rendered with the foreach
+			if ($(elem).hasClass('box fill')) { //it gets called for all elements rendered with the foreach
 				if (self.itemsLoaded < self.loadingInitialItemsCount) {
 					self.itemsLoaded++;
 					$(elem).find('#loadingIcon').fadeOut();
@@ -357,6 +354,7 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 		};
 
 		self.showPopUpVideo = function (data, event) {
+			console.log("add video");
 			var context = ko.contextFor(event.target);
 			var index = context.$index();
 			editItem(data, self.dbId(), index, 'PopUpVideoMode');
@@ -376,116 +374,57 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 		var _draggedItem;
 		var _bIsMoveOperation = false;
 		
-		self.dymmy = function() {
-			alert("kk");
-		}
-		
-		self.dragStart = function (move) {
-			console.log("1");
-			_draggedItem = this;
-			_bIsMoveOperation = move;
-			return true;
-		}
-		
-		self.drop = function (index) {
-			alert("1");
-			var indexNewItem = index;
-			var newItem = ko.mapping.fromJS({}, {});
-			newItem = _draggedItem;
-			var indexDraggedItem = self.collectionItemsArray.indexOf(_draggedItem);
-			_startIndex = indexDraggedItem;
-			if (_draggedItem.contextData == undefined) {
-				contextData = ko.mapping.fromJS([{
-					"contextDataType": "ExhibitionData",
-					"target": {
-						"collectionId": self.dbId(),
-						"position": indexNewItem
-					},
-					"body" : {
-						"audioUrl": "",
-						"text": {"default": ""},
-						"videoUrl": ""
-					}
-				}], {});
-				newItem.contextData = contextData;
-			} else {
-				newItem.contextData()[0].target.position(indexNewItem);
-			}
-			//dont do anything if it is moved to its direct left or right dashed box
-			if (_bIsMoveOperation) {// moved from exhibition itself
-				if (indexDraggedItem == indexNewItem || (indexDraggedItem + 1) == indexNewItem) {
-					_draggedItem = undefined;
-					return;
-				}
-			}
-			dropElement.animate({
-				width: "60px"
-			}, 200);
-			dropElement.find('#droppable-Children').css({
-				display: "none"
-			});
-			if (_bIsMoveOperation) {
-				_removeItem = false;
-				self.collectionItemsArray.splice(indexDraggedItem, 1);
-			}
-			self.collectionItemsArray.splice(indexNewItem, 0, newItem);
-			_draggedItem = undefined;
-		}
-		
 		ko.bindingHandlers.drag = {
 			init: function (element, valueAccessor, allBindingsAccessor, viewModel, bindingContext) {
 				var dragElement = $(element);
 				var dragOptions = {
 					start: function (event, ui) {
-						/*$('#outer-bottom').css({
+						$('#outer-bottom').css({
 							"overflow": 'visible'
 						});
-						$('.bottom-box').removeClass("box-Hover");*/
+						$('#bottom-box').removeClass("box-Hover");
 						_draggedItem = ko.utils.unwrapObservable(valueAccessor().item);
 						_bIsMoveOperation = ko.utils.unwrapObservable(valueAccessor().move);
-						/*ui.helper.css({
+						ui.helper.css({
 							"z-index": 500
 						});
-						if (_bIsMoveOperation) {
-							if (ui.helper.width() > 150) {
-								var newAspectHeight = 150 / ui.helper.width() * ui.helper.height();
+						//if (!_bIsMoveOperation) {
+							if (ui.helper.width() > 80) {
+								//var newAspectHeight = 80 / ui.helper.width() * ui.helper.height();
 								ui.helper.css({
-									"width": 150
+									"width": 80
 								});
 								ui.helper.css({
-									"height": newAspectHeight
+									"height": 80//newAspectHeight
 								});
 								ui.helper.css({
 									opacity: 0.8
 								});
 							}
-						}*/
+						//}
 					},
 					stop: function (event, ui) {
-						/*$("#outer-bottom").css({
+						$("#outer-bottom").css({
 							overflow: "scroll"
 						});
 						$("#outer-bottom").css({
 							"overflow-y": "hidden"
-						});*/
+						});
 						//un comment below statement
 						//$('.outer').autoscroll('destroy');
 						_draggedItem = undefined;
 					}
 				};
-				/*if (dragElement.hasClass('boxBasic boxItem')) { //if it is move operation
-					dragOptions.appendTo = $('.left');
+				if (dragElement.hasClass('box fill')) { //if item selected from exhibitions
+					//dragOptions.appendTo = $('.left');
 					dragOptions.helper = function () {
-
 						var $imageElementHelper = $(this).find('.itemImage').clone();
 						$imageElementHelper.css('margin', 0).css({
 							'padding-top': 0
 						});
-
 						//to fix the scroll issues remove it from div
 						return $imageElementHelper;
 					};
-
 					dragOptions.cursorAt = {
 						top: 0,
 						left: 75
@@ -496,17 +435,16 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 					dragOptions.helper = 'clone';
 					dragOptions.cursor = 'pointer';
 					dragOptions.revert = 'invalid';
-				}*/
+				}
 				dragElement.draggable(dragOptions).disableSelection();
 			}
 		};
 
 		ko.bindingHandlers.drop = {
 			init: function (element, valueAccessor, allBindingsAccessor, viewModel, bindingContext) {
-				alert("drop");
 				var dropElement = $(element);
 				var dropOptions = {
-					/*hoverClass: "drop-hover",
+					hoverClass: "drop-hover",
 					tolerance: "intersect",
 					over: function (event, ui) {
 						if (!_bIsMoveOperation) {
@@ -525,7 +463,7 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 						dropElement.animate({
 							width: "60px"
 						}, 200);
-					},*/
+					},
 					drop: function (event, ui) {
 						var indexNewItem = ko.utils.unwrapObservable(valueAccessor().index);
 						var newItem = ko.mapping.fromJS({}, {});
@@ -549,7 +487,7 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 						} else {
 							newItem.contextData()[0].target.position(indexNewItem);
 						}
-						//dont do anything if it is moved to its direct left or right dashed box
+						//don't do anything if it is moved to its direct left or right dashed box
 						if (_bIsMoveOperation) {// moved from exhibition itself
 							if (indexDraggedItem == indexNewItem || (indexDraggedItem + 1) == indexNewItem) {
 								_draggedItem = undefined;
@@ -705,7 +643,7 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 
 		//fix for hover issue
 		self.showXbutton = function (data, event) {
-			$('.bottom-box').removeClass('box-Hover');
+			$('#bottom-box').removeClass('box-Hover');
 			$(event.target).addClass('box-Hover');
 		};
 
