@@ -1,8 +1,4 @@
-<<<<<<< HEAD
-define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','app', 'knockout-validation'], function (bootstrap, ko, template, KnockoutElse, app) {
-=======
 define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else', 'app', 'knockout-validation'], function (bootstrap, ko, template, KnockoutElse, app) {
->>>>>>> share collection to groups has now a blue cirle with the 2 first letters of a group, like manage groups
 
 	ko.validation.init({
 		errorElementClass: 'error',
@@ -31,16 +27,6 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else', '
 		}
 	};
 
-<<<<<<< HEAD
-	ko.validation.init({
-		errorElementClass: 'error',
-		errorMessageClass: 'errormsg',
-		decorateInputElement: true
-	});
-
-=======
-		
->>>>>>> share collection to groups has now a blue cirle with the 2 first letters of a group, like manage groups
 	function getCollectionsSharedWithMe(isExhibition, offset, count) {
 		return $.ajax({
 			type        : "GET",
