@@ -21,6 +21,12 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 		}
 	};
 
+	ko.validation.init({
+		errorElementClass: 'error',
+		errorMessageClass: 'errormsg',
+		decorateInputElement: true
+	});
+	
 	function getCollectionsSharedWithMe(isExhibition, offset, count) {
 		return $.ajax({
 			type        : "GET",
@@ -103,7 +109,7 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 		};
 
 		self.myCollections = ko.mapping.fromJS([], mapping);
-		self.titleToEdit = ko.observable("");
+		self.titleToEdit = ko.observable("").extend({ required: true });
 		self.descriptionToEdit = ko.observable("");
 		self.isPublicToEdit = ko.observable(false);
 		self.apiUrl = ko.observable("");
@@ -118,6 +124,9 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 		self.moreCollectionData = ko.observable(true);
 		self.moreSharedCollectionData = ko.observable(true);
 		self.sharedCollections = ko.mapping.fromJS([], mapping);
+		self.validationModel = ko.validatedObservable({
+			title: self.titleToEdit
+		});
 
 		/*self.multiLiteral = function (multiLiteral) {
     	        return ko.computed({
@@ -196,7 +205,9 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 			self.showDelCollPopup(collectionTitle, collectionId);
 		};
 
-		self.createCollection = function (collectionType) {
+
+		self.createCollection = function () {
+			console.log(self.validationModel.isValid());
 			var jsondata = JSON.stringify({
 				administrative: {
 					access: {
@@ -584,49 +595,54 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 		//TODO: currently changes fisrt entry of label.default and description.default
 		//have to support multilinguality (both in presentation of collection, as well as in edit - drop-down list with languages)
 		self.editCollection = function () {
-			var collIndex = self.index();
-			var collId = -1;
-			if (self.collectionSet() == "my") {
-				collId = self.myCollections()[collIndex].dbId();
-			} else if (self.collectionSet() == "shared") {
-				collId = self.sharedCollections()[collIndex].dbId();
-			}
-			if (collId != -1) {
-				$.ajax({
-					"url": "/collection/" + collId,
-					"method": "PUT",
-					"contentType": "application/json",
-					"data": JSON.stringify(
-						{descriptiveData: {
-							label: {default: [self.titleToEdit()]},
-							description: {default: [self.descriptionToEdit()]}
+			console.log(self.validationModel.isValid());
+			if(self.validationModel.isValid()) {
+				var collIndex = self.index();
+				var collId = -1;
+				if (self.collectionSet() == "my") {
+					collId = self.myCollections()[collIndex].dbId();
+				} else if (self.collectionSet() == "shared") {
+					collId = self.sharedCollections()[collIndex].dbId();
+				}
+				if (collId != -1) {
+					$.ajax({
+						"url": "/collection/" + collId,
+						"method": "PUT",
+						"contentType": "application/json",
+						"data": JSON.stringify(
+							{descriptiveData: {
+								label: {default: [self.titleToEdit()]},
+								description: {default: [self.descriptionToEdit()]}
+							}
+						}),
+						success: function (result) {
+							if (self.collectionSet() == "my") {
+								self.updateCollectionData(self.myCollections(), collIndex);
+							} else if (self.collectionSet() == "shared") {
+								self.updateCollectionData(self.sharedCollections(), collIndex);
+							}
+							var editItem = ko.utils.arrayFirst(currentUser.editables(), function (item) {
+								return item.dbId === collId;
+							});
+							editItem.title = self.titleToEdit();
+						},
+						error: function (error) {
+							var r = JSON.parse(error.responseText);
+							$("#myModal").find("h4").html("An error occured");
+							$("#myModal").find("div.modal-body").html(r.message);
+							$("#myModal").modal('show');
 						}
-					}),
-					success: function (result) {
-						if (self.collectionSet() == "my") {
-							self.updateCollectionData(self.myCollections(), collIndex);
-						} else if (self.collectionSet() == "shared") {
-							self.updateCollectionData(self.sharedCollections(), collIndex);
-						}
-						var editItem = ko.utils.arrayFirst(currentUser.editables(), function (item) {
-							return item.dbId === collId;
-						});
-						editItem.title = self.titleToEdit();
-					},
-					error: function (error) {
-						var r = JSON.parse(error.responseText);
-						$("#myModal").find("h4").html("An error occured");
-						$("#myModal").find("div.modal-body").html(r.message);
-						$("#myModal").modal('show');
-					}
-				});
+					});
+				} else {
+					$("#myModal").find("h4").html("An error occured");
+					$("#myModal").find("div.modal-body").html("The collection cannot be edited");
+					$("#myModal").modal('show');
+				}
+				self.closeSideBar();
+				//WITHApp.tabAction();
 			} else {
-				$("#myModal").find("h4").html("An error occured");
-				$("#myModal").find("div.modal-body").html("The collection cannot be edited");
-				$("#myModal").modal('show');
+				self.validationModel.errors.showAllMessages();
 			}
-			self.closeSideBar();
-			//WITHApp.tabAction();
 		};
 
 		self.closeSideBar = function () {

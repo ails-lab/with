@@ -94,7 +94,7 @@
 			    <div class="title">Edit Collection</div>
 			  </div>
 			  <div class="action-body">
-				<input type="text" data-bind="{value: titleToEdit,
+				<input type="text" data-bind="{value: titleToEdit, validationElement: titleToEdit,
 				      attr: {placeholder: titleToEdit}}">
 				<textarea data-bind="{value: descriptionToEdit,
 					  attr: {placeholder: descriptionToEdit}"></textarea>
@@ -121,10 +121,10 @@
 			  </div>
 			  <div class="action-body">
 			  	<!-- ko if: showsExhibitions -->
-				<input type="text" data-bind="{value: titleToEdit}" placeholder="Name your exhibition">
+				<input type="text" data-bind="{value: titleToEdit, validationElement: titleToEdit}" placeholder="Name your exhibition">
 				<!-- /ko -->
 			    <!-- ko else -->
-			    <input type="text" data-bind="{value: titleToEdit}" placeholder="Name your collection">
+			    <input type="text" data-bind="{value: titleToEdit, validationElement: titleToEdit}" placeholder="Name your collection">
 				<!-- /ko -->
 				<!--<a class="add" >
 					<span class="plus" style="cursor:pointer;"></span>
