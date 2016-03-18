@@ -480,14 +480,15 @@ define(['bridget', 'knockout', 'text!./_collection-view.html', 'isotope', 'image
 			tile += '<div class="action-group"><div class="wrap"><a href="' + record.view_url + '" target="_new" class="links">' + record.sourceCredits() + '</a>';
 			if (isLogged()) {
 				tile+="<ul>"
-				if (!self.isFavorites() && (self.access() == "WRITE" || self.access() == "OWN")) {
+				if ((self.access() == "WRITE" || self.access() == "OWN")) {
 					tile += '<li><a  data-toggle="tooltip" data-placement="top" title="Remove media" class="fa fa-trash-o"  onclick="removeRecord(\'' + record.dbId + '\',event)"></a></li>';
 				}
+				if(!self.isFavorites()){
 				if (record.isLiked()) {
 					tile += '<li><a data-toggle="tooltip" data-placement="top" title="Remove from favorites"  onclick="likeRecord(\'' + record.dbId + '\',event);" class="fa fa-heart" style="color: #ec5a62;"></a></li>';
 				} else {
 					tile += '<li><a  data-toggle="tooltip" data-placement="top" title="Add to favorites" onclick="likeRecord(\'' + record.dbId + '\',event);" class="fa fa-heart"></a></li>';
-				}
+				}}
 				tile += '<li><a data-toggle="tooltip" data-placement="top" title="Collect it" class="fa fa-download collectbutton" onclick="collect(\'' + record.dbId + '\',event);" ></a></li></ul>';
 			}
 

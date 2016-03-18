@@ -21,7 +21,7 @@ define(['jquery','knockout', './router', './app','knockout-mapping', 'bootstrap'
 	ko.components.register('register-page', { require: 'components/login-register-page/login-register' });
 	ko.components.register('myexhibitions', { require: 'components/myexhibitions/myexhibitions' });
 	ko.components.register('mycollections', { require: 'components/mycollections/mycollections' });
-	ko.components.register('myfavorites', { require: 'components/myfavorites/myfavorites' });
+	
 	ko.components.register('organizations', { require: 'components/myorganizations/myorganizations' });
 	ko.components.register('organization-edit', {
 		viewModel: { require: 'components/organization-edit/organization-edit'},
@@ -42,6 +42,10 @@ define(['jquery','knockout', './router', './app','knockout-mapping', 'bootstrap'
 	ko.components.register('testsearch', { require: 'components/testsearch/testsearch' });
 	ko.components.register('import-collections', { require: 'components/import-collections/import-collections' });
 
+	ko.components.register('myfavorites', {
+		viewModel: { require: 'components/collection-view/collection-view' },
+		template: { require: 'text!components/collection-view/_myfavorites.html' }
+	});
 	ko.components.register('itemview', {
 		viewModel: { require: 'components/item-view/item' },
 		template: { require: 'text!components/item-view/item.html' }
