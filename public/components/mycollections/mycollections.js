@@ -166,6 +166,7 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 		};
 		
 		WITHApp.changeList();
+		WITHApp.initTooltip();
 
 		/*self.changeList = function () {
 			alert("0");

@@ -329,7 +329,7 @@ define(['knockout', 'text!./collection-popup.html', 'selectize', 'app', 'knockou
 				jsondata=JSON.stringify(self.record().data());
 			}
 			if (noDouble === undefined)
-				noDouble = true;
+				noDouble = false;
 			$.ajax({
 				"beforeSend": function (xhr) {
 					self.ajaxConnections++;

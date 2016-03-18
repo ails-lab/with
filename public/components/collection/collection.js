@@ -1,10 +1,12 @@
 define(['knockout', 'text!./collection.html', 'selectize', 'app', 'knockout-validation','smoke'], function (ko, template, selectize, app) {
 
+	
 	ko.validation.init({
-		errorElementClass: 'has-error',
-		errorMessageClass: 'help-block',
+		errorElementClass: 'error',
+		errorMessageClass: 'errormsg',
+		decorateInputElement: true
 	});
-
+	
 	var inject_binding = function (allBindings, key, value) {
 	    return {
 	        has: function (bindingKey) {
@@ -146,7 +148,7 @@ define(['knockout', 'text!./collection.html', 'selectize', 'app', 'knockout-vali
 		self.ajaxConnections = 0;
 		self.selected_items2 = ko.observableArray([]);
 		self.validationModel = ko.validatedObservable({
-			collname: self.collname
+			collname: self.collname()
 		});
 
 		self.findEditableCollections = function () {
@@ -348,7 +350,7 @@ define(['knockout', 'text!./collection.html', 'selectize', 'app', 'knockout-vali
 				jsondata=JSON.stringify(self.record().data());
 			}
 			if (noDouble === undefined)
-				noDouble = true;
+				noDouble = false;
 			$.ajax({
 				"beforeSend": function (xhr) {
 					self.ajaxConnections++;

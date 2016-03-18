@@ -140,6 +140,10 @@ WITHApp.ui = function( custom ){
 		
 	}
 	
+	this.initTooltip=function(){
+		initTooltip();
+	}
+	
 	// method to toggle search view mode
 	var initSearchViewToggle = function(){
 
