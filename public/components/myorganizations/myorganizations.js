@@ -65,6 +65,7 @@ define(['knockout', 'text!./myorganizations.html', 'app', 'moment', 'async!https
 		self.baseURL = ko.pureComputed(function () {
 			return window.location.origin + '/assets/index.html#' + self.name().toLowerCase() + '/';
 		});
+		
 
 		// Project Information
 		self.username = ko.observable().extend({

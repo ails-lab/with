@@ -231,6 +231,7 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 		  
 		  var promiseCollections = self.getSpaceCollections();
 		  var promiseSpaces=self.getSpaces();
+		  WITHApp.initTooltip();
 		  $.when(promiseSpaces).done(function(response) {
 		        //self.totalSpaces(response);
 			    self.revealSpaceItems(response);
