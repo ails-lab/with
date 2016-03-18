@@ -134,6 +134,12 @@ define(['knockout', 'text!./profile.html', 'app', 'knockout-validation', 'jquery
 			}
 		};
 
+		self.deleteAvatar = function () {
+			self.avatar = null;
+			self.updateProfile();
+			app.loadUser(data, true, false);
+		};
+
 		self.loadFromFacebook = function () {
 			FB.api(
 				"/" + self.facebookId() + "/picture?type=normal",

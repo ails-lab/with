@@ -24,6 +24,10 @@
 							<div class="meta">
 								<div class="text" data-bind="html: message"></div>
 							</div>
+							<ul class="action" data-bind="visible: pending">
+								<li class="accept"><a href="#" data-bind="click: $parent.accept" data-toggle="tooltip" data-placement="top" title="Accept"><i class="fa fa-check"></i></a></li>
+								<li class="reject"><a href="#" data-bind="click: $parent.reject" data-toggle="tooltip" data-placement="top" title="Reject"><i class="fa fa-times"></i></a></li>
+							</ul>
 							<div class="timing" data-bind="text: date"></div>
 						</li>
 					</ul>
