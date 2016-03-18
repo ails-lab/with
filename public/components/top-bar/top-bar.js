@@ -45,12 +45,19 @@ define(['knockout', 'text!./top-bar.html', 'app', 'autocomplete', 'knockout-swit
 
 		logout             = function() { app.logout(); };
 
+		
+		
         self.notificationShow=function(){
-        	self.removeFlyouts();
-        	if(!$('section.notification').hasClass('open'))
-        	$('section.notification').addClass('open');
-        	else
-        		$('section.notification').removeClass('open');
+        	
+        	if($('section.notification').hasClass('open')==false){
+        	   $('section.notification').addClass('open');
+        	   $( '.action' ).removeClass( 'active' );
+        	}
+        	else{
+        	
+         	  $('section.notification').removeClass('open');
+        	}
+        	
         }
 		self.removeFlyouts=function() {
 			$('section.notification').removeClass('open');
