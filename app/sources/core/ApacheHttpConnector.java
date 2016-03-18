@@ -86,6 +86,7 @@ public class ApacheHttpConnector extends HttpConnector {
 	}
 
 	public <T> T getContent(String url) throws Exception {
+		Logger.debug("1 calling: " + url);
 		JsonNode response = getJsonContentResponse(buildGet(url));
 		return (T) response;
 	}

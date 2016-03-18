@@ -47,7 +47,7 @@ public class EuropeanaItemRecordFormatter extends CulturalRecordFormatter {
 		
 		String stringValue = rec.getStringValue("type");
 		List<Object> vals = getValuesMap().translateToCommon(CommonFilters.TYPE.getId(), stringValue);
-		WithMediaType type = (WithMediaType) vals.get(0);
+		WithMediaType type = (WithMediaType.getType(vals.get(0).toString())) ;
 		
 
 //		String id = rec.getStringValue("objectNumber");
@@ -103,10 +103,11 @@ public class EuropeanaItemRecordFormatter extends CulturalRecordFormatter {
 		rec.enterContext("aggregations[0]");
 		LiteralOrResource rightsLiteral = rec.getLiteralOrResourceValue("edmRights");
 		LiteralOrResource rights = rightsLiteral;
-		WithMediaRights withMediaRights = (!Utils.hasInfo(rightsLiteral))?null:
+		String rightsString = rec.getStringValue("edmRights");
+		WithMediaRights withMediaRights = (!Utils.hasInfo(rightsString))?null:
 			(WithMediaRights.getRighs(getValuesMap().translateToCommon(CommonFilters.RIGHTS.getId(),
-					 rightsLiteral.getURI()).get(0).toString()));
-
+					rightsString).get(0).toString()));
+		
 		model.setIsShownAt(rec.getLiteralOrResourceValue("edmIsShownAt"));
 		model.setIsShownBy(rec.getLiteralOrResourceValue("edmIsShownBy"));
 		String uriAt = model.getIsShownAt()==null?null:model.getIsShownAt().getURI();

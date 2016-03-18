@@ -40,8 +40,11 @@ public class JsonNodeUtils {
 				JsonNode jsonNode = node.get(0);
 				if (jsonNode != null)
 					return jsonNode.asText();
-			} else
+			} else if (node.isTextual()) {
 				return node.asText();
+			} else {
+				return asStringArray(node).get(0);
+			}
 		}
 		return null;
 	}
@@ -161,11 +164,15 @@ public class JsonNodeUtils {
 			} else if (node.isTextual()) {
 				res.add(node.asText());
 			} else {
+				boolean flag = false;
 				for (Iterator<Entry<String, JsonNode>> iterator = node.fields(); iterator.hasNext();) {
 					Entry<String, JsonNode> next = iterator.next();
 					JsonNode value = next.getValue();
 					res.addAll(asStringArray(value));
+					flag = true;
 				}
+				if (!flag)
+					res.add(node.asText());
 			}
 			return res;
 		}
