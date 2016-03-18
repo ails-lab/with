@@ -120,12 +120,14 @@
 				</div>
 			  </div>
 			  <div class="action-body">
-			  	<!-- ko if: showsExhibitions -->
-				<input type="text" data-bind="{value: titleToEdit, validationElement: titleToEdit}" placeholder="Name your exhibition">
-				<!-- /ko -->
-			    <!-- ko else -->
-			    <input type="text" data-bind="{value: titleToEdit, validationElement: titleToEdit}" placeholder="Name your collection">
-				<!-- /ko -->
+			  	<div class="form-group" data-bind="validationElement: titleToEdit">
+				  	<!-- ko if: showsExhibitions -->
+					<input type="text" data-bind="value: titleToEdit, valueUpdate: 'afterkeypress', hasFocus: true" placeholder="Name your exhibition">
+					<!-- /ko -->
+				    <!-- ko else -->
+				    <input type="text" data-bind="value: titleToEdit, valueUpdate: 'afterkeypress', hasFocus: true" placeholder="Name your collection">
+					<!-- /ko -->
+				</div>
 				<!--<a class="add" >
 					<span class="plus" style="cursor:pointer;"></span>
 					<span href="#" class="text">Add description</span>
@@ -184,7 +186,7 @@
 				<div class="group">
 				  <div class="title">Groups access</div>
 				  <input type="text" id="usernameOrEmail" data-bind="autocompleteUsername1: myUsername, category:2" placeholder="Start typing group name">
-				  <ul class="access-list" data-bind="foreach: userGroupsToShare">				  	
+				  <ul class="access-list" data-bind="foreach: userGroupsToShare">
 				  	<li class="blue">
 					    <span class="text" data-bind="text: username().substring(0,2).toUpperCase()"></span>
 						<a data-toggle="tooltip" data-placement="top" style="cursor:pointer;" data-bind="{attr: {title: username}, click: $parent.removeRights}" class="trash">
