@@ -65,6 +65,8 @@
 			<section class="collection-list">
 			  <!-- collection main header-->
 			  <div class="list-head">
+
+
 				<div class="sort"><span>Sort by</span><a id="sorting" href="#" data-toggle="dropdown"><span class="text">Date</span><span class="arrow"></span></a>
 				  <!-- dropdown-->
 				  <ul aria-labelledby="sorting" class="dropdown-menu">
@@ -268,6 +270,7 @@
 						<a data-toggle="tooltip" data-bind="click: $parent.prepareForEditCollection" data-placement="top" title="Edit collection" class="fa fa-pencil editaction"></a>
 						<!-- /ko -->
 						<!-- /ko -->
+						<span data-bind="visible: myAccess() == 'READ'">&nbsp;</span>
 					</div>
 				  </div>
 				</li>

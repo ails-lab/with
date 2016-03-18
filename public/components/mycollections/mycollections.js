@@ -151,6 +151,7 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 					ko.mapping.fromJS(data2[0].collectionsOrExhibitions, mapping, self.sharedCollections);
 					self.loading(false);
 					WITHApp.tabAction();
+					WITHApp.initTooltip();
 				});
 			} else {
 				var promise = app.getUserCollections(false, 0, count);
@@ -161,10 +162,11 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 					ko.mapping.fromJS(data2[0].collectionsOrExhibitions, mapping, self.sharedCollections);
 					self.loading(false);
 					WITHApp.tabAction();
+					WITHApp.initTooltip();
 				});
 			}
 		};
-		
+
 		WITHApp.changeList();
 		WITHApp.initTooltip();
 
@@ -183,11 +185,11 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 		};
 
 		self.checkLogged();
-		
+
 		self.hideMessage = function () {
 			$("section.message").toggle();
 		};
-		
+
 		self.deleteMyCollection = function (collection) {
 			var collectionId = collection.dbId();
 			var collectionTitle = collection.title();
@@ -236,7 +238,7 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 			});
 		};
 
-	
+
 		self.showDelCollPopup = function (collectionTitle, collectionId) {
 			var myself = this;
 			myself.id = collectionId;
@@ -708,7 +710,7 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 				return {index: -1, set: "none"};
 			}
 		};
-		
+
 		self.sortByTitle = function () {
 			$("#sorting .text").text("Title");
 			if (self.collectionSet() == "my")
@@ -720,14 +722,14 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 					return left.title() < right.title() ? -1 : 1;
 				});
 		}
-		
+
 		self.sortByDate = function () {
 			$("#sorting .text").text("Date");
-			if (self.collectionSet() == "my") 
+			if (self.collectionSet() == "my")
 				self.myCollections.sort(function (left, right) {
 					return right.administrative.created() < left.administrative.lastModified() ? -1: 1;
 				});
-			if (self.collectionSet() == "shared") 
+			if (self.collectionSet() == "shared")
 				self.sharedCollections.sort(function (left, right) {
 					return right.administrative.created() < left.administrative.lastModified() ? -1: 1;
 				});
@@ -763,7 +765,7 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 				$("#myModal").removeClass("modal-info");
 			});
 		};
-		
+
 	    self.playExhibition = function(dbId) {
 	    	window.location.hash = '#exhibitionview/' + dbId;
 	    };*/
