@@ -207,6 +207,7 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else', '
 
 
 		self.createCollection = function () {
+
 			console.log(self.validationModel.isValid());
 			var jsondata = JSON.stringify({
 				administrative: {
@@ -646,6 +647,10 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else', '
 		};
 
 		self.closeSideBar = function () {
+
+			self.isPublicToEdit(false);
+			self.titleToEdit("");
+			self.descriptionToEdit("");
 			self.isPublicToEdit();
 			self.titleToEdit();
 			self.descriptionToEdit();
