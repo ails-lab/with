@@ -354,6 +354,7 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 		};
 
 		self.showPopUpVideo = function (data, event) {
+			console.log("add video");
 			var context = ko.contextFor(event.target);
 			var index = context.$index();
 			editItem(data, self.dbId(), index, 'PopUpVideoMode');
