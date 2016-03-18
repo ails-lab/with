@@ -3446,7 +3446,7 @@ body div[role='main'] .wrapper main section.project section.isotope .listing .gr
 body div[role='main'] .wrapper main section.favorite section.isotope .listing .grid .item .action-group .wrap ul li a {
   text-decoration: none;
   font-size: 1.5rem;
-  color: #a4a4a4  !important;
+  color: #a4a4a4;
   -webkit-transition: color 0.3s;
   -o-transition: color 0.3s;
   transition: color 0.3s;
@@ -3558,7 +3558,8 @@ body div[role='main'] .wrapper main section.collection section.isotope .listing 
 body div[role='main'] .wrapper main section.collection section.isotope .listing .grid .item .action-group .wrap ul li a {
   text-decoration: none;
   font-size: 1.5rem;
-  color: #a4a4a4  !important;
+  color: #a4a4a4  ;
+  /*!important;*/
   -webkit-transition: color 0.3s;
   -o-transition: color 0.3s;
   transition: color 0.3s;
