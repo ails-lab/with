@@ -116,7 +116,7 @@ public class CollectionObjectController extends WithResourceController {
 				int firstPageCount = 0;
 		    	for (WithResource<?, ?> item : result.items.getCulturalCHO()) {
 					WithResourceController.internalAddRecordToCollection(cid, (RecordResource)item, 
-							F.Option.None(), resultInfo);
+							F.Option.None(), resultInfo,true);
 					firstPageCount++;
 				}
 
@@ -133,7 +133,7 @@ public class CollectionObjectController extends WithResourceController {
 							result = src.getResults(q);
 							for (WithResource<?, ?> item : result.items.getCulturalCHO()) {
 								WithResourceController.internalAddRecordToCollection(cid,
-										(RecordResource) item, F.Option.None(), resultInfo);
+										(RecordResource) item, F.Option.None(), resultInfo,true);
 								itemsCount++;
 							}
 						}
