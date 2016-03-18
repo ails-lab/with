@@ -273,6 +273,7 @@ WITHApp.ui = function( custom ){
 
 			// edit
 			$( '.editaction' ).on("click", function( e ) {
+				e.preventDefault();
 
 				$( '.action' ).removeClass( 'active' );
 				$( '.action.edit' ).addClass( 'active' );
@@ -281,7 +282,7 @@ WITHApp.ui = function( custom ){
 
 			// access
 			$( '.fa-paper-plane-o' ).on("click", function( e ) {
-
+				e.preventDefault();
 				$( '.action' ).removeClass( 'active' );
 				$( '.action.access' ).addClass( 'active' );
 
@@ -289,7 +290,7 @@ WITHApp.ui = function( custom ){
 
 			// access
 			$( '.members' ).on("click", function( e ) {
-
+				e.preventDefault();
 				$( '.action' ).removeClass( 'active' );
 				$( '.action.access' ).addClass( 'active' );
 
@@ -752,6 +753,43 @@ WITHApp.ui = function( custom ){
 		}
 	};
 
+	
+	// method to initialize more info on item page
+	var initShowMore = function(){
+
+		// log
+		logger( 'info','plugins.js / initShowMore' );
+
+		// check
+		if( $( '.listmore' ).length > 0 ) {
+
+			// each
+			$( '.listmore' ).each( function(){
+
+				// get target
+				var target = $( this ).attr( 'data-target' );
+
+				// click
+				$( this ).on( 'click', function( e ){
+
+					// e
+					e.preventDefault();
+
+					// check
+					if( $('#'+target).hasClass( 'show' )) {
+
+						// remove
+						$('#'+target).removeClass( 'show' )
+						$( this ).html( 'SHOW MORE INFO' );
+					} else {
+						// add
+						$('#'+target).addClass( 'show' )
+						$( this ).html( 'SHOW LESS INFO' );
+					}
+				});
+			});
+		}	
+	};
 	// method to initialize multiple select on search
 	var initMultipleSelect = function(){
 

@@ -240,6 +240,8 @@ WITHApp.ui = function( custom ){
 
 			// edit
 			$( '.editaction' ).click( function( e ) {
+				// e
+				e.preventDefault();
 
 				$( '.action' ).removeClass( 'active' );
 				$( '.action.edit' ).addClass( 'active' );
@@ -248,6 +250,8 @@ WITHApp.ui = function( custom ){
 
 			// access
 			$( '.fa-paper-plane-o' ).click( function( e ) {
+				// e
+				e.preventDefault();
 
 				$( '.action' ).removeClass( 'active' );
 				$( '.action.access' ).addClass( 'active' );
@@ -256,6 +260,8 @@ WITHApp.ui = function( custom ){
 
 			// access
 			$( '.members' ).click( function( e ) {
+				// e
+				e.preventDefault();
 
 				$( '.action' ).removeClass( 'active' );
 				$( '.action.access' ).addClass( 'active' );
@@ -263,12 +269,16 @@ WITHApp.ui = function( custom ){
 			});
 
 			$( '.fa-download' ).click( function( e ) {
+				// e
+				e.preventDefault();
 
 				$( '.action' ).removeClass( 'active' );
 				$( '.action.collect' ).addClass( 'active' );
 
 			});
 			$( '.collectbutton' ).click( function( e ) {
+				// e
+				e.preventDefault();
 
 				$( '.action' ).removeClass( 'active' );
 				$( '.action.collect' ).addClass( 'active' );
@@ -717,7 +727,10 @@ WITHApp.ui = function( custom ){
 				var target = $( this ).attr( 'data-target' );
 
 				// click
-				$( this ).on( 'click', function(){
+				$( this ).on( 'click', function( e ){
+
+					// e
+					e.preventDefault();
 
 					// check
 					if( $('#'+target).hasClass( 'show' )) {

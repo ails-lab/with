@@ -509,6 +509,14 @@ body {
 		/* equal to footer height */
 		margin-bottom: -109px; 
 
+		// loader
+		.loader {
+			font-size: 3rem;
+			display: block;
+			text-align: center;
+			color: #7f9d9d;
+			padding: 30px 0 30px 0;
+		}
 
 		// hero section
 		section.hero {
@@ -1306,12 +1314,14 @@ body {
 								a {
 									.text {
 										left: 50px;
+										.transition-delay( 0.4s );
 									}
 									// counter
 									.counter {
 										left: auto;
 										right: 0px;
 										.opacity(1);
+
 									}
 								}
 							}
@@ -1377,6 +1387,7 @@ body {
 									position: absolute;
 									left: -200px;
 									top: 12px;
+									
 								}
 
 								// counter
@@ -1397,6 +1408,7 @@ body {
 									position: absolute;
 									.opacity(0);
 									.transition( opacity 0.6s );
+									.transition-delay( 0.4s );
 									left: -200px;
 								}
 							}
@@ -2066,7 +2078,7 @@ body {
 					.list-body {
 						list-style: none;
 						padding: 0;
-						margin: 0 0 20px;
+						margin: 20px 0 20px;
 						.clearfix;
 
 						li {
@@ -2454,6 +2466,7 @@ body {
 						}
 					}
 
+					// isotope
 					section.isotope {
 						.listing {
 							background-color: white;
@@ -2462,16 +2475,13 @@ body {
 							.grid {
 
 								.sizer,.item {
-									width: 100%/4%;
 
 									a {
-										
-
-										
 										.info {
 											border-left: 1px solid #ccc;
 											border-right: 1px solid #ccc;
-											border-bottom: 1px solid #ccc;
+											border-bottom: 0;
+											padding-bottom: 0px;
 
 											// title
 											.title {
@@ -2480,6 +2490,84 @@ body {
 										}
 									}
 									
+									.action-group {
+										border-left: 1px solid #ccc;
+										border-right: 1px solid #ccc;
+										border-bottom: 1px solid #ccc;
+										position: relative;
+										padding: 10px 30px 30px 30px;
+										.clearfix;
+
+										// wrap
+										.wrap {
+											position: relative;
+
+
+											// before
+											&::before {
+												content: '';
+												width: 100%;
+												height: 1px;
+												background-color: #ccc;
+												position: absolute;
+												top: 14px;
+												left: 0;
+											}
+
+											// links
+											.links {
+												color:@brand-dashboard;
+												float: left;
+												text-align: left;
+												padding: 0 10px 0 0;
+												max-width: 50%;
+												position: relative;
+												z-index: 0;
+												background: #fff;
+
+												// hover
+												&:hover {
+													color: darken(@brand-dashboard, 20%)
+												}
+											}
+
+											// action
+											ul {
+												margin: 0;
+												padding: 0;
+												z-index: 0;
+												position: relative;
+												float: right;
+												text-align: right;
+												background-color: white;
+
+												// li
+												li {
+													list-style: none;
+													display: inline-block;
+													margin-left: 10px;
+
+													// anchor
+													a {
+														text-decoration: none;
+														font-size: 1.5rem;
+														color: #a4a4a4  !important;
+														.transition(color .3s);
+														padding: 0 !important;
+
+														// hover
+														&:hover {
+															color: #444;
+
+															&.fa-heart {
+																color: #e46667  !important;
+															}
+														}
+													}
+												}
+											}
+										}
+									}
 								}
 							}
 						}
@@ -2488,6 +2576,11 @@ body {
 
 				// collection 
 				section.collection {
+
+					// header
+					.list-head {
+						margin-bottom: 0px;
+					}
 
 					// isotope
 					section.isotope {
@@ -2600,6 +2693,11 @@ body {
 				// favourite page
 				section.favorite {
 					padding-top: 0;
+
+					// header
+					.list-head {
+						margin-bottom: 0px;
+					}
 				}
 
 				// project page
@@ -2610,6 +2708,26 @@ body {
 
 					section.message {
 						padding-bottom: 10px;
+					}
+
+					// isotope
+					.isotope {
+						.listing {
+							.grid {
+								.sizer, .item {
+									.wrap {
+										.info {
+											padding: 20px;
+											border-bottom: 1px solid #ccc;
+
+											.text {
+											 	margin-top: 15px;
+											}
+										}
+									}
+								}
+							}
+						}
 					}
 				}
 
@@ -2869,7 +2987,7 @@ body {
 
 					// notification
 					section.notification {
-						width: 60%;
+						width: 70%;
 						margin: 60px auto 0;
 						display: table;
 
@@ -2992,6 +3110,8 @@ body {
 								.meta {
 									display: inline-block;
 									vertical-align: middle;
+									width: 60%;
+									line-height: 1.5em;
 
 									.text {
 										color: #454545;
@@ -3015,7 +3135,51 @@ body {
 									float: right;
 									font-size: 1.4rem;
 									color: #bcbcbc;
-									margin: 7px 0 0 0;
+									margin: 10px 0 0 0;
+								}
+
+								// timing
+								.action {
+									float: right;
+									font-size: 1.4rem;
+									color: #bcbcbc;
+									margin: -15px 0 0 10px;
+									padding: 0;
+
+									// ul
+									li {
+										list-style: none;
+										display: inline-block;
+										font-style: italic;
+										padding: 0 0 0 3px;
+
+										// accept
+										&.accept, &.reject {
+											a {
+												display: block;
+												color: #fff;
+												text-align: center;
+												width: 32px;
+												height: 32px;
+												border-radius: 16px;
+												border: 3px solid #d4d4d4;
+												background: #6eb946;
+												padding-top: 2px;
+												.opacity(0.8);
+												.transition( opacity 0.3s );
+
+												// hover
+												&:hover {
+													.opacity(1);
+												}
+											}
+										}
+										&.reject {
+											a {
+												background: #d75050;
+											}
+										}
+									}
 								}
 
 								+ li {
@@ -3479,6 +3643,8 @@ body {
 						width: 100%;
 					}
 				}
+
+				// collection list
 			}
 
 			// search
@@ -4717,7 +4883,7 @@ body {
 				overflow: auto;
 				background: white;
 				border-left: 1px solid #ccc;
-				z-index: 10;
+				z-index: 11;
 				padding: 35px;
 				.transition(all .3s);
 				outline: 0;

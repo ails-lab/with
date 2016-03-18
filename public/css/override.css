@@ -7,7 +7,7 @@ a {
   line-height: 16px !important;
   z-index: 60;
 }
-.listing {
+.listing { 
   padding: 30px 0 30px 0;
   background: #f6f6f6;
   border-bottom: 1px solid #d7d7d7;
@@ -737,6 +737,13 @@ body div[role='main'] {
   min-height: 100%;
   /* equal to footer height */
   margin-bottom: -109px;
+}
+body div[role='main'] .loader {
+  font-size: 3rem;
+  display: block;
+  text-align: center;
+  color: #7f9d9d;
+  padding: 30px 0 30px 0;
 }
 body div[role='main'] section.hero {
   padding: 40px 0;
@@ -1699,6 +1706,8 @@ body div[role='main'] .wrapper aside:hover .site {
 }
 body div[role='main'] .wrapper aside:hover .app ul li a .text {
   left: 50px;
+  -webkit-transition-delay: 0.4s;
+  transition-delay: 0.4s;
 }
 body div[role='main'] .wrapper aside:hover .app ul li a .counter {
   left: auto;
@@ -1777,6 +1786,8 @@ body div[role='main'] .wrapper aside .app ul li a .counter {
   -webkit-transition: opacity 0.6s;
   -o-transition: opacity 0.6s;
   transition: opacity 0.6s;
+  -webkit-transition-delay: 0.4s;
+  transition-delay: 0.4s;
   left: -200px;
 }
 body div[role='main'] .wrapper aside .app ul li:hover a {
@@ -2560,7 +2571,7 @@ body div[role='main'] .wrapper main section.project .list-body,
 body div[role='main'] .wrapper main section.favorite .list-body {
   list-style: none;
   padding: 0;
-  margin: 0 0 20px;
+  margin: 20px 0 20px;
 }
 body div[role='main'] .wrapper main section.collection .list-body:before,
 body div[role='main'] .wrapper main section.exhibition .list-body:before,
@@ -3278,16 +3289,6 @@ body div[role='main'] .wrapper main section.favorite section.isotope .listing {
   background-color: white;
   border: 0;
 }
-body div[role='main'] .wrapper main section.collection section.isotope .listing .grid .sizer,
-body div[role='main'] .wrapper main section.exhibition section.isotope .listing .grid .sizer,
-body div[role='main'] .wrapper main section.project section.isotope .listing .grid .sizer,
-body div[role='main'] .wrapper main section.favorite section.isotope .listing .grid .sizer,
-body div[role='main'] .wrapper main section.collection section.isotope .listing .grid .item,
-body div[role='main'] .wrapper main section.exhibition section.isotope .listing .grid .item,
-body div[role='main'] .wrapper main section.project section.isotope .listing .grid .item,
-body div[role='main'] .wrapper main section.favorite section.isotope .listing .grid .item {
-  width: 25%;
-}
 body div[role='main'] .wrapper main section.collection section.isotope .listing .grid .sizer a .info,
 body div[role='main'] .wrapper main section.exhibition section.isotope .listing .grid .sizer a .info,
 body div[role='main'] .wrapper main section.project section.isotope .listing .grid .sizer a .info,
@@ -3298,7 +3299,8 @@ body div[role='main'] .wrapper main section.project section.isotope .listing .gr
 body div[role='main'] .wrapper main section.favorite section.isotope .listing .grid .item a .info {
   border-left: 1px solid #ccc;
   border-right: 1px solid #ccc;
-  border-bottom: 1px solid #ccc;
+  border-bottom: 0;
+  padding-bottom: 0px;
 }
 body div[role='main'] .wrapper main section.collection section.isotope .listing .grid .sizer a .info .title,
 body div[role='main'] .wrapper main section.exhibition section.isotope .listing .grid .sizer a .info .title,
@@ -3309,6 +3311,169 @@ body div[role='main'] .wrapper main section.exhibition section.isotope .listing 
 body div[role='main'] .wrapper main section.project section.isotope .listing .grid .item a .info .title,
 body div[role='main'] .wrapper main section.favorite section.isotope .listing .grid .item a .info .title {
   margin-bottom: 0;
+}
+body div[role='main'] .wrapper main section.collection section.isotope .listing .grid .sizer .action-group,
+body div[role='main'] .wrapper main section.exhibition section.isotope .listing .grid .sizer .action-group,
+body div[role='main'] .wrapper main section.project section.isotope .listing .grid .sizer .action-group,
+body div[role='main'] .wrapper main section.favorite section.isotope .listing .grid .sizer .action-group,
+body div[role='main'] .wrapper main section.collection section.isotope .listing .grid .item .action-group,
+body div[role='main'] .wrapper main section.exhibition section.isotope .listing .grid .item .action-group,
+body div[role='main'] .wrapper main section.project section.isotope .listing .grid .item .action-group,
+body div[role='main'] .wrapper main section.favorite section.isotope .listing .grid .item .action-group {
+  border-left: 1px solid #ccc;
+  border-right: 1px solid #ccc;
+  border-bottom: 1px solid #ccc;
+  position: relative;
+  padding: 10px 30px 30px 30px;
+}
+body div[role='main'] .wrapper main section.collection section.isotope .listing .grid .sizer .action-group:before,
+body div[role='main'] .wrapper main section.exhibition section.isotope .listing .grid .sizer .action-group:before,
+body div[role='main'] .wrapper main section.project section.isotope .listing .grid .sizer .action-group:before,
+body div[role='main'] .wrapper main section.favorite section.isotope .listing .grid .sizer .action-group:before,
+body div[role='main'] .wrapper main section.collection section.isotope .listing .grid .item .action-group:before,
+body div[role='main'] .wrapper main section.exhibition section.isotope .listing .grid .item .action-group:before,
+body div[role='main'] .wrapper main section.project section.isotope .listing .grid .item .action-group:before,
+body div[role='main'] .wrapper main section.favorite section.isotope .listing .grid .item .action-group:before,
+body div[role='main'] .wrapper main section.collection section.isotope .listing .grid .sizer .action-group:after,
+body div[role='main'] .wrapper main section.exhibition section.isotope .listing .grid .sizer .action-group:after,
+body div[role='main'] .wrapper main section.project section.isotope .listing .grid .sizer .action-group:after,
+body div[role='main'] .wrapper main section.favorite section.isotope .listing .grid .sizer .action-group:after,
+body div[role='main'] .wrapper main section.collection section.isotope .listing .grid .item .action-group:after,
+body div[role='main'] .wrapper main section.exhibition section.isotope .listing .grid .item .action-group:after,
+body div[role='main'] .wrapper main section.project section.isotope .listing .grid .item .action-group:after,
+body div[role='main'] .wrapper main section.favorite section.isotope .listing .grid .item .action-group:after {
+  content: " ";
+  display: table;
+}
+body div[role='main'] .wrapper main section.collection section.isotope .listing .grid .sizer .action-group:after,
+body div[role='main'] .wrapper main section.exhibition section.isotope .listing .grid .sizer .action-group:after,
+body div[role='main'] .wrapper main section.project section.isotope .listing .grid .sizer .action-group:after,
+body div[role='main'] .wrapper main section.favorite section.isotope .listing .grid .sizer .action-group:after,
+body div[role='main'] .wrapper main section.collection section.isotope .listing .grid .item .action-group:after,
+body div[role='main'] .wrapper main section.exhibition section.isotope .listing .grid .item .action-group:after,
+body div[role='main'] .wrapper main section.project section.isotope .listing .grid .item .action-group:after,
+body div[role='main'] .wrapper main section.favorite section.isotope .listing .grid .item .action-group:after {
+  clear: both;
+}
+body div[role='main'] .wrapper main section.collection section.isotope .listing .grid .sizer .action-group .wrap,
+body div[role='main'] .wrapper main section.exhibition section.isotope .listing .grid .sizer .action-group .wrap,
+body div[role='main'] .wrapper main section.project section.isotope .listing .grid .sizer .action-group .wrap,
+body div[role='main'] .wrapper main section.favorite section.isotope .listing .grid .sizer .action-group .wrap,
+body div[role='main'] .wrapper main section.collection section.isotope .listing .grid .item .action-group .wrap,
+body div[role='main'] .wrapper main section.exhibition section.isotope .listing .grid .item .action-group .wrap,
+body div[role='main'] .wrapper main section.project section.isotope .listing .grid .item .action-group .wrap,
+body div[role='main'] .wrapper main section.favorite section.isotope .listing .grid .item .action-group .wrap {
+  position: relative;
+}
+body div[role='main'] .wrapper main section.collection section.isotope .listing .grid .sizer .action-group .wrap::before,
+body div[role='main'] .wrapper main section.exhibition section.isotope .listing .grid .sizer .action-group .wrap::before,
+body div[role='main'] .wrapper main section.project section.isotope .listing .grid .sizer .action-group .wrap::before,
+body div[role='main'] .wrapper main section.favorite section.isotope .listing .grid .sizer .action-group .wrap::before,
+body div[role='main'] .wrapper main section.collection section.isotope .listing .grid .item .action-group .wrap::before,
+body div[role='main'] .wrapper main section.exhibition section.isotope .listing .grid .item .action-group .wrap::before,
+body div[role='main'] .wrapper main section.project section.isotope .listing .grid .item .action-group .wrap::before,
+body div[role='main'] .wrapper main section.favorite section.isotope .listing .grid .item .action-group .wrap::before {
+  content: '';
+  width: 100%;
+  height: 1px;
+  background-color: #ccc;
+  position: absolute;
+  top: 14px;
+  left: 0;
+}
+body div[role='main'] .wrapper main section.collection section.isotope .listing .grid .sizer .action-group .wrap .links,
+body div[role='main'] .wrapper main section.exhibition section.isotope .listing .grid .sizer .action-group .wrap .links,
+body div[role='main'] .wrapper main section.project section.isotope .listing .grid .sizer .action-group .wrap .links,
+body div[role='main'] .wrapper main section.favorite section.isotope .listing .grid .sizer .action-group .wrap .links,
+body div[role='main'] .wrapper main section.collection section.isotope .listing .grid .item .action-group .wrap .links,
+body div[role='main'] .wrapper main section.exhibition section.isotope .listing .grid .item .action-group .wrap .links,
+body div[role='main'] .wrapper main section.project section.isotope .listing .grid .item .action-group .wrap .links,
+body div[role='main'] .wrapper main section.favorite section.isotope .listing .grid .item .action-group .wrap .links {
+  color: #4f7979;
+  float: left;
+  text-align: left;
+  padding: 0 10px 0 0;
+  max-width: 50%;
+  position: relative;
+  z-index: 0;
+  background: #fff;
+}
+body div[role='main'] .wrapper main section.collection section.isotope .listing .grid .sizer .action-group .wrap .links:hover,
+body div[role='main'] .wrapper main section.exhibition section.isotope .listing .grid .sizer .action-group .wrap .links:hover,
+body div[role='main'] .wrapper main section.project section.isotope .listing .grid .sizer .action-group .wrap .links:hover,
+body div[role='main'] .wrapper main section.favorite section.isotope .listing .grid .sizer .action-group .wrap .links:hover,
+body div[role='main'] .wrapper main section.collection section.isotope .listing .grid .item .action-group .wrap .links:hover,
+body div[role='main'] .wrapper main section.exhibition section.isotope .listing .grid .item .action-group .wrap .links:hover,
+body div[role='main'] .wrapper main section.project section.isotope .listing .grid .item .action-group .wrap .links:hover,
+body div[role='main'] .wrapper main section.favorite section.isotope .listing .grid .item .action-group .wrap .links:hover {
+  color: #273b3b;
+}
+body div[role='main'] .wrapper main section.collection section.isotope .listing .grid .sizer .action-group .wrap ul,
+body div[role='main'] .wrapper main section.exhibition section.isotope .listing .grid .sizer .action-group .wrap ul,
+body div[role='main'] .wrapper main section.project section.isotope .listing .grid .sizer .action-group .wrap ul,
+body div[role='main'] .wrapper main section.favorite section.isotope .listing .grid .sizer .action-group .wrap ul,
+body div[role='main'] .wrapper main section.collection section.isotope .listing .grid .item .action-group .wrap ul,
+body div[role='main'] .wrapper main section.exhibition section.isotope .listing .grid .item .action-group .wrap ul,
+body div[role='main'] .wrapper main section.project section.isotope .listing .grid .item .action-group .wrap ul,
+body div[role='main'] .wrapper main section.favorite section.isotope .listing .grid .item .action-group .wrap ul {
+  margin: 0;
+  padding: 0;
+  z-index: 0;
+  position: relative;
+  float: right;
+  text-align: right;
+  background-color: white;
+}
+body div[role='main'] .wrapper main section.collection section.isotope .listing .grid .sizer .action-group .wrap ul li,
+body div[role='main'] .wrapper main section.exhibition section.isotope .listing .grid .sizer .action-group .wrap ul li,
+body div[role='main'] .wrapper main section.project section.isotope .listing .grid .sizer .action-group .wrap ul li,
+body div[role='main'] .wrapper main section.favorite section.isotope .listing .grid .sizer .action-group .wrap ul li,
+body div[role='main'] .wrapper main section.collection section.isotope .listing .grid .item .action-group .wrap ul li,
+body div[role='main'] .wrapper main section.exhibition section.isotope .listing .grid .item .action-group .wrap ul li,
+body div[role='main'] .wrapper main section.project section.isotope .listing .grid .item .action-group .wrap ul li,
+body div[role='main'] .wrapper main section.favorite section.isotope .listing .grid .item .action-group .wrap ul li {
+  list-style: none;
+  display: inline-block;
+  margin-left: 10px;
+}
+body div[role='main'] .wrapper main section.collection section.isotope .listing .grid .sizer .action-group .wrap ul li a,
+body div[role='main'] .wrapper main section.exhibition section.isotope .listing .grid .sizer .action-group .wrap ul li a,
+body div[role='main'] .wrapper main section.project section.isotope .listing .grid .sizer .action-group .wrap ul li a,
+body div[role='main'] .wrapper main section.favorite section.isotope .listing .grid .sizer .action-group .wrap ul li a,
+body div[role='main'] .wrapper main section.collection section.isotope .listing .grid .item .action-group .wrap ul li a,
+body div[role='main'] .wrapper main section.exhibition section.isotope .listing .grid .item .action-group .wrap ul li a,
+body div[role='main'] .wrapper main section.project section.isotope .listing .grid .item .action-group .wrap ul li a,
+body div[role='main'] .wrapper main section.favorite section.isotope .listing .grid .item .action-group .wrap ul li a {
+  text-decoration: none;
+  font-size: 1.5rem;
+  color: #a4a4a4  !important;
+  -webkit-transition: color 0.3s;
+  -o-transition: color 0.3s;
+  transition: color 0.3s;
+  padding: 0 !important;
+}
+body div[role='main'] .wrapper main section.collection section.isotope .listing .grid .sizer .action-group .wrap ul li a:hover,
+body div[role='main'] .wrapper main section.exhibition section.isotope .listing .grid .sizer .action-group .wrap ul li a:hover,
+body div[role='main'] .wrapper main section.project section.isotope .listing .grid .sizer .action-group .wrap ul li a:hover,
+body div[role='main'] .wrapper main section.favorite section.isotope .listing .grid .sizer .action-group .wrap ul li a:hover,
+body div[role='main'] .wrapper main section.collection section.isotope .listing .grid .item .action-group .wrap ul li a:hover,
+body div[role='main'] .wrapper main section.exhibition section.isotope .listing .grid .item .action-group .wrap ul li a:hover,
+body div[role='main'] .wrapper main section.project section.isotope .listing .grid .item .action-group .wrap ul li a:hover,
+body div[role='main'] .wrapper main section.favorite section.isotope .listing .grid .item .action-group .wrap ul li a:hover {
+  color: #444;
+}
+body div[role='main'] .wrapper main section.collection section.isotope .listing .grid .sizer .action-group .wrap ul li a:hover.fa-heart,
+body div[role='main'] .wrapper main section.exhibition section.isotope .listing .grid .sizer .action-group .wrap ul li a:hover.fa-heart,
+body div[role='main'] .wrapper main section.project section.isotope .listing .grid .sizer .action-group .wrap ul li a:hover.fa-heart,
+body div[role='main'] .wrapper main section.favorite section.isotope .listing .grid .sizer .action-group .wrap ul li a:hover.fa-heart,
+body div[role='main'] .wrapper main section.collection section.isotope .listing .grid .item .action-group .wrap ul li a:hover.fa-heart,
+body div[role='main'] .wrapper main section.exhibition section.isotope .listing .grid .item .action-group .wrap ul li a:hover.fa-heart,
+body div[role='main'] .wrapper main section.project section.isotope .listing .grid .item .action-group .wrap ul li a:hover.fa-heart,
+body div[role='main'] .wrapper main section.favorite section.isotope .listing .grid .item .action-group .wrap ul li a:hover.fa-heart {
+  color: #e46667  !important;
+}
+body div[role='main'] .wrapper main section.collection .list-head {
+  margin-bottom: 0px;
 }
 body div[role='main'] .wrapper main section.collection section.isotope .listing {
   background-color: white;
@@ -3410,11 +3575,23 @@ body div[role='main'] .wrapper main section.collection section.isotope .listing 
 body div[role='main'] .wrapper main section.favorite {
   padding-top: 0;
 }
+body div[role='main'] .wrapper main section.favorite .list-head {
+  margin-bottom: 0px;
+}
 body div[role='main'] .wrapper main section.project .list-head {
   margin-bottom: 30px;
 }
 body div[role='main'] .wrapper main section.project section.message {
   padding-bottom: 10px;
+}
+body div[role='main'] .wrapper main section.project .isotope .listing .grid .sizer .wrap .info,
+body div[role='main'] .wrapper main section.project .isotope .listing .grid .item .wrap .info {
+  padding: 20px;
+  border-bottom: 1px solid #ccc;
+}
+body div[role='main'] .wrapper main section.project .isotope .listing .grid .sizer .wrap .info .text,
+body div[role='main'] .wrapper main section.project .isotope .listing .grid .item .wrap .info .text {
+  margin-top: 15px;
 }
 body div[role='main'] .wrapper main section.search .list-head {
   margin-bottom: 20px;
@@ -3644,7 +3821,7 @@ body div[role='main'] .wrapper main section.dashboard section.message {
   border-bottom: 1px solid #ccc;
 }
 body div[role='main'] .wrapper main section.dashboard section.notification {
-  width: 60%;
+  width: 70%;
   margin: 60px auto 0;
   display: table;
 }
@@ -3752,6 +3929,8 @@ body div[role='main'] .wrapper main section.dashboard section.notification ul.no
 body div[role='main'] .wrapper main section.dashboard section.notification ul.notif-list li .meta {
   display: inline-block;
   vertical-align: middle;
+  width: 60%;
+  line-height: 1.5em;
 }
 body div[role='main'] .wrapper main section.dashboard section.notification ul.notif-list li .meta .text {
   color: #454545;
@@ -3770,7 +3949,45 @@ body div[role='main'] .wrapper main section.dashboard section.notification ul.no
   float: right;
   font-size: 1.4rem;
   color: #bcbcbc;
-  margin: 7px 0 0 0;
+  margin: 10px 0 0 0;
+}
+body div[role='main'] .wrapper main section.dashboard section.notification ul.notif-list li .action {
+  float: right;
+  font-size: 1.4rem;
+  color: #bcbcbc;
+  margin: -15px 0 0 10px;
+  padding: 0;
+}
+body div[role='main'] .wrapper main section.dashboard section.notification ul.notif-list li .action li {
+  list-style: none;
+  display: inline-block;
+  font-style: italic;
+  padding: 0 0 0 3px;
+}
+body div[role='main'] .wrapper main section.dashboard section.notification ul.notif-list li .action li.accept a,
+body div[role='main'] .wrapper main section.dashboard section.notification ul.notif-list li .action li.reject a {
+  display: block;
+  color: #fff;
+  text-align: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 16px;
+  border: 3px solid #d4d4d4;
+  background: #6eb946;
+  padding-top: 2px;
+  opacity: 0.8;
+  filter: alpha(opacity=80);
+  -webkit-transition: opacity 0.3s;
+  -o-transition: opacity 0.3s;
+  transition: opacity 0.3s;
+}
+body div[role='main'] .wrapper main section.dashboard section.notification ul.notif-list li .action li.accept a:hover,
+body div[role='main'] .wrapper main section.dashboard section.notification ul.notif-list li .action li.reject a:hover {
+  opacity: 1;
+  filter: alpha(opacity=100);
+}
+body div[role='main'] .wrapper main section.dashboard section.notification ul.notif-list li .action li.reject a {
+  background: #d75050;
 }
 body div[role='main'] .wrapper main section.dashboard section.notification ul.notif-list li + li {
   margin-top: 20px;
@@ -5212,7 +5429,7 @@ body div[role='main'] .wrapper section.action {
   overflow: auto;
   background: white;
   border-left: 1px solid #ccc;
-  z-index: 10;
+  z-index: 11;
   padding: 35px;
   -webkit-transition: all 0.3s;
   -o-transition: all 0.3s;
@@ -7246,9 +7463,6 @@ body footer .sosmed a:hover {
 }
 /* Large devices (tablet landscape, 1200px) */
 @media (max-width: 1199px) {
-  body div[role='main'] .wrapper aside .app ul li a .counter {
-    margin-right: 0;
-  }
   body div[role='main'] section.entrance {
     width: 70%;
   }
@@ -7287,8 +7501,29 @@ body footer .sosmed a:hover {
   body div[role='main'].homepage section.partners ul li img {
     margin-right: 10px;
   }
+  body div[role='main'] .wrapper aside:hover {
+    width: 101px;
+  }
+  body div[role='main'] .wrapper aside:hover .site {
+    display: none;
+  }
+  body div[role='main'] .wrapper aside:hover .app ul li a .text {
+    left: -200px;
+  }
+  body div[role='main'] .wrapper aside:hover .app ul li a .counter {
+    left: -200px;
+    right: auto;
+    opacity: 0;
+    filter: alpha(opacity=0);
+  }
+  body div[role='main'] .wrapper main section.message {
+    width: 100%;
+  }
   body div[role='main'] .wrapper main section.dashboard section.notification {
     width: 100%;
+  }
+  body div[role='main'] .wrapper main section.dashboard section.message {
+    padding-right: 0px;
   }
   body div[role='main'] .wrapper main section.project .list-body.list li .meta .other-info .user,
   body div[role='main'] .wrapper main section.exhibition .list-body.list li .meta .other-info .user,
@@ -7308,26 +7543,116 @@ body footer .sosmed a:hover {
   body div[role='main'] .wrapper main section.exhibition section.exhibition-list .list-body.list li .meta {
     width: 50%;
   }
-  body div[role='main'] .wrapper aside .app ul li a {
-    display: block;
+  body div[role='main'] .wrapper main section.collection section.isotope .listing .grid .sizer .action-group,
+  body div[role='main'] .wrapper main section.favorite section.isotope .listing .grid .sizer .action-group,
+  body div[role='main'] .wrapper main section.collection section.isotope .listing .grid .item .action-group,
+  body div[role='main'] .wrapper main section.favorite section.isotope .listing .grid .item .action-group {
+    padding: 10px 15px 15px 15px;
   }
-  body div[role='main'] .wrapper aside .app ul li a:before,
-  body div[role='main'] .wrapper aside .app ul li a:after {
-    content: " ";
-    display: table;
+  body div[role='main'] .wrapper main section.collection section.isotope .listing .grid .sizer .action-group .wrap .links,
+  body div[role='main'] .wrapper main section.favorite section.isotope .listing .grid .sizer .action-group .wrap .links,
+  body div[role='main'] .wrapper main section.collection section.isotope .listing .grid .item .action-group .wrap .links,
+  body div[role='main'] .wrapper main section.favorite section.isotope .listing .grid .item .action-group .wrap .links,
+  body div[role='main'] .wrapper main section.collection section.isotope .listing .grid .sizer .action-group .wrap ul,
+  body div[role='main'] .wrapper main section.favorite section.isotope .listing .grid .sizer .action-group .wrap ul,
+  body div[role='main'] .wrapper main section.collection section.isotope .listing .grid .item .action-group .wrap ul,
+  body div[role='main'] .wrapper main section.favorite section.isotope .listing .grid .item .action-group .wrap ul {
+    float: none;
+    text-align: left;
   }
-  body div[role='main'] .wrapper aside .app ul li a:after {
-    clear: both;
+  body div[role='main'] .wrapper main section.collection section.isotope .listing .grid .sizer .action-group .wrap ul,
+  body div[role='main'] .wrapper main section.favorite section.isotope .listing .grid .sizer .action-group .wrap ul,
+  body div[role='main'] .wrapper main section.collection section.isotope .listing .grid .item .action-group .wrap ul,
+  body div[role='main'] .wrapper main section.favorite section.isotope .listing .grid .item .action-group .wrap ul {
+    border-top: 1px solid #d4d4d4;
+    padding-top: 13px;
+    margin-top: 10px;
   }
-  body div[role='main'] .wrapper aside .app ul li a span.text {
+  body div[role='main'] .wrapper main section.collection section.isotope .listing .grid .sizer .action-group .wrap ul li,
+  body div[role='main'] .wrapper main section.favorite section.isotope .listing .grid .sizer .action-group .wrap ul li,
+  body div[role='main'] .wrapper main section.collection section.isotope .listing .grid .item .action-group .wrap ul li,
+  body div[role='main'] .wrapper main section.favorite section.isotope .listing .grid .item .action-group .wrap ul li {
+    margin-left: 0;
+    margin-right: 10px;
+  }
+  body div[role='main'] .wrapper main section.collection section.isotope .listing .grid .sizer .action-group .wrap ul li a,
+  body div[role='main'] .wrapper main section.favorite section.isotope .listing .grid .sizer .action-group .wrap ul li a,
+  body div[role='main'] .wrapper main section.collection section.isotope .listing .grid .item .action-group .wrap ul li a,
+  body div[role='main'] .wrapper main section.favorite section.isotope .listing .grid .item .action-group .wrap ul li a {
+    font-size: 2rem;
+  }
+  body div[role='main'] .wrapper main section.collection section.isotope .listing .grid .sizer .action-group .wrap::before,
+  body div[role='main'] .wrapper main section.favorite section.isotope .listing .grid .sizer .action-group .wrap::before,
+  body div[role='main'] .wrapper main section.collection section.isotope .listing .grid .item .action-group .wrap::before,
+  body div[role='main'] .wrapper main section.favorite section.isotope .listing .grid .item .action-group .wrap::before {
     display: none;
   }
-  body div[role='main'] .wrapper aside .app ul li a span.icon {
-    display: inline-block;
+  body div[role='main'] .wrapper main section.collection .list-body.grids li .meta .action-group,
+  body div[role='main'] .wrapper main section.exhibition .list-body.grids li .meta .action-group,
+  body div[role='main'] .wrapper main section.project .list-body.grids li .meta .action-group,
+  body div[role='main'] .wrapper main section.favorite .list-body.grids li .meta .action-group {
+    text-align: left  !important;
+    margin-left: 0;
+    margin-right: 10px;
+    border-top: 1px solid #d4d4d4;
+    margin-top: 10px;
+    padding-top: 10px;
   }
-  body div[role='main'] .wrapper aside .app ul li a span.counter {
-    display: inline-block;
-    float: none;
+  body div[role='main'] .wrapper main section.collection .list-body.grids li .meta .action-group::before,
+  body div[role='main'] .wrapper main section.exhibition .list-body.grids li .meta .action-group::before,
+  body div[role='main'] .wrapper main section.project .list-body.grids li .meta .action-group::before,
+  body div[role='main'] .wrapper main section.favorite .list-body.grids li .meta .action-group::before {
+    display: none  !important;
+  }
+  body div[role='main'] .wrapper main section.collection .list-body.grids li .meta .action-group a,
+  body div[role='main'] .wrapper main section.exhibition .list-body.grids li .meta .action-group a,
+  body div[role='main'] .wrapper main section.project .list-body.grids li .meta .action-group a,
+  body div[role='main'] .wrapper main section.favorite .list-body.grids li .meta .action-group a {
+    padding-left: 0 !important;
+    padding-right: 15px !important;
+    font-size: 2rem !important;
+  }
+  body div[role='main'] .wrapper main section.collection .list-body.grids li .meta .action-group a.links,
+  body div[role='main'] .wrapper main section.exhibition .list-body.grids li .meta .action-group a.links,
+  body div[role='main'] .wrapper main section.project .list-body.grids li .meta .action-group a.links,
+  body div[role='main'] .wrapper main section.favorite .list-body.grids li .meta .action-group a.links {
+    font-size: 1.5rem !important;
+    display: block;
+    width: 100%;
+  }
+  body div[role='main'] .wrapper main section.collection .list-body.list li .meta .other-info,
+  body div[role='main'] .wrapper main section.exhibition .list-body.list li .meta .other-info,
+  body div[role='main'] .wrapper main section.project .list-body.list li .meta .other-info,
+  body div[role='main'] .wrapper main section.favorite .list-body.list li .meta .other-info {
+    margin: 10px 0 10px 0;
+  }
+  body div[role='main'] .wrapper main section.collection .list-body.list li .meta .other-info::before,
+  body div[role='main'] .wrapper main section.exhibition .list-body.list li .meta .other-info::before,
+  body div[role='main'] .wrapper main section.project .list-body.list li .meta .other-info::before,
+  body div[role='main'] .wrapper main section.favorite .list-body.list li .meta .other-info::before {
+    display: none;
+  }
+  body div[role='main'] .wrapper main section.collection .list-body.list li .meta .other-info .count,
+  body div[role='main'] .wrapper main section.exhibition .list-body.list li .meta .other-info .count,
+  body div[role='main'] .wrapper main section.project .list-body.list li .meta .other-info .count,
+  body div[role='main'] .wrapper main section.favorite .list-body.list li .meta .other-info .count,
+  body div[role='main'] .wrapper main section.collection .list-body.list li .meta .other-info .date,
+  body div[role='main'] .wrapper main section.exhibition .list-body.list li .meta .other-info .date,
+  body div[role='main'] .wrapper main section.project .list-body.list li .meta .other-info .date,
+  body div[role='main'] .wrapper main section.favorite .list-body.list li .meta .other-info .date,
+  body div[role='main'] .wrapper main section.collection .list-body.list li .meta .other-info .user,
+  body div[role='main'] .wrapper main section.exhibition .list-body.list li .meta .other-info .user,
+  body div[role='main'] .wrapper main section.project .list-body.list li .meta .other-info .user,
+  body div[role='main'] .wrapper main section.favorite .list-body.list li .meta .other-info .user {
+    font-size: 1.4rem;
+    padding: 0;
+    margin-right: 10px;
+  }
+  body div[role='main'] .wrapper main section.project section.hero {
+    height: auto;
+  }
+  body div[role='main'] .wrapper main section.project .listing .grid {
+    margin: 0 -15px 0 -5px;
   }
   body div[role='main'].about .selectioncontent .content .left .thumbs {
     max-width: 100%;
@@ -7725,6 +8050,26 @@ body footer .sosmed a:hover {
     padding: 5px 20px 0 20px;
     height: 30px;
   }
+  body div[role='main'] .wrapper .search .searchbar .wrap {
+    padding: 0;
+    margin: 0;
+  }
+  body div[role='main'] .wrapper .search .searchbar .searchbox .searchinput {
+    width: 200px;
+  }
+  body div[role='main'] .wrapper .search .searchbar::before {
+    display: none;
+  }
+  body div[role='main'] .wrapper .search .searchresults.openfilter {
+    padding-right: 0px;
+  }
+  body div[role='main'] .wrapper section.action {
+    width: 300px;
+    right: -300px;
+  }
+  body div[role='main'] .wrapper main section.dashboard section.notification ul.notif-list li .meta {
+    width: 55%;
+  }
   body footer {
     text-align: center;
   }
@@ -7772,6 +8117,81 @@ body footer .sosmed a:hover {
     margin: 5px 0;
     width: 100%;
     display: block;
+  }
+}
+/* in between for search */
+@media (max-width: 580px) {
+  body div[role='main'] .wrapper .search .searchbar {
+    height: 107px;
+  }
+  body div[role='main'] .wrapper .search .searchbar .wrap {
+    padding: 0;
+    margin: 0;
+  }
+  body div[role='main'] .wrapper .search .searchbar .close {
+    display: none !important;
+  }
+  body div[role='main'] .wrapper .search .searchbar .searchbox {
+    float: left;
+    margin-right: 10px;
+  }
+  body div[role='main'] .wrapper .search .searchbar .searchbox .searchinput {
+    width: 220px;
+  }
+  body div[role='main'] .wrapper .search .searchbar .provider {
+    margin: 0px 0 0 0;
+    float: left;
+  }
+  body div[role='main'] .wrapper .search .searchbar .provider:before,
+  body div[role='main'] .wrapper .search .searchbar .provider:after {
+    content: " ";
+    display: table;
+  }
+  body div[role='main'] .wrapper .search .searchbar .provider:after {
+    clear: both;
+  }
+  body div[role='main'] .wrapper .search .searchbar .provider > a {
+    border: 1px solid #ccc;
+    padding: 4px 10px 5px 10px;
+  }
+  body div[role='main'] .wrapper .search .searchbar .view {
+    float: left;
+    margin-left: 15px;
+    margin-top: 10px;
+  }
+  body div[role='main'] .wrapper .search .searchlabel {
+    display: none;
+  }
+  body div[role='main'] .wrapper .search .searchresults {
+    padding-top: 107px;
+  }
+}
+/* in between for search */
+@media (max-width: 502px) {
+  body div[role='main'] .wrapper .search .searchbar .searchbox {
+    margin-right: 0;
+  }
+  body div[role='main'] .wrapper .search .searchbar .searchbox .searchinput {
+    width: 210px;
+  }
+  body div[role='main'] .wrapper .search .searchbar .provider {
+    margin: 10px 0 0 0;
+  }
+  body div[role='main'] .wrapper .search .searchbar .provider:before,
+  body div[role='main'] .wrapper .search .searchbar .provider:after {
+    content: " ";
+    display: table;
+  }
+  body div[role='main'] .wrapper .search .searchbar .provider:after {
+    clear: both;
+  }
+  body div[role='main'] .wrapper .search .searchbar .provider > a {
+    border: 1px solid #ccc;
+    padding: 4px 10px 5px 10px;
+    font-size: 1.4rem;
+  }
+  body div[role='main'] .wrapper .search .searchbar .view {
+    margin-left: 10px;
   }
 }
 /* Extra small devices (potrait mobiles, 480px) */
@@ -7912,6 +8332,15 @@ body footer .sosmed a:hover {
     float: none;
     margin-top: 20px;
   }
+  body div[role='main'] .wrapper .search .gridlist .listing .grid .item .wrap .info {
+    padding: 15px;
+  }
+  .listing .grid .sizer,
+  .listing .grid .item {
+    width: 100%;
+    padding: 0px;
+    margin-bottom: 20px;
+  }
 }
 #uploaded-image > input {
   display: none;
@@ -8004,4 +8433,13 @@ body div[role='main'] .wrapper .search .searchlabel .label {
 - .autocomplete-suggestion-extra .label {
   background-color: #ec5a62;
   margin: 2px 0;
+}
+/* Validation Errors */
+.errormsg {
+  color: #9c3b3b;
+  display: block;
+  font-style: italic;
+  line-height: 1.3em;
+  padding: 3px 0 0;
+  text-align: right;
 }
