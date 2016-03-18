@@ -1,4 +1,4 @@
-define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','app'], function (bootstrap, ko, template, KnockoutElse, app) {
+define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','app', 'knockout-validation'], function (bootstrap, ko, template, KnockoutElse, app) {
 
 	count = 6;
 	accessLevels = {
@@ -26,7 +26,7 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 		errorMessageClass: 'errormsg',
 		decorateInputElement: true
 	});
-	
+
 	function getCollectionsSharedWithMe(isExhibition, offset, count) {
 		return $.ajax({
 			type        : "GET",
