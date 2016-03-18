@@ -199,7 +199,12 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 		self.dbId(params.id);
 		self.userSavedItemsArray = ko.mapping.fromJS([], {});  //holds the selected collections items
 		self.collectionItemsArray = ko.mapping.fromJS([], {}); //holds the exhibitions items
-
+		//self.exhibitionItem = ko.observable({});
+		self.itemText = ko.observable("");
+		self.itemVideoUrl = ko.observable("");
+		self.itemPosition = ko.observable(0);
+		self.itemId = ko.observable("");
+		
 		var collections = [];
 		var promise = app.getAllUserCollections();
 		self.myCollections = ko.mapping.fromJS([]); //ko.observableArray([]); //holds all the collections
@@ -252,25 +257,6 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 					// Empty
 				}
 			});
-
-
-			// TODO: Update Code
-			// self.loadingInitialItemsCount = self.firstEntries.length;
-			// self.firstEntries.map(function (record) { //fix for now till service gets implemented
-			// 	record.additionalText = ko.observable('');
-			// 	record.videoUrl = ko.observable('');
-			// 	record.containsVideo = ko.observable(false);
-			// 	record.containsText = ko.observable(false);
-			// 	var exhibitionItemInfo = record.exhibitionRecord;
-			// 	if (exhibitionItemInfo !== undefined) {
-			// 		record.additionalText(exhibitionItemInfo.annotation);
-			// 		record.videoUrl(exhibitionItemInfo.videoUrl);
-			// 		record.containsVideo(!isEmpty(record.videoUrl()));
-			// 		record.containsText(!isEmpty(record.additionalText()));
-			// 	}
-			// });
-			// self.collectionItemsArray(self.firstEntries);
-			// self.loadingExhibitionItems = true;
 		});
 
 		self.selectedCollection = ko.observable();
@@ -353,18 +339,66 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 			$(elem).fadeOut(500);
 		};
 
-		self.showPopUpVideo = function (data, event) {
-			console.log("add video");
+		self.prepareForItemEdit = function (exhibitionItem, event) {
 			var context = ko.contextFor(event.target);
 			var index = context.$index();
-			editItem(data, self.dbId(), index, 'PopUpVideoMode');
+			self.itemPosition(index);
+			self.itemText(exhibitionItem.contextData()[0].body.text.default());
+			self.itemVideoUrl(exhibitionItem.contextData()[0].body.videoUrl());
+			self.itemId(exhibitionItem.dbId());
 		};
-
-		self.showPopUpText = function (data, event) {
-			var context = ko.contextFor(event.target);
-			var index = context.$index();
-			editItem(data, self.dbId(), index, 'PopUpTextMode');
+		
+		self.editItem = function (editMode) {
+			if (editMode == "editText") {
+				var promise = self.updateRecord(self.itemId(), self.itemText(), self.itemVideoUrl(), self.dbId(), self.itemPosition());
+				$.when(promise).done(function (data) {
+					self.collectionItemsArray()[self.itemPosition()].contextData()[0].body.text.default(self.itemText());
+					self.closeSideBar();
+				}).fail(function (data) {
+					//alert('text edit failed');
+					self.closeSideBar();
+				});
+			}
+			else if (editMode == "editVideo") {
+				
+			}
 		};
+		
+		self.closeSideBar = function () {
+			self.itemPosition(-1);
+			self.itemText("");
+			self.itemVideoUrl("");
+			self.itemId("");
+			$('textarea').hide();
+			//$('.add').show();
+			$('.action').removeClass('active');
+		};
+		
+		self.updateRecord = function(dbId, text, videoUrl, colId, position) {
+			var jsonData = {};
+			jsonData = {
+				"contextDataType": "ExhibitionData",
+				"target": {
+					"collectionId": colId,
+					"position": position
+				},
+				"body" : {
+					"text": {"default": text},
+					"videoUrl": videoUrl
+				}
+			};
+			jsonData = JSON.stringify(jsonData);
+			return $.ajax({
+				"url": "/record/contextData	",
+				"method": "put",
+				"contentType": "application/json",
+				"data": jsonData,
+				"success": function (data) {
+				},
+				"error": function (result) {
+				}
+			});
+		}
 
 		self.playExhibition = function () {
 			window.location.hash = '#exhibitionview/' + self.dbId();
@@ -418,7 +452,7 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 				if (dragElement.hasClass('box fill')) { //if item selected from exhibitions
 					//dragOptions.appendTo = $('.left');
 					dragOptions.helper = function () {
-						var $imageElementHelper = $(this).find('.itemImage').clone();
+						var $imageElementHelper = $(this).find('#itemImage').clone();
 						$imageElementHelper.css('margin', 0).css({
 							'padding-top': 0
 						});
