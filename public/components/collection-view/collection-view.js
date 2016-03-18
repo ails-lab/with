@@ -570,7 +570,7 @@ define(['bridget', 'knockout', 'text!./_collection-view.html', 'isotope', 'image
 		self.isotopeImagesReveal = function ($container, $items) {
 			self.$container = $(".grid#" + self.id());
 			var iso = self.$container.data('isotope');
-			var itemSelector = null;
+			var itemSelector = ".item";
 			if (iso) {
 				itemSelector = iso.options.itemSelector;
 			} else {
@@ -584,7 +584,7 @@ define(['bridget', 'knockout', 'text!./_collection-view.html', 'isotope', 'image
 					}
 				});
 				iso = self.$container.data('isotope');
-				itemSelector = iso.options.itemSelector;
+				//itemSelector = iso.options.itemSelector;
 			}
 			// append to container
 			self.$container.append($items);
