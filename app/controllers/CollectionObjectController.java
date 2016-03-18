@@ -113,23 +113,28 @@ public class CollectionObjectController extends WithResourceController {
 				src.setUsingCursor(true);
 				SourceResponse result = src.getResults(q);
 				int total = result.totalCount;
+				int firstPageCount = 0;
 		    	for (WithResource<?, ?> item : result.items.getCulturalCHO()) {
 					WithResourceController.internalAddRecordToCollection(cid, (RecordResource)item, 
 							F.Option.None(), resultInfo);
+					firstPageCount++;
 				}
 
+		    	int firstPageCount1 =firstPageCount;
 				Promise<Integer> promiseOfInt = Promise.promise(new Function0<Integer>() {
 					public Integer apply() {
 						SourceResponse result;
 						int page = 1;
 						int pageSize = 20;
-						while (page * pageSize < total) {
+						int itemsCount = firstPageCount1;
+						while (itemsCount < total) {
 							page++;
 							q.page = page + "";
 							result = src.getResults(q);
 							for (WithResource<?, ?> item : result.items.getCulturalCHO()) {
 								WithResourceController.internalAddRecordToCollection(cid,
 										(RecordResource) item, F.Option.None(), resultInfo);
+								itemsCount++;
 							}
 						}
 						return 0;
@@ -170,25 +175,29 @@ public class CollectionObjectController extends WithResourceController {
 		q.page = 1+"";
 		SourceResponse result = src.getAllResults(q);
 		int total = result.totalCount;
+		int firstPageCount = 0;
     	for (WithResource<?, ?> item : result.items.getCulturalCHO()) {
 			WithResourceController.internalAddRecordToCollection(collection.getDbId().toString(), (RecordResource)item, 
 					F.Option.None(), resultInfo);
-		};
-		
+			firstPageCount++;
+		}
+    	int firstPageCount1 =firstPageCount;
 	    Promise<Integer> promiseOfInt = Promise.promise(
 	      new Function0<Integer>() {
 	        public Integer apply() {
 	        	SourceResponse result;
         		int page = 1;
         		int pageSize = 20;
-        		while (page*pageSize < total) {
+        		int itemsCount = firstPageCount1;
+        		while (itemsCount < total) {
 	        		page++;
 	    			q.page = page+"";
 	    	    	result = src.getAllResults(q);
 	    	    	for (WithResource<?, ?> item : result.items.getCulturalCHO()) {
 	    				WithResourceController.internalAddRecordToCollection(collection.getDbId().toString(), (RecordResource)item, 
 	    						F.Option.None(), resultInfo);
-	    			};
+	    				itemsCount++;
+	    			}
 	    	    } 
 	          return 0;
 	        }

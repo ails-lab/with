@@ -61,7 +61,7 @@ public class EuropeanaCollectionSpaceSource extends EuropeanaSpaceSource{
 		return new Function<List<String>, Pair<String>>() {
 			@Override
 			public Pair<String> apply(List<String> t) {
-				return new Pair<String>("qf", parameter + ":" + t.get(0));
+				return new Pair<String>("qf", parameter + ":" + function.apply(t.get(0)));
 			}
 		};
 	}

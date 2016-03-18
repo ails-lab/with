@@ -30,6 +30,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import model.basicDataTypes.ProvenanceInfo.Sources;
 import model.resources.RecordResource;
 import model.resources.WithResource;
+import play.Logger;
 import play.libs.Json;
 import sources.core.AdditionalQueryModifier;
 import sources.core.AutocompleteResponse;
@@ -333,8 +334,12 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 				res.items.setCulturalCHO(getItems(response));
 				// res.facets = response.path("facets");
 				res.filtersLogic = createFilters(response);
-				if (usingCursor)
-				nextCursor = Utils.readAttr(response, "nextCursor", true);
+				if (usingCursor) {
+					nextCursor = Utils.readAttr(response, "nextCursor", true);
+					if (!Utils.hasInfo(nextCursor))
+						Logger.error("cursor error!!");
+				}
+				
 
 			} catch (Exception e) {
 				// TODO Auto-generated catch block

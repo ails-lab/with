@@ -200,6 +200,7 @@ public class StringUtils {
 	public static MultiLiteralOrResource getLiteralLanguages(Language... lang){
 		MultiLiteralOrResource res = new MultiLiteralOrResource();
 		for (Language language : lang) {
+			if (language!=null)
 			res.addLiteral(Language.EN, language.getName());
 		}
 		res.fillDEF();
