@@ -21,6 +21,7 @@ define(['knockout', 'text!./import-collections.html'], function(ko, template) {
   	    self.page = ko.observable("1");
   	    self.pageSize = ko.observable("20");
 	  	self.collectionName = ko.observable("");
+	  	self.limit = ko.observable("-1");
   	    self.toJson = function (){
   	    	return {  
   	    		collectionName : self.collectionName(),
@@ -36,6 +37,8 @@ define(['knockout', 'text!./import-collections.html'], function(ko, template) {
 	function CollectionName() {
   	    var self = this;
   	    self.collectionName = ko.observable("");
+  	    self.limit = ko.observable("-1");
+	    
   	}
   	
 	
@@ -66,7 +69,7 @@ define(['knockout', 'text!./import-collections.html'], function(ko, template) {
 	    	console.log( self.im.collectionName());
 	    	console.log( json1 );
 	    	$.ajax({
-	    				"url": "/collection/importEuropeanaCollection?id="+self.im.collectionName(),
+	    				"url": "/collection/importEuropeanaCollection?id="+self.im.collectionName()+"&limit="+self.im.limit(),
 	    				"method": "GET",
 	    				"success": function( data, textStatus, jQxhr ){
 	    					console.log( data );
