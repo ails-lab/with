@@ -1,4 +1,4 @@
-define(['bridget', 'knockout', 'text!./_collection-view.html', 'isotope', 'imagesloaded', 'app', 'smoke'], function (bridget, ko, template, Isotope, imagesLoaded, app) {
+define(['bridget', 'knockout', 'text!./_collection-view.html', 'isotope', 'imagesloaded', 'app', 'smoke','knockout-validation'], function (bridget, ko, template, Isotope, imagesLoaded, app) {
 
 	$.bridget('isotope', Isotope);
 	self.loading = ko.observable(false);
@@ -7,6 +7,12 @@ define(['bridget', 'knockout', 'text!./_collection-view.html', 'isotope', 'image
 		init: app.initOrUpdate('init'),
 		update: app.initOrUpdate('update')
 	};
+	
+	ko.validation.init({
+		errorElementClass: 'error',
+		errorMessageClass: 'errormsg',
+		decorateInputElement: true
+	});
 
 	ko.showMoreLess = function (initialText) {
 
@@ -174,7 +180,7 @@ define(['bridget', 'knockout', 'text!./_collection-view.html', 'isotope', 'image
 		self.route = params.route;
 		var counter = 1;
 		self.title = ko.observable('');
-		self.titleToEdit = ko.observable('');
+		self.titleToEdit = ko.observable('').extend({ required: true });
 		self.description = ko.observable('');
 		self.descriptionToEdit = ko.observable('');
 		self.isPublicEdit = ko.observable(true);
@@ -473,6 +479,47 @@ define(['bridget', 'knockout', 'text!./_collection-view.html', 'isotope', 'image
 
 			collectionShow(rec);
 		};
+		
+		
+		self.deleteMyCollection = function () {
+			$.smkConfirm({
+				text: 'Are you sure you want to permanently remove this collection and all the containing records?',
+				accept: 'Delete',
+				cancel: 'Cancel'
+			}, function (ee) {
+				if (ee) {
+					$.ajax({
+						"url": "/collection/" + self.id(),
+						"method": "DELETE",
+						success: function (result) {
+							$.smkAlert({text: 'Collection removed', type: 'success'});
+							
+							var thecollection = ko.utils.arrayFirst(currentUser.editables(), function (c) {
+								return c.dbId === self.id();
+							});
+							if(thecollection)
+							  currentUser.editables.remove(thecollection);
+							window.location.href="/assets/index.html#mycollections";
+							loadCounters();
+								
+						}
+					    ,
+						error: function (xhr, textStatus, errorThrown) {
+							$.smkAlert({
+								text: 'An error has occured while removing this collection',
+								type: 'danger',
+								time: 10
+							});
+						}
+					});
+				} else {
+					// Empty
+				}
+			});
+		};
+
+		
+		
 
 		function getItem(record) {
 			var tile = '<div class="item ' + record.dbId + '"><div class="wrap"><a href="#"  onclick="recordSelect(\'' + record.dbId + '\',event)"><div class="thumb"><img style="width:100%" src="' + record.thumbnail() + '" onError="this.src=\'img/content/thumb-empty.png\'"/></div>';
@@ -538,7 +585,6 @@ define(['bridget', 'knockout', 'text!./_collection-view.html', 'isotope', 'image
 						collectionType: "SimpleCollection"}}
 				}
 			});
-			console.log(jsondata);
 			$.ajax({
 				"url": "/collection/" + self.id(),
 				"method": "PUT",

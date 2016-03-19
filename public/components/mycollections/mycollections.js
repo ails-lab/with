@@ -142,6 +142,8 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 		};
 
 		self.init = function () {
+			WITHApp.tabAction();
+			
 			if (self.showsExhibitions) {
 				mapping.label = {
 					create: function (options) {

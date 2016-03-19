@@ -243,6 +243,12 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
 			}
 
 		};
+		
+		
+		self.close = function() {
+			 if($request!==undefined)$request.abort();
+			 window.history.go(-1); return false;
+		}
 
 		self.reset = function() {
 			 if($request!==undefined)$request.abort();
