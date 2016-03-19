@@ -121,27 +121,14 @@ public class CollectionObjectController extends WithResourceController {
 				}
 
 		    	int firstPageCount1 =firstPageCount;
-				Promise<Integer> promiseOfInt = Promise.promise(new Function0<Integer>() {
-					public Integer apply() {
-						SourceResponse result;
-						int page = 1;
-						int pageSize = 20;
-						int itemsCount = firstPageCount1;
-						while (itemsCount < total) {
-							page++;
-							q.page = page + "";
-							result = src.getResults(q);
-							for (WithResource<?, ?> item : result.items.getCulturalCHO()) {
-								WithResourceController.internalAddRecordToCollection(cid,
-										(RecordResource) item, F.Option.None(), resultInfo,true);
-								itemsCount++;
-							}
-						}
-						return 0;
+				Promise<Result> promise = Promise.promise(new Function0<Result>() {
+					public Result apply() {
+						Integer doTheImport = doTheImport(resultInfo, q, cid, src, total, firstPageCount1);
+						return ok("total "+total);
 					}
 				});
 				
-				return Promise.pure(ok("ok"));
+				return promise;
 			} catch (Exception e) {
 				e.printStackTrace();
 				return Promise.pure((Result)badRequest(e.getMessage()));
@@ -811,5 +798,24 @@ public class CollectionObjectController extends WithResourceController {
 			userJSON.put("image", image);
 		}
 		return userJSON;
+	}
+
+	private static Integer doTheImport(ObjectNode resultInfo, final CommonQuery q, final String cid,
+			EuropeanaSpaceSource src, int total, int firstPageCount1) {
+		SourceResponse result;
+		int page = 1;
+		int pageSize = 20;
+		int itemsCount = firstPageCount1;
+		while (itemsCount < total) {
+			page++;
+			q.page = page + "";
+			result = src.getResults(q);
+			for (WithResource<?, ?> item : result.items.getCulturalCHO()) {
+				WithResourceController.internalAddRecordToCollection(cid,
+						(RecordResource) item, F.Option.None(), resultInfo,true);
+				itemsCount++;
+			}
+		}
+		return 0;
 	}
 }
