@@ -96,8 +96,8 @@
 			  <div class="action-body" data-bind="validationElement: titleToEdit">
 				<input type="text" data-bind="{value: titleToEdit, valueUpdate: 'afterkeypress', hasFocus: true
 				      attr: {placeholder: titleToEdit}}">
-				<textarea data-bind="{value: descriptionToEdit,
-					  attr: {placeholder: descriptionToEdit}"></textarea>
+				<textarea data-bind="value: descriptionToEdit"
+					  placeholder="Description"></textarea>
 			  </div>
 			  <div class="button-group">
 			  	<a class="btn-green-o cancel" data-bind="click: closeSideBar">Cancel</a>
@@ -258,7 +258,7 @@
 						<!-- /ko -->
 						<!-- /ko -->
 						<!--  ko if: (myAccess() ==  "OWN" || myAccess() == "WRITE")-->
-						<a data-toggle="tooltip" data-bind="click: $parent.prepareForEditCollection" data-placement="top" title="Edit collection" class="fa fa-pencil editaction"></a>
+						<a data-toggle="tooltip" data-bind="click: $parent.prepareForEditCollection" data-placement="top" title="Edit" class="fa fa-pencil editaction"></a>
 						<!-- /ko -->
 						<span data-bind="visible: myAccess() == 'READ'">&nbsp;</span>
 					</div>

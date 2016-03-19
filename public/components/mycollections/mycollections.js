@@ -652,7 +652,6 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 		};
 
 		self.closeSideBar = function () {
-
 			self.isPublicToEdit(false);
 			self.titleToEdit("");
 			self.descriptionToEdit("");

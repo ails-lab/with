@@ -37,15 +37,11 @@
 									<span><a data-toggle="tooltip" data-placement="top" title="Drag an item here"><img src="img/ui/ic-add.png"></a></span>
 								</div>
 								<!-- box-->
-								<div class="box fill" data-bind="{css: {videoadded: !containsVideo}, drag: {item: $data, move: true}}">
+								<div class="box fill" data-bind="{css: {videoadded: containsVideo}, drag: {item: $data, move: true}}">
 									<div class="boxaction">
 										<ul>
-											<li>
-												<a href="#" data-toggle="tooltip" data-bind="click: $parent.prepareForItemEdit" data-placement="top" title="Edit text" class="editbox"> <i class="fa fa-pencil-square-o"></i></a>
-											</li>
-											<li>
-												<a href="#" data-toggle="tooltip" data-placement="top" title="Delete item" data-bind="click: $parent.xButtonClicked"> <i class="fa fa-trash-o"></i></a>
-											</li>
+										<li><a href="#" data-toggle="tooltip" data-placement="top" title="Edit item text" data-bind="click: $parent.prepareForItemEdit" class="editbox"> <i class="fa fa-pencil-square-o"></i></a></li>
+										<li><a href="#" data-toggle="tooltip" data-placement="top" title="Delete item" data-bind="click: $parent.xButtonClicked"> <i class="fa fa-trash-o"></i></a><li>
 										</ul>
 									</div>
 									<div class="left">
@@ -60,27 +56,42 @@
 											<!-- /ko -->
 										</div>
 									</div>
-									<!--  ko if: $data.containsText-->
+									<!--  ko if: containsText -->
 										<div class="right">
 											<div class="boxtitle" data-bind="text: contextData()[0].body.text.default"></div>
-										</div>
+				                        </div>
 									<!-- /ko -->
-								    <!--  ko if: $data.containsVideo-->
+									<!-- ko else -->
+										<!-- ko if: description -->
+											<div class="right">
+												<div class="boxtitle" data-bind="text: description"></div>
+					                        </div>
+										<!--  /ko -->
+									<!-- /ko -->
+								    <!--  ko if: containsVideo -->
 									<div class="video">
 				                        <div class="imgwrap">
+				                          <!-- ko if: embeddedVideoUrl -->
 				                          <div class="embed-responsive embed-responsive-4by3">
-				                            <iframe src="https://www.youtube.com/embed/YykjpeuMNEk" frameborder="0" allowfullscreen class="embed-responsive-item"></iframe>
+				                            <iframe data-bind="attr: {src: embeddedVideoUrl}" frameborder="0" allowfullscreen class="embed-responsive-item"></iframe>
 				                          </div>
+				                          <!-- /ko -->
+				                          <!-- ko else -->
+				                          <div>Invalid video url:</div>
+				                          <span style="color:red" data-bind="text: contextData()[0].body.videoUrl"></span>
+				                          <!-- /ko -->
 				                        </div>
-				                        <div class="imginfo"><span class="mediatitle">As I stand out here in the wonders of the unknown at Hadley, I sort of realize there’s a fundamental truth to our nature, Man must explore and this is exploration at its greatest.</span></div>
+				                        <!--  ko if: containsVideoDescription -->
+				                        <div class="imginfo"><span class="mediatitle" data-bind="text: contextData()[0].body.videoDescription"></span></div>
+				                        <!-- /ko -->
 				                        <ul class="action">
-				                          <li><a href="#" data-toggle="tooltip" data-placement="top" title="Edit video"><i class="fa fa-pencil"></i></a></li>
-				                          <li><a href="#" data-toggle="tooltip" data-placement="top" title="Delete video"><i class="fa fa-trash-o"></i></a></li>
+				                          <li><a href="#" data-toggle="tooltip" data-placement="top" title="Edit video" data-bind="click: $parent.prepareForItemEdit"><i class="fa fa-pencil videobox"></i></a></li>
+				                          <li><a href="#" data-toggle="tooltip" data-placement="top" title="Delete video" data-bind="click: $parent.deleteVideo"><i class="fa fa-trash-o"></i></a></li>
 				                        </ul>
 				                     </div>
-				                     <!--  /ko -->
+				                     <!-- /ko -->
 				                     <!-- ko else -->
-									 <div class="video"><a href="#" data-toggle="tooltip" data-placement="top" title="Add video" class="addvideo" data-bind="click: $parent.showPopUpVideo">
+									 <div class="video"><a href="#" data-toggle="tooltip" data-placement="top" title="Add video" class="addvideo videobox" data-bind="click: $parent.prepareForItemEdit">
 									 	<img src="img/ui/ic-add.png"></a>
 									 </div>
 									 <!-- /ko -->
@@ -132,10 +143,10 @@
 				</section>
 				<section class="action editsection">
 					<div class="action-header">
-						<div class="title">Edit item text</div>
+						<div class="title">Edit text</div>
 					</div>
 					<div class="action-body">
-						<textarea type="text" placeholder="Exhibition text" data-bind="value: itemText"></textarea>
+						<textarea type="text" placeholder="Add text" data-bind="value: itemText"></textarea>
 						<!--  <div class="sectionside">
 							<div class="head">Media location</div>
 							<div class="toggle">
@@ -146,6 +157,17 @@
 					</div>
 					<div class="button-group"><a class="btn-green-o cancel" data-bind="click: closeSideBar">Cancel</a>
 					<a class="btn-green" data-bind="click: editItem.bind($data, 'editText')">Save</a></div>
+				</section>
+				<section class="action editvideo">
+					<div class="action-header">
+						<div class="title">Edit video</div>
+					</div>
+					<div class="action-body">
+						<textarea type="text" placeholder="Add youtube url" data-bind="value: itemVideoUrl"></textarea>
+						<textarea type="text" placeholder="Add video description" data-bind="value: itemVideoDescription"></textarea>
+					</div>
+					<div class="button-group"><a class="btn-green-o cancel" data-bind="click: closeSideBar">Cancel</a>
+					<a class="btn-green" data-bind="click: editItem.bind($data, 'editVideo')">Save</a></div>
 				</section>
 			</main>
 		</div>
