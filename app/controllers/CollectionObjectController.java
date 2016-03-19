@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -91,44 +92,25 @@ public class CollectionObjectController extends WithResourceController {
 				ObjectId creatorDbId = new ObjectId(session().get("user"));
 				final CommonQuery q = Utils.parseJson(json.get("query"));
 				final String cname = json.get("collectionName").toString();
-				String ccid = null;
+				final int limit = (json.has("limit"))?json.get("limit").asInt():-1;
+				CollectionObject ccid = null;
 				if (!isCollectionCreated(creatorDbId, cname)){
 					CollectionObject collection = new CollectionObject();
 					collection.getDescriptiveData().setLabel(new MultiLiteral(cname).fillDEF());
 					boolean success = internalAddCollection(collection, CollectionType.SimpleCollection, creatorDbId, resultInfo);
 					if (!success)
 						return Promise.pure((Result)badRequest("Expecting Json query"));
-					ccid  = collection.getDbId().toString();
+					ccid  = collection;
 				} else {
-//					DB.getCollectionObjectDAO().getColl
 					 List<CollectionObject> col = DB.getCollectionObjectDAO().getByLabel(Language.DEFAULT, cname);
-					 ccid = col.get(0).getDbId().toString();
+					 ccid = col.get(0);
 				}
 
-				final String cid = ccid;
-				
-				q.page = "1";
-				q.pageSize = "20";
 				EuropeanaSpaceSource src = new EuropeanaSpaceSource();
 				src.setUsingCursor(true);
-				SourceResponse result = src.getResults(q);
-				int total = result.totalCount;
-				int firstPageCount = 0;
-		    	for (WithResource<?, ?> item : result.items.getCulturalCHO()) {
-					WithResourceController.internalAddRecordToCollection(cid, (RecordResource)item, 
-							F.Option.None(), resultInfo,true);
-					firstPageCount++;
-				}
-
-		    	int firstPageCount1 =firstPageCount;
-				Promise<Result> promise = Promise.promise(new Function0<Result>() {
-					public Result apply() {
-						Integer doTheImport = doTheImport(resultInfo, q, cid, src, total, firstPageCount1);
-						return ok("total "+total);
-					}
-				});
 				
-				return promise;
+				return internalImport(src, ccid, q, limit, resultInfo, true, true);
+				
 			} catch (Exception e) {
 				e.printStackTrace();
 				return Promise.pure((Result)badRequest(e.getMessage()));
@@ -143,60 +125,64 @@ public class CollectionObjectController extends WithResourceController {
 	 * @param id
 	 * @return
 	 */
-	public static Result createAndFillEuropeanaCollection(String id) {
-
+	public static Promise<Result> createAndFillEuropeanaCollection(String id, int limit) {
 		CollectionObject collection = new CollectionObject();
 		collection.getDescriptiveData().setLabel(new MultiLiteral(id).fillDEF());
 		ObjectNode resultInfo = Json.newObject();
 		ObjectId creatorDbId = new ObjectId(session().get("user"));
 		boolean success = internalAddCollection(collection, CollectionType.SimpleCollection, creatorDbId, resultInfo);
 		if (!success)
-			return badRequest(resultInfo);
-
+			return Promise.pure((Result)badRequest(resultInfo));
 		CommonQuery q = new CommonQuery();
-		q.page = "1";
-		q.pageSize = "20";
 		EuropeanaCollectionSpaceSource src = new EuropeanaCollectionSpaceSource(id);
-		
-		
+		return internalImport(src, collection, q, limit, resultInfo, false, false);
+	}
+
+	private static Promise<Result> internalImport(EuropeanaSpaceSource src, CollectionObject collection, CommonQuery q,
+			int limit, ObjectNode resultInfo, boolean dontDuplicate, boolean waitToFinish) {
 		q.page = 1+"";
-		SourceResponse result = src.getAllResults(q);
+		q.pageSize = "20";
+		SourceResponse result = src.getResults(q);
 		int total = result.totalCount;
-		int firstPageCount = 0;
-    	for (WithResource<?, ?> item : result.items.getCulturalCHO()) {
-			WithResourceController.internalAddRecordToCollection(collection.getDbId().toString(), (RecordResource)item, 
-					F.Option.None(), resultInfo);
-			firstPageCount++;
-		}
-    	int firstPageCount1 =firstPageCount;
-	    Promise<Integer> promiseOfInt = Promise.promise(
-	      new Function0<Integer>() {
-	        public Integer apply() {
+		final int mylimit = (limit==-1)? total: Math.min(limit, total);
+		
+		int firstPageCount1 = addResultToCollection(result, collection.getDbId().toString(), mylimit, resultInfo, dontDuplicate);
+    
+	    Promise<Result> promiseOfInt = Promise.promise(
+	      new Function0<Result>() {
+	        public Result apply() {
 	        	SourceResponse result;
         		int page = 1;
-        		int pageSize = 20;
         		int itemsCount = firstPageCount1;
-        		while (itemsCount < total) {
+        		while (itemsCount < mylimit) {
 	        		page++;
 	    			q.page = page+"";
-	    	    	result = src.getAllResults(q);
-	    	    	for (WithResource<?, ?> item : result.items.getCulturalCHO()) {
-	    				WithResourceController.internalAddRecordToCollection(collection.getDbId().toString(), (RecordResource)item, 
-	    						F.Option.None(), resultInfo);
-	    				itemsCount++;
-	    			}
+	    	    	result = src.getResults(q);
+	    	    	int c = addResultToCollection(result, collection.getDbId().toString(), mylimit - itemsCount, resultInfo, dontDuplicate);
+	    	    	itemsCount = itemsCount + c;
 	    	    } 
-	          return 0;
+	          return ok("Imported "+mylimit+" items");
 	        }
 	      }
 	    );
-		
-		
-	    
-	    
 	    if (resultInfo.has("error"))
-	    	return badRequest(resultInfo);
-		return ok(resultInfo);
+	    	return Promise.pure((Result)badRequest(resultInfo));
+	    if (waitToFinish)
+	    	return promiseOfInt;
+		else
+			return Promise.pure(ok("Imported " + firstPageCount1 + " items out of " + mylimit));
+	}
+	
+	private static int addResultToCollection(SourceResponse result, String collectionID, int limit, ObjectNode resultInfo, boolean dontRepeat) {
+		int itemsCount = 0;
+		for (Iterator<WithResource<?, ?>> iterator = result.items.getCulturalCHO().iterator(); iterator.hasNext()
+				&& itemsCount < limit;) {
+			WithResource<?, ?> item = iterator.next();
+			WithResourceController.internalAddRecordToCollection(collectionID, (RecordResource) item, F.Option.None(),
+					resultInfo,dontRepeat);
+			itemsCount++;
+		}
+		return itemsCount;
 	}
 
 	/**

@@ -16,26 +16,16 @@
 
 package sources;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
 import java.util.Arrays;
 import java.util.List;
 import java.util.function.Function;
 
-import com.fasterxml.jackson.databind.JsonNode;
-
-import sources.EuropeanaSpaceSource.EuroQB;
 import sources.core.ApacheHttpConnector;
 import sources.core.CommonFilter;
-import sources.core.CommonFilters;
 import sources.core.CommonQuery;
-import sources.core.FacetsModes;
 import sources.core.HttpConnector;
-import sources.core.QueryBuilder;
 import sources.core.SourceResponse;
-import sources.core.Utils;
 import sources.core.Utils.Pair;
-import utils.ListUtils;
 
 public class EuropeanaCollectionSpaceSource extends EuropeanaSpaceSource{
 
@@ -68,7 +58,7 @@ public class EuropeanaCollectionSpaceSource extends EuropeanaSpaceSource{
 	
 	@Override
 	public SourceResponse getResults(CommonQuery q) {
-		q.addFilter(new CommonFilter("europeana_collectionName",getCollectionName()));
+		q.filters = Arrays.asList(new CommonFilter("europeana_collectionName",getCollectionName()));
 		return super.getResults(q);
 	}
 	
@@ -95,10 +85,6 @@ public class EuropeanaCollectionSpaceSource extends EuropeanaSpaceSource{
 //		}
 //		return res;
 //	}
-	public SourceResponse getAllResults(CommonQuery q) {
-		q.filters = Arrays.asList(new CommonFilter("europeana_collectionName",getCollectionName()));
-		return super.getResults(q);
-	}
 
 	public String getCollectionName() {
 		return collectionName;
