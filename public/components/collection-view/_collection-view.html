@@ -78,8 +78,8 @@
 									<label for="toggle1"></label><span class="private">private</span><span class="public">public</span>
 								</div>
 							</div>
-							<div class="action-body">
-								<input type="text" placeholder="Name your collection" data-bind="validationElement: titleToEdit"
+							<div class="action-body" data-bind="validationElement: titleToEdit">
+								<input type="text" placeholder="Name your collection"
 								data-bind="{value: titleToEdit, valueUpdate: 'afterkeypress', hasFocus: true
 				      attr: {placeholder: titleToEdit}}">
 								<textarea placeholder="Describe your collection" data-bind="{value: descriptionToEdit}" ></textarea>

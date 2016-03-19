@@ -196,6 +196,10 @@ define(['bridget', 'knockout', 'text!./_collection-view.html', 'isotope', 'image
 		self.isFavorites = ko.observable(false);
 		self.fetchitemnum = 20;
 		self.isPublic = ko.observable(true);
+		self.validationModel = ko.validatedObservable({
+			title: self.titleToEdit
+		});
+
 		self.displayTitle = ko.pureComputed(function () {
 			return self.isFavorites() ? 'Favorites' : self.title();
 		});
@@ -576,6 +580,7 @@ define(['bridget', 'knockout', 'text!./_collection-view.html', 'isotope', 'image
 		};
 
 		self.editCollection = function () {
+			if (self.validationModel.isValid()) {
 			var jsondata = JSON.stringify({
 				descriptiveData: {
 					label: {default: [self.titleToEdit()]},
@@ -611,7 +616,11 @@ define(['bridget', 'knockout', 'text!./_collection-view.html', 'isotope', 'image
 					});
 				}
 			});
-		};
+		} else {
+			self.validationModel.errors.showAllMessages();
+		}
+		}
+		
 
 		self.isotopeImagesReveal = function ($container, $items) {
 			self.$container = $(".grid#" + self.id());
