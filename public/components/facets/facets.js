@@ -365,7 +365,7 @@ define(['bridget','knockout', 'text!./facets.html','inputtags','liveFilter', 'ba
     	$('#f_search').val('');$('#f_search').removeAttr('value');
     	$("ul.list>li").css('display','block');
     	$('#'+e.filterID).liveFilter('#f_search', 'li', {
-    		  filterChildSelector: 'span'
+    		  filterChildSelector: 'a'
     		});
     	
     	
