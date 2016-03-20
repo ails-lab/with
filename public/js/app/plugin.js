@@ -469,7 +469,8 @@ WITHApp.ui = function( custom ){
 		
 
 		// init filter
-		if( $( '.filter' ).length > 0 ) {
+		
+	/*	if( $( '.filter' ).length > 0 ) {
 
 			// get list
 			$( '.filter .nav li' ).each( function(){
@@ -495,7 +496,7 @@ WITHApp.ui = function( custom ){
 				});
 			});
 
-		}
+		}*/
 	};
 	
 

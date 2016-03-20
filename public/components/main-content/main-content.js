@@ -187,7 +187,7 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 	  self.exhibitions=ko.observableArray();
 	  self.all=ko.observableArray();
 	  self.morespaces=ko.observable(true);
-	  self.fetchitemnum=5;
+	  self.fetchitemnum=10;
 	  self.nocollections=ko.observable(false);
 	  self.noexhibitions=ko.observable(false);
 	  self.nospaces=ko.observable(false);
@@ -393,12 +393,8 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 			var promise3=self.moreExhibitions();
 			$.when(promise1,promise2,promise3).done(function(data1,data2,data3){
 				self.revealSpaceItems(data1[0]);
-				
 				self.revealItems(data2[0]['collectionsOrExhibitions']);
 				self.revealExItems(data3[0]['collectionsOrExhibitions']);
-				var selector=$("ul.nav").find("li.active").attr('data-filter');
-				$( settings.mSelector ).isotope({ filter: '*' });
-			    $( settings.mSelector ).isotope({ filter: selector });
 				
 			})
 			
@@ -463,11 +459,17 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 		
 	  
 	  self.filter=function(data, event) {
+		       if(self.loadingcoll()==false && self.loadingex()==false && self.loadingspaces()==false){
 		  			  var selector = event.currentTarget.attributes.getNamedItem("data-filter").value;
 					  $(event.currentTarget).siblings().removeClass("active");
 					  $(event.currentTarget).addClass("active");
 					  $( settings.mSelector ).isotope({ filter: selector });
-					  return false;
+					  if(selector!="*"){
+						  $(".loadmore").hide();
+						  
+					  }
+					  else{ $(".loadmore").show();}
+					  return false;}
 				}
 					  
 	 
