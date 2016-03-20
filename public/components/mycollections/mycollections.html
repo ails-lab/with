@@ -213,6 +213,7 @@
 
 			   <script type="text/html" id="collectionsTemplate">
 			   	<li data-bind="css: { private: !administrative.access.isPublic()}">
+<a href="#" data-bind="attr: {href: 'index.html#collectionview/'+dbId()}" title="view"> 
 				  <div class="thumbnails">
 				  	<!-- ko if: administrative.access.isPublic()-->
 					<div class="category">public</div>
@@ -239,6 +240,7 @@
 					<div class="wrap small"></div>
 					<!-- /ko -->
 				  </div>
+</a>
 				  <div class="meta">
 				  	<!-- ko if: $parent.showsExhibitions -->
 				  	<a title="View exhibition" data-bind="{text: title(), attr: {href: 'index.html#exhibitionview/'+dbId()}}" class="header truncate"></a>
