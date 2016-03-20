@@ -401,6 +401,13 @@ WITHApp.ui = function( custom ){
 			$( '.action.editsection' ).addClass( 'active' );
 
 		});
+		
+		$( '.videobox' ).click( function( e ) {
+			console.log("videobox");
+			e.preventDefault();
+			$( '.action' ).removeClass( 'active' );
+			$( '.action.editvideo' ).addClass( 'active' );
+		});
 
 		// multiple select
 		$( '#multiplecollect' ).click( function( e ){

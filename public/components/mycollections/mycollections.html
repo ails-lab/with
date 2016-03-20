@@ -96,8 +96,11 @@
 			  <div class="action-body" data-bind="validationElement: titleToEdit">
 				<input type="text" data-bind="{value: titleToEdit, valueUpdate: 'afterkeypress', hasFocus: true
 				      attr: {placeholder: titleToEdit}}">
-				<textarea data-bind="{value: descriptionToEdit,
-					  attr: {placeholder: descriptionToEdit}"></textarea>
+				  </input>    
+				<textarea data-bind="{value: titleToEdit, valueUpdate: 'afterkeypress', hasFocus: false
+				      attr: {placeholder: descriptionToEdit}}"></textarea> 
+
+
 			  </div>
 			  <div class="button-group">
 			  	<a class="btn-green-o cancel" data-bind="click: closeSideBar">Cancel</a>
@@ -132,6 +135,9 @@
 					<span class="plus" style="cursor:pointer;"></span>
 					<span href="#" class="text">Add description</span>
 				</a>-->
+				<!-- <div class="form-group" data-bind="validationElement: descriptionToEdit">				  	
+				    <input type="text" data-bind="value: descriptionToEdit, valueUpdate: 'afterkeypress', hasFocus: true" placeholder="Collection description...">
+				</div> -->
 				<textarea rows="10" placeholder="Description" data-bind="value: descriptionToEdit"></textarea>
 			  </div>
 			  <!-- ko if: showsExhibitions -->
@@ -150,7 +156,7 @@
 			<!-- collection give access-->
 			<section class="action access">
 			  <div class="action-header">
-				<div class="title">Give access to collection</div>
+				<div class="title">Give access to users and user groups</div>
 			  </div>
 			  <div class="toggle">
 				<input type="checkbox" id="toggle1" data-bind="{checked: isPublicToEdit, click: isPublicToggle}">
@@ -258,12 +264,7 @@
 						<!-- /ko -->
 						<!-- /ko -->
 						<!--  ko if: (myAccess() ==  "OWN" || myAccess() == "WRITE")-->
-						<!-- ko if: $parent.showsExhibitions -->
-						<a data-toggle="tooltip" data-bind="attr: {href: 'index.html#exhibition-edit/'+dbId()}" data-placement="top" title="Edit exhibition" class="fa fa-pencil editaction"></a>
-						<!-- /ko -->
-						<!-- ko else -->
-						<a data-toggle="tooltip" data-bind="click: $parent.prepareForEditCollection" data-placement="top" title="Edit collection" class="fa fa-pencil editaction"></a>
-						<!-- /ko -->
+						<a data-toggle="tooltip" data-bind="click: $parent.prepareForEditCollection" data-placement="top" title="Edit" class="fa fa-pencil editaction"></a>
 						<!-- /ko -->
 						<span data-bind="visible: myAccess() == 'READ'">&nbsp;</span>
 					</div>

@@ -35,6 +35,7 @@ public class ExhibitionData extends ContextData<ExhibitionData.ExhibitionAnnotat
 		Literal text = new Literal();
 		String audioUrl="";
 		String videoUrl="";
+		String videoDescription="";
 
 		public Literal getText() {
 			return text;
@@ -53,6 +54,13 @@ public class ExhibitionData extends ContextData<ExhibitionData.ExhibitionAnnotat
 		}
 		public void setVideoUrl(String videoUrl) {
 			this.videoUrl = videoUrl;
+		}
+		
+		public String getVideoDescription() {
+			return videoDescription;
+		}
+		public void setVideoDescription(String videoDescription) {
+			this.videoDescription = videoDescription;
 		}
 	}
 

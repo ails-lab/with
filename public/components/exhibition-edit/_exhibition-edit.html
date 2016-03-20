@@ -28,46 +28,77 @@
 							<div class="scroll">
 								<!-- box-->
 								<div class="box">
-									<input data-bind="textInput: title, event: { blur: textfieldsLostFocus.bind($data, true) }" class="editortext" />
-									<textarea class="editortextarea" data-bind="textInput: description, event: { blur: textfieldsLostFocus.bind($data, false) }">Never in all their history have men been able truly to conceive of the world as one: a single sphere, a globe, having the qualities of a globe, a round earth in which all the directions eventually meet, in which there is no center.</textarea>
+									<input data-bind="{textInput: title, event: { blur: textfieldsLostFocus.bind($data, true) }}" class="editortext" />
+									<textarea class="editortextarea" data-bind="{textInput: description, event: { blur: textfieldsLostFocus.bind($data, false) }}"/>
 								</div>
 								<!-- add-->
 								<!-- ko template: { foreach: collectionItemsArray, beforeRemove: removeItem, afterAdd: showNewItem } -->
-								<div class="add droppable" 
-								data-bind="{event: {dragover: function(event){event.preventDefault();},
-                          dragenter: function(event){event.target.addClass('dragover'); event.preventDefault();},
-                          dragleave: function(event){event.target.removeClass('dragover'); event.preventDefault();}}, 
-                          drop: $parent.drop.bind($data, $index)}">
-									<span><a href="#" data-toggle="tooltip" data-placement="top" title="Drag an item here"><img src="img/ui/ic-add.png" /></a></span>
+								<div class="add" data-bind="drop: {index: $index}">
+									<span><a data-toggle="tooltip" data-placement="top" title="Drag an item here"><img src="img/ui/ic-add.png"></a></span>
 								</div>
 								<!-- box-->
-								<div class="box fill" data-bind="drag: { item: $data, move: true }">
+								<div class="box fill" data-bind="{css: {videoadded: containsVideo}, drag: {item: $data, move: true}}">
 									<div class="boxaction">
 										<ul>
-											<li>
-												<a href="#" data-toggle="tooltip" data-placement="top" title="Edit section" class="editbox"> <i class="fa fa-pencil-square-o"></i></a>
-											</li>
-											<li>
-												<a href="#" data-toggle="tooltip" data-placement="top" title="Delete section" data-bind="click: $parent.xButtonClicked"> <i class="fa fa-trash-o"></i></a>
-											</li>
+										<li><a href="#" data-toggle="tooltip" data-placement="top" title="Edit item text" data-bind="click: $parent.prepareForItemEdit" class="editbox"> <i class="fa fa-pencil-square-o"></i></a></li>
+										<li><a href="#" data-toggle="tooltip" data-placement="top" title="Delete item" data-bind="click: $parent.xButtonClicked"> <i class="fa fa-trash-o"></i></a><li>
 										</ul>
 									</div>
 									<div class="left">
 										<div class="imgwrap">
-											<img data-bind="attr: { src: media()[0].Thumbnail.url }" />
+											<img data-bind="attr: { src: thumbnailUrl }" id="itemImage"/>
 										</div>
 										<div class="imginfo">
-											<span class="mediatitle" data-bind="text: title"></span><br />
+											<span class="mediatitle" data-bind="text: title"></span><br/>
 											<span class="mediasource" data-bind="text: provenance()[provenance().length - 1].provider"></span>
+											<!-- ko if: description -->
+												<div data-bind="text: description"> </div>
+											<!-- /ko -->
 										</div>
 									</div>
-									<div class="right">
-										<div class="boxtitle" data-bind="text: description"></div>
-									</div>
-								</div>
+									<!--  ko if: containsText -->
+										<div class="right">
+											<div class="boxtitle" data-bind="text: contextData()[0].body.text.default"></div>
+				                        </div>
+									<!-- /ko -->
+									<!-- ko else -->
+										<!-- ko if: description -->
+											<div class="right">
+												<div class="boxtitle" data-bind="text: description"></div>
+					                        </div>
+										<!--  /ko -->
+									<!-- /ko -->
+								    <!--  ko if: containsVideo -->
+									<div class="video">
+				                        <div class="imgwrap">
+				                          <!-- ko if: embeddedVideoUrl -->
+				                          <div class="embed-responsive embed-responsive-4by3">
+				                            <iframe data-bind="attr: {src: embeddedVideoUrl}" frameborder="0" allowfullscreen class="embed-responsive-item"></iframe>
+				                          </div>
+				                          <!-- /ko -->
+				                          <!-- ko else -->
+				                          <div>Invalid video url:</div>
+				                          <span style="color:red" data-bind="text: contextData()[0].body.videoUrl"></span>
+				                          <!-- /ko -->
+				                        </div>
+				                        <!--  ko if: containsVideoDescription -->
+				                        <div class="imginfo"><span class="mediatitle" data-bind="text: contextData()[0].body.videoDescription"></span></div>
+				                        <!-- /ko -->
+				                        <ul class="action">
+				                          <li><a href="#" data-toggle="tooltip" data-placement="top" title="Edit video" data-bind="click: $parent.prepareForItemEdit"><i class="fa fa-pencil videobox"></i></a></li>
+				                          <li><a href="#" data-toggle="tooltip" data-placement="top" title="Delete video" data-bind="click: $parent.deleteVideo"><i class="fa fa-trash-o"></i></a></li>
+				                        </ul>
+				                     </div>
+				                     <!-- /ko -->
+				                     <!-- ko else -->
+									 <div class="video"><a href="#" data-toggle="tooltip" data-placement="top" title="Add video" class="addvideo videobox" data-bind="click: $parent.prepareForItemEdit">
+									 	<img src="img/ui/ic-add.png"></a>
+									 </div>
+									 <!-- /ko -->
+			                    </div>
 								<!-- /ko -->
-								<div class="add droppable">
-									<span><a href="#" data-toggle="tooltip" data-placement="top" title="Drag an item here">
+								<div class="add">
+									<span><a data-toggle="tooltip" data-bind="drop: {index: collectionItemsArray().length}" data-placement="top" title="Drag an item here">
 										<img src="img/ui/ic-add.png" /></a></span>
 								</div>
 							</div>
@@ -78,7 +109,7 @@
 						<!-- actions-->
 						<div class="actions">
 							<!--  ko if: myCollections().length > 0 -->
-							<select  id="CollectionSelect" class="form-control collectionlist" data-bind="options: myCollections, optionsText: 'title', value: selectedCollection"></select>
+							<select id="CollectionSelect" class="form-control collectionlist" data-bind="options: myCollections, optionsText: 'title', value: selectedCollection"></select>
 							<!-- /ko -->
 
 							<!--<div class="collectionsearch">
@@ -87,15 +118,13 @@
 							<div class="notification">Select items from your collections and drag them to your exhibition</div>
 						</div>
 						<!-- listing-->
-						<div class="assetlisting">
+						<div class="assetlisting" id="outer-bottom">
 							<ul data-bind="foreach: userSavedItemsArray">
 								<li>
-									<a href="#" data-toggle="tooltip" data-placement="top" draggable="true"
-									data-bind="{event:{ dragstart: $parent.dragStart.bind($data, false), 
-										dragend: function(event){console.log("2");document.getElementsByClassName('dragover')[0].removeClass('dragover')}},
-										attr: { title: title }}}">
+									<a id="bottom-box" href="#" data-toggle="tooltip" data-placement="top" 
+									data-bind="{drag: {item: $data, move: false}, attr: {title: title}}">
 										<div class="hue">
-											<img data-bind="attr: { src: media()[0].thumbnailUrl }" />
+											<img data-bind="attr: { src: thumbnailUrl }" class="itemImage"/>
 											<div class="color"></div>
 										</div>
 									</a>
@@ -114,19 +143,31 @@
 				</section>
 				<section class="action editsection">
 					<div class="action-header">
-						<div class="title">Edit section</div>
+						<div class="title">Edit text</div>
 					</div>
 					<div class="action-body">
-						<textarea type="text" placeholder="About me">Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidunt ut laoreet dolore magna aliquam erat volutpat.</textarea>
-						<div class="sectionside">
+						<textarea type="text" placeholder="Add text" data-bind="value: itemText"></textarea>
+						<!--  <div class="sectionside">
 							<div class="head">Media location</div>
 							<div class="toggle">
 								<input type="checkbox" id="toggle3">
 								<label for="toggle3"></label><span class="private">left</span><span class="public">right</span>
 							</div>
-						</div>
+						</div> -->
 					</div>
-					<div class="button-group"><a href="#" class="btn-green-o cancel">Cancel</a><a href="#" class="btn-green">Save</a></div>
+					<div class="button-group"><a class="btn-green-o cancel" data-bind="click: closeSideBar">Cancel</a>
+					<a class="btn-green" data-bind="click: editItem.bind($data, 'editText')">Save</a></div>
+				</section>
+				<section class="action editvideo">
+					<div class="action-header">
+						<div class="title">Edit video</div>
+					</div>
+					<div class="action-body">
+						<textarea type="text" placeholder="Add youtube url" data-bind="value: itemVideoUrl"></textarea>
+						<textarea type="text" placeholder="Add video description" data-bind="value: itemVideoDescription"></textarea>
+					</div>
+					<div class="button-group"><a class="btn-green-o cancel" data-bind="click: closeSideBar">Cancel</a>
+					<a class="btn-green" data-bind="click: editItem.bind($data, 'editVideo')">Save</a></div>
 				</section>
 			</main>
 		</div>

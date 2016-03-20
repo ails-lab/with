@@ -142,6 +142,8 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 		};
 
 		self.init = function () {
+			WITHApp.tabAction();
+			
 			if (self.showsExhibitions) {
 				mapping.label = {
 					create: function (options) {
@@ -581,14 +583,18 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 			var context = ko.contextFor(event.target);
 			var collIndex = context.$index();
 			self.index(collIndex);
-			if (self.collectionSet() == "my") {
-				//self.collectionSet("my");
-				self.titleToEdit(self.myCollections()[collIndex].title());
-				self.descriptionToEdit(self.myCollections()[collIndex].description());
-			} else {
-				//self.collectionSet("shared");
-				self.titleToEdit(self.sharedCollections()[collIndex].title());
-				self.descriptionToEdit(self.sharedCollections()[collIndex].description());
+			if (self.showsExhibitions)
+				window.location = '#exhibition-edit/' + collection.dbId();
+			else {
+				if (self.collectionSet() == "my") {
+					//self.collectionSet("my");
+					self.titleToEdit(self.myCollections()[collIndex].title());
+					self.descriptionToEdit(self.myCollections()[collIndex].description());
+				} else {
+					//self.collectionSet("shared");
+					self.titleToEdit(self.sharedCollections()[collIndex].title());
+					self.descriptionToEdit(self.sharedCollections()[collIndex].description());
+				}
 			}
 		};
 
@@ -646,14 +652,13 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 		};
 
 		self.closeSideBar = function () {
-
 			self.isPublicToEdit(false);
-			self.titleToEdit("");
+			self.titleToEdit(" ");
 			self.descriptionToEdit("");
 			self.isPublicToEdit();
 			self.titleToEdit();
 			self.descriptionToEdit();
-			$('textarea').hide();
+			//$('textarea').hide();
 			//$('.add').show();
 			$('.action').removeClass('active');
 		};
