@@ -1,4 +1,4 @@
-define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', 'app', 'jquery.lazyload'], function (ko, template, jqueryUI, autoscroll, app, jqueryLazyLoad) {
+define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', 'app', 'jquery.lazyload', 'knockout-else', 'knockout-validation'], function (ko, template, jqueryUI, autoscroll, app, jqueryLazyLoad, KnockoutElse) {
 
 	function setUpSwitch(exhibition) {
 		// Set the initial value
@@ -20,6 +20,12 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 			});
 		});
 	}
+	
+	ko.validation.init({
+		errorElementClass: 'error',
+		errorMessageClass: 'errormsg',
+		decorateInputElement: true
+	});
 
 	function MyCollection(collectionData) {
 		this.dbId = collectionData.dbId;
@@ -131,6 +137,7 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 	var ExhibitionEditModel = function (params) {
 		var self = this;
 		self.route = params.route;
+		KnockoutElse.init([spec = {}]);
 		self.checkLogged = function () {
 			if (localStorage.getItem('logged_in') != "true") {
 				window.location.href = "#login";
@@ -158,12 +165,49 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 					}
 					return result;
 				});
+				newRecord.containsVideoDescription = ko.pureComputed(function () {
+					if (newRecord.contextData == undefined || newRecord.contextData()[0].body.videoDescription == undefined) {
+						return false;
+					} else {
+						return (newRecord.contextData()[0].body.videoDescription() !== '');
+					}
+					return result;
+				});
 				newRecord.containsText = ko.pureComputed(function () {
 					if (newRecord.contextData == undefined || newRecord.contextData()[0].body.text.default == undefined) {
 						return false;
 					} else {
 						return newRecord.contextData()[0].body.text.default() !== '';
 					}
+				});
+				if (newRecord.contextData == undefined) {
+					contextData = ko.mapping.fromJS([{
+						"contextDataType": "ExhibitionData",
+						"target": {
+							"collectionId": newRecord.dbId()
+						},
+						"body" : {
+							"audioUrl": "",
+							"text": {"default": ""},
+							"videoUrl": "",
+							"videoDescription": ""
+						}
+					}], {});
+					newRecord.contextData = contextData;
+				}
+				newRecord.embeddedVideoUrl = ko.pureComputed(function () {
+					if (newRecord.containsVideo()) {
+						var urlMatch = newRecord.contextData()[0].body.videoUrl().match(/youtube\.com.*(\?v=|\/embed\/)(.{11})/);
+						if (urlMatch !== null) {
+							var youtube_video_id = urlMatch.pop();
+							var embeddedVideoPath = 'https://www.youtube.com/embed/' + youtube_video_id;
+							return embeddedVideoPath;
+						}
+						else
+							return null;
+					}
+					else
+						return null;
 				});
 				newRecord.title = ko.mapping.fromJS(app.findByLang(record.descriptiveData.label), {});
 				var dbDescription = record.descriptiveData.description;
@@ -201,9 +245,19 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 		self.collectionItemsArray = ko.mapping.fromJS([], {}); //holds the exhibitions items
 		//self.exhibitionItem = ko.observable({});
 		self.itemText = ko.observable("");
-		self.itemVideoUrl = ko.observable("");
+		self.itemVideoUrl = ko.observable("").extend({
+			required: true,
+			pattern: {
+				message: 'Not valid youtube video url.',
+				params: /youtube\.com.*(\?v=|\/embed\/)(.{11})/
+			}
+		});
 		self.itemPosition = ko.observable(0);
 		self.itemId = ko.observable("");
+		self.itemVideoDescription = ko.observable(undefined);
+		self.validationModel = ko.validatedObservable({
+			itemVideoUrl: self.itemVideoUrl
+		});
 		
 		var collections = [];
 		var promise = app.getAllUserCollections();
@@ -345,36 +399,52 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 			self.itemPosition(index);
 			self.itemText(exhibitionItem.contextData()[0].body.text.default());
 			self.itemVideoUrl(exhibitionItem.contextData()[0].body.videoUrl());
+			self.itemVideoDescription(exhibitionItem.contextData()[0].body.videoDescription());
 			self.itemId(exhibitionItem.dbId());
 		};
 		
 		self.editItem = function (editMode) {
-			if (editMode == "editText") {
-				var promise = self.updateRecord(self.itemId(), self.itemText(), self.itemVideoUrl(), self.dbId(), self.itemPosition());
+			if (self.itemVideoUrl() == "" || self.validationModel.isValid()) {
+				var promise = self.updateRecord(self.itemId(), self.itemText(), self.itemVideoUrl(), self.itemVideoDescription(), self.dbId(), self.itemPosition());
 				$.when(promise).done(function (data) {
-					self.collectionItemsArray()[self.itemPosition()].contextData()[0].body.text.default(self.itemText());
+					if (editMode == "editText") {
+						self.collectionItemsArray()[self.itemPosition()].contextData()[0].body.text.default(self.itemText());
+					} else if (editMode == "editVideo") {
+						self.collectionItemsArray()[self.itemPosition()].contextData()[0].body.videoUrl(self.itemVideoUrl());
+						self.collectionItemsArray()[self.itemPosition()].contextData()[0].body.videoDescription(self.itemVideoDescription());
+					}
 					self.closeSideBar();
 				}).fail(function (data) {
 					//alert('text edit failed');
 					self.closeSideBar();
 				});
-			}
-			else if (editMode == "editVideo") {
-				
-			}
+			} else {
+				self.validationModel.errors.showAllMessages();
+			}	
 		};
+		
+		self.deleteVideo = function(exhibitionItem, event) {
+			var context = ko.contextFor(event.target);
+			var index = context.$index();
+			var promise = self.updateRecord(exhibitionItem.dbId(), self.itemText(), "", "", self.dbId(), index);
+			$.when(promise).done(function (data) {
+				self.collectionItemsArray()[index].contextData()[0].body.videoUrl("");
+				self.collectionItemsArray()[index].contextData()[0].body.videoDescription("");
+			});
+		}
 		
 		self.closeSideBar = function () {
 			self.itemPosition(-1);
 			self.itemText("");
 			self.itemVideoUrl("");
+			self.itemVideoDescription("");
 			self.itemId("");
-			$('textarea').hide();
+			//$('textarea').hide();
 			//$('.add').show();
 			$('.action').removeClass('active');
 		};
 		
-		self.updateRecord = function(dbId, text, videoUrl, colId, position) {
+		self.updateRecord = function(dbId, text, videoUrl, videoDescription, colId, position) {
 			var jsonData = {};
 			jsonData = {
 				"contextDataType": "ExhibitionData",
@@ -384,7 +454,8 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 				},
 				"body" : {
 					"text": {"default": text},
-					"videoUrl": videoUrl
+					"videoUrl": videoUrl,
+					"videoDescription": videoDescription
 				}
 			};
 			jsonData = JSON.stringify(jsonData);
@@ -500,11 +571,11 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 					},
 					drop: function (event, ui) {
 						var indexNewItem = ko.utils.unwrapObservable(valueAccessor().index);
-						var newItem = ko.mapping.fromJS({}, {});
-						newItem = _draggedItem;
+						var newItem = ko.mapping.fromJS(_draggedItem, self.mapping);
+						newItem.contextData()[0].target.position(indexNewItem);
 						var indexDraggedItem = self.collectionItemsArray.indexOf(_draggedItem);
 						_startIndex = indexDraggedItem;
-						if (_draggedItem.contextData == undefined) {
+						/*if (_draggedItem.contextData == undefined) {
 							contextData = ko.mapping.fromJS([{
 								"contextDataType": "ExhibitionData",
 								"target": {
@@ -520,7 +591,18 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 							newItem.contextData = contextData;
 						} else {
 							newItem.contextData()[0].target.position(indexNewItem);
-						}
+							if (newItem.contextData()[0].body.videoUrl !== undefined &&
+									newItem.contextData()[0].body.videoUrl() !== null
+									&& newItem.contextData()[0].body.videoUrl() !== "") {
+								var youtube_video_id = newItem.contextData()[0].body.videoUrl().match(/youtube\.com.*(\?v=|\/embed\/)(.{11})/).pop();
+								//var thumbnailPath = '//img.youtube.com/vi/' + youtube_video_id + '/0.jpg';
+								console.log(youtube_video_id);
+								var embeddedVideoPath = 'https://www.youtube.com/embed/' + youtube_video_id;
+								console.log(embeddedVideoPath);
+								//newItem.videoThumbnail = ko.observable(thumbnailPath);
+								newItem.embeddedVideoUrl = ko.observable(embeddedVideoPath);
+							}
+						}*/
 						//don't do anything if it is moved to its direct left or right dashed box
 						if (_bIsMoveOperation) {// moved from exhibition itself
 							if (indexDraggedItem == indexNewItem || (indexDraggedItem + 1) == indexNewItem) {
