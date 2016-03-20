@@ -634,15 +634,11 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 						},
 						error: function (error) {
 							var r = JSON.parse(error.responseText);
-							$("#myModal").find("h4").html("An error occured");
-							$("#myModal").find("div.modal-body").html(r.message);
-							$("#myModal").modal('show');
+							$.smkAlert({ text: r.message, type: 'danger', time: 10 });
 						}
 					});
 				} else {
-					$("#myModal").find("h4").html("An error occured");
-					$("#myModal").find("div.modal-body").html("The collection cannot be edited");
-					$("#myModal").modal('show');
+					$.smkAlert({ text: 'An error occured', type: 'danger', time: 10 });
 				}
 				self.closeSideBar();
 				//WITHApp.tabAction();
@@ -653,13 +649,21 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 
 		
 		self.closeSideBar = function () {
-		
-			self.isPublicToEdit();
-			self.titleToEdit();
-			self.descriptionToEdit();
+			/*self.isPublicToEdit(false);
+			self.titleToEdit(" ");
+			self.descriptionToEdit("");*/
+			self.isPublicToEdit("");
+			self.titleToEdit("");
+			self.descriptionToEdit("");
 			//$('textarea').hide();
 			//$('.add').show();
 			$('.action').removeClass('active');
+		};
+		
+		self.flushEditableFields = function () {
+			self.isPublicToEdit();
+			self.titleToEdit();
+			self.descriptionToEdit();
 		};
 
 		self.updateCollectionData = function (collectionSet, collIndex) {
