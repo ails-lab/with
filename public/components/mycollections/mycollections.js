@@ -651,6 +651,12 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 			}
 		};
 
+		self.emptyDetails = function(){
+			self.isPublicToEdit(false);
+			self.titleToEdit(" ");
+			self.descriptionToEdit("");
+		}
+		
 		self.closeSideBar = function () {
 			/*self.isPublicToEdit(false);
 			self.titleToEdit(" ");

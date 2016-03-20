@@ -32,10 +32,10 @@
 			  </ul>
 			  <!-- /ko -->
 			  <!-- ko if: showsExhibitions -->
-			    <a href="#" class="new"><span class="plus"></span><span class="text">New Exhibition</span></a>
+			    <a href="#" class="new"  event: {click: emptyDetails()}><span class="plus"></span><span class="text">New Exhibition</span></a>
 			  <!-- /ko -->
 			  <!-- ko else -->
-			    <a href="#" class="new"><span class="plus"></span><span class="text">New Collection</span></a>
+			    <a href="#" class="new"  event: {click: emptyDetails()} ><span class="plus"></span><span class="text">New Collection</span></a>
 			  <!-- /ko -->
 			</section>
 			<!-- message-->
