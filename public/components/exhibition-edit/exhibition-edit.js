@@ -1,5 +1,8 @@
 define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', 'app', 'jquery.lazyload', 'knockout-else', 'knockout-validation'], function (ko, template, jqueryUI, autoscroll, app, jqueryLazyLoad, KnockoutElse) {
-
+	
+	collectionItemCount = 10;
+	exhibitionItemCount = 4;
+	
 	function setUpSwitch(exhibition) {
 		// Set the initial value
 		$('#toggle2').prop('checked', exhibition.administrative.access.isPublic());
@@ -184,6 +187,7 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 					contextData = ko.mapping.fromJS([{
 						"contextDataType": "ExhibitionData",
 						"target": {
+							"position": -1,
 							"collectionId": newRecord.dbId()
 						},
 						"body" : {
@@ -261,7 +265,7 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 		
 		var collections = [];
 		var promise = app.getAllUserCollections();
-		self.myCollections = ko.mapping.fromJS([]); //ko.observableArray([]); //holds all the collections
+		self.myCollections = ko.mapping.fromJS([]); //holds all the collections
 		$.when(promise).done(function (data) {
 			var collections = [];
 			if (data.hasOwnProperty('collectionsOrExhibitions')) {
@@ -297,9 +301,8 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 			self.title(app.findByLang(data.descriptiveData.label));
 			self.description(app.findByLang(data.descriptiveData.description));
 			setUpSwitch(self);
-
 			$.ajax({
-				url: "/collection/" + self.dbId() + "/list?count=5&start=0",
+				url: "/collection/" + self.dbId() + "/list?count="+exhibitionItemCount+"&start=0",
 				method: "get",
 				success: function (data) {
 					self.firstEntries = data.records;
@@ -319,7 +322,7 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 		self.selectedCollection.subscribe(function (newCollection) {
 			// Load the first 20 records when loading a different collection
 			$.ajax({
-				url: "/collection/" + newCollection.dbId + "/list?count=20&start=0",
+				url: "/collection/" + newCollection.dbId + "/list?count="+collectionItemCount+"&start=0",
 				method: "get",
 				success: function (data) {
 					self.firstEntries = data.records;
@@ -553,18 +556,18 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 					tolerance: "intersect",
 					over: function (event, ui) {
 						if (!_bIsMoveOperation) {
-							$(this).find('#droppable-Children').css({
+							/*$(this).find('#droppable-Children').css({
 								display: "block"
-							});
+							});*/
 							dropElement.animate({
 								width: "150px"
 							}, 200);
 						}
 					},
 					out: function (event, ui) {
-						$(this).find('#droppable-Children').css({
+						/*$(this).find('#droppable-Children').css({
 							display: "none"
-						});
+						});*/
 						dropElement.animate({
 							width: "60px"
 						}, 200);
@@ -575,34 +578,6 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 						newItem.contextData()[0].target.position(indexNewItem);
 						var indexDraggedItem = self.collectionItemsArray.indexOf(_draggedItem);
 						_startIndex = indexDraggedItem;
-						/*if (_draggedItem.contextData == undefined) {
-							contextData = ko.mapping.fromJS([{
-								"contextDataType": "ExhibitionData",
-								"target": {
-									"collectionId": self.dbId(),
-									"position": indexNewItem
-								},
-								"body" : {
-									"audioUrl": "",
-									"text": {"default": ""},
-									"videoUrl": ""
-								}
-							}], {});
-							newItem.contextData = contextData;
-						} else {
-							newItem.contextData()[0].target.position(indexNewItem);
-							if (newItem.contextData()[0].body.videoUrl !== undefined &&
-									newItem.contextData()[0].body.videoUrl() !== null
-									&& newItem.contextData()[0].body.videoUrl() !== "") {
-								var youtube_video_id = newItem.contextData()[0].body.videoUrl().match(/youtube\.com.*(\?v=|\/embed\/)(.{11})/).pop();
-								//var thumbnailPath = '//img.youtube.com/vi/' + youtube_video_id + '/0.jpg';
-								console.log(youtube_video_id);
-								var embeddedVideoPath = 'https://www.youtube.com/embed/' + youtube_video_id;
-								console.log(embeddedVideoPath);
-								//newItem.videoThumbnail = ko.observable(thumbnailPath);
-								newItem.embeddedVideoUrl = ko.observable(embeddedVideoPath);
-							}
-						}*/
 						//don't do anything if it is moved to its direct left or right dashed box
 						if (_bIsMoveOperation) {// moved from exhibition itself
 							if (indexDraggedItem == indexNewItem || (indexDraggedItem + 1) == indexNewItem) {
@@ -630,7 +605,6 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 
 		ko.bindingHandlers.hscroll = {
 			updating: true,
-
 			init: function (element, valueAccessor, allBindingsAccessor) {
 				var self = this;
 				self.updating = true;
@@ -640,7 +614,6 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 					self.updating = false;
 				});
 			},
-
 			update: function (element, valueAccessor, allBindingsAccessor) {
 				var props = allBindingsAccessor().scrollOptions;
 				var offset = props.offset ? props.offset : "0";
@@ -675,10 +648,15 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 		};
 
 		self.loadNextExhibition = function () {
+			console.log("next");
 			self.moreItems(true);
 		};
 
 		self.moreItems = function (isForExhibition) {
+			if (isForExhibition)
+				count = exhibitionItemCount;
+			else
+				count = collectionItemCount;
 			if (self.loading === true) {
 				setTimeout(self.moreItems(), 300);
 			}
@@ -694,29 +672,21 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 					collectionID = self.selectedCollection().dbId;
 				}
 				$.ajax({
-					"url": "/collection/" + collectionID + "/list?count=20&start=" + offset,
+					"url": "/collection/" + collectionID + "/list?count="+count+"&start=" + offset,
 					"method": "get",
 					"contentType": "application/json",
 					"success": function (data) {
-						console.log(data.itemCount);
 						if (isForExhibition) {
-							data.records.map(function (record) { //fix for now till service gets implemented
-								record.additionalText = ko.observable('');
-								record.videoUrl = ko.observable('');
-								record.containsVideo = ko.observable(false);
-								record.containsText = ko.observable(false);
-								var exhibitionItemInfo = record.exhibitionRecord;
-								if (exhibitionItemInfo !== undefined) {
-									record.additionalText(exhibitionItemInfo.annotation);
-									record.videoUrl(exhibitionItemInfo.videoUrl);
-									record.containsVideo(!isEmpty(record.videoUrl()));
-									record.containsText(!isEmpty(record.additionalText()));
-								}
-							});
 							self.loadingInitialItemsCount = self.loadingInitialItemsCount + data.records.length;
-							self.collectionItemsArray.push.apply(self.collectionItemsArray, data.records);
+							$.each(data.records, function( index, value ) {
+								var exhibitionRecord = ko.mapping.fromJS(value, self.mapping);
+								self.collectionItemsArray.push(exhibitionRecord);
+							});
 						} else {
-							self.userSavedItemsArray.push.apply(self.userSavedItemsArray, data.records);
+							$.each(data.records, function( index, value ) {
+								var exhibitionRecord = ko.mapping.fromJS(value, self.mapping);
+								self.userSavedItemsArray.push(exhibitionRecord);
+							});
 						}
 						self.loading(false);
 					},
@@ -726,12 +696,13 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 				});
 			}
 		};
-		//----knockout solution----//
+		
 
 		//for the side scrolling
 		$('.left').droppable({
 			tolerance: "touch",
 			over: function (event, ui) {
+				console.log("left");
 				$('.outer').autoscroll({
 					direction: 'left',
 					step: 1000,
@@ -746,6 +717,7 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 		$('.right').droppable({
 			tolerance: "touch",
 			over: function (event, ui) {
+				console.log("left");
 				$('.outer').autoscroll({
 					direction: 'right',
 					step: 1000,
