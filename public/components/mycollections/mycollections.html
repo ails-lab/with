@@ -65,8 +65,6 @@
 			<section class="collection-list">
 			  <!-- collection main header-->
 			  <div class="list-head">
-
-
 				<div class="sort"><span>Sort by</span><a id="sorting" href="#" data-toggle="dropdown"><span class="text">Date</span><span class="arrow"></span></a>
 				  <!-- dropdown-->
 				  <ul aria-labelledby="sorting" class="dropdown-menu">
@@ -83,11 +81,27 @@
 			  <ul class="list-body grids">
 					<div data-bind="{visible: collectionSet() == 'my', template: { name: 'collectionsTemplate', foreach: myCollections()}}"></div>
 					<div data-bind="{visible: collectionSet() == 'shared', template: { name: 'collectionsTemplate', foreach: sharedCollections()}}"></div>
-			  </ul><a style="cursor:pointer;" class="loadmore" data-bind="{visible: collectionCount() > myCollections().length, event: {click: moreCollections(false)}}">load more
+			  <!-- ko if: collectionSet == 'my' -->
+			  <a style="cursor:pointer;" class="loadmore" 
+			  data-bind="{visible: (!showsExhibitions && collectionCount() > myCollections().length) || (showsExhibitions && exhibitionCount() > myCollections().length), 
+			  event: {click: moreCollections.bind($data, showsExhibitions)}}">load more
+			      <div class="left"></div>
+                  <div class="right"></div>
+                  <div class="top"></div>
+                  <div class="bot"></div>
+              </a>
+			  <!-- /ko -->
+			  <!-- ko if: collectionSet == "shared" -->
+			  	<a style="cursor:pointer;" class="loadmore" 
+			  	data-bind="{visible: (!showsExhibitions && collectionCount() > sharedCollections().length) || (showsExhibitions && exhibitionCount() > sharedCollections().length),  
+			  	event: {click: moreCollections.bind($data, showsExhibitions)}}">load more
 			   <div class="left"></div>
                   <div class="right"></div>
                   <div class="top"></div>
-                  <div class="bot"></div></a>
+                  <div class="bot"></div>
+              </a>
+			  <!-- /ko -->
+			  </ul>
 			</section>
 			<section class="action edit">
 			  <div class="action-header">
