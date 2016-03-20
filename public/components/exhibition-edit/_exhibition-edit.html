@@ -51,9 +51,6 @@
 										<div class="imginfo">
 											<span class="mediatitle" data-bind="text: title"></span><br/>
 											<span class="mediasource" data-bind="text: provenance()[provenance().length - 1].provider"></span>
-											<!-- ko if: description -->
-												<div data-bind="text: description"> </div>
-											<!-- /ko -->
 										</div>
 									</div>
 									<!--  ko if: containsText -->
@@ -117,9 +114,9 @@
 							<!--  ko if: myCollections().length > 0 -->
 							<select id="CollectionSelect" class="form-control collectionlist" data-bind="options: myCollections, optionsText: 'title', value: selectedCollection"></select>
 							<!-- /ko -->
-							<!--<div class="collectionsearch">
-								<input type="text" placeholder="Search"><img src="img/ui/ic-mag.png" class="icon">
-							</div>-->
+							<div class="collectionsearch">
+								<input id="searchBox" type="text" placeholder="Search"/><img src="img/ui/ic-mag.png" class="icon" data-bind="search"/>
+							</div>
 							<div class="notification">Select items from your collections and drag them to your exhibition</div>
 						</div>
 						<!-- listing-->

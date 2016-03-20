@@ -177,7 +177,7 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
 		/*self.sources= ko.observableArray([ "Europeana", "DPLA","DigitalNZ","WITHin", "Rijksmuseum"]);
 		 * no WITHin until it's fully functional
 		 */
-		self.sources= ko.observableArray([ "Europeana", "DPLA","DigitalNZ","Rijksmuseum"]);
+		self.sources= ko.observableArray([ "Europeana", "DPLA","DigitalNZ", "WITHin", "Rijksmuseum"]);
 		self.mixresults=ko.observableArray();
 		self.selectedSource=ko.observable(self.sources()[0]);
 		self.results = ko.observableArray([]);

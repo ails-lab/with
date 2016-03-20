@@ -234,7 +234,8 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 		        return newRecord;
 		    }
 		}
-
+		
+		self.searchPage = 0;
 		self.checkLogged();
 		self.loading = ko.observable(false);
 		self.title = ko.observable('');
@@ -327,6 +328,7 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 				success: function (data) {
 					self.firstEntries = data.records;
 					ko.mapping.fromJS(self.firstEntries, self.mapping, self.userSavedItemsArray);
+					self.searchPage = 0;
 					//self.userSavedItemsArray(data.records);
 				},
 				error: function (result) {
@@ -477,6 +479,41 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 		self.playExhibition = function () {
 			window.location.hash = '#exhibitionview/' + self.dbId();
 		};
+		
+		$("#searchBox").keyup(function(event){
+	        if (event.keyCode == 13) {
+	        	self.searchPage=1;
+	        	self.search();
+	        }
+	    });
+		
+		self.search = function() {
+			$.ajax({
+				"url": "/api/advancedsearch",
+				"method": "post",
+				"contentType": "application/json",
+				"data": JSON.stringify({
+					searchTerm: $("#searchBox").val(),
+					page: self.searchPage,
+					pageSize:20,
+				    source:["WITHin"],
+				    filters:[]
+				}),
+				"success": function(reply) {
+					var records = reply.responses[0].items.culturalCHO;
+					if (self.searchPage > 1) {
+						$.each(records, function( index, value ) {
+							var exhibitionRecord = ko.mapping.fromJS(value, self.mapping);
+							self.userSavedItemsArray.push(exhibitionRecord);
+						});
+					}
+					else if (self.searchPage == 1) {
+						ko.mapping.fromJS(records, self.mapping, self.userSavedItemsArray);
+
+					}
+				}
+			});
+		}
 		
 		//custom binding
 		var _draggedItem;
@@ -653,51 +690,58 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 		};
 
 		self.moreItems = function (isForExhibition) {
-			if (isForExhibition)
-				count = exhibitionItemCount;
-			else
-				count = collectionItemCount;
-			if (self.loading === true) {
-				setTimeout(self.moreItems(), 300);
-			}
-			if (self.loading() === false) {
-				self.loading(true);
-				var offset;
-				var collectionID;
-				if (isForExhibition) {
-					offset = self.collectionItemsArray().length;
-					collectionID = self.dbId();
-				} else {
-					offset = self.userSavedItemsArray().length;
-					collectionID = self.selectedCollection().dbId;
+			if (self.searchPage >= 0) {//items in collectionItemsArray are search results
+				if (!isForExhibition) {
+					self.searchPage++;
+					self.search();
 				}
-				$.ajax({
-					"url": "/collection/" + collectionID + "/list?count="+count+"&start=" + offset,
-					"method": "get",
-					"contentType": "application/json",
-					"success": function (data) {
-						if (isForExhibition) {
-							self.loadingInitialItemsCount = self.loadingInitialItemsCount + data.records.length;
-							$.each(data.records, function( index, value ) {
-								var exhibitionRecord = ko.mapping.fromJS(value, self.mapping);
-								self.collectionItemsArray.push(exhibitionRecord);
-							});
-						} else {
-							$.each(data.records, function( index, value ) {
-								var exhibitionRecord = ko.mapping.fromJS(value, self.mapping);
-								self.userSavedItemsArray.push(exhibitionRecord);
-							});
-						}
-						self.loading(false);
-					},
-					"error": function (result) {
-						self.loading(false);
+			}
+			else {
+				if (isForExhibition)
+					count = exhibitionItemCount;
+				else
+					count = collectionItemCount;
+				if (self.loading === true) {
+					setTimeout(self.moreItems(), 300);
+				}
+				if (self.loading() === false) {
+					self.loading(true);
+					var offset;
+					var collectionID;
+					if (isForExhibition) {
+						offset = self.collectionItemsArray().length;
+						collectionID = self.dbId();
+					} else {
+						offset = self.userSavedItemsArray().length;
+						collectionID = self.selectedCollection().dbId;
 					}
-				});
+					$.ajax({
+						"url": "/collection/" + collectionID + "/list?count="+count+"&start=" + offset,
+						"method": "get",
+						"contentType": "application/json",
+						"success": function (data) {
+							if (isForExhibition) {
+								self.loadingInitialItemsCount = self.loadingInitialItemsCount + data.records.length;
+								$.each(data.records, function( index, value ) {
+									var exhibitionRecord = ko.mapping.fromJS(value, self.mapping);
+									self.collectionItemsArray.push(exhibitionRecord);
+								});
+							} else {
+								$.each(data.records, function( index, value ) {
+									var exhibitionRecord = ko.mapping.fromJS(value, self.mapping);
+									self.userSavedItemsArray.push(exhibitionRecord);
+								});
+							}
+							self.loading(false);
+						},
+						"error": function (result) {
+							self.loading(false);
+						}
+					});
+				}
 			}
 		};
 		
-
 		//for the side scrolling
 		$('.left').droppable({
 			tolerance: "touch",
@@ -738,6 +782,8 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 		//hide the nav bar
 		$('#bottomBar').fadeOut(500);
 	};
+	
+	
 
 	return {
 		viewModel: ExhibitionEditModel,
