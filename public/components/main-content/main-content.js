@@ -197,15 +197,9 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 	  
 	  
 	  
-	 /* self.loading=ko.computed(function(){
-		  if(self.loadingex() && self.loadingcoll() && self.loadingspaces()){
-			  return true;
-		  }
-		  else{return false;}
-	  });*/
+	
 	  self.buttontext=ko.computed(function() {
 		  if(self.homecollections().length>0 && self.noexhibitions()==true && self.nocollections()==true && self.nospaces()==true){
-			  console.log("changing text");
 			  $(".loadmore").text("no more results");
 		  }
 		  
@@ -403,7 +397,8 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 				self.revealItems(data2[0]['collectionsOrExhibitions']);
 				self.revealExItems(data3[0]['collectionsOrExhibitions']);
 				var selector=$("ul.nav").find("li.active").attr('data-filter');
-				 $( settings.mSelector ).isotope({ filter: selector });
+				$( settings.mSelector ).isotope({ filter: '*' });
+			    $( settings.mSelector ).isotope({ filter: selector });
 				
 			})
 			
