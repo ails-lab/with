@@ -300,7 +300,7 @@
 						<div class="top"></div>
 						<div class="bot"></div>
 					</a>
-					<div class="more" data-bind="visible: loading"> <i class="fa fa-spinner fa-pulse"></i></div>
+					<div class="more" data-bind="visible: loadingex()==true || loadingcoll()==true || loadingspaces()==true "> <i class="fa fa-spinner fa-pulse"></i></div>
                   </div>
 
 			</section>
@@ -343,59 +343,7 @@
 			<section class="api">
 				<div class="container">
 
-					<!-- section heading -->
-					<h2 class="section-heading">apps built using <b>with api</b></h2>
-
-					<!-- section description -->
-					<p class="section-desc">
-					Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod temporincididunt ut labore et dolore magna aliqua.
-					</p>
-					<ul>
-						<li>
-							<img src="img/ui/api-1.png">
-							<div class="overlay">
-								<a href="#">museum tour
-									<div class="left"></div>
-									<div class="right"></div>
-									<div class="top"></div>
-									<div class="bot"></div>
-								</a>
-							</div>
-						</li>
-						<li>
-							<img src="img/ui/api-2.png">
-							<div class="overlay">
-								<a href="#">museum tour
-									<div class="left"></div>
-									<div class="right"></div>
-									<div class="top"></div>
-									<div class="bot"></div>
-								</a>
-							</div>
-						</li>
-						<li>
-							<img src="img/ui/api-3.png">
-							<div class="overlay">
-								<a href="#">museum tour
-									<div class="left"></div>
-									<div class="right"></div>
-									<div class="top"></div>
-									<div class="bot"></div>
-								</a>
-							</div>
-						</li>
-						<li>
-							<img src="img/ui/api-4.png">
-							<div class="overlay">
-								<a href="#">museum tour
-									<div class="left"></div>
-									<div class="right"></div>
-									<div class="top"></div>
-									<div class="bot"></div>
-								</a>
-							</div>
-						</li>
-					</ul>
+					
 
 					<!-- register now -->
 					<a href="#register" class="register">

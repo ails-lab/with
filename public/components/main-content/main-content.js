@@ -3,7 +3,7 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 	
 	$.bridget('isotope', Isotope);
 	
-	self.loading=ko.observable(false);
+	//self.loading=ko.observable(false);
 		
 	ko.bindingHandlers.homeisotope = {
 					init: app.initOrUpdate('init'),
@@ -93,6 +93,7 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 			        			return "item space";
 			        		else return "item exhibition";
 			        	}
+			        	else{return "item collection";}
 			        });
 			        
 			        self.url=ko.computed(function() {
@@ -137,11 +138,11 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 		};
 
 		self.loadRecords= function(offset,count){
-			loading(true);
+			//loading(true);
 			var promise=self.getCollectionRecords(0,30);
 			 $.when(promise).done(function(responseRecords) {
 				 ko.mapping.fromJS(responseRecords.records,recmapping,self.records);
-				 loading(false);
+				 //loading(false);
 				 
 			 });
 		}
@@ -183,10 +184,35 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 	  self.totalExhibitions=ko.observable(0);
 	  self.spaces=ko.observableArray();
 	  self.collections=ko.observableArray();
+	  self.exhibitions=ko.observableArray();
+	  self.all=ko.observableArray();
 	  self.morespaces=ko.observable(true);
-	  self.fetchitemnum=20;
+	  self.fetchitemnum=5;
+	  self.nocollections=ko.observable(false);
+	  self.noexhibitions=ko.observable(false);
+	  self.nospaces=ko.observable(false);
+	  self.loadingex=ko.observable(false);
+	  self.loadingcoll=ko.observable(false);
+	  self.loadingspaces=ko.observable(false);
+	  
+	  
+	  
+	 /* self.loading=ko.computed(function(){
+		  if(self.loadingex() && self.loadingcoll() && self.loadingspaces()){
+			  return true;
+		  }
+		  else{return false;}
+	  });*/
+	  self.buttontext=ko.computed(function() {
+		  if(self.homecollections().length>0 && self.noexhibitions()==true && self.nocollections()==true && self.nospaces()==true){
+			  console.log("changing text");
+			  $(".loadmore").text("no more results");
+		  }
+		  
+	  });
+	  
 	  self.revealItems = function (data) {
-		  if((data.length==0 || data.length<self.fetchitemnum) && self.morespaces()==false){ loading(false);$(".loadmore").text("no more results");}
+		  if((data.length==0 || data.length<self.fetchitemnum)){ self.nocollections(true);}
 			
 			for (var i in data) {
 				var c=new Collection(
@@ -195,14 +221,30 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 				
 				
 				self.homecollections().push(c);
-				self.collections().push(c);
+				self.collections.push(c);
 			}
-			self.homecollections.valueHasMutated();
+			
+			self.homecollections.valueHasMutated();self.loadingcoll(false);
 		};
 		
+		
+		self.revealExItems = function (data) {
+			  if((data.length==0 || data.length<self.fetchitemnum)){self.noexhibitions(true);}
+				
+				for (var i in data) {
+					var c=new Collection(
+								data[i]				
+					);
+					
+					
+					self.homecollections().push(c);
+					self.exhibitions.push(c);
+				}
+				self.homecollections.valueHasMutated();self.loadingex(false);
+			};
 	  
 		self.revealSpaceItems = function (data) {
-			if(data.length==0 || data.length<self.fetchitemnum){self.morespaces(false);}
+			if(data.length==0 || data.length<self.fetchitemnum){self.morespaces(false);self.nospaces(true);}
 				for (var i in data) {
 					var page=data[i].page;
 					var thumb=null;
@@ -220,34 +262,55 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 					
 					
 					self.homecollections().push(c);
-					self.spaces().push(c);
+					self.spaces.push(c);
 				}
-				self.homecollections.valueHasMutated();
+				self.homecollections.valueHasMutated();self.loadingspaces(false);
 			};	
 		
 	  self.loadAll = function () {
 		  //this should replaced with get space collections + exhibitions
-		   loading(true);
 		  
+		  self.loadingcoll(true);
+		  self.loadingex(true);
+		  self.loadingspaces(true);
 		  var promiseCollections = self.getSpaceCollections();
+		  var promiseExhibitions=self.getSpaceExhibitions();
 		  var promiseSpaces=self.getSpaces();
 		  WITHApp.initTooltip();
-		  $.when(promiseSpaces).done(function(response) {
-		        //self.totalSpaces(response);
-			    self.revealSpaceItems(response);
-			    
-				
-		  });
+		 
 		  $.when(promiseCollections).done(function(responseCollections) {
-			        self.totalCollections(responseCollections.totalCollections);
-			        self.totalExhibitions(responseCollections.totalExhibitions);
+			        //self.totalCollections(responseCollections.totalCollections);
+			        //self.totalExhibitions(responseCollections.totalExhibitions);
 				    self.revealItems(responseCollections['collectionsOrExhibitions']);
 				    initFilterStick();
 				    WITHApp.initIsotope();
-				    loading(false);
+				    var selector=$("ul.nav").find("li.active").attr('data-filter');
+				    $( settings.mSelector ).isotope({ filter: selector });
+				   
 					
 			});
 		 
+		  $.when(promiseExhibitions).done(function(response) {
+		        //self.totalCollections(response.totalCollections);
+		        //self.totalExhibitions(response.totalExhibitions);
+			    self.revealExItems(response['collectionsOrExhibitions']);
+			    initFilterStick();
+			    WITHApp.initIsotope();
+			    var selector=$("ul.nav").find("li.active").attr('data-filter');
+			    $( settings.mSelector ).isotope({ filter: selector });
+			   
+				
+		});
+		  $.when(promiseSpaces).done(function(response) {
+		        //self.totalSpaces(response);
+			    self.revealSpaceItems(response);
+			    var selector=$("ul.nav").find("li.active").attr('data-filter');
+			    $( settings.mSelector ).isotope({ filter: selector });
+			    
+				
+		  });
+		  
+		  
 		  var promise2 = self.getFeatured("56cd993275fe2461e089a8a5");
           $.when(promise2).done(function (data) {
         	  
@@ -291,11 +354,24 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 				dataType: "json",
 				url: "/collection/list",
 				processData: false,
-				data: "offset=0&count="+self.fetchitemnum+"&collectionHits=true&isPublic=true",
+				data: "offset=0&count="+self.fetchitemnum+"&collectionHits=true&isPublic=true&isExhibition=false",
 			}).success (function(){
 			});
 		};
 		
+		
+		self.getSpaceExhibitions = function () {
+			//call should be replaced with space collections+exhibitions
+			return $.ajax({
+				type: "GET",
+				contentType: "application/json",
+				dataType: "json",
+				url: "/collection/list",
+				processData: false,
+				data: "offset=0&count="+self.fetchitemnum+"&collectionHits=true&isPublic=true&isExhibition=true",
+			}).success (function(){
+			});
+		};
 		
 		
          self.getFeatured=function(id) {
@@ -314,14 +390,21 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 		
 	    
 		self.loadNext = function () {
-		  if (loading() === false) {
-			 loading(true);
+		  if (!self.loadingcoll() && !self.loadingex() && !self.loadingspaces()) {
+			self.loadingcoll(true);
+			self.loadingex(true);
+			self.loadingspaces(true);
 			var promise1=self.moreSpaces();
 			var promise2=self.moreCollections();
-			$.when(promise1,promise2).done(function(data1,data2){
+			var promise3=self.moreExhibitions();
+			$.when(promise1,promise2,promise3).done(function(data1,data2,data3){
 				self.revealSpaceItems(data1[0]);
+				
 				self.revealItems(data2[0]['collectionsOrExhibitions']);
-				loading(false);
+				self.revealExItems(data3[0]['collectionsOrExhibitions']);
+				var selector=$("ul.nav").find("li.active").attr('data-filter');
+				 $( settings.mSelector ).isotope({ filter: selector });
+				
 			})
 			
 			
@@ -350,12 +433,25 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 				dataType: "json",
 				url: "/collection/list",
 				processData: false,
-				data: "isPublic=true&count="+self.fetchitemnum+"&offset=" + self.collections().length,
+				data: "isPublic=true&count="+self.fetchitemnum+"&offset=" + self.collections().length+"&isExhibition=false",
 			}).success (function(){
 			});
 			
 		};
 
+		self.moreExhibitions = function () {
+			return $.ajax({
+				type: "GET",
+				contentType: "application/json",
+				dataType: "json",
+				url: "/collection/list",
+				processData: false,
+				data: "isPublic=true&count="+self.fetchitemnum+"&offset=" + self.exhibitions().length+"&isExhibition=true",
+			}).success (function(){
+			});
+			
+		};
+		
 	  self.loadCollectionOrExhibition = function(item) {
 		  if (item.isExhibition) {
 			  window.location = 'index.html#exhibitionview/'+ item.id;
