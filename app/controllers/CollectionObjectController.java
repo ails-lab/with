@@ -83,7 +83,7 @@ public class CollectionObjectController extends WithResourceController {
 	/**
 	 * creates a new collection corresponding to a collection in Europeana and
 	 * collects all its items.
-	 * 
+	 *
 	 * @param id
 	 * @return
 	 */
@@ -122,7 +122,7 @@ public class CollectionObjectController extends WithResourceController {
 						System.out.println("more pages?");
 						int page = 1;
 						int pageSize = 20;
-						while (page * pageSize < total) {
+						while ((page * pageSize) < total) {
 							page++;
 							q.page = page + "";
 							result = src.getAllResults(q);
@@ -371,7 +371,7 @@ public class CollectionObjectController extends WithResourceController {
 			CollectionObject collectionChanges = Json.fromJson(json,
 					CollectionObject.class);
 			ObjectId creatorDbId = new ObjectId(session().get("user"));
-			if (collectionChanges.getDescriptiveData().getLabel() != null
+			if ((collectionChanges.getDescriptiveData().getLabel() != null)
 					&& DB.getCollectionObjectDAO().existsOtherForOwnerAndLabel(
 							creatorDbId,
 							null,
@@ -815,18 +815,20 @@ public class CollectionObjectController extends WithResourceController {
 				new ObjectId(collectionId), retrievedFields);
 		WithAccess access = collection.getAdministrative().getAccess();
 		for (AccessEntry ae : access.getAcl()) {
-			ObjectId userId = ae.getUser();
-			User user = DB.getUserDAO().getById(userId, null);
-			Access accessRights = ae.getLevel();
-			if (user != null) {
-				result.add(userOrGroupJson(user, accessRights));
-			} else {
-				UserGroup usergroup = DB.getUserGroupDAO().get(userId);
-				if (usergroup != null)
-					result.add(userOrGroupJson(usergroup, accessRights));
-				else
-					return internalServerError("User with id " + userId
-							+ " cannot be retrieved from db");
+			if(ae.getLevel().ordinal() > 0) {
+				ObjectId userId = ae.getUser();
+				User user = DB.getUserDAO().getById(userId, null);
+				Access accessRights = ae.getLevel();
+				if (user != null) {
+					result.add(userOrGroupJson(user, accessRights));
+				} else {
+					UserGroup usergroup = DB.getUserGroupDAO().get(userId);
+					if (usergroup != null)
+						result.add(userOrGroupJson(usergroup, accessRights));
+					else
+						return internalServerError("User with id " + userId
+								+ " cannot be retrieved from db");
+				}
 			}
 		}
 		return ok(result);
