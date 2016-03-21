@@ -667,12 +667,10 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 				var parentContainer = element.parentElement;
 				if (load) {
 					$(parentContainer).on("scroll.ko.scrollHandler", function () {
-						console.log("2");
 						var parentContainer = element.parentElement;
 						//console.log('Is scrolling');
 						//console.log('left: ' + parentContainer.scrollLeft + ' offset: ' + parentContainer.offsetWidth  + 'scrollview width' + parentContainer.scrollWidth);
 						if (parentContainer.scrollWidth - (parentContainer.scrollLeft + parentContainer.offsetWidth) < 150) {
-							console.log("3");
 							if (self.updating) {
 								loadFunc();
 								self.updating = false;
