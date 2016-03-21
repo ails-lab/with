@@ -580,6 +580,7 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 		};
 
 		self.prepareForEditCollection = function (collection, event) {
+			console.log("edit");
 			var context = ko.contextFor(event.target);
 			var collIndex = context.$index();
 			self.index(collIndex);
@@ -631,6 +632,7 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 								return item.dbId === collId;
 							});
 							editItem.title = self.titleToEdit();
+							self.closeSideBar();
 						},
 						error: function (error) {
 							var r = JSON.parse(error.responseText);
@@ -639,8 +641,8 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 					});
 				} else {
 					$.smkAlert({ text: 'An error occured', type: 'danger', time: 10 });
+					self.closeSideBar();
 				}
-				self.closeSideBar();
 				//WITHApp.tabAction();
 			} else {
 				self.validationModel.errors.showAllMessages();
@@ -649,12 +651,10 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 
 		
 		self.closeSideBar = function () {
-			/*self.isPublicToEdit(false);
-			self.titleToEdit(" ");
-			self.descriptionToEdit("");*/
 			self.isPublicToEdit("");
 			self.titleToEdit("");
 			self.descriptionToEdit("");
+			$('#usernameOrEmail').val("");
 			//$('textarea').hide();
 			//$('.add').show();
 			$('.action').removeClass('active');
