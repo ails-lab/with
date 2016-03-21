@@ -205,6 +205,7 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 			var collectionId = collection.dbId();
 			var collectionTitle = collection.title();
 			self.showDelCollPopup(collectionTitle, collectionId);
+			self.closeSideBar();
 		};
 
 
@@ -278,10 +279,10 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 					self.sharedCollections.remove(function (item) {
 						return item.dbId() == collectionId;
 					});
-					var theitem = ko.utils.arrayFirst(currentUser.editables(), function (item) {
+					/*var theitem = ko.utils.arrayFirst(currentUser.editables(), function (item) {
 						return item.dbId === collectionId;
 					});
-					currentUser.editables.remove(theitem);
+					currentUser.editables.remove(theitem);*/
 					if (self.showsExhibitions) {
 						app.currentUser.exhibitionCount(app.currentUser.exhibitionCount() - 1);
 						self.exhibitionCount(self.exhibitionCount() + 1);
@@ -363,6 +364,8 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 					});
 					ko.mapping.fromJS(users, self.usersMapping, self.usersToShare);
 					ko.mapping.fromJS(userGroups, self.usersMapping, self.userGroupsToShare);
+					$( '.action' ).removeClass( 'active' );
+					$( '.action.access' ).addClass( 'active' );
 				}
 			});
 		};
@@ -578,9 +581,8 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 				}
 			});
 		};
-
+		
 		self.prepareForEditCollection = function (collection, event) {
-			console.log("edit");
 			var context = ko.contextFor(event.target);
 			var collIndex = context.$index();
 			self.index(collIndex);
@@ -596,6 +598,8 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 					self.titleToEdit(self.sharedCollections()[collIndex].title());
 					self.descriptionToEdit(self.sharedCollections()[collIndex].description());
 				}
+				$( '.action' ).removeClass( 'active' );
+				$( '.action.edit' ).addClass( 'active' );
 			}
 		};
 
@@ -628,10 +632,10 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 							} else if (self.collectionSet() == "shared") {
 								self.updateCollectionData(self.sharedCollections(), collIndex);
 							}
-							var editItem = ko.utils.arrayFirst(currentUser.editables(), function (item) {
+							/*var editItem = ko.utils.arrayFirst(currentUser.editables(), function (item) {
 								return item.dbId === collId;
 							});
-							editItem.title = self.titleToEdit();
+							editItem.title = self.titleToEdit();*/
 							self.closeSideBar();
 						},
 						error: function (error) {
@@ -651,7 +655,7 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 
 		
 		self.closeSideBar = function () {
-			self.isPublicToEdit("");
+			self.isPublicToEdit(false); //default value for isPublic
 			self.titleToEdit("");
 			self.descriptionToEdit("");
 			$('#usernameOrEmail').val("");
