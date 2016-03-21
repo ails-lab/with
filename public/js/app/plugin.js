@@ -403,7 +403,6 @@ WITHApp.ui = function( custom ){
 		});
 		
 		$( '.videobox' ).click( function( e ) {
-			console.log("videobox");
 			e.preventDefault();
 			$( '.action' ).removeClass( 'active' );
 			$( '.action.editvideo' ).addClass( 'active' );

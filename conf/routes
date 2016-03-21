@@ -41,6 +41,7 @@ GET		 /collection/favorites					controllers.RecordResourceController.getFavorite
 GET      /collection/:id/listUsers				controllers.CollectionObjectController.listUsersWithRights(id)
 GET      /collection/:id/list		   	        controllers.CollectionObjectController.listRecordResources(id, format: String ?="noContent", start: Integer ?=0, count: Integer ?=10)
 GET		 /collection/favoriteCollection			controllers.CollectionObjectController.getFavoriteCollection()
+PUT		 /collection/sort/:id					controllers.CollectionObjectController.sortCollectionObject(id)
 
 POST     /collection/liked			            controllers.WithResourceController.addToFavorites()
 POST     /collection/:id/addRecord              controllers.WithResourceController.addRecordToCollection(id, position: play.libs.F.Option[Integer], noDouble: Boolean ?= false)
