@@ -194,7 +194,14 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 	  self.loadingex=ko.observable(false);
 	  self.loadingcoll=ko.observable(false);
 	  self.loadingspaces=ko.observable(false);
-	  
+	  var $container = $(".grid").isotope({
+			itemSelector: '.item',
+			transitionDuration: transDuration,
+			masonry: {
+				columnWidth		: '.sizer',
+				percentPosition	: true
+			}
+		});
 	  
 	  
 	
@@ -207,38 +214,40 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 	  
 	  self.revealItems = function (data) {
 		  if((data.length==0 || data.length<self.fetchitemnum)){ self.nocollections(true);}
-			
+		  var items = [];
 			for (var i in data) {
 				var c=new Collection(
 							data[i]				
 				);
 				
-				
+				items.push(c);
 				self.homecollections().push(c);
 				self.collections.push(c);
 			}
 			
 			self.homecollections.valueHasMutated();self.loadingcoll(false);
+			return items;
 		};
 		
 		
 		self.revealExItems = function (data) {
 			  if((data.length==0 || data.length<self.fetchitemnum)){self.noexhibitions(true);}
-				
+				var items=[];
 				for (var i in data) {
 					var c=new Collection(
 								data[i]				
 					);
-					
-					
+					items.push(c);
 					self.homecollections().push(c);
 					self.exhibitions.push(c);
 				}
 				self.homecollections.valueHasMutated();self.loadingex(false);
+				return items;
 			};
 	  
 		self.revealSpaceItems = function (data) {
 			if(data.length==0 || data.length<self.fetchitemnum){self.morespaces(false);self.nospaces(true);}
+			var items = [];
 				for (var i in data) {
 					var page=data[i].page;
 					var thumb=null;
@@ -254,11 +263,12 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 								spacetocollection				
 					);
 					
-					
+					items.push(c);
 					self.homecollections().push(c);
 					self.spaces.push(c);
 				}
 				self.homecollections.valueHasMutated();self.loadingspaces(false);
+				return items;
 			};	
 		
 	  self.loadAll = function () {
@@ -275,7 +285,12 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 		  $.when(promiseCollections).done(function(responseCollections) {
 			        //self.totalCollections(responseCollections.totalCollections);
 			        //self.totalExhibitions(responseCollections.totalExhibitions);
-				    self.revealItems(responseCollections['collectionsOrExhibitions']);
+				    var items=self.revealItems(responseCollections['collectionsOrExhibitions']);
+				    if (items.length > 0) {
+						var $newitems = getItems(items);
+						isotopeImagesReveal($newitems);
+					}
+				    
 				    initFilterStick();
 				    WITHApp.initIsotope();
 				    var selector=$("ul.nav").find("li.active").attr('data-filter');
@@ -287,7 +302,11 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 		  $.when(promiseExhibitions).done(function(response) {
 		        //self.totalCollections(response.totalCollections);
 		        //self.totalExhibitions(response.totalExhibitions);
-			    self.revealExItems(response['collectionsOrExhibitions']);
+			    var items=self.revealExItems(response['collectionsOrExhibitions']);
+			    if (items.length > 0) {
+					var $newitems = getItems(items);
+					isotopeImagesReveal($newitems);
+				}
 			    initFilterStick();
 			    WITHApp.initIsotope();
 			    var selector=$("ul.nav").find("li.active").attr('data-filter');
@@ -297,7 +316,11 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 		});
 		  $.when(promiseSpaces).done(function(response) {
 		        //self.totalSpaces(response);
-			    self.revealSpaceItems(response);
+			    var items=self.revealSpaceItems(response);
+			    if (items.length > 0) {
+					var $newitems = getItems(items);
+					isotopeImagesReveal($newitems);
+				}
 			    var selector=$("ul.nav").find("li.active").attr('data-filter');
 			    $( settings.mSelector ).isotope({ filter: selector });
 			    
@@ -392,9 +415,21 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 			var promise2=self.moreCollections();
 			var promise3=self.moreExhibitions();
 			$.when(promise1,promise2,promise3).done(function(data1,data2,data3){
-				self.revealSpaceItems(data1[0]);
-				self.revealItems(data2[0]['collectionsOrExhibitions']);
-				self.revealExItems(data3[0]['collectionsOrExhibitions']);
+				var items1=self.revealSpaceItems(data1[0]);
+				if (items1.length > 0) {
+					var $newitems = getItems(items1);
+					isotopeImagesReveal($newitems);
+				}
+				var items2=self.revealItems(data2[0]['collectionsOrExhibitions']);
+				if (items2.length > 0) {
+					var $newitems = getItems(items2);
+					isotopeImagesReveal($newitems);
+				}
+				var items3=self.revealExItems(data3[0]['collectionsOrExhibitions']);
+				if (items3.length > 0) {
+					var $newitems = getItems(items3);
+					isotopeImagesReveal($newitems);
+				}
 				
 			})
 			
@@ -464,16 +499,69 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 					  $(event.currentTarget).siblings().removeClass("active");
 					  $(event.currentTarget).addClass("active");
 					  $( settings.mSelector ).isotope({ filter: selector });
-					  if(selector!="*"){
+					 /* if(selector!="*"){
 						  $(".loadmore").hide();
 						  
 					  }
-					  else{ $(".loadmore").show();}
+					  else{ $(".loadmore").show();}*/
 					  return false;}
 				}
 					  
 	 
+	  function getItem(collection) {
+			var tile = '<div class="' + collection.data.css() + '"> <div class="wrap">';
 
+			tile += '<a href="#" onclick="loadUrl(\'' + collection.data.url() + '\',event)">' +
+				'<div class="thumb"><img src="' + collection.data.thumbnail() + '"></div>' +
+				'<div class="info"><span class="type">' + collection.data.type() + '</span><h1 class="title">' +
+				collection.data.title + '</h1><span class="owner">'+collection.data.owner()+'</span></div>' +
+				'</a></div></div>';
+
+			return tile;
+		}
+
+		function getItems(data) {
+			var items = '';
+			for (var i in data) {
+				items += getItem(data[i]);
+			}
+
+			return $(items);
+		}
+
+		
+
+		isotopeImagesReveal = function ($items) {
+			var $container=$(".grid");
+			var iso = $container.data('isotope');
+			if(!iso){
+				var $container = $(".grid").isotope({
+					itemSelector: '.item',
+					transitionDuration: transDuration,
+					masonry: {
+						columnWidth		: '.sizer',
+						percentPosition	: true
+					}
+				});
+				iso= $container.data('isotope');
+			}
+			var itemSelector = ".item";
+
+			// append to container
+			$container.append($items);
+			// hide by default
+			$items.hide();
+			$items.imagesLoaded().progress(function (imgLoad, image) {
+				// get item
+				var $item = $(image.img).parents(itemSelector);
+				// un-hide item
+				$item.show();
+				iso.appended($item);
+				
+			});
+
+			return this;
+		};
 	  
 	
   }
