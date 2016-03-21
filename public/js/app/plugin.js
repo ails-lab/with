@@ -593,7 +593,6 @@ WITHApp.ui = function( custom ){
 	// method to initialize tooltip funciton
 	// dependency bootstrap.js
 	var initTooltip = function() {
-
 		// init
 		$('[data-toggle="tooltip"]').tooltip(); 
 	};

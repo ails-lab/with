@@ -128,15 +128,6 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 			title: self.titleToEdit
 		});
 
-		/*self.multiLiteral = function (multiLiteral) {
-    	        return ko.computed({
-    	            read: function () {
-    	            	var s = app.findByLang(multiLiteral);
-    	                return app.findByLang(multiLiteral);
-    	            }
-    	        }, this);
-    	    }.bind(self.myCollections);*/
-
 		self.multiLiteral = function (multiLiteral) {
 			return app.findByLang(multiLiteral);
 		};
@@ -180,11 +171,6 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 
 		WITHApp.changeList();
 		WITHApp.initTooltip();
-
-		/*self.changeList = function () {
-			alert("0");
-			WITHApp.changeList();
-		};*/
 
 		self.checkLogged = function () {
 			// Check if user is logged in. If not, ask for user to login
@@ -647,7 +633,6 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 					$.smkAlert({ text: 'An error occured', type: 'danger', time: 10 });
 					self.closeSideBar();
 				}
-				//WITHApp.tabAction();
 			} else {
 				self.validationModel.errors.showAllMessages();
 			}
