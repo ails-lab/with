@@ -5,7 +5,7 @@ define(function () {
     _args.projectName = 'eufoodanddrink';
     //_args.projectId = '56db1ea175fe2419dc849e93';
     //_args.featuredExhibition='56e944c075fe24537193411b';
-    _args.projectId = '56cd8aac75fe2461e0871aad';
+    _args.projectId = '56db1ea175fe2419dc849e93';
     _args.featuredExhibition='56cd993275fe2461e089a8a5';
     
     _args.featuredCollection='';
