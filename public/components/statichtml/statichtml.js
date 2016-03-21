@@ -13,8 +13,10 @@ define(['knockout', 'text!./statichtml.html', 'app', 'slick'], function (ko, tem
 		self.route = params.route;
 		self.templateName = ko.observable(params.page);
 
+
 		self.scrollTo = function (anchor) {
-			$(anchor).scrollView();
+			window.history.pushState(null, anchor, '#about/' + anchor);
+			$('#' + anchor).scrollView();
 		};
 
 		self.animatePageChange = function () {
@@ -26,8 +28,8 @@ define(['knockout', 'text!./statichtml.html', 'app', 'slick'], function (ko, tem
 		case 'about':
 			document.body.setAttribute("data-page", "about");
 			if (typeof params.anchor !== 'undefined') {
-				setTimeout(function () {
-					self.scrollTo('#' + params.anchor);
+				setTimeout(function () {	// Don't use the function, to avoid duplicate states
+					$('#' + params.anchor).scrollView();
 				}, 500);
 			}
 			break;
