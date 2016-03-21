@@ -20,16 +20,16 @@ define("app", ['knockout', 'facebook', 'imagesloaded', 'moment', './js/app/plugi
 		mobileSelector: '.mobilemenu',
 		mobileMenu: '.main .menu'
 	});
-    self.custom=false;
+	self.custom = false;
 	self.transDuration = 0;
 	var isFirefox = typeof InstallTrigger !== 'undefined'; // Firefox 1.0+
 	if (isFirefox) {
 		self.transDuration = 0;
 	}
 
-	self.loadDependancies=function () {
+	self.loadDependancies = function () {
 		/* we are in WITH*/
-		if(plugin.WITHApp){
+		if (plugin.WITHApp) {
 			self.WITHApp = new plugin.WITHApp.ui({
 				// page name
 				page: $('body').attr('data-page'),
@@ -46,10 +46,9 @@ define("app", ['knockout', 'facebook', 'imagesloaded', 'moment', './js/app/plugi
 			return {
 				WITHApp: self.WITHApp
 			};
-		}
-		else{
-			self.custom=true;
-			self.WITHApp=new plugin.EUSpaceApp.ui({
+		} else {
+			self.custom = true;
+			self.WITHApp = new plugin.EUSpaceApp.ui({
 
 		 		// page name
 		 		page  	  : $( 'body' ).attr( 'data-page' ),
@@ -443,7 +442,7 @@ define("app", ['knockout', 'facebook', 'imagesloaded', 'moment', './js/app/plugi
 		self.currentUser.notifications.groupNotifications.removeAll();
 		self.currentUser.notifications.unread(0);
 
-		if(data){
+		if (data) {
 			// Sort notification array
 			data.sort(function (a, b) {
 				return a.openedAt - b.openedAt;
@@ -451,6 +450,10 @@ define("app", ['knockout', 'facebook', 'imagesloaded', 'moment', './js/app/plugi
 
 			// Load notifications
 			for (var i = 0; i < data.length; i++) {
+				if (data[i].resourceName === 'DELETED') {
+					return;
+				}
+
 				if (data[i].activity != null) {
 					self.addNotification(data[i]);
 				}
