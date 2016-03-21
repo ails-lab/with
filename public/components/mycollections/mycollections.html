@@ -82,8 +82,8 @@
 					<div data-bind="{visible: collectionSet() == 'my', template: { name: 'collectionsTemplate', foreach: myCollections()}}"></div>
 					<div data-bind="{visible: collectionSet() == 'shared', template: { name: 'collectionsTemplate', foreach: sharedCollections()}}"></div>
 			  <!-- ko if: collectionSet() == 'my' -->
-			  <a style="cursor:pointer;" class="loadmore" 
-			  data-bind="{visible: (!showsExhibitions && collectionCount() > myCollections().length) || (showsExhibitions && exhibitionCount() > myCollections().length), 
+			  <a style="cursor:pointer;" class="loadmore"
+			  data-bind="{visible: (!showsExhibitions && collectionCount() > myCollections().length) || (showsExhibitions && exhibitionCount() > myCollections().length),
 			  event: {click: moreCollections.bind($data, showsExhibitions)}}">load more
 			      <div class="left"></div>
                   <div class="right"></div>
@@ -92,7 +92,7 @@
               </a>
 			  <!-- /ko -->
 			  <!-- ko if: collectionSet() == "shared" -->
-			  	<a style="cursor:pointer;" class="loadmore" 
+			  	<a style="cursor:pointer;" class="loadmore"
 			  	data-bind="event: {click: moreCollections.bind($data, showsExhibitions)}">load more
 			   <div class="left"></div>
                   <div class="right"></div>
@@ -114,9 +114,9 @@
 			  <div class="action-body" data-bind="validationElement: titleToEdit">
 				<input type="text" data-bind="{value: titleToEdit, valueUpdate: 'afterkeypress', hasFocus: true
 				      attr: {placeholder: titleToEdit}}">
-				  </input>    
+				  </input>
 				<textarea data-bind="{value: descriptionToEdit, valueUpdate: 'afterkeypress', hasFocus: false
-				      attr: {placeholder: descriptionToEdit}}"></textarea> 
+				      attr: {placeholder: descriptionToEdit}}"></textarea>
 			  </div>
 			  <div class="button-group">
 			  	<a class="btn-green-o cancel" data-bind="click: closeSideBar">Cancel</a>
