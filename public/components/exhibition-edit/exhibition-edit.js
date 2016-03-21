@@ -406,6 +406,8 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 			self.itemVideoUrl(exhibitionItem.contextData()[0].body.videoUrl());
 			self.itemVideoDescription(exhibitionItem.contextData()[0].body.videoDescription());
 			self.itemId(exhibitionItem.dbId());
+			$( '.action' ).removeClass( 'active' );
+			$( '.action.editvideo' ).addClass( 'active' );
 		};
 		
 		self.editItem = function (editMode) {
