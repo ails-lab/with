@@ -38,7 +38,8 @@ public class ProvenanceInfo {
 		DigitalNZ("DigitalNZ"), DPLA("DPLA","Digital Public Library of America"), 
 		EFashion("EFashion"), 
 		NLA("NLA","National Library of Australia"),
-		Rijksmuseum("Rijksmuseum","Rijksmuseum");
+		Rijksmuseum("Rijksmuseum","Rijksmuseum"),
+		DBPedia("DBPedia", "DBPedia");
 		
 		private final String text;
 		private final String ID;

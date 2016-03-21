@@ -230,6 +230,12 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 		// int MAX = 10000;
 		// return getByCollectionBetweenPositions(colId, 0, MAX);
 	}
+	
+	public List<RecordResource> getByMedia(String mediaUrl) {
+		Query<RecordResource> q = this.createQuery().disableValidation().field("media.0.Original.url").equal(mediaUrl);
+		System.out.println(q.toString());
+		return this.find(q.retrievedFields(true, "_id")).asList();
+	}
 
 	public void shift(ObjectId colId, int position,
 			BiConsumer<String, UpdateOperations> update) {
@@ -429,7 +435,7 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 		shiftRecordsToRight(colId, position);
 		updateRecordUsageCollectedAndRights(
 				new CollectionInfo(colId, position), newAccess, recordId, colId);
-		DB.getCollectionObjectDAO().addCollectionMediaAsync(colId, recordId);
+		DB.getCollectionObjectDAO().addCollectionMedia(colId, recordId);
 	}
 
 	public void appendToCollection(ObjectId recordId, ObjectId colId,
@@ -445,7 +451,7 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 					.getAdministrative().getAccess());
 		updateRecordUsageCollectedAndRights(new CollectionInfo(colId,
 				entryCount), newAccess, recordId, colId);
-		DB.getCollectionObjectDAO().addCollectionMediaAsync(colId, recordId);
+		DB.getCollectionObjectDAO().addCollectionMedia(colId, recordId);
 	}
 
 	public WithAccess mergeParentCollectionRights(ObjectId recordId,
@@ -661,10 +667,12 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 		return this.find(q.limit(1)).asList().size() == 0? false : true;
 	}
 	
-	public boolean existsInCollection(ObjectId colId) {
-		Query<RecordResource> q = this.createQuery().field("collectedIn")
-				.hasThisElement(new CollectionInfo(colId, null));
-		return this.find(q.limit(1)).asList().size() == 0? false : true;
+	public boolean existsSameExternaIdInCollection(String externalId,
+			ObjectId colId) {
+		Query<RecordResource> q = this.createQuery().disableValidation()
+				.field("collectedIn.collectionId").equal(colId);
+		q.field("administrative.externalId").equal(externalId);
+		return this.find(q.limit(1)).asList().size() == 0 ? false : true;
 	}
 	
 	public void editRecord(String root, ObjectId dbId, JsonNode json) {

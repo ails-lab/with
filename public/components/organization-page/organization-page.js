@@ -769,8 +769,7 @@ define(['knockout', 'text!./organization-page.html', 'app', 'bridget', 'isotope'
 				self.page.address(data.page.address);
 				self.page.city(data.page.city);
 				self.page.country(data.page.country);
-				
-					self.page.url=data.page.url;
+				self.page.url(data.page.url);
 				
 				if (data.page.coordinates) {
 					self.page.coordinates.longitude(data.page.coordinates.longitude);
@@ -823,7 +822,7 @@ define(['knockout', 'text!./organization-page.html', 'app', 'bridget', 'isotope'
 				//TODO:add parent project filter
 				data: "offset=0&count=20&collectionHits=true&directlyAccessedByUserOrGroup=" + JSON.stringify([{
 					group: self.username(),
-					rights: "OWN"
+					rights: "WRITE"
 				}]),
 			}).success(function () {});
 		};
@@ -866,7 +865,7 @@ define(['knockout', 'text!./organization-page.html', 'app', 'bridget', 'isotope'
 				processData: false,
 				data: "count=20&offset=" +self.page.featuredCollections().length + "&directlyAccessedByUserOrGroup=" + JSON.stringify([{
 					"group": self.username(),
-					rights: "OWN"
+					rights: "WRITE"
 				}]),
 				
 			}).success (function(){

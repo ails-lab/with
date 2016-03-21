@@ -85,14 +85,14 @@ public class RijksmuseumSpaceSource extends ISpaceSource {
 		// CommonFilterLogic.contributorFilter();
 		if (checkFilters(q)) {
 			try {
-				response = HttpConnector.getURLContent(httpQuery);
+				response = getHttpConnector().getURLContent(httpQuery);
 				res.totalCount = Utils.readIntAttr(response, "count", true);
 				// res.count = q.pageSize;
 				for (JsonNode item : response.path("artObjects")) {
 					res.addItem(formatreader.readObjectFrom(item));
 				}
 				//TODO: what is the count?
-				res.count = 0;
+				res.count = res.items.getItemsCount();
 
 				res.facets = response.path("facets");
 
@@ -162,7 +162,7 @@ public class RijksmuseumSpaceSource extends ISpaceSource {
 		ArrayList<RecordJSONMetadata> jsonMetadata = new ArrayList<RecordJSONMetadata>();
 		JsonNode response;
 		try {
-			response = HttpConnector.getURLContent(
+			response = getHttpConnector().getURLContent(
 					"https://www.rijksmuseum.nl/api/en/collection/" + recordId + "?key=" + apiKey + "&format=json");
 			JsonNode record = response;
 			if (record != null) {
@@ -179,7 +179,7 @@ public class RijksmuseumSpaceSource extends ISpaceSource {
 				System.out.println(json);
 				jsonMetadata.add(new RecordJSONMetadata(Format.JSON_WITH, json));
 			}
-			Document xmlResponse = HttpConnector.getURLContentAsXML(
+			Document xmlResponse = getHttpConnector().getURLContentAsXML(
 					"https://www.rijksmuseum.nl/api/en/collection/" + recordId + "?key=" + apiKey + "&format=xml");
 			jsonMetadata.add(new RecordJSONMetadata(Format.XML_NLA, Serializer.serializeXML(xmlResponse)));
 			return jsonMetadata;

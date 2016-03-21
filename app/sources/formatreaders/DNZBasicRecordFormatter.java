@@ -21,6 +21,7 @@ import java.util.List;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
+import akka.dispatch.Filter;
 import model.EmbeddedMediaObject;
 import model.EmbeddedMediaObject.MediaVersion;
 import model.EmbeddedMediaObject.WithMediaRights;
@@ -40,8 +41,8 @@ import sources.utils.StringUtils;
 
 public class DNZBasicRecordFormatter extends CulturalRecordFormatter {
 
-	public DNZBasicRecordFormatter(FilterValuesMap map) {
-		super(map);
+	public DNZBasicRecordFormatter() {
+		super(FilterValuesMap.getDNZMap());
 		object = new CulturalObject();
 	}
 
@@ -83,7 +84,7 @@ public class DNZBasicRecordFormatter extends CulturalRecordFormatter {
 		object.addToProvenance(
 				new ProvenanceInfo(rec.getStringValue("content_partner[0]")));
 		object.addToProvenance(
-				new ProvenanceInfo(Sources.DigitalNZ.toString(), "http://www.digitalnz.org/objects/" + id, id));
+				new ProvenanceInfo(Sources.DigitalNZ.toString(), "http://www.digitalnz.org/records/" + id, id));
 		
 		
 		//TODO EmbeddedMediaObject.originalRights <- rights_url
@@ -110,7 +111,7 @@ public class DNZBasicRecordFormatter extends CulturalRecordFormatter {
 			medThumb.setUrl(uri3);
 			medThumb.setType(type);
 			if (Utils.hasInfo(rights))
-			medThumb.setOriginalRights(new LiteralOrResource(rights.get(0)));
+			medThumb.setOriginalRights(new LiteralOrResource(rights.get(0)).fillDEF());
 			medThumb.setWithRights(withRights);
 			object.addMedia(MediaVersion.Thumbnail, medThumb);
 		}
@@ -118,7 +119,7 @@ public class DNZBasicRecordFormatter extends CulturalRecordFormatter {
 			EmbeddedMediaObject med = new EmbeddedMediaObject();
 			med.setUrl(uri2);
 			if (Utils.hasInfo(rights))
-			med.setOriginalRights(new LiteralOrResource(rights.get(0)));
+			med.setOriginalRights(new LiteralOrResource(rights.get(0)).fillDEF());
 			med.setWithRights(withRights);
 			med.setType(type);
 			object.addMedia(MediaVersion.Original, med);
@@ -130,7 +131,7 @@ public class DNZBasicRecordFormatter extends CulturalRecordFormatter {
 			medThumb.setUrl(uri3);
 			medThumb.setType(type);
 			if (Utils.hasInfo(rights))
-			medThumb.setOriginalRights(new LiteralOrResource(rights.get(0)));
+			medThumb.setOriginalRights(new LiteralOrResource(rights.get(0)).fillDEF());
 			medThumb.setWithRights(withRights);
 			object.addMediaView(MediaVersion.Thumbnail, medThumb);
 		}

@@ -30,6 +30,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import model.basicDataTypes.ProvenanceInfo.Sources;
 import model.resources.RecordResource;
 import model.resources.WithResource;
+import play.Logger;
 import play.libs.Json;
 import sources.core.AdditionalQueryModifier;
 import sources.core.AutocompleteResponse;
@@ -53,7 +54,10 @@ import sources.formatreaders.EuropeanaRecordFormatter;
 import utils.ListUtils;
 
 public class EuropeanaSpaceSource extends ISpaceSource {
-
+	
+	private boolean usingCursor = false;
+	private String nextCursor;
+	
 	public EuropeanaSpaceSource() {
 		super();
 		vmap = FilterValuesMap.getEuropeanaMap();
@@ -94,14 +98,17 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 
 	private Function<List<String>, QueryModifier> qrightwriter() {
 		Function<String, String> function = (String s) -> {
-			s = s.replace("(?!.*nc)", "*%20NOT%20*nc");
-			s = s.replace("(?!.*nd)", "*%20NOT%20*nd");
-			return "RIGHTS%3A%28" + s.replace(".", "") + "%29";
+//			s = s.replace("(?!.*nc)", "*%20NOT%20*nc");
+//			s = s.replace("(?!.*nd)", "*%20NOT%20*nd");
+//			return "RIGHTS%3A%28" + s.replace(".", "") + "%29";
+			s = s.replace("(?!.*nc)", "* NOT *nc");
+			s = s.replace("(?!.*nd)", "* NOT *nd");
+			return "RIGHTS:(" + s.replace(".", "") + ")";
 		};
 		return new Function<List<String>, QueryModifier>() {
 			@Override
 			public AdditionalQueryModifier apply(List<String> t) {
-				return new AdditionalQueryModifier("%20" + Utils.getORList(ListUtils.transform(t, function), false));
+				return new AdditionalQueryModifier(" " + Utils.getORList(ListUtils.transform(t, function), false));
 			}
 		};
 	}
@@ -111,12 +118,12 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 			return qfwriterYEAR();
 		}
 		Function<String, String> function = (String s) -> {
-			return "%22" + Utils.spacesFormatQuery(s, "%20") + "%22";
+			return "\"" + s+ "\"";
 		};
 		return new Function<List<String>, Pair<String>>() {
 			@Override
 			public Pair<String> apply(List<String> t) {
-				return new Pair<String>("qf", parameter + "%3A" + Utils.getORList(ListUtils.transform(t, function)));
+				return new Pair<String>("qf", parameter + ":" + Utils.getORList(ListUtils.transform(t, function)));
 			}
 		};
 	}
@@ -125,11 +132,11 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 		return new Function<List<String>, Pair<String>>() {
 			@Override
 			public Pair<String> apply(List<String> t) {
-				String val = "%22" + t.get(0) + "%22";
+				String val = "\"" + t.get(0) + "\"";
 				if (t.size() > 1) {
-					val = "%5B" + val + "%20TO%20%22" + t.get(1) + "%22%5D";
+					val = "[" + val + " TO \"" + t.get(1) + "\"]";
 				}
-				return new Pair<String>("qf", "YEAR%3A" + val);
+				return new Pair<String>("qf", "YEAR:" + val);
 			}
 		};
 	}
@@ -161,7 +168,8 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 				String string = added ? "&" : "?";
 				if (next.first.equals("qf") && skipqf) {
 					skipqf = false;
-					res += (string + "query=" + next.second);
+					query.second = next.second;
+					res += (string + query.getHttp());
 					added = true;
 				} else {
 					added = true;
@@ -179,10 +187,16 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 
 		builder.addQuery("query", q.searchTerm);
 
+		if (usingCursor){
+			if (q.page.equals("1"))
+				builder.addSearchParam("cursor", "*");
+			else
+				builder.addSearchParam("cursor", nextCursor);
+		} else
 		builder.addSearchParam("start", "" + (((Integer.parseInt(q.page) - 1) * Integer.parseInt(q.pageSize)) + 1));
 
 		builder.addSearchParam("rows", "" + q.pageSize);
-		builder.addSearchParam("profile", "rich%20facets");
+		builder.addSearchParam("profile", "rich facets");
 		String facets = "DEFAULT";
 		if (q.facetsMode != null) {
 			switch (q.facetsMode) {
@@ -314,12 +328,18 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 		JsonNode response;
 		if (checkFilters(q)) {
 			try {
-				response = HttpConnector.getURLContent(httpQuery);
+				response = getHttpConnector().getURLContent(httpQuery);
 				res.totalCount = Utils.readIntAttr(response, "totalResults", true);
 				res.count = Utils.readIntAttr(response, "itemsCount", true);
 				res.items.setCulturalCHO(getItems(response));
 				// res.facets = response.path("facets");
 				res.filtersLogic = createFilters(response);
+				if (usingCursor) {
+					nextCursor = Utils.readAttr(response, "nextCursor", true);
+					if (!Utils.hasInfo(nextCursor))
+						Logger.error("cursor error!!");
+				}
+				
 
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
@@ -367,7 +387,7 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 		ArrayList<RecordJSONMetadata> jsonMetadata = new ArrayList<RecordJSONMetadata>();
 		JsonNode response;
 		try {
-			response = HttpConnector
+			response = getHttpConnector()
 					.getURLContent("http://www.europeana.eu/api/v2/record/" + recordId + ".json?wskey=" + key);
 			// todo read the other format;
 			JsonNode record = response.get("object");
@@ -377,7 +397,7 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 				String json = Json.toJson(f.readObjectFrom(record)).toString();
 				jsonMetadata.add(new RecordJSONMetadata(Format.JSON_WITH, json));
 			}
-			response = HttpConnector
+			response = getHttpConnector()
 					.getURLContent("http://www.europeana.eu/api/v2/record/" + recordId + ".jsonld?wskey=" + key);
 			if (response != null) {
 				record = response;
@@ -389,4 +409,13 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 			return jsonMetadata;
 		}
 	}
+
+	public boolean isUsingCursor() {
+		return usingCursor;
+	}
+
+	public void setUsingCursor(boolean useCursor) {
+		this.usingCursor = useCursor;
+	}
+	
 }

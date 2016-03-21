@@ -27,7 +27,6 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import model.basicDataTypes.WithAccess.Access;
-
 import org.bson.types.ObjectId;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
@@ -63,7 +62,6 @@ import org.elasticsearch.search.suggest.SuggestBuilders;
 import org.elasticsearch.search.suggest.term.TermSuggestionBuilder;
 
 import com.fasterxml.jackson.databind.JsonNode;
-
 import utils.Tuple;
 
 public class ElasticSearcher {
@@ -148,7 +146,7 @@ public class ElasticSearcher {
 		fedSearchFieldsWithBoosts.put("keywords", 1.3f);
 
 		this.aggregatedFields = new ArrayList<String>();
-		aggregatedFields.add("resourceType.all");
+		//aggregatedFields.add("resourceType.all");
 		aggregatedFields.add("provider.all");
 		aggregatedFields.add("dataProvider.all");
 		aggregatedFields.add("media.type.all");
@@ -173,12 +171,6 @@ public class ElasticSearcher {
 		return search.execute().actionGet();
 	}
 
-	public SearchResponse execute(QueryBuilder query, SearchOptions options, String... fields) {
-		SearchRequestBuilder search = this.getSearchRequestBuilder(query, options);
-		search.addFields(fields);
-		return search.execute().actionGet();
-	}
-	
 	public SearchResponse executeWithAggs(QueryBuilder query, SearchOptions options) {
 		SearchRequestBuilder search = this.getSearchRequestBuilder(query, options);
 		for(String aggName: aggregatedFields) {
@@ -187,6 +179,12 @@ public class ElasticSearcher {
 		}
 
 		//System.out.println(search.toString());
+		return search.execute().actionGet();
+	}
+	
+	public SearchResponse execute(QueryBuilder query, SearchOptions options, String... fields) {
+		SearchRequestBuilder search = this.getSearchRequestBuilder(query, options);
+		search.addFields(fields);
 		return search.execute().actionGet();
 	}
 
@@ -458,3 +456,4 @@ public class ElasticSearcher {
 	}
 
 }
+

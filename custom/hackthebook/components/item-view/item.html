@@ -1,3 +1,4 @@
+
  <div class="itemview">
         <!-- menu bar-->
         <nav class="menubar media">
@@ -25,19 +26,25 @@
           <div class="container">
             <div class="wrap">
               <!-- media itself-->
-              <div class="mediathumb"><img data-bind="attr: {src: record().fullres()},event: {error: function(){changeSource($data)}}" ></div>
+              <div class="mediathumb"><img data-bind="attr: {src: record().fullres()}" onError="this.src='img/content/thumb-empty.png'" ></div>
               <!-- media information-->
               <div class="mediainfo">
                 <div class="infowrap">
                   <!-- title-->
-                  <h1><!-- ko text: record().title --><!-- /ko --> </h1>
+                  <h1><!-- ko text: record().title --><!-- /ko --> 
+                    <!-- ADDED BY ALESSIO PICCIOLI -->
+                    <!-- ko if:record().source=='Europeana' -->
+                    <span data-bind="attr: { 'about': 'http://data.europeana.eu/item' + record().externalId}"  class="pnd-resource" onclick="angular.element(document).trigger('Pundit.showBootstrap')"></span>
+                   <!-- /ko -->
+                   <!-- ADDED BY ALESSIO PICCIOLI -->
+                   </h1>
                   <div class="owner" data-bind="text:record().dataProvider"></div>
                   <!-- metadata-->
                   <ul role="tablist" class="nav nav-tabs">
                     <li class="active"><a href="#information" title="" data-toggle="tab">Info</a></li>
                     <li><a href="#related" title="" data-toggle="tab" data-bind="event:{ click: function(){record().findsimilar()}}">Related</a></li>
                     <li><a href="#comment" title="" data-toggle="tab">Comments</a></li>
-                    <li data-bind="visible: record().source=='WITHin'"><a href="#share" title="" data-toggle="tab">Share</a></li>
+                    <li data-bind="visible: record().recordId!='-1'"><a href="#share" title="" data-toggle="tab">Share</a></li>
                   </ul>
                   <!-- panes-->
                   <div class="tab-content">

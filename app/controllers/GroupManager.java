@@ -226,7 +226,7 @@ public class GroupManager extends Controller {
 									+ ((country == null) ? "" : country);
 							fullAddress = fullAddress.replace(" ", "+");
 							try {
-								JsonNode response = HttpConnector
+								JsonNode response = HttpConnector.getWSHttpConnector()
 										.getURLContent("https://maps.googleapis.com/maps/api/geocode/json?address="
 												+ fullAddress);
 								Point coordinates = GeoJson.point(
@@ -370,7 +370,7 @@ public class GroupManager extends Controller {
 		UserGroup group = DB.getUserGroupDAO().getByName(name);
 		return getGroupJson.apply(group);
 	}
-	
+
 	public static ArrayNode groupsAsJSON(List<UserGroup> groups,
 			ObjectId restrictedById, boolean collectionHits) {
 		ArrayNode result = Json.newObject().arrayNode();
@@ -410,7 +410,7 @@ public class GroupManager extends Controller {
 
 	/**
 	 * Return child groups or all descedant groups according to group type.
-	 * 
+	 *
 	 * @param groupId
 	 * @param groupType
 	 * @param direct
@@ -478,7 +478,7 @@ public class GroupManager extends Controller {
 			User u;
 			for (ObjectId oid : group.getUsers()) {
 				if ((u = DB.getUserDAO().get(oid)) == null) {
-					log.error("Not a User with dbId: " + oid);
+					log.error("No User with dbId: " + oid);
 				}
 				users.add(userOrGroupJson(u));
 			}
@@ -513,6 +513,47 @@ public class GroupManager extends Controller {
 		return userJSON;
 	}
 
+
+	public static ArrayNode userGroupsAsJSON(List<UserGroup> groups) {
+		ArrayNode result = Json.newObject().arrayNode();
+		for (UserGroup group : groups) {
+			ObjectNode g = (ObjectNode) Json.toJson(group);
+
+			ObjectId userId = AccessManager.effectiveUserDbId(session().get(
+					"effectiveUserIds"));
+			User user = DB.getUserDAO().get(userId);
+			g.put("firstName", user.getFirstName());
+			g.put("lastName", user.getLastName());
+
+			//
+			Query<CollectionObject> q = DB.getCollectionObjectDAO()
+					.createQuery();
+			// Criteria criteria1 =
+			// DB.getCollectionObjectDAO().formAccessLevelQuery(new
+			// Tuple(restrictedById, Access.READ), QueryOperator.GTE);
+			Criteria criteria2 = DB.getCollectionObjectDAO()
+					.formAccessLevelQuery(
+							new Tuple(group.getDbId(), Access.READ),
+							QueryOperator.GTE);
+			// Criteria criteria3 = DB.getCollectionObjectDAO().createQuery()
+			// .criteria("administrative.access.isPublic").equal(true);
+			// q.and(criteria1, criteria2);
+			q.and(criteria2);
+			Tuple<Integer, Integer> hits = DB.getCollectionObjectDAO().getHits(
+					q, Optional.ofNullable(null));
+			ObjectNode count = Json.newObject();
+
+			count.put("Collections", hits.x);
+			count.put("Exhibitions", hits.y);
+			g.put("count", count);
+			//
+
+			result.add(g);
+		}
+		return result;
+	}
+
+
 	public static Result listUserGroups(String groupType, int offset, int count) {
 		List<UserGroup> groups = new ArrayList<UserGroup>();
 		try {
@@ -528,7 +569,10 @@ public class GroupManager extends Controller {
 			groups = DB.getUserGroupDAO().findByIds(userGroupsIds, type,
 					offset, count);
 			if (groups.size() == count)
-				return ok(Json.toJson(groups));
+				//return ok(Json.toJson(groups));
+
+				return ok(userGroupsAsJSON(groups));
+
 			int userGroupCount = DB.getUserGroupDAO().getGroupCount(
 					userGroupsIds, type);
 			if (offset < userGroupCount)
@@ -538,9 +582,13 @@ public class GroupManager extends Controller {
 			count = count - groups.size();
 			groups.addAll(DB.getUserGroupDAO().findPublicWithRestrictions(type,
 					offset, count, userGroupsIds));
-			return ok(Json.toJson(groups));
+//			return ok(Json.toJson(groups));
+			return ok(userGroupsAsJSON(groups));
+
 		} catch (Exception e) {
-			return ok(Json.toJson(groups));
+			//return ok(Json.toJson(groups));
+			return ok(userGroupsAsJSON(groups));
+
 		}
 	}
 }

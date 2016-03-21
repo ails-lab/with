@@ -44,4 +44,8 @@ public class ItemsGrouping {
 		culturalCHO.addAll(items.getCulturalCHO());
 	}
 
+	public int getItemsCount() {
+		return culturalCHO.size();
+	}
+
 }

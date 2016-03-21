@@ -16,10 +16,7 @@
 
 package sources.formatreaders;
 
-import java.util.Arrays;
 import java.util.List;
-
-import com.fasterxml.jackson.databind.JsonNode;
 
 import model.EmbeddedMediaObject;
 import model.EmbeddedMediaObject.MediaVersion;
@@ -50,7 +47,7 @@ public class EuropeanaItemRecordFormatter extends CulturalRecordFormatter {
 		
 		String stringValue = rec.getStringValue("type");
 		List<Object> vals = getValuesMap().translateToCommon(CommonFilters.TYPE.getId(), stringValue);
-		WithMediaType type = (WithMediaType) vals.get(0);
+		WithMediaType type = (WithMediaType.getType(vals.get(0).toString())) ;
 		
 
 //		String id = rec.getStringValue("objectNumber");
@@ -104,11 +101,13 @@ public class EuropeanaItemRecordFormatter extends CulturalRecordFormatter {
 
 		rec.exitContext();
 		rec.enterContext("aggregations[0]");
-		LiteralOrResource rights = rec.getLiteralOrResourceValue("edmRights");
-		WithMediaRights withMediaRights = (WithMediaRights)
-				 getValuesMap().translateToCommon(CommonFilters.RIGHTS.getId(),
-						 rec.getLiteralOrResourceValue("edmRights").getURI()).get(0);
-
+		LiteralOrResource rightsLiteral = rec.getLiteralOrResourceValue("edmRights");
+		LiteralOrResource rights = rightsLiteral;
+		String rightsString = rec.getStringValue("edmRights");
+		WithMediaRights withMediaRights = (!Utils.hasInfo(rightsString))?null:
+			(WithMediaRights.getRighs(getValuesMap().translateToCommon(CommonFilters.RIGHTS.getId(),
+					rightsString).get(0).toString()));
+		
 		model.setIsShownAt(rec.getLiteralOrResourceValue("edmIsShownAt"));
 		model.setIsShownBy(rec.getLiteralOrResourceValue("edmIsShownBy"));
 		String uriAt = model.getIsShownAt()==null?null:model.getIsShownAt().getURI();

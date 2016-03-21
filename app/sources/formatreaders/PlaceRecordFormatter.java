@@ -23,6 +23,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import model.basicDataTypes.Language;
 import model.basicDataTypes.LiteralOrResource;
 import model.basicDataTypes.ProvenanceInfo;
+import model.resources.PlaceObject;
+import model.resources.PlaceObject.PlaceData;
 import model.resources.CulturalObject;
 import model.resources.CulturalObject.CulturalObjectData;
 import play.Logger;
@@ -32,11 +34,11 @@ import sources.core.Utils;
 import sources.utils.JsonContextRecord;
 import sources.utils.StringUtils;
 
-public abstract class CulturalRecordFormatter extends JsonContextRecordFormatReader<CulturalObject> {
+public abstract class PlaceRecordFormatter extends JsonContextRecordFormatReader<PlaceObject> {
 
 	private FilterValuesMap valuesMap;
 
-	public CulturalRecordFormatter(FilterValuesMap valuesMap) {
+	public PlaceRecordFormatter(FilterValuesMap valuesMap) {
 		super();
 		this.valuesMap = valuesMap;
 	}
@@ -53,21 +55,17 @@ public abstract class CulturalRecordFormatter extends JsonContextRecordFormatRea
 		return res.toArray(new Language[]{});
 	}
 	
-	public CulturalObject readObjectFrom(JsonContextRecord text) {
-		object = new CulturalObject();
+	public PlaceObject readObjectFrom(JsonContextRecord text) {
+		object = new PlaceObject();
 		object.getAdministrative().getAccess().setIsPublic(true);
 
-		CulturalObjectData model = new CulturalObjectData();
+		PlaceData model = new PlaceData();
 		object.setDescriptiveData(model);
 		model.setMetadataRights(new LiteralOrResource("http://creativecommons.org/publicdomain/zero/1.0/"));
 		model.setRdfType("http://www.europeana.eu/schemas/edm/ProvidedCHO");
 
-		try {
 		fillObjectFrom(text);
-		} catch (Exception e){
-			e.printStackTrace();
-			Logger.error(e.getMessage());
-		}
+
 		List<ProvenanceInfo> provenance = object.getProvenance();
 		int index = provenance.size() - 1;
 		String resourceId = provenance.get(index).getResourceId();
@@ -76,7 +74,7 @@ public abstract class CulturalRecordFormatter extends JsonContextRecordFormatRea
 		return object;
 	}
 
-	public CulturalObject readObjectFrom(JsonNode text) {
+	public PlaceObject readObjectFrom(JsonNode text) {
 		return readObjectFrom(new JsonContextRecord(text));
 	}
 

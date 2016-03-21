@@ -25,7 +25,7 @@
           <div class="container">
             <div class="wrap">
               <!-- media itself-->
-              <div class="mediathumb"><img data-bind="attr: {src: record().fullres()},event: {error: function(){changeSource($data)}}" ></div>
+              <div class="mediathumb"><img data-bind="attr: {src: record().fullres()}" onError="this.src='img/content/thumb-empty.png'"></div>
               <!-- media information-->
               <div class="mediainfo">
                 <div class="infowrap">
@@ -37,7 +37,7 @@
                     <li class="active"><a href="#information" title="" data-toggle="tab">Info</a></li>
                     <li><a href="#related" title="" data-toggle="tab" data-bind="event:{ click: function(){record().findsimilar()}}">Related</a></li>
                     <li><a href="#comment" title="" data-toggle="tab">Comments</a></li>
-                    <li data-bind="visible: record().source=='WITHin'"><a href="#share" title="" data-toggle="tab">Share</a></li>
+                    <li data-bind="visible: record().recordId!='-1'"><a href="#share" title="" data-toggle="tab">Share</a></li>
                   </ul>
                   <!-- panes-->
                   <div class="tab-content">
@@ -141,6 +141,11 @@
                 <div class="shortcut">
                   <!-- ul-->
                   <ul>
+                    <li data-bind="visible: record().source=='Europeana'">
+                      <a data-bind="click: annotate" target="_blank"  class="btn btn-alt">
+                        ANNOTATE
+                      </a>
+                    </li>
                     <li><a data-bind="attr: { href:record().view_url}" target="_blank" class="btn btn-alt">VISIT ITEM SITE</a></li>
                   </ul>
                 </div>

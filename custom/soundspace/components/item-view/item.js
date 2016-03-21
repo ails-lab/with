@@ -2,7 +2,7 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 
 	function Record(data) {
 		var self = this;
-	    self.recordId = "";
+	    self.recordId = "-1";
 		self.title = "";
 		self.description="";
 		self.thumb = "";
@@ -68,9 +68,10 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 			self.dataProvider=data.dataProvider;
 			self.dataProvider_uri=data.dataProvider_uri;
 			self.rights=data.rights;
-			self.recordId=data.dbId;
-			self.loc(location.href.replace(location.hash,"")+"#item/"+self.recordId);
-			
+			if(data.dbId){
+			 self.recordId=data.dbId;
+			 self.loc(location.href.replace(location.hash,"")+"#item/"+self.recordId);
+			}
 			self.externalId=data.externalId;
 			self.likes=data.likes;
 			self.collected=data.collected;
@@ -226,7 +227,7 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 					return self.thumb;
 				}
 			   else{
-				   return "images/no_image.jpg";
+				   return "img/content/thumb-empty.png";
 			   }
 			});
 		self.sourceCredits = ko.pureComputed(function() {
@@ -363,18 +364,29 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 				"method": "get",
 				"contentType": "application/json",
 				"success": function (result) {
+					var admindata=result.administrative;
+					var descdata=result.descriptiveData;
+					var media=result.media;
+					var provenance=result.provenance;
+					var usage=result.usage;
 					 var record = new Record({
-							recordId: result.recordId || result.id,
-							thumb: result.thumbnailUrl,
-							fullres: result.fullresolution!=null ? result.fullresolution : "",
-							title: result.title!=null? result.title:"",
-							view_url: result.sourceUrl,
-							creator: result.creator!==undefined && result.creator!==null? result.creator : "",
-							dataProvider: result.dataProvider!=undefined && result.dataProvider!==null ? result.dataProvider: "",
-							provider: result.provider!=undefined && result.provider!==null ? result.provider: "",
-							rights: result.rights!==undefined && result.rights!==null ? result.rights : "",
-							externalId: result.externalId,
-							source: result.source
+						            thumb: media!=null &&  media[0] !=null  && media[0].Thumbnail!=null  && media[0].Thumbnail.url!="null" ? media[0].Thumbnail.url:"img/content/thumb-empty.png",
+								    fullres: media!=null &&  media[0] !=null && media[0].Original!=null  && media[0].Original.url!="null"  ? media[0].Original.url : "",
+									title: findByLang(descdata.label),
+									description: findByLang(descdata.description),
+									view_url: findProvenanceValues(provenance,"source_uri"),
+									creator: findByLang(descdata.dccreator),
+									dataProvider: findProvenanceValues(provenance,"dataProvider"),
+									dataProvider_uri: findProvenanceValues(provenance,"dataProvider_uri"),
+									provider: findProvenanceValues(provenance,"provider"),
+									rights: findResOrLit(descdata.metadataRights),
+									externalId: admindata.externalId,
+									source: findProvenanceValues(provenance,"source"),
+									dbId:result.dbId,
+									likes: usage.likes,
+									collected: usage.collected,
+									collectedIn:result.collectedIn,
+									data: result
 						  });
 					self.record(record);
 					$('.nav-tabs a[href="#information"]').tab('show');
@@ -391,6 +403,12 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 		if(self.id()!=undefined){
 			
 			self.loadItem();
+		}
+		
+		
+		self.annotate=function(){
+			
+			window.open('http://euspndwidget.netseven.it/index.php?id='+self.record().externalId, self.record().externalId, 'top=10, left=10, width=900, height=600, status=no, menubar=no, toolbar=no scrollbars=no');
 		}
 		
 		function adjustHeight() {

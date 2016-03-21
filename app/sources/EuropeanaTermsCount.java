@@ -60,7 +60,7 @@ public class EuropeanaTermsCount {
 		while (s.hasNextLine()){
 			String term = s.nextLine();
 			Function<String, String> function = (String ss) -> {
-				return "%22" + Utils.spacesFormatQuery(ss, "%20") + "%22";
+				return "\"" + ss + "\"";
 			};
 			QueryBuilder builder = new QueryBuilder("http://europeana.eu/api/v2/search.json");
 			builder.addSearchParam("wskey", apiKey);
@@ -69,7 +69,7 @@ public class EuropeanaTermsCount {
 			int count = response.getIntValue("totalResults");
 			
 			Collection<String> t = Arrays.asList("Europeana Food and Drink");
-			builder.addSearchParam("qf", "PROVIDER%3A" + Utils.getORList(ListUtils.transform(t , function)));
+			builder.addSearchParam("qf", "PROVIDER:" + Utils.getORList(ListUtils.transform(t , function)));
 			response = new JsonContextRecord(getHTML(builder.getHttp()));
 			int count2 = response.getIntValue("totalResults");
 		}

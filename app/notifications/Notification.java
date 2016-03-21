@@ -59,6 +59,7 @@ public class Notification {
 
 	@JsonSerialize(using = Serializer.ObjectIdSerializer.class)
 	private ObjectId sender;
+	private String senderLogoUrl;
 
 	private String message;
 	// While the notification is pending for an answer, it remains open
@@ -146,15 +147,6 @@ public class Notification {
 		this.activity = activity;
 	}
 
-	/*public Access getAccess() {
-		return access;
-	}
-
-	public void setAccess(Access access) {
-		this.access = access;
-	}*/
-
-
 	@Override
 	public boolean equals(Object other) {
 		if (other == null)
@@ -170,6 +162,14 @@ public class Notification {
 	@Override
 	public int hashCode() {
 		return new HashCodeBuilder(17, 31).append(this.dbId).toHashCode();
+	}
+
+	public String getSenderLogoUrl() {
+		return senderLogoUrl;
+	}
+
+	public void setSenderLogoUrl(String senderLogoUrl) {
+		this.senderLogoUrl = senderLogoUrl;
 	}
 
 }

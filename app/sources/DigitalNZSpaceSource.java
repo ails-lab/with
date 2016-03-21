@@ -63,14 +63,14 @@ public class DigitalNZSpaceSource extends ISpaceSource {
 		// TODO: rights_url shows the license in the search
 
 		
-		formatreader = new DNZBasicRecordFormatter(vmap);
+		formatreader = new DNZBasicRecordFormatter();
 
 	}
 
 	private Function<List<String>, Pair<String>> fwriter(String parameter) {
 
 		Function<String, String> function = (String s) -> {
-			return Utils.spacesFormatQuery(s, "%20");
+			return s;
 		};
 		return new Function<List<String>, Pair<String>>() {
 			@Override
@@ -100,6 +100,7 @@ public class DigitalNZSpaceSource extends ISpaceSource {
 		builder.addSearchParam("page", q.page);
 		builder.addSearchParam("per_page", q.pageSize);
 		builder.addSearchParam("facets", "year,creator,category,usage");
+		builder.addSearchParam("facets_per_page", "20");
 		return addfilters(q, builder).getHttp();
 	}
 
@@ -109,6 +110,8 @@ public class DigitalNZSpaceSource extends ISpaceSource {
 
 	@Override
 	public SourceResponse getResults(CommonQuery q) {
+		if (q.searchTerm==null)
+			q.searchTerm = "format:(picture OR book OR music OR article)";
 		SourceResponse res = new SourceResponse();
 		res.source = getSourceName();
 		String httpQuery = getHttpQuery(q);
@@ -122,7 +125,7 @@ public class DigitalNZSpaceSource extends ISpaceSource {
 
 		if (checkFilters(q)) {
 			try {
-				response = HttpConnector.getURLContent(httpQuery);
+				response = getHttpConnector().getURLContent(httpQuery);
 
 				JsonNode o = response.path("search");
 				// System.out.print(o.path("name").asText() + " ");
@@ -182,7 +185,7 @@ public class DigitalNZSpaceSource extends ISpaceSource {
 		ArrayList<RecordJSONMetadata> jsonMetadata = new ArrayList<RecordJSONMetadata>();
 		JsonNode response;
 		try {
-			response = HttpConnector
+			response = getHttpConnector()
 					.getURLContent("http://api.digitalnz.org/v3/records/" + recordId + ".json?api_key=" + apiKey);
 			JsonNode record = response;
 			if (record!=null){
@@ -190,7 +193,7 @@ public class DigitalNZSpaceSource extends ISpaceSource {
 				String json = Json.toJson(formatreader.readObjectFrom(record)).toString();
 				jsonMetadata.add(new RecordJSONMetadata(Format.JSON_WITH, json));
 			}
-			Document xmlResponse = HttpConnector
+			Document xmlResponse = getHttpConnector()
 					.getURLContentAsXML("http://api.digitalnz.org/v3/records/" + recordId + ".xml?api_key=" + apiKey);
 			jsonMetadata.add(new RecordJSONMetadata(Format.XML_DNZ, Serializer.serializeXML(xmlResponse)));
 			return jsonMetadata;

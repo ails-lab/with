@@ -86,6 +86,9 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
 					return "www.rijksmuseum.nl";
 			    case "DDB":
 			        return "deutsche-digitale-bibliothek.de";
+			    case "DBPedia":
+			    	return "dbpedia.org";
+
 			    default: return "";
 			 }
 			});
@@ -146,7 +149,7 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
 		/* to be used if site becomes multilingual*/
 		self.lang=ko.observable("");
 		self.sourceview=ko.observable(true);
-		self.sources= ko.observableArray([ "Rijksmuseum","DigitalNZ","DDB","The British Library","DPLA","Europeana","WITHin"]);
+		self.sources= ko.observableArray([ "Rijksmuseum","DigitalNZ","DDB","The British Library","DPLA","Europeana","WITHin","DBPedia"]);
 		self.mixresults=ko.observableArray([]);
 		
 		self.results = ko.observableArray([]);
@@ -226,6 +229,9 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
 		 var directlyAccessedByGroupName = [{"groupName":"a", "rights": "OWN"}];
 		 if(self.searching()==false && self.currentTerm()!=""){
 			self.searching(true);
+
+
+			
 			$request=$.ajax({
 				"url": "/api/advancedsearch",
 				"method": "post",
@@ -260,6 +266,7 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
 						var items = [];
 						
 						items=self.revealItems(data[i].items.culturalCHO);
+						
 						api_console="";
 						if(source=="Europeana"){
 							api_console="http://labs.europeana.eu/api/console/?function=search&query="+self.term();
@@ -278,6 +285,9 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
 						}
 						else if (source=="Rijksmuseum") {
 							api_console="https://www.rijksmuseum.nl/en/api";
+						}
+						else if(source=="DBPedia"){
+							api_console="http://dbpedia.org";
 						}
 						else
 							api_console="";

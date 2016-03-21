@@ -14,6 +14,7 @@ PUT      /notifications/read                       controllers.NotificationContr
 POST     /notifications/send                       controllers.NotificationController.sendMessage(receiverId)
 
 POST     /api/advancedsearch        controllers.SearchController.searchwithfilter()
+POST     /api/initialfilters        controllers.SearchController.getfilters()  
 GET     /api/searchsources        controllers.SearchController.searchSources()
 POST     /api/search            	controllers.SearchController.search()
 
@@ -34,6 +35,7 @@ PUT		/record/:id								controllers.RecordResourceController.editRecordResource(
 # Collection Controller
 GET 	 /collection/list 						controllers.CollectionObjectController.list(directlyAccessedByUserOrGroup: play.libs.F.Option[controllers.parameterTypes.MyPlayList], recursivelyAccessedByUserOrGroup: play.libs.F.Option[controllers.parameterTypes.MyPlayList], creator: play.libs.F.Option[String], isPublic: play.libs.F.Option[java.lang.Boolean], isExhibition: play.libs.F.Option[java.lang.Boolean], collectionHits:Boolean ?= false, offset: Integer ?=0, count: Integer ?=10)
 GET 	 /collection/listShared					controllers.CollectionObjectController.listShared(direct: Boolean ?= true, directlyAccessedByUserOrGroup: play.libs.F.Option[controllers.parameterTypes.MyPlayList], recursivelyAccessedByUserOrGroup: play.libs.F.Option[controllers.parameterTypes.MyPlayList], isExhibition: play.libs.F.Option[java.lang.Boolean], collectionHits:Boolean ?= false, offset: Integer ?=0, count: Integer ?=10)
+GET 	 /collection/countMyAndShared			controllers.CollectionObjectController.countMyAndShared()
 GET 	 /collection/featured					controllers.CollectionObjectController.getFeatured(groupOrUserName: String, isExhibition: play.libs.F.Option[java.lang.Boolean], offset: Integer ?=0, countPerType: Integer ?=10)
 GET		 /collection/favorites					controllers.RecordResourceController.getFavorites()
 GET      /collection/:id/listUsers				controllers.CollectionObjectController.listUsersWithRights(id)
@@ -49,6 +51,8 @@ PUT		 /collection/:id/moveRecord				controllers.WithResourceController.moveRecor
 DELETE   /collection/unliked/:recId			    controllers.WithResourceController.removeFromFavorites(recId)
 
 POST     /collection		                    controllers.CollectionObjectController.createCollectionObject(collectionType: String ?= "SimpleCollection")
+POST     /collection/importSearch		        controllers.CollectionObjectController.importSearch()
+GET     /collection/importEuropeanaCollection	controllers.CollectionObjectController.createAndFillEuropeanaCollection(id: String, limit:Integer ?=-1)
 GET	     /collection/:id 	        			controllers.CollectionObjectController.getCollectionObject(id)
 PUT		 /collection/:id 						controllers.CollectionObjectController.editCollectionObject(id)
 DELETE   /collection/:id	                    controllers.CollectionObjectController.deleteCollectionObject(id)

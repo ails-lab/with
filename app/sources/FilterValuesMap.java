@@ -37,6 +37,7 @@ public class FilterValuesMap {
 	private static FilterValuesMap dnzMap;
 	private static FilterValuesMap rijksMap;
 	private static FilterValuesMap flickrMap;
+	private static FilterValuesMap dbpediaMap;
 	
 	private HashMap<String, List<Object>> specificvalues;
 	// private HashMap<String, List<Pair<String>>> queryTexts;
@@ -152,7 +153,7 @@ public class FilterValuesMap {
 		addMapping(CommonFilters.TYPE.getId(), WithMediaType.VIDEO, "VIDEO");
 		addMapping(CommonFilters.TYPE.getId(), WithMediaType.AUDIO, "SOUND");
 		addMapping(CommonFilters.TYPE.getId(), WithMediaType.TEXT, "TEXT");
-		addMapping(CommonFilters.TYPE.getId(), WithMediaType.THREED, "3D");
+		addMapping(CommonFilters.TYPE.getId(), WithMediaType.THREED, "3D","_3D");
 
 		addMapping(CommonFilters.RIGHTS.getId(), WithMediaRights.Creative, ".*creative.*");
 		addMapping(CommonFilters.RIGHTS.getId(), WithMediaRights.Commercial, ".*creative(?!.*nc).*");
@@ -166,6 +167,14 @@ public class FilterValuesMap {
 		addMap(id, obj, string);
 	}
 
+	public static FilterValuesMap getDBPediaMap(){
+		if (dbpediaMap==null){
+			dbpediaMap = new FilterValuesMap();
+			dbpediaMap.fillDBPedia();
+		}
+		return dbpediaMap;
+	}
+	
 	public static FilterValuesMap getEuropeanaMap(){
 		if (europeanaMap==null){
 			europeanaMap = new FilterValuesMap();
@@ -207,6 +216,14 @@ public class FilterValuesMap {
 	}
 
 
+	private void fillDBPedia() {
+//		addMapping(CommonFilters.TYPE.getId(), WithMediaType.IMAGE, "Image", "Photograph",
+//				"Poster, chart, other");
+//		addMapping(CommonFilters.TYPE.getId(), WithMediaType.VIDEO, "Video");
+//		addMapping(CommonFilters.TYPE.getId(), WithMediaType.AUDIO, "Sound", "Sheet music");
+//		addMapping(CommonFilters.TYPE.getId(), WithMediaType.TEXT, "Books", "Article");
+	}
+	
 	private void fillFlickr() {
 		addMapping(CommonFilters.TYPE.getId(), WithMediaType.IMAGE, "photo");
 		addMapping(CommonFilters.TYPE.getId(), WithMediaType.VIDEO, "video");
@@ -276,7 +293,11 @@ public class FilterValuesMap {
 
 		addMapping(CommonFilters.TYPE.getId(), WithMediaType.IMAGE, "Images");
 		addMapping(CommonFilters.TYPE.getId(), WithMediaType.AUDIO, "Audio");
-		addMapping(CommonFilters.TYPE.getId(), WithMediaType.TEXT, "Books","Articles");
+		addMapping(CommonFilters.TYPE.getId(), WithMediaType.VIDEO, "Videos");
+		addMapping(CommonFilters.TYPE.getId(), WithMediaType.TEXT, "Books",
+				"Articles","Newspapers",
+				"Research papers",
+				"Manuscripts");
 
 		// addMapping(CommonFilters.RIGHTS.name(),
 		// RightsValues.Creative_Commercial,
