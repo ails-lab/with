@@ -41,7 +41,12 @@ define(["knockout", "crossroads", "hasher"], function (ko, crossroads, hasher) {
 			{ url: 'organizations', params: { page: 'organizations', title: 'Organizations', 'type': 'Organization' } },
 			{ url: 'projects', params: { page: 'organizations', title: 'Projects', 'type': 'Project' } },
 			{ url: 'project/{id}', params: { page: 'group-page', title: 'Project', 'type': 'project' } },
-			{ url: 'notifications', params: { page: 'notifications-page', title: 'Notifications' } }
+			{ url: 'notifications', params: { page: 'notifications-page', title: 'Notifications' } },
+			{ url: 'about', params: { page: 'about', title: 'About' } },
+			{ url: 'about/{anchor}', params: { page: 'about', title: 'About' } },
+			{ url: 'terms', params: { page: 'terms', title: 'Terms and Conditions' } },
+			{ url: 'privacy', params: { page: 'privacy', title: 'Privacy Policy' } },
+			{ url: 'feedback', params: { page: 'feedback', title: 'Feedback and Contact' } }
 		]
 	});
 
@@ -67,20 +72,18 @@ define(["knockout", "crossroads", "hasher"], function (ko, crossroads, hasher) {
 			$( '.action' ).removeClass( 'active' );
 			//now reset mobile menu
 			var $menu = $( '.main .menu');
-			
 	          if($menu.hasClass("visible")){
 	        	  $menu.toggleClass( 'visible' );
 
 					// toggle button
 					$( '.mobilemenu' ).toggleClass( 'active' );
 	          }
-	         
-	     	 
 		}
-		
+
 		function resetScroll() {
 			document.body.scrollTop = document.documentElement.scrollTop = 0;
 		}
+
 		function parseHash(newHash, oldHash) {
 			if (oldHash) {
 				if (oldHash.indexOf("provider/") === 0) {
@@ -99,7 +102,6 @@ define(["knockout", "crossroads", "hasher"], function (ko, crossroads, hasher) {
 				}
 			}
 			crossroads.parse(newHash);
-
 		}
 
 		crossroads.ignoreState = true;
