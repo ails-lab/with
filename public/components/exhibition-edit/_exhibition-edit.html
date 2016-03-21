@@ -23,13 +23,12 @@
 					</div>
 					<!-- editor box-->
 					<div class="editorbox">
-						<div class="wrap">
+						<div class="wrap" >
 							<!-- scroll-->
-							<div class="scroll" data-bind="hscroll: collectionItemsArray(), scrollOptions: { loadFunc: loadNextExhibition, offset: 20 }">
+							<div class="scroll" data-bind="hscroll: collectionItemsArray(), scrollOptions: { loadFunc: loadNextExhibition }">
 								<!-- box-->
 								<div class="box">
 								 <div class="boxinputs">
-                     
 									<input data-bind="{textInput: title, event: { blur: textfieldsLostFocus.bind($data, true) }}" class="editortext" />
 									<textarea class="editortextarea" data-bind="{textInput: description, event: { blur: textfieldsLostFocus.bind($data, false) }}"/>
 								</div>
@@ -131,7 +130,7 @@
 									</a>
 								</li>
 							</ul>
-							<div data-bind="hscroll: userSavedItemsArray(), scrollOptions: { loadFunc: loadNextCollection, offset: 20 }"></div>
+							<div data-bind="hscroll: userSavedItemsArray(), scrollOptions: { loadFunc: loadNextCollection }"></div>
 						</div>
 					</div>
 				</section>

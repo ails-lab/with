@@ -1,7 +1,7 @@
 define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', 'app', 'jquery.lazyload', 'knockout-else', 'knockout-validation'], function (ko, template, jqueryUI, autoscroll, app, jqueryLazyLoad, KnockoutElse) {
 	
-	collectionItemCount = 10;
-	exhibitionItemCount = 4;
+	collectionItemCount = 14;
+	exhibitionItemCount = 2;
 	
 	function setUpSwitch(exhibition) {
 		// Set the initial value
@@ -141,6 +141,8 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 		var self = this;
 		self.route = params.route;
 		KnockoutElse.init([spec = {}]);
+		WITHApp.tabAction();
+		WITHApp.initTooltip();
 		self.checkLogged = function () {
 			if (localStorage.getItem('logged_in') != "true") {
 				window.location.href = "#login";
@@ -310,6 +312,7 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 					self.loadingInitialItemsCount = data.entryCount;
 					ko.mapping.fromJS(self.firstEntries, self.mapping, self.collectionItemsArray);
 					self.loadingExhibitionItems = true;
+					WITHApp.initTooltip();
 				},
 				error: function (result) {
 					// Empty
@@ -329,6 +332,7 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 					self.firstEntries = data.records;
 					ko.mapping.fromJS(self.firstEntries, self.mapping, self.userSavedItemsArray);
 					self.searchPage = 0;
+					WITHApp.initTooltip();
 					//self.userSavedItemsArray(data.records);
 				},
 				error: function (result) {
@@ -384,6 +388,7 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 					saveItemToExhibition(record, index, self.dbId());
 					$(elem).find('#loadingIcon').fadeOut();
 				}
+				WITHApp.initTooltip();
 			}
 		};
 
@@ -662,10 +667,12 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 				var parentContainer = element.parentElement;
 				if (load) {
 					$(parentContainer).on("scroll.ko.scrollHandler", function () {
+						console.log("2");
 						var parentContainer = element.parentElement;
 						//console.log('Is scrolling');
 						//console.log('left: ' + parentContainer.scrollLeft + ' offset: ' + parentContainer.offsetWidth  + 'scrollview width' + parentContainer.scrollWidth);
 						if (parentContainer.scrollWidth - (parentContainer.scrollLeft + parentContainer.offsetWidth) < 150) {
+							console.log("3");
 							if (self.updating) {
 								loadFunc();
 								self.updating = false;
@@ -687,6 +694,7 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 		};
 
 		self.loadNextExhibition = function () {
+			console.log("next");
 			self.moreItems(true);
 		};
 
@@ -734,6 +742,7 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 								});
 							}
 							self.loading(false);
+							WITHApp.initTooltip();
 						},
 						"error": function (result) {
 							self.loading(false);
