@@ -564,6 +564,12 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 			return this;
 		};
 	  
+		loadUrl = function (data,event) {
+			event.preventDefault();
+			window.location.href = data;
+
+			return false;
+		};
 	
   }
   
