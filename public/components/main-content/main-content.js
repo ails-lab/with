@@ -112,6 +112,7 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 			        	if(self.withCreatorInfo){
 			        		return self.withCreatorInfo.username;
 			        	}
+			        	return "";
 			        });
 			        
 			        return self;
