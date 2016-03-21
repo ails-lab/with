@@ -21,7 +21,7 @@ define(['jquery','knockout', './router', './app','knockout-mapping', 'bootstrap'
 	ko.components.register('register-page', { require: 'components/login-register-page/login-register' });
 	ko.components.register('myexhibitions', { require: 'components/myexhibitions/myexhibitions' });
 	ko.components.register('mycollections', { require: 'components/mycollections/mycollections' });
-	
+
 	ko.components.register('organizations', { require: 'components/myorganizations/myorganizations' });
 	ko.components.register('organization-edit', {
 		viewModel: { require: 'components/organization-edit/organization-edit'},
@@ -91,13 +91,18 @@ define(['jquery','knockout', './router', './app','knockout-mapping', 'bootstrap'
 		template: { require: 'text!components/members/members-popup.html' }
 	});
 
+	ko.components.register('about', { require: 'components/statichtml/statichtml' });
+	ko.components.register('terms', { require: 'components/statichtml/statichtml' });
+	ko.components.register('faq', { require: 'components/statichtml/statichtml' });
+	ko.components.register('privacy', { require: 'components/statichtml/statichtml' });
+	ko.components.register('feedback', { require: 'components/statichtml/statichtml' });
+
 	// ... or for template-only components, you can just point to a .html file directly:
 	ko.components.register('empty', { template: '&nbsp;' });
 
 	// [Scaffolded component registrations will be inserted here. To retain this feature, don't remove this comment.]
 	popupName = ko.observable('empty');
 	popupParams = ko.observable({});
-
 
 	// Start the application
 	ko.applyBindings({ route: router.currentRoute, popupName: popupName, popupParams: popupParams });
