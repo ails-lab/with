@@ -177,7 +177,12 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 			if (localStorage.getItem('logged_in') != "true") {
 				window.location.href = "#login";
 			} else {
+				if(currentUser.username())
 				self.init();
+				else{
+					setTimeout(function(){ self.init(); }, 1500);
+					
+				}
 			}
 		};
 
