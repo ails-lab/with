@@ -85,6 +85,8 @@ public class ResourceNotification extends Notification {
 		
 		public String getUserOrGroupName() {
 			String username = "";
+			if (userOrGroup == null)
+				return "DELETED";
 			User user = DB.getUserDAO().getById(userOrGroup, new ArrayList<String>(Arrays.asList("username")));
 			if (user != null)
 				username = user.getUsername();
