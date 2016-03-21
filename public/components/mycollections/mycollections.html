@@ -81,7 +81,7 @@
 			  <ul class="list-body grids">
 					<div data-bind="{visible: collectionSet() == 'my', template: { name: 'collectionsTemplate', foreach: myCollections()}}"></div>
 					<div data-bind="{visible: collectionSet() == 'shared', template: { name: 'collectionsTemplate', foreach: sharedCollections()}}"></div>
-			  <!-- ko if: collectionSet == 'my' -->
+			  <!-- ko if: collectionSet() == 'my' -->
 			  <a style="cursor:pointer;" class="loadmore" 
 			  data-bind="{visible: (!showsExhibitions && collectionCount() > myCollections().length) || (showsExhibitions && exhibitionCount() > myCollections().length), 
 			  event: {click: moreCollections.bind($data, showsExhibitions)}}">load more
@@ -91,10 +91,9 @@
                   <div class="bot"></div>
               </a>
 			  <!-- /ko -->
-			  <!-- ko if: collectionSet == "shared" -->
+			  <!-- ko if: collectionSet() == "shared" -->
 			  	<a style="cursor:pointer;" class="loadmore" 
-			  	data-bind="{visible: (!showsExhibitions && collectionCount() > sharedCollections().length) || (showsExhibitions && exhibitionCount() > sharedCollections().length),  
-			  	event: {click: moreCollections.bind($data, showsExhibitions)}}">load more
+			  	data-bind="event: {click: moreCollections.bind($data, showsExhibitions)}">load more
 			   <div class="left"></div>
                   <div class="right"></div>
                   <div class="top"></div>
@@ -227,7 +226,6 @@
 
 			   <script type="text/html" id="collectionsTemplate">
 			   	<li data-bind="css: { private: !administrative.access.isPublic()}">
-<a href="#" data-bind="attr: {href: 'index.html#collectionview/'+dbId()}" title="view"> 
 				  <div class="thumbnails">
 				  	<!-- ko if: administrative.access.isPublic()-->
 					<div class="category">public</div>
@@ -254,7 +252,6 @@
 					<div class="wrap small"></div>
 					<!-- /ko -->
 				  </div>
-</a>
 				  <div class="meta">
 				  	<!-- ko if: $parent.showsExhibitions -->
 				  	<a title="View exhibition" data-bind="{text: title(), attr: {href: 'index.html#exhibitionview/'+dbId()}}" class="header truncate"></a>
