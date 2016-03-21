@@ -1,7 +1,7 @@
 define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', 'app', 'jquery.lazyload', 'knockout-else', 'knockout-validation'], function (ko, template, jqueryUI, autoscroll, app, jqueryLazyLoad, KnockoutElse) {
 	
 	collectionItemCount = 14;
-	exhibitionItemCount = 2;
+	exhibitionItemCount = 4;
 	
 	function setUpSwitch(exhibition) {
 		// Set the initial value
@@ -664,9 +664,8 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 				var loadFunc = props.loadFunc;
 				var load = ko.utils.unwrapObservable(valueAccessor());
 				var self = this;
-				var parentContainer = element.parentElement;
 				if (load) {
-					$(parentContainer).on("scroll.ko.scrollHandler", function () {
+					$(element).on("scroll.ko.scrollHandler", function () {
 						var parentContainer = element.parentElement;
 						//console.log('Is scrolling');
 						//console.log('left: ' + parentContainer.scrollLeft + ' offset: ' + parentContainer.offsetWidth  + 'scrollview width' + parentContainer.scrollWidth);
@@ -686,13 +685,51 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 				}
 			}
 		};
+		
+		ko.bindingHandlers.hscroll2 = {
+				updating: true,
+				init: function (element, valueAccessor, allBindingsAccessor) {
+					var self = this;
+					self.updating = true;
+					var parentContainer = element.parentElement;
+					ko.utils.domNodeDisposal.addDisposeCallback(element, function () {
+						$(parentContainer).off("scroll.ko.scrollHandler");
+						self.updating = false;
+					});
+				},
+				update: function (element, valueAccessor, allBindingsAccessor) {
+					var props = allBindingsAccessor().scrollOptions;
+					var offset = props.offset ? props.offset : "0";
+					var loadFunc = props.loadFunc;
+					var load = ko.utils.unwrapObservable(valueAccessor());
+					var self = this;
+					if (load) {
+						$(element).on("scroll.ko.scrollHandler", function () {
+							var parentContainer = element;
+							//console.log('Is scrolling');
+							//console.log('left: ' + parentContainer.scrollLeft + ' offset: ' + parentContainer.offsetWidth  + 'scrollview width' + parentContainer.scrollWidth);
+							if (parentContainer.scrollWidth - (parentContainer.scrollLeft + parentContainer.offsetWidth) < 150) {
+								if (self.updating) {
+									loadFunc();
+									self.updating = false;
+								}
+							} else {
+								self.updating = true;
+							}
+						});
+					} else {
+						element.style.display = "none";
+						$(parentContainer).off("scroll.ko.scrollHandler");
+						self.updating = false;
+					}
+				}
+			};
 
 		self.loadNextCollection = function () {
 			self.moreItems(false);
 		};
 
 		self.loadNextExhibition = function () {
-			console.log("next");
 			self.moreItems(true);
 		};
 
@@ -749,46 +786,6 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 				}
 			}
 		};
-		
-		//for the side scrolling
-		$('.left').droppable({
-			tolerance: "touch",
-			over: function (event, ui) {
-				console.log("left");
-				$('.outer').autoscroll({
-					direction: 'left',
-					step: 1000,
-					scroll: true
-				});
-			},
-			out: function (event, ui) {
-				$('.outer').autoscroll('destroy');
-			}
-		});
-
-		$('.right').droppable({
-			tolerance: "touch",
-			over: function (event, ui) {
-				console.log("left");
-				$('.outer').autoscroll({
-					direction: 'right',
-					step: 1000,
-					scroll: true
-				});
-			},
-			out: function (event, ui) {
-				$('.outer').autoscroll('destroy');
-			}
-		});
-
-		//fix for hover issue
-		self.showXbutton = function (data, event) {
-			$('#bottom-box').removeClass('box-Hover');
-			$(event.target).addClass('box-Hover');
-		};
-
-		//hide the nav bar
-		$('#bottomBar').fadeOut(500);
 	};
 	
 	

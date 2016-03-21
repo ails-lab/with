@@ -119,7 +119,7 @@
 						</div>
 						<!-- listing-->
 						<div class="assetlisting" id="outer-bottom">
-							<ul data-bind="foreach: userSavedItemsArray">
+							<ul data-bind="foreach: userSavedItemsArray, hscroll2: userSavedItemsArray(), scrollOptions: { loadFunc: loadNextCollection }">
 								<li>
 									<a id="bottom-box" href="#" data-toggle="tooltip" data-placement="top" 
 									data-bind="{drag: {item: $data, move: false}, attr: {title: title}}">
@@ -130,7 +130,6 @@
 									</a>
 								</li>
 							</ul>
-							<div data-bind="hscroll: userSavedItemsArray(), scrollOptions: { loadFunc: loadNextCollection }"></div>
 						</div>
 					</div>
 				</section>
