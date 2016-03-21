@@ -3202,7 +3202,6 @@ body {
 
 						// wrap
 						.wrap {
-							overflow-x: scroll;
 							background: #efefef;
 							position: absolute;
 							right: -30px;
@@ -3212,18 +3211,22 @@ body {
 
 							// scroll
 							.scroll {
-								width: 3500px;
 								padding: 20px;
 								height: 100%;
-
+								overflow-x: scroll;
+								overflow-y: hidden;
+								white-space: nowrap;
+							}
+						
 								// box
 								.box, .add {
 									width: 350px;
-									height: 100%;
-									float: left;
-									margin-right: 20px;
-									background: #fff;
-									padding: 40px;
+									height: 383px !important;
+								display: inline-block;
+								margin-right: 20px;
+								background: #fff;
+								padding: 40px;
+								white-space: normal;
 
 									// fill
 									&.fill {
@@ -3387,17 +3390,20 @@ body {
 										}
 									}
 								}
+							.boxinputs {
+								float: left;
+							}
 								.add {
 									background: none;
 									border: 1px dashed #c6c6c6;
 									width: 70px;
 									text-align: center;
 									padding: 0;
-									display: table;
+								display: inline-block;
 									// span
 									span {
-										display: table-cell;
-										vertical-align: middle;
+									float: left;
+									padding: 177px 0 0 22px;
 									}
 								}
 
@@ -3454,7 +3460,7 @@ body {
 										color: #666;
 									}
 								}
-							}
+							
 
 						}
 					}
@@ -3532,21 +3538,24 @@ body {
 							width: 100%;
 							height: 140px;
 							margin-top: 20px;
-							overflow-x: scroll;
+							
 
 							// ul
 							ul {
 								margin: 0;
 								padding: 0;
 								height: 100%;
-								min-width: 2000px;
+								width: auto;
+								overflow-x: scroll;
+								overflow-y: hidden;
+								white-space: nowrap;
 
 								// li
 								li {
 									list-style: none;
-									float: left;
+									display: inline-block;
 									height: 100%;
-									margin-right: 10px;
+									margin-right: 6px;
 
 									// a
 									a {
