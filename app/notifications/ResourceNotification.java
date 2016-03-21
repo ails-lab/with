@@ -84,7 +84,7 @@ public class ResourceNotification extends Notification {
 		}
 		
 		public String getUserOrGroupName() {
-			String username = "";
+			String username;
 			if (userOrGroup == null)
 				return "DELETED";
 			User user = DB.getUserDAO().getById(userOrGroup, new ArrayList<String>(Arrays.asList("username")));
@@ -92,6 +92,8 @@ public class ResourceNotification extends Notification {
 				username = user.getUsername();
 			else {
 				UserGroup userGroup =  DB.getUserGroupDAO().getById(userOrGroup, new ArrayList<String>(Arrays.asList("username")));
+				if (userGroup == null)
+					return "DELETED";
 				username = userGroup.getUsername();
 			}
 			return username;
