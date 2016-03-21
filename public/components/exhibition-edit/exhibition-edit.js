@@ -687,12 +687,11 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 		};
 
 		self.loadNextExhibition = function () {
-			console.log("next");
 			self.moreItems(true);
 		};
 
 		self.moreItems = function (isForExhibition) {
-			if (self.searchPage >= 0) {//items in collectionItemsArray are search results
+			if (self.searchPage > 0) {//items in collectionItemsArray are search results
 				if (!isForExhibition) {
 					self.searchPage++;
 					self.search();
