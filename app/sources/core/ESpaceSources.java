@@ -21,6 +21,7 @@ import java.util.List;
 
 import play.Logger;
 import sources.BritishLibrarySpaceSource;
+import sources.DBPediaSpaceSource;
 import sources.DDBSpaceSource;
 import sources.DPLASpaceSource;
 import sources.DigitalNZSpaceSource;
@@ -60,6 +61,7 @@ public class ESpaceSources {
 		esources.add(new BritishLibrarySpaceSource());
 		esources.add(new FlickrSpaceSource.InternetArchiveSpaceSource());
 		esources.add(new WithSpaceSource());
+		esources.add(new DBPediaSpaceSource());
 		Logger.info("Initialization of sources list");
 	}
 

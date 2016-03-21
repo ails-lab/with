@@ -37,6 +37,7 @@ public class FilterValuesMap {
 	private static FilterValuesMap dnzMap;
 	private static FilterValuesMap rijksMap;
 	private static FilterValuesMap flickrMap;
+	private static FilterValuesMap dbpediaMap;
 	
 	private HashMap<String, List<Object>> specificvalues;
 	// private HashMap<String, List<Pair<String>>> queryTexts;
@@ -166,6 +167,14 @@ public class FilterValuesMap {
 		addMap(id, obj, string);
 	}
 
+	public static FilterValuesMap getDBPediaMap(){
+		if (dbpediaMap==null){
+			dbpediaMap = new FilterValuesMap();
+			dbpediaMap.fillDBPedia();
+		}
+		return dbpediaMap;
+	}
+	
 	public static FilterValuesMap getEuropeanaMap(){
 		if (europeanaMap==null){
 			europeanaMap = new FilterValuesMap();
@@ -207,6 +216,14 @@ public class FilterValuesMap {
 	}
 
 
+	private void fillDBPedia() {
+//		addMapping(CommonFilters.TYPE.getId(), WithMediaType.IMAGE, "Image", "Photograph",
+//				"Poster, chart, other");
+//		addMapping(CommonFilters.TYPE.getId(), WithMediaType.VIDEO, "Video");
+//		addMapping(CommonFilters.TYPE.getId(), WithMediaType.AUDIO, "Sound", "Sheet music");
+//		addMapping(CommonFilters.TYPE.getId(), WithMediaType.TEXT, "Books", "Article");
+	}
+	
 	private void fillFlickr() {
 		addMapping(CommonFilters.TYPE.getId(), WithMediaType.IMAGE, "photo");
 		addMapping(CommonFilters.TYPE.getId(), WithMediaType.VIDEO, "video");

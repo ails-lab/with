@@ -17,6 +17,7 @@
 package model.resources;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import org.mongodb.morphia.annotations.Entity;
 
@@ -30,13 +31,30 @@ public class AgentObject extends RecordResource<AgentObject.AgentData> {
 
 	public static class AgentData extends RecordDescriptiveData {
 
-		ArrayList<WithDate> birthdate;
+		List<WithDate> birthdate;
 		MultiLiteralOrResource birthplace;
-		ArrayList<WithDate> deathdate;
+		List<WithDate> deathdate;
 		public static enum Gender {
 			MALE, FEMALE, UNKNOWN
 		}
 		Gender genderEnum;
 		Literal gender;
+		
+		public void setBirthDate(List<WithDate> birthdate) {
+			this.birthdate = birthdate;
+		}
+		
+		public void setDeathDate(List<WithDate> deathDate) {
+			this.deathdate = deathDate;
+		}
+		
+		public void setBirthPlace(MultiLiteralOrResource birthplace) {
+			this.birthplace = birthplace;
+		}
+		
+		public void setGender(Gender g) {
+			this.genderEnum = g;
+		}
+
 	}
 }

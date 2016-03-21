@@ -22,7 +22,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import model.resources.AgentObject;
 import model.resources.CulturalObject;
+import model.resources.PlaceObject;
 import model.resources.RecordResource;
 import model.resources.WithResource;
 
@@ -131,7 +133,7 @@ public class SourceResponse {
 
 	public void addItem(WithResource<?, ?> record) {
 		if (record!=null){
-		if (record instanceof CulturalObject)
+		if (record instanceof CulturalObject || record instanceof AgentObject || record instanceof PlaceObject)
 			items.getCulturalCHO().add(record);
 		}
 	}
