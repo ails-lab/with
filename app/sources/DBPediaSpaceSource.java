@@ -81,7 +81,7 @@ public class DBPediaSpaceSource extends ISpaceSource {
 		if (checkFilters(q)) {
 			try {
 				
-				response = HttpConnector.getURLContent(httpQuery);
+				response = getHttpConnector().getURLContent(httpQuery);
 				res.totalCount = Utils.readIntAttr(response, "totalCount", true);
 
 				for (JsonNode item : response.path("results")) {
