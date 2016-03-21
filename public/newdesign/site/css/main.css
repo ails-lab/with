@@ -857,7 +857,7 @@ body div[role='main'] section.selection ul li .select-hover a {
 }
 body div[role='main'] section.selection ul li .select-hover a div {
   position: absolute;
-  background: white;
+  background: #ffffff;
   -webkit-transition: all 0.3s;
   -o-transition: all 0.3s;
   transition: all 0.3s;
@@ -1521,11 +1521,11 @@ body div[role='main'].homepage section.api ul li .overlay a {
   padding: 5px 0;
 }
 body div[role='main'].homepage section.api ul li .overlay a:hover {
-  color: white;
+  color: #ffffff;
 }
 body div[role='main'].homepage section.api ul li .overlay a div {
   position: absolute;
-  background: white;
+  background: #ffffff;
   -webkit-transition: all 0.3s;
   -o-transition: all 0.3s;
   transition: all 0.3s;
@@ -3999,7 +3999,6 @@ body div[role='main'] .wrapper main section.exhibition .editorbox {
   position: relative;
 }
 body div[role='main'] .wrapper main section.exhibition .editorbox .wrap {
-  overflow-x: scroll;
   background: #efefef;
   position: absolute;
   right: -30px;
@@ -4008,49 +4007,52 @@ body div[role='main'] .wrapper main section.exhibition .editorbox .wrap {
   height: 100%;
 }
 body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .scroll {
-  width: 3500px;
   padding: 20px;
   height: 100%;
+  overflow-x: scroll;
+  overflow-y: hidden;
+  white-space: nowrap;
 }
-body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .scroll .box,
-body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .scroll .add {
+body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .box,
+body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .add {
   width: 350px;
-  height: 100%;
-  float: left;
+  height: 383px !important;
+  display: inline-block;
   margin-right: 20px;
   background: #fff;
   padding: 40px;
+  white-space: normal;
 }
-body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .scroll .box.fill,
-body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .scroll .add.fill {
+body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .box.fill,
+body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .add.fill {
   width: 750px;
   padding: 20px 20px 20px 20px;
 }
-body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .scroll .box.fill:before,
-body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .scroll .add.fill:before,
-body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .scroll .box.fill:after,
-body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .scroll .add.fill:after {
+body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .box.fill:before,
+body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .add.fill:before,
+body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .box.fill:after,
+body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .add.fill:after {
   content: " ";
   display: table;
 }
-body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .scroll .box.fill:after,
-body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .scroll .add.fill:after {
+body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .box.fill:after,
+body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .add.fill:after {
   clear: both;
 }
-body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .scroll .box.fill .left,
-body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .scroll .add.fill .left {
+body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .box.fill .left,
+body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .add.fill .left {
   float: left;
   width: 35%;
   padding: 0 20px 0 0;
 }
-body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .scroll .box.fill .right,
-body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .scroll .add.fill .right {
+body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .box.fill .right,
+body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .add.fill .right {
   float: left;
   width: 50%;
   padding: 0 20px 0 0;
 }
-body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .scroll .box.fill .video,
-body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .scroll .add.fill .video {
+body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .box.fill .video,
+body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .add.fill .video {
   float: left;
   width: 15%;
   height: 280px;
@@ -4058,48 +4060,48 @@ body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .scroll 
   padding: 10px;
   position: relative;
 }
-body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .scroll .box.fill .video .embed-responsive,
-body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .scroll .add.fill .video .embed-responsive {
+body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .box.fill .video .embed-responsive,
+body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .add.fill .video .embed-responsive {
   background: #dedede;
 }
-body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .scroll .box.fill .video .imginfo,
-body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .scroll .add.fill .video .imginfo {
+body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .box.fill .video .imginfo,
+body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .add.fill .video .imginfo {
   height: 132px;
   overflow: auto;
 }
-body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .scroll .box.fill .video .addvideo,
-body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .scroll .add.fill .video .addvideo {
+body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .box.fill .video .addvideo,
+body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .add.fill .video .addvideo {
   width: 100%;
   height: 100%;
   display: block;
   text-align: center;
 }
-body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .scroll .box.fill .video .addvideo img,
-body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .scroll .add.fill .video .addvideo img {
+body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .box.fill .video .addvideo img,
+body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .add.fill .video .addvideo img {
   margin-top: 113px;
 }
-body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .scroll .box.fill .video .addvideo:hover,
-body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .scroll .add.fill .video .addvideo:hover {
+body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .box.fill .video .addvideo:hover,
+body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .add.fill .video .addvideo:hover {
   background: #f9f9f9;
 }
-body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .scroll .box.fill .video .action,
-body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .scroll .add.fill .video .action {
+body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .box.fill .video .action,
+body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .add.fill .video .action {
   position: absolute;
   bottom: -27px;
   left: -1px;
   margin: 0px;
   padding: 0;
 }
-body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .scroll .box.fill .video .action li,
-body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .scroll .add.fill .video .action li {
+body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .box.fill .video .action li,
+body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .add.fill .video .action li {
   list-style-type: none;
   float: left;
   margin-right: -1px;
   border: 1px solid #c6c6c6;
   background: #fff;
 }
-body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .scroll .box.fill .video .action li a,
-body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .scroll .add.fill .video .action li a {
+body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .box.fill .video .action li a,
+body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .add.fill .video .action li a {
   display: inline-block;
   width: 25px;
   height: 25px;
@@ -4107,114 +4109,117 @@ body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .scroll 
   position: relative;
   background: #fff;
 }
-body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .scroll .box.fill.videoadded .left,
-body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .scroll .add.fill.videoadded .left {
+body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .box.fill.videoadded .left,
+body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .add.fill.videoadded .left {
   float: left;
   width: 35%;
   padding: 0 20px 0 0;
 }
-body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .scroll .box.fill.videoadded .right,
-body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .scroll .add.fill.videoadded .right {
+body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .box.fill.videoadded .right,
+body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .add.fill.videoadded .right {
   float: left;
   width: 40%;
   padding: 0 20px 0 0;
 }
-body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .scroll .box.fill.videoadded .video,
-body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .scroll .add.fill.videoadded .video {
+body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .box.fill.videoadded .video,
+body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .add.fill.videoadded .video {
   float: left;
   width: 25%;
 }
-body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .scroll .box.fill .imgwrap,
-body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .scroll .add.fill .imgwrap {
+body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .box.fill .imgwrap,
+body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .add.fill .imgwrap {
   width: 100%;
   max-height: 220px;
   overflow: hidden;
 }
-body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .scroll .box.fill .imgwrap img,
-body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .scroll .add.fill .imgwrap img {
+body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .box.fill .imgwrap img,
+body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .add.fill .imgwrap img {
   max-width: 100%;
 }
-body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .scroll .box.fill .imginfo,
-body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .scroll .add.fill .imginfo {
+body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .box.fill .imginfo,
+body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .add.fill .imginfo {
   font-size: 1.4rem;
   font-style: italic;
   line-height: 1.5em;
   margin-top: 10px;
 }
-body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .scroll .box.fill .imginfo .mediatitle,
-body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .scroll .add.fill .imginfo .mediatitle {
+body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .box.fill .imginfo .mediatitle,
+body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .add.fill .imginfo .mediatitle {
   color: #8e8e8e;
 }
-body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .scroll .box.fill .imginfo .mediasource,
-body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .scroll .add.fill .imginfo .mediasource {
+body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .box.fill .imginfo .mediasource,
+body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .add.fill .imginfo .mediasource {
   color: #2a2a2a;
 }
-body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .scroll .box.fill .boxtitle,
-body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .scroll .add.fill .boxtitle {
+body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .box.fill .boxtitle,
+body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .add.fill .boxtitle {
   overflow: auto;
   color: #1a1a1a;
   line-height: 1.6em;
   font-size: 1.5rem;
   max-height: 280px;
 }
-body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .scroll .box.fill .boxaction,
-body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .scroll .add.fill .boxaction {
+body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .box.fill .boxaction,
+body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .add.fill .boxaction {
   margin-bottom: 10px;
 }
-body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .scroll .box.fill .boxaction:before,
-body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .scroll .add.fill .boxaction:before,
-body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .scroll .box.fill .boxaction:after,
-body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .scroll .add.fill .boxaction:after {
+body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .box.fill .boxaction:before,
+body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .add.fill .boxaction:before,
+body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .box.fill .boxaction:after,
+body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .add.fill .boxaction:after {
   content: " ";
   display: table;
 }
-body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .scroll .box.fill .boxaction:after,
-body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .scroll .add.fill .boxaction:after {
+body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .box.fill .boxaction:after,
+body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .add.fill .boxaction:after {
   clear: both;
 }
-body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .scroll .box.fill .boxaction ul,
-body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .scroll .add.fill .boxaction ul {
+body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .box.fill .boxaction ul,
+body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .add.fill .boxaction ul {
   margin: 0;
   padding: 0;
   float: right;
 }
-body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .scroll .box.fill .boxaction ul li,
-body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .scroll .add.fill .boxaction ul li {
+body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .box.fill .boxaction ul li,
+body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .add.fill .boxaction ul li {
   list-style: none;
   display: inline-block;
   margin-left: 10px;
 }
-body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .scroll .box.fill .boxaction ul li a,
-body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .scroll .add.fill .boxaction ul li a {
+body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .box.fill .boxaction ul li a,
+body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .add.fill .boxaction ul li a {
   color: #a4a4a4;
 }
-body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .scroll .add {
+body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .boxinputs {
+  float: left;
+}
+body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .add {
   background: none;
   border: 1px dashed #c6c6c6;
   width: 70px;
   text-align: center;
   padding: 0;
-  display: table;
+  display: inline-block;
 }
-body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .scroll .add span {
-  display: table-cell;
-  vertical-align: middle;
+body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .add span {
+  float: left;
+  padding: 177px 0 0 22px;
 }
-body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .scroll .title,
-body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .scroll h1,
-body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .scroll h2,
-body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .scroll h3 {
+body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .title,
+body div[role='main'] .wrapper main section.exhibition .editorbox .wrap h1,
+body div[role='main'] .wrapper main section.exhibition .editorbox .wrap h2,
+body div[role='main'] .wrapper main section.exhibition .editorbox .wrap h3 {
   font-size: 2.4rem;
   font-family: "Proxima Nova", "Helvetica Neue", Helvetica, Arial, sans-serif;
   color: #6c6c6c;
   margin: 0 0 10px 0;
   padding: 0;
 }
-body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .scroll p {
+body div[role='main'] .wrapper main section.exhibition .editorbox .wrap p {
   color: #6c6c6c;
   font-size: 1.5rem;
 }
-body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .scroll .editortext {
+body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .editortext {
   width: 100%;
   font-size: 2rem;
   font-family: "Proxima Nova", "Helvetica Neue", Helvetica, Arial, sans-serif;
@@ -4225,15 +4230,15 @@ body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .scroll 
   -o-transition: all 0.3s;
   transition: all 0.3s;
 }
-body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .scroll .editortext:hover {
+body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .editortext:hover {
   border: 1px solid #c3c3c3;
 }
-body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .scroll .editortext:focus,
-body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .scroll .editortext:active {
+body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .editortext:focus,
+body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .editortext:active {
   border: 1px solid #4f7979;
   color: #666;
 }
-body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .scroll .editortextarea {
+body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .editortextarea {
   width: 100%;
   height: 200px;
   margin-top: 10px;
@@ -4241,11 +4246,11 @@ body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .scroll 
   padding: 5px 0 0px 10px;
   color: #888;
 }
-body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .scroll .editortextarea:hover {
+body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .editortextarea:hover {
   border: 1px solid #c3c3c3;
 }
-body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .scroll .editortextarea:focus,
-body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .scroll .editortextarea:active {
+body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .editortextarea:focus,
+body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .editortextarea:active {
   border: 1px solid #4f7979;
   color: #666;
 }
@@ -4314,19 +4319,21 @@ body div[role='main'] .wrapper main section.exhibition .assets .assetlisting {
   width: 100%;
   height: 140px;
   margin-top: 20px;
-  overflow-x: scroll;
 }
 body div[role='main'] .wrapper main section.exhibition .assets .assetlisting ul {
   margin: 0;
   padding: 0;
   height: 100%;
-  min-width: 2000px;
+  width: auto;
+  overflow-x: scroll;
+  overflow-y: hidden;
+  white-space: nowrap;
 }
 body div[role='main'] .wrapper main section.exhibition .assets .assetlisting ul li {
   list-style: none;
-  float: left;
+  display: inline-block;
   height: 100%;
-  margin-right: 10px;
+  margin-right: 6px;
 }
 body div[role='main'] .wrapper main section.exhibition .assets .assetlisting ul li a {
   height: 100%;
@@ -5352,12 +5359,12 @@ body div[role='main'] .wrapper .itemview .mediacontent .container-fluid .wrap .m
 body div[role='main'] .wrapper .itemview .mediacontent .container-fluid .wrap .metadata .infowrap .tab-content .comments .form .btn {
   display: block;
   padding: 5px 30px;
-  border: 1px solid white;
+  border: 1px solid #ffffff;
   text-decoration: none;
   font-size: 12px;
   letter-spacing: 1.3px;
   text-transform: uppercase;
-  color: white;
+  color: #ffffff;
   -webkit-transition: all 0.3s;
   -o-transition: all 0.3s;
   transition: all 0.3s;
@@ -5370,7 +5377,7 @@ body div[role='main'] .wrapper .itemview .mediacontent .container-fluid .wrap .m
   margin-top: 10px;
 }
 body div[role='main'] .wrapper .itemview .mediacontent .container-fluid .wrap .metadata .infowrap .tab-content .comments .form .btn:hover {
-  color: white;
+  color: #ffffff;
 }
 body div[role='main'] .wrapper .itemview .mediacontent .container-fluid .wrap .metadata .infowrap .tab-content .comments .form .commentbox {
   border-radius: 0;
@@ -6072,12 +6079,12 @@ body div[role='main'] .wrapper section.action .button-group .btn-green-o:hover {
 body div[role='main'] .wrapper section.action .button-group .btn-green {
   display: block;
   padding: 5px 30px;
-  border: 1px solid white;
+  border: 1px solid #ffffff;
   text-decoration: none;
   font-size: 12px;
   letter-spacing: 1.3px;
   text-transform: uppercase;
-  color: white;
+  color: #ffffff;
   -webkit-transition: all 0.3s;
   -o-transition: all 0.3s;
   transition: all 0.3s;
@@ -6088,7 +6095,7 @@ body div[role='main'] .wrapper section.action .button-group .btn-green {
   letter-spacing: 0px;
 }
 body div[role='main'] .wrapper section.action .button-group .btn-green:hover {
-  color: white;
+  color: #ffffff;
 }
 body div[role='main'] .wrapper section.action .button-group .btn-green:hover {
   background-color: #3b5a5a;
@@ -6865,12 +6872,12 @@ body div[role='main'] section.entrance .btn-green-o:hover {
 body div[role='main'] section.entrance .btn-green {
   display: block;
   padding: 5px 30px;
-  border: 1px solid white;
+  border: 1px solid #ffffff;
   text-decoration: none;
   font-size: 12px;
   letter-spacing: 1.3px;
   text-transform: uppercase;
-  color: white;
+  color: #ffffff;
   -webkit-transition: all 0.3s;
   -o-transition: all 0.3s;
   transition: all 0.3s;
@@ -6881,7 +6888,7 @@ body div[role='main'] section.entrance .btn-green {
   letter-spacing: 0px;
 }
 body div[role='main'] section.entrance .btn-green:hover {
-  color: white;
+  color: #ffffff;
 }
 body div[role='main'] section.entrance .btn-green:hover {
   background-color: #3b5a5a;

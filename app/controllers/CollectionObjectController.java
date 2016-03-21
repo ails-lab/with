@@ -35,6 +35,7 @@ import controllers.parameterTypes.MyPlayList;
 import controllers.parameterTypes.StringTuple;
 import db.DB;
 import model.annotations.ContextData;
+import model.basicDataTypes.CollectionInfo;
 import model.basicDataTypes.Language;
 import model.basicDataTypes.MultiLiteral;
 import model.basicDataTypes.WithAccess;
@@ -64,6 +65,7 @@ import play.mvc.Result;
 import sources.EuropeanaCollectionSpaceSource;
 import sources.core.CommonQuery;
 import sources.core.SourceResponse;
+import sources.core.Utils;
 import utils.AccessManager;
 import utils.AccessManager.Action;
 import utils.Locks;
@@ -75,7 +77,8 @@ import utils.Tuple;
  */
 public class CollectionObjectController extends WithResourceController {
 
-	public static final ALogger log = Logger.of(CollectionObjectController.class);
+	public static final ALogger log = Logger
+			.of(CollectionObjectController.class);
 
 	/**
 	 * creates a new collection corresponding to a collection in Europeana and
@@ -87,56 +90,92 @@ public class CollectionObjectController extends WithResourceController {
 	public static Result createAndFillEuropeanaCollection(String id) {
 
 		CollectionObject collection = new CollectionObject();
-		collection.getDescriptiveData().setLabel(new MultiLiteral(id).fillDEF());
+		collection.getDescriptiveData()
+				.setLabel(new MultiLiteral(id).fillDEF());
 		ObjectNode resultInfo = Json.newObject();
 		ObjectId creatorDbId = new ObjectId(session().get("user"));
-		boolean success = internalAddCollection(collection, CollectionType.SimpleCollection, creatorDbId, resultInfo);
+		boolean success = internalAddCollection(collection,
+				CollectionType.SimpleCollection, creatorDbId, resultInfo);
 		if (!success)
 			return badRequest(resultInfo);
 
 		CommonQuery q = new CommonQuery();
 		q.page = "1";
 		q.pageSize = "20";
-		EuropeanaCollectionSpaceSource src = new EuropeanaCollectionSpaceSource(id);
-		
-		
-		q.page = 1+"";
+		EuropeanaCollectionSpaceSource src = new EuropeanaCollectionSpaceSource(
+				id);
+
+		q.page = 1 + "";
 		SourceResponse result = src.getAllResults(q);
 		int total = result.totalCount;
-    	for (WithResource<?, ?> item : result.items.getCulturalCHO()) {
-			WithResourceController.internalAddRecordToCollection(collection.getDbId().toString(), (RecordResource)item, 
-					F.Option.None(), resultInfo);
-		};
-		
-	    Promise<Integer> promiseOfInt = Promise.promise(
-	      new Function0<Integer>() {
-	        public Integer apply() {
-	        	SourceResponse result;
-	        	System.out.println("more pages?");
-        		int page = 1;
-        		int pageSize = 20;
-        		while (page*pageSize < total) {
-	        		page++;
-	    			q.page = page+"";
-	    	    	result = src.getAllResults(q);
-	    	    	for (WithResource<?, ?> item : result.items.getCulturalCHO()) {
-	    				WithResourceController.internalAddRecordToCollection(collection.getDbId().toString(), (RecordResource)item, 
-	    						F.Option.None(), resultInfo);
-	    			};
-	    			System.out.println("more pages? "+page+" of "+result.totalCount);
-	    	    } 
-	        	System.out.println("Done? "+page);
-	          return 0;
-	        }
-	      }
-	    );
-		
-		
-	    
-	    
-	    if (resultInfo.has("error"))
-	    	return badRequest(resultInfo);
+		for (WithResource<?, ?> item : result.items.getCulturalCHO()) {
+			WithResourceController.internalAddRecordToCollection(collection
+					.getDbId().toString(), (RecordResource) item, F.Option
+					.None(), resultInfo);
+		}
+		;
+
+		Promise<Integer> promiseOfInt = Promise
+				.promise(new Function0<Integer>() {
+					public Integer apply() {
+						SourceResponse result;
+						System.out.println("more pages?");
+						int page = 1;
+						int pageSize = 20;
+						while (page * pageSize < total) {
+							page++;
+							q.page = page + "";
+							result = src.getAllResults(q);
+							for (WithResource<?, ?> item : result.items
+									.getCulturalCHO()) {
+								WithResourceController
+										.internalAddRecordToCollection(
+												collection.getDbId().toString(),
+												(RecordResource) item,
+												F.Option.None(), resultInfo);
+							}
+							;
+							System.out.println("more pages? " + page + " of "
+									+ result.totalCount);
+						}
+						System.out.println("Done? " + page);
+						return 0;
+					}
+				});
+
+		if (resultInfo.has("error"))
+			return badRequest(resultInfo);
 		return ok(resultInfo);
+	}
+
+	public static Result sortCollectionObject(String collectionId) {
+		ObjectNode result = Json.newObject();
+		try {
+			ObjectId collectionDbId = new ObjectId(collectionId);
+			int entryCount = DB
+					.getCollectionObjectDAO()
+					.getById(collectionDbId,
+							Arrays.asList("administrative.entryCount"))
+					.getAdministrative().getEntryCount();
+			List<RecordResource> records = DB.getRecordResourceDAO()
+					.getByCollectionBetweenPositions(collectionDbId, 0,
+							entryCount);
+			RecordResource<?>[] array = records.toArray(new RecordResource<?>[]{});
+			Arrays.sort(array,Utils.compareThumbs);
+			for (int i = 0, pos = 0; i < array.length; i++) {
+				RecordResource<?> recordResource = array[i];
+				for (CollectionInfo ci : recordResource.getCollectedIn()) {
+					if (ci.getCollectionId().equals(collectionDbId)) {
+						ci.setPosition(pos++);
+					}
+				}
+				DB.getRecordResourceDAO().makePermanent(recordResource);
+			}
+			return ok();
+		} catch (Exception e) {
+			result.put("error", e.getMessage());
+			return internalServerError(result);
+		}
 	}
 
 	/**
@@ -167,20 +206,24 @@ public class CollectionObjectController extends WithResourceController {
 				return forbidden(error);
 			}
 			ObjectId creatorDbId = new ObjectId(session().get("user"));
-			CollectionObject collection = Json.fromJson(json, CollectionObject.class);
-			boolean success = internalAddCollection(collection, colType, creatorDbId, error);
+			CollectionObject collection = Json.fromJson(json,
+					CollectionObject.class);
+			boolean success = internalAddCollection(collection, colType,
+					creatorDbId, error);
 			if (!success)
 				return badRequest(error);
-			return ok(Json.toJson(collectionWithMyAccessData(collection,
-					AccessManager.effectiveUserIds(session().get("effectiveUserIds")))));
+			return ok(Json.toJson(collectionWithMyAccessData(
+					collection,
+					AccessManager.effectiveUserIds(session().get(
+							"effectiveUserIds")))));
 		} catch (Exception e) {
 			error.put("error", e.getMessage());
 			return internalServerError(error);
 		}
 	}
 
-	private static boolean internalAddCollection(CollectionObject collection, CollectionType colType,
-			ObjectId creatorDbId, ObjectNode error) {
+	private static boolean internalAddCollection(CollectionObject collection,
+			CollectionType colType, ObjectId creatorDbId, ObjectNode error) {
 		if (collection.getDescriptiveData().getLabel() == null) {
 			error.put("error", "Missing collection title");
 			return false;
@@ -189,16 +232,21 @@ public class CollectionObjectController extends WithResourceController {
 			error.put("error", "Missing collection title");
 			return false;
 		}
-		if (DB.getCollectionObjectDAO().existsForOwnerAndLabel(creatorDbId, null,
-				collection.getDescriptiveData().getLabel().get(Language.DEFAULT))) {
+		if (DB.getCollectionObjectDAO().existsForOwnerAndLabel(
+				creatorDbId,
+				null,
+				collection.getDescriptiveData().getLabel()
+						.get(Language.DEFAULT))) {
 			error.put("error", "Not unique collection title");
 			return false;
 		}
-		Set<ConstraintViolation<CollectionObject>> violations = Validation.getValidator().validate(collection);
+		Set<ConstraintViolation<CollectionObject>> violations = Validation
+				.getValidator().validate(collection);
 		if (!violations.isEmpty()) {
 			ArrayNode properties = Json.newObject().arrayNode();
 			for (ConstraintViolation<CollectionObject> cv : violations) {
-				properties.add(Json.parse("{\"" + cv.getPropertyPath() + "\":\"" + cv.getMessage() + "\"}"));
+				properties.add(Json.parse("{\"" + cv.getPropertyPath()
+						+ "\":\"" + cv.getMessage() + "\"}"));
 			}
 			error.put("error", properties);
 			return false;
@@ -213,7 +261,8 @@ public class CollectionObjectController extends WithResourceController {
 			collection.getAdministrative().setEntryCount(0);
 		}
 		DB.getCollectionObjectDAO().makePermanent(collection);
-		DB.getCollectionObjectDAO().updateWithURI(collection.getDbId(), "/collection/" + collection.getDbId());
+		DB.getCollectionObjectDAO().updateWithURI(collection.getDbId(),
+				"/collection/" + collection.getDbId());
 		return true;
 	}
 
@@ -223,7 +272,8 @@ public class CollectionObjectController extends WithResourceController {
 	 * @return
 	 */
 	private static MultiLiteral createExhibitionDummyTitle() {
-		return new MultiLiteral(Language.DEFAULT, "New Exhibition (" + new Date() + ")");
+		return new MultiLiteral(Language.DEFAULT, "New Exhibition ("
+				+ new Date() + ")");
 	}
 
 	/**
@@ -238,11 +288,13 @@ public class CollectionObjectController extends WithResourceController {
 		ObjectNode result = Json.newObject();
 		try {
 			ObjectId collectionDbId = new ObjectId(id);
-			Result response = errorIfNoAccessToCollection(Action.READ, collectionDbId);
+			Result response = errorIfNoAccessToCollection(Action.READ,
+					collectionDbId);
 			if (!response.toString().equals(ok().toString()))
 				return response;
 			else {
-				CollectionObject collection = DB.getCollectionObjectDAO().get(new ObjectId(id));
+				CollectionObject collection = DB.getCollectionObjectDAO().get(
+						new ObjectId(id));
 				/*
 				 * List<RecordResource> firstEntries =
 				 * DB.getCollectionObjectDAO() .getFirstEntries(collectionDbId,
@@ -271,13 +323,16 @@ public class CollectionObjectController extends WithResourceController {
 		try {
 			locks = Locks.create().write("Collection #" + id).acquire();
 			ObjectId collectionDbId = new ObjectId(id);
-			Result response = errorIfNoAccessToCollection(Action.DELETE, collectionDbId);
+			Result response = errorIfNoAccessToCollection(Action.DELETE,
+					collectionDbId);
 			if (!response.toString().equals(ok().toString()))
 				return response;
 			else {
-				CollectionObject collection = DB.getCollectionObjectDAO().get(collectionDbId);
+				CollectionObject collection = DB.getCollectionObjectDAO().get(
+						collectionDbId);
 				// TODO: have to test that this works
-				DB.getRecordResourceDAO().removeAllRecordsFromCollection(collectionDbId);
+				DB.getRecordResourceDAO().removeAllRecordsFromCollection(
+						collectionDbId);
 				DB.getCollectionObjectDAO().makeTransient(collection);
 
 				result.put("message", "Resource was deleted successfully");
@@ -305,72 +360,85 @@ public class CollectionObjectController extends WithResourceController {
 		ObjectNode result = Json.newObject();
 		ObjectId collectionDbId = new ObjectId(id);
 		try {
-			Result response = errorIfNoAccessToCollection(Action.EDIT, collectionDbId);
+			Result response = errorIfNoAccessToCollection(Action.EDIT,
+					collectionDbId);
 			if (!response.toString().equals(ok().toString()))
 				return response;
 			if (json == null) {
 				result.put("error", "Invalid JSON");
 				return badRequest(result);
 			}
-			CollectionObject collectionChanges = Json.fromJson(json, CollectionObject.class);
+			CollectionObject collectionChanges = Json.fromJson(json,
+					CollectionObject.class);
 			ObjectId creatorDbId = new ObjectId(session().get("user"));
 			if (collectionChanges.getDescriptiveData().getLabel() != null
-					&& DB.getCollectionObjectDAO().existsOtherForOwnerAndLabel(creatorDbId, null,
-							collectionChanges.getDescriptiveData().getLabel().get(Language.DEFAULT), collectionDbId)) {
+					&& DB.getCollectionObjectDAO().existsOtherForOwnerAndLabel(
+							creatorDbId,
+							null,
+							collectionChanges.getDescriptiveData().getLabel()
+									.get(Language.DEFAULT), collectionDbId)) {
 				ObjectNode error = Json.newObject();
 				error.put("error", "Not unique collection title");
 				return badRequest(error);
 			}
 			DB.getCollectionObjectDAO().editCollection(collectionDbId, json);
-			return ok(Json.toJson(DB.getCollectionObjectDAO().get(collectionDbId)));
+			return ok(Json.toJson(DB.getCollectionObjectDAO().get(
+					collectionDbId)));
 		} catch (Exception e) {
 			result.put("error", e.getMessage());
 			return internalServerError(result);
 		}
 	}
-	
+
 	public static Result countMyAndShared() {
 		ObjectNode result = Json.newObject().objectNode();
 		List<String> effectiveUserIds = AccessManager
 				.effectiveUserIds(session().get("effectiveUserIds"));
 		if (effectiveUserIds.isEmpty()) {
 			return badRequest("You should be signed in as a user.");
+		} else {
+			result = DB.getCollectionObjectDAO().countMyAndSharedCollections(
+					AccessManager.toObjectIds(effectiveUserIds));
+			return ok(result);
 		}
-		 else { 
-			 result = DB.getCollectionObjectDAO().countMyAndSharedCollections(
-					 AccessManager.toObjectIds(effectiveUserIds));
-				return ok(result);
-		 }
 	}
 
 	public static Result list(Option<MyPlayList> directlyAccessedByUserOrGroup,
-			Option<MyPlayList> recursivelyAccessedByUserOrGroup, Option<String> creator, Option<Boolean> isPublic,
-			Option<Boolean> isExhibition, Boolean collectionHits, int offset, int count) {
+			Option<MyPlayList> recursivelyAccessedByUserOrGroup,
+			Option<String> creator, Option<Boolean> isPublic,
+			Option<Boolean> isExhibition, Boolean collectionHits, int offset,
+			int count) {
 		ObjectNode result = Json.newObject().objectNode();
 		ArrayNode collArray = Json.newObject().arrayNode();
 		List<CollectionObject> userCollections;
-		List<String> effectiveUserIds = AccessManager.effectiveUserIds(session().get("effectiveUserIds"));
+		List<String> effectiveUserIds = AccessManager
+				.effectiveUserIds(session().get("effectiveUserIds"));
 		List<List<Tuple<ObjectId, Access>>> accessedByUserOrGroup = accessibleByUserOrGroup(
 				directlyAccessedByUserOrGroup, recursivelyAccessedByUserOrGroup);
-		Boolean isExhibitionBoolean = isExhibition.isDefined() ? isExhibition.get() : null;
+		Boolean isExhibitionBoolean = isExhibition.isDefined() ? isExhibition
+				.get() : null;
 		ObjectId creatorId = null;
 		if (creator.isDefined()) {
 			User creatorUser = DB.getUserDAO().getByUsername(creator.get());
 			if (creatorUser != null)
 				creatorId = creatorUser.getDbId();
 		}
-		if (effectiveUserIds.isEmpty() || (isPublic.isDefined() && (isPublic.get() == true))) {
+		if (effectiveUserIds.isEmpty()
+				|| (isPublic.isDefined() && (isPublic.get() == true))) {
 			// if not logged or ask for public collections, return all public
 			// collections
-			Tuple<List<CollectionObject>, Tuple<Integer, Integer>> info = DB.getCollectionObjectDAO().getPublicAndByAcl(
-					accessedByUserOrGroup, creatorId, isExhibitionBoolean, collectionHits, offset, count);
+			Tuple<List<CollectionObject>, Tuple<Integer, Integer>> info = DB
+					.getCollectionObjectDAO().getPublicAndByAcl(
+							accessedByUserOrGroup, creatorId,
+							isExhibitionBoolean, collectionHits, offset, count);
 			userCollections = info.x;
 			if (info.y != null) {
 				result.put("totalCollections", info.y.x);
 				result.put("totalExhibitions", info.y.y);
 			}
 			for (CollectionObject collection : userCollections) {
-				ObjectId withCreator = collection.getAdministrative().getWithCreator();
+				ObjectId withCreator = collection.getAdministrative()
+						.getWithCreator();
 				ObjectNode c = (ObjectNode) Json.toJson(collection);
 				if (effectiveUserIds.isEmpty())
 					c.put("access", Access.READ.toString());
@@ -382,16 +450,20 @@ public class CollectionObjectController extends WithResourceController {
 					// accessible by effectiveUserIds
 			Tuple<List<CollectionObject>, Tuple<Integer, Integer>> info;
 			if (!AccessManager.isSuperUser(effectiveUserIds.get(0)))
-				info = DB.getCollectionObjectDAO().getByLoggedInUsersAndAcl(AccessManager.toObjectIds(effectiveUserIds),
-						accessedByUserOrGroup, creatorId, isExhibitionBoolean, collectionHits, offset, count);
+				info = DB.getCollectionObjectDAO().getByLoggedInUsersAndAcl(
+						AccessManager.toObjectIds(effectiveUserIds),
+						accessedByUserOrGroup, creatorId, isExhibitionBoolean,
+						collectionHits, offset, count);
 			else
-				info = DB.getCollectionObjectDAO().getByAcl(accessedByUserOrGroup, creatorId, isExhibitionBoolean,
+				info = DB.getCollectionObjectDAO().getByAcl(
+						accessedByUserOrGroup, creatorId, isExhibitionBoolean,
 						collectionHits, offset, count);
 			if (info.y != null) {
 				result.put("totalCollections", info.y.x);
 				result.put("totalExhibitions", info.y.y);
 			}
-			List<ObjectNode> collections = collectionsWithMyAccessData(info.x, effectiveUserIds);
+			List<ObjectNode> collections = collectionsWithMyAccessData(info.x,
+					effectiveUserIds);
 			for (ObjectNode c : collections)
 				collArray.add(c);
 			result.put("collectionsOrExhibitions", collArray);
@@ -399,39 +471,50 @@ public class CollectionObjectController extends WithResourceController {
 		}
 	}
 
-	public static Result listShared(Boolean direct, Option<MyPlayList> directlyAccessedByUserOrGroup,
-			Option<MyPlayList> recursivelyAccessedByUserOrGroup, Option<Boolean> isExhibition, boolean collectionHits,
-			int offset, int count) {
+	public static Result listShared(Boolean direct,
+			Option<MyPlayList> directlyAccessedByUserOrGroup,
+			Option<MyPlayList> recursivelyAccessedByUserOrGroup,
+			Option<Boolean> isExhibition, boolean collectionHits, int offset,
+			int count) {
 		ObjectNode result = Json.newObject().objectNode();
 		ArrayNode collArray = Json.newObject().arrayNode();
-		List<String> effectiveUserIds = AccessManager.effectiveUserIds(session().get("effectiveUserIds"));
-		Boolean isExhibitionBoolean = isExhibition.isDefined() ? isExhibition.get() : null;
+		List<String> effectiveUserIds = AccessManager
+				.effectiveUserIds(session().get("effectiveUserIds"));
+		Boolean isExhibitionBoolean = isExhibition.isDefined() ? isExhibition
+				.get() : null;
 		if (effectiveUserIds.isEmpty()) {
-			return forbidden(Json.parse("\"error\", \"Must specify user for the collection\""));
+			return forbidden(Json
+					.parse("\"error\", \"Must specify user for the collection\""));
 		} else {
 			ObjectId userId = new ObjectId(effectiveUserIds.get(0));
 			List<List<Tuple<ObjectId, Access>>> accessedByUserOrGroup = new ArrayList<List<Tuple<ObjectId, Access>>>();
-			accessedByUserOrGroup = accessibleByUserOrGroup(directlyAccessedByUserOrGroup,
+			accessedByUserOrGroup = accessibleByUserOrGroup(
+					directlyAccessedByUserOrGroup,
 					recursivelyAccessedByUserOrGroup);
 			List<Tuple<ObjectId, Access>> accessedByLoggedInUser = new ArrayList<Tuple<ObjectId, Access>>();
 			if (direct) {
-				accessedByLoggedInUser.add(new Tuple<ObjectId, Access>(userId, Access.READ));
+				accessedByLoggedInUser.add(new Tuple<ObjectId, Access>(userId,
+						Access.READ));
 				accessedByUserOrGroup.add(accessedByLoggedInUser);
 			} else {// indirectly: include collections for which user has access
 					// via userGoup sharing
 				for (String effectiveId : effectiveUserIds) {
-					accessedByLoggedInUser.add(new Tuple<ObjectId, Access>(new ObjectId(effectiveId), Access.READ));
+					accessedByLoggedInUser.add(new Tuple<ObjectId, Access>(
+							new ObjectId(effectiveId), Access.READ));
 				}
 				accessedByUserOrGroup.add(accessedByLoggedInUser);
 			}
-			Tuple<List<CollectionObject>, Tuple<Integer, Integer>> info = DB.getCollectionObjectDAO().getSharedAndByAcl(
-					accessedByUserOrGroup, userId, isExhibitionBoolean, collectionHits, offset, count);
+			Tuple<List<CollectionObject>, Tuple<Integer, Integer>> info = DB
+					.getCollectionObjectDAO().getSharedAndByAcl(
+							accessedByUserOrGroup, userId, isExhibitionBoolean,
+							collectionHits, offset, count);
 			if (info.y != null) {
 				result.put("totalCollections", info.y.x);
 				result.put("totalExhibitions", info.y.y);
 			}
 
-			List<ObjectNode> collections = collectionsWithMyAccessData(info.x, effectiveUserIds);
+			List<ObjectNode> collections = collectionsWithMyAccessData(info.x,
+					effectiveUserIds);
 			for (ObjectNode c : collections)
 				collArray.add(c);
 			result.put("collectionsOrExhibitions", collArray);
@@ -445,32 +528,38 @@ public class CollectionObjectController extends WithResourceController {
 	// i.e. each entry in directlyAccessedByUserName for example has to be
 	// included in a separate list!
 	private static List<List<Tuple<ObjectId, Access>>> accessibleByUserOrGroup(
-			Option<MyPlayList> directlyAccessedByUserOrGroup, Option<MyPlayList> recursivelyAccessedByUserOrGroup) {
+			Option<MyPlayList> directlyAccessedByUserOrGroup,
+			Option<MyPlayList> recursivelyAccessedByUserOrGroup) {
 		List<List<Tuple<ObjectId, Access>>> accessedByUserOrGroup = new ArrayList<List<Tuple<ObjectId, Access>>>();
 		if (directlyAccessedByUserOrGroup.isDefined()) {
-			MyPlayList directlyUserNameList = directlyAccessedByUserOrGroup.get();
+			MyPlayList directlyUserNameList = directlyAccessedByUserOrGroup
+					.get();
 			for (StringTuple userAccess : directlyUserNameList.list) {
 				List<Tuple<ObjectId, Access>> directlyAccessedByUser = new ArrayList<Tuple<ObjectId, Access>>();
 				UserOrGroup userOrGroup = getUserOrGroup(userAccess.x);
 				if (userOrGroup != null) {
-					directlyAccessedByUser.add(new Tuple<ObjectId, Access>(userOrGroup.getDbId(),
-							Access.valueOf(userAccess.y.toUpperCase())));
+					directlyAccessedByUser.add(new Tuple<ObjectId, Access>(
+							userOrGroup.getDbId(), Access.valueOf(userAccess.y
+									.toUpperCase())));
 					accessedByUserOrGroup.add(directlyAccessedByUser);
 				}
 			}
 		}
 		// TODO: add support for userGroups in recursively!!!!!
 		if (recursivelyAccessedByUserOrGroup.isDefined()) {
-			MyPlayList recursivelyUserNameList = recursivelyAccessedByUserOrGroup.get();
+			MyPlayList recursivelyUserNameList = recursivelyAccessedByUserOrGroup
+					.get();
 			for (StringTuple userAccess : recursivelyUserNameList.list) {
 				List<Tuple<ObjectId, Access>> recursivelyAccessedByUser = new ArrayList<Tuple<ObjectId, Access>>();
 				User user = DB.getUserDAO().getByUsername(userAccess.x);
 				ObjectId userId = user.getDbId();
 				Access access = Access.valueOf(userAccess.y.toUpperCase());
-				recursivelyAccessedByUser.add(new Tuple<ObjectId, Access>(userId, access));
+				recursivelyAccessedByUser.add(new Tuple<ObjectId, Access>(
+						userId, access));
 				Set<ObjectId> groupIds = user.getUserGroupsIds();
 				for (ObjectId groupId : groupIds) {
-					recursivelyAccessedByUser.add(new Tuple<ObjectId, Access>(groupId, access));
+					recursivelyAccessedByUser.add(new Tuple<ObjectId, Access>(
+							groupId, access));
 				}
 				accessedByUserOrGroup.add(recursivelyAccessedByUser);
 			}
@@ -492,30 +581,35 @@ public class CollectionObjectController extends WithResourceController {
 		return userOrGroup;
 	}
 
-	private static List<ObjectNode> collectionsWithMyAccessData(List<CollectionObject> userCollections,
+	private static List<ObjectNode> collectionsWithMyAccessData(
+			List<CollectionObject> userCollections,
 			List<String> effectiveUserIds) {
-		List<ObjectNode> collections = new ArrayList<ObjectNode>(userCollections.size());
+		List<ObjectNode> collections = new ArrayList<ObjectNode>(
+				userCollections.size());
 		for (CollectionObject collection : userCollections) {
 			// List<String> titles = collection.getDescriptiveData().getLabel()
 			// .get(Language.DEFAULT);
 			// if ((titles != null) && !titles.get(0).equals("_favorites")) {
-			collections.add(collectionWithMyAccessData(collection, effectiveUserIds));
+			collections.add(collectionWithMyAccessData(collection,
+					effectiveUserIds));
 			// }
 		}
 		return collections;
 	}
 
-	private static ObjectNode collectionWithMyAccessData(CollectionObject userCollection,
-			List<String> effectiveUserIds) {
+	private static ObjectNode collectionWithMyAccessData(
+			CollectionObject userCollection, List<String> effectiveUserIds) {
 		ObjectNode c = (ObjectNode) Json.toJson(userCollection);
-		Access maxAccess = AccessManager.getMaxAccess(userCollection.getAdministrative().getAccess(), effectiveUserIds);
+		Access maxAccess = AccessManager.getMaxAccess(userCollection
+				.getAdministrative().getAccess(), effectiveUserIds);
 		if (maxAccess.equals(Access.NONE))
 			maxAccess = Access.READ;
 		c.put("myAccess", maxAccess.toString());
 		return c;
 	}
 
-	public static void addCollectionToList(int index, List<CollectionObject> collectionsOrExhibitions,
+	public static void addCollectionToList(int index,
+			List<CollectionObject> collectionsOrExhibitions,
 			List<ObjectId> colls, List<String> effectiveUserIds) {
 		if (index < colls.size()) {
 			ObjectId id = colls.get(index);
@@ -524,7 +618,8 @@ public class CollectionObjectController extends WithResourceController {
 				if (c.getAdministrative().getAccess().getIsPublic())
 					collectionsOrExhibitions.add(c);
 			} else {
-				Access maxAccess = AccessManager.getMaxAccess(c.getAdministrative().getAccess(), effectiveUserIds);
+				Access maxAccess = AccessManager.getMaxAccess(c
+						.getAdministrative().getAccess(), effectiveUserIds);
 				if (!maxAccess.equals(Access.NONE))
 					collectionsOrExhibitions.add(c);
 			}
@@ -534,8 +629,8 @@ public class CollectionObjectController extends WithResourceController {
 	// If isExhibition is undefined, returns (max) countPerType collections and
 	// countPerType exhibitions, i.e. (max) 2*countPerType
 	// collectionsOrExhibitions
-	public static Result getFeatured(String userOrGroupName, Option<Boolean> isExhibition, int offset,
-			int countPerType) {
+	public static Result getFeatured(String userOrGroupName,
+			Option<Boolean> isExhibition, int offset, int countPerType) {
 		Page page = null;
 		UserGroup userGroup = DB.getUserGroupDAO().getByName(userOrGroupName);
 		if (userGroup != null) {
@@ -550,30 +645,37 @@ public class CollectionObjectController extends WithResourceController {
 			}
 		}
 		if (page != null) {
-			List<String> effectiveUserIds = AccessManager.effectiveUserIds(session().get("effectiveUserIds"));
+			List<String> effectiveUserIds = AccessManager
+					.effectiveUserIds(session().get("effectiveUserIds"));
 			ObjectNode result = Json.newObject().objectNode();
 			int start = offset * countPerType;
 			int collectionsSize = page.getFeaturedCollections().size();
 			int exhibitionsSize = page.getFeaturedExhibitions().size();
 			List<CollectionObject> collectionsOrExhibitions = new ArrayList<CollectionObject>();
 			if (!isExhibition.isDefined()) {
-				for (int i = start; (i < (start + countPerType)) && (i < collectionsSize); i++) {
-					addCollectionToList(i, collectionsOrExhibitions, page.getFeaturedCollections(), effectiveUserIds);
-					addCollectionToList(i, collectionsOrExhibitions, page.getFeaturedExhibitions(), effectiveUserIds);
+				for (int i = start; (i < (start + countPerType))
+						&& (i < collectionsSize); i++) {
+					addCollectionToList(i, collectionsOrExhibitions,
+							page.getFeaturedCollections(), effectiveUserIds);
+					addCollectionToList(i, collectionsOrExhibitions,
+							page.getFeaturedExhibitions(), effectiveUserIds);
 				}
 			} else {
 				if (!isExhibition.get()) {
-					for (int i = start; (i < (start + countPerType)) && (i < collectionsSize); i++)
-						addCollectionToList(i, collectionsOrExhibitions, page.getFeaturedCollections(),
-								effectiveUserIds);
+					for (int i = start; (i < (start + countPerType))
+							&& (i < collectionsSize); i++)
+						addCollectionToList(i, collectionsOrExhibitions,
+								page.getFeaturedCollections(), effectiveUserIds);
 				} else {
-					for (int i = start; (i < (start + countPerType)) && (i < exhibitionsSize); i++)
-						addCollectionToList(i, collectionsOrExhibitions, page.getFeaturedExhibitions(),
-								effectiveUserIds);
+					for (int i = start; (i < (start + countPerType))
+							&& (i < exhibitionsSize); i++)
+						addCollectionToList(i, collectionsOrExhibitions,
+								page.getFeaturedExhibitions(), effectiveUserIds);
 				}
 			}
 			ArrayNode collArray = Json.newObject().arrayNode();
-			List<ObjectNode> collections = collectionsWithMyAccessData(collectionsOrExhibitions, effectiveUserIds);
+			List<ObjectNode> collections = collectionsWithMyAccessData(
+					collectionsOrExhibitions, effectiveUserIds);
 			for (ObjectNode c : collections)
 				collArray.add(c);
 			result.put("totalCollections", collectionsSize);
@@ -582,8 +684,8 @@ public class CollectionObjectController extends WithResourceController {
 			// TODO: put collection and exhibition hits in response
 			return ok(result);
 		} else
-			return badRequest(
-					"User or group with name " + userOrGroupName + " does not exist or has no specified page.");
+			return badRequest("User or group with name " + userOrGroupName
+					+ " does not exist or has no specified page.");
 
 	}
 
@@ -597,7 +699,8 @@ public class CollectionObjectController extends WithResourceController {
 		ObjectId userId = new ObjectId(session().get("user"));
 		CollectionObject favorite;
 		ObjectId favoritesId;
-		if ((favorite = DB.getCollectionObjectDAO().getByOwnerAndLabel(userId, null, "_favorites")) == null) {
+		if ((favorite = DB.getCollectionObjectDAO().getByOwnerAndLabel(userId,
+				null, "_favorites")) == null) {
 			favoritesId = createFavorites(userId);
 		} else {
 			favoritesId = favorite.getDbId();
@@ -610,7 +713,8 @@ public class CollectionObjectController extends WithResourceController {
 		CollectionObject fav = new CollectionObject();
 		fav.getAdministrative().setCreated(new Date());
 		fav.getAdministrative().setWithCreator(userId);
-		fav.getDescriptiveData().setLabel(new MultiLiteral(Language.DEFAULT, "_favorites"));
+		fav.getDescriptiveData().setLabel(
+				new MultiLiteral(Language.DEFAULT, "_favorites"));
 		DB.getCollectionObjectDAO().makePermanent(fav);
 		return fav.getDbId();
 	}
@@ -618,25 +722,30 @@ public class CollectionObjectController extends WithResourceController {
 	/**
 	 * List all Records from a Collection using a start item and a page size
 	 */
-	public static Result listRecordResources(String collectionId, String contentFormat, int start, int count) {
+	public static Result listRecordResources(String collectionId,
+			String contentFormat, int start, int count) {
 		ObjectNode result = Json.newObject();
 		ObjectId colId = new ObjectId(collectionId);
 		Locks locks = null;
 		try {
-			locks = Locks.create().read("Collection #" + collectionId).acquire();
+			locks = Locks.create().read("Collection #" + collectionId)
+					.acquire();
 			Result response = errorIfNoAccessToCollection(Action.READ, colId);
 			if (!response.toString().equals(ok().toString()))
 				return response;
 			else {
 
-				/*List<String> retrievedFields = new ArrayList<String>(
-						Arrays.asList("descriptiveData.label",
-								"descriptiveData.description", "media", "collectedIn"));*/
+				/*
+				 * List<String> retrievedFields = new ArrayList<String>(
+				 * Arrays.asList("descriptiveData.label",
+				 * "descriptiveData.description", "media", "collectedIn"));
+				 */
 				List<RecordResource> records = DB.getRecordResourceDAO()
 						.getByCollectionBetweenPositions(colId, start,
 								start + count);
 				if (records == null) {
-					result.put("message", "Cannot retrieve records from database!");
+					result.put("message",
+							"Cannot retrieve records from database!");
 					return internalServerError(result);
 				}
 				ArrayNode recordsList = Json.newObject().arrayNode();
@@ -644,7 +753,8 @@ public class CollectionObjectController extends WithResourceController {
 				for (RecordResource e : records) {
 					// filter out records to which the user has no read access
 					if (!response.toString().equals(ok().toString())) {
-						recordsList.add(Json.toJson(new RecordResource(e.getDbId())));
+						recordsList.add(Json.toJson(new RecordResource(e
+								.getDbId())));
 					} else {
 						// filter out all context annotations that do not refer
 						// to this collection-position
@@ -659,13 +769,17 @@ public class CollectionObjectController extends WithResourceController {
 						}
 						e.setContextData(filteredContextAnns);
 						if (e.getContent() != null) {
-							if (contentFormat.equals("contentOnly") && (e.getContent() != null)) {
+							if (contentFormat.equals("contentOnly")
+									&& (e.getContent() != null)) {
 								recordsList.add(Json.toJson(e.getContent()));
 							} else if (contentFormat.equals("noContent")) {
 								e.getContent().clear();
-							} else if (e.getContent().containsKey(contentFormat)) {
-								HashMap<String, String> newContent = new HashMap<String, String>(1);
-								newContent.put(contentFormat, (String) e.getContent().get(contentFormat));
+							} else if (e.getContent()
+									.containsKey(contentFormat)) {
+								HashMap<String, String> newContent = new HashMap<String, String>(
+										1);
+								newContent.put(contentFormat, (String) e
+										.getContent().get(contentFormat));
 								e.setContent(newContent);
 							}
 						}
@@ -673,9 +787,13 @@ public class CollectionObjectController extends WithResourceController {
 					}
 					position += 1;
 				}
-				result.put("entryCount",
+				result.put(
+						"entryCount",
 						DB.getCollectionObjectDAO()
-								.getById(colId, new ArrayList<String>(Arrays.asList("administrative.entryCount")))
+								.getById(
+										colId,
+										new ArrayList<String>(
+												Arrays.asList("administrative.entryCount")))
 								.getAdministrative().getEntryCount());
 				result.put("records", recordsList);
 				return ok(result);
@@ -691,8 +809,10 @@ public class CollectionObjectController extends WithResourceController {
 
 	public static Result listUsersWithRights(String collectionId) {
 		ArrayNode result = Json.newObject().arrayNode();
-		List<String> retrievedFields = new ArrayList<String>(Arrays.asList("administrative.access"));
-		CollectionObject collection = DB.getCollectionObjectDAO().getById(new ObjectId(collectionId), retrievedFields);
+		List<String> retrievedFields = new ArrayList<String>(
+				Arrays.asList("administrative.access"));
+		CollectionObject collection = DB.getCollectionObjectDAO().getById(
+				new ObjectId(collectionId), retrievedFields);
 		WithAccess access = collection.getAdministrative().getAccess();
 		for (AccessEntry ae : access.getAcl()) {
 			ObjectId userId = ae.getUser();
@@ -705,13 +825,15 @@ public class CollectionObjectController extends WithResourceController {
 				if (usergroup != null)
 					result.add(userOrGroupJson(usergroup, accessRights));
 				else
-					return internalServerError("User with id " + userId + " cannot be retrieved from db");
+					return internalServerError("User with id " + userId
+							+ " cannot be retrieved from db");
 			}
 		}
 		return ok(result);
 	}
 
-	private static ObjectNode userOrGroupJson(UserOrGroup user, Access accessRights) {
+	private static ObjectNode userOrGroupJson(UserOrGroup user,
+			Access accessRights) {
 		ObjectNode userJSON = Json.newObject();
 		userJSON.put("userId", user.getDbId().toString());
 		userJSON.put("username", user.getUsername());

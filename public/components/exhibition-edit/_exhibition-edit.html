@@ -28,14 +28,17 @@
 							<div class="scroll" data-bind="hscroll: collectionItemsArray(), scrollOptions: { loadFunc: loadNextExhibition, offset: 20 }">
 								<!-- box-->
 								<div class="box">
+								 <div class="boxinputs">
+                     
 									<input data-bind="{textInput: title, event: { blur: textfieldsLostFocus.bind($data, true) }}" class="editortext" />
 									<textarea class="editortextarea" data-bind="{textInput: description, event: { blur: textfieldsLostFocus.bind($data, false) }}"/>
 								</div>
+								</div>
 								<!-- add-->
 								<!-- ko template: { foreach: collectionItemsArray, beforeRemove: removeItem, afterAdd: showNewItem } -->
-								<div class="add" data-bind="drop: {index: $index}">
-									<span><a data-toggle="tooltip" data-placement="top" title="Drag an item here"><img src="img/ui/ic-add.png"></a></span>
-								</div>
+								  <div data-toggle="tooltip" data-placement="top" title="Drag an item here" class="add" data-bind="drop: {index: $index}"><span><a href="#"><img src="img/ui/ic-add.png"></a></span></div>
+                  
+								
 								<!-- box-->
 								<div class="box fill" data-bind="{css: {videoadded: containsVideo}, drag: {item: $data, move: true}}">
 									<div class="boxaction">
@@ -97,13 +100,9 @@
 									</div>
 			                    </div>
 								<!-- /ko -->
-								<div class="add">
-									<span>
-										<a data-toggle="tooltip" data-bind="drop: {index: collectionItemsArray().length}" data-placement="top" title="Drag an item here">
-										<img src="img/ui/ic-add.png" />
-										</a>
-									</span>
-								</div>
+								<div data-toggle="tooltip" data-placement="top" title="Drag an item here" class="add" data-bind="drop: {index: collectionItemsArray().length}"><span><a href="#"><img src="img/ui/ic-add.png"></a></span></div>
+                
+								
 							</div>							
 						</div>
 					</div>
