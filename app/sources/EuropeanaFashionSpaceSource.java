@@ -174,7 +174,7 @@ public class EuropeanaFashionSpaceSource extends ISpaceSource {
 		ArrayList<RecordJSONMetadata> jsonMetadata = new ArrayList<RecordJSONMetadata>();
 		JsonNode response;
 		try {
-			response = HttpConnector.getURLContent("http://www.europeanafashion.eu/api/record/" + recordId);
+			response = getHttpConnector().getURLContent("http://www.europeanafashion.eu/api/record/" + recordId);
 			JsonNode record = response;
 			jsonMetadata.add(new RecordJSONMetadata(Format.JSON_EDM, record.toString()));
 			return jsonMetadata;

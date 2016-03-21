@@ -120,7 +120,7 @@ public class SearchController extends Controller {
 					List<String> userIds = AccessManager.effectiveUserIds(session().get("effectiveUserIds"));
 					q.setEffectiveUserIds(userIds);
 				}
-				Promise<SearchResponse> myResults = getMyResutls(q);
+				Promise<SearchResponse> myResults = getMyResutlsPromise(q);
 				play.libs.F.Function<SearchResponse, Result> function = 
 				new play.libs.F.Function<SearchResponse, Result>() {
 				  public Result apply(SearchResponse r) {
@@ -150,7 +150,7 @@ public class SearchController extends Controller {
 					List<String> userIds = AccessManager.effectiveUserIds(session().get("effectiveUserIds"));
 					q.setEffectiveUserIds(userIds);
 				}
-				Promise<SearchResponse> myResults = getMyResutls(q);
+				Promise<SearchResponse> myResults = getMyResutlsPromise(q);
 				play.libs.F.Function<SearchResponse, Result> function = 
 				new play.libs.F.Function<SearchResponse, Result>() {
 				  public Result apply(SearchResponse r) {
@@ -166,7 +166,7 @@ public class SearchController extends Controller {
 		}
 	}
 
-	private static Promise<SearchResponse> getMyResutls(final CommonQuery q) {
+	static Promise<SearchResponse> getMyResutlsPromise(final CommonQuery q) {
 		Iterable<Promise<SourceResponse>> promises = callSources(q);
 		// compose all futures, blocks until all futures finish
 		Function<CommonFilterLogic, CommonFilterResponse> f = (CommonFilterLogic o) -> {
@@ -253,30 +253,25 @@ public class SearchController extends Controller {
 		}
 		return promises;
 	}
+	
 
-
-	/*public static Result testsearch() {
-		return buildresult(new CommonQuery("Zeus"));
-	}
-
-	private static Result buildresult(CommonQuery q) {
-		// q.source = Arrays.asList(DigitalNZSpaceSource.LABEL);
-		List<SourceResponse> res = search(q);
-		SearchResponse r1 = new SearchResponse();
-		r1.responses = res;
-		ArrayList<CommonFilterLogic> merge = new ArrayList<CommonFilterLogic>();
-		for (SourceResponse sourceResponse : res) {
-			// System.out.println(sourceResponse.source + " Filters: " +
-			// sourceResponse.filters);
-			FiltersHelper.merge(merge, sourceResponse.filtersLogic);
-		}
-		Function<CommonFilterLogic, CommonFilterResponse> f = (CommonFilterLogic o) -> {
-			return o.export();
-		};
-		List<CommonFilterResponse> merge1 = ListUtils.transform(merge, f);
-		// System.out.println(" Merged Filters: " + merge1);
-
-		return ok(views.html.testsearch.render(userForm, res, merge1));
+	/*
+	 * public static Result testsearch() { return buildresult(new
+	 * CommonQuery("Zeus")); }
+	 * 
+	 * private static Result buildresult(CommonQuery q) { // q.source =
+	 * Arrays.asList(DigitalNZSpaceSource.LABEL); List<SourceResponse> res =
+	 * search(q); SearchResponse r1 = new SearchResponse(); r1.responses = res;
+	 * ArrayList<CommonFilterLogic> merge = new ArrayList<CommonFilterLogic>();
+	 * for (SourceResponse sourceResponse : res) { //
+	 * System.out.println(sourceResponse.source + " Filters: " + //
+	 * sourceResponse.filters); FiltersHelper.merge(merge,
+	 * sourceResponse.filtersLogic); } Function<CommonFilterLogic,
+	 * CommonFilterResponse> f = (CommonFilterLogic o) -> { return o.export();
+	 * }; List<CommonFilterResponse> merge1 = ListUtils.transform(merge, f); //
+	 * System.out.println(" Merged Filters: " + merge1);
+	 * 
+	 * return ok(views.html.testsearch.render(userForm, res, merge1));
 	 */
 
 	public static Promise<Result> searchForMLTRelatedItems() {

@@ -134,7 +134,7 @@ public class MediaController extends Controller {
 				return media;
 			media = new MediaObject();
 			Logger.info("Downloading " + url);
-			File img = HttpConnector.getURLContentAsFile(url);
+			File img = HttpConnector.getWSHttpConnector().getURLContentAsFile(url);
 			byte[] mediaBytes = IOUtils.toByteArray(new FileInputStream(img));
 			media.setUrl(url);
 			media.setMediaBytes(mediaBytes);
@@ -159,18 +159,20 @@ public class MediaController extends Controller {
 
 	// Make a thumbnail for a specific media object
 	public static MediaObject makeThumbnail(MediaObject media) {
-		try {
-			MediaObject thumbnail = makeThumbNew(media, MediaVersion.Thumbnail);
-			thumbnail.setMediaVersion(MediaVersion.Thumbnail);
-			thumbnail.setParentId(media.getDbId());
-			DB.getMediaObjectDAO().makePermanent(thumbnail);
-			thumbnail.setUrl(
-					"/media/" + thumbnail.getDbId().toString() + "?file=true");
-			DB.getMediaObjectDAO().makePermanent(thumbnail);
-			return thumbnail;
-		} catch (Exception e) {
-			return null;
-		}
+		if (media.getType() != WithMediaType.IMAGE)
+		 try {
+			 	MediaObject thumbnail = makeThumbNew(media, MediaVersion.Thumbnail);
+			 	thumbnail.setMediaVersion(MediaVersion.Thumbnail);
+			 	thumbnail.setParentId(media.getDbId());
+			 	DB.getMediaObjectDAO().makePermanent(thumbnail);
+			 	thumbnail.setUrl("/media/" + thumbnail.getDbId().toString() + "?file=true");
+			 	DB.getMediaObjectDAO().makePermanent(thumbnail);
+			 	return thumbnail;
+			} catch (Exception e) {
+			    return null;
+		      }
+		else
+			   return null;
 	}
 
 	/**
@@ -234,7 +236,7 @@ public class MediaController extends Controller {
 			}
 			try {
 				// image = HttpConnector.getContent(formData.get("url")[0]);
-				File x = HttpConnector
+				File x = HttpConnector.getWSHttpConnector()
 						.getURLContentAsFile(jsonn.get("url").asText());
 				result = storeMedia(med, x);
 				MediaCheckMessage mcm = new MediaCheckMessage(med);
@@ -614,7 +616,7 @@ public class MediaController extends Controller {
 		// Logger.info("URL: " + queryURL);
 		JsonNode response = null;
 		try {
-			response = HttpConnector.postURLContent(url, mediaURL, "url");
+			response = HttpConnector.getWSHttpConnector().postURLContent(url, mediaURL, "url");
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -708,7 +710,7 @@ public class MediaController extends Controller {
 		}
 
 	}
-	
+
 	public static boolean hasAccessToMedia(String mediaUrl, List<ObjectId> effectiveIds, Action action) {
 		List<RecordResource> resources = DB.getRecordResourceDAO().getByMedia(mediaUrl);
 		if (!resources.isEmpty()) {

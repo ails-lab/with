@@ -16,6 +16,7 @@
 
 package model.basicDataTypes;
 
+import play.Logger;
 import sources.core.Utils;
 
 /**
@@ -2020,6 +2021,7 @@ public enum Language {
 			if (lang.belongsTo(code) || match(code, lang))
 				return lang;
 		}
+		Logger.warn("unkown language "+code);
 		return null;
 	}
 

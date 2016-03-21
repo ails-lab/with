@@ -44,12 +44,12 @@ public class QueryBuilder {
 		String res = getBaseUrl();
 		Iterator<Pair<String>> it = parameters.iterator();
 		boolean added = false;
-		if (query!=null && query.second!=null){
-		res+=("?"+query.getHttp());
-		added = true;
+		if (query != null && query.second != null) {
+			res += ("?" + query.getHttp());
+			added = true;
 		}
 		for (; it.hasNext();) {
-			String string = added?"&":"?";
+			String string = added ? "&" : "?";
 			res += string + it.next().getHttp();
 			added = true;
 		}

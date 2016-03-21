@@ -16,6 +16,8 @@
 
 package sources.core;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -196,14 +198,14 @@ public class Utils {
 		if (values.size() > 1) {
 			if (paren)
 				res += "(";
-			res += spacesPlusFormatQuery(values.get(0));
+			res += values.get(0);
 			for (int i = 1; i < values.size(); i++) {
-				res += "%20OR%20" + spacesPlusFormatQuery(values.get(i));
+				res += " OR " + values.get(i);
 			}
 			if (paren)
 				res += ")";
 		} else {
-			res += spacesPlusFormatQuery(values.get(0));
+			res += values.get(0);
 		}
 		return res;
 	}
@@ -211,12 +213,12 @@ public class Utils {
 	public static String getStringList(List<String> values, String separator) {
 		String res = "";
 		if (values.size() > 1) {
-			res += spacesPlusFormatQuery(values.get(0));
+			res += values.get(0);
 			for (int i = 1; i < values.size(); i++) {
-				res += separator + spacesPlusFormatQuery(values.get(i));
+				res += separator + values.get(i);
 			}
 		} else {
-			res += spacesPlusFormatQuery(values.get(0));
+			res += values.get(0);
 		}
 		return res;
 	}
@@ -236,7 +238,14 @@ public class Utils {
 		}
 
 		public String getHttp() {
-			return first + "=" + spacesFormatQuery(second.toString(), "%20");
+			String string = first + "=" + second.toString();
+			try {
+				String encode = URLEncoder.encode(second.toString(), "UTF-8");
+				string = first + "=" + encode;
+			} catch (UnsupportedEncodingException e) {
+				e.printStackTrace();
+			}
+			return string;
 		}
 
 	}
@@ -252,7 +261,12 @@ public class Utils {
 		}
 
 		public String getHttp() {
-			return first + "=%22" + spacesFormatQuery(second.toString(), "%20") + "%22";
+			try {
+				return first + "=%22" + URLEncoder.encode(second.toString(), "UTF-8") + "%22";
+			} catch (UnsupportedEncodingException e) {
+				e.printStackTrace();
+				return first + "=%22" + second.toString() + "%22";
+			}
 		}
 	}
 

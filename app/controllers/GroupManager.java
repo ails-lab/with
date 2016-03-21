@@ -226,7 +226,7 @@ public class GroupManager extends Controller {
 									+ ((country == null) ? "" : country);
 							fullAddress = fullAddress.replace(" ", "+");
 							try {
-								JsonNode response = HttpConnector
+								JsonNode response = HttpConnector.getWSHttpConnector()
 										.getURLContent("https://maps.googleapis.com/maps/api/geocode/json?address="
 												+ fullAddress);
 								Point coordinates = GeoJson.point(
