@@ -315,6 +315,7 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 					ko.mapping.fromJS(self.firstEntries, self.mapping, self.collectionItemsArray);
 					self.loadingExhibitionItems = true;
 					WITHApp.initTooltip();
+					WITHApp.tabAction();
 				},
 				error: function (result) {
 					// Empty
@@ -390,7 +391,6 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 					saveItemToExhibition(record, index, self.dbId());
 					$(elem).find('#loadingIcon').fadeOut();
 				}
-				WITHApp.initTooltip();
 			}
 		};
 
@@ -509,7 +509,7 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 				    filters:[]
 				}),
 				"success": function(reply) {
-					if (reply.responses[0] !== unedfined && reply.responses[0].items !== undefined) {
+					if (reply.responses[0] !== undefined && reply.responses[0].items !== undefined) {
 						var records = reply.responses[0].items.culturalCHO;
 						if (self.searchPage > 1) {
 							$.each(records, function( index, value ) {
@@ -646,6 +646,8 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 						}
 						self.collectionItemsArray.splice(indexNewItem, 0, newItem);
 						_draggedItem = undefined;
+						WITHApp.initTooltip();
+						WITHApp.tabAction();
 					}
 				};
 				dropElement.droppable(dropOptions);
@@ -783,6 +785,7 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 							}
 							self.loading(false);
 							WITHApp.initTooltip();
+							WITHApp.tabAction();
 						},
 						"error": function (result) {
 							self.loading(false);
