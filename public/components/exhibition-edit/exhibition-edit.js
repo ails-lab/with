@@ -533,7 +533,7 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 				var dragElement = $(element);
 				var dragOptions = {
 					start: function (event, ui) {
-						$('#outer-bottom').css({
+						$('#collscroll').css({
 							"overflow": 'visible'
 						});
 						$('.bottom-box').removeClass("box-Hover");
@@ -559,10 +559,10 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 						//}
 					},
 					stop: function (event, ui) {
-						$("#outer-bottom").css({
+						$("#collscroll").css({
 							overflow: "scroll"
 						});
-						$("#outer-bottom").css({
+						$("#collscroll").css({
 							"overflow-y": "hidden"
 						});
 						//un comment below statement
@@ -789,6 +789,47 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 				}
 			}
 		};
+		
+		
+		$('.leftscr').droppable({
+			tolerance: "touch",
+			over: function (event, ui) {
+				console.log("left");
+				$('.scroll').autoscroll({
+					direction: 'left',
+					step: 1000,
+					scroll: true
+				});
+			},
+			out: function (event, ui) {
+				$('.scroll').autoscroll('destroy');
+			}
+		});
+
+		$('.rightscr').droppable({
+			tolerance: "touch",
+			over: function (event, ui) {
+				console.log("left");
+				$('.scroll').autoscroll({
+					direction: 'right',
+					step: 1000,
+					scroll: true
+				});
+			},
+			out: function (event, ui) {
+				$('.scroll').autoscroll('destroy');
+			}
+		});
+
+		//fix for hover issue
+		self.showXbutton = function (data, event) {
+			$('#bottom-box').removeClass('box-Hover');
+			$(event.target).addClass('box-Hover');
+		};
+
+		//hide the nav bar
+		$('#bottomBar').fadeOut(500);
+		
 	};
 	
 	

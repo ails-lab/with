@@ -25,6 +25,8 @@
 					<div class="editorbox">
 						<div class="wrap" >
 							<!-- scroll-->
+							<div class="leftscr"></div>  <!-- for scrolling the page when dragging item at left of page-->
+				
 							<div class="scroll" data-bind="hscroll: collectionItemsArray(), scrollOptions: { loadFunc: loadNextExhibition }">
 								<!-- box-->
 								<div class="box">
@@ -104,6 +106,8 @@
 							</div>							
 						</div>
 					</div>
+					<div class="rightscr"></div><!-- for scrolling the page when dragging item at right of page-->
+					
 					<!-- assets-->
 					<div class="assets">
 						<!-- actions-->
@@ -118,7 +122,7 @@
 						</div>
 						<!-- listing-->
 						<div class="assetlisting" id="outer-bottom">
-							<ul data-bind="foreach: userSavedItemsArray, hscroll2: userSavedItemsArray(), scrollOptions: { loadFunc: loadNextCollection }">
+							<ul id="collscroll" data-bind="foreach: userSavedItemsArray, hscroll2: userSavedItemsArray(), scrollOptions: { loadFunc: loadNextCollection }">
 								<li>
 									<a class="bottom-box" href="#" data-toggle="tooltip" data-placement="top" 
 									data-bind="{drag: {item: $data, move: false}, attr: {title: title}}">
