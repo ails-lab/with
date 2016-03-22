@@ -509,16 +509,18 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 				    filters:[]
 				}),
 				"success": function(reply) {
-					var records = reply.responses[0].items.culturalCHO;
-					if (self.searchPage > 1) {
-						$.each(records, function( index, value ) {
-							var exhibitionRecord = ko.mapping.fromJS(value, self.mapping);
-							self.userSavedItemsArray.push(exhibitionRecord);
-						});
-					}
-					else if (self.searchPage == 1) {
-						ko.mapping.fromJS(records, self.mapping, self.userSavedItemsArray);
-
+					if (reply.responses[0] !== unedfined && reply.responses[0].items !== undefined) {
+						var records = reply.responses[0].items.culturalCHO;
+						if (self.searchPage > 1) {
+							$.each(records, function( index, value ) {
+								var exhibitionRecord = ko.mapping.fromJS(value, self.mapping);
+								self.userSavedItemsArray.push(exhibitionRecord);
+							});
+						}
+						else if (self.searchPage == 1) {
+							ko.mapping.fromJS(records, self.mapping, self.userSavedItemsArray);
+	
+						}
 					}
 				}
 			});
