@@ -537,6 +537,7 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 							"overflow": 'visible'
 						});
 						$('.bottom-box').removeClass("box-Hover");
+						
 						_draggedItem = ko.utils.unwrapObservable(valueAccessor().item);
 						_bIsMoveOperation = ko.utils.unwrapObservable(valueAccessor().move);
 						ui.helper.css({
