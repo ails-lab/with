@@ -1,5 +1,7 @@
 define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', 'app', 'jquery.lazyload', 'knockout-else', 'knockout-validation'], function (ko, template, jqueryUI, autoscroll, app, jqueryLazyLoad, KnockoutElse) {
 	
+	
+	
 	collectionItemCount = 14;
 	exhibitionItemCount = 4;
 	
@@ -534,7 +536,7 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 						$('#outer-bottom').css({
 							"overflow": 'visible'
 						});
-						$('#bottom-box').removeClass("box-Hover");
+						$('.bottom-box').removeClass("box-Hover");
 						_draggedItem = ko.utils.unwrapObservable(valueAccessor().item);
 						_bIsMoveOperation = ko.utils.unwrapObservable(valueAccessor().move);
 						ui.helper.css({
@@ -632,9 +634,9 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 						dropElement.animate({
 							width: "60px"
 						}, 200);
-						dropElement.find('#droppable-Children').css({
+						/*dropElement.find('#droppable-Children').css({
 							display: "none"
-						});
+						});*/
 						if (_bIsMoveOperation) {
 							_removeItem = false;
 							self.collectionItemsArray.splice(indexDraggedItem, 1);
