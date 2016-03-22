@@ -727,6 +727,7 @@ public class WithResourceController extends Controller {
 	 * @return
 	 */
 	public static Result removeFromFavorites(String externalId) {
+		System.out.println(externalId);
 		ObjectId userId = new ObjectId(session().get("user"));
 		String fav = DB.getCollectionObjectDAO()
 				.getByOwnerAndLabel(userId, null, "_favorites").getDbId()
