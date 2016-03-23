@@ -111,6 +111,12 @@
 			    <div class="title">Edit Collection</div>
 			    <!-- /ko -->
 			  </div>
+			  <div class="toggle">
+				<input type="checkbox" id="toggle1" data-bind="{checked: isPublicToEdit, click: isPublicToggle}">
+				<label for="toggle1"></label>
+				<span class="private">private</span>
+				<span class="public">public</span>
+			  </div>
 			  <div class="action-body" data-bind="validationElement: titleToEdit">
 				<input type="text" data-bind="{value: titleToEdit, valueUpdate: 'afterkeypress', hasFocus: true
 				      attr: {placeholder: titleToEdit}}">
