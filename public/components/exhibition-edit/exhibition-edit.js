@@ -419,7 +419,13 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 		
 		self.editItem = function (editMode) {
 			if (self.itemVideoUrl() == "" || self.validationModel.isValid()) {
-				var promise = self.updateRecord(self.itemId(), self.itemText(), self.itemVideoUrl(), self.itemVideoDescription(), self.dbId(), self.itemPosition());
+				var itemEmbeddedVideoUrl = "";
+				var urlMatch = self.itemVideoUrl().match(/youtube\.com.*(\?v=|\/embed\/)(.{11})/);
+				if (urlMatch !== null) {
+					var youtube_video_id = urlMatch.pop();
+					itemEmbeddedVideoUrl = 'https://www.youtube.com/embed/' + youtube_video_id;	
+				}
+				var promise = self.updateRecord(self.itemId(), self.itemText(), itemEmbeddedVideoUrl, self.itemVideoDescription(), self.dbId(), self.itemPosition());
 				$.when(promise).done(function (data) {
 					if (editMode == "editText") {
 						self.collectionItemsArray()[self.itemPosition()].contextData()[0].body.text.default(self.itemText());
