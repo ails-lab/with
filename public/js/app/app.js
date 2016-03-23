@@ -570,9 +570,12 @@ define("app", ['knockout', 'facebook', 'imagesloaded', 'moment', './js/app/plugi
 				}
 			});
 		} else { // Unlike
+			console.log(encodeURIComponent(id));
 			$.ajax({
-				type: "DELETE",
-				url: "/collection/unliked/" + encodeURIComponent(id),
+				type: "POST",
+				url: "/collection/unliked",
+				contentType: "application/json",
+				data: JSON.stringify({externalId: id}),
 				success: function (data, textStatus, jqXHR) {
 					self.currentUser.favorites.remove(id);
 					update(false);

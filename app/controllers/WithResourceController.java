@@ -726,22 +726,32 @@ public class WithResourceController extends Controller {
 	/**
 	 * @return
 	 */
-	public static Result removeFromFavorites(String externalId) {
-		System.out.println(externalId);
-		ObjectId userId = new ObjectId(session().get("user"));
-		String fav = DB.getCollectionObjectDAO()
-				.getByOwnerAndLabel(userId, null, "_favorites").getDbId()
-				.toString();
-		RecordResource record = DB.getRecordResourceDAO().getByExternalId(
-				externalId);
-		List<CollectionInfo> collected = record.getCollectedIn();
-		for (CollectionInfo c : collected) {
-			if (c.getCollectionId().toString().equals(fav)) {
-				return removeRecordFromCollection(fav, record.getDbId()
-						.toString(), Option.Some(c.getPosition()), false);
+
+	public static Result removeFromFavorites() {
+		JsonNode json = request().body().asJson();
+		JsonNode externalIdNode = json.get("externalId");
+		if (externalIdNode != null) {
+			String externalId = externalIdNode.asText();
+			ObjectId userId = new ObjectId(session().get("user"));
+			String fav = DB.getCollectionObjectDAO()
+					.getByOwnerAndLabel(userId, null, "_favorites").getDbId()
+					.toString();
+			RecordResource record = DB.getRecordResourceDAO().getByExternalId(
+					externalId);
+			List<CollectionInfo> collected = record.getCollectedIn();
+			for (CollectionInfo c : collected) {
+				if (c.getCollectionId().toString().equals(fav)) {
+					return removeRecordFromCollection(fav, record.getDbId()
+							.toString(), Option.Some(c.getPosition()), false);
+				}
 			}
+			return removeRecordFromCollection(fav, record.getDbId().toString(),
+					Option.None(), false);
 		}
-		return removeRecordFromCollection(fav, record.getDbId().toString(),
-				Option.None(), false);
+		else {
+			ObjectNode result = Json.newObject();
+			result.put("error", "Json request should have format {externalId: id}");
+			return internalServerError(result);
+		}
 	}
 }
