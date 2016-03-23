@@ -393,10 +393,8 @@ WITHApp.ui = function( custom ){
 		
 		// profile
 		$( '.editbox' ).click( function( e ) {
-
 			// prevent
 			e.preventDefault();
-
 			$( '.action' ).removeClass( 'active' );
 			$( '.action.editsection' ).addClass( 'active' );
 
