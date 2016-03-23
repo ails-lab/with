@@ -337,8 +337,7 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 					if (items.length > 0) {
 						var $newitems = getItems(items);
 
-						self.isotopeImagesReveal(self.$container, $newitems);
-
+						 self.isotopeImagesReveal($newitems );
 					}
 					loading(false);
 				});
@@ -460,7 +459,7 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
        self.isotopeImagesReveal = function($items ) {
  		  self.$container = $(".grid#" + self.id());
 			var iso = self.$container.data('isotope');
-			var itemSelector = null;
+			var itemSelector = '.media';
 			if (iso)
 				itemSelector = iso.options.itemSelector;
 			else {
