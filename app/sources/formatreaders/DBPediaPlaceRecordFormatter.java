@@ -68,30 +68,50 @@ public class DBPediaPlaceRecordFormatter extends PlaceRecordFormatter {
 		// model.setYear(Integer.parseInt(rec.getStringValue("year")));
 //		model.setDccreator(rec.getMultiLiteralOrResourceValue("principalOrFirstMaker"));
 		
+		String id = rec.getStringValue("uri");
+		object.addToProvenance(new ProvenanceInfo(Sources.DBPedia.toString(), id , id));
+
+		List<String> subject =  rec.getStringArrayValue("subject");
+		if (subject != null && subject.size() > 0) {
+			MultiLiteralOrResource ct = new MultiLiteralOrResource();
+			ct.addURI(subject);
+			model.setKeywords(ct);
+		}
+		
+		String uri3 = rec.getStringValue("thumbnail");
+		if (Utils.hasInfo(uri3)){
+			EmbeddedMediaObject med = new EmbeddedMediaObject();
+			med.setUrl(uri3);
+//			medThumb.setWidth(rec.getIntValue("headerImage.width"));
+//			medThumb.setHeight(rec.getIntValue("headerImage.height"));
+//			medThumb.setType(type);
+//			if (Utils.hasInfo(rights))
+			med.setOriginalRights(new LiteralOrResource("http://creativecommons.org/publicdomain/zero/1.0/deed.en"));
+			med.setWithRights(WithMediaRights.Public);
+			
+			object.addMedia(MediaVersion.Thumbnail, med);
+		}
+
+		String uri2 = rec.getStringValue("depiction");
+		if (Utils.hasInfo(uri2)){
+			EmbeddedMediaObject med = new EmbeddedMediaObject();
+			med.setUrl(uri2);
+//			medThumb.setWidth(rec.getIntValue("headerImage.width"));
+//			medThumb.setHeight(rec.getIntValue("headerImage.height"));
+//			medThumb.setType(type);
+//			if (Utils.hasInfo(rights))
+			med.setOriginalRights(new LiteralOrResource("http://creativecommons.org/publicdomain/zero/1.0/deed.en"));
+			med.setWithRights(WithMediaRights.Public);
+			
+			object.addMedia(MediaVersion.Original, med);
+		}
+		
 		List<String> country =  rec.getStringArrayValue("country");
 		if (country != null && country.size() > 0) {
 			MultiLiteralOrResource ct = new MultiLiteralOrResource();
 			ct.addURI(country);
 			model.setNation(ct);
 		}
-		
-		String id = rec.getStringValue("uri");
-		object.addToProvenance(new ProvenanceInfo(Sources.DBPedia.toString(), id , id));
-		
-		String uri3 = rec.getStringValue("depiction");
-		if (Utils.hasInfo(uri3)){
-			EmbeddedMediaObject medThumb = new EmbeddedMediaObject();
-			medThumb.setUrl(uri3);
-//			medThumb.setWidth(rec.getIntValue("headerImage.width"));
-//			medThumb.setHeight(rec.getIntValue("headerImage.height"));
-//			medThumb.setType(type);
-//			if (Utils.hasInfo(rights))
-			medThumb.setOriginalRights(new LiteralOrResource("http://creativecommons.org/publicdomain/zero/1.0/deed.en"));
-			medThumb.setWithRights(WithMediaRights.Public);
-			
-			object.addMedia(MediaVersion.Thumbnail, medThumb);
-		}
-		
 		
 		return object;
 	}

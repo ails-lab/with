@@ -189,22 +189,34 @@ public class DAGNode<T> implements Comparable<DAGNode<T>> {
 	private StringBuffer itoJSON(Map<String, ObjectId> idMap, Map<String, SKOSSemantic> map, Language lang) {
 
 		T s = label.iterator().next();
+
+		ObjectId id = idMap.get(s);
 		
 		StringBuffer sb = new StringBuffer();
-		
-		sb.append("{ \"id\":\"" + idMap.get(s).toString() + "\", \"uri\":\"" + s + "\", \"label\":\"" + map.get(s).getPrefLabel().getLiteral(lang) + "\", \"size\":\"" + size + "\", \"children\": [");
-		
-		int i = 0;
-		for (DAGNode<T> node : children) {
-			if (i++ > 0) {
-				sb.append(", ");
+
+		if (id != null) {
+			sb.append("{ \"id\":\"" + idMap.get(s).toString() + "\", \"uri\":\"" + s + "\", \"label\":\"" + map.get(s).getPrefLabel().getLiteral(lang) + "\", \"size\":\"" + size + "\", \"children\": [");
+			
+			int i = 0;
+			for (DAGNode<T> node : children) {
+				StringBuffer r1 = node.itoJSON(idMap, map, lang);
+				if (r1.length() > 0) {
+					if (i++ > 0) {
+						sb.append(", ");
+					}
+					sb.append(r1);
+				}
 			}
-			sb.append(node.itoJSON(idMap, map, lang));
+			
+			sb.append("] }");
+			
 		}
 		
-		sb.append("] }");
-		
 		return sb;
+
+		
+		
+
 	}
 
 

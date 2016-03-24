@@ -109,36 +109,19 @@ public class DBPediaSpaceSource extends ISpaceSource {
 		}
 		return res;
 	}
-	
+
 	@Override
 	public ArrayList<RecordJSONMetadata> getRecordFromSource(String recordId, RecordResource fullRecord) {
+		//WHAT IS: recordID? IT SHOULD BY DBPEDIA URI name AFTER http://dbpedia.org/resource/...
 		ArrayList<RecordJSONMetadata> jsonMetadata = new ArrayList<RecordJSONMetadata>();
 		JsonNode response;
-//		try {
-//			response = HttpConnector.getURLContent(
-//					"https://www.rijksmuseum.nl/api/en/collection/" + recordId + "?key=" + apiKey + "&format=json");
-//			JsonNode record = response;
-//			if (record != null) {
-//				jsonMetadata.add(new RecordJSONMetadata(Format.JSON_RIJ, record.toString()));
-//				CulturalRecordFormatter f = new RijksmuseumItemRecordFormatter();
-//				// TODO make another reader
-//				CulturalObject res = f .readObjectFrom(record);
-//				if (fullRecord!=null && Utils.hasInfo(fullRecord.getMedia())){
-//					EmbeddedMediaObject object = ((HashMap<MediaVersion, EmbeddedMediaObject>)fullRecord.getMedia().get(0)).get(MediaVersion.Thumbnail);
-//					res.addMedia(MediaVersion.Thumbnail, object);
-//				}
-//					
-//				String json = Json.toJson(res).toString();
-//				System.out.println(json);
-//				jsonMetadata.add(new RecordJSONMetadata(Format.JSON_WITH, json));
-//			}
-//			Document xmlResponse = HttpConnector.getURLContentAsXML(
-//					"https://www.rijksmuseum.nl/api/en/collection/" + recordId + "?key=" + apiKey + "&format=xml");
-//			jsonMetadata.add(new RecordJSONMetadata(Format.XML_NLA, Serializer.serializeXML(xmlResponse)));
+		try {
+			response = getHttpConnector()
+					.getURLContent("http://zenon.image.ece.ntua.gr:8890/data/" + recordId + ".rdf");
+			jsonMetadata.add(new RecordJSONMetadata(Format.JSON_YOUTUBE, response.toString()));
 			return jsonMetadata;
-//		} catch (Exception e) {
-//			return jsonMetadata;
-//		}
+		} catch (Exception e) {
+			return jsonMetadata;
+		}
 	}
-
 }

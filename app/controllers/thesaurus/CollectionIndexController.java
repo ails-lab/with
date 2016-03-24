@@ -36,6 +36,7 @@ import play.Logger.ALogger;
 import play.libs.Json;
 import play.mvc.Result;
 import utils.AccessManager.Action;
+import akka.japi.Util;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -68,7 +69,6 @@ public class CollectionIndexController extends WithResourceController	{
 
 			List<String[]> list = new ArrayList<>();
 
-//			System.out.println("RESULTS " + sh.getHits().length);
 			for (Iterator<SearchHit> iter = sh.iterator(); iter.hasNext();) {
 				SearchHit hit = iter.next();
 

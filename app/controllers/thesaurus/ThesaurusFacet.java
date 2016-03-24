@@ -68,9 +68,11 @@ public class ThesaurusFacet {
 		SKOSSemantic res = map.get(term);
 		if (res == null) {
 			ThesaurusObject to = DB.getThesaurusDAO().getByUri(term);
-			res = to.getSemantic();
-			map.put(res.getUri(), res);
-			idMap.put(res.getUri(), to.getDbid());
+			if (to != null) {
+				res = to.getSemantic();
+				map.put(res.getUri(), res);
+				idMap.put(res.getUri(), to.getDbid());
+			}
 		}
 		
 		return res;
@@ -94,10 +96,13 @@ public class ThesaurusFacet {
 		
 		int i = 0;
 		for (DAGNode<String> node : tops) {
-			if (i++ > 0) {
-				res.append(", ");
+			String r1 = node.toJSON(idMap, map, lang);
+			if (r1.length() > 0) {
+				if (i++ > 0) {
+					res.append(", ");
+				}
+				res.append(r1);
 			}
-			res.append(node.toJSON(idMap, map, lang));
 		}
 		
 		res.append("] }");
@@ -120,16 +125,19 @@ public class ThesaurusFacet {
 		for (String[] uris : list) {
 			Set<String> used = new HashSet<>();
 //			Set<String> fused = new HashSet<>();
-			for (String uri : uris) {
-				SKOSSemantic semantic = getSemantic(uri);
-				
-				count(counterMap, uri, used);
-//				count(levelMap, uri, fused);
-				
-				List<SKOSTerm> broader = semantic.getBroaderTransitive();
-				if (broader != null) {
-					for (SKOSTerm term : broader) {
-						count(counterMap, term.getUri(), used);
+			if (uris != null) {
+				for (String uri : uris) {
+					SKOSSemantic semantic = getSemantic(uri);
+					
+					count(counterMap, uri, used);
+	//				count(levelMap, uri, fused);
+					if (semantic != null) {
+						List<SKOSTerm> broader = semantic.getBroaderTransitive();
+						if (broader != null) {
+							for (SKOSTerm term : broader) {
+								count(counterMap, term.getUri(), used);
+							}
+						}
 					}
 				}
 			}
@@ -158,25 +166,28 @@ public class ThesaurusFacet {
 				}
 			}
 			
-			List<SKOSTerm> broaderList = getSemantic(term).getBroader();
-			
-			if (broaderList != null) {
-				for (SKOSTerm broader : broaderList) {
-					String broaderURI = broader.getUri();
-					
-					DAGNode<String> parent = nodeMap.get(broaderURI);
-					if (parent == null) {
-						parent = new DAGNode<String>(broaderURI, counterMap.get(broaderURI).getValue());
-						nodeMap.put(broaderURI, parent);
-						tops.add(parent);
+			SKOSSemantic semantic = getSemantic(term);
+			if (semantic != null) {
+				List<SKOSTerm> broaderList = semantic.getBroader();
+				
+				if (broaderList != null) {
+					for (SKOSTerm broader : broaderList) {
+						String broaderURI = broader.getUri();
 						
-						if (selected.contains(broaderURI)) {
-							points.add(parent);
+						DAGNode<String> parent = nodeMap.get(broaderURI);
+						if (parent == null) {
+							parent = new DAGNode<String>(broaderURI, counterMap.get(broaderURI).getValue());
+							nodeMap.put(broaderURI, parent);
+							tops.add(parent);
+							
+							if (selected.contains(broaderURI)) {
+								points.add(parent);
+							}
 						}
+						
+						parent.addChild(node);
+						tops.remove(node);
 					}
-					
-					parent.addChild(node);
-					tops.remove(node);
 				}
 			}
 		}
