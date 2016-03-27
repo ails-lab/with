@@ -157,11 +157,13 @@ public class CollectionObjectController extends WithResourceController {
 					.getById(collectionDbId,
 							Arrays.asList("administrative.entryCount"))
 					.getAdministrative().getEntryCount();
+			Logger.info("Sorting collection "+collectionId);
 			List<RecordResource> records = DB.getRecordResourceDAO()
 					.getByCollectionBetweenPositions(collectionDbId, 0,
-							entryCount);
+							Math.min(entryCount, 1000));
 			RecordResource<?>[] array = records.toArray(new RecordResource<?>[]{});
 			Arrays.sort(array,Utils.compareThumbs);
+			Logger.info("Items sorted based on image quality");
 			for (int i = 0, pos = 0; i < array.length; i++) {
 				RecordResource<?> recordResource = array[i];
 				for (CollectionInfo ci : recordResource.getCollectedIn()) {
@@ -170,6 +172,7 @@ public class CollectionObjectController extends WithResourceController {
 					}
 				}
 				DB.getRecordResourceDAO().makePermanent(recordResource);
+				Logger.info(pos +"th item was updated");
 			}
 			return ok();
 		} catch (Exception e) {

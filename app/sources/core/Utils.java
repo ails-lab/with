@@ -16,13 +16,17 @@
 
 package sources.core;
 
+import java.awt.image.BufferedImage;
 import java.io.UnsupportedEncodingException;
+import java.net.URL;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
+
+import javax.imageio.ImageIO;
 
 import model.EmbeddedMediaObject;
 import model.EmbeddedMediaObject.MediaVersion;
@@ -33,6 +37,7 @@ import org.apache.commons.validator.routines.UrlValidator;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.net.MediaType;
 
+import play.Logger;
 import play.libs.Json;
 import sources.utils.StringUtils;
 
@@ -54,7 +59,7 @@ public class Utils {
 
 	public final static Comparator<WithResource<?,?>> compareThumbs = new Comparator<WithResource<?,?>>() {
 		public int compare(WithResource<?,?> o1, WithResource<?,?> o2) {
-			return getRank(o2) - getRank(o1);
+			return getRank1(o2) - getRank1(o1);
 		}
 
 		private int getRank(WithResource<?, ?> o1) {
@@ -65,6 +70,26 @@ public class Utils {
 				return (int)f.getSize();
 			}
 		}
+		
+		private int getRank1(WithResource<?, ?> o1) {
+			EmbeddedMediaObject f = o1.getMedia().get(0).get(MediaVersion.Thumbnail);
+			if (!Utils.hasInfo(f.getUrl()) || !Utils.isValidURL(f.getUrl())){
+				Logger.info("Rank: -1 for "+f.getUrl());
+				return -1;
+			} else {
+				try{
+					URL url = new URL(f.getUrl());
+					final BufferedImage bi = ImageIO.read(url);
+					int size = bi.getWidth()* bi.getHeight();
+					Logger.info("Rank: "+size+" for "+f.getUrl());
+					return size;
+				} catch(Exception e) {
+					Logger.info("Rank: -1 for "+f.getUrl());
+					return -1;
+				}
+			}
+		}
+		
 	};
 
 	public static String toLower(String text) {
