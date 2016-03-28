@@ -122,11 +122,11 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 			if (descdata) {
 				self.title = findByLang(descdata.label);
 				self.description = findByLang(descdata.description);
-//				if (typeof media[0].Original.originalRights !== 'undefined') {
-//					self.rights = media[0] != null && media[0].Original != null && media[0].Original.originalRights != "null" ? media[0].Original.originalRights.uri : null;
-//				} else {
-//					self.rights = null;
-//				}
+				if (typeof media[0].Original.originalRights !== 'undefined') {
+					self.rights = media[0] != null && media[0].Original != null && media[0].Original.originalRights != "null" ? media[0].Original.originalRights.uri : null;
+				} else {
+					self.rights = null;
+				}
 				self.creator = findByLang(descdata.dccreator);
 			}
 

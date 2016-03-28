@@ -24,10 +24,17 @@ import org.mongodb.morphia.annotations.Entity;
 import model.basicDataTypes.Literal;
 import model.basicDataTypes.MultiLiteralOrResource;
 import model.basicDataTypes.WithDate;
+import model.resources.RecordResource.RecordAdmin;
 import model.resources.RecordResource.RecordDescriptiveData;
+import model.resources.WithResource.WithResourceType;
 
 @Entity("RecordResource")
 public class AgentObject extends RecordResource<AgentObject.AgentData> {
+
+	public AgentObject() {
+		super();
+		this.resourceType = WithResourceType.valueOf(this.getClass().getSimpleName());
+	}
 
 	public static class AgentData extends RecordDescriptiveData {
 

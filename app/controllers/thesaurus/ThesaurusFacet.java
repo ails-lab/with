@@ -16,6 +16,7 @@
 
 package controllers.thesaurus;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -122,6 +123,7 @@ public class ThesaurusFacet {
 		
 //		DAGNode<String> flattop = new DAGNode<String>();
 		
+		boolean computeBroader = false;
 		for (String[] uris : list) {
 			Set<String> used = new HashSet<>();
 //			Set<String> fused = new HashSet<>();
@@ -132,8 +134,15 @@ public class ThesaurusFacet {
 					count(counterMap, uri, used);
 	//				count(levelMap, uri, fused);
 					if (semantic != null) {
-						List<SKOSTerm> broader = semantic.getBroaderTransitive();
+						
+						Collection<SKOSTerm> broader = semantic.getBroaderTransitive();
+						
+//						if (broader == null && semantic.getBroader() != null) {
+//							broader = constructBroaderTransitive(semantic);
+//						}
+
 						if (broader != null) {
+							computeBroader = true;
 							for (SKOSTerm term : broader) {
 								count(counterMap, term.getUri(), used);
 							}
@@ -153,9 +162,9 @@ public class ThesaurusFacet {
 			if (!used.add(term)) {
 				continue;
 			}
-
-//			System.out.println(term);
+			
 			DAGNode<String> node = nodeMap.get(term);
+
 			if (node == null) {
 				node = new DAGNode<String>(term, entry.getValue().getValue());
 				nodeMap.put(term, node);
@@ -167,7 +176,8 @@ public class ThesaurusFacet {
 			}
 			
 			SKOSSemantic semantic = getSemantic(term);
-			if (semantic != null) {
+
+			if (semantic != null && computeBroader) {
 				List<SKOSTerm> broaderList = semantic.getBroader();
 				
 				if (broaderList != null) {
@@ -193,24 +203,27 @@ public class ThesaurusFacet {
 		}
 
 		Set<DAGNode<String>> changedParents = new HashSet<>();
-		
+
 		for (DAGNode<String> p : points) {
 			DAGNode<String> top = p;
+			
 			while (top.getParents().size() > 0) {
 				top = top.getParents().iterator().next();
 			}
-			
+
 			Set<DAGNode<String>> pcopy = new HashSet<>();
 			pcopy.addAll(p.getParents());
-
+			
 			for (DAGNode<String> parent : pcopy) {
 				parent.removeChild(p);
 				changedParents.add(parent);
 			}
+			
 			for (DAGNode<String> child : p.getChildren()) {
 				top.addChild(child);
 			}
 		}
+		
 		
 		while (changedParents.size() > 0) {
 			Set<DAGNode<String>> newChangedParents = new HashSet<>();
@@ -229,10 +242,41 @@ public class ThesaurusFacet {
 			changedParents = newChangedParents;
 		}
 		
+		
 		for (DAGNode<String> top : tops) {
 			top.normalize(selected);
 		}
-
+	}
+	
+	public Collection<SKOSTerm> constructBroaderTransitive(SKOSSemantic skos) {
+		Collection<SKOSTerm> used = new HashSet<>();
+		
+		List<SKOSSemantic> queue = new ArrayList<>();
+		for (SKOSTerm c : skos.getBroader()) {
+			if (used.add(c)) {
+				queue.add(getSemantic(c.getUri()));
+			}
+		}
+		
+		int i = 0;
+		while (queue.size() > i) {
+			SKOSSemantic current = queue.get(i++);
+//			System.out.println("S " + i + " " + current + " " + current.getUri());
+			
+			List<SKOSTerm> list = current.getBroader();
+			if (list != null) {
+				for (SKOSTerm c : list) {
+					if (used.add(c)) {
+						SKOSSemantic br = getSemantic(c.getUri());
+						if (br != null) {
+							queue.add(br);
+						}
+					}
+				}
+			}
+		}
+		
+		return used;
 	}
 
 }

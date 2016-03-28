@@ -23,9 +23,15 @@ import org.mongodb.morphia.annotations.Entity;
 import model.DescriptiveData;
 import model.basicDataTypes.MultiLiteralOrResource;
 import model.resources.RecordResource.RecordDescriptiveData;
+import model.resources.WithResource.WithResourceType;
 
 @Entity("RecordResource")
 public class PlaceObject extends RecordResource<PlaceObject.PlaceData> {
+
+	public PlaceObject() {
+		super();
+		this.resourceType = WithResourceType.valueOf(this.getClass().getSimpleName());
+	}
 
 	public static class PlaceData extends RecordDescriptiveData {
 

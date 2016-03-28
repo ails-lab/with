@@ -265,7 +265,7 @@ public class DAGNode<T> implements Comparable<DAGNode<T>> {
 //		for (Iterator<DAGNode<T>> iter =  children.iterator(); iter.hasNext();) {
 //			System.out.println("\t" + iter.next().getLabel());
 //		}
-		
+
 		for (Iterator<DAGNode<T>> iter =  children.iterator(); iter.hasNext();) {
 			DAGNode<T> child = iter.next();
 			child.normalize(selected);

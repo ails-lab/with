@@ -27,7 +27,9 @@ import com.fasterxml.jackson.databind.JsonNode;
 import model.EmbeddedMediaObject.MediaVersion;
 import model.EmbeddedMediaObject;
 import model.basicDataTypes.ProvenanceInfo.Sources;
+import model.resources.AgentObject;
 import model.resources.CulturalObject;
+import model.resources.PlaceObject;
 import model.resources.RecordResource;
 import play.libs.Json;
 import sources.core.CommonQuery;
@@ -48,8 +50,8 @@ import utils.Serializer;
 
 public class DBPediaSpaceSource extends ISpaceSource {
 
-	protected JsonContextRecordFormatReader agentformatreader;
-	protected JsonContextRecordFormatReader placeformatreader;
+	protected JsonContextRecordFormatReader<AgentObject> agentformatreader;
+	protected JsonContextRecordFormatReader<PlaceObject> placeformatreader;
 	
 	public DBPediaSpaceSource() {
 		LABEL = Sources.DBPedia.toString();
@@ -118,7 +120,7 @@ public class DBPediaSpaceSource extends ISpaceSource {
 		try {
 			response = getHttpConnector()
 					.getURLContent("http://zenon.image.ece.ntua.gr:8890/data/" + recordId + ".rdf");
-			jsonMetadata.add(new RecordJSONMetadata(Format.JSON_YOUTUBE, response.toString()));
+			jsonMetadata.add(new RecordJSONMetadata(Format.JSON_RDF, response.toString()));
 			return jsonMetadata;
 		} catch (Exception e) {
 			return jsonMetadata;

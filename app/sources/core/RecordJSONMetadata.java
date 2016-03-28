@@ -26,7 +26,7 @@ public class RecordJSONMetadata {
 		JSON_NLA, XML_NLA, 
 		JSON_DNZ, XML_DNZ,
 		JSON_YOUTUBE, JSON_RIJ,
-		RDF
+		JSON_RDF
 	}
 
 	private String jsonContent;

@@ -46,7 +46,7 @@ public class ThesaurusObject {
 	public static class SKOSTerm {
 		protected String uri;
 		protected String type;
-
+		
 		protected Literal prefLabel;
 		protected MultiLiteral altLabel;
 
@@ -104,7 +104,11 @@ public class ThesaurusObject {
 		}
 
 		public String toString() {
-			return prefLabel.get("en");
+			if (prefLabel != null) {
+				return prefLabel.get("en");
+			} else {
+				return "";
+			}
 		}
 	}
 
