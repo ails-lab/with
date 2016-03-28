@@ -16,16 +16,30 @@
 
 package sources.core;
 
+import java.awt.image.BufferedImage;
+import java.io.UnsupportedEncodingException;
+import java.net.URL;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
+
+import javax.imageio.ImageIO;
+
+import model.EmbeddedMediaObject;
+import model.EmbeddedMediaObject.MediaVersion;
+import model.resources.WithResource;
 
 import org.apache.commons.validator.routines.UrlValidator;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.google.common.net.MediaType;
 
+import play.Logger;
 import play.libs.Json;
+import sources.utils.StringUtils;
 
 public class Utils {
 
@@ -42,6 +56,41 @@ public class Utils {
 		public String lang;
 		public String value;
 	}
+
+	public final static Comparator<WithResource<?,?>> compareThumbs = new Comparator<WithResource<?,?>>() {
+		public int compare(WithResource<?,?> o1, WithResource<?,?> o2) {
+			return getRank1(o2) - getRank1(o1);
+		}
+
+		private int getRank(WithResource<?, ?> o1) {
+			EmbeddedMediaObject f = o1.getMedia().get(0).get(MediaVersion.Thumbnail);
+			if (!Utils.hasInfo(f.getUrl()) || !Utils.isValidURL(f.getUrl())){
+				return -1;
+			} else {
+				return (int)f.getSize();
+			}
+		}
+		
+		private int getRank1(WithResource<?, ?> o1) {
+			EmbeddedMediaObject f = o1.getMedia().get(0).get(MediaVersion.Thumbnail);
+			if (!Utils.hasInfo(f.getUrl()) || !Utils.isValidURL(f.getUrl())){
+				Logger.info("Rank: -1 for "+f.getUrl());
+				return -1;
+			} else {
+				try{
+					URL url = new URL(f.getUrl());
+					final BufferedImage bi = ImageIO.read(url);
+					int size = bi.getWidth()* bi.getHeight();
+					Logger.info("Rank: "+size+" for "+f.getUrl());
+					return size;
+				} catch(Exception e) {
+					Logger.info("Rank: -1 for "+f.getUrl());
+					return -1;
+				}
+			}
+		}
+		
+	};
 
 	public static String toLower(String text) {
 		if (text != null) {
@@ -196,14 +245,14 @@ public class Utils {
 		if (values.size() > 1) {
 			if (paren)
 				res += "(";
-			res += spacesPlusFormatQuery(values.get(0));
+			res += values.get(0);
 			for (int i = 1; i < values.size(); i++) {
-				res += "%20OR%20" + spacesPlusFormatQuery(values.get(i));
+				res += " OR " + values.get(i);
 			}
 			if (paren)
 				res += ")";
 		} else {
-			res += spacesPlusFormatQuery(values.get(0));
+			res += values.get(0);
 		}
 		return res;
 	}
@@ -211,12 +260,12 @@ public class Utils {
 	public static String getStringList(List<String> values, String separator) {
 		String res = "";
 		if (values.size() > 1) {
-			res += spacesPlusFormatQuery(values.get(0));
+			res += values.get(0);
 			for (int i = 1; i < values.size(); i++) {
-				res += separator + spacesPlusFormatQuery(values.get(i));
+				res += separator + values.get(i);
 			}
 		} else {
-			res += spacesPlusFormatQuery(values.get(0));
+			res += values.get(0);
 		}
 		return res;
 	}
@@ -236,7 +285,15 @@ public class Utils {
 		}
 
 		public String getHttp() {
-			return first + "=" + spacesFormatQuery(second.toString(), "%20");
+			String string = first + "=" + second.toString();
+			try {
+				String encode = URLEncoder.encode(second.toString(), "UTF-8");
+				System.out.println(second.toString()+" ---> "+encode);
+				string = first + "=" + encode;
+			} catch (UnsupportedEncodingException e) {
+				e.printStackTrace();
+			}
+			return string;
 		}
 
 	}
@@ -252,7 +309,12 @@ public class Utils {
 		}
 
 		public String getHttp() {
-			return first + "=%22" + spacesFormatQuery(second.toString(), "%20") + "%22";
+			try {
+				return first + "=%22" + URLEncoder.encode(second.toString(), "UTF-8") + "%22";
+			} catch (UnsupportedEncodingException e) {
+				e.printStackTrace();
+				return first + "=%22" + second.toString() + "%22";
+			}
 		}
 	}
 

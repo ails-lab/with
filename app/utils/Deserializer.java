@@ -54,6 +54,7 @@ import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.BooleanNode;
 import com.fasterxml.jackson.databind.node.TextNode;
+import com.google.common.net.MediaType;
 import com.hp.hpl.jena.tdb.store.IntegerNode;
 
 import db.DB;
@@ -116,7 +117,7 @@ public class Deserializer {
 			return rights;
 		}
 	}
-	
+
 	public static class ContextDataDeserializer extends
 	JsonDeserializer<List<ContextData>> {
 
@@ -126,12 +127,12 @@ public class Deserializer {
 			JsonProcessingException {
 		TreeNode contextDataJson = contextString.readValueAsTree();
 		List<ContextData> contextDataList = new ArrayList<ContextData>();
-		if (contextDataJson != null && contextDataJson.isArray()) {
+		if ((contextDataJson != null) && contextDataJson.isArray()) {
 			for (int i = 0; i < contextDataJson.size(); i++) {
 				TreeNode c = contextDataJson.get(i);
 				TreeNode contextDataTypeNode = c.get("contextDataType");
 				ContextData contextData = new ContextData();
-				if (contextDataTypeNode != null && contextDataTypeNode.isValueNode()) {
+				if ((contextDataTypeNode != null) && contextDataTypeNode.isValueNode()) {
 					String contextDataTypeString = ((TextNode) contextDataTypeNode).asText();
 					ContextDataType contextDataType = null;
 					if ((contextDataType = ContextDataType.valueOf(contextDataTypeString)) != null) {
@@ -149,7 +150,7 @@ public class Deserializer {
 		}
 		return contextDataList;
 	}
-			
+
 	}
 
 	public static class MultiLiteralDesiarilizer extends
@@ -291,6 +292,17 @@ public class Deserializer {
 				r.put(new ObjectId(e.getKey()), Access.values()[e.getValue()]);
 			}
 			return r;
+		}
+	}
+
+	public static class MimeTypeDeserializer extends
+	JsonDeserializer<MediaType> {
+
+		@Override
+		public MediaType deserialize(JsonParser mimetype_string,
+				DeserializationContext arg1) throws IOException,
+				JsonProcessingException {
+					return MediaType.parse(mimetype_string.readValueAs(String.class));
 		}
 	}
 

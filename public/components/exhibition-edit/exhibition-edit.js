@@ -1,15 +1,17 @@
-define(['knockout', 'text!./exhibition-edit.html', 'jquery.ui', 'autoscroll', 'app', 'bootstrap-select', 'bootstrap-switch', 'jquery.lazyload'], function (ko, template, jqueryUI, autoscroll, app, bootstrapSelect, bootstrapSwitch, jqueryLazyLoad) {
-
+define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', 'app', 'jquery.lazyload', 'knockout-else', 'knockout-validation'], function (ko, template, jqueryUI, autoscroll, app, jqueryLazyLoad, KnockoutElse) {
+	
+	
+	
+	collectionItemCount = 14;
+	exhibitionItemCount = 4;
+	
 	function setUpSwitch(exhibition) {
-		$("input.switch").bootstrapSwitch({
-			onText: 'Public',
-			offText: 'Restricted',
-			size: 'small',
-			onColor: 'success',
-			offColor: 'danger',
-			state: exhibition.administrative.access.isPublic()
-		});
-		$("input.switch").on('switchChange.bootstrapSwitch', function (event, state) {
+		// Set the initial value
+		$('#toggle2').prop('checked', exhibition.administrative.access.isPublic());
+
+		// Add event handler for change event
+		$("#toggle2").change(function () {
+			state = this.checked;
 			$.ajax({
 				url: '/rights/' + exhibition.dbId() + '?isPublic=' + state,
 				method: 'GET',
@@ -23,6 +25,12 @@ define(['knockout', 'text!./exhibition-edit.html', 'jquery.ui', 'autoscroll', 'a
 			});
 		});
 	}
+	
+	ko.validation.init({
+		errorElementClass: 'error',
+		errorMessageClass: 'errormsg',
+		decorateInputElement: true
+	});
 
 	function MyCollection(collectionData) {
 		this.dbId = collectionData.dbId;
@@ -49,16 +57,6 @@ define(['knockout', 'text!./exhibition-edit.html', 'jquery.ui', 'autoscroll', 'a
 		});
 	}
 
-	function createExhibition() {
-		return $.ajax({
-			type: "POST",
-			url: "/collection?collectionType=Exhibition",
-			success: function () {
-				// Empty
-			}
-		});
-	}
-
 	function getExhibition(id) {
 		return $.ajax({
 			type: "GET",
@@ -74,13 +72,13 @@ define(['knockout', 'text!./exhibition-edit.html', 'jquery.ui', 'autoscroll', 'a
 		if (isTitleUpdate) {
 			jsonObject.descriptiveData = {
 				label: {
-					default: [ exhibition.title() ]
+					default: [exhibition.title()]
 				}
 			};
 		} else {
 			jsonObject.descriptiveData = {
 				description: {
-					default: [ exhibition.description() ]
+					default: [exhibition.description()]
 				}
 			};
 		}
@@ -128,10 +126,10 @@ define(['knockout', 'text!./exhibition-edit.html', 'jquery.ui', 'autoscroll', 'a
 		$.ajax({
 			url: "/collection/" + exhibitionId + "/moveRecord" + "?recordId=" + recordId + '&oldPosition=' + oldPosition + '&newPosition=' + newPosition,
 			method: 'put',
-			success: function(data) {
+			success: function (data) {
 				// Empty
 			},
-			error: function(result) {
+			error: function (result) {
 				// Empty
 			}
 		});
@@ -144,74 +142,135 @@ define(['knockout', 'text!./exhibition-edit.html', 'jquery.ui', 'autoscroll', 'a
 	var ExhibitionEditModel = function (params) {
 		var self = this;
 		self.route = params.route;
+		KnockoutElse.init([spec = {}]);
+		WITHApp.tabAction();
+		WITHApp.initTooltip();
 		self.checkLogged = function () {
-
-			if (isLogged() == false) {
-				window.location = '#login';
-				return;
+			if (localStorage.getItem('logged_in') != "true") {
+				window.location.href = "#login";
 			}
 		};
 
 		self.mapping = {
 			create: function (options) {
-		        //customize at the root level: add title and description observables, based on multiliteral
+				//customize at the root level: add title and description observables, based on multiliteral
 				//TODO: support multilinguality, have to be observable arrays of type [{lang: default, values: []}, ...]
 		        var record = options.data;
-		        var newRecord =  ko.mapping.fromJS({}, {});
-		        newRecord.dbId = ko.observable(record.dbId);
-		        var contextData= record.contextData;
-				if (contextData !== undefined)
-					newRecord.contextData = ko.mapping.fromJS(contextData, {});
+		        var newRecord =  ko.mapping.fromJS(record, {});
 		        newRecord.containsAudio = ko.pureComputed(function() {
 		        	if (newRecord.contextData == undefined || newRecord.contextData()[0].body.audioUrl == undefined)
 		        		return false;
 		        	else
 		        		return (newRecord.contextData()[0].body.audioUrl() !== '');
+
 				});
-		        newRecord.containsVideo = ko.pureComputed(function() {
-		        	if (newRecord.contextData == undefined || newRecord.contextData()[0].body.videoUrl == undefined)
-		        		return false;
-		        	else
-		        		return (newRecord.contextData()[0].body.videoUrl() !== '');
-		        	return result;
-				});
-				newRecord.containsText = ko.pureComputed(function() {
-					if (newRecord.contextData == undefined || newRecord.contextData()[0].body.text.default == undefined)
+				newRecord.containsVideo = ko.pureComputed(function () {
+					if (newRecord.contextData == undefined || newRecord.contextData()[0].body.videoUrl == undefined) {
 						return false;
-		        	else
-		        		return newRecord.contextData()[0].body.text.default() !== '';
+					} else {
+						return (newRecord.contextData()[0].body.videoUrl() !== '');
+					}
+					return result;
 				});
-				newRecord.media = ko.mapping.fromJS(record.media, {});
+				newRecord.containsVideoDescription = ko.pureComputed(function () {
+					if (newRecord.contextData == undefined || newRecord.contextData()[0].body.videoDescription == undefined) {
+						return false;
+					} else {
+						return (newRecord.contextData()[0].body.videoDescription() !== '');
+					}
+					return result;
+				});
+				newRecord.containsText = ko.pureComputed(function () {
+					if (newRecord.contextData == undefined || newRecord.contextData()[0].body.text.default == undefined) {
+						return false;
+					} else {
+						return newRecord.contextData()[0].body.text.default() !== '';
+					}
+				});
+				if (newRecord.contextData == undefined) {
+					contextData = ko.mapping.fromJS([{
+						"contextDataType": "ExhibitionData",
+						"target": {
+							"position": -1,
+							"collectionId": newRecord.dbId()
+						},
+						"body" : {
+							"audioUrl": "",
+							"text": {"default": ""},
+							"videoUrl": "",
+							"videoDescription": ""
+						}
+					}], {});
+					newRecord.contextData = contextData;
+				}
+				newRecord.embeddedVideoUrl = ko.pureComputed(function () {
+					if (newRecord.containsVideo()) {
+						var urlMatch = newRecord.contextData()[0].body.videoUrl().match(/youtube\.com.*(\?v=|\/embed\/)(.{11})/);
+						if (urlMatch !== null) {
+							var youtube_video_id = urlMatch.pop();
+							var embeddedVideoPath = 'https://www.youtube.com/embed/' + youtube_video_id;
+							return embeddedVideoPath;
+						}
+						else
+							return null;
+					}
+					else
+						return null;
+				});
 				newRecord.title = ko.mapping.fromJS(app.findByLang(record.descriptiveData.label), {});
 				var dbDescription = record.descriptiveData.description;
-		        if (dbDescription == undefined || dbDescription == null)
+		        if (dbDescription === undefined || dbDescription === null || dbDescription.default[0] === undefined || dbDescription.default[0] === "null")
 		        	newRecord.description = ko.observable("");
 		        else
 		        	newRecord.description = ko.observable(app.findByLang(dbDescription));
-				newRecord.provenance = ko.mapping.fromJS(record.provenance, {});
+		        var withUrl = newRecord.media()[0].Thumbnail.url();
+		        if (withUrl != "empty") {
+					if (withUrl == "")
+						newRecord.thumbnailUrl = ko.observable("img/content/thumb-empty.png");
+					else {
+						if (withUrl.indexOf("/media") == 0) {
+							newRecord.thumbnailUrl = ko.observable(window.location.origin + withUrl);
+						} else {
+							newRecord.thumbnailUrl = ko.observable(withUrl);
+						}
+					}
+				}
 		        return newRecord;
 		    }
 		}
-
+		
+		self.searchPage = 0;
 		self.checkLogged();
 		self.loading = ko.observable(false);
 		self.title = ko.observable('');
 		self.description = ko.observable('');
 		self.dbId = ko.observable();
-		self.creationMode = !params.hasOwnProperty('id');
 		self.loadingExhibitionItems = false;
 		self.loadingInitialItemsCount = 0;
 		var _removeItem = false;
 		var _startIndex = -1;
-		if (!self.creationMode) {
-			self.dbId(params.id);
-		}
+		self.dbId(params.id);
 		self.userSavedItemsArray = ko.mapping.fromJS([], {});  //holds the selected collections items
 		self.collectionItemsArray = ko.mapping.fromJS([], {}); //holds the exhibitions items
-
+		//self.exhibitionItem = ko.observable({});
+		self.itemText = ko.observable("");
+		self.itemVideoUrl = ko.observable("").extend({
+			required: true,
+			pattern: {
+				message: 'Not valid youtube video url.',
+				params: /youtube\.com.*(\?v=|\/embed\/)(.{11})/
+			}
+		});
+		self.itemPosition = ko.observable(0);
+		self.itemId = ko.observable("");
+		self.itemVideoDescription = ko.observable(undefined);
+		self.validationModel = ko.validatedObservable({
+			itemVideoUrl: self.itemVideoUrl
+		});
+		
 		var collections = [];
 		var promise = app.getAllUserCollections();
-		self.myCollections = ko.mapping.fromJS([]); //ko.observableArray([]); //holds all the collections
+		self.myCollections = ko.mapping.fromJS([]); //holds all the collections
 		$.when(promise).done(function (data) {
 			var collections = [];
 			if (data.hasOwnProperty('collectionsOrExhibitions')) {
@@ -222,7 +281,7 @@ define(['knockout', 'text!./exhibition-edit.html', 'jquery.ui', 'autoscroll', 'a
 			}));
 
 			//then initialise select
-			$('.selectpicker').selectpicker();
+			// $('.selectpicker').selectpicker();
 		});
 
 		var mappingExhibition = {
@@ -239,59 +298,30 @@ define(['knockout', 'text!./exhibition-edit.html', 'jquery.ui', 'autoscroll', 'a
 			'copy': ["media"]
 		};
 
-		if (self.creationMode) {
+		self.loadingExhibitionItems = true;
+		var promise = getExhibition(self.dbId());
+		$.when(promise).done(function (data) {
 			$('.outer').css("visibility", "visible");
-			var promiseCreateExhibtion = createExhibition();
-			$.when(promiseCreateExhibtion).done(function (data) {
-				ko.mapping.fromJS(data, mappingExhibition, self);
-				setUpSwitch(self);
-				self.title('');
-				self.description('');
+			ko.mapping.fromJS(data, mappingExhibition, self);
+			self.title(app.findByLang(data.descriptiveData.label));
+			self.description(app.findByLang(data.descriptiveData.description));
+			setUpSwitch(self);
+			$.ajax({
+				url: "/collection/" + self.dbId() + "/list?count="+exhibitionItemCount+"&start=0",
+				method: "get",
+				success: function (data) {
+					self.firstEntries = data.records;
+					self.loadingInitialItemsCount = data.entryCount;
+					ko.mapping.fromJS(self.firstEntries, self.mapping, self.collectionItemsArray);
+					self.loadingExhibitionItems = true;
+					WITHApp.initTooltip();
+					WITHApp.tabAction();
+				},
+				error: function (result) {
+					// Empty
+				}
 			});
-		} else {
-			self.loadingExhibitionItems = true;
-			var promise = getExhibition(self.dbId());
-			$.when(promise).done(function (data) {
-				$('.outer').css("visibility", "visible");
-				ko.mapping.fromJS(data, mappingExhibition, self);
-				self.title(app.findByLang(data.descriptiveData.label));
-				self.description(app.findByLang(data.descriptiveData.description));
-				setUpSwitch(self);
-
-				$.ajax({
-					url: "/collection/" + self.dbId() + "/list?count=5&start=0",
-					method: "get",
-					success: function (data) {
-						self.firstEntries = data.records;
-						self.loadingInitialItemsCount = data.entryCount;
-						ko.mapping.fromJS(self.firstEntries, self.mapping, self.collectionItemsArray);
-						self.loadingExhibitionItems = true;
-					},
-					error: function (result) {
-						// Empty
-					}
-				});
-
-
-// TODO: Update Code
-				// self.loadingInitialItemsCount = self.firstEntries.length;
-				// self.firstEntries.map(function (record) { //fix for now till service gets implemented
-				// 	record.additionalText = ko.observable('');
-				// 	record.videoUrl = ko.observable('');
-				// 	record.containsVideo = ko.observable(false);
-				// 	record.containsText = ko.observable(false);
-				// 	var exhibitionItemInfo = record.exhibitionRecord;
-				// 	if (exhibitionItemInfo !== undefined) {
-				// 		record.additionalText(exhibitionItemInfo.annotation);
-				// 		record.videoUrl(exhibitionItemInfo.videoUrl);
-				// 		record.containsVideo(!isEmpty(record.videoUrl()));
-				// 		record.containsText(!isEmpty(record.additionalText()));
-				// 	}
-				// });
-				// self.collectionItemsArray(self.firstEntries);
-				// self.loadingExhibitionItems = true;
-			});
-		}
+		});
 
 		self.selectedCollection = ko.observable();
 		self.currentItemSet = ko.observable(false);
@@ -299,11 +329,13 @@ define(['knockout', 'text!./exhibition-edit.html', 'jquery.ui', 'autoscroll', 'a
 		self.selectedCollection.subscribe(function (newCollection) {
 			// Load the first 20 records when loading a different collection
 			$.ajax({
-				url: "/collection/" + newCollection.dbId + "/list?count=20&start=0",
+				url: "/collection/" + newCollection.dbId + "/list?count="+collectionItemCount+"&start=0",
 				method: "get",
 				success: function (data) {
 					self.firstEntries = data.records;
 					ko.mapping.fromJS(self.firstEntries, self.mapping, self.userSavedItemsArray);
+					self.searchPage = 0;
+					WITHApp.initTooltip();
 					//self.userSavedItemsArray(data.records);
 				},
 				error: function (result) {
@@ -317,10 +349,10 @@ define(['knockout', 'text!./exhibition-edit.html', 'jquery.ui', 'autoscroll', 'a
 			}
 		});
 
-		showViewModel = function () {
+		/*showViewModel = function () {
 			console.log(ko.toJSON(self));
 			console.log(self.myCollections());
-		};
+		};*/
 
 		self.textfieldsLostFocus = function (isTitleUpdate) {
 			updateExhibition(self, isTitleUpdate);
@@ -336,25 +368,12 @@ define(['knockout', 'text!./exhibition-edit.html', 'jquery.ui', 'autoscroll', 'a
 			}
 		};
 
-		self.detailsEnabled = ko.observable(false);
-
-		self.enableDetails = function (data, event) {
-			self.currentItem(data);
-			self.detailsEnabled(true);
-			//fix hover
-			$(event.target).parent().addClass('box-Hover');
-		};
-
-		self.disableDetails = function (data, event) {
-			self.detailsEnabled(false);
-			$(event.target).parent().removeClass('box-Hover');
-		};
-
 		self.itemsLoaded = 0;
+
 		self.showNewItem = function (elem, index, record) {
 			$(elem).hide().fadeIn(500);
-			if ($(elem).hasClass('boxBasic boxItem')) { //it gets called for all elements rendered with the foreach
-				if (!self.creationMode && self.itemsLoaded < self.loadingInitialItemsCount) {
+			if ($(elem).hasClass('box fill')) { //it gets called for all elements rendered with the foreach
+				if (self.itemsLoaded < self.loadingInitialItemsCount) {
 					self.itemsLoaded++;
 					$(elem).find('#loadingIcon').fadeOut();
 					return;
@@ -378,7 +397,7 @@ define(['knockout', 'text!./exhibition-edit.html', 'jquery.ui', 'autoscroll', 'a
 		self.removeItem = function (elem, index, record) {
 			if (_bIsMoveOperation) {
 				_startIndex = index;	// If removeItem is executed before the showNewItem, save the startIndex for moving the record
-				if (_removeItem) { 	// If removeItem is executed after the showNewItem, remove the item
+				if (_removeItem) {		// If removeItem is executed after the showNewItem, remove the item
 					deleteItemFromExhibition(self.dbId(), record.dbId(), index);
 					_removeItem = false;
 				}
@@ -386,59 +405,172 @@ define(['knockout', 'text!./exhibition-edit.html', 'jquery.ui', 'autoscroll', 'a
 			$(elem).fadeOut(500);
 		};
 
-		self.showPopUpVideo = function (data, event) {
-			 var context = ko.contextFor(event.target);
-		    var index = context.$index();
-			editItem(data, self.dbId(), index, 'PopUpVideoMode');
-		};
-
-		self.showPopUpText = function (data, event) {
+		self.prepareForItemEdit = function (exhibitionItem, event) {
 			var context = ko.contextFor(event.target);
-		    var index = context.$index();
-			editItem(data, self.dbId(), index, 'PopUpTextMode');
+			var index = context.$index();
+			self.itemPosition(index);
+			self.itemText(exhibitionItem.contextData()[0].body.text.default());
+			self.itemVideoUrl(exhibitionItem.contextData()[0].body.videoUrl());
+			self.itemVideoDescription(exhibitionItem.contextData()[0].body.videoDescription());
+			self.itemId(exhibitionItem.dbId());
+			$( '.action' ).removeClass( 'active' );
+			$( '.action.editvideo' ).addClass( 'active' );
 		};
+		
+		self.editItem = function (editMode) {
+			if (self.itemVideoUrl() == "" || self.validationModel.isValid()) {
+				var itemEmbeddedVideoUrl = "";
+				var urlMatch = self.itemVideoUrl().match(/youtube\.com.*(\?v=|\/embed\/)(.{11})/);
+				if (urlMatch !== null) {
+					var youtube_video_id = urlMatch.pop();
+					itemEmbeddedVideoUrl = 'https://www.youtube.com/embed/' + youtube_video_id;	
+				}
+				var promise = self.updateRecord(self.itemId(), self.itemText(), itemEmbeddedVideoUrl, self.itemVideoDescription(), self.dbId(), self.itemPosition());
+				$.when(promise).done(function (data) {
+					if (editMode == "editText") {
+						self.collectionItemsArray()[self.itemPosition()].contextData()[0].body.text.default(self.itemText());
+					} else if (editMode == "editVideo") {
+						self.collectionItemsArray()[self.itemPosition()].contextData()[0].body.videoUrl(self.itemVideoUrl());
+						self.collectionItemsArray()[self.itemPosition()].contextData()[0].body.videoDescription(self.itemVideoDescription());
+					}
+					self.closeSideBar();
+				}).fail(function (data) {
+					//alert('text edit failed');
+					self.closeSideBar();
+				});
+			} else {
+				self.validationModel.errors.showAllMessages();
+			}	
+		};
+		
+		self.deleteVideo = function(exhibitionItem, event) {
+			var context = ko.contextFor(event.target);
+			var index = context.$index();
+			var promise = self.updateRecord(exhibitionItem.dbId(), self.itemText(), "", "", self.dbId(), index);
+			$.when(promise).done(function (data) {
+				self.collectionItemsArray()[index].contextData()[0].body.videoUrl("");
+				self.collectionItemsArray()[index].contextData()[0].body.videoDescription("");
+			});
+		}
+		
+		self.closeSideBar = function () {
+			self.itemPosition(-1);
+			self.itemText("");
+			self.itemVideoUrl("");
+			self.itemVideoDescription("");
+			self.itemId("");
+			//$('textarea').hide();
+			//$('.add').show();
+			$('.action').removeClass('active');
+		};
+		
+		self.updateRecord = function(dbId, text, videoUrl, videoDescription, colId, position) {
+			var jsonData = {};
+			jsonData = {
+				"contextDataType": "ExhibitionData",
+				"target": {
+					"collectionId": colId,
+					"position": position
+				},
+				"body" : {
+					"text": {"default": text},
+					"videoUrl": videoUrl,
+					"videoDescription": videoDescription
+				}
+			};
+			jsonData = JSON.stringify(jsonData);
+			return $.ajax({
+				"url": "/record/contextData	",
+				"method": "put",
+				"contentType": "application/json",
+				"data": jsonData,
+				"success": function (data) {
+				},
+				"error": function (result) {
+				}
+			});
+		}
 
-	    self.playExhibition = function() {
-	    	window.location.hash = '#exhibitionview/' + self.dbId();
-	    };
-
+		self.playExhibition = function () {
+			window.location.hash = '#exhibitionview/' + self.dbId();
+		};
+		
+		$("#searchBox").keyup(function(event){
+	        if (event.keyCode == 13) {
+	        	self.searchPage=1;
+	        	self.search();
+	        }
+	    });
+		
+		self.search = function() {
+			$.ajax({
+				"url": "/api/advancedsearch",
+				"method": "post",
+				"contentType": "application/json",
+				"data": JSON.stringify({
+					searchTerm: $("#searchBox").val(),
+					page: self.searchPage,
+					pageSize:20,
+				    source:["WITHin"],
+				    filters:[]
+				}),
+				"success": function(reply) {
+					if (reply.responses[0] !== undefined && reply.responses[0].items !== undefined) {
+						var records = reply.responses[0].items.culturalCHO;
+						if (self.searchPage > 1) {
+							$.each(records, function( index, value ) {
+								var exhibitionRecord = ko.mapping.fromJS(value, self.mapping);
+								self.userSavedItemsArray.push(exhibitionRecord);
+							});
+						}
+						else if (self.searchPage == 1) {
+							ko.mapping.fromJS(records, self.mapping, self.userSavedItemsArray);
+	
+						}
+					}
+				}
+			});
+		}
+		
 		//custom binding
 		var _draggedItem;
 		var _bIsMoveOperation = false;
+		
 		ko.bindingHandlers.drag = {
 			init: function (element, valueAccessor, allBindingsAccessor, viewModel, bindingContext) {
 				var dragElement = $(element);
 				var dragOptions = {
 					start: function (event, ui) {
-						$('#outer-bottom').css({
+						$('#collscroll').css({
 							"overflow": 'visible'
 						});
 						$('.bottom-box').removeClass("box-Hover");
+						
 						_draggedItem = ko.utils.unwrapObservable(valueAccessor().item);
 						_bIsMoveOperation = ko.utils.unwrapObservable(valueAccessor().move);
 						ui.helper.css({
 							"z-index": 500
 						});
-						if (_bIsMoveOperation) {
-							if (ui.helper.width() > 150) {
-								var newAspectHeight = 150 / ui.helper.width() * ui.helper.height();
+						//if (!_bIsMoveOperation) {
+							if (ui.helper.width() > 80) {
+								//var newAspectHeight = 80 / ui.helper.width() * ui.helper.height();
 								ui.helper.css({
-									"width": 150
+									"width": 80
 								});
 								ui.helper.css({
-									"height": newAspectHeight
+									"height": 80//newAspectHeight
 								});
 								ui.helper.css({
 									opacity: 0.8
 								});
 							}
-						}
+						//}
 					},
 					stop: function (event, ui) {
-						$("#outer-bottom").css({
+						$("#collscroll").css({
 							overflow: "scroll"
 						});
-						$("#outer-bottom").css({
+						$("#collscroll").css({
 							"overflow-y": "hidden"
 						});
 						//un comment below statement
@@ -446,19 +578,16 @@ define(['knockout', 'text!./exhibition-edit.html', 'jquery.ui', 'autoscroll', 'a
 						_draggedItem = undefined;
 					}
 				};
-				if (dragElement.hasClass('boxBasic boxItem')) { //if it is move operation
-					dragOptions.appendTo = $('.left');
+				if (dragElement.hasClass('box fill')) { //if item selected from exhibitions
+					//dragOptions.appendTo = $('.left');
 					dragOptions.helper = function () {
-
-						var $imageElementHelper = $(this).find('.itemImage').clone();
+						var $imageElementHelper = $(this).find('#itemImage').clone();
 						$imageElementHelper.css('margin', 0).css({
 							'padding-top': 0
 						});
-
 						//to fix the scroll issues remove it from div
 						return $imageElementHelper;
 					};
-
 					dragOptions.cursorAt = {
 						top: 0,
 						left: 75
@@ -482,46 +611,29 @@ define(['knockout', 'text!./exhibition-edit.html', 'jquery.ui', 'autoscroll', 'a
 					tolerance: "intersect",
 					over: function (event, ui) {
 						if (!_bIsMoveOperation) {
-							$(this).find('#droppable-Children').css({
+							/*$(this).find('#droppable-Children').css({
 								display: "block"
-							});
+							});*/
 							dropElement.animate({
 								width: "150px"
 							}, 200);
 						}
 					},
 					out: function (event, ui) {
-						$(this).find('#droppable-Children').css({
+						/*$(this).find('#droppable-Children').css({
 							display: "none"
-						});
+						});*/
 						dropElement.animate({
 							width: "60px"
 						}, 200);
 					},
 					drop: function (event, ui) {
 						var indexNewItem = ko.utils.unwrapObservable(valueAccessor().index);
-						var newItem = ko.mapping.fromJS({}, {});
-						newItem = _draggedItem;
+						var newItem = ko.mapping.fromJS(_draggedItem, self.mapping);
+						newItem.contextData()[0].target.position(indexNewItem);
 						var indexDraggedItem = self.collectionItemsArray.indexOf(_draggedItem);
 						_startIndex = indexDraggedItem;
-						if (_draggedItem.contextData == undefined) {
-							contextData = ko.mapping.fromJS([{
-								"contextDataType": "ExhibitionData",
-								"target": {
-									"collectionId": self.dbId(),
-									"position": indexNewItem
-								},
-								"body" : {
-									"audioUrl": "",
-									"text": {"default": ""},
-									"videoUrl": ""
-								}
-							}], {});
-							newItem.contextData = contextData;
-						}
-						else
-							newItem.contextData()[0].target.position(indexNewItem);
-						//dont do anything if it is moved to its direct left or right dashed box
+						//don't do anything if it is moved to its direct left or right dashed box
 						if (_bIsMoveOperation) {// moved from exhibition itself
 							if (indexDraggedItem == indexNewItem || (indexDraggedItem + 1) == indexNewItem) {
 								_draggedItem = undefined;
@@ -531,25 +643,25 @@ define(['knockout', 'text!./exhibition-edit.html', 'jquery.ui', 'autoscroll', 'a
 						dropElement.animate({
 							width: "60px"
 						}, 200);
-						dropElement.find('#droppable-Children').css({
+						/*dropElement.find('#droppable-Children').css({
 							display: "none"
-						});
+						});*/
 						if (_bIsMoveOperation) {
 							_removeItem = false;
 							self.collectionItemsArray.splice(indexDraggedItem, 1);
 						}
 						self.collectionItemsArray.splice(indexNewItem, 0, newItem);
 						_draggedItem = undefined;
+						WITHApp.initTooltip();
+						WITHApp.tabAction();
 					}
 				};
 				dropElement.droppable(dropOptions);
 			}
 		};
 
-
 		ko.bindingHandlers.hscroll = {
 			updating: true,
-
 			init: function (element, valueAccessor, allBindingsAccessor) {
 				var self = this;
 				self.updating = true;
@@ -559,16 +671,14 @@ define(['knockout', 'text!./exhibition-edit.html', 'jquery.ui', 'autoscroll', 'a
 					self.updating = false;
 				});
 			},
-
 			update: function (element, valueAccessor, allBindingsAccessor) {
 				var props = allBindingsAccessor().scrollOptions;
 				var offset = props.offset ? props.offset : "0";
 				var loadFunc = props.loadFunc;
 				var load = ko.utils.unwrapObservable(valueAccessor());
 				var self = this;
-				var parentContainer = element.parentElement;
 				if (load) {
-					$(parentContainer).on("scroll.ko.scrollHandler", function () {
+					$(element).on("scroll.ko.scrollHandler", function () {
 						var parentContainer = element.parentElement;
 						//console.log('Is scrolling');
 						//console.log('left: ' + parentContainer.scrollLeft + ' offset: ' + parentContainer.offsetWidth  + 'scrollview width' + parentContainer.scrollWidth);
@@ -588,6 +698,45 @@ define(['knockout', 'text!./exhibition-edit.html', 'jquery.ui', 'autoscroll', 'a
 				}
 			}
 		};
+		
+		ko.bindingHandlers.hscroll2 = {
+				updating: true,
+				init: function (element, valueAccessor, allBindingsAccessor) {
+					var self = this;
+					self.updating = true;
+					var parentContainer = element.parentElement;
+					ko.utils.domNodeDisposal.addDisposeCallback(element, function () {
+						$(parentContainer).off("scroll.ko.scrollHandler");
+						self.updating = false;
+					});
+				},
+				update: function (element, valueAccessor, allBindingsAccessor) {
+					var props = allBindingsAccessor().scrollOptions;
+					var offset = props.offset ? props.offset : "0";
+					var loadFunc = props.loadFunc;
+					var load = ko.utils.unwrapObservable(valueAccessor());
+					var self = this;
+					if (load) {
+						$(element).on("scroll.ko.scrollHandler", function () {
+							var parentContainer = element;
+							//console.log('Is scrolling');
+							//console.log('left: ' + parentContainer.scrollLeft + ' offset: ' + parentContainer.offsetWidth  + 'scrollview width' + parentContainer.scrollWidth);
+							if (parentContainer.scrollWidth - (parentContainer.scrollLeft + parentContainer.offsetWidth) < 150) {
+								if (self.updating) {
+									loadFunc();
+									self.updating = false;
+								}
+							} else {
+								self.updating = true;
+							}
+						});
+					} else {
+						element.style.display = "none";
+						$(parentContainer).off("scroll.ko.scrollHandler");
+						self.updating = false;
+					}
+				}
+			};
 
 		self.loadNextCollection = function () {
 			self.moreItems(false);
@@ -598,93 +747,103 @@ define(['knockout', 'text!./exhibition-edit.html', 'jquery.ui', 'autoscroll', 'a
 		};
 
 		self.moreItems = function (isForExhibition) {
-			if (self.loading === true) {
-				setTimeout(self.moreItems(), 300);
-			}
-			if (self.loading() === false) {
-				self.loading(true);
-				var offset;
-				var collectionID;
-				if (isForExhibition) {
-					offset = self.collectionItemsArray().length;
-					collectionID = self.dbId();
-				} else {
-					offset = self.userSavedItemsArray().length;
-					collectionID = self.selectedCollection().dbId;
+			if (self.searchPage > 0) {//items in collectionItemsArray are search results
+				if (!isForExhibition) {
+					self.searchPage++;
+					self.search();
 				}
-				$.ajax({
-					"url": "/collection/" + collectionID + "/list?count=20&start=" + offset,
-					"method": "get",
-					"contentType": "application/json",
-					"success": function (data) {
-						console.log(data.itemCount);
-						if (isForExhibition) {
-							data.records.map(function (record) { //fix for now till service gets implemented
-								record.additionalText = ko.observable('');
-								record.videoUrl = ko.observable('');
-								record.containsVideo = ko.observable(false);
-								record.containsText = ko.observable(false);
-								var exhibitionItemInfo = record.exhibitionRecord;
-								if (exhibitionItemInfo !== undefined) {
-									record.additionalText(exhibitionItemInfo.annotation);
-									record.videoUrl(exhibitionItemInfo.videoUrl);
-									record.containsVideo(!isEmpty(record.videoUrl()));
-									record.containsText(!isEmpty(record.additionalText()));
-								}
-							});
-							self.loadingInitialItemsCount = self.loadingInitialItemsCount + data.records.length;
-							self.collectionItemsArray.push.apply(self.collectionItemsArray, data.records);
-						} else {
-							self.userSavedItemsArray.push.apply(self.userSavedItemsArray, data.records);
-						}
-						self.loading(false);
-					},
-					"error": function (result) {
-						self.loading(false);
+			}
+			else {
+				if (isForExhibition)
+					count = exhibitionItemCount;
+				else
+					count = collectionItemCount;
+				if (self.loading === true) {
+					setTimeout(self.moreItems(), 300);
+				}
+				if (self.loading() === false) {
+					self.loading(true);
+					var offset;
+					var collectionID;
+					if (isForExhibition) {
+						offset = self.collectionItemsArray().length;
+						collectionID = self.dbId();
+					} else {
+						offset = self.userSavedItemsArray().length;
+						collectionID = self.selectedCollection().dbId;
 					}
-				});
+					$.ajax({
+						"url": "/collection/" + collectionID + "/list?count="+count+"&start=" + offset,
+						"method": "get",
+						"contentType": "application/json",
+						"success": function (data) {
+							if (isForExhibition) {
+								self.loadingInitialItemsCount = self.loadingInitialItemsCount + data.records.length;
+								$.each(data.records, function( index, value ) {
+									var exhibitionRecord = ko.mapping.fromJS(value, self.mapping);
+									self.collectionItemsArray.push(exhibitionRecord);
+								});
+							} else {
+								$.each(data.records, function( index, value ) {
+									var exhibitionRecord = ko.mapping.fromJS(value, self.mapping);
+									self.userSavedItemsArray.push(exhibitionRecord);
+								});
+							}
+							self.loading(false);
+							WITHApp.initTooltip();
+							WITHApp.tabAction();
+						},
+						"error": function (result) {
+							self.loading(false);
+						}
+					});
+				}
 			}
 		};
-		//----knockout solution----//
-
-		//for the side scrolling
-		$('.left').droppable({
+		
+		
+		$('.leftscr').droppable({
 			tolerance: "touch",
 			over: function (event, ui) {
-				$('.outer').autoscroll({
+				console.log("left");
+				$('.scroll').autoscroll({
 					direction: 'left',
 					step: 1000,
 					scroll: true
 				});
 			},
 			out: function (event, ui) {
-				$('.outer').autoscroll('destroy');
+				$('.scroll').autoscroll('destroy');
 			}
 		});
 
-		$('.right').droppable({
+		$('.rightscr').droppable({
 			tolerance: "touch",
 			over: function (event, ui) {
-				$('.outer').autoscroll({
+				console.log("left");
+				$('.scroll').autoscroll({
 					direction: 'right',
 					step: 1000,
 					scroll: true
 				});
 			},
 			out: function (event, ui) {
-				$('.outer').autoscroll('destroy');
+				$('.scroll').autoscroll('destroy');
 			}
 		});
 
 		//fix for hover issue
 		self.showXbutton = function (data, event) {
-			$('.bottom-box').removeClass('box-Hover');
+			$('#bottom-box').removeClass('box-Hover');
 			$(event.target).addClass('box-Hover');
 		};
 
 		//hide the nav bar
 		$('#bottomBar').fadeOut(500);
+		
 	};
+	
+	
 
 	return {
 		viewModel: ExhibitionEditModel,

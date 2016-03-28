@@ -77,7 +77,7 @@ public class DPLASpaceSource extends ISpaceSource {
 
 	private Function<List<String>, List<Pair<String>>> qfwriterYEAR() {
 		Function<String, String> function = (String s) -> {
-			return "%22" + Utils.spacesFormatQuery(s, "%20") + "%22";
+			return "\"" + s+ "\"";
 		};
 		return new Function<List<String>, List<Pair<String>>>() {
 			@Override
@@ -104,7 +104,7 @@ public class DPLASpaceSource extends ISpaceSource {
 
 	private Function<List<String>, Pair<String>> fwriter(String parameter) {
 		Function<String, String> function = (String s) -> {
-			return "%22" + Utils.spacesFormatQuery(s, "%20") + "%22";
+			return "\"" + s + "\"";
 		};
 		return new Function<List<String>, Pair<String>>() {
 			@Override
@@ -129,7 +129,7 @@ public class DPLASpaceSource extends ISpaceSource {
 		CommonFilterLogic contributor = new CommonFilterLogic(CommonFilters.CONTRIBUTOR);
 		if (checkFilters(q)) {
 			try {
-				response = HttpConnector.getURLContent(httpQuery);
+				response = getHttpConnector().getURLContent(httpQuery);
 				// System.out.println(response.toString());
 				JsonNode docs = response.path("docs");
 				res.totalCount = Utils.readIntAttr(response, "count", true);
@@ -189,7 +189,7 @@ public class DPLASpaceSource extends ISpaceSource {
 		ArrayList<RecordJSONMetadata> jsonMetadata = new ArrayList<RecordJSONMetadata>();
 		JsonNode response;
 		try {
-			response = HttpConnector.getURLContent("http://api.dp.la/v2/items?id=" + recordId + "&api_key=" + apiKey);
+			response = getHttpConnector().getURLContent("http://api.dp.la/v2/items?id=" + recordId + "&api_key=" + apiKey);
 			JsonNode record = response.get("docs").get(0);
 			if (record != null) {
 				jsonMetadata.add(new RecordJSONMetadata(Format.JSONLD_DPLA, record.toString()));

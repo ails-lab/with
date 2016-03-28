@@ -1,0 +1,54 @@
+<div class="md-modal-coll md-effect-1" id="modal-2">
+			<div class="md-content-coll">
+			   <button type="button" class="close" aria-label="Close" data-bind="event: {click: close}"><span aria-hidden="true">&times;</span></button>
+				<h3>Create a collection</h3>
+					<hr class="faded"/>
+			      <form data-bind="submit: save">
+					  <div class="col-md-12">
+					  <div class="form-group" data-bind="validationElement: collname">
+					    <div class="spec">
+					      <div class="itemlabel">Name
+					      </div>
+					       <div class="value">
+					      <input type="text" name="collname" data-bind="value: collname" class="form-control input-sm xxs" id="collname" placeholder="Like 'Paintings' or 'Art project'" >
+					        </div>
+					      </div>
+					    </div> 
+					       <div class="form-group">
+					      <div class="spec">
+					      <div class="itemlabel">Is it public?
+					      </div>
+					     <div class="btn-group btn-toggle" id="publiccoll"> 
+						    <button class="btn btn-xs btn-default xxs" data-bind="event: {click:privateToggle}" data-value="true">Yes</button>
+						    <button class="btn btn-xs btn-primary active xxs" data-bind="event: {click:privateToggle}" data-value="false">No</button>
+						  </div>
+					    </div>
+					    </div>
+					 
+					 <div class="form-group">
+					   <div class="spec">
+					      <div class="itemlabel">More details
+					      </div>
+					      <div class="value">
+					      
+					      <textarea id="details" name="details" data-bind="value: description" class="form-control input-sm xxs" ></textarea>
+					      </div>
+					    </div>
+					    </div>
+					    
+					    <div class="spec">
+					     <div class="col-md-4"><p>
+					       <button type="button" class="btn btn-default btn-xs xxs" data-bind="event: {click: close}">Cancel</button></p>
+					     </div>
+					      <div class="col-md-4 col-md-offset-3"><p>
+					        <button type="submit" class="btn btn-primary btn-xs xxs">Create Collection</button></p>
+					      </div>
+					  </div>			  
+					  </div>
+				 </form>	
+				 	
+			</div>
+</div>
+			
+		
+<div class="md-overlay-coll" data-bind="event: {click: close}"></div><!-- the overlay element -->

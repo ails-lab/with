@@ -71,6 +71,13 @@ public class AutocompleteController extends Controller {
 			            response.append(line);
 			        }
 			        rd.close();
+			        /*
+			         * Hack-ish FIX. The problem is that the JSON response from
+			         * the request to Europeana is not well-formatted or is empty.
+			         * Enrique need to check that.
+			         */
+			        if(response.toString().equals(""))
+			        	response.append("{ \"success\": false }");
 			        //transform response into standard json
 			        AutocompleteResponse standardResponse = src.autocompleteResponse(response.toString());;
 			        return standardResponse;

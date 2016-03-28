@@ -212,8 +212,8 @@ public class DAO<E> extends BasicDAO<E, ObjectId> {
 						.getClass().getMethod("getDbId", new Class<?>[0])
 						.invoke(doc), (Map<String, Object>) doc.getClass()
 						.getMethod("transform", new Class<?>[0]).invoke(doc));
-				return dbKey;
 			}
+			return dbKey;
 		} catch (Exception e) {
 			log.error("Cannot save " + doc.getClass().getSimpleName(), e);
 		}
@@ -398,7 +398,8 @@ public class DAO<E> extends BasicDAO<E, ObjectId> {
 	}
 
 	public boolean existsFieldWithValue(String field, Object value) {
-		Query<E> q = this.createQuery().disableValidation().field(field).equal(value).limit(1);
+		Query<E> q = this.createQuery().disableValidation().field(field)
+				.equal(value).limit(1);
 		return (this.find(q).asList().size() == 0 ? false : true);
 	}
 
@@ -458,6 +459,8 @@ public class DAO<E> extends BasicDAO<E, ObjectId> {
 			JsonNode fieldValue = node.get(fieldName);
 			String newFieldName = parentField.isEmpty() ? fieldName
 					: parentField + "." + fieldName;
+			if (fieldValue.isNull())
+				continue;
 			if (fieldValue.isObject()) {
 				updateFields(newFieldName, fieldValue, updateOps);
 			} else {
@@ -469,7 +472,7 @@ public class DAO<E> extends BasicDAO<E, ObjectId> {
 						else
 							values[i] = fieldValue.get(i).asText();
 					}
-					if (values[0] != null)
+					if ((values.length > 0) && (values[0] != null) )
 						updateOps.disableValidation().set(newFieldName, values);
 				} else {
 					updateOps.disableValidation().set(newFieldName,

@@ -18,8 +18,6 @@ package controllers;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -27,8 +25,17 @@ import java.util.Set;
 
 import javax.validation.ConstraintViolation;
 
+import org.bson.types.ObjectId;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+
+import controllers.parameterTypes.MyPlayList;
+import controllers.parameterTypes.StringTuple;
+import db.DB;
 import model.annotations.ContextData;
-import model.annotations.ExhibitionData;
+import model.basicDataTypes.CollectionInfo;
 import model.basicDataTypes.Language;
 import model.basicDataTypes.MultiLiteral;
 import model.basicDataTypes.WithAccess;
@@ -46,27 +53,23 @@ import model.usersAndGroups.Project;
 import model.usersAndGroups.User;
 import model.usersAndGroups.UserGroup;
 import model.usersAndGroups.UserOrGroup;
-
-import org.bson.types.ObjectId;
-
 import play.Logger;
 import play.Logger.ALogger;
 import play.data.validation.Validation;
+import play.libs.F;
+import play.libs.F.Function0;
 import play.libs.F.Option;
+import play.libs.F.Promise;
 import play.libs.Json;
 import play.mvc.Result;
+import sources.EuropeanaCollectionSpaceSource;
+import sources.core.CommonQuery;
+import sources.core.SourceResponse;
+import sources.core.Utils;
 import utils.AccessManager;
+import utils.AccessManager.Action;
 import utils.Locks;
 import utils.Tuple;
-import utils.AccessManager.Action;
-
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-
-import controllers.parameterTypes.MyPlayList;
-import controllers.parameterTypes.StringTuple;
-import db.DB;
 
 /**
  * @author mariaral
@@ -79,6 +82,107 @@ public class CollectionObjectController extends WithResourceController {
 			.of(CollectionObjectController.class);
 
 	/**
+	 * creates a new collection corresponding to a collection in Europeana and
+	 * collects all its items.
+	 *
+	 * @param id
+	 * @return
+	 */
+	public static Result createAndFillEuropeanaCollection(String id) {
+
+		CollectionObject collection = new CollectionObject();
+		collection.getDescriptiveData()
+				.setLabel(new MultiLiteral(id).fillDEF());
+		ObjectNode resultInfo = Json.newObject();
+		ObjectId creatorDbId = new ObjectId(session().get("user"));
+		boolean success = internalAddCollection(collection,
+				CollectionType.SimpleCollection, creatorDbId, resultInfo);
+		if (!success)
+			return badRequest(resultInfo);
+
+		CommonQuery q = new CommonQuery();
+		q.page = "1";
+		q.pageSize = "20";
+		EuropeanaCollectionSpaceSource src = new EuropeanaCollectionSpaceSource(
+				id);
+
+		q.page = 1 + "";
+		SourceResponse result = src.getAllResults(q);
+		int total = result.totalCount;
+		for (WithResource<?, ?> item : result.items.getCulturalCHO()) {
+			WithResourceController.internalAddRecordToCollection(collection
+					.getDbId().toString(), (RecordResource) item, F.Option
+					.None(), resultInfo);
+		}
+		;
+
+		Promise<Integer> promiseOfInt = Promise
+				.promise(new Function0<Integer>() {
+					public Integer apply() {
+						SourceResponse result;
+						System.out.println("more pages?");
+						int page = 1;
+						int pageSize = 20;
+						while ((page * pageSize) < total) {
+							page++;
+							q.page = page + "";
+							result = src.getAllResults(q);
+							for (WithResource<?, ?> item : result.items
+									.getCulturalCHO()) {
+								WithResourceController
+										.internalAddRecordToCollection(
+												collection.getDbId().toString(),
+												(RecordResource) item,
+												F.Option.None(), resultInfo);
+							}
+							;
+							System.out.println("more pages? " + page + " of "
+									+ result.totalCount);
+						}
+						System.out.println("Done? " + page);
+						return 0;
+					}
+				});
+
+		if (resultInfo.has("error"))
+			return badRequest(resultInfo);
+		return ok(resultInfo);
+	}
+
+	public static Result sortCollectionObject(String collectionId) {
+		ObjectNode result = Json.newObject();
+		try {
+			ObjectId collectionDbId = new ObjectId(collectionId);
+			int entryCount = DB
+					.getCollectionObjectDAO()
+					.getById(collectionDbId,
+							Arrays.asList("administrative.entryCount"))
+					.getAdministrative().getEntryCount();
+			Logger.info("Sorting collection "+collectionId);
+			List<RecordResource> records = DB.getRecordResourceDAO()
+					.getByCollectionBetweenPositions(collectionDbId, 0,
+							Math.min(entryCount, 1000));
+			RecordResource<?>[] array = records.toArray(new RecordResource<?>[]{});
+			Arrays.sort(array,Utils.compareThumbs);
+			Logger.info("Items sorted based on image quality");
+			for (int i = 0, pos = 0; i < array.length; i++) {
+				RecordResource<?> recordResource = array[i];
+				for (CollectionInfo ci : recordResource.getCollectedIn()) {
+					if (ci.getCollectionId().equals(collectionDbId)) {
+						ci.setPosition(pos++);
+					}
+				}
+				DB.getRecordResourceDAO().makePermanent(recordResource);
+				Logger.info(pos +"th item was updated");
+			}
+			return ok();
+		} catch (Exception e) {
+			result.put("error", e.getMessage());
+			return internalServerError(result);
+		}
+	}
+
+	/**
 	 * Creates a new Collection from the JSON body
 	 *
 	 * @param collectionType
@@ -86,10 +190,16 @@ public class CollectionObjectController extends WithResourceController {
 	 *            {SimpleCollection, Exhibition }
 	 * @return the newly created collection
 	 */
-	public static Result createCollectionObject(String collectionType) {
+	public static Result createCollectionObject() {
 		ObjectNode error = Json.newObject();
 		JsonNode json = request().body().asJson();
-		CollectionType colType = CollectionType.valueOf(collectionType);
+		CollectionType colType = null;
+		JsonNode adm = json.get("administrative");
+		if (adm != null) {
+			JsonNode ct = adm.get("collectionType");
+			if (ct != null)
+				colType = CollectionType.valueOf(ct.asText());
+		}
 		try {
 			if ((colType == null) && (json == null)) {
 				error.put("error", "Invalid JSON");
@@ -100,61 +210,12 @@ public class CollectionObjectController extends WithResourceController {
 				return forbidden(error);
 			}
 			ObjectId creatorDbId = new ObjectId(session().get("user"));
-			CollectionObject collection = new CollectionObject();
-			if (colType.equals(CollectionType.Exhibition)) {
-				collection.getDescriptiveData().setLabel(
-						createExhibitionDummyTitle());
-			} else {
-				collection = Json.fromJson(json, CollectionObject.class);
-				if (collection.getDescriptiveData().getLabel() == null) {
-					error.put("error", "Missing collection title");
-					return badRequest(error);
-				}
-				if (collection.getDescriptiveData().getLabel().isEmpty()) {
-					error.put("error", "Missing collection title");
-					return badRequest(error);
-				}
-				if (DB.getCollectionObjectDAO().existsForOwnerAndLabel(
-						creatorDbId,
-						null,
-						collection.getDescriptiveData().getLabel()
-								.get(Language.DEFAULT))) {
-					error.put("error", "Not unique collection title");
-					return badRequest(error);
-				}
-			}
-			Set<ConstraintViolation<CollectionObject>> violations = Validation
-					.getValidator().validate(collection);
-			if (!violations.isEmpty()) {
-				ArrayNode properties = Json.newObject().arrayNode();
-				for (ConstraintViolation<CollectionObject> cv : violations) {
-					properties.add(Json.parse("{\"" + cv.getPropertyPath()
-							+ "\":\"" + cv.getMessage() + "\"}"));
-				}
-				error.put("error", properties);
+			CollectionObject collection = Json.fromJson(json,
+					CollectionObject.class);
+			boolean success = internalAddCollection(collection, colType,
+					creatorDbId, error);
+			if (!success)
 				return badRequest(error);
-			}
-			// Fill with all the administrative metadata
-			collection.getAdministrative().setCollectionType(colType);
-			collection.setResourceType(WithResourceType.CollectionObject);
-			collection.getAdministrative().setWithCreator(creatorDbId);
-			collection.getAdministrative().setCreated(new Date());
-			collection.getAdministrative().setLastModified(new Date());
-			if (collection.getAdministrative() instanceof CollectionAdmin) {
-				collection.getAdministrative().setEntryCount(0);
-			}
-			DB.getCollectionObjectDAO().makePermanent(collection);
-			DB.getCollectionObjectDAO().updateWithURI(collection.getDbId(),
-					"/collection/" + collection.getDbId());
-
-			/*
-			 * index collection BiFunction<ObjectId, Map<String, Object>,
-			 * IndexResponse> indexCollection = (ObjectId colId, Map<String,
-			 * Object> doc) -> { return
-			 * ElasticIndexer.index(Elastic.typeCollection, colId, doc); };
-			 * ParallelAPICall.createPromise(indexCollection,
-			 * collection.getDbId(), collection.transformCO());
-			 */
 			return ok(Json.toJson(collectionWithMyAccessData(
 					collection,
 					AccessManager.effectiveUserIds(session().get(
@@ -163,6 +224,50 @@ public class CollectionObjectController extends WithResourceController {
 			error.put("error", e.getMessage());
 			return internalServerError(error);
 		}
+	}
+
+	private static boolean internalAddCollection(CollectionObject collection,
+			CollectionType colType, ObjectId creatorDbId, ObjectNode error) {
+		if (collection.getDescriptiveData().getLabel() == null) {
+			error.put("error", "Missing collection title");
+			return false;
+		}
+		if (collection.getDescriptiveData().getLabel().isEmpty()) {
+			error.put("error", "Missing collection title");
+			return false;
+		}
+		if (DB.getCollectionObjectDAO().existsForOwnerAndLabel(
+				creatorDbId,
+				null,
+				collection.getDescriptiveData().getLabel()
+						.get(Language.DEFAULT))) {
+			error.put("error", "Not unique collection title");
+			return false;
+		}
+		Set<ConstraintViolation<CollectionObject>> violations = Validation
+				.getValidator().validate(collection);
+		if (!violations.isEmpty()) {
+			ArrayNode properties = Json.newObject().arrayNode();
+			for (ConstraintViolation<CollectionObject> cv : violations) {
+				properties.add(Json.parse("{\"" + cv.getPropertyPath()
+						+ "\":\"" + cv.getMessage() + "\"}"));
+			}
+			error.put("error", properties);
+			return false;
+		}
+		// Fill with all the administrative metadata
+		collection.getAdministrative().setCollectionType(colType);
+		collection.setResourceType(WithResourceType.CollectionObject);
+		collection.getAdministrative().setWithCreator(creatorDbId);
+		collection.getAdministrative().setCreated(new Date());
+		collection.getAdministrative().setLastModified(new Date());
+		if (collection.getAdministrative() instanceof CollectionAdmin) {
+			collection.getAdministrative().setEntryCount(0);
+		}
+		DB.getCollectionObjectDAO().makePermanent(collection);
+		DB.getCollectionObjectDAO().updateWithURI(collection.getDbId(),
+				"/collection/" + collection.getDbId());
+		return true;
 	}
 
 	/* Find a unique dummy title for the user exhibition */
@@ -270,7 +375,7 @@ public class CollectionObjectController extends WithResourceController {
 			CollectionObject collectionChanges = Json.fromJson(json,
 					CollectionObject.class);
 			ObjectId creatorDbId = new ObjectId(session().get("user"));
-			if (collectionChanges.getDescriptiveData().getLabel() != null
+			if ((collectionChanges.getDescriptiveData().getLabel() != null)
 					&& DB.getCollectionObjectDAO().existsOtherForOwnerAndLabel(
 							creatorDbId,
 							null,
@@ -701,18 +806,20 @@ public class CollectionObjectController extends WithResourceController {
 				new ObjectId(collectionId), retrievedFields);
 		WithAccess access = collection.getAdministrative().getAccess();
 		for (AccessEntry ae : access.getAcl()) {
-			ObjectId userId = ae.getUser();
-			User user = DB.getUserDAO().getById(userId, null);
-			Access accessRights = ae.getLevel();
-			if (user != null) {
-				result.add(userOrGroupJson(user, accessRights));
-			} else {
-				UserGroup usergroup = DB.getUserGroupDAO().get(userId);
-				if (usergroup != null)
-					result.add(userOrGroupJson(usergroup, accessRights));
-				else
-					return internalServerError("User with id " + userId
-							+ " cannot be retrieved from db");
+			if(ae.getLevel().ordinal() > 0) {
+				ObjectId userId = ae.getUser();
+				User user = DB.getUserDAO().getById(userId, null);
+				Access accessRights = ae.getLevel();
+				if (user != null) {
+					result.add(userOrGroupJson(user, accessRights));
+				} else {
+					UserGroup usergroup = DB.getUserGroupDAO().get(userId);
+					if (usergroup != null)
+						result.add(userOrGroupJson(usergroup, accessRights));
+					else
+						return internalServerError("User with id " + userId
+								+ " cannot be retrieved from db");
+				}
 			}
 		}
 		return ok(result);

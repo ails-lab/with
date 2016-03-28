@@ -1,0 +1,11 @@
+{
+  "name": "Packages for WITH",
+  "version": "1.0",
+  "dependencies": {
+    "jquery": "latest",
+    "modernizr": "latest",
+    "bootstrap": "latest",
+    "jquery.nicescroll": "nicescroll#~3.6.0",
+    "components-font-awesome": "https://github.com/components/font-awesome.git#~4.4.0"
+  }
+}

@@ -27,7 +27,7 @@ libraryDependencies ++= Seq(
  "commons-validator" % "commons-validator" % "1.4.0",
  "org.jsoup" % "jsoup" % "1.8.3",
  "com.optimaize.languagedetector" % "language-detector" % "0.4",
- "org.apache.httpcomponents" % "httpclient" % "4.3.1",
+ "org.apache.httpcomponents" % "httpclient" % "4.5.2",
  "org.apache.httpcomponents" % "httpasyncclient" % "4.1.1",
   "org.apache.httpcomponents" % "httpmime" % "4.3.1",
   "org.elasticsearch" % "elasticsearch" % "1.5.1",

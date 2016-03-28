@@ -1,0 +1,10 @@
+{
+    "curly": true,
+    "eqeqeq": false,
+    "eqnull": false,
+    "expr": true,
+    "noarg": true,
+    "unused": false,
+	"sub": true,
+	"-W041": false
+}

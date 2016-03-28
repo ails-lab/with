@@ -16,6 +16,7 @@
 
 package model;
 
+import utils.Deserializer;
 import utils.MediaTypeConverter;
 import utils.Serializer;
 
@@ -24,6 +25,7 @@ import org.mongodb.morphia.annotations.Entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.google.common.net.MediaType;
 
@@ -50,8 +52,8 @@ public class EmbeddedMediaObject {
 	}
 
 	/**
-	 * the text used to represent the value is defined by the getName() property 
-	 * in order to give support to values like "3D" which is not a valid id for an 
+	 * the text used to represent the value is defined by the getName() property
+	 * in order to give support to values like "3D" which is not a valid id for an
 	 * Enum value.
 	 * @author Enrique Matos Alfonso (gardero@gmail.com)
 	 *
@@ -63,15 +65,15 @@ public class EmbeddedMediaObject {
 				return "3D";
 			}
 		}, OTHER{
-			
+
 			@Override
 			public boolean isKnown() {
 				return false;
 			}
-			
+
 
 		};
-		
+
 		public static WithMediaType getType(String string) {
 			for (WithMediaType v : WithMediaType.values()) {
 				if (v.toString().equals(string) || v.getName().equals(string))
@@ -83,26 +85,32 @@ public class EmbeddedMediaObject {
 		public boolean isKnown() {
 			return true;
 		}
-		
+
 		public String getName() {
 			return this.name();
 		}
-		
+
 	}
 
 	// this needs work
 	public static enum WithMediaRights {
-		Public("Attribution Alone"), Restricted("Restricted"), Permission(
-				"Permission"), Modify("Allow re-use and modifications"), Commercial(
-				"Allow re-use for commercial"), Creative_Commercial_Modify(
-				"use for commercial purposes modify, adapt, or build upon"), Creative_Not_Commercial(
-				"NOT Comercial"), Creative_Not_Modify("NOT Modify"), Creative_Not_Commercial_Modify(
-				"not modify, adapt, or build upon, not for commercial purposes"), Creative_SA(
-				"share alike"), Creative_BY("use by attribution"), Creative(
-				"Allow re-use"), RR("Rights Reserved"), RRPA(
-				"Rights Reserved - Paid Access"), RRRA(
-				"Rights Reserved - Restricted Access"), RRFA(
-				"Rights Reserved - Free Access"), UNKNOWN("Unknown");
+		Public("Attribution Alone"),
+		Restricted("Restricted"),
+		Permission("Permission"),
+		Modify("Allow re-use and modifications"),
+		Commercial("Allow re-use for commercial"),
+		Creative_Commercial_Modify("use for commercial purposes modify, adapt, or build upon"),
+		Creative_Not_Commercial("NOT Comercial"),
+		Creative_Not_Modify("NOT Modify"),
+		Creative_Not_Commercial_Modify("not modify, adapt, or build upon, not for commercial purposes"),
+		Creative_SA("share alike"),
+		Creative_BY("use by attribution"),
+		Creative("Allow re-use"),
+		RR("Rights Reserved"),
+		RRPA("Rights Reserved - Paid Access"),
+		RRRA("Rights Reserved - Restricted Access"),
+		RRFA("Rights Reserved - Free Access"),
+		UNKNOWN("Unknown");
 
 		private final String text;
 
@@ -132,16 +140,9 @@ public class EmbeddedMediaObject {
 	private WithMediaRights withRights;
 
 	// the media object URL
-	private String url="";
+	private String url= "empty";
 
 	private MediaVersion mediaVersion;
-
-	/*
-	 * These do not have to be saved in the db just returned in the json, i.e.
-	 * the json has a field withThumbnailUrl computed based on whether there
-	 * exists a MediaObject in the db* * // with urls for embedded or cached
-	 * objects private String withUrl; private String withThumbnailUrl;
-	 */
 
 	public MediaVersion getMediaVersion() {
 		return mediaVersion;
@@ -158,7 +159,8 @@ public class EmbeddedMediaObject {
 	 * .com/git/javadoc/com/google/common/net/MediaType.html
 	 */
 	@JsonSerialize(using = Serializer.MimeTypeSerializer.class)
-	private MediaType mimeType;
+	@JsonDeserialize(using = Deserializer.MimeTypeDeserializer.class)
+	private MediaType mimeType = MediaType.ANY_IMAGE_TYPE;
 
 	public static enum Quality {
 		UNKNOWN, IMAGE_SMALL, IMAGE_500k, IMAGE_1, IMAGE_4, VIDEO_SD, VIDEO_HD, AUDIO_8k, AUDIO_32k, AUDIO_256k, TEXT_IMAGE, TEXT_TEXT
@@ -213,7 +215,7 @@ public class EmbeddedMediaObject {
 	}
 
 	public String getWithUrl() {
-		if (url == null || url.isEmpty() || url.startsWith("/media") || mediaVersion == null) {
+		if ((url == null) || url.isEmpty() || url.startsWith("/media") || (mediaVersion == null)) {
 			return url;
 		}
 		else
@@ -227,8 +229,7 @@ public class EmbeddedMediaObject {
 	public void setOriginalRights(LiteralOrResource originalRights) {
 		this.originalRights = originalRights;
 	}
-	
-	@JsonSerialize(using = Serializer.MimeTypeSerializer.class)
+
 	public MediaType getMimeType() {
 		return mimeType;
 	}

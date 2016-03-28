@@ -27,6 +27,7 @@ import java.io.InputStream;
 import java.net.URLConnection;
 import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BiFunction;
@@ -37,6 +38,7 @@ import model.EmbeddedMediaObject.MediaVersion;
 import model.EmbeddedMediaObject.Quality;
 import model.EmbeddedMediaObject.WithMediaRights;
 import model.EmbeddedMediaObject.WithMediaType;
+import model.resources.RecordResource;
 import model.MediaObject;
 import net.coobird.thumbnailator.Thumbnails;
 import net.coobird.thumbnailator.geometry.Positions;
@@ -67,6 +69,8 @@ import play.mvc.Http.MultipartFormData.FilePart;
 import play.mvc.Result;
 import sources.core.HttpConnector;
 import sources.core.ParallelAPICall;
+import utils.AccessManager;
+import utils.AccessManager.Action;
 import actors.MediaCheckerActor.MediaCheckMessage;
 import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
@@ -130,7 +134,7 @@ public class MediaController extends Controller {
 				return media;
 			media = new MediaObject();
 			Logger.info("Downloading " + url);
-			File img = HttpConnector.getURLContentAsFile(url);
+			File img = HttpConnector.getWSHttpConnector().getURLContentAsFile(url);
 			byte[] mediaBytes = IOUtils.toByteArray(new FileInputStream(img));
 			media.setUrl(url);
 			media.setMediaBytes(mediaBytes);
@@ -155,18 +159,20 @@ public class MediaController extends Controller {
 
 	// Make a thumbnail for a specific media object
 	public static MediaObject makeThumbnail(MediaObject media) {
-		try {
-			MediaObject thumbnail = makeThumbNew(media, MediaVersion.Thumbnail);
-			thumbnail.setMediaVersion(MediaVersion.Thumbnail);
-			thumbnail.setParentId(media.getDbId());
-			DB.getMediaObjectDAO().makePermanent(thumbnail);
-			thumbnail.setUrl(
-					"/media/" + thumbnail.getDbId().toString() + "?file=true");
-			DB.getMediaObjectDAO().makePermanent(thumbnail);
-			return thumbnail;
-		} catch (Exception e) {
-			return null;
-		}
+		if (media.getType() != WithMediaType.IMAGE)
+		 try {
+			 	MediaObject thumbnail = makeThumbNew(media, MediaVersion.Thumbnail);
+			 	thumbnail.setMediaVersion(MediaVersion.Thumbnail);
+			 	thumbnail.setParentId(media.getDbId());
+			 	DB.getMediaObjectDAO().makePermanent(thumbnail);
+			 	thumbnail.setUrl("/media/" + thumbnail.getDbId().toString() + "?file=true");
+			 	DB.getMediaObjectDAO().makePermanent(thumbnail);
+			 	return thumbnail;
+			} catch (Exception e) {
+			    return null;
+		      }
+		else
+			   return null;
 	}
 
 	/**
@@ -230,7 +236,7 @@ public class MediaController extends Controller {
 			}
 			try {
 				// image = HttpConnector.getContent(formData.get("url")[0]);
-				File x = HttpConnector
+				File x = HttpConnector.getWSHttpConnector()
 						.getURLContentAsFile(jsonn.get("url").asText());
 				result = storeMedia(med, x);
 				MediaCheckMessage mcm = new MediaCheckMessage(med);
@@ -251,7 +257,7 @@ public class MediaController extends Controller {
 	}
 
 	private static MediaObject makeThumbNew(MediaObject mediaObject,
-			MediaVersion version) throws IOException {
+		MediaVersion version) throws IOException {
 
 		int newWidth = 0;
 		int newHeight;
@@ -275,14 +281,15 @@ public class MediaController extends Controller {
 		default:
 			break;
 		}
+		InputStream mediaBytes = new ByteArrayInputStream(mediaObject.getMediaBytes());
 		BufferedImage originalImage = ImageIO
-				.read(new ByteArrayInputStream(mediaObject.getMediaBytes()));
+				.read(mediaBytes);
 		int originalWidth = originalImage.getWidth();
 		int originalHeight = originalImage.getHeight();
 		MediaObject thumbnailObject = new MediaObject(mediaObject);
 
 		// first check if we need to scale width
-		if (originalWidth <= newWidth && !crop) {
+		if ((originalWidth <= newWidth) && !crop) {
 			// there is no need for thumbnail
 			thumbnailObject = new MediaObject(mediaObject);
 			thumbnailObject.setMediaVersion(version);
@@ -308,6 +315,9 @@ public class MediaController extends Controller {
 		thumbnailObject.setWidth(newWidth);
 		thumbnailObject.setHeight(newHeight);
 		thumbnailObject.setMediaVersion(version);
+		// closes the media bytes input stream
+		mediaBytes.close();
+		originalImage.flush();
 		return thumbnailObject;
 	}
 
@@ -466,11 +476,11 @@ public class MediaController extends Controller {
 	private static MediaObject makeThumb(MediaObject med, BufferedImage image,
 			int width, boolean crop) throws IOException {
 
-		if (image.getWidth() <= 150 && image.getHeight() <= 150) {
+		if ((image.getWidth() <= 150) && (image.getHeight() <= 150)) {
 			crop = false;
 		}
 		Boolean res = true;
-		if (image.getWidth() <= 150 ^ image.getHeight() <= 150) {
+		if ((image.getWidth() <= 150) ^ (image.getHeight() <= 150)) {
 			res = false;
 		}
 		// TODO: comments left on purpose because this needs a bit of cleaning
@@ -605,7 +615,7 @@ public class MediaController extends Controller {
 		// Logger.info("URL: " + queryURL);
 		JsonNode response = null;
 		try {
-			response = HttpConnector.postURLContent(url, mediaURL, "url");
+			response = HttpConnector.getWSHttpConnector().postURLContent(url, mediaURL, "url");
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -698,5 +708,18 @@ public class MediaController extends Controller {
 			return ok(result);
 		}
 
+	}
+
+	public static boolean hasAccessToMedia(String mediaUrl, List<ObjectId> effectiveIds, Action action) {
+		List<RecordResource> resources = DB.getRecordResourceDAO().getByMedia(mediaUrl);
+		if (!resources.isEmpty()) {
+			for (RecordResource r: resources) {
+				if (DB.getRecordResourceDAO().hasAccess(effectiveIds, action, r.getDbId()))
+					return true;
+			}
+			return false;
+		}
+		else
+			return true;
 	}
 }

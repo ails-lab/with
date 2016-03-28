@@ -79,7 +79,7 @@ public class DDBSpaceSource extends ISpaceSource {
 		JsonNode response;
 		if (checkFilters(q)) {
 			try {
-				response = HttpConnector.getURLContent(res.query);
+				response = getHttpConnector().getURLContent(res.query);
 				JsonNode docs = response.path("results").get(0).path("docs");
 				res.totalCount = Utils.readIntAttr(response, "numberOfResults", true);
 				res.count = docs.size();
@@ -108,6 +108,7 @@ public class DDBSpaceSource extends ISpaceSource {
 		return res;
 	}
 	
+	
 	@Override
 	public ArrayList<RecordJSONMetadata> getRecordFromSource(String recordId, RecordResource fullRecord) {
 		ArrayList<RecordJSONMetadata> jsonMetadata = new ArrayList<RecordJSONMetadata>();
@@ -118,7 +119,7 @@ public class DDBSpaceSource extends ISpaceSource {
 			QueryBuilder builder = new QueryBuilder();
 			builder.setBaseUrl("http://api.deutsche-digitale-bibliothek.de/items/"+recordId+"/edm");
 			builder.addSearchParam("oauth_consumer_key", apiKey);
-			response = HttpConnector
+			response = getHttpConnector()
 					.getURLContent(builder.getHttp());
 			// todo read the other format;
 			JsonNode record = response;

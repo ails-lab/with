@@ -1,0 +1,283 @@
+//- index.jade
+- var title = "WITH - Organizations"
+- var page  = "Collection"
+
+doctype html
+html
+
+	// head
+	include ./includes/head.inc.jade
+
+	// body
+	body
+
+		// header
+		header
+			.wrap
+				.container
+					a(href="index.html").logo
+						img(src="img/ui/logo.png")
+
+					nav
+						ul
+							li
+								a(href="index.html" title="home") HOME
+							li
+								a(href="search-view.html" title="home") EXPLORE
+							li.active
+								a(href="about.html" title="home") ABOUT
+							li.mobile
+								a( href="login.html" class="login") SIGN IN
+								a( href="register.html" class="register") REGISTER
+
+					// login
+					section.login-section
+						a( href="login.html" class="login") SIGN IN
+						a( href="register.html" class="register") REGISTER
+
+					// mobile menu trigger
+					a.mobile-trigger( href="#" )
+						.burger
+		
+		// main
+		div( role="main" ).exhibitionviewer
+			.container-fluid
+
+				// wrapper
+				.wrapper
+
+					// section
+					section.exhibitionviewer
+
+						// menu bar
+						nav.titlebar.exhibition
+							.container
+
+								// title
+								span.title The Wonders of Denali National Park
+
+								// action
+								ul.action
+									li
+										a( href="#" data-toggle="tooltip" data-placement="bottom" title="Expand exhibition")
+											img( src="img/ui/ic-expand.png" )
+									li
+										a( href="#" data-toggle="tooltip" data-placement="bottom" title="Close exhibition")
+											img( src="img/ui/ic-close.png" )
+							
+
+						// exhibition carousel
+						section.exhibitionplayer
+
+							// carousel
+							.wrap( style="background-image: url('img/content/bg-exhibition-1.png');")
+								.carouselexhibition.hue
+
+									// item
+									.item.main
+										.container
+
+											// title
+											h1.title THE WONDERS OF DENALI NATIONAL PARK
+											.description
+												p
+													| A visit to Denali National Park and Preserve and its crown jewel Mount Mckinley
+													| is at the top of many Alaska’s visitors ‘must-do’ list 
+											a.btn( href="#" title="START EXHIBITION")
+												| START EXHIBITION
+
+									// item
+									.item.style1
+										.container
+
+											// image
+											.imagewrap
+												img( src="img/content/img-exhibition-1.png" alt="" )
+												ul.action
+													li.zoom
+														a.imagezoom( href="img/content/img-exhibition-1.png" title="EXPLORING SOUTH EAST ALASKA" )
+															i.glyphicon.glyphicon-resize-full
+													li.view
+														a( href="media.html" title="#" )
+															i.glyphicon.glyphicon-link
+
+											// title
+											.textbox
+												.wrap
+													h2 EXPLORING SOUTH EAST ALASKA
+													p
+														| Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor 
+														| incididunt ut labore et dolore magna aliqua. Ut enim adminim veniam, quis nostrud 
+														| exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
+													p
+														| Duis aute irure dolor in reprehenderit in voluptate velit essecillum dolore 
+														| eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt 
+														| in culpa qui officia deserunt mollit anim id est laborum.
+													.expand
+														a( href="#" title="#" )
+															i.glyphicon.glyphicon-chevron-up
+
+
+											
+
+									// item
+									.item.style1
+										.container
+
+											// image
+											.imagewrap
+												img( src="img/content/img-exhibition-2.png" alt="" )
+												ul.action
+													li.zoom
+														a.imagezoom( href="img/content/img-exhibition-2.png" title="EXPLORING SOUTH EAST ALASKA" )
+															i.glyphicon.glyphicon-resize-full
+													li.view
+														a( href="media.html" title="#" )
+															i.glyphicon.glyphicon-link
+
+											// title
+											.textbox
+												.wrap
+													h2 EXPLORING SOUTH EAST ALASKA
+													p
+														| Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor 
+														| incididunt ut labore et dolore magna aliqua. Ut enim adminim veniam, quis nostrud 
+														| exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
+													p
+														| Duis aute irure dolor in reprehenderit in voluptate velit essecillum dolore 
+														| eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt 
+														| in culpa qui officia deserunt mollit anim id est laborum.
+													.expand
+														a( href="#" title="#" )
+															i.glyphicon.glyphicon-chevron-up
+											
+
+									// item
+									.item.style2
+										.container
+
+											// image
+											.imagewrap
+												img( src="img/content/img-exhibition-3.png" alt="" )
+												ul.action
+													li.zoom
+														a.imagezoom( href="img/content/img-exhibition-3.png" title="EXPLORING SOUTH EAST ALASKA" )
+															i.glyphicon.glyphicon-resize-full
+													li.view
+														a( href="media.html" title="#" )
+															i.glyphicon.glyphicon-link
+
+											// title
+											.textbox
+												.wrap
+													h2 EXPLORING SOUTH EAST ALASKA
+													p
+														| Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor 
+														| incididunt ut labore et dolore magna aliqua. Ut enim adminim veniam, quis nostrud 
+														| exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
+													p
+														| Duis aute irure dolor in reprehenderit in voluptate velit essecillum dolore 
+														| eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt 
+														| in culpa qui officia deserunt mollit anim id est laborum.
+													.expand
+														a( href="#" title="#" )
+															i.glyphicon.glyphicon-chevron-up
+
+									// item
+									.item.style2
+										.container
+
+											// image
+											.imagewrap
+												.embed-responsive.embed-responsive-16by9
+													iframe( width="100%" height="100%" src="https://www.youtube.com/embed/4nVJ4WhYVWA" frameborder="0" allowfullscreen )
+												ul.action
+													li.zoom
+														a.iframezoom( href="http://www.youtube.com/watch?v=4nVJ4WhYVWA" title="EXPLORING SOUTH EAST ALASKA" )
+															i.glyphicon.glyphicon-resize-full
+													li.view
+														a( href="media.html" title="#" )
+															i.glyphicon.glyphicon-link
+											// title
+											.textbox
+												.wrap
+													h2 EXPLORING SOUTH EAST ALASKA
+													p
+														| Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor 
+														| incididunt ut labore et dolore magna aliqua. Ut enim adminim veniam, quis nostrud 
+														| exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
+													p
+														| Duis aute irure dolor in reprehenderit in voluptate velit essecillum dolore 
+														| eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt 
+														| in culpa qui officia deserunt mollit anim id est laborum.
+													.expand
+														a( href="#" title="#" )
+															i.glyphicon.glyphicon-chevron-up
+											
+
+									// item
+									.item.style3
+										.container
+
+											// image
+											.imagewrap
+												img( src="img/content/img-exhibition-4.png" alt="exhibition" )
+												ul.action
+													li.zoom
+														a.imagezoom( href="img/content/img-exhibition-4.png" title="EXPLORING SOUTH EAST ALASKA" )
+															i.glyphicon.glyphicon-resize-full
+													li.view
+														a( href="media.html" title="#" )
+															i.glyphicon.glyphicon-link
+
+											// textbox
+											.textbox
+												.wrap
+													h2 BEAUTIFUL ETHNICS OF AFRICA
+													span.note
+														| Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod 
+														| tempor incididunt ut labore et dolore magna aliqua.
+													p
+														| Duis aute irure dolor in reprehenderit in voluptate velit essecillum dolore 
+														| eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt 
+														| in culpa qui officia
+													.expand
+														a( href="#" title="#" )
+															i.glyphicon.glyphicon-chevron-up
+									// item
+									.item.credit
+										.container
+
+											// wrap
+											.creditwrap
+
+												// title
+												h1.title CREDIT
+												
+												// wrap
+												.row
+
+													// left
+													.left
+														p
+															| Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor 
+															| incididunt ut labore et dolore magna aliqua. Ut enim adminim veniam, quis nostrud 
+															| exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
+														p
+															| Duis aute irure dolor in reprehenderit in voluptate velit essecillum dolore 
+															| eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt 
+															| in culpa qui officia deserunt mollit anim id est laborum.
+
+													// right
+													.right
+														p
+															| Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor 
+															| incididunt ut labore et dolore magna aliqua. Ut enim adminim veniam, quis nostrud 
+															| exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
+														p
+															| Duis aute irure dolor in reprehenderit in voluptate velit essecillum dolore 
+															| eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt 
+															| in culpa qui officia deserunt mollit anim id est laborum.
+			
+	// script
+	include ./includes/script.inc.jade

@@ -152,8 +152,14 @@ public class WithResourceController extends Controller {
 		}
 	}
 
-	public static Result addRecordToCollection(JsonNode json,
-			ObjectId collectionDbId, Option<Integer> position, Boolean noDouble) {
+	
+	public static Result internalAddRecordToCollection(String colId, RecordResource record, Option<Integer> position,
+			ObjectNode result) {
+		return addRecordToCollection(Json.toJson(record), new ObjectId(colId), position, false);
+	}
+	
+	public static Result addRecordToCollection(JsonNode json, ObjectId collectionDbId,
+			Option<Integer> position, Boolean noDouble) {
 		ObjectNode result = Json.newObject();
 		String resourceType = null;
 		ObjectId userId = AccessManager.effectiveUserDbIds(
@@ -164,15 +170,15 @@ public class WithResourceController extends Controller {
 				|| (WithResourceType.valueOf(resourceType) == null))
 			resourceType = WithResourceType.CulturalObject.toString();
 		try {
-			Class<?> clazz = Class.forName("model.resources." + resourceType);
-			// if (position.isDefined())
-			// fillInContextTarget(json, collectionDbId.toString(),
-			// position.get());
-			RecordResource record = (RecordResource) Json.fromJson(json, clazz);
-			MultiLiteral label = record.getDescriptiveData().getLabel();
-			if (label == null || label.get(Language.DEFAULT) == null
-					|| label.get(Language.DEFAULT).isEmpty()
-					|| label.get(Language.DEFAULT).get(0) == "")
+			Class<?> clazz = Class.forName("model.resources."
+					+ resourceType);
+			if (position.isDefined())
+				fillInContextTarget(json, collectionDbId.toString(), position.get());
+			RecordResource record = (RecordResource) Json.fromJson(json,
+					clazz);
+			MultiLiteral label =  record.getDescriptiveData().getLabel();
+			if (label == null || label.get(Language.DEFAULT) == null || 
+					label.get(Language.DEFAULT).isEmpty() || label.get(Language.DEFAULT).get(0) == "") 
 				return badRequest("A label for the record has to be provided");
 			int last = 0;
 			Sources source = Sources.UploadedByUser;
@@ -245,7 +251,6 @@ public class WithResourceController extends Controller {
 					// that has been created
 					record.getAdministrative().setWithCreator(userId);
 					String mediaUrl;
-					WithMediaRights withRights;
 					for (HashMap<MediaVersion, EmbeddedMediaObject> embeddedMedia : (List<HashMap<MediaVersion, EmbeddedMediaObject>>) record
 							.getMedia()) {
 						for (MediaVersion version : embeddedMedia.keySet()) {
@@ -254,13 +259,18 @@ public class WithResourceController extends Controller {
 							if (media != null) {
 								mediaUrl = media.getUrl();
 								EmbeddedMediaObject existingMedia = null;
-								if (!mediaUrl.isEmpty()
-										&& ((existingMedia = DB
-												.getMediaObjectDAO().getByUrl(
-														mediaUrl)) != null)) {
-									media = new EmbeddedMediaObject(
-											existingMedia);
-								} else {
+								if (!mediaUrl.isEmpty()) {
+									MediaObject mediaObject = DB.getMediaObjectDAO().getByUrl(mediaUrl);
+									if (mediaObject != null) {
+										//if user has access to at least one recordResource pointing to that media, or if media is an orphan
+										//then the user has write access to the media
+										boolean hasAccessToMedia = MediaController.hasAccessToMedia(mediaUrl, AccessManager.effectiveUserDbIds(session().get(
+												"effectiveUserIds")), Action.EDIT);
+										if (!hasAccessToMedia)
+											media = new EmbeddedMediaObject(existingMedia);
+									}
+								}
+								else {
 									return badRequest("A media url has to be provided.");
 								}
 								// TODO: careful, the user is allowed to set
@@ -593,6 +603,8 @@ public class WithResourceController extends Controller {
 				locks.release();
 		}
 	}
+	
+	
 
 	/**
 	 * @param recordId
@@ -676,5 +688,32 @@ public class WithResourceController extends Controller {
 		 */
 		return removeRecordFromCollection(fav, record.getDbId().toString(),
 				Option.None(), true);
+
+	/*public static Result removeFromFavorites() {
+		JsonNode json = request().body().asJson();
+		JsonNode externalIdNode = json.get("externalId");
+		if (externalIdNode != null) {
+			String externalId = externalIdNode.asText();
+			ObjectId userId = new ObjectId(session().get("user"));
+			String fav = DB.getCollectionObjectDAO()
+					.getByOwnerAndLabel(userId, null, "_favorites").getDbId()
+					.toString();
+			RecordResource record = DB.getRecordResourceDAO().getByExternalId(
+					externalId);
+			List<CollectionInfo> collected = record.getCollectedIn();
+			for (CollectionInfo c : collected) {
+				if (c.getCollectionId().toString().equals(fav)) {
+					return removeRecordFromCollection(fav, record.getDbId()
+							.toString(), Option.Some(c.getPosition()), false);
+				}
+			}
+			return removeRecordFromCollection(fav, record.getDbId().toString(),
+					Option.None(), false);
+		}
+		else {
+			ObjectNode result = Json.newObject();
+			result.put("error", "Json request should have format {externalId: id}");
+			return internalServerError(result);
+		}*/
 	}
 }

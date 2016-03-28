@@ -20,10 +20,22 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import utils.ListUtils;
+
 public class CommonFilter implements Cloneable {
 
 	public String filterID;
 	public List<String> values;
+	
+	public CommonFilter() {
+		super();
+	}
+
+	public CommonFilter(String filterID, String... values) {
+		super();
+		this.filterID = filterID;
+		this.values = Arrays.asList(values);
+	}
 
 	@Override
 	public String toString() {

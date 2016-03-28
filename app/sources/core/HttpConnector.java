@@ -44,11 +44,21 @@ import com.ning.http.multipart.Part;
 
 
 public class HttpConnector {
+	
+	private static HttpConnector wsHttpConnector;
 
-	private static final int TIMEOUT_CONNECTION = 40000;
+
+	public static HttpConnector getWSHttpConnector(){
+		if (wsHttpConnector==null){
+			wsHttpConnector = new HttpConnector();
+		}
+		return wsHttpConnector;
+	}
+
+	private  final int TIMEOUT_CONNECTION = 40000;
 	
 	
-	public static <T> T getContent(String url) throws Exception {
+	public <T> T getContent(String url) throws Exception {
 		try {
 			Logger.debug("calling: " + url);
 			long time = System.currentTimeMillis();
@@ -72,7 +82,7 @@ public class HttpConnector {
 		}
 	}
 	
-	public static <T> T getContentAsFile(String url) throws Exception {
+	public  <T> T getContentAsFile(String url) throws Exception {
 		try {
 			Logger.debug("calling: " + url);
 			long time = System.currentTimeMillis();
@@ -100,7 +110,7 @@ public class HttpConnector {
 	}
 
 	
-	public static <T> T postFileContent(String url, File file, String paramName, String paramValue) throws Exception {
+	public  <T> T postFileContent(String url, File file, String paramName, String paramValue) throws Exception {
 		try {
 			Logger.debug("calling: " + url);
 			long time = System.currentTimeMillis();
@@ -124,7 +134,7 @@ public class HttpConnector {
 		}
 	}
 	
-/*	public static <T> T postMultiPartFormDataContent(String url, FilePart file, 
+/*	public  <T> T postMultiPartFormDataContent(String url, FilePart file, 
 			String paramName, String paramValue) throws Exception {
 		
 		
@@ -173,7 +183,7 @@ public class HttpConnector {
 */	
 	
 	
-	public static <T> T postMultiPartFormDataContent(String url, File file, 
+	public  <T> T postMultiPartFormDataContent(String url, File file, 
 			String paramName, String paramValue) throws Exception {
 		
 		
@@ -224,7 +234,7 @@ public class HttpConnector {
 	}
 
 	
-	public static <T> T postJsonContent(String url, JsonNode node) throws Exception {
+	public  <T> T postJsonContent(String url, JsonNode node) throws Exception {
 		try {
 			Logger.debug("calling: " + url);
 			long time = System.currentTimeMillis();
@@ -248,7 +258,7 @@ public class HttpConnector {
 		}
 	}
 
-public static <T> T postContent(String url, String parameter, String paramName) throws Exception {
+public  <T> T postContent(String url, String parameter, String paramName) throws Exception {
 		try {
 			Logger.debug("calling: " + url);
 			long time = System.currentTimeMillis();
@@ -275,39 +285,39 @@ public static <T> T postContent(String url, String parameter, String paramName) 
 	}
 
 
-	public static JsonNode getURLContent(String url) throws Exception {
-		return HttpConnector.<JsonNode>getContent(url);
+	public  JsonNode getURLContent(String url) throws Exception {
+		return this.<JsonNode>getContent(url);
 	}
 	
-	public static File getURLContentAsFile(String url) throws Exception {
-		return HttpConnector.<File>getContentAsFile(url);
+	public  File getURLContentAsFile(String url) throws Exception {
+		return this.<File>getContentAsFile(url);
 	}
 
 	
-	public static JsonNode postURLContent(String url, String parameter, String paramName) throws Exception {
-		return HttpConnector.<JsonNode>postContent(url, parameter, paramName);
+	public  JsonNode postURLContent(String url, String parameter, String paramName) throws Exception {
+		return this.<JsonNode>postContent(url, parameter, paramName);
 	}
 
 	
-	public static JsonNode postJson(String url, JsonNode node) throws Exception {
-		return HttpConnector.<JsonNode>postJsonContent(url, node);
+	public  JsonNode postJson(String url, JsonNode node) throws Exception {
+		return this.<JsonNode>postJsonContent(url, node);
 	}
 
 	
-	public static JsonNode postFile(String url, File file, String paramName, String paramValue) throws Exception {
-		return HttpConnector.<JsonNode>postFileContent(url, file, paramName, paramValue);
+	public  JsonNode postFile(String url, File file, String paramName, String paramValue) throws Exception {
+		return this.<JsonNode>postFileContent(url, file, paramName, paramValue);
 	}
 	
-	public static JsonNode postMultiPartFormData(String url, File file, String paramName, String paramValue) throws Exception {
-		return HttpConnector.<JsonNode>postMultiPartFormDataContent(url, file, paramName, paramValue);
+	public  JsonNode postMultiPartFormData(String url, File file, String paramName, String paramValue) throws Exception {
+		return this.<JsonNode>postMultiPartFormDataContent(url, file, paramName, paramValue);
 	}
 
 	
-	public static String getURLStringContent(String url) throws Exception {
-		return HttpConnector.<String>getContent(url);
+	public  String getURLStringContent(String url) throws Exception {
+		return this.<String>getContent(url);
 	}
 
-	public static Document getURLContentAsXML(String url) throws Exception {
+	public  Document getURLContentAsXML(String url) throws Exception {
 		try {
 			Promise<Document> xmlPromise = WS.url(url).get().map(new Function<WSResponse, Document>() {
 				public Document apply(WSResponse response) {

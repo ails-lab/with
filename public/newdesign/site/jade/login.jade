@@ -1,0 +1,75 @@
+//- index.jade
+- var title = "WITH - Login"
+- var page  = "Login"
+
+doctype html
+html
+
+	// head
+	include ./includes/head.inc.jade
+
+	// body
+	body
+
+		// header
+		header
+			.wrap
+				.container
+					a(href="index.html").logo
+						img(src="img/ui/logo.png")
+
+					nav
+						ul
+							li
+								a(href="index.html" title="home") HOME
+							li
+								a(href="search-view.html" title="home") EXPLORE
+							li
+								a(href="about.html" title="home") ABOUT
+							li.mobile
+								a( href="login.html" class="login") SIGN IN
+								a( href="register.html" class="register") REGISTER
+
+					// login
+					section.login-section
+						a( href="login.html" class="login") SIGN IN
+						a( href="register.html" class="register") REGISTER
+
+
+					// mobile menu trigger
+					a.mobile-trigger( href="#" )
+						.burger
+		
+		// main
+		div( role="main" )
+
+			// viewer mode
+			.viewer
+
+				// Login
+				section.login.entrance
+					.section-header
+						.text Sign in
+					.section-body 
+						a(href="#").fb
+							i.fa.fa-facebook-official
+							span.text Sign in with Facebook account
+						a(href="#").gplus
+							i.fa.fa-google-plus
+							span.text Sign in with Google account
+						.or
+							span.text or
+						.input-group
+							input(type="text" placeholder="Email or username")
+							input(type="password" placeholder="Password")
+							input(type="checkbox")#login
+							label(for="login") Keep me signed in
+						.button-group
+							a(href="#").btn-green-o Forgot password?
+							a(href="#").btn-green Sign in
+
+		// footer
+		include ./includes/footer.view.jade
+			
+	// script
+	include ./includes/script.inc.jade

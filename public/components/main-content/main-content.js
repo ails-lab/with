@@ -3,7 +3,7 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 	
 	$.bridget('isotope', Isotope);
 	
-	self.loading=ko.observable(false);
+	//self.loading=ko.observable(false);
 		
 	ko.bindingHandlers.homeisotope = {
 					init: app.initOrUpdate('init'),
@@ -93,6 +93,7 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 			        			return "item space";
 			        		else return "item exhibition";
 			        	}
+			        	else{return "item collection";}
 			        });
 			        
 			        self.url=ko.computed(function() {
@@ -111,6 +112,7 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 			        	if(self.withCreatorInfo){
 			        		return self.withCreatorInfo.username;
 			        	}
+			        	return "";
 			        });
 			        
 			        return self;
@@ -137,11 +139,11 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 		};
 
 		self.loadRecords= function(offset,count){
-			loading(true);
+			//loading(true);
 			var promise=self.getCollectionRecords(0,30);
 			 $.when(promise).done(function(responseRecords) {
 				 ko.mapping.fromJS(responseRecords.records,recmapping,self.records);
-				 loading(false);
+				 //loading(false);
 				 
 			 });
 		}
@@ -183,26 +185,70 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 	  self.totalExhibitions=ko.observable(0);
 	  self.spaces=ko.observableArray();
 	  self.collections=ko.observableArray();
+	  self.exhibitions=ko.observableArray();
+	  self.all=ko.observableArray();
 	  self.morespaces=ko.observable(true);
-	  self.fetchitemnum=20;
+	  self.fetchitemnum=10;
+	  self.nocollections=ko.observable(false);
+	  self.noexhibitions=ko.observable(false);
+	  self.nospaces=ko.observable(false);
+	  self.loadingex=ko.observable(false);
+	  self.loadingcoll=ko.observable(false);
+	  self.loadingspaces=ko.observable(false);
+	  var $container = $(".grid").isotope({
+			itemSelector: '.item',
+			transitionDuration: transDuration,
+			masonry: {
+				columnWidth		: '.sizer',
+				percentPosition	: true
+			}
+		});
+	  
+	  
+	
+	  self.buttontext=ko.computed(function() {
+		  if(self.homecollections().length>0 && self.noexhibitions()==true && self.nocollections()==true && self.nospaces()==true){
+			  $(".loadmore").text("no more results");
+		  }
+		  
+	  });
+	  
 	  self.revealItems = function (data) {
-		  if((data.length==0 || data.length<self.fetchitemnum) && self.morespaces()==false){ loading(false);$(".loadmore").text("no more results");}
-			
+		  if((data.length==0 || data.length<self.fetchitemnum)){ self.nocollections(true);}
+		  var items = [];
 			for (var i in data) {
 				var c=new Collection(
 							data[i]				
 				);
 				
-				
+				items.push(c);
 				self.homecollections().push(c);
-				self.collections().push(c);
+				self.collections.push(c);
 			}
-			self.homecollections.valueHasMutated();
+			
+			self.homecollections.valueHasMutated();self.loadingcoll(false);
+			return items;
 		};
 		
+		
+		self.revealExItems = function (data) {
+			  if((data.length==0 || data.length<self.fetchitemnum)){self.noexhibitions(true);}
+				var items=[];
+				for (var i in data) {
+					var c=new Collection(
+								data[i]				
+					);
+					items.push(c);
+					self.homecollections().push(c);
+					self.exhibitions.push(c);
+				}
+				self.homecollections.valueHasMutated();self.loadingex(false);
+				return items;
+			};
 	  
 		self.revealSpaceItems = function (data) {
-			if(data.length==0 || data.length<self.fetchitemnum){self.morespaces(false);}
+			if(data.length==0 || data.length<self.fetchitemnum){self.morespaces(false);self.nospaces(true);}
+			var items = [];
 				for (var i in data) {
 					var page=data[i].page;
 					var thumb=null;
@@ -218,35 +264,71 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 								spacetocollection				
 					);
 					
-					
+					items.push(c);
 					self.homecollections().push(c);
-					self.spaces().push(c);
+					self.spaces.push(c);
 				}
-				self.homecollections.valueHasMutated();
+				self.homecollections.valueHasMutated();self.loadingspaces(false);
+				return items;
 			};	
 		
 	  self.loadAll = function () {
 		  //this should replaced with get space collections + exhibitions
-		   loading(true);
 		  
+		  self.loadingcoll(true);
+		  self.loadingex(true);
+		  self.loadingspaces(true);
 		  var promiseCollections = self.getSpaceCollections();
+		  var promiseExhibitions=self.getSpaceExhibitions();
 		  var promiseSpaces=self.getSpaces();
-		  $.when(promiseSpaces).done(function(response) {
-		        //self.totalSpaces(response);
-			    self.revealSpaceItems(response);
-			    
-				
-		  });
+		  WITHApp.initTooltip();
+		 
 		  $.when(promiseCollections).done(function(responseCollections) {
-			        self.totalCollections(responseCollections.totalCollections);
-			        self.totalExhibitions(responseCollections.totalExhibitions);
-				    self.revealItems(responseCollections['collectionsOrExhibitions']);
+			        //self.totalCollections(responseCollections.totalCollections);
+			        //self.totalExhibitions(responseCollections.totalExhibitions);
+				    var items=self.revealItems(responseCollections['collectionsOrExhibitions']);
+				    if (items.length > 0) {
+						var $newitems = getItems(items);
+						isotopeImagesReveal($newitems);
+					}
+				    
 				    initFilterStick();
 				    WITHApp.initIsotope();
-				    loading(false);
+				    var selector=$("ul.nav").find("li.active").attr('data-filter');
+				    $( settings.mSelector ).isotope({ filter: selector });
+				   
 					
 			});
 		 
+		  $.when(promiseExhibitions).done(function(response) {
+		        //self.totalCollections(response.totalCollections);
+		        //self.totalExhibitions(response.totalExhibitions);
+			    var items=self.revealExItems(response['collectionsOrExhibitions']);
+			    if (items.length > 0) {
+					var $newitems = getItems(items);
+					isotopeImagesReveal($newitems);
+				}
+			    initFilterStick();
+			    WITHApp.initIsotope();
+			    var selector=$("ul.nav").find("li.active").attr('data-filter');
+			    $( settings.mSelector ).isotope({ filter: selector });
+			   
+				
+		});
+		  $.when(promiseSpaces).done(function(response) {
+		        //self.totalSpaces(response);
+			    var items=self.revealSpaceItems(response);
+			    if (items.length > 0) {
+					var $newitems = getItems(items);
+					isotopeImagesReveal($newitems);
+				}
+			    var selector=$("ul.nav").find("li.active").attr('data-filter');
+			    $( settings.mSelector ).isotope({ filter: selector });
+			    
+				
+		  });
+		  
+		  
 		  var promise2 = self.getFeatured("56cd993275fe2461e089a8a5");
           $.when(promise2).done(function (data) {
         	  
@@ -290,11 +372,24 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 				dataType: "json",
 				url: "/collection/list",
 				processData: false,
-				data: "offset=0&count="+self.fetchitemnum+"&collectionHits=true&isPublic=true",
+				data: "offset=0&count="+self.fetchitemnum+"&collectionHits=true&isPublic=true&isExhibition=false",
 			}).success (function(){
 			});
 		};
 		
+		
+		self.getSpaceExhibitions = function () {
+			//call should be replaced with space collections+exhibitions
+			return $.ajax({
+				type: "GET",
+				contentType: "application/json",
+				dataType: "json",
+				url: "/collection/list",
+				processData: false,
+				data: "offset=0&count="+self.fetchitemnum+"&collectionHits=true&isPublic=true&isExhibition=true",
+			}).success (function(){
+			});
+		};
 		
 		
          self.getFeatured=function(id) {
@@ -313,14 +408,30 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 		
 	    
 		self.loadNext = function () {
-		  if (loading() === false) {
-			 loading(true);
+		  if (!self.loadingcoll() && !self.loadingex() && !self.loadingspaces()) {
+			self.loadingcoll(true);
+			self.loadingex(true);
+			self.loadingspaces(true);
 			var promise1=self.moreSpaces();
 			var promise2=self.moreCollections();
-			$.when(promise1,promise2).done(function(data1,data2){
-				self.revealSpaceItems(data1[0]);
-				self.revealItems(data2[0]['collectionsOrExhibitions']);
-				loading(false);
+			var promise3=self.moreExhibitions();
+			$.when(promise1,promise2,promise3).done(function(data1,data2,data3){
+				var items1=self.revealSpaceItems(data1[0]);
+				if (items1.length > 0) {
+					var $newitems = getItems(items1);
+					isotopeImagesReveal($newitems);
+				}
+				var items2=self.revealItems(data2[0]['collectionsOrExhibitions']);
+				if (items2.length > 0) {
+					var $newitems = getItems(items2);
+					isotopeImagesReveal($newitems);
+				}
+				var items3=self.revealExItems(data3[0]['collectionsOrExhibitions']);
+				if (items3.length > 0) {
+					var $newitems = getItems(items3);
+					isotopeImagesReveal($newitems);
+				}
+				
 			})
 			
 			
@@ -349,12 +460,25 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 				dataType: "json",
 				url: "/collection/list",
 				processData: false,
-				data: "isPublic=true&count="+self.fetchitemnum+"&offset=" + self.collections().length,
+				data: "isPublic=true&count="+self.fetchitemnum+"&offset=" + self.collections().length+"&isExhibition=false",
 			}).success (function(){
 			});
 			
 		};
 
+		self.moreExhibitions = function () {
+			return $.ajax({
+				type: "GET",
+				contentType: "application/json",
+				dataType: "json",
+				url: "/collection/list",
+				processData: false,
+				data: "isPublic=true&count="+self.fetchitemnum+"&offset=" + self.exhibitions().length+"&isExhibition=true",
+			}).success (function(){
+			});
+			
+		};
+		
 	  self.loadCollectionOrExhibition = function(item) {
 		  if (item.isExhibition) {
 			  window.location = 'index.html#exhibitionview/'+ item.id;
@@ -371,16 +495,81 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 		
 	  
 	  self.filter=function(data, event) {
+		       if(self.loadingcoll()==false && self.loadingex()==false && self.loadingspaces()==false){
 		  			  var selector = event.currentTarget.attributes.getNamedItem("data-filter").value;
 					  $(event.currentTarget).siblings().removeClass("active");
 					  $(event.currentTarget).addClass("active");
 					  $( settings.mSelector ).isotope({ filter: selector });
-					  return false;
+					 /* if(selector!="*"){
+						  $(".loadmore").hide();
+						  
+					  }
+					  else{ $(".loadmore").show();}*/
+					  return false;}
 				}
 					  
 	 
+	  function getItem(collection) {
+			var tile = '<div class="' + collection.data.css() + '"> <div class="wrap">';
 
+			tile += '<a href="#" onclick="loadUrl(\'' + collection.data.url() + '\',event)">' +
+				'<div class="thumb"><img src="' + collection.data.thumbnail() + '"></div>' +
+				'<div class="info"><span class="type">' + collection.data.type() + '</span><h1 class="title">' +
+				collection.data.title + '</h1><span class="owner">'+collection.data.owner()+'</span></div>' +
+				'</a></div></div>';
+
+			return tile;
+		}
+
+		function getItems(data) {
+			var items = '';
+			for (var i in data) {
+				items += getItem(data[i]);
+			}
+
+			return $(items);
+		}
+
+		
+
+		isotopeImagesReveal = function ($items) {
+			var $container=$(".grid");
+			var iso = $container.data('isotope');
+			if(!iso){
+				var $container = $(".grid").isotope({
+					itemSelector: '.item',
+					transitionDuration: transDuration,
+					masonry: {
+						columnWidth		: '.sizer',
+						percentPosition	: true
+					}
+				});
+				iso= $container.data('isotope');
+			}
+			var itemSelector = ".item";
+
+			// append to container
+			$container.append($items);
+			// hide by default
+			$items.hide();
+			$items.imagesLoaded().progress(function (imgLoad, image) {
+				// get item
+				var $item = $(image.img).parents(itemSelector);
+				// un-hide item
+				$item.show();
+				iso.appended($item);
+				
+			});
+
+			return this;
+		};
 	  
+		loadUrl = function (data,event) {
+			event.preventDefault();
+			window.location.href = data;
+
+			return false;
+		};
 	
   }
   

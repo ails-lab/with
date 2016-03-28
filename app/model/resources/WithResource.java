@@ -540,7 +540,8 @@ public class WithResource<T extends DescriptiveData, U extends WithResource.With
 		if (administrative.getWithCreator() != null)
 			return DB.getUserDAO().getById(
 					this.administrative.getWithCreator(),
-					new ArrayList<String>(Arrays.asList("username")));
+					new ArrayList<String>(Arrays.asList("username",
+							"firstName", "lastName")));
 		else
 			return null;
 	}

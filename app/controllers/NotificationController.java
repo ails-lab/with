@@ -62,12 +62,18 @@ public class NotificationController extends Controller {
 			UserGroup group = DB.getUserGroupDAO().get(groupId);
 			Set<ObjectId> ancestorGroups;
 			Date now = new Date();
-			if (accept) {
+			if (!accept) {
 				// The user is added to the group
-				ancestorGroups = group.getAncestorGroups();
+				/*ancestorGroups = group.getAncestorGroups();
 				ancestorGroups.add(group.getDbId());
 				group.getUsers().add(group.getDbId());
 				user.addUserGroups(ancestorGroups);
+				DB.getUserDAO().makePermanent(user);
+				DB.getUserGroupDAO().makePermanent(group);*/
+				ancestorGroups = group.getAncestorGroups();
+				ancestorGroups.add(group.getDbId());
+				group.removeUser(user.getDbId());
+				user.removeUserGroups(ancestorGroups);
 				DB.getUserDAO().makePermanent(user);
 				DB.getUserGroupDAO().makePermanent(group);
 			}
