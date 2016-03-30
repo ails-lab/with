@@ -584,6 +584,7 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 					//self.collectionSet("my");
 					self.titleToEdit(self.myCollections()[collIndex].title());
 					self.descriptionToEdit(self.myCollections()[collIndex].description());
+					self.isPublicToEdit(self.myCollections()[collIndex].administrative.access.isPublic());
 				} else {
 					//self.collectionSet("shared");
 					self.titleToEdit(self.sharedCollections()[collIndex].title());
