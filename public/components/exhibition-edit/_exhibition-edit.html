@@ -37,7 +37,7 @@
 								</div>
 								<!-- add-->
 								<!-- ko template: { foreach: collectionItemsArray, beforeRemove: removeItem, afterAdd: showNewItem } -->
-								  <div data-toggle="tooltip" data-placement="top" title="Drag an item here" class="add" data-bind="drop: {index: $index}"><span><a href="#"><img src="img/ui/ic-add.png"></a></span></div>
+								  <div data-toggle="tooltip" data-placement="top" title="Drag an item here" class="add" data-bind="drop: {index: $index}"><span><a href="javascript:void(0)"><img src="img/ui/ic-add.png"></a></span></div>
                   
 								
 								<!-- box-->
@@ -92,7 +92,7 @@
 				                     </div>
 				                     <!-- /ko -->
 				                     <!-- ko else -->
-									 <div class="video"><a href="#" data-toggle="tooltip" data-placement="top" title="Add video" class="addvideo videobox" data-bind="click: $parent.prepareForItemEdit">
+									 <div class="video"><a href="javascript:void(0)" data-toggle="tooltip" data-placement="top" title="Add video" class="addvideo videobox" data-bind="click: $parent.prepareForItemEdit">
 									 	<img src="img/ui/ic-add.png"></a>
 									 </div>
 									 <!-- /ko -->
@@ -124,7 +124,7 @@
 						<div class="assetlisting" id="outer-bottom">
 							<ul id="collscroll" data-bind="foreach: userSavedItemsArray, hscroll2: userSavedItemsArray(), scrollOptions: { loadFunc: loadNextCollection }">
 								<li>
-									<a class="bottom-box" href="#" data-toggle="tooltip" data-placement="top" 
+									<a class="bottom-box" href="javascript:void(0)" data-toggle="tooltip" data-placement="top" 
 									data-bind="{drag: {item: $data, move: false}, attr: {title: title}}">
 										<div class="hue">
 											<img data-bind="attr: { src: thumbnailUrl }" class="itemImage"/>
