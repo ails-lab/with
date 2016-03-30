@@ -26,7 +26,9 @@ import model.basicDataTypes.Language;
 
 import org.bson.types.ObjectId;
 import org.elasticsearch.action.search.SearchResponse;
+import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
+import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHitField;
 import org.elasticsearch.search.SearchHits;
@@ -50,7 +52,12 @@ public class CollectionIndexController extends WithResourceController	{
 
 	public static final ALogger log = Logger.of(CollectionObjectController.class);
 
-	private static String[] fields = new String[] { "keywords.uri", "dctype.uri" };
+	public static String[] indexFacetFields = new String[] {
+		"keywords.uri.all",
+		"dctype.uri.all",
+		"dcformat.uri.all"
+	};
+
 	
 	public static Result getCollectionIndex(String id) {
 		ObjectNode result = Json.newObject();
@@ -62,9 +69,9 @@ public class CollectionIndexController extends WithResourceController	{
 			ElasticSearcher es = new ElasticSearcher();
 			
 //			MatchQueryBuilder query = QueryBuilders.matchQuery("collectedIn.collectionId", id);
-			QueryBuilder query = CollectionObjectController.getIndexCollectionQuery(new ObjectId(id), json);
+			QueryBuilder query = getIndexCollectionQuery(new ObjectId(id), json);
 
-			SearchResponse res = es.execute(query, new SearchOptions(0, Integer.MAX_VALUE), fields);
+			SearchResponse res = es.execute(query, new SearchOptions(0, Integer.MAX_VALUE), indexFacetFields);
 			SearchHits sh = res.getHits();
 
 			List<String[]> list = new ArrayList<>();
@@ -74,7 +81,7 @@ public class CollectionIndexController extends WithResourceController	{
 
 				List<Object> olist = new ArrayList<>();
 				
-				for (String field : fields) {
+				for (String field : indexFacetFields) {
 					SearchHitField shf = hit.field(field);
 				
 					if (shf != null) {
@@ -112,4 +119,29 @@ public class CollectionIndexController extends WithResourceController	{
 		}
 	}
 	
+	public static QueryBuilder getIndexCollectionQuery(ObjectId colId, JsonNode json) {
+		BoolQueryBuilder query = QueryBuilders.boolQuery();
+		query.must(QueryBuilders.termQuery("collectedIn.collectionId", colId));
+
+		if (json != null) {
+			for (Iterator<JsonNode> iter = json.get("terms").elements(); iter.hasNext();) {
+				BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
+	
+				JsonNode inode = iter.next();
+				for (Iterator<JsonNode> iter2 = inode.get("sub").elements(); iter2.hasNext();) {
+					String s = iter2.next().asText();
+	
+					for (String f : indexFacetFields) {
+						boolQuery = boolQuery.should(QueryBuilders.termQuery(f, s));
+					}
+				}
+				
+				query.must(boolQuery);
+			}
+		}
+
+//		System.out.println("QUERY " + query);
+		return query;
+	}
+
 }

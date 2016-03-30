@@ -34,6 +34,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import controllers.parameterTypes.MyPlayList;
 import controllers.parameterTypes.StringTuple;
+import controllers.thesaurus.CollectionIndexController;
 import db.DB;
 import model.annotations.ContextData;
 import model.basicDataTypes.Language;
@@ -54,7 +55,6 @@ import model.usersAndGroups.User;
 import model.usersAndGroups.UserGroup;
 import model.usersAndGroups.UserOrGroup;
 
-
 import org.bson.types.ObjectId;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.index.query.BoolQueryBuilder;
@@ -64,7 +64,6 @@ import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.TermQueryBuilder;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
-
 
 import play.Logger;
 import play.Logger.ALogger;
@@ -84,7 +83,6 @@ import utils.AccessManager;
 import utils.AccessManager.Action;
 import utils.Locks;
 import utils.Tuple;
-
 import elastic.ElasticSearcher;
 import elastic.ElasticSearcher.SearchOptions;
 
@@ -762,29 +760,6 @@ public class CollectionObjectController extends WithResourceController {
 		}
 	}
 	
-	public static QueryBuilder getIndexCollectionQuery(ObjectId colId, JsonNode json) {
-		BoolQueryBuilder query = QueryBuilders.boolQuery();
-		query.must(QueryBuilders.termQuery("collectedIn.collectionId", colId));
-
-		if (json != null) {
-			for (Iterator<JsonNode> iter = json.get("terms").elements(); iter.hasNext();) {
-				BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
-	
-				JsonNode inode = iter.next();
-				for (Iterator<JsonNode> iter2 = inode.get("sub").elements(); iter2.hasNext();) {
-					String s = iter2.next().asText();
-	
-					boolQuery = boolQuery.should(QueryBuilders.termQuery("keywords.uri.all", s));
-					boolQuery = boolQuery.should(QueryBuilders.termQuery("dctype.uri.all", s));
-				}
-				
-				query.must(boolQuery);
-			}
-		}
-
-//		System.out.println("QUERY " + query);
-		return query;
-	}
 	
 	/**
 	 * List all Records from a Collection using a start item and a page size
@@ -808,7 +783,7 @@ public class CollectionObjectController extends WithResourceController {
 //				System.out.println("QUERYING FOR VIEW");
 				ElasticSearcher es = new ElasticSearcher();
 				
-				QueryBuilder query = getIndexCollectionQuery(colId, json);
+				QueryBuilder query = CollectionIndexController.getIndexCollectionQuery(colId, json);
 				
 //				log.info("QUERY " + query.toString());
 //				log.info("QUERC " + start + " " + count);

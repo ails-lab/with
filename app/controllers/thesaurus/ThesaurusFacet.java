@@ -104,6 +104,7 @@ public class ThesaurusFacet {
 				}
 				res.append(r1);
 			}
+			
 		}
 		
 		res.append("] }");

@@ -18,6 +18,8 @@ package model;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.PrintWriter;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Date;
@@ -83,11 +85,11 @@ import elastic.ElasticUtils;
 import elastic.ElasticSearcher.SearchOptions;
 
 public class IndexTest {
-	
-	@Test
-	public void genericTest() {
 
-		String id = "56bccfa575fe24428d3fcdb2";
+	@Test
+	public void genericTest() throws FileNotFoundException {
+
+		String id = "56fa7b8fc743431f1cd72645";
 //		String[] uris = new String[] {"http://bib.arts.kuleuven.be/photoVocabulary/30214"};
 		
 //	Result x = CollectionIndexController.getCollectionIndex(id);
@@ -98,14 +100,14 @@ public class IndexTest {
 		ElasticSearcher es = new ElasticSearcher();
 		
 		
-//		JsonNode json = Json.parse("{ \"terms\": [ ] }");
-		JsonNode json = Json.parse("{ \"terms\": [ { \"top\": \"http://bib.arts.kuleuven.be/photoVocabulary/31401\" } ] }");
+		JsonNode json = Json.parse("{ \"terms\": [ ] }");
+//		JsonNode json = Json.parse("{ \"terms\": [ { \"top\": \"http://bib.arts.kuleuven.be/photoVocabulary/31401\" } ] }");
 		System.out.println(id);
 		
 //				MatchQueryBuilder query = QueryBuilders.matchQuery("collectedIn.collectionId", id);
 		QueryBuilder query = CollectionObjectController.getIndexCollectionQuery(new ObjectId(id), json);
 
-//		System.out.println(query);
+		System.out.println(query);
 		
 		SearchOptions so = new SearchOptions(0, Integer.MAX_VALUE);
 
@@ -121,7 +123,6 @@ public class IndexTest {
 		
 		for (Iterator<SearchHit> iter = sh.iterator(); iter.hasNext();) {
 			SearchHit hit = iter.next();
-
 			SearchHitField keywords = hit.field("keywords.uri");
 			SearchHitField dctypes = hit.field("dctype.uri");
 
@@ -140,6 +141,7 @@ public class IndexTest {
 			}			
 			
 			if (olist.size() > 0 ) {
+				System.out.println(" > " + olist);
 				list.add(olist.toArray(new String[] {}));
 			}
 		}
@@ -154,9 +156,11 @@ public class IndexTest {
 		ThesaurusFacet tf = new ThesaurusFacet();
 		tf.create(list, selected);
 		
+		PrintWriter out = new PrintWriter("collection-index.txt");
 		
-		System.out.println(tf.toJSON(Language.EN));
-		
+//		System.out.println("RES " + tf.toJSON(Language.EN));
+		out.print(tf.toJSON(Language.EN));
+		out.close();
 		
 //		JsonNode json = Json.parse("{ \"administrative\": { \"externalId\": \"http://vocab.getty.edu/aat/300073692\", \"created\": { \"$date\": 1450700821484 } , \"lastModified\": { \"$date\": 1450700821484 } }, \"semantic\": { \"uri\": \"http://vocab.getty.edu/aat/300073692\", \"type\": \"http://www.w3.org/2004/02/skos/core#Collection\", \"prefLabel\": { \"en\": \"<balustrades, railings and their components>\", \"es\": \"<balaustradas, barandas y sus componentes>\", \"nl\": \"<balustrades, leuningen en hun onderdelen>\" }, \"members\": [ { \"uri\": \"http://vocab.getty.edu/aat/300001988\", \"type\": \"http://www.w3.org/2004/02/skos/core#Concept\", \"prefLabel\": { \"en\": \"barrier elements\", \"es\": \"elementos de barrera\", \"nl\": \"hekwerkelementen\" }, \"altLabel\": { \"en\": [ \"barrier element\", \"elements, barrier\" ] } }, { \"uri\": \"http://vocab.getty.edu/aat/300163880\", \"type\": \"http://www.w3.org/2004/02/skos/core#Concept\", \"prefLabel\": { \"en\": \"barriers and barrier elements\", \"es\": \"barreras y elementos de barrera\", \"nl\": \"hekwerken en hekwerkonderdelen\" } }, { \"uri\": \"http://vocab.getty.edu/aat/300000885\", \"type\": \"http://www.w3.org/2004/02/skos/core#Concept\", \"prefLabel\": { \"en\": \"architectural elements\", \"es\": \"elementos de arquitectura\", \"nl\": \"architecturale elementen\", \"zh\": \"建築元素\" }, \"altLabel\": { \"en\": [ \"architectural element\", \"elements, architectural\" ], \"es\": [ \"elemento de arquitectura\" ], \"nl\": [ \"architecturaal element\", \"bouwfragment\", \"bouwfragmenten\" ], \"zh\": [ \"jiàn zhú yuán sù\", \"jian zhu yuan su\", \"chien chu yüan su\" ] } }, { \"uri\": \"http://vocab.getty.edu/aat/300241584\", \"type\": \"http://www.w3.org/2004/02/skos/core#Collection\", \"prefLabel\": { \"en\": \"<components by specific context>\", \"es\": \"<componentes según contexto específico>\", \"nl\": \"<onderdelen naar specifieke context>\" }, \"altLabel\": { \"nl\": [ \"<onderdeel naar specifieke context>\" ] } }, { \"uri\": \"http://vocab.getty.edu/aat/300241583\", \"type\": \"http://www.w3.org/2004/02/skos/core#Concept\", \"prefLabel\": { \"en\": \"components (objects parts)\", \"es\": \"componentes\", \"nl\": \"onderdelen\" }, \"altLabel\": { \"en\": [ \"component (component object)\", \"parts (component objects)\" ], \"es\": [ \"componente\" ], \"nl\": [ \"onderdeel\" ] } }, { \"uri\": \"http://vocab.getty.edu/aat/300241490\", \"type\": \"http://www.w3.org/2004/02/skos/core#Collection\", \"prefLabel\": { \"en\": \"Components (hierarchy name)\", \"es\": \"componentes\", \"fr\": \"Composantes\", \"nl\": \"Onderdelen\" } }, { \"uri\": \"http://vocab.getty.edu/aat/300264092\", \"type\": \"http://www.w3.org/2004/02/skos/core#Collection\", \"prefLabel\": { \"en\": \"Objects Facet\", \"es\": \"faceta objetos\", \"nl\": \"Facet Objecten\" } }, { \"uri\": \"http://vocab.getty.edu/aat/300241508\", \"type\": \"http://www.w3.org/2004/02/skos/core#Collection\", \"prefLabel\": { \"en\": \"<object groupings by general context>\", \"es\": \"<grupos de objetos por contexto general>\", \"nl\": \"<objectgroepen naar algemene context>\" }, \"altLabel\": { \"nl\": [ \"<objectgroep naar algemene context>\" ] } }, { \"uri\": \"http://vocab.getty.edu/aat/300241507\", \"type\": \"http://www.w3.org/2004/02/skos/core#Concept\", \"prefLabel\": { \"en\": \"object groupings\", \"es\": \"grupos de objetos\", \"fr\": \"groupements d'objets\", \"nl\": \"objectgroepen\" }, \"altLabel\": { \"en\": [ \"object grouping\", \"groupings, object\" ], \"nl\": [ \"objectgroep\" ] } }, { \"uri\": \"http://vocab.getty.edu/aat/300241489\", \"type\": \"http://www.w3.org/2004/02/skos/core#Collection\", \"prefLabel\": { \"en\": \"Object Groupings and Systems (hierarchy name)\", \"es\": \"sistemas y grupos de objetos\", \"fr\": \"Ensembles d'objets et systèmes\", \"nl\": \"Objectgroepen en systemen\" } } ] } }");
 		
@@ -239,19 +243,5 @@ public class IndexTest {
 
 	}
 	
-	private static void follow(Map<SKOSTerm, Map> map, List<SKOSTerm> tops, Set<SKOSTerm> allURIs) {
-		System.out.println(tops);
-		for (SKOSTerm top : tops) {
-//			String topURI = top.getUri();
-			System.out.println(top);
-			
-			if (allURIs.contains(top)) {
-				Map<SKOSTerm, Map> nextMap = new HashMap<>();
-				map.put(top, nextMap);
-				follow(nextMap, DB.getThesaurusDAO().getByUri(top.getUri()).getSemantic().getNarrower(), allURIs);
-			}
-		}
-		
-	}
 	
 }

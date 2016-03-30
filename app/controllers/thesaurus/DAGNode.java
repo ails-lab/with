@@ -179,14 +179,18 @@ public class DAGNode<T> implements Comparable<DAGNode<T>> {
 //	
 
 	public String toString() {
-		return label.toString() + "  :  " + size;
+		return (label !=null?label.toString():"NULL") + "  :  " + size;
 	}
 
 	public String toJSON(Map<String, ObjectId> idMap, Map<String, SKOSSemantic> map, Language lang) {
-		return itoJSON(idMap, map, lang).toString();
+		Set<DAGNode<T>> used = new HashSet<>();
+		return itoJSON(idMap, map, lang, used).toString();
 	}
 	
-	private StringBuffer itoJSON(Map<String, ObjectId> idMap, Map<String, SKOSSemantic> map, Language lang) {
+	private StringBuffer itoJSON(Map<String, ObjectId> idMap, Map<String, SKOSSemantic> map, Language lang, Set<DAGNode<T>> used) {
+		if (!used.add(this)) {
+			return new StringBuffer();
+		}
 
 		T s = label.iterator().next();
 
@@ -195,11 +199,15 @@ public class DAGNode<T> implements Comparable<DAGNode<T>> {
 		StringBuffer sb = new StringBuffer();
 
 		if (id != null) {
-			sb.append("{ \"id\":\"" + idMap.get(s).toString() + "\", \"uri\":\"" + s + "\", \"label\":\"" + map.get(s).getPrefLabel().getLiteral(lang) + "\", \"size\":\"" + size + "\", \"children\": [");
+			String ss = map.get(s).getPrefLabel().getLiteral(lang) + " ";
+//			String ss = map.get(s).getPrefLabel().getLiteral(lang);
+			
+//			sb.append("{ \"id\":\"" + idMap.get(s).toString() + "\", \"uri\":\"" + s + "\", \"label\":\"" + ss + "\", \"size\":\"" + size + "\", \"children\": [");
+			sb.append("{ \"id\":\"" + idMap.get(s).toString() + "\", \"uri\":\"" + s + "\", \"label\":\"" + ss + size + "\", \"size\":\"" + size + "\", \"children\": [");
 			
 			int i = 0;
 			for (DAGNode<T> node : children) {
-				StringBuffer r1 = node.itoJSON(idMap, map, lang);
+				StringBuffer r1 = node.itoJSON(idMap, map, lang, used);
 				if (r1.length() > 0) {
 					if (i++ > 0) {
 						sb.append(", ");
@@ -209,7 +217,6 @@ public class DAGNode<T> implements Comparable<DAGNode<T>> {
 			}
 			
 			sb.append("] }");
-			
 		}
 		
 		return sb;
@@ -254,12 +261,19 @@ public class DAGNode<T> implements Comparable<DAGNode<T>> {
 	
 //	private static double THRESHOLD = 0.05;
 	
-	public boolean childRemoved = false;
+//	public boolean childRemoved = false;
 	
 	public void normalize(Set<T> selected) {
-
+		normalize(selected, new HashSet<>());
+	}
+	
+	public void normalize(Set<T> selected, Set<DAGNode<T>> used) {
+		if (!used.add(this)) {
+			return;
+		}
+		
 //		int totalch = 0;
-		Collection<DAGNode<T>> toAdd = new HashSet<>();
+//		Collection<DAGNode<T>> toAdd = new HashSet<>();
 		
 //		System.out.println(this.getLabel());
 //		for (Iterator<DAGNode<T>> iter =  children.iterator(); iter.hasNext();) {
@@ -268,7 +282,7 @@ public class DAGNode<T> implements Comparable<DAGNode<T>> {
 
 		for (Iterator<DAGNode<T>> iter =  children.iterator(); iter.hasNext();) {
 			DAGNode<T> child = iter.next();
-			child.normalize(selected);
+			child.normalize(selected, used);
 		}
 		
 //		for (Iterator<DAGNode<T>> iter =  children.iterator(); iter.hasNext();) {
@@ -298,16 +312,52 @@ public class DAGNode<T> implements Comparable<DAGNode<T>> {
 //			children.add(cc);
 //		}
 		
-		if (children.size() == 1) {
-			DAGNode<T> child = children.iterator().next();
-			if (size == child.size) {
-				children.clear();
-				children.addAll(child.children);
+		Set<DAGNode<T>> toAdd = new HashSet<>();
+//		for (Iterator<DAGNode<T>> iter = children.iterator(); iter.hasNext();) {
+//			DAGNode<T> child = iter.next();
+//			int psize = child.size();
+//			if (child.children.size() > 0) {
+//				int csize = 0;
+//				for (DAGNode<T> ch : child.children) {
+//					csize += ch.size;
+//				}
+//				
+//				if (csize == psize) {
+//					iter.remove();
+//					toAdd.addAll(child.children);
+//				}
+//			}
+//		}
+//
+//		for (DAGNode<T> ch : toAdd) {
+//			addChild(ch);
+//		}
+
+//		if (children.size() == 1) {
+//			DAGNode<T> child = children.iterator().next();
+//			if (size == child.size) {
+//				children.clear();
+//				children.addAll(child.children);
+//				label.clear();
+//				label.addAll(child.getLabel());
+//			}
+//		}
+		
+		toAdd.clear();
+//		Set<DAGNode<T>> toAdd = new HashSet<>();
+		for (Iterator<DAGNode<T>> iter = children.iterator(); iter.hasNext();) {
+			DAGNode<T> child = iter.next();
+			
+			if (child.size() == size) {
+				iter.remove();
+				toAdd.addAll(child.children);
 				label.clear();
 				label.addAll(child.getLabel());
-				
-				childRemoved = child.childRemoved;
 			}
+		}
+				
+		for (DAGNode<T> ch : toAdd) {
+			addChild(ch);
 		}
 	}
 

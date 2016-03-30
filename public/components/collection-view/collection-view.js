@@ -217,7 +217,12 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 			selfx.label = ko.observable();
 			selfx.children = ko.observableArray();
 			selfx.id = ko.observable(); 
+			selfx.size = ko.observable();
 		 
+			selfx.sizelabel = ko.pureComputed(function () {
+				return selfx.label + "(" + selfx.size + ")";
+			});
+			
 			selfx.toggleVisibility = function() {
 				selfx.isExpanded(!selfx.isExpanded());
 			};
@@ -275,7 +280,6 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 				"contentType": "application/json",
 				"success": function (data) {
 					self.index(new NodeModel(JSON.parse(data)));
-					
 					//loading(false);
 				},
 				"error": function (result) {
