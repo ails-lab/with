@@ -880,7 +880,8 @@ define("app", ['knockout', 'facebook', 'imagesloaded', 'moment', './js/app/plugi
 		if(usercookie!=null){
 		   var keys=ExtractQueryString(usercookie);
 		   if(self.currentUser._id()==undefined || self.currentUser._id().length==0){
-		     if(keys["user"]){self.currentUser._id(keys["user"]);self.reloadUser();}}
+		   	if(keys["username"]){self.currentUser.username(keys["username"]);}
+		   	if(keys["user"]){self.currentUser._id(keys["user"]);self.reloadUser();}}
 		    return (keys["user"]==undefined ? false : true);
 		} else{return false;}
 
