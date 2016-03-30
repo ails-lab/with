@@ -253,9 +253,6 @@ public class ElasticUtils {
 					media.put("quality", Json.toJson(emo.getQuality()));
 					media.put("width", emo.getWidth());
 					media.put("height", emo.getHeight());
-
-
-
 					/*
 					 * Eliminate null values from Media json structures
 					 */

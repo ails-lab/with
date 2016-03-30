@@ -1,0 +1,151 @@
+//- index.jade
+- var title = "WITH - Static"
+- var page  = "Static"
+
+doctype html
+html
+
+	// head
+	include ./includes/head.inc.jade
+
+	// body
+	body
+
+		// header
+		header
+			.wrap
+				.container
+					a(href="index.html").logo
+						img(src="img/ui/logo.png")
+
+					nav
+						ul
+							li
+								a(href="index.html" title="home") HOME
+							li
+								a(href="search-view.html" title="home") EXPLORE
+							li
+								a(href="about.html" title="home") ABOUT
+							li.mobile
+								a( href="login.html" class="login") SIGN IN
+								a( href="register.html" class="register") REGISTER
+
+					// login
+					section.login-section
+						a( href="login.html" class="login") SIGN IN
+						a( href="register.html" class="register") REGISTER
+
+					// mobile menu trigger
+					a.mobile-trigger( href="#" )
+						.burger
+
+		// main
+		div( role="main" )
+
+			// static page
+			.static
+
+				// container
+				.container
+
+					// aside
+					aside
+						ul
+							li.active
+								a( href="faq.html" title="Frequently Asked Question" )
+									| FAQ
+							li
+								a( href="terms.html" title="Terms of use" )
+									| Terms of use
+							li
+								a( href="privacy.html" title="Terms of use" )
+									| Privacy Policy
+							li
+								a( href="feedback.html" title="Feedback" )
+									| Feedback &amp; Contact
+					
+					// static content
+					.staticcontent
+						.pads
+							// h1
+							h1 Frequently Asked Questions
+							p
+								| It suddenly struck me that that tiny pea, pretty and blue, was the Earth. I put up my thumb and shut one eye, and my thumb blotted out the planet Earth. I didn't feel like a giant. I felt very, very small.
+
+							hr
+							
+							// FAQ
+							.panel-group#accordion( role="tablist" aria-multiselectable="true" )
+								
+								// panel one
+								.panel.panel-default
+									.panel-heading( role="tab" )
+										a.collapsed( role="button" data-toggle="collapse" data-parent="#accordion" href="#question1" aria-expanded="true")
+											| Anim pariatur cliche reprehenderit, enim eiusmod high?
+											i.arrow
+
+									#question1.panel-collapse.collapse( role="tabpanel" )
+										.panel-body
+											| Anim pariatur cliche reprehenderit, enim eiusmod high life accusamus terry richardson ad squid. 
+											| 3 wolf moon officia aute, non cupidatat skateboard dolor brunch. Food truck quinoa nesciunt 
+											| laborum eiusmod. Brunch 3 wolf moon tempor, sunt aliqua put a bird on it squid single-origin 
+											| coffee nulla assumenda shoreditch et. Nihil anim keffiyeh helvetica, craft beer labore wes 
+											| anderson cred nesciunt sapiente ea proident. Ad vegan excepteur butcher vice lomo. Leggings 
+											| occaecat craft beer farm-to-table, raw denim aesthetic synth nesciunt you probably haven't 
+											| heard of them accusamus labore sustainable VHS.
+
+								// panel one
+								.panel.panel-default
+									.panel-heading( role="tab" )
+										a.collapsed( role="button" data-toggle="collapse" data-parent="#accordion" href="#question2" aria-expanded="true")
+											| Brunch 3 wolf moon tempor, sunt aliqua put a bird on it squid?
+											i.arrow
+
+									#question2.panel-collapse.collapse( role="tabpanel" )
+										.panel-body
+											| Anim pariatur cliche reprehenderit, enim eiusmod high life accusamus terry richardson ad squid. 
+											| 3 wolf moon officia aute, non cupidatat skateboard dolor brunch. Food truck quinoa nesciunt 
+											| laborum eiusmod. Brunch 3 wolf moon tempor, sunt aliqua put a bird on it squid single-origin 
+											| coffee nulla assumenda shoreditch et. Nihil anim keffiyeh helvetica, craft beer labore wes 
+											| anderson cred nesciunt sapiente ea proident. Ad vegan excepteur butcher vice lomo. Leggings 
+											| occaecat craft beer farm-to-table, raw denim aesthetic synth nesciunt you probably haven't 
+											| heard of them accusamus labore sustainable VHS.
+
+								// panel one
+								.panel.panel-default
+									.panel-heading( role="tab" )
+										a.collapsed( role="button" data-toggle="collapse" data-parent="#accordion" href="#question3" aria-expanded="true" )
+											| Nihil anim keffiyeh helvetica, craft beer labore?
+											i.arrow
+
+									#question3.panel-collapse.collapse( role="tabpanel" )
+										.panel-body
+											| Anim pariatur cliche reprehenderit, enim eiusmod high life accusamus terry richardson ad squid. 
+											| 3 wolf moon officia aute, non cupidatat skateboard dolor brunch. Food truck quinoa nesciunt 
+											| laborum eiusmod. Brunch 3 wolf moon tempor, sunt aliqua put a bird on it squid single-origin 
+											| coffee nulla assumenda shoreditch et. Nihil anim keffiyeh helvetica, craft beer labore wes 
+											| anderson cred nesciunt sapiente ea proident. Ad vegan excepteur butcher vice lomo. Leggings 
+											| occaecat craft beer farm-to-table, raw denim aesthetic synth nesciunt you probably haven't 
+											| heard of them accusamus labore sustainable VHS.
+
+								// panel one
+								.panel.panel-default
+									.panel-heading( role="tab" )
+										a.collapsed( role="button" data-toggle="collapse" data-parent="#accordion" href="#question4" aria-expanded="true" )
+											| Them accusamus labore sustainable VHS?
+											i.arrow
+
+									#question4.panel-collapse.collapse( role="tabpanel" )
+										.panel-body
+											| Anim pariatur cliche reprehenderit, enim eiusmod high life accusamus terry richardson ad squid. 
+											| 3 wolf moon officia aute, non cupidatat skateboard dolor brunch. Food truck quinoa nesciunt 
+											| laborum eiusmod. Brunch 3 wolf moon tempor, sunt aliqua put a bird on it squid single-origin 
+											| coffee nulla assumenda shoreditch et. Nihil anim keffiyeh helvetica, craft beer labore wes 
+											| anderson cred nesciunt sapiente ea proident. Ad vegan excepteur butcher vice lomo. Leggings 
+											| occaecat craft beer farm-to-table, raw denim aesthetic synth nesciunt you probably haven't 
+											| heard of them accusamus labore sustainable VHS.
+		// footer
+		include ./includes/footer.view.jade
+			
+	// script
+	include ./includes/script.inc.jade

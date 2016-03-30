@@ -20,18 +20,18 @@ import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
-import model.resources.CollectionObject;
 import model.usersAndGroups.UserGroup;
-import controllers.GroupManager.GroupType;
 
 import org.bson.types.ObjectId;
+import org.mongodb.morphia.geo.Point;
 import org.mongodb.morphia.query.Query;
 import org.mongodb.morphia.query.UpdateOperations;
 
-import play.Logger;
+import com.fasterxml.jackson.databind.JsonNode;
+
+import controllers.GroupManager.GroupType;
 
 public class UserGroupDAO extends DAO<UserGroup> {
-	static private final Logger.ALogger log = Logger.of(UserGroup.class);
 
 	public UserGroupDAO() {
 		super(UserGroup.class);
@@ -57,7 +57,8 @@ public class UserGroupDAO extends DAO<UserGroup> {
 
 	public List<UserGroup> findPublic(GroupType groupType, int offset, int count) {
 		Query<UserGroup> q = createQuery().disableValidation()
-				.field("privateGroup").equal(false).offset(offset).limit(count).order("-created");
+				.field("privateGroup").equal(false).offset(offset).limit(count)
+				.order("-created");
 		if (groupType.equals(GroupType.All)) {
 			return find(q).asList();
 		}
@@ -76,23 +77,23 @@ public class UserGroupDAO extends DAO<UserGroup> {
 		}
 		return find(q).asList();
 	}
-	
-	public int getGroupCount(Set<ObjectId> groupIds,
-			GroupType groupType) {
+
+	public int getGroupCount(Set<ObjectId> groupIds, GroupType groupType) {
 		Query<UserGroup> q = createQuery().disableValidation().field("_id")
 				.in(groupIds);
 		if (!groupType.equals(GroupType.All)) {
 			q.field("className").equal(
 					"model.usersAndGroups." + groupType.toString());
 		}
-		return (int) count(q);		
+		return (int) count(q);
 	}
 
 	public List<UserGroup> findPublicWithRestrictions(GroupType groupType,
 			int offset, int count, Set<ObjectId> excludedIds) {
 		Query<UserGroup> q = createQuery().disableValidation()
 				.field("privateGroup").equal(false).field("_id")
-				.notIn(excludedIds).offset(offset).limit(count).order("-created");
+				.notIn(excludedIds).offset(offset).limit(count)
+				.order("-created");
 		if (groupType.equals(GroupType.All)) {
 			return find(q).asList();
 		}
@@ -114,21 +115,37 @@ public class UserGroupDAO extends DAO<UserGroup> {
 
 	public List<UserGroup> getByGroupNamePrefix(String prefix) {
 		Query<UserGroup> q = this.createQuery().field("username")
-				.startsWith(prefix);
+				.startsWithIgnoreCase(prefix);
 		return find(q).asList();
 
 	}
-	
+
 	public void setCreated() {
 		Query<UserGroup> q = this.createQuery().field("created").doesNotExist();
-		UpdateOperations<UserGroup> updateOps = this
-				.createUpdateOperations();
+		UpdateOperations<UserGroup> updateOps = this.createUpdateOperations();
 		updateOps.set("created", new Date());
 		List<UserGroup> a = find(q).asList();
-		for (UserGroup g :a) {
+		for (UserGroup g : a) {
 			q = this.createQuery().field("_id").equal(g.getDbId());
 			this.update(q, updateOps);
 		}
 	}
 
+	public void editGroup(ObjectId groupId, JsonNode json) {
+		Query<UserGroup> q = this.createQuery().field("_id").equal(groupId);
+		UpdateOperations<UserGroup> updateOps = this.createUpdateOperations();
+		updateFields("", json, updateOps);
+		this.update(q, updateOps);
+	}
+
+	public void updatePageCoordinates(ObjectId groupId, Point point) {
+		Query<UserGroup> q = this.createQuery().field("_id").equal(groupId);
+		UpdateOperations<UserGroup> updateOps = this.createUpdateOperations()
+				.disableValidation();
+		if (point != null)
+			updateOps.set("page.coordinates", point);
+		else
+			updateOps.unset("page.coordinates");
+		this.update(q, updateOps);
+	}
 }

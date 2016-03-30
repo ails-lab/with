@@ -1,4 +1,4 @@
-define(['knockout', 'text!./exhibition-view.html', 'app', 'magnific-popup', 'slick'], function (ko, template, app, magnificPopup, slick) {
+define(['knockout', 'text!./_exhibition-view.html', 'app', 'magnific-popup', 'slick'], function (ko, template, app, magnificPopup, slick) {
 
 	ko.bindingHandlers.backgroundImage = {
 		update: function (element, valueAccessor) {
@@ -99,6 +99,7 @@ define(['knockout', 'text!./exhibition-view.html', 'app', 'magnific-popup', 'sli
 		self.showCarousel = ko.observable(false);
 
 		self.initCarousel = function () {
+			WITHApp.initTooltip();
 			WITHApp.initCarousel();
 			WITHApp.initExpandExhibitionText();
 			WITHApp.initImageZoom();

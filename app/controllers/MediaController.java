@@ -257,7 +257,7 @@ public class MediaController extends Controller {
 	}
 
 	private static MediaObject makeThumbNew(MediaObject mediaObject,
-			MediaVersion version) throws IOException {
+		MediaVersion version) throws IOException {
 
 		int newWidth = 0;
 		int newHeight;

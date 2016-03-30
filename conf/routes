@@ -14,8 +14,8 @@ PUT      /notifications/read                       controllers.NotificationContr
 POST     /notifications/send                       controllers.NotificationController.sendMessage(receiverId)
 
 POST     /api/advancedsearch        controllers.SearchController.searchwithfilter()
-POST     /api/initialfilters        controllers.SearchController.getfilters()  
-GET     /api/searchsources        controllers.SearchController.searchSources()
+POST     /api/initialfilters        controllers.SearchController.getfilters()
+GET      /api/searchsources        controllers.SearchController.searchSources()
 POST     /api/search            	controllers.SearchController.search()
 
 #Autocomplete
@@ -41,6 +41,7 @@ GET		 /collection/favorites					controllers.RecordResourceController.getFavorite
 GET      /collection/:id/listUsers				controllers.CollectionObjectController.listUsersWithRights(id)
 GET      /collection/:id/list		   	        controllers.CollectionObjectController.listRecordResources(id, format: String ?="noContent", start: Integer ?=0, count: Integer ?=10)
 GET		 /collection/favoriteCollection			controllers.CollectionObjectController.getFavoriteCollection()
+PUT		 /collection/sort/:id					controllers.CollectionObjectController.sortCollectionObject(id)
 
 POST     /collection/liked			            controllers.WithResourceController.addToFavorites()
 POST     /collection/:id/addRecord              controllers.WithResourceController.addRecordToCollection(id, position: play.libs.F.Option[Integer], noDouble: Boolean ?= false)
@@ -48,11 +49,10 @@ POST 	/collection/:id/addRecords				controllers.WithResourceController.addRecord
 
 DELETE   /collection/:id/removeRecord           controllers.WithResourceController.removeRecordFromCollection(id, recId, position: play.libs.F.Option[Integer], all: Boolean ?= false)
 PUT		 /collection/:id/moveRecord				controllers.WithResourceController.moveRecordInCollection(id, recordId, oldPosition: Int, newPosition: Int)
-DELETE   /collection/unliked/:recId			    controllers.WithResourceController.removeFromFavorites(recId)
+POST     /collection/unliked    			    controllers.WithResourceController.removeFromFavorites()
 
-POST     /collection		                    controllers.CollectionObjectController.createCollectionObject(collectionType: String ?= "SimpleCollection")
-POST     /collection/importSearch		        controllers.CollectionObjectController.importSearch()
-GET     /collection/importEuropeanaCollection	controllers.CollectionObjectController.createAndFillEuropeanaCollection(id: String, limit:Integer ?=-1)
+POST     /collection		                    controllers.CollectionObjectController.createCollectionObject()
+GET     /collection/importEuropeanaCollection	controllers.CollectionObjectController.createAndFillEuropeanaCollection(id)
 GET	     /collection/:id 	        			controllers.CollectionObjectController.getCollectionObject(id)
 PUT		 /collection/:id 						controllers.CollectionObjectController.editCollectionObject(id)
 DELETE   /collection/:id	                    controllers.CollectionObjectController.deleteCollectionObject(id)
@@ -70,7 +70,7 @@ GET      /group/findByGroupName                 controllers.GroupManager.findByG
 GET		/group/descendantGroups/:groupId		controllers.GroupManager.getDescendantGroups(groupId, groupType: String  ?="All", direct: Boolean ?=true, collectionHits:Boolean ?= false)
 GET		/group/descendantOrganizations/:groupId	controllers.GroupManager.getDescendantGroups(groupId, groupType: String  ?="Organization", direct: Boolean ?=true, collectionHits:Boolean ?= false)
 GET		/group/descendantProjects/:groupId		controllers.GroupManager.getDescendantGroups(groupId, groupType: String  ?="Project", direct: Boolean ?=true, collectionHits:Boolean ?= false)
-GET		/group/list								controllers.GroupManager.listUserGroups(groupType: String ?="Project", offset: Integer ?=0, count: Integer ?=10)
+GET		/group/list								controllers.GroupManager.listUserGroups(groupType: String ?="Project", offset: Integer ?=0, count: Integer ?=10, belongsOnly: Boolean ?=false)
 PUT      /group/:id                             controllers.GroupManager.editGroup(id)
 DELETE   /group/:id                             controllers.GroupManager.deleteGroup(id)
 GET      /group/:id                             controllers.GroupManager.getGroup(id)

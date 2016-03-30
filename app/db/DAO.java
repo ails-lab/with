@@ -398,7 +398,8 @@ public class DAO<E> extends BasicDAO<E, ObjectId> {
 	}
 
 	public boolean existsFieldWithValue(String field, Object value) {
-		Query<E> q = this.createQuery().disableValidation().field(field).equal(value).limit(1);
+		Query<E> q = this.createQuery().disableValidation().field(field)
+				.equal(value).limit(1);
 		return (this.find(q).asList().size() == 0 ? false : true);
 	}
 
@@ -458,6 +459,8 @@ public class DAO<E> extends BasicDAO<E, ObjectId> {
 			JsonNode fieldValue = node.get(fieldName);
 			String newFieldName = parentField.isEmpty() ? fieldName
 					: parentField + "." + fieldName;
+			if (fieldValue.isNull())
+				continue;
 			if (fieldValue.isObject()) {
 				updateFields(newFieldName, fieldValue, updateOps);
 			} else {

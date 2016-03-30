@@ -30,7 +30,7 @@ var require = {
 		"selectize"                 : "bower_modules/selectize/dist/js/standalone/selectize.min",
 		"autocomplete"              : "bower_modules/devbridge-autocomplete/dist/jquery.autocomplete.min",
 		"jquery.ui.widget"          : "bower_modules/jquery-ui/ui/minified/widget.min",
-		"jquery.ui"                 : "bower_modules/jquery-ui/jquery-ui.min",
+		"jquery.ui"					: "js/jquery-ui-custom/jquery-ui.min",
 		"load-image"                : "bower_modules/blueimp-load-image/js/load-image",
 		"canvas-to-blob"            : "bower_modules/blueimp-canvas-to-blob/js/canvas-to-blob.min",
 		"jquery.fileupload"         : "bower_modules/jquery-file-upload/js/jquery.fileupload",

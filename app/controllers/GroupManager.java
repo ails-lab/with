@@ -16,33 +16,14 @@
 
 package controllers;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
-import java.util.Optional;
 
-import javax.validation.ConstraintViolation;
-
-import org.bson.types.ObjectId;
-import org.mongodb.morphia.geo.GeoJson;
-import org.mongodb.morphia.geo.Point;
-import org.mongodb.morphia.query.Criteria;
-import org.mongodb.morphia.query.CriteriaContainer;
-import org.mongodb.morphia.query.Query;
-
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ObjectReader;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-
-import db.DAO.QueryOperator;
-import db.DB;
-import model.basicDataTypes.Language;
 import model.basicDataTypes.WithAccess.Access;
 import model.resources.CollectionObject;
 import model.usersAndGroups.Organization;
@@ -51,17 +32,30 @@ import model.usersAndGroups.Project;
 import model.usersAndGroups.User;
 import model.usersAndGroups.UserGroup;
 import model.usersAndGroups.UserOrGroup;
+
+import org.bson.types.ObjectId;
+import org.mongodb.morphia.geo.GeoJson;
+import org.mongodb.morphia.geo.Point;
+import org.mongodb.morphia.query.Criteria;
+import org.mongodb.morphia.query.Query;
+
 import play.Logger;
 import play.Logger.ALogger;
-import play.data.validation.Validation;
 import play.libs.Json;
 import play.mvc.Controller;
 import play.mvc.Result;
 import sources.core.HttpConnector;
 import utils.AccessManager;
 import utils.Tuple;
-import utils.AccessManager.Action;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+
+import db.DAO.QueryOperator;
+import db.DB;
+
+@SuppressWarnings({ "unchecked", "rawtypes" })
 public class GroupManager extends Controller {
 
 	public static final ALogger log = Logger.of(UserGroup.class);
@@ -148,6 +142,7 @@ public class GroupManager extends Controller {
 				error.put("error", "Cannot save group to database!");
 				return internalServerError(error);
 			}
+			updatePage(newGroup.getDbId(), json);
 			return ok(Json.toJson(newGroup));
 		} catch (Exception e) {
 			error.put("error", e.getMessage());
@@ -175,111 +170,80 @@ public class GroupManager extends Controller {
 	 * @return the updated group metadata
 	 */
 	public static Result editGroup(String groupId) {
-		ObjectNode json = (ObjectNode) request().body().asJson();
+		JsonNode json = request().body().asJson();
 		ObjectNode result = Json.newObject();
-		UserGroup group = DB.getUserGroupDAO().get(new ObjectId(groupId));
-		if (group != null) {
-			ObjectId userId = new ObjectId(AccessManager
-					.effectiveUserIds(session().get("effectiveUserIds")).get(0));
-			User user = DB.getUserDAO().get(userId);
-			Set<ObjectId> groupAdmins = group.getAdminIds();
-			if (groupAdmins.contains(userId) || user.isSuperUser()) {
-				try {
-					if (json.has("username")) {
-						if (json.get("username") != null) {
-							if (!group.getUsername().equals(
-									json.get("username").asText())) {
-								if (!uniqueGroupName(json.get("username").asText())) {
-									return badRequest("Group name already exists! Please specify another name.");
-								}
-							}
-						}
-					}
-					// Update user page
-					if (json.has("page")
-							&& ((group instanceof Organization) || (group instanceof Project))) {
-						String address = null, city = null, country = null;
-						Page oldPage = null;
-						JsonNode newPage = json.get("page");
-						// Keep previous page fields
-						if (group instanceof Organization) {
-							oldPage = ((Organization) group).getPage();
-						} else if (group instanceof Project) {
-							oldPage = ((Project) group).getPage();
-						}
-						// Update Page
-						ObjectMapper pageObjectMapper = new ObjectMapper();
-						ObjectReader pageUpdator = pageObjectMapper
-								.readerForUpdating(oldPage);
-						Page page;
-						page = pageUpdator.readValue(newPage);
-						// In case that the location has changed we need to calculate
-						// the new coordinates
-						if (((json.get("page").get("address") != null)
-								|| (json.get("page").get("city") != null) || (json.get(
-								"page").get("country") != null))) {
-							address = page.getAddress();
-							city = page.getCity();
-							country = page.getCountry();
-							String fullAddress = ((address == null) ? "" : address)
-									+ "," + ((city == null) ? "" : city) + ","
-									+ ((country == null) ? "" : country);
-							fullAddress = fullAddress.replace(" ", "+");
-							try {
-								JsonNode response = HttpConnector.getWSHttpConnector()
-										.getURLContent("https://maps.googleapis.com/maps/api/geocode/json?address="
-												+ fullAddress);
-								Point coordinates = GeoJson.point(
-										response.get("results").get(0).get("geometry")
-												.get("location").get("lat").asDouble(),
-										response.get("results").get(0).get("geometry")
-												.get("location").get("lng").asDouble());
-								page.setCoordinates(coordinates);
-							} catch (Exception e) {
-								log.error("Cannot update coordinates of group Page", e);
-								page.setCoordinates(null);
-							}
-						}
-						json.remove("page");
-						if (group instanceof Organization) {
-							((Organization) group).setPage(page);
-						} else if (group instanceof Project) {
-							((Project) group).setPage(page);
-						}
-					}
-					UserGroup oldVersion = group;
-					ObjectMapper objectMapper = new ObjectMapper();
-					ObjectReader updator = objectMapper.readerForUpdating(oldVersion);
-					UserGroup newVersion;
-					newVersion = updator.readValue(json);
-					Set<ConstraintViolation<UserGroup>> violations = Validation
-							.getValidator().validate(newVersion);
-					if (!violations.isEmpty()) {
-						ArrayNode properties = Json.newObject().arrayNode();
-						for (ConstraintViolation<UserGroup> cv : violations) {
-							properties.add(Json.parse("{\"" + cv.getPropertyPath()
-									+ "\":\"" + cv.getMessage() + "\"}"));
-						}
-						result.put("error", properties);
-						return badRequest(result);
-					}
-
-					// update group on mongo
-					DB.getUserGroupDAO().makePermanent(newVersion);
-					return ok(Json.toJson(newVersion));
-				} catch (IOException e) {
-					e.printStackTrace();
-					return internalServerError(e.getMessage());
-				}
-			} else {
-				result.put("error",
-						"Only an admin of the group has the right to edit the group.");
-				return forbidden(result);
-			}
-		}
-		else {
+		ObjectId groupDbId = new ObjectId(groupId);
+		UserGroup group = DB.getUserGroupDAO().get(groupDbId);
+		if (group == null) {
 			result.put("error", "Cannot retrieve group from database.");
 			return internalServerError(result);
+		}
+		ObjectId userId = new ObjectId(AccessManager.effectiveUserIds(
+				session().get("effectiveUserIds")).get(0));
+		User user = DB.getUserDAO().get(userId);
+		Set<ObjectId> groupAdmins = group.getAdminIds();
+		if (!groupAdmins.contains(userId) && !user.isSuperUser()) {
+			result.put("error",
+					"Only an admin of the group has the right to edit the group.");
+			return forbidden(result);
+		}
+		if (json.has("username") && json.get("username") != null
+				&& !group.getUsername().equals(json.get("username").asText())) {
+			if (!uniqueGroupName(json.get("username").asText())) {
+				result.put("error",
+						"Group name already exists! Please specify another name.");
+				return badRequest(result);
+			}
+		}
+		DB.getUserGroupDAO().editGroup(groupDbId, json);
+		updatePage(groupDbId, json);
+		return ok(Json.toJson(DB.getUserGroupDAO().get(groupDbId)));
+	}
+
+	
+	
+	private static void updatePage(ObjectId groupId, JsonNode json) {
+		UserGroup group = DB.getUserGroupDAO().get(groupId);
+		if (!json.has("page") || !(group instanceof Organization)
+				&& !(group instanceof Project))
+			return;
+		Page newPage = Json.fromJson(json.get("page"), Page.class);
+		if (newPage.getAddress() == null && newPage.getCity() == null
+				&& newPage.getCountry() == null)
+			return;
+		Page oldPage = null;
+		// Keep previous page fields
+		if (group instanceof Organization)
+			oldPage = ((Organization) group).getPage();
+		else if (group instanceof Project)
+			oldPage = ((Project) group).getPage();
+
+		// In case that the location has changed we need to calculate the
+		// new coordinates
+		String address = (newPage.getAddress() != null) ? newPage.getAddress()
+				: oldPage.getAddress();
+		String city = (newPage.getCity() != null) ? newPage.getCity() : oldPage
+				.getCity();
+		String country = (newPage.getCountry() != null) ? newPage.getCountry()
+				: oldPage.getCountry();
+		String fullAddress = ((address == null) ? "" : address) + ","
+				+ ((city == null) ? "" : city) + ","
+				+ ((country == null) ? "" : country);
+		fullAddress = fullAddress.replace(" ", "+");
+		try {
+			JsonNode response = HttpConnector.getWSHttpConnector()
+					.getURLContent("https://maps.googleapis.com/maps/api/geocode/json?address="
+							+ fullAddress);
+			Point coordinates = GeoJson.point(
+					response.get("results").get(0).get("geometry")
+							.get("location").get("lat").asDouble(),
+					response.get("results").get(0).get("geometry")
+							.get("location").get("lng").asDouble());
+			DB.getUserGroupDAO().updatePageCoordinates(groupId, coordinates);
+		} catch (Exception e) {
+			log.error("Cannot update coordinates of group Page", e);
+			DB.getUserGroupDAO().updatePageCoordinates(groupId, null);
+
 		}
 	}
 
@@ -354,11 +318,11 @@ public class GroupManager extends Controller {
 			groupJSON.put("username", group.getUsername());
 			groupJSON.put("about", group.getAbout());
 			if (collectionId != null) {
-				CollectionObject collection = DB.getCollectionObjectDAO().getById(
-						new ObjectId(collectionId));
+				CollectionObject collection = DB.getCollectionObjectDAO()
+						.getById(new ObjectId(collectionId));
 				if (collection != null) {
-					Access accessRights = collection.getAdministrative().getAccess().getAcl(
-							group.getDbId());
+					Access accessRights = collection.getAdministrative()
+							.getAccess().getAcl(group.getDbId());
 					if (accessRights != null)
 						groupJSON.put("accessRights", accessRights.toString());
 					else
@@ -377,13 +341,22 @@ public class GroupManager extends Controller {
 		for (UserGroup group : groups) {
 			ObjectNode g = (ObjectNode) Json.toJson(group);
 			if (collectionHits) {
-				Query<CollectionObject> q = DB.getCollectionObjectDAO().createQuery();
-				Criteria criteria1 = DB.getCollectionObjectDAO().formAccessLevelQuery(new Tuple(restrictedById, Access.READ), QueryOperator.GTE);
-				Criteria criteria2 = DB.getCollectionObjectDAO().formAccessLevelQuery(new Tuple(group.getDbId(), Access.WRITE), QueryOperator.GTE);
-				//Criteria criteria3 = DB.getCollectionObjectDAO().createQuery()
-					//	.criteria("administrative.access.isPublic").equal(true);
+				Query<CollectionObject> q = DB.getCollectionObjectDAO()
+						.createQuery();
+				Criteria criteria1 = DB.getCollectionObjectDAO()
+						.formAccessLevelQuery(
+								new Tuple(restrictedById, Access.READ),
+								QueryOperator.GTE);
+				Criteria criteria2 = DB.getCollectionObjectDAO()
+						.formAccessLevelQuery(
+								new Tuple(group.getDbId(), Access.WRITE),
+								QueryOperator.GTE);
+				// Criteria criteria3 =
+				// DB.getCollectionObjectDAO().createQuery()
+				// .criteria("administrative.access.isPublic").equal(true);
 				q.and(criteria1, criteria2);
-				Tuple<Integer, Integer> hits = DB.getCollectionObjectDAO().getHits(q, Optional.ofNullable(null));
+				Tuple<Integer, Integer> hits = DB.getCollectionObjectDAO()
+						.getHits(q, Optional.ofNullable(null));
 				g.put("totalCollections", hits.x);
 				g.put("totalExhibitions", hits.y);
 			}
@@ -513,8 +486,7 @@ public class GroupManager extends Controller {
 		return userJSON;
 	}
 
-
-	public static ArrayNode userGroupsAsJSON(List<UserGroup> groups) {
+	public static ArrayNode userGroupsToJSON(List<UserGroup> groups) {
 		ArrayNode result = Json.newObject().arrayNode();
 		for (UserGroup group : groups) {
 			ObjectNode g = (ObjectNode) Json.toJson(group);
@@ -524,8 +496,6 @@ public class GroupManager extends Controller {
 			User user = DB.getUserDAO().get(userId);
 			g.put("firstName", user.getFirstName());
 			g.put("lastName", user.getLastName());
-
-			//
 			Query<CollectionObject> q = DB.getCollectionObjectDAO()
 					.createQuery();
 			// Criteria criteria1 =
@@ -542,19 +512,16 @@ public class GroupManager extends Controller {
 			Tuple<Integer, Integer> hits = DB.getCollectionObjectDAO().getHits(
 					q, Optional.ofNullable(null));
 			ObjectNode count = Json.newObject();
-
 			count.put("Collections", hits.x);
 			count.put("Exhibitions", hits.y);
 			g.put("count", count);
-			//
-
 			result.add(g);
 		}
 		return result;
 	}
 
-
-	public static Result listUserGroups(String groupType, int offset, int count) {
+	public static Result listUserGroups(String groupType, int offset,
+			int count, boolean belongsOnly) {
 		List<UserGroup> groups = new ArrayList<UserGroup>();
 		try {
 			GroupType type = GroupType.valueOf(groupType);
@@ -569,10 +536,7 @@ public class GroupManager extends Controller {
 			groups = DB.getUserGroupDAO().findByIds(userGroupsIds, type,
 					offset, count);
 			if (groups.size() == count)
-				//return ok(Json.toJson(groups));
-
-				return ok(userGroupsAsJSON(groups));
-
+				return ok(userGroupsToJSON(groups));
 			int userGroupCount = DB.getUserGroupDAO().getGroupCount(
 					userGroupsIds, type);
 			if (offset < userGroupCount)
@@ -580,15 +544,14 @@ public class GroupManager extends Controller {
 			else
 				offset = offset - userGroupCount;
 			count = count - groups.size();
-			groups.addAll(DB.getUserGroupDAO().findPublicWithRestrictions(type,
-					offset, count, userGroupsIds));
-//			return ok(Json.toJson(groups));
-			return ok(userGroupsAsJSON(groups));
-
+			if (!belongsOnly)
+				groups.addAll(DB.getUserGroupDAO().findPublicWithRestrictions(
+						type, offset, count, userGroupsIds));
+			return ok(userGroupsToJSON(groups));
+			// return ok(Json.toJson(groups));
 		} catch (Exception e) {
-			//return ok(Json.toJson(groups));
-			return ok(userGroupsAsJSON(groups));
-
+			return ok(userGroupsToJSON(groups));
+			// return ok(Json.toJson(groups));
 		}
 	}
 }

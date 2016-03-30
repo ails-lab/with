@@ -1,0 +1,204 @@
+// Imports main.less file (along with anything that imports)
+@import "main.less";
+
+// Add any modifications here
+#uploaded-image > input
+{
+    display: none;
+}
+
+// Validation Decoration
+.has-error {
+	color: #a94442!important;
+}
+a.redheart {
+	color: #ec5a62!important;
+}
+
+.closemedia{
+    cursor: pointer;
+}
+
+// Loading Icon
+body div[role='main'] .more {
+	bottom: 100px;
+	right: 40px;
+	padding: 5px;
+	position: fixed;
+	z-index: 1032;
+	font-size: 25px;
+}
+
+/* Collection View
+body div[role="main"] .wrapper main section.collection .list-head .upload,
+body div[role="main"] .wrapper main section.exhibition .list-head .upload,
+body div[role="main"] .wrapper main section.favorite .list-head .upload,
+body div[role="main"] .wrapper main section.project .list-head .upload {
+    padding-left: 10px;
+	cursor: pointer;
+}
+
+body div[role='main'] .wrapper main section.favorite .list-head .list-control .fa {
+	cursor:pointer
+}
+body div[role='main'] .wrapper main section.collection .list-body.grids li.sizer {
+	width: 25%; margin-left:0;
+}
+
+body div[role='main'] .wrapper main section.collection .list-body.grids li.item {
+	width: 25%; padding: 0 15px 0 15px;float:none;margin-left:0;
+}
+*/
+body div[role='main'] .wrapper section.action .button-group,
+.list-control a,
+.action-group a {
+	cursor: pointer;
+}
+
+// My Groups
+body div[role="main"] .wrapper main section.project section.project-list .list-body.list li .thumbnails .wrap.small {
+	width: 100px;
+}
+
+body div[role="main"] .wrapper main section.collection .list-body.list li .thumbnails .wrap,
+body div[role="main"] .wrapper main section.exhibition .list-body.list li .thumbnails .wrap   {
+  overflow: hidden;
+}
+
+// Remove dummy map
+body div[role="main"] .wrapper main section.collection section.hero .map,
+body div[role="main"] .wrapper main section.exhibition section.hero .map,
+body div[role="main"] .wrapper main section.favorite section.hero .map,
+body div[role="main"] .wrapper main section.project section.hero .map {
+	background: none;
+}
+body div[role='main'] .wrapper .search .searchlabel .label{
+    font-weight: 400!important;
+    cursor: pointer;
+}
+#uploaded-logo img {
+	cursor: pointer;
+}
+
+.hiddenfile {
+	width: 0px;
+	height: 0px;
+	overflow: hidden;
+}
+
+.autocomplete-suggestions {
+  border: 1px solid #ccc;
+  -webkit-box-shadow: 2px 2px 2px 0px rgba(128,128,128,0.75);
+  -moz-box-shadow: 2px 2px 2px 0px rgba(128,128,128,0.75);
+  box-shadow: 2px 2px 2px 0px rgba(128,128,128,0.75);
+  background: white;
+}
+
+.autocomplete-suggestions > .autocomplete-selected {
+  background-color: #cccccc;
+}
+.autocomplete-suggestions-extra {
+  font-size: 12pt;
+}
+.autocomplete-suggestion-extra {
+  background-color: #FAFAFA;
+  cursor: default;
+  padding: 2px 4px 2px 8px;
+}
+-
+.autocomplete-suggestion-extra .label {
+  background-color: #ec5a62;
+  margin: 2px 0;
+}
+
+/* Validation Errors */
+.errormsg {
+  color: #9c3b3b;
+  display: block;
+  font-style: italic;
+  line-height: 1.3em;
+  padding: 3px 0 0;
+  text-align: right;
+}
+
+
+
+body div[role='main'].homepage .featured .featured-box .featured-meta .img-exhibition li img {
+    max-width: 90%;
+    max-height: 90px;
+}
+
+/* Collections / Exhibitions */
+.truncate {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: 90%;
+  display: block;
+}
+
+/* About */
+body div.about[role="main"] .aboutlink .left ul li a {
+  color: #4f7979;
+  text-decoration: none;
+}
+
+.about-desc {
+  font-size: 1.3em;
+  width: 75%;
+  text-align: center;
+  margin: 20px auto;
+}
+
+body div[role=main] .wrapper main section.exhibition .assets .assetlisting ul li a img {
+     height: 110px !important;
+}
+
+.rightscr {
+    width: 40px;
+    right: 0;
+    position: fixed;
+    height: 100%;
+    z-index: 10;
+    top:0;
+}
+
+.leftscr
+ {   top:0;
+    width: 40px;
+    position: fixed;
+    height: 100%;
+    z-index: 10;
+}
+
+
+body div[role=main] .wrapper main section.exhibition .assets {
+    /*margin-top: 10px;
+    z-index:2;*/
+    position: fixed;
+    bottom: 0;
+    /* left: 150px; */
+    background-color: #FFFFFF;
+    z-index: 1;
+    overflow: visible;
+    width: 100%;
+    height: 160px;
+}
+
+body div[role=main] .wrapper main section.exhibition .assets .assetlisting{
+	position: absolute;
+    display: inline-block;
+    height: 100px;
+    background-color: #FFF;
+ }
+ 
+body div[role=main] .wrapper main section.exhibition .editorbox{
+ margin-top:5px;
+}
+ 
+body div[role=main] .wrapper main section.exhibition .assets .actions .notification {
+    float: left;
+    padding-left:10px;
+    padding-right:0;
+}
+ 

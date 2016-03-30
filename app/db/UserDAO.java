@@ -51,7 +51,7 @@ public class UserDAO extends DAO<User> {
 	public User getByGoogleId(String googleId) {
 		return this.findOne("googleId", googleId);
 	}
-	
+
 	/**
 	 * This method is updating one specific User. By default update method is
 	 * invoked to all documents of a collection.
@@ -81,7 +81,7 @@ public class UserDAO extends DAO<User> {
 
 	//Is this fast or should we use ElasticSearch
 	public List<User> getByUsernamePrefix(String prefix) {
-		Query<User> q = this.createQuery().field("username").startsWith(prefix);
+		Query<User> q = this.createQuery().field("username").startsWithIgnoreCase(prefix);
 		return find(q).asList();
 
 	}

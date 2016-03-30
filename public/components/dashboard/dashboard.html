@@ -1,0 +1,39 @@
+
+<div role="main">
+<div class="container-fluid">
+	<div class="wrapper">
+		<!-- ko if: isLogged() == true  -->
+		<side-bar params="route: route"></side-bar>
+		<!-- /ko -->
+		<main>
+			<section class="dashboard">
+				<section class="message"><img src="img/ui/ic-inbox.png" class="hero">
+					<div class="message-body">
+						<div class="header">Welcome to Your Dashboard</div>
+						<div class="description">This is <b>Your Dashboard</b>, where you can see all the most recent activities on your collections and exhibitions. Do you know that you can start exploring the media by clicking in the Explore right above this message? Try it now!</div><a href="#" data-bind="click: function() { hideMessage(); }"><span class="cross"></span><span class="text">Hide welcome message</span></a>
+					</div>
+				</section>
+				<section class="notification">
+					<!-- header-->
+					<div class="list-head">
+						<div class="sort"><span class="text">My Notifications</span></div>
+					</div>
+					<ul class="notif-list" data-bind="foreach: notifications">
+						<li>
+							<div class="thumbnails"><img data-bind="attr: { src: image }"></div>
+							<div class="meta">
+								<div class="text" data-bind="html: message"></div>
+							</div>
+							<ul class="action" data-bind="visible: pending">
+								<li class="accept"><a href="#" data-bind="click: $parent.accept" data-toggle="tooltip" data-placement="top" title="Accept"><i class="fa fa-check"></i></a></li>
+								<li class="reject"><a href="#" data-bind="click: $parent.reject" data-toggle="tooltip" data-placement="top" title="Reject"><i class="fa fa-times"></i></a></li>
+							</ul>
+							<div class="timing" data-bind="text: date"></div>
+						</li>
+					</ul>
+				</section>
+			</section>
+		</main>
+	</div>
+</div>
+</div>

@@ -20,16 +20,16 @@ define("app", ['knockout', 'facebook', 'imagesloaded', 'moment', './js/app/plugi
 		mobileSelector: '.mobilemenu',
 		mobileMenu: '.main .menu'
 	});
-    self.custom=false;
+	self.custom = false;
 	self.transDuration = 0;
 	var isFirefox = typeof InstallTrigger !== 'undefined'; // Firefox 1.0+
 	if (isFirefox) {
 		self.transDuration = 0;
 	}
 
-	self.loadDependancies=function () {
+	self.loadDependancies = function () {
 		/* we are in WITH*/
-		if(plugin.WITHApp){
+		if (plugin.WITHApp) {
 			self.WITHApp = new plugin.WITHApp.ui({
 				// page name
 				page: $('body').attr('data-page'),
@@ -46,10 +46,9 @@ define("app", ['knockout', 'facebook', 'imagesloaded', 'moment', './js/app/plugi
 			return {
 				WITHApp: self.WITHApp
 			};
-		}
-		else{
-			self.custom=true;
-			self.WITHApp=new plugin.EUSpaceApp.ui({
+		} else {
+			self.custom = true;
+			self.WITHApp = new plugin.EUSpaceApp.ui({
 
 		 		// page name
 		 		page  	  : $( 'body' ).attr( 'data-page' ),
@@ -161,7 +160,8 @@ define("app", ['knockout', 'facebook', 'imagesloaded', 'moment', './js/app/plugi
 				$(window).on("scroll.ko.scrollHandler", function () {
 					if ($(window).scrollTop() >= $(document).height() - $(window).height() - 300) {
 						if (self.updating) {
-							if (functPar1 !== undefined && functPar1 !== null) 
+							if (functPar1 !== undefined && functPar1 !== null)
+
 								loadFunc(functPar1);
 							else
 								loadFunc();
@@ -190,7 +190,9 @@ define("app", ['knockout', 'facebook', 'imagesloaded', 'moment', './js/app/plugi
 
 	self.receiveEvent = function (event) {
 		var notification = JSON.parse(event.data);
+
 		self.addNotification(notification);
+
 		switch (notification.activity) {
 		case "GROUP_INVITE":
 			$.smkAlert({
@@ -299,8 +301,8 @@ define("app", ['knockout', 'facebook', 'imagesloaded', 'moment', './js/app/plugi
 		"_id": ko.observable(),
 		"email": ko.observable(),
 		"username": ko.observable(),
-		"firstName": ko.observable(),
-		"lastName": ko.observable(),
+		"firstName": ko.observable(''),
+		"lastName": ko.observable(''),
 		"gender": ko.observable(),
 		"facebookId": ko.observable(),
 		"googleId": ko.observable(),
@@ -325,7 +327,11 @@ define("app", ['knockout', 'facebook', 'imagesloaded', 'moment', './js/app/plugi
 			'unread': ko.observable(0),
 			'userNotifications': ko.observableArray(),
 			'groupNotifications': ko.observableArray()
-		}
+		},
+		"collectionCount": ko.observable(0),
+		"exhibitionCount": ko.observable(0),
+		"sharedCollectionCount": ko.observable(0),
+		"sharedExhibitionCount": ko.observable(0)
 	};
 	isLogged = ko.observable(false);
 
@@ -385,9 +391,24 @@ define("app", ['knockout', 'facebook', 'imagesloaded', 'moment', './js/app/plugi
 			url: '/user/' + self.currentUser._id(),
 			type: 'GET',
 			success: function (data, text) {
-				loadUser(data, false, false);
+				loadUser(data, false, true);
 			},
 			//async: false
+		});
+
+		self.loadCounters();
+	};
+
+	self.loadCounters = function () {
+		$.ajax({
+			url: '/collection/countMyAndShared',
+			type: 'GET',
+			success: function (data, text) {
+				self.currentUser.exhibitionCount(data.my.Exhibition);
+				self.currentUser.collectionCount(data.my.SimpleCollection);
+				self.currentUser.sharedExhibitionCount(data.sharedWithMe.Exhibition);
+				self.currentUser.sharedCollectionCount(data.sharedWithMe.SimpleCollection);
+			}
 		});
 	};
 
@@ -421,16 +442,22 @@ define("app", ['knockout', 'facebook', 'imagesloaded', 'moment', './js/app/plugi
 		self.currentUser.notifications.groupNotifications.removeAll();
 		self.currentUser.notifications.unread(0);
 
-		if(data){
-		// Sort notification array
-		data.sort(function (a, b) {
-			return a.openedAt - b.openedAt;
-		});
+		if (data) {
+			// Sort notification array
+			data.sort(function (a, b) {
+				return a.openedAt - b.openedAt;
+			});
 
-		// Load notifications
-		for (var i = 0; i < data.length; i++) {
-			self.addNotification(data[i]);
-		}
+			// Load notifications
+			for (var i = 0; i < data.length; i++) {
+				if (data[i].resourceName === 'DELETED') {
+					return;
+				}
+
+				if (data[i].activity != null) {
+					self.addNotification(data[i]);
+				}
+			}
 		}
 	};
 
@@ -438,53 +465,61 @@ define("app", ['knockout', 'facebook', 'imagesloaded', 'moment', './js/app/plugi
 		data.date = ko.pureComputed(function () {
 			return moment(data.openedAt).fromNow();
 		});
+		data.image = ko.computed(function() {
+			if (null == data.senderLogoUrl) {
+				return 'images/user.png';
+			} else {
+				return data.senderLogoUrl;
+			}
+		});
 
 		data.pending = ko.observable(data.pendingResponse);
 		data.unread = ko.observable(data.readAt === null || data.readAt == undefined);
 
-		if (data.unread()) {
+		// Only pending notifications are displayed in the counter
+		if (data.pending()) {
 			self.currentUser.notifications.unread(self.currentUser.notifications.unread() + 1);
 		}
 
 		switch (data.activity) {
 		case "GROUP_INVITE":
-			data.message = '<strong>' + data.senderName + '</strong> invites you to join <strong><a href="#organization/' + data.group + '">' + data.groupName + '</a></strong>';
+			data.message = '<strong>' + data.senderName + '</strong> invites you to join <a href="#organization/' + data.group + '">' + data.groupName + '</a>';
 			self.currentUser.notifications.userNotifications.unshift(data);
 			break;
 		case "GROUP_INVITE_ACCEPT":
-			data.message = '<strong>' + data.senderName + '</strong> joined <strong><a href="#organization/' + data.group + '">' + data.groupName + '</a></strong>';
+			data.message = '<strong>' + data.senderName + '</strong> joined <a href="#organization/' + data.group + '">' + data.groupName + '</a>';
 			self.currentUser.notifications.groupNotifications.unshift(data);
 			break;
 		case "GROUP_INVITE_DECLINED":
-			data.message = '<strong>' + data.senderName + '</strong> declined your invitation to join <strong><a href="#organization/' + data.group + '">' + data.groupName + '</a></strong>';
+			data.message = '<strong>' + data.senderName + '</strong> declined your invitation to join <a href="#organization/' + data.group + '">' + data.groupName + '</a>';
 			self.currentUser.notifications.groupNotifications.unshift(data);
 			break;
 		case "GROUP_REQUEST":
-			data.message = '<strong>' + data.senderName + '</strong> wants to join <strong><a href="#organization/' + data.group + '">' + data.groupName + '</a></strong>';
+			data.message = '<strong>' + data.senderName + '</strong> wants to join <a href="#organization/' + data.group + '">' + data.groupName + '</a>';
 			self.currentUser.notifications.groupNotifications.unshift(data);
 			break;
 		case "GROUP_REQUEST_ACCEPT":
-			data.message = 'You joined <strong><a href="#organization/' + data.group + '">' + data.groupName + '</a></strong>';
+			data.message = 'You joined <a href="#organization/' + data.group + '">' + data.groupName + '</a>';
 			self.currentUser.notifications.userNotifications.unshift(data);
 			break;
 		case "GROUP_REQUEST_DENIED":
-			data.message = 'Your request to join <strong><a href="#organization/' + data.group + '">' + data.groupName + '</a></strong> was declined';
+			data.message = 'Your request to join <a href="#organization/' + data.group + '">' + data.groupName + '</a> was declined';
 			self.currentUser.notifications.userNotifications.unshift(data);
 			break;
 		case "COLLECTION_SHARE":
 			if (data.shareInfo.sharedWithGroup) {
-				data.message = '<strong>' + data.senderName + '</strong> wants to share collection <strong><a href="#collectionview/' + data.resoure + '">' + data.resourceName + '</a></strong> with <strong>' + data.shareInfo.userOrGroupName + '</strong>';
+				data.message = '<strong>' + data.senderName + '</strong> wants to share collection <a href="#collectionview/' + data.resoure + '">' + data.resourceName + '</a> with <strong>' + data.shareInfo.userOrGroupName + '</strong>';
 				self.currentUser.notifications.groupNotifications.unshift(data);
 			} else {
-				data.message = '<strong>' + data.senderName + '</strong> wants to share collection <strong><a href="#collectionview/' + data.resource + '">' + data.resourceName + '</a></strong> with you';
+				data.message = '<strong>' + data.senderName + '</strong> wants to share collection <a href="#collectionview/' + data.resource + '">' + data.resourceName + '</a> with you';
 				self.currentUser.notifications.userNotifications.unshift(data);
 			}
 			break;
 		case "COLLECTION_SHARED":
 			if (data.shareInfo.sharedWithGroup) {
-				data.message = '<strong><a href="#collectionview/' + data.resource + '">' + data.resourceName + '</a></strong> is now shared with <strong>' + data.shareInfo.userOrGroupName + '</strong>';
+				data.message = '<a href="#collectionview/' + data.resource + '">' + data.resourceName + '</a> is now shared with <strong>' + data.shareInfo.userOrGroupName + '</strong>';
 			} else {
-				data.message = '<strong><a href="#collectionview/' + data.resource + '">' + data.resourceName + '</a></strong> is now shared with <strong>' + data.senderName + '</strong>';
+				data.message = '<a href="#collectionview/' + data.resource + '">' + data.resourceName + '</a> is now shared with <strong>' + data.senderName + '</strong>';
 			}
 			self.currentUser.notifications.userNotifications.unshift(data);
 			break;
@@ -535,9 +570,12 @@ define("app", ['knockout', 'facebook', 'imagesloaded', 'moment', './js/app/plugi
 				}
 			});
 		} else { // Unlike
+			console.log(encodeURIComponent(id));
 			$.ajax({
-				type: "DELETE",
-				url: "/collection/unliked/" + encodeURIComponent(id),
+				type: "POST",
+				url: "/collection/unliked",
+				contentType: "application/json",
+				data: JSON.stringify({externalId: id}),
 				success: function (data, textStatus, jqXHR) {
 					self.currentUser.favorites.remove(id);
 					update(false);
@@ -692,7 +730,7 @@ define("app", ['knockout', 'facebook', 'imagesloaded', 'moment', './js/app/plugi
 		}
 		$('#popup').modal('show');
 	};
-	
+
 	self.showInfoPopup = function(title, bodyText, callback) {
 		$("#myModal").find("h4").html(title);
 		var body = $("#myModal").find("div.modal-body");
@@ -750,7 +788,7 @@ define("app", ['knockout', 'facebook', 'imagesloaded', 'moment', './js/app/plugi
 		popupParams("{}");
 	};
 
-	autoCompleteUserName = function (elem, valueAccessor, allBindingsAccessor, viewModel, context) {
+	autoCompleteUserName = function (elem, valueAccessor, allBindingsAccessor, viewModel, context, callback) {
 		var category = allBindingsAccessor.get('category') || 0;
 		$(elem).devbridgeAutocomplete({
 			minChars: 3,
@@ -785,14 +823,19 @@ define("app", ['knockout', 'facebook', 'imagesloaded', 'moment', './js/app/plugi
 				$(".autocomplete-suggestion").addClass("autocomplete-suggestion-extra");
 			},
 			formatResult: function (suggestion, currentValue) {
+				var prefix = suggestion.value.substring(0, currentValue.length);
 				var s =
 					/*'<img class="img-responsive img-circle" src="';
 				s	 += (currentUser.image() ? currentUser.image() : 'images/user.png') + '" />'
 				s	 +=*/
-					'<strong>' + currentValue + '</strong>';
+					'<strong>' + prefix + '</strong>';
 				s += suggestion.value.substring(currentValue.length);
 				s += ' <span class="label pull-right">' + suggestion.data.category + '</span>';
 				return s;
+			},
+			onSelect: function (suggestion) {
+				if (callback !== undefined && callback != null)
+					callback.call(this, suggestion.value);
 			}
 		});
 	};
@@ -838,7 +881,8 @@ define("app", ['knockout', 'facebook', 'imagesloaded', 'moment', './js/app/plugi
 		if(usercookie!=null){
 		   var keys=ExtractQueryString(usercookie);
 		   if(self.currentUser._id()==undefined || self.currentUser._id().length==0){
-		     if(keys["user"]){self.currentUser._id(keys["user"]);self.reloadUser();}}
+		   	if(keys["username"]){self.currentUser.username(keys["username"]);}
+		   	if(keys["user"]){self.currentUser._id(keys["user"]);self.reloadUser();}}
 		    return (keys["user"]==undefined ? false : true);
 		} else{return false;}
 
@@ -953,15 +997,16 @@ define("app", ['knockout', 'facebook', 'imagesloaded', 'moment', './js/app/plugi
 			if(data){
 			if(data[uilang]){
 
-			   for(var i=0;i<data[uilang].length;i++){
-			                	if(selvalue.length>0){selvalue+=",";}
-			                	selvalue=data[uilang][i];
-			     }
-
-			}
+			                	selvalue=data[uilang];
+			   }
 			else if(data.uri){
 				selvalue=data.uri;
-			}}
+			}
+			else if(data["en"]){
+
+            	selvalue=data["en"];
+				}
+			}
 			return selvalue;
 
 		}
@@ -1002,6 +1047,7 @@ define("app", ['knockout', 'facebook', 'imagesloaded', 'moment', './js/app/plugi
 		isLiked: isLiked,
 		isLogged:isLogged,
 		loadFavorites: loadFavorites,
+		loadCounters: loadCounters,
 		likeItem: likeItem,
 		initOrUpdate: initOrUpdate,
 		scroll: scroll

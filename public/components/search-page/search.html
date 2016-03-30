@@ -1,113 +1,120 @@
 
-<div id="withsearchid" class="withsearch" data-bind="event: { scroll: scrolled }">
-		<form class="withsearch-form">
-			<input class="withsearch-input" type="search" data-bind="value: term" placeholder="Search..."/>
-			<div class="line">&nbsp;</div>
-			<button class="withsearch-submit" type="submit" data-bind="click: function() { search(true,true); }">Search</button>
-			<button class="withsearch-view" data-bind="click: toggleSourceview, enable: searching()==false" title="Change view...">
-				<span class="glyphicon glyphicon-th" data-bind="visible: !sourceview()"></span>
-				<span class="glyphicon glyphicon-th-list" data-bind="visible: sourceview()"></span>
-			</button>
-		</form>
-
-				<div id="withsearch-content" class="withsearch-content">
-
-					<facets id="search-facets" data-bind="visible: filterselect()==true || results().length>0" params="name:'search-filters',params: {}"></facets>
-
-					<!-- ko if: noResults -->
-					<div class="withsearch-content-masonry">
-						<p>Your search did not return results. Please try again.</p></div>
-					<!-- /ko -->
-
-
-					<!-- ko if: results().length > 0 -->
-					 <div class="scrollable" data-bind="visible: sourceview()==true">
-
-				    <!-- ko foreach: results -->
-					<div class="dummy-column">
-					<h2>
-					 <!-- ko text: source --><!-- /ko -->
-					 <!-- ko if: consoleurl != "" -->
-					 <span class="withsearch-console"><a data-bind="attr: { href:consoleurl}" target="_blank"><i class="fa fa-external-link fa-1" title="API console"></i></a></span>
-					 <!-- /ko -->
-					</h2>
-
-					 <!-- ko foreach: items -->
-
-					 	<a class="dummy-media-object" data-bind="event: { click: $parents[1].columnRecordSelect}">
-							<img onError="this.src='images/no_image.jpg'" data-bind="attr: { src:thumb }"/>
-								<span><!-- ko text: title --><!-- /ko --></span>
-						</a>
-					   <!-- /ko -->
-					</div>
-					<!-- /ko -->
-					</div>
-					<!-- /ko -->
-
-
-
-						 <!-- wrap spacer-->
-      <div class="spacer double">
-        <!-- listing-->
-        <section class="listing" style="background: none;border:0">
-          <div class="container">
-            <!-- grid-->
-
-
-			<!-- grid-->
-            <div class="grid" data-bind="visible: sourceview()==false && mixresults().length> 0, searchIsotope: mixresults">
-              <!-- item-->
-               <!-- ko if: $index() === 0 -->
-              <div class="sizer"></div>
-              <!-- /ko -->
-
-
-              <div class="item media" data-bind="visible: isLoaded()">
-              <div class="wrap">
-              <span class="star" data-bind="css: { active: isLiked }, visible: isLogged()">
-						<span class="fa-stack fa-fw" data-bind="visible: externalId!=null,event: { click: function() { $parent.likeRecord($data); } }">
-							<i class="fa fa-heart fa-stack-1x"></i><i class="fa fa-heart-o fa-stack-1x fa-inverse"></i>
-						</span>
-					</span>
-                <!-- anchor--><a href="#" data-view="inline"  data-bind="event: {click: function(){$parent.recordSelect($data)}}">
-                  <!-- thumbnail-->
-                  <div class="thumb"><img data-bind="attr: {src: thumb}"  onError="this.src='img/content/thumb-empty.png'"></div>
-                  <!-- info-->
-                  <div class="info">
-                    <h1 class="title" data-bind="text: title"></h1><span class="owner" data-bind="text: dataProvider,attr: { href: dataProvider_uri }"></span>
+<div role="main" class="searchpage">
+      <div class="container-fluid">
+        <!-- wrapper-->
+        <div class="wrapper">
+          <!-- main-->
+          <div class="search">
+            <!-- searchbar-->
+            <section class="searchbar">
+              <div class="container-fluid">
+                <!-- wrap-->
+                <div class="wrap">
+                  <!-- settings bar-->
+                  <div class="settings"><a href="#" title="Filter settings" data-toggle="tooltip" data-placement="left" data-bind="event : {click: function(data, event) {showfacets(event)}}" data-bind="disable:$parent.searching"><img src="img/ui/ic-setting.png" alt="settings"></a></div>
+                  <!-- input-->
+                  <div class="searchbox" id="withsearchid"><img src="img/ui/ic-mag.png" alt="Search" class="icon" data-bind="attr: {src: searching()==true ? 'img/ui/ic-loading.gif' : 'img/ui/ic-mag.png'}, click: function() { search(true,true); }">
+                    <input type="text" data-bind="value: term" placeholder="Search media" class="searchinput">
                   </div>
-
-                 <div class="sourceCredits">
-					
-				<a data-bind="text:sourceCredits,attr: { href: view_url }" target="_new"></a></div>
-            	
-                  </a>
+                  <div class="provider" style="visibility:hidden">
+                    <!-- collection picker--><a id="picker" href="#" data-toggle="dropdown" class="picker"><span class="text">All Content Provider </span><span class="arrow"></span></a>
+                    <ul aria-labelledby="picker" class="dropdown-menu">
+                      <li><a href="#">Content Providers</a></li>
+                      <li><a href="#">WITH Content</a></li>
+                    </ul>
+                  </div>
+                  <!-- view setting-->
+                  <ul class="view">
+                       <li class="active" data-bind="event: {click: toggleSourceview}, enable: searching()==false"><a href="#" title="Column View" data-view="column" data-toggle="tooltip" data-placement="left"><img src="img/ui/ic-list.png" alt="list"></a></li>
+                       <li data-bind="event: {click: toggleSourceview}, enable: searching()==false"><a href="#" title="Grid View" data-view="grid" data-toggle="tooltip" data-placement="right"><img src="img/ui/ic-grid.png" alt="grid"></a></li>
+                  </ul>
+                </div>
+                <!-- close search--><a href="void(0);"  data-bind="click: close" title="Close Search" class="close" data-toggle="tooltip" data-placement="left"><img src="img/ui/ic-close.png"></a>
               </div>
-            </div>
-
-
-            </div>
-            </div>
-            <div id="more" data-bind="visible: searching"> <i class="fa fa-spinner fa-pulse"></i></div>
-            <div class="scroll-top-wrapper"  data-bind="event:{click: goToTop}">
-				<span class="scroll-top-inner">
-					<i class="fa fa-2x fa-arrow-circle-up"></i>
-				</span>
-			</div>
             </section>
-
-
-		</div>
-
+            <!-- search filter-->
+            <section class="searchlabel">
+               <div class="container-fluid" data-bind="visible: filterselect()==true || results().length>0">
+                <input id="facet_tags" type="text" data-role="tagsinput">
+        	  </div>
+        	</section>
+           
+            <!-- results-->
+            <div class="searchresults" data-bind="style: { visibility : mixresults().length>0 ? '':'hidden'}">
+              <!-- search result grid-->
+              <section id="gridlist" class="gridlist" data-bind="css : {active: sourceview()==false}">
+                <section class="listing itemlistview">
+                  <div class="container">
+                    <!-- grid-->
+                    <div class="grid">
+                      <!-- item-->
+                      <div class="sizer"></div>
+                      
+                      
+                    </div>
+                     <div class="scroll-top-wrapper"  data-bind="visible: mixresults().length>0 && $('.grid').height()>800, event:{click: goToTop}">
+						<span class="scroll-top-inner">
+							<i class="fa fa-2x fa-arrow-circle-up"></i>
+						</span>
 					</div>
-
-				<span class="withsearch-close"></span>
-
-
-
-
-			</div>
-
-			<div class="overlay"></div>
-			<item-view params="route: route"></item-view>
-
+                  </div>
+                 <div class="more" data-bind="visible: searching, scroll: mixresults(), scrollOptions: { loadFunc: searchNext, offset: 0 }"> <i class="fa fa-spinner fa-pulse"></i></div>
+		        
+                </section>
+              </section>
+              <!-- search result-->
+               <!-- ko if: sourceview()==true -->
+              <section id="columnlist" class="searchlist active">
+                <div class="container-fluid">
+                        <!-- row-->
+				          <div class="row">
+				          <!-- ko if: noResults -->
+							<div>
+							  <p><br/><br/>Your search did not return results. Please try again.</p>
+							</div>
+							<!-- /ko -->
+							<!-- ko if: results().length > 0 -->
+				            <!-- ko foreach: results -->
+				            <div data-bind="attr: {'id': source+'_result'}, css: $parent.selectedSource()==source? 'column selected' : 'column'">
+				              <!-- wrap-->
+				              <div class="wrap">
+				                <div class="header"><a data-bind="attr: { href:consoleurl}" target="_blank" title="API console">
+				                    <div class="source" data-bind="text: source"></div>
+				                    <div class="link"><i class="fa fa-external-link"></i></div>
+				                    <div class="loading" data-bind="visible: loading()==true"><i class="fa fa-circle-o-notch fa-spin"></i></div>
+				                    </a></div>
+				                <div class="result" data-bind="foreach: items, event: { scroll: $parents[0].scrolled }">
+				                
+				                  <!-- item-->
+				                  <div class="item"><a href="#" data-bind="event: { click: $parents[1].columnRecordSelect}" data-view="inline" class="mediaviewer">
+				                      <div class="imgwrap"><img onError="this.src='img/content/thumb-empty.png'" data-bind="attr: { src:thumb }" class="thumb"></div><span class="text" data-bind="text: title"></span></a></div>
+				                  <!-- item-->
+				                  
+				                 </div>
+				              </div>
+				            </div>
+				            
+				            <!-- /ko -->
+				            <!-- /ko -->
+				          </div>
+                      <!-- scroll pointer--><img id="pointermark" src="img/ui/ic-right.png" data-toggle="tooltip" data-placement="top" title="Scroll to the right to see more results" class="pointer">
+                </div>
+              </section>
+              <!-- /ko -->
+            </div>
+          </div>
+           <!-- item view-->
+               <item-view params="route: route"></item-view>
+          
+  			<!-- collection give access-->
+              <section class="action collect">
+              <collection params="route: route"></collection>
+              </section>
+             
+             
+          <facets id="search-facets" params="name:'search-filters',params: {}"></facets>
+ 
+        </div>
+      </div>
+      </div>
+    

@@ -1,112 +1,169 @@
-<div class="md-modal md-effect-1" id="modal-1">
-			<div class="md-content">
-			    <button type="button" class="close" aria-label="Close" data-bind="event: {click: close}"><span aria-hidden="true">&times;</span></button>
-				<h3 class="truncate">
-				 <span class="withcollect">
-						<a class="btn btn-default btn-sm" data-bind="event: {click: collect}">
-                   <i class="fa fa-download"></i> Collect it</a>
-				</span>
-				<!-- ko text: record().title --><!-- /ko --> 
-				</h3>
-				<hr class="faded">
-				
-			  <div class="container-fluid">
-				   <div class="row" style="overflow-y:auto;max-height:400px">
-					  <div class="col-md-6">
-					    <div class="spec">
-					      <div class="itemlabel">Description
-					      </div>
-					      <div class="value" data-bind="html:record().description"> 
-					      </div>
-					      </div>
-					      
-					     
-					    
-					     <div class="spec" data-bind="if: record().creator">
-					      <div class="itemlabel">Creator
-					      </div>
-					      <div class="value" data-bind="text:record().creator">
-					      
-					      </div>
-					    </div>
-					  <div class="spec" data-bind="if: record().dataProvider">
-					      <div class="itemlabel">Data Provider
-					      </div>
-					      <div class="value" data-bind="html:record().dataProvider">
-					      
-					      </div>
-					    </div>
-					   <div class="spec" data-bind="if: record().provider">
-					      <div class="itemlabel">Provider
-					      </div>
-					      <div class="value" data-bind="html:record().provider">
-					      
-					      </div>
-					    </div>
-					    
-					    <div class="spec" data-bind="if: record().rights">
-					      <div class="itemlabel">Rights
-					      </div>
-					      <div class="value" data-bind="html:record().rights">
-					      
-					      </div>
-					    </div>
-					    
-					    <div class="spec" data-bind="if: (record().collected>0)">
-					      <div class="itemlabel">Within
-					<!-- ko text: record().collected --><!-- /ko --> 
-						collections					      				      
-					    </div>
-					      	<!-- ko foreach: record().collections -->
+<div role="main">
+		<div class="container-fluid">
+<div class="wrapper">
+<main>
 
-					       <div  style="cursor:pointer" class:"value"  > 
-								 <div data-bind="attr: {  title: userName },text: title,click: $parent.goToCollection"  ></div>
-						   </div>			    
-							 <!-- /ko -->	
-					  
-					    </div>
-					    
-					      <div class="spec" data-bind="if: (record().liked>0)">
-					      <div class="itemlabel">Liked 
-					<!-- ko text: record().liked --><!-- /ko --> 
-					
-					    </div>					  
-					    </div>
+<section class="itemview">
+<!-- header-->
+                <div class="header">
+                  <div class="container-fluid">
+                    <!-- head-->
+                    <h3>Media Viewer</h3>
+                    <!-- actions-->
+                    <div class="actions"><a href="#" data-toggle="tooltip" data-placement="top" title="Add to favorites" class="fa fa-heart favorite" data-bind="visible:loggedUser && record().externalId!=null, css: { redheart: record().isLike()==true }, event: { click: function(data,event) { likeRecord(record(),event); } }"></a>
+                    <a href="#" data-toggle="tooltip" data-placement="top" title="Collect it" class="fa fa-download collectbutton" data-bind="visible:loggedUser, event: { click: function(data,event) { collect(record(),event); } }"></a>
+                    <a href="#" data-toggle="tooltip" data-placement="bottom" title="Visit item site" class="medialink" data-bind="attr: { href:record().view_url}" target="_blank"><i class="fa fa-external-link"></i></a>
+                    <a  data-toggle="tooltip" data-placement="bottom" title="Close media viewer" class="closemedia" data-bind="visible: window.location.href.indexOf('#item')==-1,click: close"><img src="img/ui/ic-close.png"></a></div>
+                  </div>
+                </div>
+                <!-- media content-->
+                <div class="mediacontent">
+                  <div class="container-fluid">
+                    <!-- wrap-->
+                    <div class="wrap">
+                      <!-- item-->
+                      <div class="media"><img data-bind="attr: {src: record().fullres()},event: {error: function(){changeSource($data)}}"/></div>
+                      <!-- metadata-->
+                      <div class="metadata">
+                      <div class="infowrap">
+                        <!-- top-->
+                          <div class="top">
+                            <!-- title-->
+                            <div class="infotitle">
+                          <!-- title-->
+                          <h1><!-- ko text: record().title --><!-- /ko --> </h1>
+                          <div class="owner"  data-bind="text:record().dataProvider"></div>
+                           </div>
+                            <!-- collect--><a href="#" title="collect" class="infocollect collectbutton" data-bind="visible:loggedUser, event: { click: function(data,event) { collect(record(),event); } }">COLLECT ITEM</a>
+                          </div>
+                          <!-- metadata-->
+                          <ul role="tablist" class="nav nav-tabs">
+                            <li class="active"><a href="#information" title="" data-toggle="tab">Info</a></li>
+                            <li><a href="#related" title="" data-toggle="tab" data-bind="event:{ click: function(){record().findsimilar()}}">Related</a></li>
+                            <li><a href="#comment" title="" data-toggle="tab">Comments</a></li>
+                            <li data-bind="visible: record().recordId!='-1'"><a href="#share" title="" data-toggle="tab">Share</a></li>
+                          </ul>
+                          <!-- panes-->
+                          <div class="tab-content">
+                            <div id="information" class="tab-pane active">
+                              <!-- description-->
+                              <div class="meta">
+                                <div class="list" data-bind="if: record().description">
+                                  <div class="title">
+                                    <div class="titlewrap">Description</div>
+                                  </div>
+                                  <div class="field" data-bind="html:record().description">
+                                  </div>
+                                </div>
+                                <div class="list"  data-bind="if: record().dataProvider">
+                                  <div class="title">
+                                    <div class="titlewrap">Provider</div>
+                                  </div>
+                                  <div class="field" data-bind="text:record().dataProvider"></div>
+                                </div>
+                                <div class="list" data-bind="if: record().creator">
+                                  <div class="title">
+                                    <div class="titlewrap">Creator</div>
+                                  </div>
+                                  <div class="field" data-bind="text:record().creator"></div>
+                                </div>
+                                <div class="list" data-bind="if: record().rights">
+                                  <div class="title">
+                                    <div class="titlewrap">Rights</div>
+                                  </div>
+                                  <div class="field" data-bind="text:record().rights"></div>
+                                </div>
+                                <div class="list">
+                                  <div class="title">
+                                    <div class="titlewrap">Record Source</div>
+                                  </div>
+                                  <div class="field" data-bind="text:record().source"></div>
+                                </div>
+                              </div>
+                            </div>
+                            <div id="related" class="tab-pane">
+                              <!-- related media-->
+                              <div style="text-align: center;" data-bind="visible: record().loading()==true"><img src="img/ic-loading.gif"></div>
+                      		  <!-- ko if: record().related().length > 0 -->
+                      
+                              <div class="title">
+                                <div class="titlewrap" data-bind="text: 'Other media items by '+record().forrelated()"></div><a href="#" title="Follow National Gallery Athens" class="follow">FOLLOW</a>
+                              </div>
+                              <ul class="related">
+                      			<!-- ko foreach: record().related -->
+                        		<li><a data-bind="event: {click: function(){itemShow($data);}}" data-toggle="tooltip" data-placement="top" title="Lorem ipsum dolor"><img data-bind="attr:{src:thumb}" alt="media"></a></li>
+                     		 <!-- /ko -->
+                       		  </ul>
+                       		<!-- /ko -->
+                      		<!-- related media-->
+                       		<!-- ko if: record().similar().length > 0 -->
+                              <div class="title">
+                                <div class="titlewrap">Similar media items</div>
+                              </div>
+                            <ul class="related">
+                       		<!-- ko foreach: record().similar -->
+                        	<li><a data-bind="event: {click: function(){itemShow($data);}}" data-toggle="tooltip" data-placement="top" title="Lorem ipsum dolor"><img data-bind="attr:{src:thumb}" alt="media"></a></li>
+                     		<!-- /ko -->
+                      		</ul>
+                       	   <!-- /ko -->
+                            </div>
+                            <div id="comment" class="tab-pane">
+                              <!-- comment -->
+                              <div class="comments">
+                                <div class="form">
+                                  <textarea placeholder="Fill in your comment" class="commentbox form-control"></textarea>
+                                  <button class="btn btn-green">Submit</button>
+                                </div>
+                                <!-- commentlist-->
+                                <ul class="commentlist">
+                                  <li><a href="#" title="#"><span class="profilepicture"><img src="img/content/img-profile.jpg"></span></a>
+                                    <div class="entry"><span class="name">Mike Jones</span>
+                                      <div class="text">Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.	</div>
+                                      <div class="meta">1 day ago</div>
+                                    </div>
+                                  </li>
+                                  <li><a href="account.html" title="#"><span class="profilepicture"><img src="img/content/img-profile.jpg"></span></a>
+                                    <div class="entry"><span class="name">Mike Jones</span>
+                                      <div class="text">Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.	</div>
+                                      <div class="meta">1 day ago</div>
+                                    </div>
+                                  </li>
+                                  <li><a href="account.html" title="#"><span class="profilepicture"><img src="img/content/img-profile.jpg"></span></a>
+                                    <div class="entry"><span class="name">Mike Jones</span>
+                                      <div class="text">Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.	</div>
+                                      <div class="meta">1 day ago</div>
+                                    </div>
+                                  </li>
+                                  <li><a href="account.html" title="#"><span class="profilepicture"><img src="img/content/img-profile.jpg"></span></a>
+                                    <div class="entry"><span class="name">Mike Jones</span>
+                                      <div class="text">Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.	</div>
+                                      <div class="meta">1 day ago</div>
+                                    </div>
+                                  </li>
+                                </ul>
+                              </div>
+                            </div>
+                            <div id="share" class="tab-pane">
+                               <!-- share-->
+                      <div class="sharetext" data-bind="text: record().title"></div>
+                      		<ul class="social">
+                        		<li><a data-bind="attr: {href:record().facebook}" title="share on facebook" onclick="javascript:window.open(this.href,'facebook-share-dialog','width=626,height=436'); return false;"><img src="img/ui/ic-facebook.png" alt="facebook"></a></li>
+                        		<li><a data-bind="attr: {href:record().twitter}" title="twitter share" onclick="javascript:window.open(this.href,'', 'menubar=no,toolbar=no,resizable=yes,scrollbars=yes,height=600,width=600');return false;"><img src="img/ui/ic-twitter.png" alt="facebook"></a></li>
+                        		<li data-bind="event: {click: function(){record().pinterest()}}"><a href="#" title="pin it"><img src="img/ui/ic-pinterest.png" alt="facebook"></a></li>
+                        		<li><a data-bind="attr: {href:record().mail}" title="email item"><img src="img/ui/ic-mail.png" alt="facebook"></a></li>
+                      		</ul>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+        </div>        
+	</section>	
 
-					  
-					   <div class="spec">
-					      <div class="itemlabel">Record source
-					      </div>
-					      <div class="value">
-					      
-					      <div data-bind="text: record().source">
-					      </div>
-					      </div>
-					    </div>
-					    
-					   
-					  
-					   <div class="spec">
-					     
-					      <div class="value">
-					      <a data-bind="attr: { href:record().view_url}" target="_blank">More details </a>
-					      <p>&nbsp;</p>
-					      </div>
-					    </div>
-					  
-					  </div>
-					  <div class="col-md-6"><img id="fullresim" data-bind="event: { error: changeSource },attr: { src:record().fullres, alt: record().title }" class="itemim"/></div>
-					</div>
-				 </div>
-			
-				
-				
-			</div>
+
+
+</main>
 </div>
-		
-		
-		
-<div class="md-overlay" data-bind="event: {click: close}"></div><!-- the overlay element -->
-
-<collection params="route: route"></collection>	
-		
+</div>
+</div>

@@ -1,174 +1,297 @@
-<div id="userCollections" class="container-fluid" style="padding-bottom: 100px;">
+<div role="main">
 
-		  <div class="row">
-			<div class="col-lg-12">
-				<!-- ko if: showsExhibitions -->
-				<span class="withmain">
-				<span class="collectiontab active">
-					<h2><a data-bind="event :{ click: function(data,event){changeTab('noshared',data,event);}}">My exhibitions</a></h2>
-				</span> |
-				<span class="collectiontab">
-					<h2><a data-bind="event :{ click: function(data,event){changeTab('shared',data,event);}}">Exhibitions shared with me</a></h2>
-				</span>
-				<div><button type="button" class="btn btn-primary btn-sm" data-bind="click: createExhibition">New Exhibition</button></div>
-				</span>
+<div class="container-fluid">
+	<div class="wrapper">
+		<!-- ko if: isLogged() == true  -->
+		<side-bar params="route: route"></side-bar>
+		<!-- /ko -->
+		<main>
+		  <!-- collection section-->
+		  <section class="collection">
+			<section class="header">
+			  <!-- ko if: showsExhibitions -->
+			  <a id="picker" href="#" data-toggle="dropdown" class="picker" >
+			  	<span id="pickerTitle" class="text">My Exhibitions</span><span class="arrow"></span>
+			  </a>
+			  <!-- /ko -->
+			  <!-- ko else -->
+			  <a id="picker" href="#" data-toggle="dropdown" class="picker" >
+			  	<span id="pickerTitle" class="text">My Collections</span><span class="arrow"></span>
+			  </a>
+			  <!-- /ko -->
+			  <!-- ko if: showsExhibitions -->
+			  	<ul aria-labelledby="picker" class="dropdown-menu">
+				<li data-bind="click: changeTab"><a style="cursor:pointer;" >My Exhibitions</a></li>
+				<li data-bind="click: changeTab"><a style="cursor:pointer;" >Exhibitions shared with me</a></li>
+			  </ul>
+			  <!-- /ko -->
+			  <!-- ko else -->
+			  <ul aria-labelledby="picker" class="dropdown-menu">
+				<li data-bind="click: changeTab"><a style="cursor:pointer;" >My Collections</a></li>
+				<li data-bind="click: changeTab"><a style="cursor:pointer;" >Collections shared with me</a></li>
+			  </ul>
+			  <!-- /ko -->
+			  <!-- ko if: showsExhibitions -->
+			    <a href="#" class="new" }><span class="plus"></span><span class="text" >New Exhibition</span></a>
+			  <!-- /ko -->
+			  <!-- ko else -->
+			    <a href="#" class="new" } ><span class="plus"></span><span class="text" >New Collection</span></a>
+			  <!-- /ko -->
+			</section>
+			<!-- message-->
+			<section class="message"><img src="img/ui/ic-inbox.png" class="hero">
+			 <!-- ko if: showsExhibitions -->
+			  <div class="message-body">
+				<div class="header">Welcome to My Exhibitions</div>
+				<div class="description">This is <b>My Exhibitions</b>. All exhibitions created by and shared with you will be presented here.</div>
+				   <a href="#" data-bind="click: hideMessage">
+				   	<span class="cross"></span>
+				   	<span class="text">Hide welcome message</span>
+				   </a>
+			  </div>
+			   <!-- /ko -->
+			  <!-- ko else -->
+			  <div class="message-body">
+				<div class="header">Welcome to My Collections</div>
+				<div class="description">This is <b>My Collections</b>. All collections created by and shared with you will be presented here.</div>
+				   <a href="#" data-bind="click: hideMessage">
+				   	<span class="cross"></span>
+				   	<span class="text">Hide welcome message</span>
+				   </a>
+			  </div>
+			  <!-- /ko -->
+			</section>
+			<!-- collection main-->
+			<section class="collection-list">
+			  <!-- collection main header-->
+			  <div class="list-head">
+				<div class="sort"><span>Sort by</span><a id="sorting" href="#" data-toggle="dropdown"><span class="text">Date</span><span class="arrow"></span></a>
+				  <!-- dropdown-->
+				  <ul aria-labelledby="sorting" class="dropdown-menu">
+				  	<li><a href="#" data-bind="click: sortByDate">Date</a></li>
+					<li><a href="#" data-bind="click: sortByTitle">Title</a></li>
+				  </ul>
+				</div>
+				<div class="list-control">
+					<a href="#" data-toggle="tooltip" data-placement="top" title="List view" class="fa fa-bars"></a>
+					<a href="#" data-toggle="tooltip" data-placement="top" title="Grid view" class="fa fa-th active"></a>
+				</div>
+			  </div>
+			  <!-- listing-->
+			  <ul class="list-body grids">
+					<div data-bind="{visible: collectionSet() == 'my', template: { name: 'collectionsTemplate', foreach: myCollections()}}"></div>
+					<div data-bind="{visible: collectionSet() == 'shared', template: { name: 'collectionsTemplate', foreach: sharedCollections()}}"></div>
+			  <!-- ko if: collectionSet() == 'my' -->
+			  <a style="cursor:pointer;" class="loadmore"
+			  data-bind="{visible: (!showsExhibitions && collectionCount() > myCollections().length) || (showsExhibitions && exhibitionCount() > myCollections().length),
+			  event: {click: moreCollections.bind($data, showsExhibitions)}}">load more
+			      <div class="left"></div>
+                  <div class="right"></div>
+                  <div class="top"></div>
+                  <div class="bot"></div>
+              </a>
+			  <!-- /ko -->
+			  <!-- ko if: collectionSet() == "shared" -->
+			  	<a style="cursor:pointer;" class="loadmore"
+			  	data-bind="event: {click: moreCollections.bind($data, showsExhibitions)}">load more
+			   <div class="left"></div>
+                  <div class="right"></div>
+                  <div class="top"></div>
+                  <div class="bot"></div>
+              </a>
+			  <!-- /ko -->
+			  </ul>
+			</section>
+			<section class="action edit">
+			  <div class="action-header">
+			  	<!-- ko if: showsExhibitions -->
+				<div class="title">Edit Exhibition</div>
 				<!-- /ko -->
-				<!-- ko else -->
-				<span class="withmain">
-				<span class="collectiontab active">
-					<h2><a data-bind="event :{ click: function(data,event){changeTab('noshared',data,event);}}">My collections</a></h2>
-				</span> |
-				<span class="collectiontab">
-					<h2><a data-bind="event :{ click: function(data,event){changeTab('shared',data,event);}}">Collections shared with me</a></h2>
-				</span>
-				<div><button type="button" class="btn btn-primary btn-sm" data-bind="click: createCollection">New Collection</button></div>
-				</span>
+			    <!-- ko else -->
+			    <div class="title">Edit Collection</div>
+			    <!-- /ko -->
+			  </div>
+			  <div class="toggle">
+				<input type="checkbox" id="toggle1" data-bind="{checked: isPublicToEdit, click: isPublicToggle}">
+				<label for="toggle1"></label>
+				<span class="private">private</span>
+				<span class="public">public</span>
+			  </div>
+			  <div class="action-body" data-bind="validationElement: titleToEdit">
+				<input type="text" data-bind="{value: titleToEdit, valueUpdate: 'afterkeypress', hasFocus: true
+				      attr: {placeholder: titleToEdit}}">
+				  </input>
+				<textarea data-bind="{value: descriptionToEdit, valueUpdate: 'afterkeypress', hasFocus: false
+				      attr: {placeholder: descriptionToEdit}}"></textarea>
+			  </div>
+			  <div class="button-group">
+			  	<a class="btn-green-o cancel" data-bind="click: closeSideBar">Cancel</a>
+			  	<a class="btn-green" data-bind="click: editCollection">Save collection</a>
+			  </div>
+			</section>
+			<!-- collection new-->
+			<section class="action new">
+			  <div class="action-header">
+			  	<!-- ko if: showsExhibitions -->
+				<div class="title">New Exhibition</div>
 				<!-- /ko -->
-				<div id="mycollections">
-				 <!-- collections listed here -->
-				 <!-- ko foreach: myCollections -->
-					 <div class="profilecoll">
-					 <div class="container-fluid">
-					 <div class="row profile">
-					 <div class="col-xs-6 col-sm-6 col-md-4 coll-body pull-left" data-bind="attr: {id: dbId}">
-					 <div class="content">
-						<div class="btn-group pull-right" role="group">
-					 	<!-- <span class="glyphicon glyphicon-link" title="API calls for this Collection" data-bind="click:$parent.getAPIUrl" aria-hidden="true"></span>-->
-					 	<!-- ko if: $parent.showsExhibitions -->
-						<span class="glyphicon glyphicon-play" title="Play Collection" data-bind="click: function() { $parent.playExhibition(dbId()) }" aria-hidden="true"></span>
-						<!-- /ko -->
-						<span class="glyphicon glyphicon-pencil" title="Edit Collection" data-bind="click: $parent.openEditCollectionPopup" aria-hidden="true"></span>
-					 	<span class="glyphicon glyphicon-trash" title="Delete Collection" data-bind="click: $parent.deleteMyCollection" aria-hidden="true"></span>
-					 	<span class="glyphicon glyphicon-share" title="Share Collection" data-bind="click: $parent.openShareCollection" aria-hidden="true"></span>
-					 </div>
-					   <h3 data-bind="text: title()"></h3>
-					   <div class="coll-descr" data-bind="text:  description()"></div>
-					   <div class="row">
-						   <div class="col-xs-12 col-sm-12 col-md-12 coll-footer">
-						   		<!-- ko if: administrative.access.isPublic --><span class="label label-success">Public</span><!-- /ko -->
-						   		<!-- ko ifnot: administrative.access.isPublic --><span class="label label-danger">Restricted</span><!-- /ko -->
-					   			&bull; <strong>Items: </strong> <span data-bind="text: administrative.entryCount()"></span> &bull;
-						   		<b>Created:</b> <i data-bind="text: administrative.created()"></i> &bull;
-						   		<b>Creator:</b> <i data-bind="text: withCreatorInfo.username"></i>
-						   </div>
-						</div>
-					 </div>
-					 </div>
-					 <!--  ko if: administrative.entryCount() > 0 -->
-					     <div data-bind="click: $parent.loadCollectionOrExhibition">
-						 <div class="col-xs-6  col-sm-6  col-md-8">
-					 	 <div class="row-fluid">
-					  	 <div class="imcontainer">
-					  	 	<!-- ko foreach: media -->
-					  	 	  <!-- ko if: $data.thumbnailUrl-->
-					  	 		<div class="coll_figure"><img  data-bind="attr: {src: $data.thumbnailUrl}">
-					  	 		 </div>
-					  	 	 <!-- /ko -->
-					  	 	 <!-- /ko -->
-
-					  	  </div>
-					  	 </div>
-					  	 </div>
-					  	 </div>
-					  <!-- /ko -->
+			    <!-- ko else -->
+			    <div class="title">New Collection</div>
+			    <!-- /ko -->
+				<div class="toggle">
+				  <input type="checkbox" id="toggle2" data-bind="checked: isPublicToEdit">
+				  <label for="toggle2" ></label><span class="private">private</span>
+				  <span class="public">public</span>
+				</div>
+			  </div>
+			  <div class="action-body">
+			  	<div class="form-group" data-bind="validationElement: titleToEdit">
+				  	<!-- ko if: showsExhibitions -->
+					<input type="text" data-bind="value: titleToEdit, valueUpdate: 'afterkeypress', hasFocus: true" placeholder="Name your exhibition">
+					<!-- /ko -->
+				    <!-- ko else -->
+				    <input type="text" data-bind="value: titleToEdit, valueUpdate: 'afterkeypress', hasFocus: true" placeholder="Name your collection">
+					<!-- /ko -->
+				</div>
+				<textarea rows="10" placeholder="Description" data-bind="value: descriptionToEdit"></textarea>
+			  </div>
+			  <!-- ko if: showsExhibitions -->
+			  <div class="button-group">
+			  	<a class="btn-green-o cancel" data-bind="click: closeSideBar">Cancel</a>
+			  	<a href="#" class="btn-green" data-bind="click: createCollection.bind($data, 'Exhibition')">Create and go to editor</a>
+			  	</div>
+			   <!-- /ko -->
+			    <!-- ko else -->
+			  <div class="button-group">
+			  	<a class="btn-green-o cancel" data-bind="click: closeSideBar">Cancel</a>
+			    <a data-bind="click: createCollection.bind($data, 'SimpleCollection')" class="btn-green">Create collection</a>
+			   </div>
+			    <!-- /ko -->
+			</section>
+			<!-- collection give access-->
+			<section class="action access">
+			  <div class="action-header">
+				<div class="title">Give access to users and user groups</div>
+			  </div>
+			  <div class="toggle">
+				<input type="checkbox" id="toggle1" data-bind="{checked: isPublicToEdit, click: isPublicToggle}">
+				<label for="toggle1"></label>
+				<span class="private">private</span>
+				<span class="public">public</span>
+			  </div>
+			  <div class="action-body">
+				<div class="group">
+				  <div class="title">Users access</div>
+				  <input type="text" id="usernameOrEmail" data-bind="autocompleteUsername1: myUsername, category:1" placeholder="Start typing username or email">
+				  <ul class="access-list">
+				  	<!-- ko foreach: usersToShare -->
+					<li>
+					  <!-- ko if: $data.image -->
+					 	 <div class="thumbnails"><img data-bind="attr: {src: image}"></div>
+					  <!--/ko-->
 					  <!-- ko else -->
-					  	<!-- TODO: Make the message look nicer -->
-					  	<div class="col-xs-6 col-sm-6 col-md-8 coll-message">
-					 	 <div class="row-fluid">
-					  	 <div class="imcontainer" data-bind="click: $parent.loadCollectionOrExhibition">
-							 <!--  ko if: $parent.showsExhibitions -->
-					  			<h5> Drag and drop items from your collections to the exhibition.</h5>
-							 <!-- /ko -->
-							 <!-- ko else -->
-								 <h5> Select items to add to collection.</h5>
-							 <!-- /ko -->
-					  	</div>
-					  	</div>
-					  	</div>
+					  	<div class="thumbnails"><img src="images/user.png"></div>
 					  <!-- /ko -->
-					 </div>
-					 </div>
-					 </div>
-				 <!-- /ko -->
-				 </div>
-				 </div>
-			<div class="col-lg-12" id="sharedtab" style="display:none">
-				 <span class="withmain">
-				<!-- ko if: showsExhibitions -->
-				 <h2>Exhibitions shared with me</h2>
-				  <!-- /ko -->
-				 <!-- ko else -->
-				 <h2>Collections shared with me</h2>
-				 <!-- /ko -->
-				 </span>
-				 <div id="sharedcollections">
-				 <!-- ko foreach: sharedCollections() -->
-					 <div class="profilecoll">
-					 <div class="container-fluid">
-					 <div class="row profile">
-					 <div class="col-xs-6 col-sm-6 col-md-4 pull-left" data-bind="attr: {id: dbId}">
-					 <div class="content">
-						<div class="btn-group pull-right" role="group">
-					 	<!-- <span class="glyphicon glyphicon-link" title="API calls for this Collection" data-bind="click:$parent.getAPIUrl" aria-hidden="true"></span>-->
-					 	<!-- ko if: $parent.showsExhibitions -->
-						<span class="glyphicon glyphicon-play" title="Play Collection" data-bind="click: function() { $parent.playExhibition(dbId()) }" aria-hidden="true"></span>
+					  <a href="#" data-toggle="tooltip" data-placement="top" data-bind="{attr: {title: username}, click: $parent.removeRights}" class="trash">
+					  <i class="fa fa-trash"></i></a>
+					  <div class="toggle">
+						<input type="checkbox" data-bind="{attr: {id: username}, checked: accessChecked, click: $parent.changeRights}">
+						<label data-bind = "{attr: {for: username}}"></label>
+						<span class="private">view</span>
+						<span class="public">co-edit</span>
+					  </div>
+					</li>
+					<!-- /ko -->
+				  </ul>
+				</div>
+				<div class="group">
+				  <div class="title">Groups access</div>
+				  <input type="text" id="usernameOrEmail" data-bind="autocompleteUsername1: myUsername, category:2" placeholder="Start typing group name">
+				  <ul class="access-list" data-bind="foreach: userGroupsToShare">
+				  	<li class="blue">
+					    <span class="text" data-bind="text: username().substring(0,2).toUpperCase()"></span>
+						<a data-toggle="tooltip" data-placement="top" style="cursor:pointer;" data-bind="{attr: {title: username}, click: $parent.removeRights}" class="trash">
+					  	<i class="fa fa-trash"></i></a>
+					  <div class="toggle">
+						<input type="checkbox" id="u2" data-bind="{attr: {id: username}, checked: accessChecked, click: $parent.changeRights}">
+						<label data-bind="{attr: {for: username}}"></label>
+						<span class="private">view</span>
+						<span class="public">co-edit</span>
+					  </div>
+					</li>
+				  </ul>
+				</div>
+			  </div>
+			  <div class="button-group">
+			  	<a href="#" class="btn-green cancel" data-bind="click: closeSideBar">Close</a>
+			  </div>
+
+			   <script type="text/html" id="collectionsTemplate">
+			   	<li data-bind="css: { private: !administrative.access.isPublic()}">
+				  <div class="thumbnails">
+				  	<a href="#" data-bind="attr: {href: $parent.showsExhibitions? 'index.html#exhibitionview/'+dbId(): 'index.html#collectionview/'+dbId()}" title="view"> 
+				  	<!-- ko if: administrative.access.isPublic()-->
+					<div class="category">public</div>
+					<!--/ko-->
+					<!-- ko else -->
+					<div class="category">private</div>
+					<!--/ko-->
+					<!-- ko if: media()[0]-->
+					<div class="wrap"><img data-bind="attr: {src: media()[0].thumbnailUrl}"/></div>
+					<!-- /ko -->
+					<!-- ko else -->
+					<div class="wrap"></div>
+					<!-- /ko -->
+					<!-- ko if: media()[1]-->
+					<div class="wrap small"><img data-bind="attr: {src: media()[1].thumbnailUrl}"/></div>
+					<!-- /ko -->
+					<!-- ko else -->
+					<div class="wrap small"></div>
+					<!-- /ko -->
+					<!-- ko if: media()[2]-->
+					<div class="wrap small"><img data-bind="attr: {src: media()[2].thumbnailUrl}"/></div>
+					<!-- /ko -->
+					<!-- ko else -->
+					<div class="wrap small"></div>
+					<!-- /ko -->
+					</a>
+				  </div>
+				  <div class="meta">
+				  	<!-- ko if: $parent.showsExhibitions -->
+				  	<a title="View exhibition" data-bind="{text: title(), attr: {href: 'index.html#exhibitionview/'+dbId()}}" class="header truncate"></a>
+				  	<!-- /ko -->
+					<!-- ko else -->
+					<a class="header" data-bind="{text: title(), attr: {href: 'index.html#collectionview/'+dbId()}}" class="header truncate"></a>
+					<!-- /ko -->
+					<div class="description" data-bind="text: description()"></div>
+					<div class="other-info">
+					  <div class="count" data-bind="text: itemCount()"></div>
+					  <div class="date" data-bind="text: administrative.created()"></div>
+					  <div class="user"data-bind="text: withCreatorInfo.creatorName"></div>
+					</div>
+					<div class="action-group">
+						<!--  ko if: myAccess() ==  "OWN" -->
+						<!-- ko if: $parent.showsExhibitions -->
+						<a data-toggle="tooltip" data-bind="click: $parent.deleteMyCollection" data-placement="top" title="Delete exhibition" class="fa fa-trash-o"></a>
+						<a data-toggle="tooltip" data-placement="top" data-bind="click: $parent.openShareCollection" title="Share exhibition" class="fa fa-paper-plane-o"></a>
+						<!-- /ko -->
+						<!-- ko else -->
+						<a data-toggle="tooltip" data-bind="click: $parent.deleteMyCollection" data-placement="top" title="Delete collection" class="fa fa-trash-o"></a>
+						<a data-toggle="tooltip" data-placement="top" data-bind="click: $parent.openShareCollection" title="Share collection" class="fa fa-paper-plane-o"></a>
+						<!-- /ko -->
 						<!-- /ko -->
 						<!--  ko if: (myAccess() ==  "OWN" || myAccess() == "WRITE")-->
-						<span class="glyphicon glyphicon-pencil" title="Edit Collection" data-bind="click: $parent.openEditCollectionPopup" aria-hidden="true"></span>
-					 	<!--  ko if: myAccess() ==  "OWN" -->
-					 	<span class="glyphicon glyphicon-trash" title="Delete Collection" data-bind="click: $parent.deleteMyCollection" aria-hidden="true"></span>
-					 	<!-- /ko -->
-					 	<!--  /ko -->
-					 	</div>
-					   <h3 data-bind="text: title"></h3>
-					   <div class="coll-descr" data-bind="text: description()"></div>
-					   <div class="row">
-						   <div class="col-xs-12 col-sm-12 col-md-12 coll-footer">
-						   		<!-- ko if: administrative.access.isPublic --><span class="label label-success">Public</span><!-- /ko -->
-						   		<!-- ko ifnot: administrative.access.isPublic --><span class="label label-danger">Restricted</span><!-- /ko -->
-					   			&bull; <strong>Items: </strong> <span data-bind="text: administrative.entryCount()"></span> &bull;
-						   		<b>Created:</b> <i data-bind="text: administrative.created()"></i> &bull;
-						   		<b>Creator:</b> <i data-bind="text: withCreatorInfo.username"></i>
-						   </div>
-						</div>
-					 </div>
-					 </div>
-					 <!--  ko if: administrative.entryCount() > 0 -->
-					     <a data-bind="attr: {href: 'index.html#collectionview/'+dbId()}">
-						 <div class="col-xs-6  col-sm-6  col-md-8">
-					 	 <div class="row-fluid">
-					  	 <div class="imcontainer">
-					  	 	<!-- ko foreach: media -->
-					  	 	  <!-- ko if: thumbnailUrl -->
-					  	 		<div class="coll_figure"><img  data-bind="attr: {src: thumbnailUrl}">
-					  	 		 </div>
-					  	 	 <!-- /ko -->
-					  	 	 <!-- /ko -->
-					  	  </div>
-					  	 </div>
-					  	 </div>
-					  	  </a>
-					  <!-- /ko -->
-					  <!-- ko else -->
-					  <!-- ko if: myAccess()=="WRITE" -->
-					  	<!-- TODO: Make the message look nicer -->
-					  	<div class="col-xs-6 col-sm-6 col-md-8 coll-message">
-					 	 <div class="row-fluid">
-					  	 <div class="imcontainer">
-					  		<h5><a href="#search" onClick="toggleSearch('focus'); return false;"> Select items from search results to add to collection.</a></h5>
-					  	</div>
-					  	</div>
-					  	</div>
-					   <!-- /ko -->
-					  <!-- /ko -->
-					 </div>
-					 </div>
-					 </div>
-				 <!-- /ko -->
-				 </div>
-				 	<div id="more1" data-bind="visible: loading, scroll: myCollections(), scrollOptions: {loadFunc: moreCollections, functPar1: showsExhibitions, offset: 0}"> <i class="fa fa-spinner fa-pulse"></i></div>
-		    </div>
-		</div>
+						<a data-toggle="tooltip" data-bind="click: $parent.prepareForEditCollection" data-placement="top" title="Edit" class="fa fa-pencil editaction"></a>
+						<!-- /ko -->
+						<span data-bind="visible: myAccess() == 'READ'">&nbsp;</span>
+					</div>
+				  </div>
+				</li>
+			  </script>
 
-
+			</section>
+		  </section>
+		</main>
+	</div>
+</div>
 </div>
