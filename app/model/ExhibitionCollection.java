@@ -16,9 +16,14 @@
 
 package model;
 
+import java.util.HashMap;
+
+import model.EmbeddedMediaObject.MediaVersion;
+
 public class ExhibitionCollection {
 
 	private String intro;
+	private HashMap<MediaVersion, EmbeddedMediaObject> backgroundImg;
 
 	public ExhibitionCollection(String intro) {
 		setIntro(intro);
@@ -30,5 +35,13 @@ public class ExhibitionCollection {
 
 	public void setIntro(String intro) {
 		this.intro = intro;
+	}
+
+	public HashMap<MediaVersion, EmbeddedMediaObject> getBackgroundImg() {
+		return backgroundImg;
+	}
+
+	public void setBackgroundImg(HashMap<MediaVersion, EmbeddedMediaObject> backgroundImg) {
+		this.backgroundImg = backgroundImg;
 	}
 }

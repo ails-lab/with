@@ -58,7 +58,9 @@ PUT		 /collection/:id 						controllers.CollectionObjectController.editCollectio
 DELETE   /collection/:id	                    controllers.CollectionObjectController.deleteCollectionObject(id)
 
 # Exhibition Controller
-#POST     /exhibition/create                     controllers.CollectionObjectController.createCollectionObject(collectionType: String ?= "Exhibition")
+POST	 /exhibition/:id/addBackgroundImg		controllers.ExhibitionObjectController.addBackgroundImg(id)
+ 
+#POST     /exhibition/create                    controllers.CollectionObjectController.createCollectionObject(collectionType: String ?= "Exhibition")
 
 #GET	  /record/similar/:externalId			controllers.RecordController.getSimilar(externalId)
 

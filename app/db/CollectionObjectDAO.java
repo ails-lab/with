@@ -494,4 +494,14 @@ public class CollectionObjectDAO extends WithResourceDAO<CollectionObject> {
 			this.update(cq, colUpdate);
 		}
 	}
+	
+	public void updateBackgroundImg(ObjectId exhId, HashMap<MediaVersion, EmbeddedMediaObject> media) {
+		UpdateOperations<CollectionObject> colUpdate = DB
+				.getCollectionObjectDAO().createUpdateOperations()
+				.disableValidation();
+		Query<CollectionObject> cq = DB.getCollectionObjectDAO()
+				.createQuery().field("_id").equal(exhId);
+		colUpdate.set("backgroundImg", media);
+		this.update(cq, colUpdate);
+	}
 }
