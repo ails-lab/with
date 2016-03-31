@@ -138,6 +138,9 @@ public class CollectionObjectController extends WithResourceController {
 		}
 		for (String oid: ids.split("[,\\s]+")){
 			CulturalObject record = new CulturalObject();
+			CulturalObjectData descriptiveData = new CulturalObjectData();
+			descriptiveData.setLabel(new MultiLiteral(oid).fillDEF());
+			record.setDescriptiveData(descriptiveData);
 			record.addToProvenance(new ProvenanceInfo(source, null, oid));
 			internalAddRecordToCollection(ccid.getDbId().toString(), record ,  F.Option.None(), resultInfo);
 			System.out.println("added "+oid);
