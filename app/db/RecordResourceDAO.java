@@ -314,13 +314,13 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 		parentCollections.remove(collectionId);
 		List<WithAccess> parentColAccess = new ArrayList<WithAccess>();
 		for (ObjectId parentId : parentCollections) {
-			CollectionObject parentCollection = DB.getCollectionObjectDAO()
-					.getById(
-							parentId,
-							new ArrayList<String>(Arrays
-									.asList("administrative.access")));
-			parentColAccess.add(parentCollection.getAdministrative()
-					.getAccess());
+			CollectionObject parentCollection;
+			if ((parentCollection = DB.getCollectionObjectDAO().getById(
+					parentId,
+					new ArrayList<String>(Arrays
+							.asList("administrative.access")))) != null)
+				parentColAccess.add(parentCollection.getAdministrative()
+						.getAccess());
 		}
 		WithAccess mergedAccess = mergeRights(parentColAccess, record
 				.getAdministrative().getWithCreator(), record
