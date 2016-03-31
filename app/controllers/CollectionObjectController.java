@@ -38,12 +38,15 @@ import db.DB;
 import model.annotations.ContextData;
 import model.basicDataTypes.Language;
 import model.basicDataTypes.MultiLiteral;
+import model.basicDataTypes.ProvenanceInfo;
 import model.basicDataTypes.WithAccess;
 import model.basicDataTypes.WithAccess.Access;
 import model.basicDataTypes.WithAccess.AccessEntry;
 import model.resources.CollectionObject;
 import model.resources.CollectionObject.CollectionAdmin;
 import model.resources.CollectionObject.CollectionAdmin.CollectionType;
+import model.resources.CulturalObject;
+import model.resources.CulturalObject.CulturalObjectData;
 import model.resources.RecordResource;
 import model.resources.WithResource;
 import model.resources.WithResource.WithResourceType;
@@ -116,6 +119,30 @@ public class CollectionObjectController extends WithResourceController {
 				return Promise.pure((Result)badRequest(e.getMessage()));
 			}
 		}
+	}
+	
+	public static Result importIDs(String cname, String source, String ids){
+		ObjectNode resultInfo = Json.newObject();
+		ObjectId creatorDbId = new ObjectId(session().get("user"));
+		CollectionObject ccid = null;
+		if (!isCollectionCreated(creatorDbId, cname)){
+			CollectionObject collection = new CollectionObject();
+			collection.getDescriptiveData().setLabel(new MultiLiteral(cname).fillDEF());
+			boolean success = internalAddCollection(collection, CollectionType.SimpleCollection, creatorDbId, resultInfo);
+			if (!success)
+				return badRequest(resultInfo);
+			ccid  = collection;
+		} else {
+			 List<CollectionObject> col = DB.getCollectionObjectDAO().getByLabel(Language.DEFAULT, cname);
+			 ccid = col.get(0);
+		}
+		for (String oid: ids.split("[,\\s]+")){
+			CulturalObject record = new CulturalObject();
+			record.addToProvenance(new ProvenanceInfo(source, null, oid));
+			internalAddRecordToCollection(ccid.getDbId().toString(), record ,  F.Option.None(), resultInfo);
+			System.out.println("added "+oid);
+		}
+		return ok(resultInfo);
 	}
 	
 	/**
