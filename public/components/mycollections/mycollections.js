@@ -41,16 +41,54 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 			console.log(JSON.parse(request.responseText));
 		});
 	}
+	
+	
 
 	function MyCollectionsModel(params) {
 		KnockoutElse.init([spec = {}]);
 		//$("div[role='main']").toggleClass( "homepage", false );
 		var self = this;
+//		WITHApp.tabAction();
+//		WITHApp.initTooltip();
 		self.route = params.route;
 		self.showsExhibitions = params.showsExhibitions;
+		console.log(app.currentUser.username());
+		self.superUser = (app.currentUser.username()=="foodanddrink");
+		
 		//self.collections = [];
 		self.index = ko.observable(0);
 		self.collectionSet = ko.observable("my");
+		
+		self.openAction = function (myclass){
+			console.log('ok');
+			$( '.action' ).removeClass( 'active' );
+			$( '.action.'+myclass ).addClass( 'active' );				
+		};
+		
+		self.europeanaID = ko.observable("");
+		self.importEuropeanaCollection = function () {
+		    console.log( self.europeanaID());
+		    $.ajax({
+		    	"url": "/collection/importEuropeanaCollection?id="+self.europeanaID(),
+		    	"method": "GET",
+		    	"success": function( data, textStatus, jQxhr ){
+		    		console.log( data );
+		    	    $.smkAlert({text: 'Collection Imported', type: 'success'});
+		    		self.reloadCollection(data);
+		    		app.currentUser.collectionCount(app.currentUser.collectionCount() + 1);
+		    		self.collectionCount(self.collectionCount() + 1);
+		    		self.closeSideBar();
+				},
+				"error": function (result) {
+					$.smkAlert({ text: 'An error occured', type: 'danger', time: 10 });
+					self.closeSideBar();
+				}
+		            
+		          
+		 });		
+   };
+		
+		
 		var mapping = {
 			create: function (options) {
 				//customize at the root level: add title and description observables, based on multiliteral
@@ -584,6 +622,7 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 					//self.collectionSet("my");
 					self.titleToEdit(self.myCollections()[collIndex].title());
 					self.descriptionToEdit(self.myCollections()[collIndex].description());
+					self.isPublicToEdit(self.myCollections()[collIndex].administrative.access.isPublic());
 				} else {
 					//self.collectionSet("shared");
 					self.titleToEdit(self.sharedCollections()[collIndex].title());
@@ -714,6 +753,14 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 			} else if ($(clickedElement).text() == "Collections shared with me") {
 				self.collectionSet("shared");
 				$("#pickerTitle").text("Collections shared with me");
+			} else if ($(clickedElement).text() == "My Exhibitions") {
+				self.collectionSet("my");
+				$("#pickerTitle").text("My Exhibitions");
+			} else if ($(clickedElement).text() == "Exhibitions shared with me") {
+				self.collectionSet("shared");
+				$("#pickerTitle").text("Exhibitions shared with me");
+			} else {
+				$.smkAlert({ text: 'Not a valid operation!', type: 'danger', time: 10 });
 			}
 		};
 

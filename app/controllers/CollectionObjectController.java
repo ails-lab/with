@@ -113,7 +113,7 @@ public class CollectionObjectController extends WithResourceController {
 					.getDbId().toString(), (RecordResource) item, F.Option
 					.None(), resultInfo);
 		}
-		;
+		
 
 		Promise<Integer> promiseOfInt = Promise
 				.promise(new Function0<Integer>() {
@@ -145,7 +145,11 @@ public class CollectionObjectController extends WithResourceController {
 
 		if (resultInfo.has("error"))
 			return badRequest(resultInfo);
-		return ok(resultInfo);
+		return 
+		ok(Json.toJson(collectionWithMyAccessData(
+				collection,
+				AccessManager.effectiveUserIds(session().get(
+						"effectiveUserIds")))));
 	}
 
 	public static Result sortCollectionObject(String collectionId) {

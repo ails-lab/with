@@ -823,11 +823,12 @@ define("app", ['knockout', 'facebook', 'imagesloaded', 'moment', './js/app/plugi
 				$(".autocomplete-suggestion").addClass("autocomplete-suggestion-extra");
 			},
 			formatResult: function (suggestion, currentValue) {
+				var prefix = suggestion.value.substring(0, currentValue.length);
 				var s =
 					/*'<img class="img-responsive img-circle" src="';
 				s	 += (currentUser.image() ? currentUser.image() : 'images/user.png') + '" />'
 				s	 +=*/
-					'<strong>' + currentValue + '</strong>';
+					'<strong>' + prefix + '</strong>';
 				s += suggestion.value.substring(currentValue.length);
 				s += ' <span class="label pull-right">' + suggestion.data.category + '</span>';
 				return s;
@@ -880,7 +881,8 @@ define("app", ['knockout', 'facebook', 'imagesloaded', 'moment', './js/app/plugi
 		if(usercookie!=null){
 		   var keys=ExtractQueryString(usercookie);
 		   if(self.currentUser._id()==undefined || self.currentUser._id().length==0){
-		     if(keys["user"]){self.currentUser._id(keys["user"]);self.reloadUser();}}
+		   	if(keys["username"]){self.currentUser.username(keys["username"]);}
+		   	if(keys["user"]){self.currentUser._id(keys["user"]);self.reloadUser();}}
 		    return (keys["user"]==undefined ? false : true);
 		} else{return false;}
 
