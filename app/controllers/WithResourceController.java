@@ -171,10 +171,11 @@ public class WithResourceController extends Controller {
 			resourceType = WithResourceType.CulturalObject.toString();
 		try {
 			Class<?> clazz = Class.forName("model.resources." + resourceType);
-			if (position.isDefined())
-				fillInContextTarget(json, collectionDbId.toString(),
-						position.get());
+//			if (position.isDefined())
+//				fillInContextTarget(json, collectionDbId.toString(),
+//						position.get());
 			RecordResource record = (RecordResource) Json.fromJson(json, clazz);
+			record.setContextData(null);
 			MultiLiteral label = record.getDescriptiveData().getLabel();
 			if (label == null || label.get(Language.DEFAULT) == null
 					|| label.get(Language.DEFAULT).isEmpty()
