@@ -124,7 +124,7 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 		for (RecordResource record : orderedRecords) {
 			for (ContextData<ContextDataBody> data : contextData) {
 				if (data.getTarget().getRecordId().equals(record.getDbId())) {
-					record.addContextData(data);
+					record.setContextData(data);
 					break;
 				}
 			}

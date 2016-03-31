@@ -389,9 +389,11 @@ public class CollectionObjectDAO extends WithResourceDAO<CollectionObject> {
 			collectionUpdate.add("collectedResources",
 					new ContextData(recordId), true);
 		} else {
-			collectionUpdate.add("collectedResources", "{ $each: ["
-					+ new ContextData(recordId) + "], $position: " + position
-					+ "}", true);
+			List<ContextData<ContextDataBody>> collectedResources = this
+					.getById(collectionId, Arrays.asList("collectedResources"))
+					.getCollectedResources();
+			collectedResources.add(position, new ContextData(recordId));
+			collectionUpdate.set("collectedResources", collectedResources);
 		}
 		collectionUpdate.inc("administrative.entryCount");
 		collectionUpdate.set("administrative.lastModified", new Date());
@@ -527,19 +529,23 @@ public class CollectionObjectDAO extends WithResourceDAO<CollectionObject> {
 
 	}
 
-	public void updateContextData(ContextData contextData, int position) throws Exception {
+	public void updateContextData(ContextData contextData, int position)
+			throws Exception {
 
 		ObjectId collectionId = contextData.getTarget().getCollectionId();
 		ObjectId recordId = contextData.getTarget().getRecordId();
 		List<ContextData<ContextDataBody>> collectedResources = this.getById(
 				collectionId, Arrays.asList("collectedResources"))
 				.getCollectedResources();
-		if (!collectedResources.get(position).getTarget().getRecordId().equals(recordId))
+		if (!collectedResources.get(position).getTarget().getRecordId()
+				.equals(recordId))
 			throw new Exception("Invalid record position");
-		Query<CollectionObject> q = this.createQuery().field("_id").equal(collectionId);
+		Query<CollectionObject> q = this.createQuery().field("_id")
+				.equal(collectionId);
 		UpdateOperations<CollectionObject> updateOps = this
 				.createUpdateOperations();
-		updateFields("contextData." + position, Json.toJson(contextData), updateOps);
+		updateFields("contextData." + position, Json.toJson(contextData),
+				updateOps);
 		updateOps.set("administrative.lastModified", new Date());
 		this.update(q, updateOps);
 	}

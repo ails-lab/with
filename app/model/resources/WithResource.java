@@ -372,8 +372,8 @@ public class WithResource<T extends DescriptiveData, U extends WithResource.With
 	private List<HashMap<MediaVersion, EmbeddedMediaObject>> media;
 
 	@Embedded
-	@JsonDeserialize(using = Deserializer.ContextDataDeserializer.class)
-	private List<ContextData> contextData;
+	//@JsonDeserialize(using = Deserializer.ContextDataDeserializer.class)
+	private ContextData contextData;
 
 	private List<Annotation> annotations;
 
@@ -381,7 +381,7 @@ public class WithResource<T extends DescriptiveData, U extends WithResource.With
 		this.usage = new Usage();
 		this.provenance = new ArrayList<ProvenanceInfo>();
 		this.collectedIn = new ArrayList<ObjectId>();
-		this.contextData = new ArrayList<ContextData>();
+		this.contextData = new ContextData();
 		this.media = new ArrayList<>();
 		HashMap<MediaVersion, EmbeddedMediaObject> embedded = new HashMap<MediaVersion, EmbeddedMediaObject>();
 		embedded.put(MediaVersion.Thumbnail, new EmbeddedMediaObject());
@@ -393,7 +393,7 @@ public class WithResource<T extends DescriptiveData, U extends WithResource.With
 		this.provenance = new ArrayList<ProvenanceInfo>();
 		this.collectedIn = new ArrayList<ObjectId>();
 		this.media = new ArrayList<>();
-		this.contextData = new ArrayList<ContextData>();
+		this.contextData = new ContextData();
 		HashMap<MediaVersion, EmbeddedMediaObject> embedded = new HashMap<MediaVersion, EmbeddedMediaObject>();
 		embedded.put(MediaVersion.Thumbnail, new EmbeddedMediaObject());
 		this.media.add(embedded);
@@ -514,18 +514,12 @@ public class WithResource<T extends DescriptiveData, U extends WithResource.With
 		this.media.get(0).put(mediaVersion, media);
 	}
 
-	public List<ContextData> getContextData() {
+	public ContextData getContextData() {
 		return contextData;
 	}
 
-	public void setContextData(List<ContextData> contextData) {
+	public void setContextData(ContextData contextData) {
 		this.contextData = contextData;
-	}
-
-	public void addContextData(ContextData contextData) {
-		if (this.contextData == null)
-			this.contextData = new ArrayList<ContextData>();
-		this.contextData.add(contextData);
 	}
 
 	public List<Annotation> getAnnotations() {

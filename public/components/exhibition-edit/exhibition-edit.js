@@ -95,11 +95,13 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 	}
 
 	function saveItemToExhibition(record, position, exhibitionId) {
+		var recordJS = ko.toJS(record);
+		delete recordJS.__ko_mapping__;
 		return $.ajax({
 			"url": "/collection/" + exhibitionId + "/addRecord?position=" + position,
 			"method": "post",
 			"contentType": "application/json",
-			"data": ko.toJSON(record),
+			"data": JSON.stringify(recordJS),
 			"success": function (data) {
 				// Empty
 			},
@@ -150,7 +152,6 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 				window.location.href = "#login";
 			}
 		};
-
 		self.mapping = {
 			create: function (options) {
 				//customize at the root level: add title and description observables, based on multiliteral
@@ -158,33 +159,36 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 		        var record = options.data;
 		        var newRecord =  ko.mapping.fromJS(record, {});
 		        newRecord.containsAudio = ko.pureComputed(function() {
-		        	if (newRecord.contextData == undefined || newRecord.contextData()[0].body.audioUrl == undefined)
+		        	if (newRecord.contextData == undefined || newRecord.contextData.body == undefined 
+		        		|| newRecord.contextData.body.audioUrl == undefined)
 		        		return false;
 		        	else
-		        		return (newRecord.contextData()[0].body.audioUrl() !== '');
+		        		return (newRecord.contextData.body.audioUrl() !== '');
 
 				});
 				newRecord.containsVideo = ko.pureComputed(function () {
-					if (newRecord.contextData == undefined || newRecord.contextData()[0].body.videoUrl == undefined) {
+					if (newRecord.contextData == undefined || newRecord.contextData.body.videoUrl == undefined) {
 						return false;
 					} else {
-						return (newRecord.contextData()[0].body.videoUrl() !== '');
+						return (newRecord.contextData.body.videoUrl() !== '');
 					}
 					return result;
 				});
 				newRecord.containsVideoDescription = ko.pureComputed(function () {
-					if (newRecord.contextData == undefined || newRecord.contextData()[0].body.videoDescription == undefined) {
+					if (newRecord.contextData == undefined || newRecord.contextData.body.videoDescription == undefined) {
 						return false;
 					} else {
-						return (newRecord.contextData()[0].body.videoDescription() !== '');
+						return (newRecord.contextData.body.videoDescription() !== '');
 					}
 					return result;
 				});
 				newRecord.containsText = ko.pureComputed(function () {
-					if (newRecord.contextData == undefined || newRecord.contextData()[0].body.text.default == undefined) {
+					if (newRecord.contextData == undefined || newRecord.contextData.body == undefined 
+						|| newRecord.contextData.body.text == undefined 
+						|| newRecord.contextData.body.text.default == undefined) {
 						return false;
 					} else {
-						return newRecord.contextData()[0].body.text.default() !== '';
+						return newRecord.contextData.body.text.default() !== '';
 					}
 				});
 				if (newRecord.contextData == undefined) {
@@ -205,7 +209,7 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 				}
 				newRecord.embeddedVideoUrl = ko.pureComputed(function () {
 					if (newRecord.containsVideo()) {
-						var urlMatch = newRecord.contextData()[0].body.videoUrl().match(/youtube\.com.*(\?v=|\/embed\/)(.{11})/);
+						var urlMatch = newRecord.contextData.body.videoUrl().match(/youtube\.com.*(\?v=|\/embed\/)(.{11})/);
 						if (urlMatch !== null) {
 							var youtube_video_id = urlMatch.pop();
 							var embeddedVideoPath = 'https://www.youtube.com/embed/' + youtube_video_id;
@@ -409,9 +413,9 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 			var context = ko.contextFor(event.target);
 			var index = context.$index();
 			self.itemPosition(index);
-			self.itemText(exhibitionItem.contextData()[0].body.text.default());
-			self.itemVideoUrl(exhibitionItem.contextData()[0].body.videoUrl());
-			self.itemVideoDescription(exhibitionItem.contextData()[0].body.videoDescription());
+			self.itemText(exhibitionItem.contextData.body.text.default());
+			self.itemVideoUrl(exhibitionItem.contextData.body.videoUrl());
+			self.itemVideoDescription(exhibitionItem.contextData.body.videoDescription());
 			self.itemId(exhibitionItem.dbId());
 			$( '.action' ).removeClass( 'active' );
 			$( '.action.editvideo' ).addClass( 'active' );
@@ -428,10 +432,10 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 				var promise = self.updateRecord(self.itemId(), self.itemText(), itemEmbeddedVideoUrl, self.itemVideoDescription(), self.dbId(), self.itemPosition());
 				$.when(promise).done(function (data) {
 					if (editMode == "editText") {
-						self.collectionItemsArray()[self.itemPosition()].contextData()[0].body.text.default(self.itemText());
+						self.collectionItemsArray()[self.itemPosition()].contextData.body.text.default(self.itemText());
 					} else if (editMode == "editVideo") {
-						self.collectionItemsArray()[self.itemPosition()].contextData()[0].body.videoUrl(self.itemVideoUrl());
-						self.collectionItemsArray()[self.itemPosition()].contextData()[0].body.videoDescription(self.itemVideoDescription());
+						self.collectionItemsArray()[self.itemPosition()].contextData.body.videoUrl(self.itemVideoUrl());
+						self.collectionItemsArray()[self.itemPosition()].contextData.body.videoDescription(self.itemVideoDescription());
 					}
 					self.closeSideBar();
 				}).fail(function (data) {
@@ -448,8 +452,8 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 			var index = context.$index();
 			var promise = self.updateRecord(exhibitionItem.dbId(), self.itemText(), "", "", self.dbId(), index);
 			$.when(promise).done(function (data) {
-				self.collectionItemsArray()[index].contextData()[0].body.videoUrl("");
-				self.collectionItemsArray()[index].contextData()[0].body.videoDescription("");
+				self.collectionItemsArray()[index].contextData.body.videoUrl("");
+				self.collectionItemsArray()[index].contextData.body.videoDescription("");
 			});
 		}
 		
@@ -630,7 +634,7 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 					drop: function (event, ui) {
 						var indexNewItem = ko.utils.unwrapObservable(valueAccessor().index);
 						var newItem = ko.mapping.fromJS(_draggedItem, self.mapping);
-						newItem.contextData()[0].target.position(indexNewItem);
+						//newItem.contextData[0].target.position(indexNewItem);
 						var indexDraggedItem = self.collectionItemsArray.indexOf(_draggedItem);
 						_startIndex = indexDraggedItem;
 						//don't do anything if it is moved to its direct left or right dashed box

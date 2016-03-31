@@ -78,7 +78,7 @@ public class RecordResourceController extends WithResourceController {
 			else {
 				// filter out all context annotations refering to collections to
 				// which the user has no read access rights
-				filterContextData(record);
+				//filterContextData(record);
 				if (format.isDefined()) {
 					if (format.equals("contentOnly")) {
 						return ok(Json.toJson(record.getContent()));
@@ -105,7 +105,7 @@ public class RecordResourceController extends WithResourceController {
 			return internalServerError(result);
 		}
 	}
-
+/*
 	public static void filterContextData(WithResource record) {
 		List<ContextData> contextAnns = record.getContextData();
 		List<ContextData> filteredContextAnns = new ArrayList<ContextData>();
@@ -122,7 +122,7 @@ public class RecordResourceController extends WithResourceController {
 				filteredContextAnns.add(contextAnn);
 		}
 		record.setContextData(filteredContextAnns);
-	}
+	}*/
 
 	/**
 	 * Edits the WITH resource according to the JSON body. For every field
