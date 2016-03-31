@@ -385,6 +385,13 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 		return this.get(recordId);
 	}
 
+	public List<RecordResource> getByMedia(String mediaUrl) {
+		Query<RecordResource> q = this.createQuery().disableValidation()
+				.field("media.0.Original.url").equal(mediaUrl);
+		System.out.println(q.toString());
+		return this.find(q.retrievedFields(true, "_id")).asList();
+	}
+
 	public boolean existsSameExternaIdInCollection(String externalId,
 			ObjectId collectionId) {
 		Query<RecordResource> q = this.createQuery().disableValidation()

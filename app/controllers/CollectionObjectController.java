@@ -149,6 +149,7 @@ public class CollectionObjectController extends WithResourceController {
 		return ok(resultInfo);
 	}
 
+	// TODO refactor
 	public static Result sortCollectionObject(String collectionId) {
 		ObjectNode result = Json.newObject();
 		try {
@@ -165,7 +166,7 @@ public class CollectionObjectController extends WithResourceController {
 			RecordResource<?>[] array = records.toArray(new RecordResource<?>[]{});
 			Arrays.sort(array,Utils.compareThumbs);
 			Logger.info("Items sorted based on image quality");
-			for (int i = 0, pos = 0; i < array.length; i++) {
+			/*for (int i = 0, pos = 0; i < array.length; i++) {
 				RecordResource<?> recordResource = array[i];
 				for (CollectionInfo ci : recordResource.getCollectedIn()) {
 					if (ci.getCollectionId().equals(collectionDbId)) {
@@ -174,7 +175,7 @@ public class CollectionObjectController extends WithResourceController {
 				}
 				DB.getRecordResourceDAO().makePermanent(recordResource);
 				Logger.info(pos +"th item was updated");
-			}
+			}*/
 			return ok();
 		} catch (Exception e) {
 			result.put("error", e.getMessage());
