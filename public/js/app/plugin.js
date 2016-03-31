@@ -319,7 +319,7 @@ WITHApp.ui = function( custom ){
 			});
 
 		}
-
+		
 		// open new
 		if ( $( 'a.new' ).length !== 0 ) {
 
@@ -331,6 +331,19 @@ WITHApp.ui = function( custom ){
 			});
 
 		}
+		
+		// open upload
+		if ( $( 'a.thesaurus' ).length !== 0 ) {
+
+			$( 'a.thesaurus' ).on("click", function( e ) {
+
+				e.preventDefault();
+				$( '.action' ).removeClass( 'active' );
+				$( '.action.thesaurus' ).addClass( 'active' );				
+			});
+
+		}
+
 
 		// open detail area
 		if ( $( 'a.detail-control' ).length !== 0 ) {

@@ -203,7 +203,7 @@ public class DAGNode<T> implements Comparable<DAGNode<T>> {
 //			String ss = map.get(s).getPrefLabel().getLiteral(lang);
 			
 //			sb.append("{ \"id\":\"" + idMap.get(s).toString() + "\", \"uri\":\"" + s + "\", \"label\":\"" + ss + "\", \"size\":\"" + size + "\", \"children\": [");
-			sb.append("{ \"id\":\"" + idMap.get(s).toString() + "\", \"uri\":\"" + s + "\", \"label\":\"" + ss + size + "\", \"size\":\"" + size + "\", \"children\": [");
+			sb.append("{ \"id\":\"" + idMap.get(s).toString() + "\", \"uri\":\"" + s + "\", \"label\":\"" + ss + "\", \"size\":\"" + size + "\", \"children\": [");
 			
 			int i = 0;
 			for (DAGNode<T> node : children) {

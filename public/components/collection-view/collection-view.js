@@ -1,4 +1,4 @@
-define(['bridget', 'knockout', 'text!./_collection-view.html', 'isotope', 'imagesloaded', 'app', 'smoke','knockout-validation'], function (bridget, ko, template, Isotope, imagesLoaded, app) {
+define(['bridget', 'knockout', 'text!./_collection-view.html', 'isotope', 'imagesloaded', 'app', 'inputtags', 'smoke','knockout-validation'], function (bridget, ko, template, Isotope, imagesLoaded, app, inputtags) {
 
 	$.bridget('isotope', Isotope);
 	self.loading = ko.observable(false);
@@ -98,6 +98,8 @@ define(['bridget', 'knockout', 'text!./_collection-view.html', 'isotope', 'image
 				return "www.rijksmuseum.nl";
 			case "DDB":
 				return "deutsche-digitale-bibliothek.de";
+			case "DBPedia":
+				return "dbpedia.org";
 			default:
 				return "";
 			}
@@ -197,7 +199,28 @@ define(['bridget', 'knockout', 'text!./_collection-view.html', 'isotope', 'image
 		self.loggedUser = isLogged();
 		self.rightsmap = ko.mapping.fromJS([]);
 		self.isFavorites = ko.observable(false);
+	    
+		$('#term_tags').tagsinput({
+	        allowDuplicates: false,
+	          itemValue: 'uri',  // this will be used to set id of tag
+	          itemText: 'label' // this will be used to set text of tag
+	      });
+		
+	    $('#term_tags').on('itemRemoved', function(event) {
+			for (var i = 0; i < self.terms().length; i++) {
+				if (self.terms()[i].uri() === event.item.uri) {
+					self.terms.splice(i,1);
+					self.reload();
+					break;
+				}
+			}
+		});
+	    
+		self.closeThesaurus = function () {
+			$('.action').removeClass('active');
+		};
 
+		
 		var Term = function(data) {
 			var selfx = this;
 			
@@ -207,17 +230,19 @@ define(['bridget', 'knockout', 'text!./_collection-view.html', 'isotope', 'image
 			
 			ko.mapping.fromJS(data, {}, selfx);
 
-			selfx.removeTerm = function() {
-				for (var i = 0; i < self.terms().length; i++) {
-					if (self.terms()[i].uri() === data.uri) {
-						self.terms.splice(i,1);
-						self.reload();
-						break;
-					}
-				}
-			};
+//			selfx.removeTerm = function() {
+//				for (var i = 0; i < self.terms().length; i++) {
+//					if (self.terms()[i].uri() === data.uri) {
+//						self.terms.splice(i,1);
+////						alert(self.terms().length);
+//						self.reload();
+//						break;
+//					}
+//				}
+//			};
 		}
-		
+
+
 		var NodeModel = function(data) {
 			var selfx = this;
 			
@@ -247,6 +272,8 @@ define(['bridget', 'knockout', 'text!./_collection-view.html', 'isotope', 'image
 
 //				$('#' + selfx.id()).hide();
 				self.terms.push(new Term({ uri: data.uri, label: data.label, subterms: selfx.collect() }));
+	    	    $("#term_tags").tagsinput('add',{ uri: data.uri, label: data.label });
+
 				self.reload();
 			};
 			
@@ -289,10 +316,8 @@ define(['bridget', 'knockout', 'text!./_collection-view.html', 'isotope', 'image
 				"contentType": "application/json",
 				"success": function (data) {
 					self.index(new NodeModel(JSON.parse(data)));
-					//loading(false);
 				},
 				"error": function (result) {
-					//loading(false);
 					$.smkAlert({
 						text: 'An error has occured',
 						type: 'danger',
@@ -301,12 +326,21 @@ define(['bridget', 'knockout', 'text!./_collection-view.html', 'isotope', 'image
 				}
 			});
 		}
-		
+
 		self.reload = function() {
+//			alert("A");
 			loading(true);
 
 			self.index(new NodeModel({ schemes: [] }));
-			self.clearImages();
+			
+			if (self.citems().length > 0) {
+				
+				self.citems.removeAll();
+				
+				var $elements = self.$container.isotope('getItemElements')
+				self.$container.isotope('remove', $elements).isotope('layout');
+				self.revealItems([]);
+			}
 			
 			self.loadIndex();
 			self.loadInit();
@@ -358,7 +392,10 @@ define(['bridget', 'knockout', 'text!./_collection-view.html', 'isotope', 'image
 
 		self.revealItems = function (data) {
 			if ((data.length === 0 || data.length < self.fetchitemnum)) {
-				loading(false);$(".loadmore").text("no more results");
+				loading(false);
+				$(".loadmore").text("no more results");
+			} else {
+				$(".loadmore").text("Load more");
 			}
 
 			var items = [];
@@ -439,6 +476,9 @@ define(['bridget', 'knockout', 'text!./_collection-view.html', 'isotope', 'image
 					} else {
 						loading(false);
 					}
+					
+			    	$("#term_tags").tagsinput('removeAll');
+
 				},
 				error: function (xhr, textStatus, errorThrown) {
 					loading(false);
@@ -465,7 +505,7 @@ define(['bridget', 'knockout', 'text!./_collection-view.html', 'isotope', 'image
 					"contentType": "application/json",
 					"success": function (data) {
 						self.indexCount("");
-						
+
 						var items = self.revealItems(data.records);
 						if (items.length > 0) {
 							var $newitems = getItems(items);
@@ -491,7 +531,7 @@ define(['bridget', 'knockout', 'text!./_collection-view.html', 'isotope', 'image
 					"data" : convertTerms(self.terms()),
 					"success": function (data) {
 						self.indexCount("(" + data.entryCount + " matches)");
-						
+
 						var items = self.revealItems(data.records);
 						if (items.length > 0) {
 							var $newitems = getItems(items);
@@ -546,74 +586,29 @@ define(['bridget', 'knockout', 'text!./_collection-view.html', 'isotope', 'image
 		};
 
 		self.moreItems = function () {
-//<<<<<<< HEAD
-//			if (loading === true) {
-//				setTimeout(self.moreItems(), 300);
-//			}
-//			if (loading() === false) {
-//				loading(true);
-//				var offset = self.citems().length;
-//				if (self.terms().length == 0) {
-//					$.ajax({
-//						"url": "/collection/" + self.id() + "/list?count=10&start=" + offset,
-//						"method": "get",
-//						"contentType": "application/json",
-//						"success": function (data) {
-//							self.indexCount("");
-//=======
-			return $.ajax({
-				type: "GET",
-				contentType: "application/json",
-				dataType: "json",
-				url: "/collection/" + self.id() + "/list",
-				processData: false,
-				data: "count=" + self.fetchitemnum + "&start=" + self.citems().length
-			}).success (function () {
-			});
-//>>>>>>> refs/heads/newdesign
-
-//<<<<<<< HEAD
-//							var items = self.revealItems(data.records);
-//	
-//							if (items.length > 0) {
-//								var $newitems = getItems(items);
-//	
-//								self.isotopeImagesReveal(self.$container, $newitems);
-//	
-//							}
-//							loading(false);
-//	
-//						},
-//						"error": function (result) {
-//							loading(false);
-//						}
-//					});
-//				} else {
-//					$.ajax({
-//						"url": "/collection/" + self.id() + "/indexedlist?count=10&start=" + offset,
-//						"method": "post",
-//						"contentType": "application/json",
-//						"data" : convertTerms(self.terms()),
-//						"success": function (data) {
-//							self.indexCount("(" + data.entryCount + " matches)");
-//
-//							var items = self.revealItems(data.records);
-//
-//							if (items.length > 0) {
-//								var $newitems = getItems(items);
-//
-//								self.isotopeImagesReveal(self.$container, $newitems);
-//							}
-//							loading(false);
-//						},
-//						"error": function (result) {
-//							loading(false);
-//						}
-//					});
-//				}
-//			}
-//=======
-//>>>>>>> refs/heads/newdesign
+			if (self.terms().length == 0) {
+				return $.ajax({
+					type: "GET",
+					contentType: "application/json",
+					dataType: "json",
+					url: "/collection/" + self.id() + "/list",
+					processData: false,
+					data: "count=" + self.fetchitemnum + "&start=" + self.citems().length
+				}).success (function () {
+					self.indexCount("");
+				});
+				} else {
+					return $.ajax({
+						type: "POST",
+						contentType: "application/json",
+						dataType: "json",
+						url: "/collection/" + self.id() + "/indexedlist?count=" + self.fetchitemnum + "&start=" + self.citems().length,
+						processData: false,
+						data : convertTerms(self.terms()) 
+					}).success (function (data) {
+						self.indexCount("(" + data.entryCount + " matches)");
+					});
+				}
 		};
 		
 		function convertTerms(terms) {
@@ -909,18 +904,18 @@ define(['bridget', 'knockout', 'text!./_collection-view.html', 'isotope', 'image
 			return this;
 		};
 		
-		self.clearImages = function ($container, $items) {
-			if (self.citems().length > 0) {
-				self.$container = $(".grid#" + self.id());
-				self.citems.removeAll();
-				
-				self.$container.isotope('remove', self.$container.isotope('getItemElements'));
-				self.$container.isotope('destroy');
-				
-				self.revealItems([]);
-			}
-			return this;
-		};
+//		self.clearImages = function () {
+//			if (self.citems().length > 0) {
+//				self.$container = $(".grid#" + self.id());
+//				self.citems.removeAll();
+//				
+//				self.$container.isotope('remove', self.$container.isotope('getItemElements'));
+//				self.$container.isotope('destroy');
+//				
+//				self.revealItems([]);
+//			}
+//			return this;
+//		};
 
 	}
 
