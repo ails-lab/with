@@ -41,16 +41,54 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 			console.log(JSON.parse(request.responseText));
 		});
 	}
+	
+	
 
 	function MyCollectionsModel(params) {
 		KnockoutElse.init([spec = {}]);
 		//$("div[role='main']").toggleClass( "homepage", false );
 		var self = this;
+//		WITHApp.tabAction();
+//		WITHApp.initTooltip();
 		self.route = params.route;
 		self.showsExhibitions = params.showsExhibitions;
+		console.log(app.currentUser.username());
+		self.superUser = (app.currentUser.username()=="foodanddrink");
+		
 		//self.collections = [];
 		self.index = ko.observable(0);
 		self.collectionSet = ko.observable("my");
+		
+		self.openAction = function (myclass){
+			console.log('ok');
+			$( '.action' ).removeClass( 'active' );
+			$( '.action.'+myclass ).addClass( 'active' );				
+		};
+		
+		self.europeanaID = ko.observable("");
+		self.importEuropeanaCollection = function () {
+		    console.log( self.europeanaID());
+		    $.ajax({
+		    	"url": "/collection/importEuropeanaCollection?id="+self.europeanaID(),
+		    	"method": "GET",
+		    	"success": function( data, textStatus, jQxhr ){
+		    		console.log( data );
+		    	    $.smkAlert({text: 'Collection Imported', type: 'success'});
+		    		self.reloadCollection(data);
+		    		app.currentUser.collectionCount(app.currentUser.collectionCount() + 1);
+		    		self.collectionCount(self.collectionCount() + 1);
+		    		self.closeSideBar();
+				},
+				"error": function (result) {
+					$.smkAlert({ text: 'An error occured', type: 'danger', time: 10 });
+					self.closeSideBar();
+				}
+		            
+		          
+		 });		
+   };
+		
+		
 		var mapping = {
 			create: function (options) {
 				//customize at the root level: add title and description observables, based on multiliteral

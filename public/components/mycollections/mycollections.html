@@ -32,10 +32,23 @@
 			  </ul>
 			  <!-- /ko -->
 			  <!-- ko if: showsExhibitions -->
-			    <a href="#" class="new" }><span class="plus"></span><span class="text" >New Exhibition</span></a>
+			    <a href="#" class="new" ><span class="plus"></span><span class="text" >New Exhibition</span></a>
 			  <!-- /ko -->
 			  <!-- ko else -->
-			    <a href="#" class="new" } ><span class="plus"></span><span class="text" >New Collection</span></a>
+			  
+			    <a href="#" class="new" ><span class="plus"></span><span class="text" >New Collection</span></a>
+			    <!-- ko if: superUser -->
+			    <div class="dropdown1">
+			    <a id="picker1" href="#" data-toggle="dropdown" 
+			      ><span class="plus"></span><span id="pickerTitle1" class="text" >Import Collection</span>
+			    <span class="arrow"></span>
+			    </a>
+			    <ul aria-labelledby="picker1" class="dropdown-menu">
+				<li data-bind="click: openAction.bind($data,'importEuropeana')"><a style="cursor:pointer;" >Europeana Collection</a></li>
+				<li data-bind="click: changeTab"><a style="cursor:pointer;" >Europeana Search</a></li>
+			  </ul>
+			  </div>
+			  <!-- /ko -->
 			  <!-- /ko -->
 			</section>
 			<!-- message-->
@@ -168,7 +181,29 @@
 			   </div>
 			    <!-- /ko -->
 			</section>
-			<!-- collection give access-->
+			
+			<!-- import collection -->
+
+				<section class="action importEuropeana">
+					<div class="action-header">
+						<div class="title">Import Europeana Collection</div>
+					</div>
+					<div class="action-body">
+
+						<div>
+							<input type="text"
+								data-bind="value: europeanaID, valueUpdate: 'afterkeypress', hasFocus: true"
+								placeholder="Europeana collection ID">
+						</div>
+					</div>
+					<div class="button-group">
+						<a class="btn-green-o cancel" data-bind="click: closeSideBar">Cancel</a>
+						<a data-bind="click: importEuropeanaCollection " class="btn-green">Import</a>
+					</div>
+
+				</section>
+
+				<!-- collection give access-->
 			<section class="action access">
 			  <div class="action-header">
 				<div class="title">Give access to users and user groups</div>
