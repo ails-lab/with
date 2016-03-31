@@ -115,7 +115,7 @@ public class UserGroupDAO extends DAO<UserGroup> {
 
 	public List<UserGroup> getByGroupNamePrefix(String prefix) {
 		Query<UserGroup> q = this.createQuery().field("username")
-				.startsWith(prefix);
+				.startsWithIgnoreCase(prefix);
 		return find(q).asList();
 
 	}

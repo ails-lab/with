@@ -584,6 +584,7 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 					//self.collectionSet("my");
 					self.titleToEdit(self.myCollections()[collIndex].title());
 					self.descriptionToEdit(self.myCollections()[collIndex].description());
+					self.isPublicToEdit(self.myCollections()[collIndex].administrative.access.isPublic());
 				} else {
 					//self.collectionSet("shared");
 					self.titleToEdit(self.sharedCollections()[collIndex].title());
@@ -714,6 +715,14 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 			} else if ($(clickedElement).text() == "Collections shared with me") {
 				self.collectionSet("shared");
 				$("#pickerTitle").text("Collections shared with me");
+			} else if ($(clickedElement).text() == "My Exhibitions") {
+				self.collectionSet("my");
+				$("#pickerTitle").text("My Exhibitions");
+			} else if ($(clickedElement).text() == "Exhibitions shared with me") {
+				self.collectionSet("shared");
+				$("#pickerTitle").text("Exhibitions shared with me");
+			} else {
+				$.smkAlert({ text: 'Not a valid operation!', type: 'danger', time: 10 });
 			}
 		};
 

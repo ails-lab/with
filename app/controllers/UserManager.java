@@ -296,6 +296,7 @@ public class UserManager extends Controller {
 			u = DB.getUserDAO().getByFacebookId(facebookId);
 			if (u != null) {
 				session().put("user", u.getDbId().toHexString());
+				session().put("username", u.getUsername());
 				session().put("sourceIp", request().remoteAddress());
 				session().put("lastAccessTime",
 						Long.toString(System.currentTimeMillis()));
@@ -310,6 +311,7 @@ public class UserManager extends Controller {
 			u = DB.getUserDAO().getByGoogleId(googleId);
 			if (u != null) {
 				session().put("user", u.getDbId().toHexString());
+				session().put("username", u.getUsername());
 				session().put("sourceIp", request().remoteAddress());
 				session().put("lastAccessTime",
 						Long.toString(System.currentTimeMillis()));
@@ -347,6 +349,7 @@ public class UserManager extends Controller {
 		}
 		if (u.checkPassword(password)) {
 			session().put("user", u.getDbId().toHexString());
+			session().put("username", u.getUsername());
 			session().put("sourceIp", request().remoteAddress());
 			session().put("lastAccessTime",
 					Long.toString(System.currentTimeMillis()));

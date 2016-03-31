@@ -196,6 +196,7 @@ define(['bridget', 'knockout', 'text!./_collection-view.html', 'isotope', 'image
 		self.isFavorites = ko.observable(false);
 		self.fetchitemnum = 20;
 		self.isPublic = ko.observable(true);
+		
 		self.validationModel = ko.validatedObservable({
 			title: self.titleToEdit
 		});
@@ -274,9 +275,9 @@ define(['bridget', 'knockout', 'text!./_collection-view.html', 'isotope', 'image
 				"method": "get",
 				"contentType": "application/json",
 				"success": function (data) {
-					if (data.administrative.isPublic === false) {
+					if (data.administrative.access.isPublic === false) {
 						self.isPublic(false);
-						self.isPublicToEdit(false);
+						self.isPublicEdit(false);
 						if (isLogged() === false) {
 							window.location = '#login';
 							return;
@@ -585,10 +586,11 @@ define(['bridget', 'knockout', 'text!./_collection-view.html', 'isotope', 'image
 				descriptiveData: {
 					label: {default: [self.titleToEdit()]},
 					description: {default: [self.descriptionToEdit()]},
-					administrative: { access: {
-						isPublic: self.isPublicEdit(),
-						collectionType: "SimpleCollection"}}
-				}
+				},
+				administrative: { access: {
+					isPublic: self.isPublicEdit()},
+					collectionType: "SimpleCollection"}
+				
 			});
 			$.ajax({
 				"url": "/collection/" + self.id(),

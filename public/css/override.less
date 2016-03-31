@@ -171,28 +171,34 @@ body div[role=main] .wrapper main section.exhibition .assets .assetlisting ul li
     z-index: 10;
 }
 
-body div[role=main] .wrapper main section.exhibition .assets .assetlisting{
-position: fixed;
-height:120px;
-}
 
 body div[role=main] .wrapper main section.exhibition .assets {
-    margin-top: 10px;
-    z-index:2;
-}
-
-body div[role=main] .wrapper main section.exhibition .assets .assetlisting{
-position: fixed;
-    width:100%;
-    bottom: 3px;
-    height: 100px;
+    /*margin-top: 10px;
+    z-index:2;*/
+    position: fixed;
+    bottom: 0;
+    /* left: 150px; */
     background-color: #FFFFFF;
     z-index: 1;
     overflow: visible;
+    width: 100%;
+    height: 160px;
+}
+
+body div[role=main] .wrapper main section.exhibition .assets .assetlisting{
+	position: absolute;
+    display: inline-block;
+    height: 100px;
+    background-color: #FFF;
  }
  
- body div[role=main] .wrapper main section.exhibition .editorbox{
+body div[role=main] .wrapper main section.exhibition .editorbox{
  margin-top:5px;
- }
+}
  
+body div[role=main] .wrapper main section.exhibition .assets .actions .notification {
+    float: left;
+    padding-left:10px;
+    padding-right:0;
+}
  
