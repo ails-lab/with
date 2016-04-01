@@ -37,11 +37,7 @@
 								</div>
 								<!-- add-->
 								<!-- ko template: { foreach: collectionItemsArray, beforeRemove: removeItem, afterAdd: showNewItem } -->
-								  <div data-toggle="tooltip" data-placement="top" title="Drag an item here" class="add" data-bind="drop: {index: $index}"><span><a href="javascript:void(0)"><img src="img/ui/ic-add.png"></a></span></div>
-                  
-								
-								<!-- box-->
-								<div class="box fill" data-bind="{css: {videoadded: containsVideo}, drag: {item: $data, move: true}}">
+								  <div data-toggle="tooltip" data-placement="top" title="Drag an item here" class="add" data-bind="drop: {index: $index}"><span><a href="javascript:void(null);"><img src="img/ui/ic-add.png"></a></span></div><div class="box fill" data-bind="{css: {videoadded: containsVideo}, drag: {item: $data, move: true}}">
 									<div class="boxaction">
 										<ul>
 										<li><a href="#" data-toggle="tooltip" data-placement="top" title="Edit item text" data-bind="click: $parent.prepareForItemEdit" class="editbox"> <i class="fa fa-pencil-square-o"></i></a></li>
@@ -50,24 +46,23 @@
 									</div>
 									<div class="left">
 										<div class="imgwrap">
-											<img data-bind="attr: { src: thumbnailUrl }" id="itemImage"/>
+											<img data-bind="attr: { src: thumbnailUrl }" id="itemImage" onError="javascript:this.src='img/content/thumb-empty.png'"/>
 										</div>
 										<div class="imginfo">
 											<span class="mediatitle" data-bind="text: title"></span><br/>
 											<span class="mediasource" data-bind="text: provenance()[provenance().length - 1].provider"></span>
 										</div>
 									</div>
+									<!-- ko if: description -->
+											<div class="right">
+											    <div class="label">Original Description</div>
+												<div class="boxtitle" data-bind="text: description"></div>
+					                        </div>
+										<!--  /ko -->
 									<!--  ko if: containsText -->
 										<div class="right">
 											<div class="boxtitle" data-bind="text: contextData()[0].body.text.default"></div>
 				                        </div>
-									<!-- /ko -->
-									<!-- ko else -->
-										<!-- ko if: description -->
-											<div class="right">
-												<div class="boxtitle" data-bind="text: description"></div>
-					                        </div>
-										<!--  /ko -->
 									<!-- /ko -->
 								    <!--  ko if: containsVideo -->
 									<div class="video">
@@ -105,9 +100,9 @@
                 				
 							</div>							
 						</div>
+						
+						<div class="rightscr"></div><!-- for scrolling the page when dragging item at right of page-->
 					</div>
-					<div class="rightscr"></div><!-- for scrolling the page when dragging item at right of page-->
-					
 					<!-- assets-->
 					<div class="assets">
 						<!-- actions-->
@@ -124,10 +119,10 @@
 						<div class="assetlisting" id="outer-bottom">
 							<ul id="collscroll" data-bind="foreach: userSavedItemsArray, hscroll2: userSavedItemsArray(), scrollOptions: { loadFunc: loadNextCollection }">
 								<li>
-									<a class="bottom-box" href="javascript:void(0)" data-toggle="tooltip" data-placement="top" 
+									<a class="bottom-box"  data-toggle="tooltip" data-placement="top" 
 									data-bind="{drag: {item: $data, move: false}, attr: {title: title}}">
 										<div class="hue">
-											<img data-bind="attr: { src: thumbnailUrl }" class="itemImage"/>
+											<img data-bind="attr: { src: thumbnailUrl }" class="itemImage" onerror="javascript:this.src='img/content/thumb-empty.png';"/>
 											<div class="color"></div>
 										</div>
 									</a>
