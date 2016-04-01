@@ -171,9 +171,9 @@ public class WithResourceController extends Controller {
 			resourceType = WithResourceType.CulturalObject.toString();
 		try {
 			Class<?> clazz = Class.forName("model.resources." + resourceType);
-//			if (position.isDefined())
-//				fillInContextTarget(json, collectionDbId.toString(),
-//						position.get());
+			// if (position.isDefined())
+			// fillInContextTarget(json, collectionDbId.toString(),
+			// position.get());
 			RecordResource record = (RecordResource) Json.fromJson(json, clazz);
 			record.setContextData(null);
 			MultiLiteral label = record.getDescriptiveData().getLabel();
@@ -603,7 +603,9 @@ public class WithResourceController extends Controller {
 					collectionDbId);
 			if (!response.toString().equals(ok().toString()))
 				return response;
-			result.put("message", "Record succesfully added to collection");
+			DB.getCollectionObjectDAO().moveInCollection(collectionDbId,
+					recordDbId, oldPosition, newPosition);
+			result.put("message", "Record succesfully moved in collection");
 			return ok(result);
 		} catch (Exception e) {
 			result.put("error", e.getMessage());
