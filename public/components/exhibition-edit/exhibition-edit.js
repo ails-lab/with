@@ -217,17 +217,20 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 					else
 						return null;
 				});
+				newRecord.description = ko.observable("");
 				newRecord.title = ko.mapping.fromJS(app.findByLang(record.descriptiveData.label), {});
 				var dbDescription = record.descriptiveData.description;
-				if(dbDescription && dbDescription.default && dbDescription.default[0]!="null")
-					newRecord.description = ko.observable(app.findByLang(dbDescription));
-		        else
-		        	newRecord.description = ko.observable("");
+				if(dbDescription.default && ko.isObservable(dbDescription.default)){dbDescription=ko.toJS(dbDescription);}
+				if(dbDescription){
+				    var val=app.findByLang(dbDescription);
+				   newRecord.description = ko.observable(val);}
+		        	
 		        var fullres="";
 			    
 		        if(newRecord.media()!=null &&  newRecord.media()[0] !=null && newRecord.media()[0].Original!=null  && newRecord.media()[0].Original.url()!="null"){
 		        	 fullres=newRecord.media()[0].Original.url();
 		        }
+		        if (fullres.indexOf("empty")!=-1) {fullres="";}
 		        newRecord.fullres=ko.observable(fullres);
 		        
 		        var withUrl = "";
@@ -647,7 +650,6 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 					drop: function (event, ui) {
 						var indexNewItem = ko.utils.unwrapObservable(valueAccessor().index);
 						var newItem = ko.mapping.fromJS(_draggedItem, self.mapping);
-						console.log("fullres:"+newItem.fullres());
 						if(newItem.fullres().length==0){
 							newItem.fullres(newItem.thumbnailUrl());
 							$.smkAlert({

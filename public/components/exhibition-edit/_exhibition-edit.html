@@ -46,24 +46,19 @@
 									</div>
 									<div class="left">
 										<div class="imgwrap">
-											<img data-bind="attr: { src: thumbnailUrl }" id="itemImage" onError="javascript:this.src='img/content/thumb-empty.png'"/>
+											<img data-bind="attr: { src: fullres.length>0 ? fullres : thumbnailUrl }" id="itemImage" onError="javascript:this.src='img/content/thumb-empty.png'"/>
 										</div>
 										<div class="imginfo">
 											<span class="mediatitle" data-bind="text: title"></span><br/>
 											<span class="mediasource" data-bind="text: provenance()[provenance().length - 1].provider"></span>
 										</div>
 									</div>
-									<!-- ko if: description -->
-											<div class="right">
-											    <div class="label">Original Description</div>
-												<div class="boxtitle" data-bind="text: description"></div>
-					                        </div>
-										<!--  /ko -->
 									<!--  ko if: containsText -->
-										<div class="right">
-											<div class="boxtitle" data-bind="text: contextData()[0].body.text.default"></div>
-				                        </div>
-									<!-- /ko -->
+											   <div class="right">
+												<div class="boxtitle" data-bind="text: contextData()[0].body.text.default"></div>
+												</div>
+				        			<!-- /ko -->
+					                
 								    <!--  ko if: containsVideo -->
 									<div class="video">
 				                        <div class="imgwrap">
@@ -98,10 +93,9 @@
 								<!-- /ko -->
 								<div data-toggle="tooltip" data-placement="top" title="Drag an item here" class="add" data-bind="drop: {index: collectionItemsArray().length}"><span><a href="#"><img src="img/ui/ic-add.png"></a></span></div>
                 				
-							</div>							
+							</div>	
+							<div class="rightscr"></div><!-- for scrolling the page when dragging item at right of page-->						
 						</div>
-						
-						<div class="rightscr"></div><!-- for scrolling the page when dragging item at right of page-->
 					</div>
 					<!-- assets-->
 					<div class="assets">
