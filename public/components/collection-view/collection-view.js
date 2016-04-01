@@ -328,7 +328,6 @@ define(['bridget', 'knockout', 'text!./_collection-view.html', 'isotope', 'image
 		}
 
 		self.reload = function() {
-//			alert("A");
 			loading(true);
 
 			self.index(new NodeModel({ schemes: [] }));
@@ -339,7 +338,8 @@ define(['bridget', 'knockout', 'text!./_collection-view.html', 'isotope', 'image
 				
 				var $elements = self.$container.isotope('getItemElements')
 				self.$container.isotope('remove', $elements).isotope('layout');
-				self.revealItems([]);
+//				self.revealItems([]);
+
 			}
 			
 			self.loadIndex();
@@ -707,6 +707,85 @@ define(['bridget', 'knockout', 'text!./_collection-view.html', 'isotope', 'image
 			collectionShow(rec);
 		};
 		
+		similar = function (id, event) {
+			event.preventDefault();
+			var rec = ko.utils.arrayFirst(self.citems(), function (record) {
+				return record.dbId === id;
+			});
+
+			loading(true);
+
+			self.index(new NodeModel({ schemes: [] }));
+			
+			if (self.citems().length > 0) {
+				
+				self.citems.removeAll();
+				
+				var $elements = self.$container.isotope('getItemElements')
+				self.$container.isotope('remove', $elements).isotope('layout');
+//				self.revealItems([]);
+			}
+			
+			self.loadIndex();
+			self.similarLoadInit(rec.dbId);
+
+		};
+
+		self.similarLoadInit = function(rec) {
+//			if (self.terms().length == 0) {
+				$.ajax({
+					"url": "/collection/" + self.id() + "/similarlist?itemid=" + rec + "&count=" + self.count() + "&start=0",
+					"method": "get",
+					"contentType": "application/json",
+					"success": function (data) {
+						self.indexCount("");
+
+						var items = self.revealItems(data.records);
+						if (items.length > 0) {
+							var $newitems = getItems(items);
+
+							self.isotopeImagesReveal(self.$container, $newitems);
+						}
+						loading(false);
+					},
+					"error": function (result) {
+						loading(false);
+						$.smkAlert({
+							text: 'An error has occured',
+							type: 'danger',
+							permanent: true
+						});
+					}
+				});
+//			} else {
+//				$.ajax({
+//					"url": "/collection/" + self.id() + "/indexedlist?count=" + self.count() + "&start=0",
+//					"method": "post",
+//					"contentType": "application/json",
+//					"data" : convertTerms(self.terms()),
+//					"success": function (data) {
+//						self.indexCount("(" + data.entryCount + " matches)");
+//
+//						var items = self.revealItems(data.records);
+//						if (items.length > 0) {
+//							var $newitems = getItems(items);
+//
+//							self.isotopeImagesReveal(self.$container, $newitems);
+//						}
+//						loading(false);
+//					},
+//					"error": function (result) {
+//						loading(false);
+//						$.smkAlert({
+//							text: 'An error has occured',
+//							type: 'danger',
+//							permanent: true
+//						});
+//					}
+//				});
+//			}
+		}
+
 		
 		self.deleteMyCollection = function () {
 			$.smkConfirm({
@@ -763,7 +842,9 @@ define(['bridget', 'knockout', 'text!./_collection-view.html', 'isotope', 'image
 				} else {
 					tile += '<li><a  data-toggle="tooltip" data-placement="top" title="Add to favorites" onclick="likeRecord(\'' + record.dbId + '\',event);" class="fa fa-heart"></a></li>';
 				}}
-				tile += '<li><a data-toggle="tooltip" data-placement="top" title="Collect it" class="fa fa-download collectbutton" onclick="collect(\'' + record.dbId + '\',event);" ></a></li></ul>';
+				tile += '<li><a data-toggle="tooltip" data-placement="top" title="Collect it" class="fa fa-download collectbutton" onclick="collect(\'' + record.dbId + '\',event);" ></a></li>';
+				tile += '<li><a data-toggle="tooltip" data-placement="top" title="Get similar" class="fa" onclick="similar(\'' + record.dbId + '\',event);" >S</a></li>';
+				tile += '</ul>';
 			}
 
 			tile += "</div></div></div></div>";

@@ -17,12 +17,17 @@
 package controllers.thesaurus;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import model.basicDataTypes.Language;
+import model.basicDataTypes.LiteralOrResource;
+import model.basicDataTypes.MultiLiteralOrResource;
+import model.resources.ThesaurusObject.SKOSTerm;
 
 import org.bson.types.ObjectId;
 import org.elasticsearch.action.search.SearchResponse;
@@ -45,6 +50,8 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import controllers.CollectionObjectController;
 import controllers.WithResourceController;
+import db.DB;
+import db.ThesaurusObjectDAO;
 import elastic.ElasticSearcher;
 import elastic.ElasticSearcher.SearchOptions;
 
@@ -140,7 +147,44 @@ public class CollectionIndexController extends WithResourceController	{
 			}
 		}
 
-//		System.out.println("QUERY " + query);
+		return query;
+	}
+
+	public static QueryBuilder getSimilarItemsIndexCollectionQuery(ObjectId colId, MultiLiteralOrResource mm) {
+		BoolQueryBuilder query = QueryBuilders.boolQuery();
+		query.must(QueryBuilders.termQuery("collectedIn.collectionId", colId));
+
+		ThesaurusObjectDAO thesaurusDAO = DB.getThesaurusDAO();
+		
+		for (Map.Entry<String, List<String>> entry : mm.entrySet()) {
+			String key = entry.getKey();
+			if (key.equals(LiteralOrResource.URI)) {
+//				query.should(QueryBuilders.termQuery("_all_uri", uri).boost(4));
+		
+				for (String uri : entry.getValue()) {
+					for (String f : indexFacetFields) {
+						query.should(QueryBuilders.termQuery(f, uri).boost(5));
+					}
+
+					List<SKOSTerm> terms = thesaurusDAO.getByUri(uri).getSemantic().getBroaderTransitive();
+					if (terms != null) {
+						for (SKOSTerm t : terms) {
+							for (String f : indexFacetFields) {
+								query.should(QueryBuilders.termQuery(f, t.getUri()).boost(2));
+							}
+						}
+					}
+				}
+			}
+			
+			for (String s : entry.getValue()) {
+				query.should(QueryBuilders.termQuery("_all_" + key.toLowerCase(), s));
+			}
+			
+		}
+		
+//		System.out.println(query);
+
 		return query;
 	}
 

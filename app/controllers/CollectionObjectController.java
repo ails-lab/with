@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -40,19 +41,27 @@ import controllers.parameterTypes.MyPlayList;
 import controllers.parameterTypes.StringTuple;
 import controllers.thesaurus.CollectionIndexController;
 import db.DB;
+import db.ThesaurusObjectDAO;
 import elastic.ElasticSearcher;
 import elastic.ElasticSearcher.SearchOptions;
+import model.DescriptiveData;
 import model.annotations.ContextData;
 import model.basicDataTypes.CollectionInfo;
 import model.basicDataTypes.Language;
+import model.basicDataTypes.LiteralOrResource;
 import model.basicDataTypes.MultiLiteral;
+import model.basicDataTypes.MultiLiteralOrResource;
 import model.basicDataTypes.WithAccess;
 import model.basicDataTypes.WithAccess.Access;
 import model.basicDataTypes.WithAccess.AccessEntry;
 import model.resources.CollectionObject;
 import model.resources.CollectionObject.CollectionAdmin;
 import model.resources.CollectionObject.CollectionAdmin.CollectionType;
+import model.resources.CulturalObject;
+import model.resources.CulturalObject.CulturalObjectData;
 import model.resources.RecordResource;
+import model.resources.RecordResource.RecordDescriptiveData;
+import model.resources.ThesaurusObject.SKOSTerm;
 import model.resources.WithResource;
 import model.resources.WithResource.WithResourceType;
 import model.usersAndGroups.Organization;
@@ -890,9 +899,9 @@ public class CollectionObjectController extends WithResourceController {
 	}
 	
 	/**
-	 * List all Records from a Collection using a start item and a page size
+	 * List all Records from a Collection that have certain thesaurus terms using a start item and a page size
 	 */
-	public static Result xlistRecordResources(String collectionId, String contentFormat, int start, int count) {
+	public static Result facetedListRecordResources(String collectionId, String contentFormat, int start, int count) {
 		ObjectNode result = Json.newObject();
 		ObjectId colId = new ObjectId(collectionId);
 		Locks locks = null;
@@ -908,7 +917,6 @@ public class CollectionObjectController extends WithResourceController {
 			if (!response.toString().equals(ok().toString())) {
 				return response;
 			} else {
-//				System.out.println("QUERYING FOR VIEW");
 				ElasticSearcher es = new ElasticSearcher();
 				
 				QueryBuilder query = CollectionIndexController.getIndexCollectionQuery(colId, json);
@@ -997,4 +1005,165 @@ public class CollectionObjectController extends WithResourceController {
 				locks.release();
 		}
 	}
+	
+	public static Result similarListRecordResources(String collectionId, String itemid, String contentFormat, int start, int count) {
+		ObjectNode result = Json.newObject();
+		ObjectId colId = new ObjectId(collectionId);
+		Locks locks = null;
+		
+		try {
+			
+			locks = Locks.create().read("Collection #" + collectionId).acquire();
+
+			Result response = errorIfNoAccessToCollection(Action.READ, colId);
+
+			if (!response.toString().equals(ok().toString())) {
+				return response;
+			} else {
+				RecordResource rr = DB.getRecordResourceDAO().getById(new ObjectId(itemid));
+				
+				MultiLiteralOrResource mm = new MultiLiteralOrResource();
+				
+				Set<String> extendedURIs = new HashSet<>();
+				if (rr instanceof CulturalObject) {
+					CulturalObjectData dd = (CulturalObjectData)rr.getDescriptiveData();
+					
+					
+					if (dd.getLabel() !=  null) {
+						mm.merge(dd.getLabel());
+					}
+					
+					if (dd.getAltLabels() !=  null) {
+						mm.merge(dd.getAltLabels());
+					}
+
+					if (dd.getDescription() !=  null) {
+						mm.merge(dd.getDescription());
+					}
+					
+					if (dd.getKeywords() != null) {
+						mm.merge(dd.getKeywords());
+					}
+
+					if (dd.getDctype() != null) {
+						mm.merge(dd.getDctype());
+					}
+
+					if (dd.getDcformat() != null) {
+						mm.merge(dd.getDcformat());
+					}
+					
+//					List<String> URIs = mm.get(LiteralOrResource.URI);
+					
+//					MultiLiteralOrResource keywords = dd.getKeywords();
+//					MultiLiteralOrResource types = dd.getDctype();
+//					MultiLiteralOrResource formats = dd.getDcformat();
+//				
+//					Set<String> URIs = new HashSet<>();
+//					
+//					if (keywords != null && keywords.get(LiteralOrResource.URI) != null) {
+//						URIs.addAll(keywords.get(LiteralOrResource.URI));
+//					}
+//					
+//					if (types != null && types.get(LiteralOrResource.URI) != null) {
+//						URIs.addAll(types.get(LiteralOrResource.URI));
+//					}
+//					
+//					if (formats != null && formats.get(LiteralOrResource.URI) != null) {
+//						URIs.addAll(formats.get(LiteralOrResource.URI));
+//					}
+					
+					
+					
+				}
+				
+//				System.out.println("QUERYING FOR VIEW");
+				ElasticSearcher es = new ElasticSearcher();
+				
+				QueryBuilder query = CollectionIndexController.getSimilarItemsIndexCollectionQuery(colId, mm);
+				
+//				log.info("QUERC " + start + " " + count);
+//				
+				SearchOptions so = new SearchOptions(start, start + count);
+				
+				SearchResponse res = es.execute(query, so);
+				SearchHits sh = res.getHits();
+				
+				long totalHits = sh.getTotalHits();
+				
+//				System.out.println("RESULTS " + sh.getHits().length);
+
+				List<String> retrievedFields = new ArrayList<String>(
+						Arrays.asList("descriptiveData.label",
+								"descriptiveData.description", "media", "collectedIn"));
+				
+				List<String> ids = new ArrayList<>();
+				for (Iterator<SearchHit> iter = sh.iterator(); iter.hasNext();) {
+					SearchHit hit = iter.next();
+					ids.add(hit.getId());
+//					log.info("ID " + hit.getId());
+				}
+				
+				List<RecordResource> records = DB.getRecordResourceDAO().getByCollectionIds(colId, ids);
+				
+//				System.out.println("RESULTS DB " + records.size());
+//				for (RecordResource rr : records) {
+//					log.info("DB " + rr.getDbId());
+//				}
+
+				if (records == null) {
+					result.put("message",
+							"Cannot retrieve records from database!");
+					return internalServerError(result);
+				}
+				ArrayNode recordsList = Json.newObject().arrayNode();
+				int position = start;
+				for (RecordResource e : records) {
+					// filter out records to which the user has no read access
+					if (!response.toString().equals(ok().toString())) {
+						recordsList.add(Json.toJson(new RecordResource(e
+								.getDbId())));
+					} else {
+						// filter out all context annotations that do not refer
+						// to this collection-position
+						List<ContextData> contextAnns = e.getContextData();
+						List<ContextData> filteredContextAnns = new ArrayList<ContextData>();
+						for (ContextData ca : contextAnns) {
+							if (ca.getTarget().getCollectionId().equals(colId)
+									&& (ca.getTarget().getPosition() == position))
+								filteredContextAnns.add(ca);
+						}
+						e.setContextData(filteredContextAnns);
+						if (e.getContent() != null) {
+							if (contentFormat.equals("contentOnly")
+									&& (e.getContent() != null)) {
+								recordsList.add(Json.toJson(e.getContent()));
+							} else if (contentFormat.equals("noContent")) {
+								e.getContent().clear();
+							} else if (e.getContent()
+									.containsKey(contentFormat)) {
+								HashMap<String, String> newContent = new HashMap<String, String>(
+										1);
+								newContent.put(contentFormat, (String) e
+										.getContent().get(contentFormat));
+								e.setContent(newContent);
+							}
+						}
+						recordsList.add(Json.toJson(e));
+					}
+					position += 1;
+				}
+				result.put("entryCount", totalHits);
+				result.put("records", recordsList);
+				return ok(result);
+			}
+		} catch (Exception e1) {
+			result.put("error", e1.getMessage());
+			return internalServerError(result);
+		} finally {
+			if (locks != null)
+				locks.release();
+		}
+	}
+
 }

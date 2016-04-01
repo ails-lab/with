@@ -89,6 +89,9 @@ public class IndexTest {
 	@Test
 	public void genericTest() throws FileNotFoundException {
 
+		Object d = DB.getRecordResourceDAO().getById(new ObjectId("56fa7b92c743431f1cd7264c"));
+		System.out.println(d);
+		
 		String id = "56fa7b8fc743431f1cd72645";
 //		String[] uris = new String[] {"http://bib.arts.kuleuven.be/photoVocabulary/30214"};
 		
@@ -105,7 +108,7 @@ public class IndexTest {
 		System.out.println(id);
 		
 //				MatchQueryBuilder query = QueryBuilders.matchQuery("collectedIn.collectionId", id);
-		QueryBuilder query = CollectionObjectController.getIndexCollectionQuery(new ObjectId(id), json);
+		QueryBuilder query = CollectionIndexController.getIndexCollectionQuery(new ObjectId(id), json);
 
 		System.out.println(query);
 		
