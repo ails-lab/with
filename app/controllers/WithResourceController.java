@@ -187,9 +187,12 @@ public class WithResourceController extends Controller {
 			RecordResource record = (RecordResource) Json.fromJson(json,
 					clazz);
 			MultiLiteral label =  record.getDescriptiveData().getLabel();
+			MultiLiteral description =  record.getDescriptiveData().getDescription();
 			if (label == null || label.get(Language.DEFAULT) == null || 
 					label.get(Language.DEFAULT).isEmpty() || label.get(Language.DEFAULT).get(0) == "") 
-				return badRequest("A label for the record has to be provided");
+				if (description == null || description.get(Language.DEFAULT) == null || 
+						description.get(Language.DEFAULT).isEmpty() || description.get(Language.DEFAULT).get(0) == "")
+				return badRequest("A label or description for the record has to be provided");
 			int last = 0;
 			Sources source = Sources.UploadedByUser;
 			if ((record.getProvenance() != null)

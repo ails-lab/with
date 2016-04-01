@@ -18,9 +18,6 @@ package model;
 
 import java.util.List;
 
-import javax.validation.constraints.NotNull;
-
-import org.hibernate.validator.constraints.NotBlank;
 import org.mongodb.morphia.annotations.Field;
 import org.mongodb.morphia.annotations.Index;
 import org.mongodb.morphia.annotations.IndexOptions;
@@ -47,6 +44,7 @@ import model.basicDataTypes.WithDate;
 @Indexes({
 	@Index(fields = @Field(value = "label", type = IndexType.ASC), options = @IndexOptions())
 })
+@DescriptiveDataAnnotation
 public class DescriptiveData {
 	
 	public static enum Quality {
@@ -61,8 +59,8 @@ public class DescriptiveData {
 	}
 
 	// one line content description with identifiable characteristic
-	@NotNull
-	@NotBlank
+	//@NotNull
+	//@Pattern(regexp="[^\\s]")
 	private MultiLiteral label;
 
 	// arbitrary length content description
