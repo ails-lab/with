@@ -220,7 +220,7 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 				newRecord.description = ko.observable("");
 				newRecord.title = ko.mapping.fromJS(app.findByLang(record.descriptiveData.label), {});
 				var dbDescription = record.descriptiveData.description;
-				if(dbDescription.default && ko.isObservable(dbDescription.default)){dbDescription=ko.toJS(dbDescription);}
+				if (dbDescription && dbDescription.default && ko.isObservable(dbDescription.default)){dbDescription=ko.toJS(dbDescription);}
 				if (dbDescription && dbDescription.default){
 				    var val=app.findByLang(dbDescription);
 				   newRecord.description = ko.observable(val);}
@@ -687,6 +687,10 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 				};
 				dropElement.droppable(dropOptions);
 			}
+		};
+		
+		ko.bindingHandlers.dropBackgroundImg = {
+				
 		};
 
 		ko.bindingHandlers.hscroll = {
