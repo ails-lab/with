@@ -144,16 +144,18 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 				}
 				$.each(innerModel.media(), function (index, value) {
 					//withUrl = value.Thumbnail.withUrl(); still not fully working
-					withUrl = value.Thumbnail.url();
-					if (withUrl != "empty") {
-						if (withUrl == "")
-							innerModel.media()[index].thumbnailUrl = "img/content/thumb-empty.png";
-						else {
-							if (withUrl.indexOf("/media") == 0) {
-								innerModel.media()[index].thumbnailUrl = window.location.origin + withUrl;
-							} else {
-								innerModel.media()[index].thumbnailUrl = withUrl;
-							}
+					var withUrl = value.Thumbnail.withUrl();
+				    var url     = value.Thumbnail.url();
+				        
+					if (withUrl == "" || withUrl == null || value.Thumbnail.mediaVersion == null) {
+						if(innerModel.administrative.entryCount() > 0)
+							innerModel.media()[index].thumbnailUrl = ko.observable("img/content/thumb-empty.png");
+					} 						
+					else {
+						if (withUrl.indexOf("/media") == 0) {
+							innerModel.media()[index].thumbnailUrl = window.location.origin + withUrl;
+						} else {
+							innerModel.media()[index].thumbnailUrl = withUrl;
 						}
 					}
 				});

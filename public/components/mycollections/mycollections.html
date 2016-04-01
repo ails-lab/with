@@ -306,7 +306,7 @@
 					<div class="category">private</div>
 					<!--/ko-->
 					<!-- ko if: media()[0]-->
-					<div class="wrap"><img data-bind="attr: {src: media()[0].thumbnailUrl}"/></div>
+					<div class="wrap"><img data-bind="attr: {src: media()[0].thumbnailUrl}" onError="this.src='img/content/thumb-empty.png'"/></div>
 					<!-- /ko -->
 					<!-- ko else -->
 					<div class="wrap"></div>

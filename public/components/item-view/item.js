@@ -156,7 +156,7 @@ define(['knockout', 'text!./_item.html', 'app','smoke'], function (ko, template,
 							}
 							 if(items.length>3){break;}
 						}	
-					self.related().push.apply(self.related(),items);
+					self.related.push.apply(self.related,items);
 					self.related.valueHasMutated();}
 					self.loading(false);
 				},
@@ -229,7 +229,7 @@ define(['knockout', 'text!./_item.html', 'app','smoke'], function (ko, template,
 								}
 								 if(items.length>3){break;}
 							}	
-						self.similar().push.apply(self.similar(),items);
+						self.similar.push.apply(self.similar,items);
 						self.similar.valueHasMutated();}
 						self.loading(false);
 					},
