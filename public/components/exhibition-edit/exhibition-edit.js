@@ -221,7 +221,7 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 				newRecord.title = ko.mapping.fromJS(app.findByLang(record.descriptiveData.label), {});
 				var dbDescription = record.descriptiveData.description;
 				if(dbDescription.default && ko.isObservable(dbDescription.default)){dbDescription=ko.toJS(dbDescription);}
-				if(dbDescription){
+				if (dbDescription && dbDescription.default){
 				    var val=app.findByLang(dbDescription);
 				   newRecord.description = ko.observable(val);}
 		        	
