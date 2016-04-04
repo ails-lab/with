@@ -23,7 +23,6 @@ import com.optimaize.langdetect.text.CommonTextObjectFactories;
 import com.optimaize.langdetect.text.TextObject;
 import com.optimaize.langdetect.text.TextObjectFactory;
 
-import play.Logger;
 import sources.core.Utils;
 import sources.utils.StringUtils;
 import utils.ListUtils;
@@ -68,14 +67,14 @@ public interface ILiteral {
 							detectedLanguage.getProbability()>=THRESHOLD
 							){
 						addLiteral(Language.getLanguage(detectedLanguage.getLanguage()), value);
-						Logger.info("Detected ["+detectedLanguage.getLanguage()+"] for " + value);
+//						Logger.info("Detected ["+detectedLanguage.getLanguage()+"] for " + value);
 						gotSome = true;
 					}
 				}
 	            if (gotSome)
 	            	return;
 	        }
-			Logger.warn("Unknown Language for text " + value);
+//			Logger.warn("Unknown Language for text " + value);
 		}
 		addLiteral(Language.UNKNOWN, value);
 	}

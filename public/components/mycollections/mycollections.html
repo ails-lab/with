@@ -201,6 +201,7 @@
 						<a data-bind="click: importEuropeanaCollection " class="btn-green">Import</a>
 					</div>
 
+
 				</section>
 				
 				<section class="action importEuropeanaSearch">
@@ -213,6 +214,7 @@
 							<input type="text"
 								data-bind="value: importCollectionName, valueUpdate: 'afterkeypress', hasFocus: true"
 								placeholder="Collection Name">
+
 						</div>
 						<div>
 							<input type="text"
@@ -257,6 +259,7 @@
 					  <!-- ko else -->
 					  	<div class="thumbnails"><img src="images/user.png"></div>
 					  <!-- /ko -->
+
 					  <a href="#" data-toggle="tooltip" data-placement="top" data-bind="{attr: {title: username}, click: $parent.removeRights}" class="trash">
 					  <i class="fa fa-trash"></i></a>
 					  <div class="toggle">
@@ -290,6 +293,7 @@
 			  <div class="button-group">
 			  	<a href="#" class="btn-green cancel" data-bind="click: closeSideBar">Close</a>
 			  </div>
+
 
 			   <script type="text/html" id="collectionsTemplate">
 			   	<li data-bind="css: { private: !administrative.access.isPublic()}">

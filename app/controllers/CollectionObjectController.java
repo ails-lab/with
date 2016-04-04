@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -38,12 +39,15 @@ import model.annotations.ContextData;
 import model.basicDataTypes.CollectionInfo;
 import model.basicDataTypes.Language;
 import model.basicDataTypes.MultiLiteral;
+import model.basicDataTypes.ProvenanceInfo;
 import model.basicDataTypes.WithAccess;
 import model.basicDataTypes.WithAccess.Access;
 import model.basicDataTypes.WithAccess.AccessEntry;
 import model.resources.CollectionObject;
 import model.resources.CollectionObject.CollectionAdmin;
 import model.resources.CollectionObject.CollectionAdmin.CollectionType;
+import model.resources.CulturalObject;
+import model.resources.CulturalObject.CulturalObjectData;
 import model.resources.RecordResource;
 import model.resources.WithResource;
 import model.resources.WithResource.WithResourceType;
@@ -63,6 +67,7 @@ import play.libs.F.Promise;
 import play.libs.Json;
 import play.mvc.Result;
 import sources.EuropeanaCollectionSpaceSource;
+import sources.EuropeanaSpaceSource;
 import sources.core.CommonQuery;
 import sources.core.SourceResponse;
 import sources.core.Utils;
@@ -80,6 +85,71 @@ public class CollectionObjectController extends WithResourceController {
 	public static final ALogger log = Logger
 			.of(CollectionObjectController.class);
 
+	
+	public static Promise<Result> importSearch(){
+		JsonNode json = request().body().asJson();
+		if (json == null) {
+			return Promise.pure((Result)badRequest("Expecting Json query"));
+		} else {
+			// Parse the query.
+			try {
+				ObjectNode resultInfo = Json.newObject();
+				ObjectId creatorDbId = new ObjectId(session().get("user"));
+				final CommonQuery q = Utils.parseJson(json.get("query"));
+				final String cname = json.get("collectionName").toString();
+				final int limit = (json.has("limit"))?json.get("limit").asInt():-1;
+				CollectionObject ccid = null;
+				if (!isCollectionCreated(creatorDbId, cname)){
+					CollectionObject collection = new CollectionObject();
+					collection.getDescriptiveData().setLabel(new MultiLiteral(cname).fillDEF());
+					boolean success = internalAddCollection(collection, CollectionType.SimpleCollection, creatorDbId, resultInfo);
+					if (!success)
+						return Promise.pure((Result)badRequest("Expecting Json query"));
+					ccid  = collection;
+				} else {
+					 List<CollectionObject> col = DB.getCollectionObjectDAO().getByLabel(Language.DEFAULT, cname);
+					 ccid = col.get(0);
+				}
+
+				EuropeanaSpaceSource src = new EuropeanaSpaceSource();
+				src.setUsingCursor(true);
+				
+				return internalImport(src, ccid, q, limit, resultInfo, true, true);
+				
+			} catch (Exception e) {
+				e.printStackTrace();
+				return Promise.pure((Result)badRequest(e.getMessage()));
+			}
+		}
+	}
+	
+	public static Result importIDs(String cname, String source, String ids){
+		ObjectNode resultInfo = Json.newObject();
+		ObjectId creatorDbId = new ObjectId(session().get("user"));
+		CollectionObject ccid = null;
+		if (!isCollectionCreated(creatorDbId, cname)){
+			CollectionObject collection = new CollectionObject();
+			collection.getDescriptiveData().setLabel(new MultiLiteral(cname).fillDEF());
+			boolean success = internalAddCollection(collection, CollectionType.SimpleCollection, creatorDbId, resultInfo);
+			if (!success)
+				return badRequest(resultInfo);
+			ccid  = collection;
+		} else {
+			 List<CollectionObject> col = DB.getCollectionObjectDAO().getByLabel(Language.DEFAULT, cname);
+			 ccid = col.get(0);
+		}
+		for (String oid: ids.split("[,\\s]+")){
+			CulturalObject record = new CulturalObject();
+			CulturalObjectData descriptiveData = new CulturalObjectData();
+			descriptiveData.setLabel(new MultiLiteral(oid).fillDEF());
+			record.setDescriptiveData(descriptiveData);
+			record.addToProvenance(new ProvenanceInfo(source, null, oid));
+			internalAddRecordToCollection(ccid.getDbId().toString(), record ,  F.Option.None(), resultInfo);
+			System.out.println("added "+oid);
+		}
+		return ok(resultInfo);
+	}
+	
 	/**
 	 * creates a new collection corresponding to a collection in Europeana and
 	 * collects all its items.
@@ -87,8 +157,7 @@ public class CollectionObjectController extends WithResourceController {
 	 * @param id
 	 * @return
 	 */
-	public static Result createAndFillEuropeanaCollection(String id) {
-
+	public static Promise<Result> createAndFillEuropeanaCollection(String id, int limit) {
 		CollectionObject collection = new CollectionObject();
 		collection.getDescriptiveData()
 				.setLabel(new MultiLiteral(id).fillDEF());
@@ -97,62 +166,61 @@ public class CollectionObjectController extends WithResourceController {
 		boolean success = internalAddCollection(collection,
 				CollectionType.SimpleCollection, creatorDbId, resultInfo);
 		if (!success)
-			return badRequest(resultInfo);
-
+			return Promise.pure((Result)badRequest(resultInfo));
 		CommonQuery q = new CommonQuery();
-		q.page = "1";
-		q.pageSize = "20";
-		EuropeanaCollectionSpaceSource src = new EuropeanaCollectionSpaceSource(
-				id);
 
-		q.page = 1 + "";
-		SourceResponse result = src.getAllResults(q);
-		int total = result.totalCount;
-		for (WithResource<?, ?> item : result.items.getCulturalCHO()) {
-			WithResourceController.internalAddRecordToCollection(collection
-					.getDbId().toString(), (RecordResource) item, F.Option
-					.None(), resultInfo);
-		}
-		
-
-		Promise<Integer> promiseOfInt = Promise
-				.promise(new Function0<Integer>() {
-					public Integer apply() {
-						SourceResponse result;
-						System.out.println("more pages?");
-						int page = 1;
-						int pageSize = 20;
-						while ((page * pageSize) < total) {
-							page++;
-							q.page = page + "";
-							result = src.getAllResults(q);
-							for (WithResource<?, ?> item : result.items
-									.getCulturalCHO()) {
-								WithResourceController
-										.internalAddRecordToCollection(
-												collection.getDbId().toString(),
-												(RecordResource) item,
-												F.Option.None(), resultInfo);
-							}
-							;
-							System.out.println("more pages? " + page + " of "
-									+ result.totalCount);
-						}
-						System.out.println("Done? " + page);
-						return 0;
-					}
-				});
-
-		if (resultInfo.has("error"))
-			return badRequest(resultInfo);
-		return 
-		ok(Json.toJson(collectionWithMyAccessData(
-				collection,
-				AccessManager.effectiveUserIds(session().get(
-						"effectiveUserIds")))));
+		EuropeanaCollectionSpaceSource src = new EuropeanaCollectionSpaceSource(id);
+		return internalImport(src, collection, q, limit, resultInfo, false, false);
 	}
 
-	public static Result sortCollectionObject(String collectionId) {
+	private static Promise<Result> internalImport(EuropeanaSpaceSource src, CollectionObject collection, CommonQuery q,
+			int limit, ObjectNode resultInfo, boolean dontDuplicate, boolean waitToFinish) {
+		q.page = 1+"";
+		q.pageSize = "20";
+		SourceResponse result = src.getResults(q);
+		int total = result.totalCount;
+		final int mylimit = (limit==-1)? total: Math.min(limit, total);
+		
+		int firstPageCount1 = addResultToCollection(result, collection.getDbId().toString(), mylimit, resultInfo, dontDuplicate);
+    
+	    Promise<Result> promiseOfInt = Promise.promise(
+	      new Function0<Result>() {
+	        public Result apply() {
+	        	SourceResponse result;
+        		int page = 1;
+        		int itemsCount = firstPageCount1;
+        		while (itemsCount < mylimit) {
+	        		page++;
+	    			q.page = page+"";
+	    	    	result = src.getResults(q);
+	    	    	int c = addResultToCollection(result, collection.getDbId().toString(), mylimit - itemsCount, resultInfo, dontDuplicate);
+	    	    	itemsCount = itemsCount + c;
+	    	    } 
+	          return ok("Imported "+mylimit+" items");
+	        }
+	      }
+	    );
+	    if (resultInfo.has("error"))
+	    	return Promise.pure((Result)badRequest(resultInfo));
+	    if (waitToFinish)
+	    	return promiseOfInt;
+		else
+			return Promise.pure(ok("Imported " + firstPageCount1 + " items out of " + mylimit));
+	}
+	
+	private static int addResultToCollection(SourceResponse result, String collectionID, int limit, ObjectNode resultInfo, boolean dontRepeat) {
+		int itemsCount = 0;
+		for (Iterator<WithResource<?, ?>> iterator = result.items.getCulturalCHO().iterator(); iterator.hasNext()
+				&& itemsCount < limit;) {
+			WithResource<?, ?> item = iterator.next();
+			WithResourceController.internalAddRecordToCollection(collectionID, (RecordResource) item, F.Option.None(),
+					resultInfo,dontRepeat);
+			itemsCount++;
+		}
+		return itemsCount;
+	}
+
+public static Result sortCollectionObject(String collectionId) {
 		ObjectNode result = Json.newObject();
 		try {
 			ObjectId collectionDbId = new ObjectId(collectionId);
@@ -184,6 +252,7 @@ public class CollectionObjectController extends WithResourceController {
 			return internalServerError(result);
 		}
 	}
+
 
 	/**
 	 * Creates a new Collection from the JSON body
@@ -227,6 +296,10 @@ public class CollectionObjectController extends WithResourceController {
 			error.put("error", e.getMessage());
 			return internalServerError(error);
 		}
+	}
+	
+	private static boolean isCollectionCreated(ObjectId creatorDbId, String name){
+		return DB.getCollectionObjectDAO().existsForOwnerAndLabel(creatorDbId, null,Arrays.asList(name));
 	}
 
 	private static boolean internalAddCollection(CollectionObject collection,
@@ -858,5 +931,24 @@ public class CollectionObjectController extends WithResourceController {
 			userJSON.put("image", image);
 		}
 		return userJSON;
+	}
+
+	private static Integer doTheImport(ObjectNode resultInfo, final CommonQuery q, final String cid,
+			EuropeanaSpaceSource src, int total, int firstPageCount1) {
+		SourceResponse result;
+		int page = 1;
+		int pageSize = 20;
+		int itemsCount = firstPageCount1;
+		while (itemsCount < total) {
+			page++;
+			q.page = page + "";
+			result = src.getResults(q);
+			for (WithResource<?, ?> item : result.items.getCulturalCHO()) {
+				WithResourceController.internalAddRecordToCollection(cid,
+						(RecordResource) item, F.Option.None(), resultInfo,true);
+				itemsCount++;
+			}
+		}
+		return 0;
 	}
 }

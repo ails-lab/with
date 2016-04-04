@@ -57,6 +57,7 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 		
 		//self.collections = [];
 		self.index = ko.observable(0);
+
 		self.collectionSet = ko.observable("my");
 		
 		self.openAction = function (myclass){
@@ -116,6 +117,7 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 		};
 		
 		
+
 		var mapping = {
 			create: function (options) {
 				//customize at the root level: add title and description observables, based on multiliteral
@@ -361,6 +363,7 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 
 		self.more = function (isExhibition, funcToExecute, my) {
 			if (self.loading === true) {
+
 				setTimeout(self.moreCollections(isExhibition), 300);
 			}
 			if (self.loading() === false && self.moreCollectionData() === true) {

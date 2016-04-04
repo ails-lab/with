@@ -288,7 +288,6 @@ public class Utils {
 			String string = first + "=" + second.toString();
 			try {
 				String encode = URLEncoder.encode(second.toString(), "UTF-8");
-				System.out.println(second.toString()+" ---> "+encode);
 				string = first + "=" + encode;
 			} catch (UnsupportedEncodingException e) {
 				e.printStackTrace();
