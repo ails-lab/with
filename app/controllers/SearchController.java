@@ -16,6 +16,7 @@
 
 package controllers;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -27,7 +28,13 @@ import java.util.function.Function;
 
 import org.elasticsearch.action.suggest.SuggestResponse;
 
+import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import elastic.Elastic;
@@ -164,6 +171,36 @@ public class SearchController extends Controller {
 				return Promise.pure((Result)badRequest(e.getMessage()));
 			}
 		}
+	}
+	
+	public static Result mergeFilters(){
+		ArrayList<CommonFilterLogic> merge = new ArrayList<CommonFilterLogic>();
+		JsonNode json = request().body().asJson(); 
+		Collection<Collection<CommonFilterResponse>> filters = new ArrayList<>();
+		ObjectMapper m = new ObjectMapper();
+		try {
+			filters = m.readValue(json.toString(), 
+					new TypeReference<Collection<Collection<CommonFilterResponse>>>() {
+			        }
+					);
+		} catch (JsonParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (JsonMappingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		System.out.println(json);
+		System.out.println(filters);
+		for (Collection<CommonFilterResponse> fresponse : filters) {
+			if (fresponse!=null){
+				FiltersHelper.mergeAux(merge, fresponse);
+			}
+		}
+		return ok(Json.toJson(ListUtils.transform(merge, (x)->x.export())));
 	}
 
 	static Promise<SearchResponse> getMyResutlsPromise(final CommonQuery q) {
