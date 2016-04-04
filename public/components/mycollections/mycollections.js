@@ -86,7 +86,34 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 		            
 		          
 		 });		
-   };
+		};
+		
+		
+		
+		self.importCollectionName, = ko.observable("");
+		self.europeanaLimit = ko.observable("");
+		self.europeanaSearch = ko.observable("");
+		self.importEuropeanaSearch = function () {
+		    console.log( self.europeanaID());
+		    $.ajax({
+		    	"url": "/collection/importEuropeanaCollection?id="+self.europeanaID(),
+		    	"method": "GET",
+		    	"success": function( data, textStatus, jQxhr ){
+		    		console.log( data );
+		    	    $.smkAlert({text: 'Collection Imported', type: 'success'});
+		    		self.reloadCollection(data);
+		    		app.currentUser.collectionCount(app.currentUser.collectionCount() + 1);
+		    		self.collectionCount(self.collectionCount() + 1);
+		    		self.closeSideBar();
+				},
+				"error": function (result) {
+					$.smkAlert({ text: 'An error occured', type: 'danger', time: 10 });
+					self.closeSideBar();
+				}
+		            
+		          
+		 });		
+		};
 		
 		
 		var mapping = {
