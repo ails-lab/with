@@ -168,6 +168,11 @@ public class WithResourceController extends Controller {
 		return addRecordToCollection(Json.toJson(record), new ObjectId(colId), position, false);
 	}
 	
+	public static Result internalAddRecordToCollection(String colId, RecordResource record, Option<Integer> position,
+			ObjectNode result, boolean noRepeated) {
+		return addRecordToCollection(Json.toJson(record), new ObjectId(colId), position, noRepeated);
+	}
+	
 	public static Result addRecordToCollection(JsonNode json, ObjectId collectionDbId,
 			Option<Integer> position, Boolean noDouble) {
 		ObjectNode result = Json.newObject();

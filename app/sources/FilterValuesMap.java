@@ -152,7 +152,7 @@ public class FilterValuesMap {
 		addMapping(CommonFilters.TYPE.getId(), WithMediaType.VIDEO, "VIDEO");
 		addMapping(CommonFilters.TYPE.getId(), WithMediaType.AUDIO, "SOUND");
 		addMapping(CommonFilters.TYPE.getId(), WithMediaType.TEXT, "TEXT");
-		addMapping(CommonFilters.TYPE.getId(), WithMediaType.THREED, "3D");
+		addMapping(CommonFilters.TYPE.getId(), WithMediaType.THREED, "3D","_3D");
 
 		addMapping(CommonFilters.RIGHTS.getId(), WithMediaRights.Creative, ".*creative.*");
 		addMapping(CommonFilters.RIGHTS.getId(), WithMediaRights.Commercial, ".*creative(?!.*nc).*");

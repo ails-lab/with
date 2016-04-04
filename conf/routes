@@ -52,7 +52,10 @@ PUT		 /collection/:id/moveRecord				controllers.WithResourceController.moveRecor
 POST     /collection/unliked    			    controllers.WithResourceController.removeFromFavorites()
 
 POST     /collection		                    controllers.CollectionObjectController.createCollectionObject()
-GET     /collection/importEuropeanaCollection	controllers.CollectionObjectController.createAndFillEuropeanaCollection(id)
+POST     /collection/importSearch		        controllers.CollectionObjectController.importSearch()
+POST     /collection/importIDs 					controllers.CollectionObjectController.importIDs(cname, source, ids)
+GET     /collection/importEuropeanaCollection	controllers.CollectionObjectController.createAndFillEuropeanaCollection(id: String, limit:Integer ?=-1)
+
 GET	     /collection/:id 	        			controllers.CollectionObjectController.getCollectionObject(id)
 PUT		 /collection/:id 						controllers.CollectionObjectController.editCollectionObject(id)
 DELETE   /collection/:id	                    controllers.CollectionObjectController.deleteCollectionObject(id)

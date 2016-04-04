@@ -20,11 +20,16 @@ define(['knockout', 'text!./import-collections.html'], function(ko, template) {
   	    self.searchTerm = ko.observable("");
   	    self.page = ko.observable("1");
   	    self.pageSize = ko.observable("20");
+	  	self.collectionName = ko.observable("");
+	  	self.limit = ko.observable("-1");
   	    self.toJson = function (){
-  	    	return {
+  	    	return {  
+  	    		collectionName : self.collectionName(),
+  	    		query: {
   	    		searchTerm : self.searchTerm(),
   	    		page : self.page(),
   	    		pageSize : self.pageSize()
+  	    	}
   	    	}
   	    }
   	}
@@ -32,6 +37,8 @@ define(['knockout', 'text!./import-collections.html'], function(ko, template) {
 	function CollectionName() {
   	    var self = this;
   	    self.collectionName = ko.observable("");
+  	    self.limit = ko.observable("-1");
+	    
   	}
   	
 	
@@ -62,7 +69,7 @@ define(['knockout', 'text!./import-collections.html'], function(ko, template) {
 	    	console.log( self.im.collectionName());
 	    	console.log( json1 );
 	    	$.ajax({
-	    				"url": "/collection/importEuropeanaCollection?id="+self.im.collectionName(),
+	    				"url": "/collection/importEuropeanaCollection?id="+self.im.collectionName()+"&limit="+self.im.limit(),
 	    				"method": "GET",
 	    				"success": function( data, textStatus, jQxhr ){
 	    					console.log( data );
@@ -80,17 +87,17 @@ define(['knockout', 'text!./import-collections.html'], function(ko, template) {
 	  	}
 	  	self.search = function() {
 	        //alert(self.q.searchTerm());
-	        
-	        var json1 = JSON.stringify(self.q.toJson());
+	       
+	  		 var json1 = JSON.stringify(self.q.toJson());
 	    	//var json1 = q;
 	    	console.log( self.q.toJson());
 	    	console.log( json1 );
 	    	$.ajax({
-	    				"url": "/api/advancedsearch",
+	    				"url": "/collection/importSearch",
 	    				"method": "POST",
 	    				"contentType": "application/json",
-	    				"data": json1,
-
+	    				"data":  json1
+	    				,
 	    				"success": function( data, textStatus, jQxhr ){
 	                self.filters(data.filters);
 	                self.responses(data.responses);

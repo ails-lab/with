@@ -22,25 +22,22 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.apache.commons.io.FileUtils;
 import org.w3c.dom.Document;
-
-import sources.core.Utils;
-import play.Logger;
-import play.libs.F.Function;
-import play.libs.F.Promise;
-import play.libs.ws.WS;
-import play.libs.ws.WSResponse;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.ning.http.client.FluentCaseInsensitiveStringsMap;
 import com.ning.http.multipart.FilePart;
 import com.ning.http.multipart.MultipartRequestEntity;
 import com.ning.http.multipart.Part;
+
+import play.Logger;
+import play.libs.F.Function;
+import play.libs.F.Promise;
+import play.libs.ws.WS;
+import play.libs.ws.WSResponse;
 
 
 public class HttpConnector {
@@ -55,7 +52,7 @@ public class HttpConnector {
 		return wsHttpConnector;
 	}
 
-	private  final int TIMEOUT_CONNECTION = 40000;
+	final int TIMEOUT_CONNECTION = 60000;
 	
 	
 	public <T> T getContent(String url) throws Exception {
@@ -82,25 +79,24 @@ public class HttpConnector {
 		}
 	}
 	
-	public  <T> T getContentAsFile(String url) throws Exception {
+	public  File getContentAsFile(String url) throws Exception {
 		try {
 			Logger.debug("calling: " + url);
 			long time = System.currentTimeMillis();
 			String url1 = Utils.replaceQuotes(url);
 			
-			Promise<T> filePromise = WS.url(url1).get().map(new Function<WSResponse, T>() {
-				public T apply(WSResponse response) throws IOException {
+			Promise<File> filePromise = WS.url(url1).get().map(new Function<WSResponse, File>() {
+				public File apply(WSResponse response) throws IOException {
 //					System.out.println(response.getBody());
 					File tmp = new File("temp");
 					FileUtils.writeByteArrayToFile(tmp, response.asByteArray());
 					//T file = (T) response.asByteArray();
-					T file = (T) tmp;
 					long ftime = (System.currentTimeMillis() - time)/1000;
 					Logger.debug("waited "+ftime+" sec for: " + url);
-					return file;
+					return tmp;
 				}
 			});
-			return (T) filePromise.get(TIMEOUT_CONNECTION);
+			return filePromise.get(TIMEOUT_CONNECTION);
 		} catch (Exception e) {
 			Logger.error("calling: " + url);
 			Logger.error("msg: " + e.getMessage());

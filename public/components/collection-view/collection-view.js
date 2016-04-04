@@ -129,7 +129,6 @@ define(['bridget', 'knockout', 'text!./_collection-view.html', 'isotope', 'image
 			if (descdata) {
 				self.title = findByLang(descdata.label);
 				self.description = findByLang(descdata.description);
-				
 				self.creator = findByLang(descdata.dccreator);
 			}
 
@@ -166,6 +165,7 @@ define(['bridget', 'knockout', 'text!./_collection-view.html', 'isotope', 'image
 			self.data(options);
 			self.isLoaded = ko.observable(true);
 			
+
 
 		};
 
@@ -542,6 +542,7 @@ define(['bridget', 'knockout', 'text!./_collection-view.html', 'isotope', 'image
 					tile += '<li><a  data-toggle="tooltip" data-placement="top" title="Add to favorites" onclick="likeRecord(\'' + record.dbId + '\',event);" class="fa fa-heart"></a></li>';
 				}}
 				tile += '<li><a data-toggle="tooltip" data-placement="top" title="Collect it" class="fa fa-download collectbutton" onclick="collect(\'' + record.dbId + '\',event);" ></a></li></ul>';
+
 			}
 
 			tile += "</div></div></div></div>";

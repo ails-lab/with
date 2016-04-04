@@ -30,6 +30,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import model.basicDataTypes.ProvenanceInfo.Sources;
 import model.resources.RecordResource;
 import model.resources.WithResource;
+import play.Logger;
 import play.libs.Json;
 import sources.core.AdditionalQueryModifier;
 import sources.core.AutocompleteResponse;
@@ -53,7 +54,10 @@ import sources.formatreaders.EuropeanaRecordFormatter;
 import utils.ListUtils;
 
 public class EuropeanaSpaceSource extends ISpaceSource {
-
+	
+	private boolean usingCursor = false;
+	private String nextCursor;
+	
 	public EuropeanaSpaceSource() {
 		super();
 		vmap = FilterValuesMap.getEuropeanaMap();
@@ -183,6 +187,12 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 
 		builder.addQuery("query", q.searchTerm);
 
+		if (usingCursor){
+			if (q.page.equals("1"))
+				builder.addSearchParam("cursor", "*");
+			else
+				builder.addSearchParam("cursor", nextCursor);
+		} else
 		builder.addSearchParam("start", "" + (((Integer.parseInt(q.page) - 1) * Integer.parseInt(q.pageSize)) + 1));
 
 		builder.addSearchParam("rows", "" + q.pageSize);
@@ -324,6 +334,12 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 				res.items.setCulturalCHO(getItems(response));
 				// res.facets = response.path("facets");
 				res.filtersLogic = createFilters(response);
+				if (usingCursor) {
+					nextCursor = Utils.readAttr(response, "nextCursor", true);
+					if (!Utils.hasInfo(nextCursor))
+						Logger.error("cursor error!!");
+				}
+				
 
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
@@ -393,4 +409,13 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 			return jsonMetadata;
 		}
 	}
+
+	public boolean isUsingCursor() {
+		return usingCursor;
+	}
+
+	public void setUsingCursor(boolean useCursor) {
+		this.usingCursor = useCursor;
+	}
+	
 }
