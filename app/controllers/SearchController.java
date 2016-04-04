@@ -193,8 +193,6 @@ public class SearchController extends Controller {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		System.out.println(json);
-		System.out.println(filters);
 		for (Collection<CommonFilterResponse> fresponse : filters) {
 			if (fresponse!=null){
 				FiltersHelper.mergeAux(merge, fresponse);
