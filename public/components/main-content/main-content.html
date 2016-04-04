@@ -344,10 +344,11 @@
 				</div>
 			</section>
 
-			<div class="wrapper" data-bind="if: isLogged()">
-				<!-- ko component: "profile" --><!-- /ko -->
-			</div>
-</div>
+			<!-- ko if: isLogged() -->
+			<!-- ko component: "profile" --><!-- /ko -->
+				<!-- /ko -->
+			
+           </div>
 			<footer>
 				<div class="container">
 
