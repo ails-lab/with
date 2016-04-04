@@ -90,7 +90,7 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 		
 		
 		
-		self.importCollectionName, = ko.observable("");
+		self.importCollectionName = ko.observable("");
 		self.europeanaLimit = ko.observable("");
 		self.europeanaSearch = ko.observable("");
 		self.importEuropeanaSearch = function () {
