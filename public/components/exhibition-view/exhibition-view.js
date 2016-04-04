@@ -57,24 +57,18 @@ define(['knockout', 'text!./_exhibition-view.html', 'app', 'magnific-popup', 'sl
 				self.collectedIn = usage.collectedIn;
 			}
 
-			self.thumb = media[0] != null && media[0].Thumbnail != null && media[0].Thumbnail.url != "null" ? media[0].Thumbnail.url : null;
-			self.fullres = media[0] != null && media[0].Original != null && media[0].Original.url != "null" ? media[0].Original.url : null,
-				self.isLoaded = ko.observable(false);
+			self.thumb = media[0] != null && media[0].Thumbnail != null && media[0].Thumbnail.url != "null" ? media[0].Thumbnail.url : "img/content/thumb-empty.png";
+			//self.fullres = media[0] != null && media[0].Original != null && media[0].Original.url != "null" ? media[0].Original.url : null,
+			if(media[0] != null && media[0].Original != null && media[0].Original.url != "null"){
+				self.fullres(media[0].Original.url);
+			}
+		    self.isLoaded = ko.observable(false);
+			if(self.fullres()==null || self.fullres().length==0){
+				self.fullres(self.thumb);
+			}
 		};
 
-		/*self.cachedThumbnail = ko.pureComputed(function() {
-
-		    if(self.thumb){
-		        if (self.thumb.indexOf('/') === 0) {
-		            return self.thumb;
-		        } else {
-		            var newurl='url=' + encodeURIComponent(self.thumb)+'&';
-		            return '/cache/byUrl?'+newurl+'Xauth2='+ sign(newurl);
-		        }}
-		    else{
-		        return "img/content/thumb-empty.png";
-		    }
-		});*/
+		
 		if (data != undefined) self.load(data);
 	}
 
@@ -162,7 +156,7 @@ define(['knockout', 'text!./_exhibition-view.html', 'app', 'magnific-popup', 'sl
 					//self.access(adminData.access);
 					if (self.entryCount() && self.entryCount() > 0) {
 						$.ajax({
-							"url": "/collection/" + self.id() + "/list?count=10&start=0",
+							"url": "/collection/" + self.id() + "/list?count="+self.entryCount()+"&start=0",
 							"method": "get",
 							"contentType": "application/json",
 							"success": function (data) {
