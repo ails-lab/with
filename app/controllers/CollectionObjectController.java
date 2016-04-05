@@ -509,7 +509,7 @@ public static Result sortCollectionObject(String collectionId) {
 		if (creator.isDefined() && creator.get().equals("undefined")) {
 			result.put("collectionsOrExhibitions", Json.newObject().arrayNode());
 			return ok(result);
-		} else {
+		} else if(creator.isDefined() && !creator.get().equals("undefined")) {
 			User creatorUser = DB.getUserDAO().getByUsername(creator.get());
 			if (creatorUser != null)
 				creatorId = creatorUser.getDbId();
