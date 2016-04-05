@@ -60,7 +60,7 @@ define(['knockout', 'text!./_item.html', 'app','smoke'], function (ko, template,
 			if ( data.fullres && data.fullres.length > 0 ) {
 				self.fullres(data.fullres);
 			} else {
-				self.fullres(self.calcThumbnail());
+				self.fullres(self.thumb);
 			}
 			//self.fullres=data.fullres;
 			self.description=data.description;
@@ -134,8 +134,8 @@ define(['knockout', 'text!./_item.html', 'app','smoke'], function (ko, template,
 										media[0].Thumbnail=media[0].Original;
 									} 
 						        var record = new Record({
-									        thumb: media!=null &&  media[0] !=null  && media[0].Thumbnail!=null  && media[0].Thumbnail.url!="null" ? media[0].Thumbnail.url:"img/content/thumb-empty.png",
-											fullres: media!=null &&  media[0] !=null && media[0].Original!=null  && media[0].Original.url!="null"  ? media[0].Original.url : "",
+									        thumb: media!=null &&  media[0] !=null  && media[0].Thumbnail!=null  && media[0].Thumbnail.url!="null" && media[0].Thumbnail.url.indexOf("empty")==-1 ? media[0].Thumbnail.url:"img/content/thumb-empty.png",
+											fullres: media!=null &&  media[0] !=null && media[0].Original!=null  && media[0].Original.url!="null"  && media[0].Original.url.indexOf("empty")==-1 ? media[0].Original.url : "",
 											title: findByLang(descdata.label),
 											description: findByLang(descdata.description),
 											view_url: findProvenanceValues(provenance,"source_uri"),
@@ -207,8 +207,8 @@ define(['knockout', 'text!./_item.html', 'app','smoke'], function (ko, template,
 											media[0].Thumbnail=media[0].Original;
 										}
 							        var record = new Record({
-							            		thumb: media!=null &&  media[0] !=null  && media[0].Thumbnail!=null  && media[0].Thumbnail.url!="null" ? media[0].Thumbnail.url:"img/content/thumb-empty.png",
-												fullres: media!=null &&  media[0] !=null && media[0].Original!=null  && media[0].Original.url!="null"  ? media[0].Original.url : "",
+							            		thumb: media!=null &&  media[0] !=null  && media[0].Thumbnail!=null  && media[0].Thumbnail.url!="null" && media[0].Thumbnail.url.indexOf("empty")==-1? media[0].Thumbnail.url:"img/content/thumb-empty.png",
+												fullres: media!=null &&  media[0] !=null && media[0].Original!=null  && media[0].Original.url!="null"  && media[0].Original.url.indexOf("empty")==-1? media[0].Original.url : "",
 												title: findByLang(descdata.label),
 												description: findByLang(descdata.description),
 												view_url: findProvenanceValues(provenance,"source_uri"),
@@ -247,11 +247,11 @@ define(['knockout', 'text!./_item.html', 'app','smoke'], function (ko, template,
 		self.calcThumbnail = ko.pureComputed(function() {
 
 
-			   if(self.thumb){
+			   if(self.thumb && self.thumb.indexOf("empty")==-1){
 					return self.thumb;
 				}
 			   else{
-				   return "images/no_image.jpg";
+				   return "img/content/thumb-empty.png";
 			   }
 			});
 		self.sourceCredits = ko.pureComputed(function() {
@@ -315,29 +315,21 @@ define(['knockout', 'text!./_item.html', 'app','smoke'], function (ko, template,
 			data = ko.toJS(e);
 			self.open();
 			self.record(new Record(data,showMeta));
-			
 		};
 		
-		
-	
-
 		self.open = function () {
 			if (window.location.href.indexOf('#item')>0) {
 				document.body.setAttribute("data-page","media");	
 				
 			}
-			document.body.setAttribute("data-page","item");
+			//document.body.setAttribute("data-page","item");
 			
 			$( '.itemview' ).fadeIn();
-			//$('[role="main"]').addClass('itemopen');
-			//$("div[role='main']").addClass("itemopen");
 			$('.nav-tabs a[href="#information"]').tab('show');
 			$(".mediathumb > img").attr("src","");
-			
-			
 			$('body').css('overflow','hidden');
 			adjustHeight();
-			
+			WITHApp.tabAction();
 		};
 
 		self.close = function () {
@@ -437,8 +429,8 @@ define(['knockout', 'text!./_item.html', 'app','smoke'], function (ko, template,
 							media[0].Thumbnail=media[0].Original;
 						}
 					 var record = new Record({
-						            thumb: media!=null &&  media[0] !=null  && media[0].Thumbnail!=null  && media[0].Thumbnail.url!="null" ? media[0].Thumbnail.url:"img/content/thumb-empty.png",
-								    fullres: media!=null &&  media[0] !=null && media[0].Original!=null  && media[0].Original.url!="null"  ? media[0].Original.url : "",
+						            thumb: media!=null &&  media[0] !=null  && media[0].Thumbnail!=null  && media[0].Thumbnail.url!="null" && media[0].Thumbnail.url.indexOf("empty")==-1 ? media[0].Thumbnail.url:"img/content/thumb-empty.png",
+								    fullres: media!=null &&  media[0] !=null && media[0].Original!=null  && media[0].Original.url!="null"  && media[0].Original.url.indexOf("empty")==-1 ? media[0].Original.url : "",
 									title: findByLang(descdata.label),
 									description: findByLang(descdata.description),
 									view_url: findProvenanceValues(provenance,"source_uri"),
@@ -487,6 +479,10 @@ define(['knockout', 'text!./_item.html', 'app','smoke'], function (ko, template,
 				});
 			}
 		}
+		
+		$('#itemTabs a').click(function (e) {
+		     $(this).tab('show');
+		   })
 		
 	}
 	

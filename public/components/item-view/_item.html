@@ -32,10 +32,10 @@
                             <!-- collect--><a href="#" title="collect" class="infocollect collectbutton" data-bind="visible:loggedUser, event: { click: function(data,event) { collect(record(),event); } }">COLLECT ITEM</a>
                           </div>
                           <!-- metadata-->
-                          <ul role="tablist" class="nav nav-tabs">
+                          <ul id="itemTabs" role="tablist" class="nav nav-tabs">
                             <li class="active"><a href="#information" title="" data-toggle="tab">Info</a></li>
-                            <li><a href="#related" title="" data-toggle="tab" data-bind="event:{ click: function(){record().findsimilar()}}">Related</a></li>
-                            <li><a href="#comment" title="" data-toggle="tab">Comments</a></li>
+                            <li><a href="#related" title="related" data-toggle="tab" data-bind="click: record().findsimilar, clickBubble: true">Related</a></li>
+                            <li><a href="#comment" title="comments" data-toggle="tab">Comments</a></li>
                             <li data-bind="visible: record().recordId!='-1'"><a href="#share" title="" data-toggle="tab">Share</a></li>
                           </ul>
                           <!-- panes-->
@@ -82,11 +82,11 @@
                       		  <!-- ko if: record().related().length > 0 -->
                       
                               <div class="title">
-                                <div class="titlewrap" data-bind="text: 'Other media items by '+record().forrelated()"></div><a href="#" title="Follow National Gallery Athens" class="follow">FOLLOW</a>
+                                <div class="titlewrap" data-bind="text: 'Other media items by '+record().forrelated()"></div>
                               </div>
                               <ul class="related">
                       			<!-- ko foreach: record().related -->
-                        		<li><a data-bind="event: {click: function(){itemShow($data);}}" data-toggle="tooltip" data-placement="top" title="Lorem ipsum dolor"><img data-bind="attr:{src:thumb}" alt="media"></a></li>
+                        		<li><a data-bind="event: {click: function(){itemShow($data);}}" data-toggle="tooltip" data-placement="top"><img data-bind="attr:{src:thumb}" alt="media"></a></li>
                      		 <!-- /ko -->
                        		  </ul>
                        		<!-- /ko -->
@@ -97,7 +97,7 @@
                               </div>
                             <ul class="related">
                        		<!-- ko foreach: record().similar -->
-                        	<li><a data-bind="event: {click: function(){itemShow($data);}}" data-toggle="tooltip" data-placement="top" title="Lorem ipsum dolor"><img data-bind="attr:{src:thumb}" alt="media"></a></li>
+                        	<li><a data-bind="event: {click: function(){itemShow($data);}}" data-toggle="tooltip" data-placement="top"><img data-bind="attr:{src:thumb}" alt="media"></a></li>
                      		<!-- /ko -->
                       		</ul>
                        	   <!-- /ko -->
