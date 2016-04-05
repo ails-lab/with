@@ -52,7 +52,6 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 //		WITHApp.initTooltip();
 		self.route = params.route;
 		self.showsExhibitions = params.showsExhibitions;
-		console.log(app.currentUser.username());
 		self.superUser = (app.currentUser.username()=="foodanddrink");
 		
 		//self.collections = [];
@@ -679,7 +678,6 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 		//TODO: currently changes fisrt entry of label.default and description.default
 		//have to support multilinguality (both in presentation of collection, as well as in edit - drop-down list with languages)
 		self.editCollection = function () {
-			console.log(self.validationModel.isValid());
 			if(self.validationModel.isValid()) {
 				var collIndex = self.index();
 				var collId = -1;

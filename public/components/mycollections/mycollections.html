@@ -298,7 +298,7 @@
 			   <script type="text/html" id="collectionsTemplate">
 			   	<li data-bind="css: { private: !administrative.access.isPublic()}">
 				  <div class="thumbnails">
-				  	<a href="#" data-bind="attr: {href: $parent.showsExhibitions? 'index.html#exhibitionview/'+dbId(): 'index.html#collectionview/'+dbId()}" title="view"> 
+				  	<a href="#" data-bind="attr: {href: $parent.showsExhibitions? (administrative.entryCount() > 0? 'index.html#exhibitionview/'+dbId(): 'index.html#exhibition-edit/'+dbId()): 'index.html#collectionview/'+dbId()}" title="view"> 
 				  	<!-- ko if: administrative.access.isPublic()-->
 					<div class="category">public</div>
 					<!--/ko-->
