@@ -16,6 +16,7 @@
 
 package db;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
@@ -75,10 +76,21 @@ public class UserGroupDAO extends DAO<UserGroup> {
 			q.field("className").equal(
 					"model.usersAndGroups." + groupType.toString());
 		}
-		return find(q).asList();
+		List<UserGroup> groups = null;
+		try {
+			groups = find(q).asList();
+		} catch(Exception e) {
+			groups = new ArrayList<UserGroup>();
+		}
+
+		return groups;
 	}
 
 	public int getGroupCount(Set<ObjectId> groupIds, GroupType groupType) {
+
+		if(groupIds.isEmpty())
+			return 0;
+
 		Query<UserGroup> q = createQuery().disableValidation().field("_id")
 				.in(groupIds);
 		if (!groupType.equals(GroupType.All)) {
@@ -91,14 +103,19 @@ public class UserGroupDAO extends DAO<UserGroup> {
 	public List<UserGroup> findPublicWithRestrictions(GroupType groupType,
 			int offset, int count, Set<ObjectId> excludedIds) {
 		Query<UserGroup> q = createQuery().disableValidation()
-				.field("privateGroup").equal(false).field("_id")
-				.notIn(excludedIds).offset(offset).limit(count)
+				.field("privateGroup").equal(false)
+				.offset(offset).limit(count)
 				.order("-created");
+
+		if(!excludedIds.isEmpty())
+			q.field("_id").notIn(excludedIds);
+
 		if (groupType.equals(GroupType.All)) {
 			return find(q).asList();
 		}
 		q.and(q.criteria("className").equal(
 				"model.usersAndGroups." + groupType.toString()));
+
 		return find(q).asList();
 	}
 
