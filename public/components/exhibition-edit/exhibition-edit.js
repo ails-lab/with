@@ -220,23 +220,34 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 				newRecord.description = ko.observable("");
 				newRecord.title = ko.mapping.fromJS(app.findByLang(record.descriptiveData.label), {});
 				var dbDescription = record.descriptiveData.description;
-
-		        if (dbDescription === undefined || dbDescription === null || dbDescription.default[0] === undefined || dbDescription.default[0] === "null")
-		        	newRecord.description = ko.observable("");
-		        else
-		        	newRecord.description = ko.observable(app.findByLang(dbDescription));
-		        var withUrl = newRecord.media()[0].Thumbnail.withUrl();
-		        var url     = newRecord.media()[0].Thumbnail.url();
+				if(dbDescription && dbDescription.default && ko.isObservable(dbDescription.default)){dbDescription=ko.toJS(dbDescription);}
+				if(dbDescription){
+				    var val=app.findByLang(dbDescription);
+				   newRecord.description = ko.observable(val);}
+		        	
+		        var fullres="";
+			    
+		        if(newRecord.media()!=null &&  newRecord.media()[0] !=null && newRecord.media()[0].Original!=null  && newRecord.media()[0].Original.url()!="null"){
+		        	 fullres=newRecord.media()[0].Original.url();
+		        }
+		        if (fullres.indexOf("empty")!=-1) {fullres="";}
+		        newRecord.fullres=ko.observable(fullres);
 		        
-				if (withUrl == "" || withUrl == null || newRecord.media()[0].Thumbnail.mediaVersion() == null)
+		        var withUrl = "";
+		        if(newRecord.media()!=null &&  newRecord.media()[0] !=null && newRecord.media()[0].Thumbnail!=null  && newRecord.media()[0].Thumbnail.url()!="null"){
+		        	withUrl=newRecord.media()[0].Thumbnail.url();
+		        }
+			        
+		       if (withUrl.indexOf("empty")!=-1) {withUrl="";}
+			   if (withUrl == "")
 						newRecord.thumbnailUrl = ko.observable("img/content/thumb-empty.png");
-				else if (withUrl.indexOf("/media") == 0) {
-						newRecord.thumbnailUrl = ko.observable(window.location.origin + withUrl);
-				} 
-				else {
-						newRecord.thumbnailUrl = ko.observable(url);
-				}
-				
+			   else {
+						if (withUrl.indexOf("/media") == 0) {
+							newRecord.thumbnailUrl = ko.observable(window.location.origin + withUrl);
+						} else {
+							newRecord.thumbnailUrl = ko.observable(withUrl);
+						}
+					}
 				return newRecord;
 		    }
 		}
