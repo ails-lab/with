@@ -24,9 +24,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import model.DescriptiveData;
 import model.basicDataTypes.Language;
 import model.basicDataTypes.LiteralOrResource;
+import model.basicDataTypes.MultiLiteral;
 import model.basicDataTypes.MultiLiteralOrResource;
+import model.resources.CulturalObject.CulturalObjectData;
+import model.resources.RecordResource.RecordDescriptiveData;
+import model.resources.PlaceObject.PlaceData;
+import model.resources.AgentObject.AgentData;
 import model.resources.ThesaurusObject.SKOSTerm;
 
 import org.bson.types.ObjectId;
@@ -150,42 +156,112 @@ public class CollectionIndexController extends WithResourceController	{
 		return query;
 	}
 
-	public static QueryBuilder getSimilarItemsIndexCollectionQuery(ObjectId colId, MultiLiteralOrResource mm) {
+	public static QueryBuilder getSimilarItemsIndexCollectionQuery(ObjectId colId, DescriptiveData dd) {
 		BoolQueryBuilder query = QueryBuilders.boolQuery();
 		query.must(QueryBuilders.termQuery("collectedIn.collectionId", colId));
 
 		ThesaurusObjectDAO thesaurusDAO = DB.getThesaurusDAO();
 		
-		for (Map.Entry<String, List<String>> entry : mm.entrySet()) {
-			String key = entry.getKey();
-			if (key.equals(LiteralOrResource.URI)) {
-//				query.should(QueryBuilders.termQuery("_all_uri", uri).boost(4));
-		
-				for (String uri : entry.getValue()) {
-					for (String f : indexFacetFields) {
-						query.should(QueryBuilders.termQuery(f, uri).boost(5));
-					}
-
-					List<SKOSTerm> terms = thesaurusDAO.getByUri(uri).getSemantic().getBroaderTransitive();
-					if (terms != null) {
-						for (SKOSTerm t : terms) {
-							for (String f : indexFacetFields) {
-								query.should(QueryBuilders.termQuery(f, t.getUri()).boost(2));
-							}
-						}
-					}
+		MultiLiteral label = dd.getLabel();
+		if (label != null) {
+			for (Map.Entry<String, List<String>> entry : label.entrySet()) {
+				String lang = entry.getKey();
+				if (lang.equals(Language.DEFAULT.getDefaultCode())) {
+					continue;
+				}
+				lang = lang.toLowerCase();
+				
+				for (String v : entry.getValue()) {
+					query.should(QueryBuilders.matchQuery("label." + lang, v));	
+					query.should(QueryBuilders.matchQuery("altLabels." + lang, v));
 				}
 			}
-			
-			for (String s : entry.getValue()) {
-				query.should(QueryBuilders.termQuery("_all_" + key.toLowerCase(), s));
+		}
+		
+		MultiLiteral altlabel = dd.getAltLabels();
+		if (altlabel != null) {
+			for (Map.Entry<String, List<String>> entry : altlabel.entrySet()) {
+				String lang = entry.getKey();
+				if (lang.equals(Language.DEFAULT.getDefaultCode())) {
+					continue;
+				}
+				lang = lang.toLowerCase();
+				
+				for (String v : entry.getValue()) {
+					query.should(QueryBuilders.matchQuery("label." + lang, v));	
+					query.should(QueryBuilders.matchQuery("altLabels." + lang, v));
+				}
 			}
-			
+		}
+		
+		MultiLiteral descr = dd.getDescription();
+		if (descr != null) {
+			for (Map.Entry<String, List<String>> entry : descr.entrySet()) {
+				String lang = entry.getKey();
+				if (lang.equals(Language.DEFAULT.getDefaultCode())) {
+					continue;
+				}
+				lang = lang.toLowerCase();
+
+				for (String v : entry.getValue()) {
+					query.should(QueryBuilders.matchQuery("description." + lang, v));
+				}
+			}
+		}
+		
+		addMultiLiteralOrResource(dd.getKeywords(), "keywords", thesaurusDAO, query);
+		
+		if (dd instanceof CulturalObjectData) {
+			addMultiLiteralOrResource(((CulturalObjectData)dd).getDctype(), "dctype", thesaurusDAO, query);
+			addMultiLiteralOrResource(((CulturalObjectData)dd).getDcformat(), "dcformat", thesaurusDAO, query);
+		} else if (dd instanceof PlaceData) {
+			addMultiLiteralOrResource(((PlaceData)dd).getNation(), "nation", thesaurusDAO, query);
+			addMultiLiteralOrResource(((PlaceData)dd).getContinent(), "continent", thesaurusDAO, query);
+			addMultiLiteralOrResource(((PlaceData)dd).getPartOfPlace(), "partofplace", thesaurusDAO, query);
+		} else if (dd instanceof AgentData) {
+			addMultiLiteralOrResource(((AgentData)dd).getBirthPlace(), "birthplace", thesaurusDAO, query);
 		}
 		
 //		System.out.println(query);
 
 		return query;
+	}
+	
+	private static void addMultiLiteralOrResource(MultiLiteralOrResource source, String field, ThesaurusObjectDAO thesaurusDAO, BoolQueryBuilder query) {
+		if (source != null) {
+			List<String> uris = source.get(LiteralOrResource.URI);
+			if (uris != null) {
+				Set<String> broader = new HashSet<>();
+				for (String uri : uris) {
+					List<SKOSTerm> terms = thesaurusDAO.getByUri(uri).getSemantic().getBroaderTransitive();
+					if (terms != null) {
+						for (SKOSTerm t : terms) {
+							broader.add(t.getUri());
+						}
+					}
+				}
+				
+				for (String f : uris) {
+					query.should(QueryBuilders.termQuery(field + ".uri.all", f).boost(4));
+				}
+				
+				for (String f : broader) {
+					query.should(QueryBuilders.termQuery(field + ".uri.all", f).boost(2));
+				}
+			}
+			
+			for (Map.Entry<String, List<String>> entry : source.entrySet()) {
+				String lang = entry.getKey();
+				if (lang.equals(LiteralOrResource.URI) || lang.equals(Language.DEFAULT.getDefaultCode())) {
+					continue;
+				}
+				lang = lang.toLowerCase();
+				
+				for (String v : entry.getValue()) {
+					query.should(QueryBuilders.matchQuery(field + "." + lang, v));
+				}
+			}
+		}
 	}
 
 }

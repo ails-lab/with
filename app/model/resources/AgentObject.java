@@ -47,6 +47,10 @@ public class AgentObject extends RecordResource<AgentObject.AgentData> {
 		Gender genderEnum;
 		Literal gender;
 		
+		public MultiLiteralOrResource getBirthPlace() {
+			return birthplace;
+		}
+		
 		public void setBirthDate(List<WithDate> birthdate) {
 			this.birthdate = birthdate;
 		}

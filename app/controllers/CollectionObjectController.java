@@ -1022,65 +1022,10 @@ public class CollectionObjectController extends WithResourceController {
 			} else {
 				RecordResource rr = DB.getRecordResourceDAO().getById(new ObjectId(itemid));
 				
-				MultiLiteralOrResource mm = new MultiLiteralOrResource();
-				
-				Set<String> extendedURIs = new HashSet<>();
-				if (rr instanceof CulturalObject) {
-					CulturalObjectData dd = (CulturalObjectData)rr.getDescriptiveData();
-					
-					
-					if (dd.getLabel() !=  null) {
-						mm.merge(dd.getLabel());
-					}
-					
-					if (dd.getAltLabels() !=  null) {
-						mm.merge(dd.getAltLabels());
-					}
-
-					if (dd.getDescription() !=  null) {
-						mm.merge(dd.getDescription());
-					}
-					
-					if (dd.getKeywords() != null) {
-						mm.merge(dd.getKeywords());
-					}
-
-					if (dd.getDctype() != null) {
-						mm.merge(dd.getDctype());
-					}
-
-					if (dd.getDcformat() != null) {
-						mm.merge(dd.getDcformat());
-					}
-					
-//					List<String> URIs = mm.get(LiteralOrResource.URI);
-					
-//					MultiLiteralOrResource keywords = dd.getKeywords();
-//					MultiLiteralOrResource types = dd.getDctype();
-//					MultiLiteralOrResource formats = dd.getDcformat();
-//				
-//					Set<String> URIs = new HashSet<>();
-//					
-//					if (keywords != null && keywords.get(LiteralOrResource.URI) != null) {
-//						URIs.addAll(keywords.get(LiteralOrResource.URI));
-//					}
-//					
-//					if (types != null && types.get(LiteralOrResource.URI) != null) {
-//						URIs.addAll(types.get(LiteralOrResource.URI));
-//					}
-//					
-//					if (formats != null && formats.get(LiteralOrResource.URI) != null) {
-//						URIs.addAll(formats.get(LiteralOrResource.URI));
-//					}
-					
-					
-					
-				}
-				
 //				System.out.println("QUERYING FOR VIEW");
 				ElasticSearcher es = new ElasticSearcher();
 				
-				QueryBuilder query = CollectionIndexController.getSimilarItemsIndexCollectionQuery(colId, mm);
+				QueryBuilder query = CollectionIndexController.getSimilarItemsIndexCollectionQuery(colId, rr.getDescriptiveData());
 				
 //				log.info("QUERC " + start + " " + count);
 //				

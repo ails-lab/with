@@ -46,6 +46,18 @@ public class PlaceObject extends RecordResource<PlaceObject.PlaceData> {
 		// also describes the extend of the position
 		Double accuracy;
 
+		public MultiLiteralOrResource getNation() {
+			return nation;
+		}
+		
+		public MultiLiteralOrResource getContinent() {
+			return continent;
+		}
+		
+		public MultiLiteralOrResource getPartOfPlace() {
+			return partOfPlace;
+		}
+		
 		public void setNation(MultiLiteralOrResource nation) {
 			this.nation = nation;
 		}
