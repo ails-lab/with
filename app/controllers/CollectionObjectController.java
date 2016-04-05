@@ -196,7 +196,10 @@ public class CollectionObjectController extends WithResourceController {
 	    	    	int c = addResultToCollection(result, collection.getDbId().toString(), mylimit - itemsCount, resultInfo, dontDuplicate);
 	    	    	itemsCount = itemsCount + c;
 	    	    } 
-	          return ok("Imported "+mylimit+" items");
+	          return ok(Json.toJson(collectionWithMyAccessData(
+						collection,
+						AccessManager.effectiveUserIds(session().get(
+								"effectiveUserIds")))));
 	        }
 	      }
 	    );
@@ -205,7 +208,12 @@ public class CollectionObjectController extends WithResourceController {
 	    if (waitToFinish)
 	    	return promiseOfInt;
 		else
-			return Promise.pure(ok("Imported " + firstPageCount1 + " items out of " + mylimit));
+			return Promise.pure(
+					ok(Json.toJson(collectionWithMyAccessData(
+							collection,
+							AccessManager.effectiveUserIds(session().get(
+									"effectiveUserIds")))))
+					);
 	}
 	
 	private static int addResultToCollection(SourceResponse result, String collectionID, int limit, ObjectNode resultInfo, boolean dontRepeat) {
