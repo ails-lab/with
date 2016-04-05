@@ -47,8 +47,8 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 			        		  return "item collection";
 			        		else if (self.administrative.collectionType.indexOf("Space")!=-1)
 			        			return "item space";
-			        	    else return "item space";
-			        	}else return "item exhibition";
+			        	    else return "item exhibition";
+			        	}else return "item collection";
 			        });
 			        
 			        self.url=ko.computed(function() {

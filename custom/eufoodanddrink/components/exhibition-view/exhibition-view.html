@@ -6,7 +6,7 @@
         <!-- action-->
         <ul class="action">
             <li class="hidden"><a href="#" title="#"><img src="img/ic-expand.png"></a></li>
-            <li><a href="#" title="#"  onclick="window.history.go(-1); return false;"><img src="img/ic-close.png"></a></li>
+            <li><a href="javascript:void(0)" title="#"  onclick="window.history.go(-1); return false;"><img src="img/ic-close.png"></a></li>
         </ul>
     </div>
 </nav>
@@ -15,7 +15,7 @@
 <section class="exhibitionplayer">
     <!-- carousel-->
     <!--  ko if: exhItems().length > 0 -->
-    <div data-bind="backgroundImage: exhItems()[0].fullres" class="wrap">
+    <div data-bind="backgroundImage: exhItems()[0].fullres()" class="wrap">
         <div class="carouselexhibition hue">
             <!-- item-->
             <div class="item main">
