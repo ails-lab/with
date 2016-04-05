@@ -894,9 +894,12 @@ define("app", ['knockout', 'facebook', 'imagesloaded', 'moment', './js/app/plugi
 		if (language == undefined || language == null)
 			language = "default";
 		if (val !== undefined && val !== null)
-			if (val[language] !== undefined && val[language] !== null) {
-				var label = val[language][0]
-				if (label !== undefined && label !== null)
+			if (val[language]) {
+				var label = val[language];
+				if(val[language][0]){
+					label = val[language][0];
+				}
+				if (label)
 					return label;
 			}
 		return "";
