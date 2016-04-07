@@ -1,5 +1,7 @@
 define(['knockout', 'text!./_item.html', 'app','smoke'], function (ko, template, app) {
 
+	self.disqusLoaded=ko.observable(false);
+	
 	
 	function Record(data,showMeta) {
 		var self = this;
@@ -70,15 +72,16 @@ define(['knockout', 'text!./_item.html', 'app','smoke'], function (ko, template,
 			self.dataProvider=data.dataProvider;
 			self.dataProvider_uri=data.dataProvider_uri;
 			self.rights=data.rights;
-			if(data.dbId){
-			 self.recordId=data.dbId;
-			 self.loc(location.href.replace(location.hash,"")+"#item/"+self.recordId);
-			}
+			
 			self.externalId=data.externalId;
 			self.likes=data.likes;
 			self.collected=data.collected;
 			self.collectedIn=data.collectedIn;
 			self.data(data.data);
+			if(data.dbId){
+				 self.recordId=data.dbId;
+				 self.loc(location.href.replace(location.hash,"")+"#item/"+self.recordId);
+				}
 			self.facebook='https://www.facebook.com/sharer/sharer.php?u='+encodeURIComponent(self.loc());
 			self.twitter='https://twitter.com/share?url='+encodeURIComponent(self.loc())+'&text='+encodeURIComponent(self.title+" on "+window.location.host)+'"';
 			self.mail="mailto:?subject="+self.title+"&body="+encodeURIComponent(self.loc());
@@ -103,7 +106,7 @@ define(['knockout', 'text!./_item.html', 'app','smoke'], function (ko, template,
 				data     : JSON.stringify({
 					searchTerm: self.forrelated(),
 					page: 1,
-					pageSize:10,
+					pageSize:20,
 				    source:[self.source],
 				    filters:[]
 				}),
@@ -178,7 +181,7 @@ define(['knockout', 'text!./_item.html', 'app','smoke'], function (ko, template,
 					data     : JSON.stringify({
 						searchTerm: self.title,
 						page: 1,
-						pageSize:10,
+						pageSize:20,
 					    source:[self.source],
 					    filters:[]
 					}),
@@ -313,8 +316,12 @@ define(['knockout', 'text!./_item.html', 'app','smoke'], function (ko, template,
 		self.id = ko.observable(params.id);
 		itemShow = function (e,showMeta) {
 			data = ko.toJS(e);
-			self.open();
+			
 			self.record(new Record(data,showMeta));
+			self.open();
+			if(self.record().recordId!="-1"){
+				self.addDisqus();
+			}
 		};
 		
 		self.open = function () {
@@ -449,7 +456,7 @@ define(['knockout', 'text!./_item.html', 'app','smoke'], function (ko, template,
 						  });
 					self.record(record);
 					self.open();
-					
+					self.addDisqus();
 					
 				},
 				error: function (xhr, textStatus, errorThrown) {
@@ -458,6 +465,43 @@ define(['knockout', 'text!./_item.html', 'app','smoke'], function (ko, template,
 				}
 			});
 		};
+		
+		self.addDisqus= function(){
+			$("#disqus_thread").hide();
+			if(disqusLoaded()==false){
+		        var disqus_shortname = 'withculture';
+		        var disqus_identifier = self.record().recordId;
+		        var disqus_url = location.href.replace(location.hash,"")+"#!item/"+self.record().recordId;
+		       
+
+		        /* * * DON'T EDIT BELOW THIS LINE * * */
+		        (function() {
+		            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+		            dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+		            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+		        })();
+		        disqusLoaded(true);
+		        
+			}
+			    setTimeout(function(){
+			    	DISQUS.reset({
+			        reload: true,
+			        config: function () {
+			            this.page.identifier = self.record().recordId;
+			            this.page.url =  location.href.replace(location.hash,"")+"#!item/"+self.record().recordId;
+			            this.page.title = self.record().title;
+			            this.language = "en";
+			        }
+			    	
+			    });
+			    	$("#disqus_thread").show();
+			    }, 2000);
+		    
+			
+		}
+		
+		
+		
 		if(self.id()!=undefined){
 			
 			self.loadItem();
