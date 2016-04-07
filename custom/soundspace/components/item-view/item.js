@@ -63,6 +63,11 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 			//self.fullres=data.fullres;
 			self.description=data.description;
 			self.source=data.source;
+			if(self.source && self.source=="Europeana"){
+				dispatchDocumentEvent('Pundit.loadAnnotations');
+				dispatchDocumentEvent('Pundit.forceCompileButton');
+				//Pundit.forceCompileButton();
+			}
 			self.creator=data.creator;
 			self.provider=data.provider;
 			self.dataProvider=data.dataProvider;
@@ -298,7 +303,8 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 	function ItemViewModel(params) {
 		var self = this;
 		document.body.setAttribute("data-page","item");
-		setTimeout(function(){ WITHApp.init(); }, 300);   
+		setTimeout(function(){ WITHApp.init(); }, 300);
+		
 		self.route = params.route;
 		self.from=window.location.href;	
 		var thumb = "";
@@ -337,6 +343,7 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 
 		self.close = function () {
 			//self.record(new Record());
+			dispatchDocumentEvent('Pundit.hide');
 			$('body').css('overflow','visible');
 			$( '.itemview' ).fadeOut();
 			

@@ -33,6 +33,11 @@
                   <h1><!-- ko text: record().title --><!-- /ko --> </h1>
                   <div class="owner" data-bind="text:record().dataProvider"></div>
                   <!-- metadata-->
+                  <!-- ko if:record().source=="Europeana" -->
+                  <span 
+					data-bind="attr{'about': record().view_url}" class="pnd-resource" onclick="dispatchDocumentEvent('Pundit.showBootstrap')">
+					</span>
+				   <!-- /ko -->	                  
                   <ul role="tablist" class="nav nav-tabs">
                     <li class="active"><a href="#information" title="" data-toggle="tab">Info</a></li>
                     <li><a href="#related" title="" data-toggle="tab" data-bind="event:{ click: function(){record().findsimilar()}}">Related</a></li>
@@ -141,11 +146,7 @@
                 <div class="shortcut">
                   <!-- ul-->
                   <ul>
-                    <li data-bind="visible: record().source=='Europeana'">
-                      <a data-bind="click: annotate" target="_blank"  class="btn btn-alt">
-                        ANNOTATE
-                      </a>
-                    </li>
+                   
                     <li><a data-bind="attr: { href:record().view_url}" target="_blank" class="btn btn-alt">VISIT ITEM SITE</a></li>
                   </ul>
                 </div>
