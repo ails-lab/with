@@ -26,7 +26,7 @@ import sources.formatreaders.FlickrRecordFormatter;
 
 public class BritishLibrarySpaceSource extends FlickrSpaceSource {
 	public BritishLibrarySpaceSource() {
-		super(Sources.BritishLibrary.toString(),"12403504%40N02");
+		super(Sources.BritishLibrary.toString(),"SECRET_KEY");
 		formatreader = new FlickrRecordFormatter.BritishLibraryRecordFormatter();
 	}
 

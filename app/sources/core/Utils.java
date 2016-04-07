@@ -285,15 +285,22 @@ public class Utils {
 		}
 
 		public String getHttp() {
+			return getHttp(true);
+		}
+		
+		public String getHttp(boolean encode) {
 			String string = first + "=" + second.toString();
-			try {
-				String encode = URLEncoder.encode(second.toString(), "UTF-8");
-				string = first + "=" + encode;
-			} catch (UnsupportedEncodingException e) {
-				e.printStackTrace();
+			if (encode){
+				try {
+					String encoded = URLEncoder.encode(second.toString(), "UTF-8");
+					string = first + "=" + encoded;
+				} catch (UnsupportedEncodingException e) {
+					e.printStackTrace();
+				}
 			}
 			return string;
 		}
+
 
 	}
 

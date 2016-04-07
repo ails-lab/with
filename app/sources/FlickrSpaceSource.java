@@ -196,7 +196,7 @@ public abstract class FlickrSpaceSource extends ISpaceSource {
 	public static class InternetArchiveSpaceSource extends FlickrSpaceSource{
 
 		public InternetArchiveSpaceSource() {
-			super(Sources.InternetArchive.toString(),"126377022%40N07");
+			super(Sources.InternetArchive.toString(),"126377022@N07");
 			formatreader = new FlickrRecordFormatter.InternetArchiveRecordFormatter();
 		}
 		

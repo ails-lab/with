@@ -350,7 +350,7 @@ define(['knockout', 'text!./collection.html', 'selectize', 'app', 'knockout-vali
 				jsondata=JSON.stringify(self.record().data());
 			}
 			if (noDouble === undefined)
-				noDouble = false;
+				noDouble = true;
 			$.ajax({
 				"beforeSend": function (xhr) {
 					self.ajaxConnections++;
@@ -379,10 +379,9 @@ define(['knockout', 'text!./collection.html', 'selectize', 'app', 'knockout-vali
 				"error": function (result) {
 					self.ajaxConnections--;
 					if (result.responseJSON.error === 'double') {
-						app.showInfoPopup("Record already exists in collection.",
-								"Do you want to add it again?", function() {
+						$.smkConfirm({text:'Record already exists in collection.', accept:'Do you want to add it again?', cancel:'Cancel'}, function(e){if(e){
 							self.addRecord(collid, false);
-						});
+						}});
 					}	
 					else {
 						$.smkAlert({text:'An error occured', type:'danger', time: 10});

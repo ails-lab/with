@@ -40,20 +40,24 @@ public class QueryBuilder {
 		parameters = new ArrayList<Utils.Pair<String>>();
 	}
 
-	public String getHttp() {
+	public String getHttp(boolean encode) {
 		String res = getBaseUrl();
 		Iterator<Pair<String>> it = parameters.iterator();
 		boolean added = false;
 		if (query != null && query.second != null) {
-			res += ("?" + query.getHttp());
+			res += ("?" + query.getHttp(encode));
 			added = true;
 		}
 		for (; it.hasNext();) {
 			String string = added ? "&" : "?";
-			res += string + it.next().getHttp();
+			res += string + it.next().getHttp(encode);
 			added = true;
 		}
 		return res;
+	}
+	
+	public String getHttp() {
+		return getHttp(true);
 	}
 
 	

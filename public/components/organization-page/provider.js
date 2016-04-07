@@ -37,8 +37,8 @@ define(['bridget','knockout', 'text!./provider.html','isotope','imagesloaded','a
 					if (self.administrative) {
 						if (self.administrative.collectionType.indexOf("Collection") != -1) {
 							return "COLLECTION";
-						} else if (self.administrative.collectionType.indexOf("Space") != -1) {
-							return "SPACE";
+						} else if (self.administrative.collectionType.indexOf("Org") != -1) {
+							return "ORGANIZATION";
 						} else {
 							return "EXHIBITION";
 						}
@@ -51,10 +51,10 @@ define(['bridget','knockout', 'text!./provider.html','isotope','imagesloaded','a
 					if (self.administrative) {
 						if (self.administrative.collectionType.indexOf("Collection") != -1) {
 							return "item collection";
-						} else if (self.administrative.collectionType.indexOf("Space") != -1) {
-							return "item space";
+						} else if (self.administrative.collectionType.indexOf("Org") != -1) {
+							return "item organization";
 						} else {
-							return "item space";
+							return "item exhibition";
 						}
 					}else {
 						return "item exhibition";
@@ -63,9 +63,9 @@ define(['bridget','knockout', 'text!./provider.html','isotope','imagesloaded','a
 
 				self.url = ko.computed(function () {
 					if (self.administrative) {
-						if (self.administrative.collectionType.indexOf("Collection") == -1) {
+						if (self.administrative.collectionType.indexOf("Collection") != -1) {
 							return 'index.html#exhibitionview/' + self.dbId;
-						} else if (self.administrative.collectionType.indexOf("Space") > -1) {
+						} else if (self.administrative.collectionType.indexOf("Org") > -1) {
 							return self.administrative.isShownAt;
 						} else {
 							return 'index.html#collectionview/' + self.dbId;
@@ -153,6 +153,7 @@ define(['bridget','knockout', 'text!./provider.html','isotope','imagesloaded','a
 
 		/*---*/
 		self.loading = ko.observable(false);
+		self.loadingOrgs = ko.observable(false);
 		self.collections = ko.observableArray();
 		self.address = ko.observable('');
 		self.description = ko.observable('');
@@ -166,6 +167,7 @@ define(['bridget','knockout', 'text!./provider.html','isotope','imagesloaded','a
 		self.username = ko.observable(false);
 		self.totalCollections = ko.observable(0);
 		self.totalExhibitions = ko.observable(0);
+		self.totalOrganizations = ko.observable(0);
 		var $container = $(".grid").isotope({
 			itemSelector: '.item',
 			transitionDuration: transDuration,
@@ -255,6 +257,46 @@ define(['bridget','knockout', 'text!./provider.html','isotope','imagesloaded','a
 			});
 		};
 
+///////////////////////
+		
+		self.getDescendantOrganizations = function() {
+			return $.ajax({
+				type: "GET",
+				contentType: "application/json",
+				dataType: "json",
+				url: "/group/descendantOrganizations/" + self.id(),
+				data: "direct=false",
+			}).success(function () {});
+		}
+		
+		if(true) {
+			var promise3 = self.getDescendantOrganizations();
+			$.when(promise3).done(function (data) {
+				if (data.length == 0) {
+					loadingOrgs(false); return;
+				}
+				var items = [];
+				for (var i in data) {
+					var orgtocollection={administrative:{collectionType:'Org',isShownAt: data[i].page.url}, 
+							descriptiveData:{label:{default:[data[i].friendlyName]}},
+							media:[{Thumbnail:{url: (data[i].avatar!=null)?data[i].avatar[0]:null}}]};
+					var o = new Collection(orgtocollection);
+					self.collections().push(o);
+					items.push(o);
+				}
+				self.collections.valueHasMutated();
+				self.totalOrganizations(data.length);
+				
+				if (items.length > 0) {
+					var $newitems = getItems(items);
+					providerIsotopeImagesReveal($container, $newitems);
+				}
+				
+				self.loadingOrgs(false);
+			});
+			
+		}
+		
 
 		self.getProfileCollections = function () {
 			//call should be replaced with collection/list?isPublic=true&offset=0&count=20&isExhibition=false&directlyAccessedByGroupName=[{"orgName":self.username(), "access":"READ"}]
@@ -331,11 +373,19 @@ define(['bridget','knockout', 'text!./provider.html','isotope','imagesloaded','a
 		function getItem(collection) {
 			var tile = '<div class="' + collection.data.css() + '"> <div class="wrap">';
 
-			tile += '<a href="#" onclick="loadUrl(\'' + collection.data.url() + '\',event)">' +
+			if (collection.data.administrative.collectionType.indexOf("Org") != -1) {
+				tile += '<a href="#" onclick="loadUrl(\'' + collection.data.url() + '\',event)">' +
+				'<div class="thumb"><img src="' + collection.data.thumbnail() + '"></div>' +
+				'<div class="info"><span class="type">' + collection.data.type() + '</span><h1 class="title">' +
+				collection.data.title + '</h1><p class="text">' + collection.data.description + '</p></div>' +
+				'</a></div></div>';
+			} else {
+				tile += '<a href="#" onclick="loadUrl(\'' + collection.data.url() + '\',event)">' +
 				'<div class="thumb"><img src="' + collection.data.thumbnail() + '"><div class="counter">' + collection.data.itemCount() + '</div></div>' +
 				'<div class="info"><span class="type">' + collection.data.type() + '</span><h1 class="title">' +
 				collection.data.title + '</h1><p class="text">' + collection.data.description + '</p></div>' +
 				'</a></div></div>';
+			}
 
 			return tile;
 		}
