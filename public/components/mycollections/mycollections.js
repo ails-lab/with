@@ -88,8 +88,6 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 		 });		
 		};
 		
-		
-		
 		self.importCollectionName = ko.observable("");
 		self.europeanaLimit = ko.observable(-1);
 		self.europeanaSearch = ko.observable("");
@@ -192,7 +190,7 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 		};
 
 		self.myCollections = ko.mapping.fromJS([], mapping);
-		self.titleToEdit = ko.observable("").extend({ required: true });
+		self.titleToEdit = ko.observable("").extend({ required: true, minLength: 2});
 		self.descriptionToEdit = ko.observable("");
 		self.isPublicToEdit = ko.observable(false);
 		self.apiUrl = ko.observable("");
@@ -285,45 +283,49 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 
 
 		self.createCollection = function (collectionType) {
-			var jsondata = JSON.stringify({
-				administrative: {
-					access: {
-						isPublic: self.isPublicToEdit()
+			if (self.validationModel.isValid()) {
+				var jsondata = JSON.stringify({
+					administrative: {
+						access: {
+							isPublic: self.isPublicToEdit()
+						},
+						collectionType: collectionType
 					},
-					collectionType: collectionType
-				},
-				descriptiveData : {
-					label : {
-						default : [self.titleToEdit()]
-					},
-					description : {
-						default : [self.descriptionToEdit()]
+					descriptiveData : {
+						label : {
+							default : [self.titleToEdit()]
+						},
+						description : {
+							default : [self.descriptionToEdit()]
+						}
 					}
-				}
-			});
-			$.ajax({
-				"url": "/collection",
-				"method": "post",
-				"contentType": "application/json",
-				"data": jsondata,
-				"success": function (data) {
-					self.reloadCollection(data);
-					if (collectionType == 'SimpleCollection') {
-						app.currentUser.collectionCount(app.currentUser.collectionCount() + 1);
-						self.collectionCount(self.collectionCount() + 1);
-			    	}
-			        if (collectionType == 'Exhibition') {
-						app.currentUser.exhibitionCount(app.currentUser.exhibitionCount() + 1);
-						self.exhibitionCount(self.exhibitionCount() + 1);
-						window.location = '#exhibition-edit/'+data.dbId;
-			        }
-					self.closeSideBar();
-				},
-				"error": function (result) {
-					$.smkAlert({ text: 'An error occured', type: 'danger', time: 10 });
-					self.closeSideBar();
-				}
-			});
+				});
+				$.ajax({
+					"url": "/collection",
+					"method": "post",
+					"contentType": "application/json",
+					"data": jsondata,
+					"success": function (data) {
+						self.reloadCollection(data);
+						if (collectionType == 'SimpleCollection') {
+							app.currentUser.collectionCount(app.currentUser.collectionCount() + 1);
+							self.collectionCount(self.collectionCount() + 1);
+				    	}
+				        if (collectionType == 'Exhibition') {
+							app.currentUser.exhibitionCount(app.currentUser.exhibitionCount() + 1);
+							self.exhibitionCount(self.exhibitionCount() + 1);
+							window.location = '#exhibition-edit/'+data.dbId;
+				        }
+						self.closeSideBar();
+					},
+					"error": function (result) {
+						$.smkAlert({ text: 'An error occured', type: 'danger', time: 10 });
+						self.closeSideBar();
+					}
+				});
+			} else {
+				self.validationModel.errors.showAllMessages();
+			}
 		};
 
 
