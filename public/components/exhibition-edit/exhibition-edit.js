@@ -1,6 +1,5 @@
-define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', 'app', 'jquery.lazyload', 'knockout-else', 'knockout-validation','smoke'], function (ko, template, jqueryUI, autoscroll, app, jqueryLazyLoad, KnockoutElse) {
-	
-	
+define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', 'app', 'jquery.lazyload', 'knockout-else', 'knockout-validation','smoke', 'jquery.fileupload'], 
+		function (ko, template, jqueryUI, autoscroll, app, jqueryLazyLoad, KnockoutElse) {
 	
 	collectionItemCount = 14;
 	exhibitionItemCount = 4;
@@ -255,7 +254,6 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 		self.searchPage = 0;
 		self.checkLogged();
 		self.loading = ko.observable(false);
-	
 		self.title = ko.observable('');
 		self.description = ko.observable('');
 		self.dbId = ko.observable();
@@ -281,7 +279,14 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 		self.validationModel = ko.validatedObservable({
 			itemVideoUrl: self.itemVideoUrl
 		});
-		
+		self.backgroundImg = ko.observable("");
+		self.displayCoverImage = ko.pureComputed(function () {
+			if (self.backgroundImg && self.backgroundImg() != "") {
+				return self.backgroundImg();
+			} else {
+				return 'img/ui/upload-placeholder.png';
+			}
+		});
 		var collections = [];
 		var promise = app.getAllUserCollections();
 		self.myCollections = ko.mapping.fromJS([]); //holds all the collections
@@ -311,6 +316,7 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 			},
 			'copy': ["media"]
 		};
+
         self.creationMode=true;
 		self.loadingExhibitionItems = true;
 		var promise = getExhibition(self.dbId());
@@ -432,8 +438,8 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 			self.itemVideoUrl(exhibitionItem.contextData()[0].body.videoUrl());
 			self.itemVideoDescription(exhibitionItem.contextData()[0].body.videoDescription());
 			self.itemId(exhibitionItem.dbId());
-			$( '.action' ).removeClass( 'active' );
-			$( '.action.editvideo' ).addClass( 'active' );
+			$('.action').removeClass('active');
+			$('.action.editvideo').addClass('active');
 		};
 		
 		self.editItem = function (editMode) {
@@ -547,6 +553,30 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 	
 						}
 					}
+				}
+			});
+		}
+		
+		self.uploadBackgroundImg = function() {
+			
+		}
+		
+		self.bindFileUpload = function() {
+			$('#coverImg').on("click", function( e ) {
+				$('.action').removeClass('active');
+				$('.action.upload').addClass('active');				
+			});
+			$('#mediaupload').fileupload({
+				type: "POST",
+				url: '/media/create',
+				success: function (data, textStatus, jqXHR) {
+					self.backgroundImg(data.original);
+					console.log(self.displayCoverImage());
+				},
+				error: function (e, data) {
+					console.log(e);
+					console.log(data);
+					$.smkAlert({ text: 'Error uploading the file', type: 'danger', time: 10});
 				}
 			});
 		}
@@ -867,13 +897,8 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 
 		//hide the nav bar
 		$('#bottomBar').fadeOut(500);
-		
-		
-		
 	};
 	
-	
-
 	return {
 		viewModel: ExhibitionEditModel,
 		template: template
