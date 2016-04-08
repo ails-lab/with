@@ -176,6 +176,9 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 					res += string + next.getHttp();
 				}
 			}
+			if (Utils.hasInfo(tail)){
+				res+=tail;
+			}
 			return res;
 		}
 
@@ -211,6 +214,7 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 			}
 		}
 		builder.addSearchParam("facet", facets);
+		builder.setTail(q.tail);
 		return addfilters(q, builder).getHttp();
 	}
 

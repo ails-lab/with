@@ -93,6 +93,7 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 		self.importCollectionName = ko.observable("");
 		self.europeanaLimit = ko.observable(-1);
 		self.europeanaSearch = ko.observable("");
+		self.europeanaSearchTail = ko.observable("");
 		self.importEuropeanaSearch = function () {
 		    console.log( self.europeanaID());
 		    
@@ -101,6 +102,7 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 				limit : self.europeanaLimit(),
 				query : {
 					searchTerm : self.europeanaSearch(),
+					tail : self.europeanaSearchTail(),
 					page : 1,
 					pageSize : 20
 				}

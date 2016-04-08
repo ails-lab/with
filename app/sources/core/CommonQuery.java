@@ -40,6 +40,7 @@ public class CommonQuery implements Cloneable {
 	public String pageSize = "20";
 	public String searchTerm;
 	public List<String> source;
+	public String tail;
 	private List<Tuple<ObjectId, Access>> directlyAccessedByUserName = new ArrayList<Tuple<ObjectId, Access>>();
 	private List<Tuple<ObjectId, Access>> directlyAccessedByGroupName = new ArrayList<Tuple<ObjectId, Access>>();
 	//private List<Tuple<String, String>> recursivelyAccessedByGroupName;
