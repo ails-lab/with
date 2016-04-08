@@ -8,7 +8,7 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 		self.thumb = "";
 		self.fullres=ko.observable('');
 		self.view_url="";
-		self.source="";
+		self.source=ko.observable("");
 		self.creator="";
 		self.provider="";
 		self.dataProvider="";
@@ -60,13 +60,12 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 			} else {
 				self.fullres(self.calcThumbnail());
 			}
-			//self.fullres=data.fullres;
 			self.description=data.description;
-			self.source=data.source;
-			if(self.source && self.source=="Europeana"){
+			self.source(data.source);
+			if(self.source() && self.source()=="Europeana"){
 				dispatchDocumentEvent('Pundit.loadAnnotations');
 				dispatchDocumentEvent('Pundit.forceCompileButton');
-				//Pundit.forceCompileButton();
+				
 			}
 			self.creator=data.creator;
 			self.provider=data.provider;
@@ -260,7 +259,7 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 			   }
 			});
 		self.sourceCredits = ko.pureComputed(function() {
-			 switch(self.source) {
+			 switch(self.source()) {
 			    case "DPLA":
 			    	return "dp.la";
 			    case "Europeana":

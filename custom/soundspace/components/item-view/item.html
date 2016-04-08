@@ -33,12 +33,13 @@
                   <h1><!-- ko text: record().title --><!-- /ko --> </h1>
                   <div class="owner" data-bind="text:record().dataProvider"></div>
                   <!-- metadata-->
-                  <!-- ko if:record().source=="Europeana" -->
+                  <span data-bind="visible: record().source()=='Europeana'">
                   <span 
 					data-bind="attr{'about': record().view_url}" class="pnd-resource" onclick="dispatchDocumentEvent('Pundit.showBootstrap')">
 					</span>
-				   <!-- /ko -->	                  
-                  <ul role="tablist" class="nav nav-tabs">
+					</span>
+				
+				  <ul role="tablist" class="nav nav-tabs">
                     <li class="active"><a href="#information" title="" data-toggle="tab">Info</a></li>
                     <li><a href="#related" title="" data-toggle="tab" data-bind="event:{ click: function(){record().findsimilar()}}">Related</a></li>
                     <li><a href="#comment" title="" data-toggle="tab">Comments</a></li>
@@ -69,7 +70,7 @@
                         </li>
                         <li>
                           <div class="title">RECORD SOURCE</div>
-                          <div class="field"  data-bind="text:record().source"></div>
+                          <div class="field"  data-bind="text:record().source()"></div>
                         </li>
                       </ul>
                     </div>
