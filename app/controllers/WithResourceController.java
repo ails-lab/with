@@ -377,7 +377,7 @@ public class WithResourceController extends Controller {
 		} 
 	}
 	
-	public static Result addRecordsToCollection(String colId) {
+	public static Result addRecordsToCollection(String colId, Boolean noDouble) {
 		JsonNode json = request().body().asJson();
 		ObjectNode result = Json.newObject();
 		ObjectId collectionDbId = new ObjectId(colId);
@@ -397,7 +397,7 @@ public class WithResourceController extends Controller {
 					Iterator<JsonNode> iterator = json.iterator();
 					while (iterator.hasNext()) {
 						JsonNode recordJson = iterator.next();
-						Result r = addRecordToCollection(recordJson, new ObjectId(colId), Option.None(), false);
+						Result r = addRecordToCollection(recordJson, new ObjectId(colId), Option.None(), noDouble);
 						if (!r.toString().equals(ok().toString())) {
 							return r;
 						}
