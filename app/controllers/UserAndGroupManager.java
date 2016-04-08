@@ -219,6 +219,10 @@ public class UserAndGroupManager extends Controller {
 						"Only administrators of the group have the right to edit the group");
 				return forbidden(result);
 			}
+			if(id.equals(groupId)) {
+				result.put("error", "Sorry! You cannot add an organization as a member of itself");
+				return badRequest(result);
+			}
 			User admin = DB.getUserDAO().get(new ObjectId(adminId));
 			UserGroup group = DB.getUserGroupDAO().get(new ObjectId(groupId));
 			if (group == null) {
@@ -242,13 +246,13 @@ public class UserAndGroupManager extends Controller {
 					result.put("error", "User is already member of a group");
 					return badRequest(result);
 				}
-				
+
 				//add user to the group - database side
 				group.getUsers().add(user.getDbId());
 				user.addUserGroups(ancestorGroups);
 				DB.getUserDAO().makePermanent(user);
 				DB.getUserGroupDAO().makePermanent(group);
-				
+
 				List<Notification> requests = DB.getNotificationDAO()
 						.getPendingGroupNotifications(user.getDbId(),
 								group.getDbId(), Activity.GROUP_REQUEST);
@@ -353,14 +357,14 @@ public class UserAndGroupManager extends Controller {
 			}
 			if (DB.getUserDAO().get(userOrGroupId) != null) {
 				User user = DB.getUserDAO().get(userOrGroupId);
-				
+
 				// remove the user from the group
 				ancestorGroups.add(group.getDbId());
 				group.removeUser(user.getDbId());
 				user.removeUserGroups(ancestorGroups);
 				if (!(DB.getUserDAO().makePermanent(user) == null)
 						&& !(DB.getUserGroupDAO().makePermanent(group) == null)) {
-					
+
 					//remove pending invites on this group
 					List<Notification> group_invites = DB.getNotificationDAO()
 							.getPendingGroupNotifications(user.getDbId(),
@@ -368,11 +372,11 @@ public class UserAndGroupManager extends Controller {
 					for(Notification not: group_invites) {
 						if(DB.getNotificationDAO().makeTransient(not) != 1) {
 							log.error("Cannot remove notification with id: " + not.getDbId());
-							result.put("error_"+not.getDbId(), 
+							result.put("error_"+not.getDbId(),
 									"Cannot remove notification with id: " + not.getDbId());
 						}
 					}
-					
+
 					GroupNotification notification = new GroupNotification();
 					notification.setActivity(Activity.GROUP_REMOVAL);
 					notification.setGroup(group.getDbId());
@@ -397,7 +401,7 @@ public class UserAndGroupManager extends Controller {
 					result.put("error", "Could not remove user from group");
 					return internalServerError(result);
 				}
-				
+
 			}
 			result.put("error", "Wrong user or group id");
 			return badRequest(result);
