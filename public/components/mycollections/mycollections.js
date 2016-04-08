@@ -60,19 +60,16 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 		self.collectionSet = ko.observable("my");
 		
 		self.openAction = function (myclass){
-			console.log('ok');
 			$( '.action' ).removeClass( 'active' );
 			$( '.action.'+myclass ).addClass( 'active' );				
 		};
 		
 		self.europeanaID = ko.observable("");
 		self.importEuropeanaCollection = function () {
-		    console.log( self.europeanaID());
 		    $.ajax({
 		    	"url": "/collection/importEuropeanaCollection?id="+self.europeanaID(),
 		    	"method": "GET",
 		    	"success": function( data, textStatus, jQxhr ){
-		    		console.log( data );
 		    	    $.smkAlert({text: 'Collection Imported', type: 'success'});
 		    		self.reloadCollection(data);
 		    		app.currentUser.collectionCount(app.currentUser.collectionCount() + 1);
@@ -93,8 +90,6 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 		self.europeanaSearch = ko.observable("");
 		self.europeanaSearchTail = ko.observable("");
 		self.importEuropeanaSearch = function () {
-		    console.log( self.europeanaID());
-		    
 		    var jsondata = JSON.stringify({
 		    	collectionName: self.importCollectionName(),
 				limit : self.europeanaLimit(),
@@ -112,7 +107,6 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 					"contentType": "application/json",
 					"data":  jsondata,
 					"success": function( data, textStatus, jQxhr ){
-			    		console.log( data );
 			    	    $.smkAlert({text: 'Collection Imported', type: 'success'});
 			    		self.reloadCollection(data);
 			    		app.currentUser.collectionCount(app.currentUser.collectionCount() + 1);
@@ -381,7 +375,6 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 
 		self.more = function (isExhibition, funcToExecute, my) {
 			if (self.loading === true) {
-
 				setTimeout(self.moreCollections(isExhibition), 300);
 			}
 			if (self.loading() === false && self.moreCollectionData() === true) {
@@ -809,6 +802,7 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 			} else {
 				$.smkAlert({ text: 'Not a valid operation!', type: 'danger', time: 10 });
 			}
+			self.moreCollectionData(true);
 		};
 
 		self.checkCollectionSet = function (dbId) {
