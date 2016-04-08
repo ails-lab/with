@@ -25,6 +25,7 @@ import sources.core.Utils.Pair;
 public class QueryBuilder {
 
 	protected String baseUrl;
+	protected String tail;
 	protected Pair<String> query;
 	protected List<Pair<String>> parameters;
 	protected Object data;
@@ -52,6 +53,9 @@ public class QueryBuilder {
 			String string = added ? "&" : "?";
 			res += string + it.next().getHttp(encode);
 			added = true;
+		}
+		if (Utils.hasInfo(tail)){
+			res+=tail;
 		}
 		return res;
 	}
@@ -105,6 +109,16 @@ public class QueryBuilder {
 	public void setData(Object data) {
 		this.data = data;
 	}
+
+	public String getTail() {
+		return tail;
+	}
+
+	public void setTail(String tail) {
+		this.tail = tail;
+	}
+	
+	
 	
 
 }
