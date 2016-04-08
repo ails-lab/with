@@ -82,10 +82,18 @@ define(['bridget','knockout', 'text!./provider.html','isotope','imagesloaded','a
 				});
 
 				self.itemCount = ko.computed(function () {
-					if (self.administrative.entryCount === 1) {
-						return "1 Item";
-					} else {
-						return self.administrative.entryCount + " Items";
+					if (self.administrative) {
+
+						if (self.administrative.entryCount === 1) {
+							return "1 Item";
+						} else {
+							//console.log(self.administrative);
+							//return self.administrative.entryCount + " Items";
+							if(self.administrative.collectionType.indexOf("Org") == -1)
+								return self.administrative.entryCount + " Items";
+							else 
+								return self.administrative.colCount + " Collections";
+						}
 					}
 				});
 
@@ -265,7 +273,7 @@ define(['bridget','knockout', 'text!./provider.html','isotope','imagesloaded','a
 				contentType: "application/json",
 				dataType: "json",
 				url: "/group/descendantOrganizations/" + self.id(),
-				data: "direct=false",
+				data: "direct=false&collectionHits=true",
 			}).success(function () {});
 		}
 		
@@ -277,9 +285,14 @@ define(['bridget','knockout', 'text!./provider.html','isotope','imagesloaded','a
 				}
 				var items = [];
 				for (var i in data) {
-					var orgtocollection={administrative:{collectionType:'Org',isShownAt: data[i].page.url}, 
+					var thumb;
+					if(data[i].avatar)
+						thumb = window.location.origin + data[i].avatar.Thumbnail;
+					else
+						thumb=null;
+					var orgtocollection={administrative:{collectionType:'Org',isShownAt: data[i].page.url, colCount: data[i].totalCollections}, 
 							descriptiveData:{label:{default:[data[i].friendlyName]}},
-							media:[{Thumbnail:{url: (data[i].avatar!=null)?data[i].avatar[0]:null}}]};
+							media:[{Thumbnail:{url: thumb}}]};
 					var o = new Collection(orgtocollection);
 					self.collections().push(o);
 					items.push(o);
@@ -375,7 +388,7 @@ define(['bridget','knockout', 'text!./provider.html','isotope','imagesloaded','a
 
 			if (collection.data.administrative.collectionType.indexOf("Org") != -1) {
 				tile += '<a href="#" onclick="loadUrl(\'' + collection.data.url() + '\',event)">' +
-				'<div class="thumb"><img src="' + collection.data.thumbnail() + '"></div>' +
+				'<div class="thumb"><img src="' + collection.data.thumbnail() + '"><div class="counter">' + collection.data.itemCount() + '</div></div>' +
 				'<div class="info"><span class="type">' + collection.data.type() + '</span><h1 class="title">' +
 				collection.data.title + '</h1><p class="text">' + collection.data.description + '</p></div>' +
 				'</a></div></div>';
