@@ -37,6 +37,7 @@ public class CommonQuery implements Cloneable {
 	@JsonIgnoreProperties(ignoreUnknown=true)
 	public String page = "1";
 	public String facetsMode = FacetsModes.DEFAULT;
+	public boolean hasMedia=false;
 	public String pageSize = "20";
 	public String searchTerm;
 	public List<String> source;
