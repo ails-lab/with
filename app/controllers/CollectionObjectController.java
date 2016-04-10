@@ -16,6 +16,7 @@
 
 package controllers;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -26,10 +27,14 @@ import java.util.Set;
 import javax.validation.ConstraintViolation;
 
 import org.bson.types.ObjectId;
+import org.mongodb.morphia.dao.BasicDAO;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.mongodb.DBObject;
 
 import controllers.parameterTypes.MyPlayList;
 import controllers.parameterTypes.StringTuple;
@@ -844,4 +849,15 @@ public class CollectionObjectController extends WithResourceController {
 		}
 		return userJSON;
 	}
+	
+	public static Result changeCollected() throws JsonProcessingException, IOException {
+		DBObject c = DB.getDs().getDB().getCollection("CollectionObject")
+			.findOne(new ObjectId("56fcf34976eee2526591ec94"));
+		ObjectNode node = (ObjectNode) new ObjectMapper().readTree(c.toString());
+		node.remove("className");
+		
+		CollectionObject col = Json.fromJson(node, CollectionObject.class);
+		return null;
+	}
+	
 }

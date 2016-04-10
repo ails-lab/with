@@ -222,26 +222,28 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 						return null;
 				});
 				newRecord.title = ko.mapping.fromJS(app.findByLang(record.descriptiveData.label), {});
-				var dbDescription = record.descriptiveData.description;
-		        if (dbDescription === undefined || dbDescription === null || dbDescription.default[0] === undefined || dbDescription.default[0] === "null")
+				if (record.descriptiveData.description  === undefined || typeof record.descriptiveData.description.default  === 'undefined') {
 		        	newRecord.description = ko.observable("");
-		        else
-		        	newRecord.description = ko.observable(app.findByLang(dbDescription));
-		        var withUrl = newRecord.media()[0].Thumbnail.url();
-		        if (withUrl != "empty") {
-					if (withUrl == "")
-						newRecord.thumbnailUrl = ko.observable("img/content/thumb-empty.png");
-					else {
-						if (withUrl.indexOf("/media") == 0) {
+				} else {
+		        	newRecord.description = ko.observable(app.findByLang(record.descriptiveData.description.default[0]));
+		        }
+				var withUrl = "";
+		        if(newRecord.media()!=null &&  newRecord.media()[0] !=null && newRecord.media()[0].Thumbnail!=null  && newRecord.media()[0].Thumbnail.url()!="null"){
+		        	withUrl=newRecord.media()[0].Thumbnail.url();
+		        }
+			       if (withUrl == "empty") {withUrl="";}
+				   if (withUrl == "")
+							newRecord.thumbnailUrl = ko.observable("img/content/thumb-empty.png");
+				   else {
+					   if (withUrl.indexOf("/media") == 0) {
 							newRecord.thumbnailUrl = ko.observable(window.location.origin + withUrl);
-						} else {
+					   } else {
 							newRecord.thumbnailUrl = ko.observable(withUrl);
-						}
+					   }
 					}
-				}
-		        return newRecord;
-		    }
-		}
+			        return newRecord;
+			    }
+			}
 		
 		self.searchPage = 0;
 		self.checkLogged();
@@ -413,9 +415,16 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 			var context = ko.contextFor(event.target);
 			var index = context.$index();
 			self.itemPosition(index);
-			self.itemText(exhibitionItem.contextData.body.text.default());
-			self.itemVideoUrl(exhibitionItem.contextData.body.videoUrl());
-			self.itemVideoDescription(exhibitionItem.contextData.body.videoDescription());
+			if (typeof exhibitionItem.contextData.body.text !== 'undefined') {
+				self.itemText(exhibitionItem.contextData.body.text.default());
+			}
+			if (typeof exhibitionItem.contextData.body.videoUrl !== 'undefined') {
+				self.itemVideoUrl(exhibitionItem.contextData.body.videoUrl());
+			}
+			if (typeof exhibitionItem.contextData.body.videoDescription !== 'undefined') {
+				console.log(exhibitionItem.contextData.body.videoDescription);
+				self.itemVideoDescription(exhibitionItem.contextData.body.videoDescription());
+			}
 			self.itemId(exhibitionItem.dbId());
 			$( '.action' ).removeClass( 'active' );
 			$( '.action.editvideo' ).addClass( 'active' );
@@ -431,6 +440,16 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 				}
 				var promise = self.updateRecord(self.itemId(), self.itemText(), itemEmbeddedVideoUrl, self.itemVideoDescription(), self.dbId(), self.itemPosition());
 				$.when(promise).done(function (data) {
+					if (typeof self.collectionItemsArray()[self.itemPosition()].contextData.body.text === 'undefined'
+						&& typeof self.collectionItemsArray()[self.itemPosition()].contextData.body.videoUrl === 'undefined') {
+						self.collectionItemsArray()[self.itemPosition()].contextData.body = {
+							text: {
+								default: ko.observable("")
+							},
+							videoUrl : ko.observable(""),
+							videoDescription : ko.observable("")
+						};
+					}
 					if (editMode == "editText") {
 						self.collectionItemsArray()[self.itemPosition()].contextData.body.text.default(self.itemText());
 					} else if (editMode == "editVideo") {
@@ -474,6 +493,7 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 				"contextDataType": "ExhibitionData",
 				"target": {
 					"collectionId": colId,
+					"recordId": dbId,
 					"position": position
 				},
 				"body" : {

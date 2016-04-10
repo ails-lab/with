@@ -544,7 +544,7 @@ public class CollectionObjectDAO extends WithResourceDAO<CollectionObject> {
 				.equal(collectionId);
 		UpdateOperations<CollectionObject> updateOps = this
 				.createUpdateOperations();
-		updateFields("contextData." + position, Json.toJson(contextData),
+		updateFields("collectedResources." + position, Json.toJson(contextData),
 				updateOps);
 		updateOps.set("administrative.lastModified", new Date());
 		this.update(q, updateOps);

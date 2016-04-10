@@ -162,7 +162,7 @@ public class RecordResourceController extends WithResourceController {
 
 	public static Result editContextData() throws Exception {
 		ObjectNode error = Json.newObject();
-		JsonNode json = request().body().asJson();
+		ObjectNode json = (ObjectNode) request().body().asJson();
 		if (json == null) {
 			error.put("error", "Invalid JSON");
 			return badRequest(error);
@@ -175,10 +175,10 @@ public class RecordResourceController extends WithResourceController {
 						& (dataType = ContextDataType.valueOf(contextDataType)) != null) {
 					Class clazz;
 					try {
+						int position = ((ObjectNode) json.get("target")).remove("position").asInt();
 						if (dataType.equals(ContextDataType.ExhibitionData)) {
 							clazz = Class.forName("model.annotations."
 									+ contextDataType);
-							int position = json.get("position").asInt();
 							ContextData newContextData = (ContextData) Json
 									.fromJson(json, clazz);
 							ObjectId collectionId = newContextData.getTarget()

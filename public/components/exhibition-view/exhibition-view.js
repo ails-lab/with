@@ -112,6 +112,7 @@ define(['knockout', 'text!./_exhibition-view.html', 'app', 'magnific-popup', 'sl
 				var record = new Record(result);
 				record.annotation = '';
 				if (result.contextData != null && result.contextData.body != null) {
+					console.log(result);
 					record.annotation = result.contextData.body.text.default;
 					record.videoUrl = result.contextData.body.videoUrl;
 //					for (var j in result.contextData) {
