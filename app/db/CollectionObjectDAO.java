@@ -148,8 +148,9 @@ public class CollectionObjectDAO extends WithResourceDAO<CollectionObject> {
 				.limit(count);
 		Criteria[] criteria = new Criteria[effectiveIds.size()];
 		for (int i = 0; i < effectiveIds.size(); i++) {
-			criteria[i] = formAccessLevelQuery(new Tuple(effectiveIds.get(i),
-					Access.READ), QueryOperator.EQ);
+			criteria[i] = formAccessLevelQuery(
+					new Tuple(effectiveIds.get(i), Access.READ),
+					QueryOperator.EQ);
 		}
 		q.or(criteria);
 		return this.find(q).asList();
@@ -166,8 +167,8 @@ public class CollectionObjectDAO extends WithResourceDAO<CollectionObject> {
 			hits.y = (int) this.find(q2).countAll();
 		} else {
 			CollectionType collectionTypeValue = collectionType.get();
-			q.field("administrative.collectionType").equal(
-					collectionTypeValue.toString());
+			q.field("administrative.collectionType")
+					.equal(collectionTypeValue.toString());
 			if (collectionTypeValue.equals(CollectionType.Exhibition))
 				hits.y = (int) this.find(q).countAll();
 			else
@@ -185,14 +186,15 @@ public class CollectionObjectDAO extends WithResourceDAO<CollectionObject> {
 			result = this.find(q);
 			collections = result.asList();
 			Query<CollectionObject> q2 = q.cloneQuery().disableValidation();
-			q2.field("administrative.collectionType").equal(
-					CollectionType.Exhibition);
+			q2.field("administrative.collectionType")
+					.equal(CollectionType.Exhibition);
 			q.disableValidation().field("administrative.collectionType")
 					.equal(CollectionType.SimpleCollection);
 			hits.x = (int) this.find(q).countAll();
 			hits.y = (int) this.find(q2).countAll();
 		} else {
-			CollectionType collectionType = isExhibition ? CollectionType.Exhibition
+			CollectionType collectionType = isExhibition
+					? CollectionType.Exhibition
 					: CollectionType.SimpleCollection;
 			q.disableValidation().field("administrative.collectionType")
 					.equal(collectionType);
@@ -219,14 +221,15 @@ public class CollectionObjectDAO extends WithResourceDAO<CollectionObject> {
 		Tuple<Integer, Integer> hits = new Tuple<Integer, Integer>(0, 0);
 		if (isExhibition == null) {
 			Query<CollectionObject> q2 = q.cloneQuery();
-			q2.field("administrative.collectionType").equal(
-					CollectionType.Exhibition);
-			q.field("administrative.collectionType").equal(
-					CollectionType.SimpleCollection);
+			q2.field("administrative.collectionType")
+					.equal(CollectionType.Exhibition);
+			q.field("administrative.collectionType")
+					.equal(CollectionType.SimpleCollection);
 			hits.x = (int) this.find(q).countAll();
 			hits.y = (int) this.find(q2).countAll();
 		} else {
-			CollectionType collectionType = isExhibition ? CollectionType.Exhibition
+			CollectionType collectionType = isExhibition
+					? CollectionType.Exhibition
 					: CollectionType.SimpleCollection;
 			q.field("administrative.collectionType").equal(collectionType);
 			if (isExhibition)
@@ -278,9 +281,9 @@ public class CollectionObjectDAO extends WithResourceDAO<CollectionObject> {
 			List<List<Tuple<ObjectId, Access>>> accessedByUserOrGroup,
 			ObjectId creator, Boolean isExhibition, boolean totalHits,
 			int offset, int count) {
-		List<Criteria> criteria = new ArrayList<Criteria>(Arrays.asList(this
-				.createQuery().criteria("administrative.access.isPublic")
-				.equal(true)));
+		List<Criteria> criteria = new ArrayList<Criteria>(Arrays.asList(
+				this.createQuery().criteria("administrative.access.isPublic")
+						.equal(true)));
 		return getByAcl(criteria, accessedByUserOrGroup, creator, isExhibition,
 				totalHits, offset, count);
 	}
@@ -289,9 +292,9 @@ public class CollectionObjectDAO extends WithResourceDAO<CollectionObject> {
 			List<List<Tuple<ObjectId, Access>>> accessedByUserOrGroup,
 			ObjectId creator, Boolean isExhibition, boolean totalHits,
 			int offset, int count) {
-		List<Criteria> criteria = new ArrayList<Criteria>(Arrays.asList(this
-				.createQuery().criteria("administrative.withCreator")
-				.notEqual(creator)));
+		List<Criteria> criteria = new ArrayList<Criteria>(Arrays.asList(
+				this.createQuery().criteria("administrative.withCreator")
+						.notEqual(creator)));
 		return getByAcl(criteria, accessedByUserOrGroup, creator, isExhibition,
 				totalHits, offset, count);
 	}
@@ -324,7 +327,8 @@ public class CollectionObjectDAO extends WithResourceDAO<CollectionObject> {
 			return getCollectionsWithCount(q, isExhibition);
 		} else {
 			if (isExhibition != null) {
-				CollectionType collectionType = isExhibition ? CollectionType.Exhibition
+				CollectionType collectionType = isExhibition
+						? CollectionType.Exhibition
 						: CollectionType.SimpleCollection;
 				q.field("administrative.collectionType").equal(collectionType);
 			}
@@ -333,7 +337,8 @@ public class CollectionObjectDAO extends WithResourceDAO<CollectionObject> {
 		}
 	}
 
-	public ObjectNode countMyAndSharedCollections(List<ObjectId> loggedInEffIds) {
+	public ObjectNode countMyAndSharedCollections(
+			List<ObjectId> loggedInEffIds) {
 		ObjectNode result = Json.newObject().objectNode();
 		Query<CollectionObject> qMy = this.createQuery().disableValidation()
 				.field("descriptiveData.label.default.0")
@@ -344,12 +349,12 @@ public class CollectionObjectDAO extends WithResourceDAO<CollectionObject> {
 		ObjectNode result1 = countPerCollectionType(qMy);
 		result.put("my", result1);
 		// count collections-exhibitions shared with me
-		Query<CollectionObject> qShared = this.createQuery()
-				.disableValidation().field("administrative.withCreator")
+		Query<CollectionObject> qShared = this.createQuery().disableValidation()
+				.field("administrative.withCreator")
 				.notEqual(loggedInEffIds.get(0));
 		List<Criteria> criteria = new ArrayList<Criteria>(
-				Arrays.asList(loggedInUserWithAtLeastAccessQuery(
-						loggedInEffIds, Access.READ)));
+				Arrays.asList(loggedInUserWithAtLeastAccessQuery(loggedInEffIds,
+						Access.READ)));
 		qShared.and(criteria.toArray(new Criteria[criteria.size()]));
 		ObjectNode result2 = countPerCollectionType(qShared);
 		result.put("sharedWithMe", result2);
@@ -368,7 +373,8 @@ public class CollectionObjectDAO extends WithResourceDAO<CollectionObject> {
 	}
 
 	public List<CollectionObject> getAtLeastCollections(
-			List<ObjectId> loggeInEffIds, Access access, int offset, int count) {
+			List<ObjectId> loggeInEffIds, Access access, int offset,
+			int count) {
 		CriteriaContainer criteria = loggedInUserWithAtLeastAccessQuery(
 				loggeInEffIds, access);
 		Query<CollectionObject> q = this.createQuery().offset(offset)
@@ -499,8 +505,8 @@ public class CollectionObjectDAO extends WithResourceDAO<CollectionObject> {
 			if (media.containsKey(MediaVersion.Original)
 					&& !media.containsKey(MediaVersion.Thumbnail)) {
 				String originalUrl = media.get(MediaVersion.Original).getUrl();
-				MediaObject original = MediaController.downloadMedia(
-						originalUrl, MediaVersion.Original);
+				MediaObject original = MediaController
+						.downloadMedia(originalUrl, MediaVersion.Original);
 				thumbnail = new EmbeddedMediaObject(
 						MediaController.makeThumbnail(original));
 			} else {
@@ -520,9 +526,8 @@ public class CollectionObjectDAO extends WithResourceDAO<CollectionObject> {
 						.disableValidation();
 				Query<CollectionObject> cq = DB.getCollectionObjectDAO()
 						.createQuery().field("_id").equal(collectionId);
-				collectionUpdate.set("media",
-						collectionMedia.size() < 5 ? collectionMedia
-								: collectionMedia.subList(0, 5));
+				collectionUpdate.set("media", collectionMedia.size() < 5
+						? collectionMedia : collectionMedia.subList(0, 5));
 				this.update(cq, collectionUpdate);
 			}
 		}
@@ -534,8 +539,8 @@ public class CollectionObjectDAO extends WithResourceDAO<CollectionObject> {
 
 		ObjectId collectionId = contextData.getTarget().getCollectionId();
 		ObjectId recordId = contextData.getTarget().getRecordId();
-		List<ContextData<ContextDataBody>> collectedResources = this.getById(
-				collectionId, Arrays.asList("collectedResources"))
+		List<ContextData<ContextDataBody>> collectedResources = this
+				.getById(collectionId, Arrays.asList("collectedResources"))
 				.getCollectedResources();
 		if (!collectedResources.get(position).getTarget().getRecordId()
 				.equals(recordId))
@@ -544,7 +549,9 @@ public class CollectionObjectDAO extends WithResourceDAO<CollectionObject> {
 				.equal(collectionId);
 		UpdateOperations<CollectionObject> updateOps = this
 				.createUpdateOperations();
-		updateFields("collectedResources." + position, Json.toJson(contextData),
+		ObjectNode contextDataJson = ((ObjectNode) Json.toJson(contextData))
+				.put("className", contextData.getClass().getName());
+		updateFields("collectedResources." + position, contextDataJson,
 				updateOps);
 		updateOps.set("administrative.lastModified", new Date());
 		this.update(q, updateOps);
