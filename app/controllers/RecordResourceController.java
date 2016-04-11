@@ -17,11 +17,8 @@
 package controllers;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 import javax.validation.ConstraintViolation;
@@ -32,7 +29,6 @@ import model.basicDataTypes.WithAccess.Access;
 import model.resources.CollectionObject;
 import model.resources.RecordResource;
 import model.resources.WithResource;
-import model.resources.WithResource.WithResourceType;
 
 import org.bson.types.ObjectId;
 
@@ -46,8 +42,6 @@ import utils.AccessManager;
 import utils.AccessManager.Action;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ObjectReader;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
@@ -57,6 +51,7 @@ import db.DB;
  * @author mariaral
  *
  */
+@SuppressWarnings({ "rawtypes", "unchecked" })
 public class RecordResourceController extends WithResourceController {
 
 	public static final ALogger log = Logger.of(RecordResourceController.class);
@@ -83,7 +78,7 @@ public class RecordResourceController extends WithResourceController {
 			else {
 				// filter out all context annotations refering to collections to
 				// which the user has no read access rights
-				filterContextData(record);
+				//filterContextData(record);
 				if (format.isDefined()) {
 					if (format.equals("contentOnly")) {
 						return ok(Json.toJson(record.getContent()));
@@ -110,7 +105,7 @@ public class RecordResourceController extends WithResourceController {
 			return internalServerError(result);
 		}
 	}
-
+/*
 	public static void filterContextData(WithResource record) {
 		List<ContextData> contextAnns = record.getContextData();
 		List<ContextData> filteredContextAnns = new ArrayList<ContextData>();
@@ -127,8 +122,7 @@ public class RecordResourceController extends WithResourceController {
 				filteredContextAnns.add(contextAnn);
 		}
 		record.setContextData(filteredContextAnns);
-	}
-
+	}*/
 
 	/**
 	 * Edits the WITH resource according to the JSON body. For every field
@@ -139,7 +133,8 @@ public class RecordResourceController extends WithResourceController {
 	 * @return the edited resource
 	 */
 	// TODO check restrictions (unique fields e.t.c)
-	//TODO: edit contextData separately ONLY for collections for which the user has access
+	// TODO: edit contextData separately ONLY for collections for which the user
+	// has access
 	public static Result editRecordResource(String id) {
 		ObjectNode error = Json.newObject();
 		ObjectId recordDbId = new ObjectId(id);
@@ -154,7 +149,7 @@ public class RecordResourceController extends WithResourceController {
 				if (!response.toString().equals(ok().toString()))
 					return response;
 				else {
-					//TODO Check the JSON
+					// TODO Check the JSON
 					DB.getRecordResourceDAO().editRecord("", recordDbId, json);
 					return ok("Record edited.");
 				}
@@ -164,10 +159,10 @@ public class RecordResourceController extends WithResourceController {
 			return internalServerError(error);
 		}
 	}
-	
-	public static Result editContextData() {
+
+	public static Result editContextData() throws Exception {
 		ObjectNode error = Json.newObject();
-		JsonNode json = request().body().asJson();
+		ObjectNode json = (ObjectNode) request().body().asJson();
 		if (json == null) {
 			error.put("error", "Invalid JSON");
 			return badRequest(error);
@@ -175,36 +170,46 @@ public class RecordResourceController extends WithResourceController {
 			String contextDataType = null;
 			if (json.has("contextDataType")) {
 				contextDataType = json.get("contextDataType").asText();
-				if (contextDataType != null & ContextDataType.valueOf(contextDataType) != null) {
+				ContextDataType dataType;
+				if (contextDataType != null
+						& (dataType = ContextDataType.valueOf(contextDataType)) != null) {
 					Class clazz;
 					try {
-						clazz = Class.forName("model.annotations."
-								+ contextDataType);
-						ContextData newContextData = (ContextData) Json.fromJson(json, clazz);
-						ObjectId colId = newContextData.getTarget().getCollectionId();
-						int position = newContextData.getTarget().getPosition();
-						if (colId != null && DB.getCollectionObjectDAO().existsEntity(colId)) {
-						//filterContextData(record);
-							Result response = errorIfNoAccessToCollection(Action.EDIT,
-								colId);
-							if (!response.toString().equals(ok().toString()))
-								return response;
-							else {
-								DB.getRecordResourceDAO().updateContextData(newContextData);
-								return ok("Edited context data.");
+						int position = ((ObjectNode) json.get("target")).remove("position").asInt();
+						if (dataType.equals(ContextDataType.ExhibitionData)) {
+							clazz = Class.forName("model.annotations."
+									+ contextDataType);
+							ContextData newContextData = (ContextData) Json
+									.fromJson(json, clazz);
+							ObjectId collectionId = newContextData.getTarget()
+									.getCollectionId();
+							// int position =
+							// newContextData.getTarget().getPosition();
+							if (collectionId != null
+									&& DB.getCollectionObjectDAO()
+											.existsEntity(collectionId)) {
+								// filterContextData(record);
+								Result response = errorIfNoAccessToCollection(
+										Action.EDIT, collectionId);
+								if (!response.toString()
+										.equals(ok().toString()))
+									return response;
+								else {
+									DB.getCollectionObjectDAO()
+											.updateContextData(newContextData,
+													position);
+
+								}
 							}
 						}
-						else
-							return badRequest("Collection with id " + colId + " does not exist.");
+						return ok("Edited context data.");
 					} catch (ClassNotFoundException e) {
 						e.printStackTrace();
 						return internalServerError(error);
-					}			
-				}
-				else 
+					}
+				} else
 					return badRequest("Context data type should be one of supported types: ExhibitionData.");
-			}
-			else 
+			} else
 				return badRequest("The contextDataType should be defined.");
 		}
 	}

@@ -16,9 +16,6 @@
 
 package model.annotations;
 
-import org.mongodb.morphia.annotations.Embedded;
-import org.mongodb.morphia.annotations.Entity;
-
 import model.basicDataTypes.Literal;
 import model.annotations.ContextData.ContextDataBody;
 
@@ -26,7 +23,7 @@ public class ExhibitionData extends ContextData<ExhibitionData.ExhibitionAnnotat
 
 	public ExhibitionData() {
 		super();
-		this.target = new ContextDataTarget();
+		this.setTarget(new ContextDataTarget());
 		this.body = new ExhibitionAnnotationBody();
 		this.contextDataType = ContextDataType.valueOf(this.getClass().getSimpleName());
 	}
