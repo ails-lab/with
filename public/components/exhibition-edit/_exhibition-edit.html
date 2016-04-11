@@ -79,11 +79,11 @@
 				                          <!-- /ko -->
 				                          <!-- ko else -->
 				                          <div>Invalid video url:</div>
-				                          <span style="color:red" data-bind="text: contextData()[0].body.videoUrl"></span>
+				                          <span style="color:red" data-bind="text: contextData.body.videoUrl"></span>
 				                          <!-- /ko -->
 				                        </div>
 				                        <!--  ko if: containsVideoDescription -->
-				                        <div class="imginfo"><span class="mediatitle" data-bind="text: contextData()[0].body.videoDescription"></span></div>
+				                        <div class="imginfo"><span class="mediatitle" data-bind="text: contextData.body.videoDescription"></span></div>
 				                        <!-- /ko -->
 				                        <ul class="action">
 				                          <li><a href="#" data-toggle="tooltip" data-placement="top" title="Edit video" data-bind="click: $parent.prepareForItemEdit"><i class="fa fa-pencil videobox"></i></a></li>
