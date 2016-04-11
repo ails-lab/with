@@ -157,55 +157,49 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 				//TODO: support multilinguality, have to be observable arrays of type [{lang: default, values: []}, ...]
 		        var record = options.data;
 		        var newRecord =  ko.mapping.fromJS(record, {});
-		        newRecord.containsAudio = ko.pureComputed(function() {
-		        	if (newRecord.contextData.body == undefined 
-		        		|| newRecord.contextData.body.audioUrl == undefined)
-		        		return false;
-		        	else
-		        		return (newRecord.contextData.body.audioUrl() !== '');
+				console.log(newRecord.contextData.body);
+				if (typeof newRecord.contextData.body.audioUrl === 'undefined') {
+					body = ko.mapping.fromJS({
+							"audioUrl": "",
+							"text": {"default": ""},
+							"videoUrl": "",
+							"videoDescription": ""
+						}, {});
+					newRecord.contextData.body = body;
+				}
+				 newRecord.containsAudio = ko.pureComputed(function() {
+			        	if (newRecord.contextData.body == undefined 
+			        		|| newRecord.contextData.body.audioUrl == undefined)
+			        		return false;
+			        	else
+			        		return (newRecord.contextData.body.audioUrl() !== '');
 
-				});
-				newRecord.containsVideo = ko.pureComputed(function () {
-					if (newRecord.contextData.body.videoUrl == undefined) {
-						return false;
-					} else {
-						return (newRecord.contextData.body.videoUrl() !== '');
-					}
-					return result;
-				});
-				newRecord.containsVideoDescription = ko.pureComputed(function () {
-					if (newRecord.contextData.body.videoDescription == undefined) {
-						return false;
-					} else {
-						return (newRecord.contextData.body.videoDescription() !== '');
-					}
-					return result;
-				});
-				newRecord.containsText = ko.pureComputed(function () {
-					if (newRecord.contextData.body == undefined 
-						|| newRecord.contextData.body.text == undefined 
-						|| newRecord.contextData.body.text.default == undefined) {
-						return false;
-					} else {
-						return newRecord.contextData.body.text.default() !== '';
-					}
-				});
-//				if (newRecord.contextData == undefined) {
-//					contextData = ko.mapping.fromJS([{
-//						"contextDataType": "ExhibitionData",
-//						"target": {
-//							"position": -1,
-//							"collectionId": newRecord.dbId()
-//						},
-//						"body" : {
-//							"audioUrl": "",
-//							"text": {"default": ""},
-//							"videoUrl": "",
-//							"videoDescription": ""
-//						}
-//					}], {});
-//					newRecord.contextData = contextData;
-//				}
+					});
+					newRecord.containsVideo = ko.pureComputed(function () {
+						if (newRecord.contextData.body.videoUrl == undefined) {
+							return false;
+						} else {
+							return (newRecord.contextData.body.videoUrl() !== '');
+						}
+						return result;
+					});
+					newRecord.containsVideoDescription = ko.pureComputed(function () {
+						if (newRecord.contextData.body.videoDescription == undefined) {
+							return false;
+						} else {
+							return (newRecord.contextData.body.videoDescription() !== '');
+						}
+						return result;
+					});
+					newRecord.containsText = ko.pureComputed(function () {
+						if (newRecord.contextData.body == undefined 
+							|| newRecord.contextData.body.text == undefined 
+							|| newRecord.contextData.body.text.default == undefined) {
+							return false;
+						} else {
+							return newRecord.contextData.body.text.default() !== '';
+						}
+					});
 				newRecord.embeddedVideoUrl = ko.pureComputed(function () {
 					if (newRecord.containsVideo()) {
 						var urlMatch = newRecord.contextData.body.videoUrl().match(/youtube\.com.*(\?v=|\/embed\/)(.{11})/);
@@ -444,7 +438,6 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 				self.itemVideoUrl(exhibitionItem.contextData.body.videoUrl());
 			}
 			if (typeof exhibitionItem.contextData.body.videoDescription !== 'undefined') {
-				console.log(exhibitionItem.contextData.body.videoDescription);
 				self.itemVideoDescription(exhibitionItem.contextData.body.videoDescription());
 			}
 			self.itemId(exhibitionItem.dbId());
@@ -462,6 +455,8 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 				}
 				var promise = self.updateRecord(self.itemId(), self.itemText(), itemEmbeddedVideoUrl, self.itemVideoDescription(), self.dbId(), self.itemPosition());
 				$.when(promise).done(function (data) {
+					console.log(self.itemPosition());
+					console.log(JSON.stringify(self.collectionItemsArray()[self.itemPosition()].contextData.body()));
 					if (typeof self.collectionItemsArray()[self.itemPosition()].contextData.body.text === 'undefined'
 						&& typeof self.collectionItemsArray()[self.itemPosition()].contextData.body.videoUrl === 'undefined') {
 						self.collectionItemsArray()[self.itemPosition()].contextData.body = {
@@ -472,6 +467,8 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 							videoDescription : ko.observable("")
 						};
 					}
+					console.log(editMode);
+					console.log(self.itemText());
 					if (editMode == "editText") {
 						self.collectionItemsArray()[self.itemPosition()].contextData.body.text.default(self.itemText());
 					} else if (editMode == "editVideo") {
