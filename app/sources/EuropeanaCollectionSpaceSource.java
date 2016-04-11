@@ -26,65 +26,69 @@ import sources.core.CommonQuery;
 import sources.core.HttpConnector;
 import sources.core.SourceResponse;
 import sources.core.Utils.Pair;
+import sources.utils.FunctionsUtils;
 
-public class EuropeanaCollectionSpaceSource extends EuropeanaSpaceSource{
+public class EuropeanaCollectionSpaceSource extends EuropeanaSpaceSource {
 
 	private String collectionName;
 	private String nextCursor;
-	
+
 	public EuropeanaCollectionSpaceSource(String collectionName) {
 		super();
 		setUsingCursor(true);
 		addDefaultWriter("europeana_collectionName", qfwriter("europeana_collectionName"));
 		this.collectionName = collectionName;
 	}
-	
+
 	@Override
 	public HttpConnector getHttpConnector() {
 		return ApacheHttpConnector.getApacheHttpConnector();
 	}
-	
+
 	private Function<List<String>, Pair<String>> qfwriter(String parameter) {
-		Function<String, String> function = (String s) -> {
-			return "\"" + s + "\"";
-		};
-		return new Function<List<String>, Pair<String>>() {
-			@Override
-			public Pair<String> apply(List<String> t) {
-				return new Pair<String>("qf", parameter + ":" + function.apply(t.get(0)));
-			}
-		};
+//		Function<String, String> function = (String s) -> {
+//			return "\"" + s + "\"";
+//		};
+//		return new Function<List<String>, Pair<String>>() {
+//			@Override
+//			public Pair<String> apply(List<String> t) {
+//				return new Pair<String>("qf", parameter + ":" + function.apply(t.get(0)));
+//			}
+//		};
+		return FunctionsUtils.toORList("qf", 
+				(s)-> parameter + ":" + FunctionsUtils.quote().apply(s)
+				);
 	}
-	
+
 	@Override
 	public SourceResponse getResults(CommonQuery q) {
-		q.filters = Arrays.asList(new CommonFilter("europeana_collectionName",getCollectionName()));
+		q.filters = Arrays.asList(new CommonFilter("europeana_collectionName", getCollectionName()));
 		return super.getResults(q);
 	}
-	
-//	public SourceResponse getMyResults(CommonQuery q) {
-//		SourceResponse res = new SourceResponse();
-//		res.source = getSourceName();
-//		String httpQuery = getHttpQuery(q);
-//		res.query = httpQuery;
-//		JsonNode response;
-//		if (checkFilters(q)) {
-//			try {
-//				response = getHttpConnector().getURLContent(httpQuery);
-//				res.totalCount = Utils.readIntAttr(response, "totalResults", true);
-//				res.count = Utils.readIntAttr(response, "itemsCount", true);
-//				res.items.setCulturalCHO(getItems(response));
-//				nextCursor = Utils.readAttr(response, "nextCursor", true);
-//				// res.facets = response.path("facets");
-//				res.filtersLogic = createFilters(response);
-//
-//			} catch (Exception e) {
-//				// TODO Auto-generated catch block
-//				 e.printStackTrace();
-//			}
-//		}
-//		return res;
-//	}
+
+	// public SourceResponse getMyResults(CommonQuery q) {
+	// SourceResponse res = new SourceResponse();
+	// res.source = getSourceName();
+	// String httpQuery = getHttpQuery(q);
+	// res.query = httpQuery;
+	// JsonNode response;
+	// if (checkFilters(q)) {
+	// try {
+	// response = getHttpConnector().getURLContent(httpQuery);
+	// res.totalCount = Utils.readIntAttr(response, "totalResults", true);
+	// res.count = Utils.readIntAttr(response, "itemsCount", true);
+	// res.items.setCulturalCHO(getItems(response));
+	// nextCursor = Utils.readAttr(response, "nextCursor", true);
+	// // res.facets = response.path("facets");
+	// res.filtersLogic = createFilters(response);
+	//
+	// } catch (Exception e) {
+	// // TODO Auto-generated catch block
+	// e.printStackTrace();
+	// }
+	// }
+	// return res;
+	// }
 
 	public String getCollectionName() {
 		return collectionName;
@@ -93,7 +97,5 @@ public class EuropeanaCollectionSpaceSource extends EuropeanaSpaceSource{
 	public void setCollectionName(String collectionName) {
 		this.collectionName = collectionName;
 	}
-	
-	
 
 }

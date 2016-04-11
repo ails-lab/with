@@ -51,6 +51,7 @@ import sources.core.Utils;
 import sources.core.Utils.Pair;
 import sources.formatreaders.EuropeanaItemRecordFormatter;
 import sources.formatreaders.EuropeanaRecordFormatter;
+import sources.utils.FunctionsUtils;
 import utils.ListUtils;
 
 public class EuropeanaSpaceSource extends ISpaceSource {
@@ -117,15 +118,18 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 		if (parameter.equals(CommonFilters.YEAR.name())) {
 			return qfwriterYEAR();
 		}
-		Function<String, String> function = (String s) -> {
-			return "\"" + s+ "\"";
-		};
-		return new Function<List<String>, Pair<String>>() {
-			@Override
-			public Pair<String> apply(List<String> t) {
-				return new Pair<String>("qf", parameter + ":" + Utils.getORList(ListUtils.transform(t, function)));
-			}
-		};
+//		Function<String, String> function = (String s) -> {
+//			return "\"" + s+ "\"";
+//		};
+//		return new Function<List<String>, Pair<String>>() {
+//			@Override
+//			public Pair<String> apply(List<String> t) {
+//				return new Pair<String>("qf", parameter + ":" + Utils.getORList(ListUtils.transform(t, function)));
+//			}
+//		};
+		return FunctionsUtils.toORList("qf", 
+				(s)-> parameter + ":" + FunctionsUtils.quote().apply(s)
+				);
 	}
 
 	private Function<List<String>, Pair<String>> qfwriterYEAR() {
@@ -213,6 +217,8 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 				break;
 			}
 		}
+		if (q.hasMedia)
+			builder.addSearchParam("media", "true");
 		builder.addSearchParam("facet", facets);
 		builder.setTail(q.tail);
 		return addfilters(q, builder).getHttp();
@@ -347,7 +353,7 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
-				// e.printStackTrace();
+				e.printStackTrace();
 			}
 		}
 		return res;

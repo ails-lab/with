@@ -24,6 +24,7 @@ public class ExhibitionCollection {
 
 	private String intro;
 	private HashMap<MediaVersion, EmbeddedMediaObject> backgroundImg;
+	private String credits;
 
 	public ExhibitionCollection(String intro) {
 		setIntro(intro);
@@ -43,5 +44,13 @@ public class ExhibitionCollection {
 
 	public void setBackgroundImg(HashMap<MediaVersion, EmbeddedMediaObject> backgroundImg) {
 		this.backgroundImg = backgroundImg;
+	}
+
+	public String getCredits() {
+		return credits;
+	}
+
+	public void setCredits(String credits) {
+		this.credits = credits;
 	}
 }
