@@ -65,9 +65,12 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 			if(self.source() && self.source()=="Europeana"){
 				console.log("about property value:"+$("span.pnd-resource").attr('about'));
 				console.log("setting about property to:"+self.view_url());
+
 				$("span.pnd-resource").attr('about',self.view_url());
+				$("div.pnd-resource").attr('about',self.view_url());
 				dispatchDocumentEvent('Pundit.loadAnnotations');
 				dispatchDocumentEvent('Pundit.forceCompileButton');
+				
 				
 			}
 			self.creator=data.creator;
