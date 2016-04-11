@@ -369,7 +369,16 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 		else
 			recordUpdate.dec("usage.collected");
 		this.update(q, recordUpdate);
+		removeRecordIfNotCollected(recordId);
 		updateRecordRightsUponRemovalFromCollection(recordId, collectionId);
+	}
+
+	private void removeRecordIfNotCollected(ObjectId recordId) {
+		RecordResource record = this.getById(recordId);
+		if (record.getCollectedIn() == null
+				|| record.getCollectedIn().size() == 0) {
+			this.makeTransient(record);
+		}
 	}
 
 	public RecordResource getByCollectionAndPosition(ObjectId collectionId,
