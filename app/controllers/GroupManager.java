@@ -187,7 +187,7 @@ public class GroupManager extends Controller {
 					"Only an admin of the group has the right to edit the group.");
 			return forbidden(result);
 		}
-		if (json.has("username") && json.get("username") != null
+		if (json.has("username") && (json.get("username") != null)
 				&& !group.getUsername().equals(json.get("username").asText())) {
 			if (!uniqueGroupName(json.get("username").asText())) {
 				result.put("error",
@@ -200,16 +200,16 @@ public class GroupManager extends Controller {
 		return ok(Json.toJson(DB.getUserGroupDAO().get(groupDbId)));
 	}
 
-	
-	
+
+
 	private static void updatePage(ObjectId groupId, JsonNode json) {
 		UserGroup group = DB.getUserGroupDAO().get(groupId);
-		if (!json.has("page") || !(group instanceof Organization)
-				&& !(group instanceof Project))
+		if (!json.has("page") || (!(group instanceof Organization)
+				&& !(group instanceof Project)))
 			return;
 		Page newPage = Json.fromJson(json.get("page"), Page.class);
-		if (newPage.getAddress() == null && newPage.getCity() == null
-				&& newPage.getCountry() == null)
+		if ((newPage.getAddress() == null) && (newPage.getCity() == null)
+				&& (newPage.getCountry() == null))
 			return;
 		Page oldPage = null;
 		// Keep previous page fields
@@ -360,7 +360,15 @@ public class GroupManager extends Controller {
 				g.put("totalCollections", hits.x);
 				g.put("totalExhibitions", hits.y);
 			}
-			result.add(g);
+			boolean add = true;
+			for(int i=0; i<result.size(); i++) {
+				if(group.getDbId().toString().equals(result.get(i).get("dbId").asText())) {
+					add=false;
+					break;
+				}
+			}
+			if(add)
+				result.add(g);
 		}
 		return result;
 	}

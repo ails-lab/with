@@ -287,6 +287,7 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 				return 'img/ui/upload-placeholder.png';
 			}
 		});
+		self.newBackgroundImg = ko.observable(false);
 		var collections = [];
 		var promise = app.getAllUserCollections();
 		self.myCollections = ko.mapping.fromJS([]); //holds all the collections
@@ -484,6 +485,7 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 			self.itemVideoUrl("");
 			self.itemVideoDescription("");
 			self.itemId("");
+			self.newBackgroundImg(false);
 			//$('textarea').hide();
 			//$('.add').show();
 			$('.action').removeClass('active');
@@ -557,8 +559,9 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 			});
 		}
 		
-		self.uploadBackgroundImg = function() {
-			
+		self.saveExhBackrImg = function() {
+			if (self.newBackgroundImg()) 
+				updateExhibitionProperty(self, "backgroundImg", self.backgroundImg());
 		}
 		
 		self.bindFileUpload = function() {
@@ -571,7 +574,8 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 				url: '/media/create',
 				success: function (data, textStatus, jqXHR) {
 					self.backgroundImg(data.original);
-					console.log(self.displayCoverImage());
+					self.newBackgroundImg(true);
+					//console.log(self.displayCoverImage());
 				},
 				error: function (e, data) {
 					console.log(e);
