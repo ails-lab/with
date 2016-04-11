@@ -35,7 +35,7 @@
                   <!-- metadata-->
                   <span data-bind="visible: record().source()=='Europeana'">
                   <span 
-					data-bind="attr{'about': record().view_url}" class="pnd-resource" onclick="dispatchDocumentEvent('Pundit.showBootstrap')">
+					 class="pnd-resource" onclick="dispatchDocumentEvent('Pundit.showBootstrap')">
 					</span>
 					</span>
 				
@@ -148,7 +148,7 @@
                   <!-- ul-->
                   <ul>
                    
-                    <li><a data-bind="attr: { href:record().view_url}" target="_blank" class="btn btn-alt">VISIT ITEM SITE</a></li>
+                    <li><a data-bind="attr: { href:record().view_url()}" target="_blank" class="btn btn-alt">VISIT ITEM SITE</a></li>
                   </ul>
                 </div>
               </div>

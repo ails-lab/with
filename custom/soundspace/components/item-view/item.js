@@ -7,7 +7,7 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 		self.description="";
 		self.thumb = "";
 		self.fullres=ko.observable('');
-		self.view_url="";
+		self.view_url=ko.observable('');
 		self.source=ko.observable("");
 		self.creator="";
 		self.provider="";
@@ -53,7 +53,7 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 			if(data.title==undefined){
 				self.title="No title";
 			}else{self.title=data.title;}
-			self.view_url=data.view_url;
+			self.view_url(data.view_url);
 			self.thumb=data.thumb;
 			if ( data.fullres && data.fullres.length > 0 ) {
 				self.fullres(data.fullres);
@@ -63,6 +63,9 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 			self.description=data.description;
 			self.source(data.source);
 			if(self.source() && self.source()=="Europeana"){
+				console.log("about property value:"+$("span.pnd-resource").attr('about'));
+				console.log("setting about property to:"+self.view_url());
+				$("span.pnd-resource").attr('about',self.view_url());
 				dispatchDocumentEvent('Pundit.loadAnnotations');
 				dispatchDocumentEvent('Pundit.forceCompileButton');
 				
@@ -317,6 +320,7 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 			data = ko.toJS(e);
 			$('.nav-tabs a[href="#information"]').tab('show');
 			$(".mediathumb > img").attr("src","");
+			$("span.pnd-resource").attr('about','');
 			
 			self.open();
 			self.record(new Record(data
