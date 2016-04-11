@@ -114,9 +114,7 @@ public class CollectionObjectDAO extends WithResourceDAO<CollectionObject> {
 		updateFields("", json, updateOps);
 		updateOps.set("administrative.lastModified", new Date());
 		this.update(q, updateOps);
-
 		/* update collection index and mongo records */
-
 		BiFunction<ObjectId, Map<String, Object>, Boolean> updateCollection = (
 				ObjectId colId, Map<String, Object> doc) -> {
 			return ElasticUpdater.updateOne(Elastic.typeCollection, colId, doc);
@@ -125,16 +123,6 @@ public class CollectionObjectDAO extends WithResourceDAO<CollectionObject> {
 		mapper.setSerializationInclusion(Include.NON_NULL);
 		Map<String, Object> idx_map = mapper.convertValue(json, Map.class);
 		ParallelAPICall.createPromise(updateCollection, dbId, idx_map);
-
-		/*
-		 * if(json.get("administratice.access.isPublic") != null) { String
-		 * isPublic = json.get("administratice.access.isPublic").asText(); if
-		 * (oldIsPublic != newVersion.getIsPublic()) {
-		 * DB.getCollectionRecordDAO(
-		 * ).setSpecificRecordField(newVersion.getDbId(), "rights.isPublic",
-		 * String.valueOf(newVersion.getIsPublic())); }
-		 * //updater.updateVisibility(); }
-		 */
 	}
 
 	public List<CollectionObject> getBySpecificAccess(
