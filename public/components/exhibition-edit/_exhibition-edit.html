@@ -14,7 +14,7 @@
 						<!-- control-->
 						<div class="list-control">
 							<a title="Preview Exhibition" data-placement="top" data-toggle="tooltip" data-bind="attr: {href: 'index.html#exhibitionview/'+dbId()}" class="fa fa-eye"></a>
-							<a id="coverImg" href="#" data-bind="click: bindFileUpload" data-toggle="tooltip" data-placement="top" title="Upload background image" class="fa fa-image exhibition"></a>
+							<!--<a id="coverImg" href="#" data-bind="click: bindFileUpload" data-toggle="tooltip" data-placement="top" title="Upload background image" class="fa fa-image exhibition"></a>-->
 							<div class="toggle">
 								<input type="checkbox" id="toggle2">
 								<label for="toggle2"></label><span class="private">private</span><span class="public">public</span>
@@ -135,10 +135,11 @@
 						</label>
 						<input type="file" id="mediaupload" name="image"/>
 						</div>
-						<!--<img src="img/ui/upload-placeholder.png" class="upload-img">
-						<span style="width:40%;" class="progress"></span>-->
 					</div>
-					<div class="button-group"><a href="#" class="btn-green-o cancel">Cancel</a><a href="#" class="btn-green">Save</a></div>
+					<div class="button-group">
+						<a href="#" class="btn-green-o cancel">Cancel</a>
+						<a href="#" data-bind="click: saveExhBackrImg" class="btn-green">Save</a>
+					</div>
 				</section>
 				<section class="action editsection">
 					<div class="action-header">

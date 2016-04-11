@@ -18,17 +18,18 @@ package model;
 
 import java.util.HashMap;
 
+import org.mongodb.morphia.annotations.Entity;
+
 import model.EmbeddedMediaObject.MediaVersion;
+import model.resources.CollectionObject;
+import model.resources.RecordResource.RecordDescriptiveData;
 
-public class ExhibitionCollection {
-
+@Entity("RecordResource")
+public class ExhibitionCollection extends CollectionObject {
+	
 	private String intro;
 	private HashMap<MediaVersion, EmbeddedMediaObject> backgroundImg;
 	private String credits;
-
-	public ExhibitionCollection(String intro) {
-		setIntro(intro);
-	}
 
 	public String getIntro() {
 		return intro;
