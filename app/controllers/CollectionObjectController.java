@@ -27,6 +27,19 @@ import java.util.Set;
 
 import javax.validation.ConstraintViolation;
 
+import org.bson.types.ObjectId;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.mongodb.BasicDBObject;
+import com.mongodb.MongoClient;
+import com.mongodb.client.FindIterable;
+import com.mongodb.client.MongoDatabase;
+
+import controllers.parameterTypes.MyPlayList;
+import controllers.parameterTypes.StringTuple;
+import db.DB;
 import model.annotations.ContextData;
 import model.annotations.ContextData.ContextDataBody;
 import model.basicDataTypes.Language;
@@ -49,8 +62,6 @@ import model.usersAndGroups.User;
 import model.usersAndGroups.UserGroup;
 import model.usersAndGroups.UserOrGroup;
 
-import org.bson.types.ObjectId;
-
 import play.Logger;
 import play.Logger.ALogger;
 import play.data.validation.Validation;
@@ -72,16 +83,7 @@ import utils.AccessManager.Action;
 import utils.Locks;
 import utils.Tuple;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.mongodb.DBObject;
-
-import controllers.parameterTypes.MyPlayList;
-import controllers.parameterTypes.StringTuple;
-import db.DB;
+import org.bson.Document;
 
 /**
  * @author mariaral
@@ -253,10 +255,38 @@ public class CollectionObjectController extends WithResourceController {
 		return itemsCount;
 	}
 	
-	public static Result updateCollections() {
+	@SuppressWarnings("unchecked")
+	public static Result updateCollections(String host, Integer port, String dbName) {
+		MongoClient mongoClient = null;
 		ObjectNode result = Json.newObject();
-		
-		return ok(result);
+		try {
+		mongoClient = new MongoClient(host, port);
+		MongoDatabase db = mongoClient.getDatabase(dbName);
+		// get all records and store the information in a HashMap
+		FindIterable<Document> collections = db.getCollection("CollectionObject")
+				.find();
+		long collectionCount = db.getCollection("CollectionObject").count();
+		for (Document collection : collections) {
+			//System.out.println(((ArrayList) ((Document) ((Document) collection.get("descriptiveData")).get("label")).get("default")).get(0));
+			ObjectId id = collection.getObjectId("_id");
+			if (((Document) collection.get("administrative")).getString("collectionType") != null) {
+				if (((Document) collection.get("administrative")).getString("collectionType").equals("Exhibition")) {
+				DB.getCollectionObjectDAO().updateField(id, "resourceType", "Exhibition");
+				DB.getCollectionObjectDAO().updateField(id, "className", "model.resources.collection.Exhibition");
+				}
+				else if (((Document) collection.get("administrative")).getString("collectionType").equals("SimpleCollection")) {
+					DB.getCollectionObjectDAO().updateField(id, "resourceType", "SimpleCollection");
+					DB.getCollectionObjectDAO().updateField(id, "className", "model.resources.collection.SimpleCollection");
+				}
+				DB.getCollectionObjectDAO().deleteField(id, "administrative.collectionType");
+			}
+		}
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			mongoClient.close();
+			return ok(result);
+		}
 	}
 
 	public static Result sortCollectionObject(String collectionId) {
