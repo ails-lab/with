@@ -190,6 +190,19 @@ define(['knockout', 'text!./collection.html', 'selectize', 'app', 'knockout-vali
 			self.templateName('collection_new');
 			self.open();
 		};
+		
+		collectInMultiple= function(){
+			if (!isLogged()) {
+				showLoginPopup();
+			} else {
+				var promise=self.findEditableCollections();
+				$.when(promise).done(function(){
+				
+					self.templateName("multiplecollect");
+					self.open();
+				});
+			}
+		}
 
 		collectionShow = function (record) {
 			if(!ko.isObservable(record)){
@@ -341,6 +354,34 @@ define(['knockout', 'text!./collection.html', 'selectize', 'app', 'knockout-vali
 			});
 		};
 
+		
+		self.addMultipleToCollections = function () {
+			/*will contain ids of collection and names for new collections so check each element if it is an id or a title for new collection*/
+			self.selected_items2().forEach(function (item) {
+				/* now find if item is one of collection ids*/
+				if ($.inArray(item, self.collectionlist().map(function (x) {
+						return x.id;
+					})) != -1) {
+					/* add item to collection with this id */
+					self.addRecords(item,true);
+				} else {
+					/*otherwise save this collection and then add the item */	
+					var jsondata = JSON.stringify({
+						administrative: { access: {
+				        isPublic: self.isPublic()},
+				        collectionType: "SimpleCollection"},
+				        descriptiveData : {
+				        	 label : {
+						            default : [item],
+						            en : [item]
+						        }
+				        }});
+					self.saveCollection(jsondata, self.addRecords);
+				}
+			});
+		};
+
+		
 		self.addRecord = function (collid, noDouble) {
 			 var jsondata = JSON.stringify({ 
 				    provenance : [{ provider : self.record().source(), 
@@ -391,6 +432,64 @@ define(['knockout', 'text!./collection.html', 'selectize', 'app', 'knockout-vali
 			});
 		};
 
+		
+		self.addRecords = function (collid,noDouble) {
+			var multipleselect=ko.dataFor(multiplecollect).multipleSelection();
+			var jsonArray=[];
+			for (i=0;i<ko.dataFor(multiplecollect).multipleSelection().length;i++){
+			 var item=ko.dataFor(multiplecollect).multipleSelection()[i];
+			 jsonArray.push({ 
+				 descriptiveData : {
+		        	 label : {
+				            default : [item.title]
+				        }
+		           },
+				    provenance : [{ provider : item.source, 
+						resourceId: item.externalId}]
+						});
+			}
+			var jsondata=JSON.stringify(jsonArray);
+			$.ajax({
+				"beforeSend": function (xhr) {
+					self.ajaxConnections++;
+					 var utc = new Date().valueOf();
+				        xhr.setRequestHeader('X-auth1', utc );
+				        xhr.setRequestHeader('X-auth2', sign( document.location.origin, utc ));
+				},
+				"url": "/collection/" + collid + "/addRecords?noDouble="+noDouble,
+				"method": "post",
+				"contentType": "application/json",
+				"data": jsondata,
+				"success": function (data) {
+					self.ajaxConnections--;
+					if(window.location.hash.indexOf("collectionview/"+collid)!=-1){
+						ko.contextFor(withcollection).$data.loadNext();
+						ko.contextFor(withcollection).$data.reloadEntryCount();
+					} 
+					else if(window.location.hash.indexOf("mycollections")!=-1){
+						var obj = null;
+						ko.contextFor(mycollections).$data.reloadRecord(collid, jsondata);
+					}
+
+					$.smkAlert({text:'Items added!', type:'success'});
+					self.close();
+				},
+				"error": function (result) {
+					self.ajaxConnections--;
+					if (result.responseJSON.error === 'double') {
+						$.smkConfirm({text:'One of the selected records already exists in collection.', accept:'Do you want to add it again?', cancel:'Cancel'}, function(e){if(e){
+							self.addRecords(collid, false);
+						}else{self.close();}});
+					}	
+					else {
+						$.smkAlert({text:'An error occured', type:'danger', time: 10});
+						self.close();
+					}
+					
+				}
+			});
+		};
+		
 		self.reset = function () {
 			self.collname('');
 			self.description('');
@@ -401,6 +500,10 @@ define(['knockout', 'text!./collection.html', 'selectize', 'app', 'knockout-vali
 			self.selected_items2([]);
 			$('textarea').hide();
 			$('.add').show();
+			$('#multiplecollect').removeClass('show');
+			ko.dataFor(multiplecollect).multipleSelection([]);
+			$('.grid').find('input[type=checkbox]:checked').removeAttr('checked');
+			$('div.item').removeClass('selected');
 			$( '.action' ).removeClass( 'active' );
 			$( '.searchresults' ).removeClass( 'openfilter');
 		};

@@ -456,7 +456,7 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 				var promise = self.updateRecord(self.itemId(), self.itemText(), itemEmbeddedVideoUrl, self.itemVideoDescription(), self.dbId(), self.itemPosition());
 				$.when(promise).done(function (data) {
 					console.log(self.itemPosition());
-					console.log(JSON.stringify(self.collectionItemsArray()[self.itemPosition()].contextData.body()));
+					//console.log(JSON.stringify(self.collectionItemsArray()[self.itemPosition()].contextData.body()));
 					if (typeof self.collectionItemsArray()[self.itemPosition()].contextData.body.text === 'undefined'
 						&& typeof self.collectionItemsArray()[self.itemPosition()].contextData.body.videoUrl === 'undefined') {
 						self.collectionItemsArray()[self.itemPosition()].contextData.body = {

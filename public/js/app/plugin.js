@@ -299,6 +299,14 @@ WITHApp.ui = function( custom ){
 				$( '.action.access' ).addClass( 'active' );
 
 			});
+			/*$( '.collectbutton' ).on("click", function( e ) {
+				// e
+				e.preventDefault();
+
+				$( '.action' ).removeClass( 'active' );
+				$( '.action.collect' ).addClass( 'active' );
+
+			});*/
 
 			/*$( '.fa-download' ).on("click", function( e ) {
 
@@ -392,7 +400,7 @@ WITHApp.ui = function( custom ){
 		});
 		
 		// profile
-		$( '.editbox' ).click( function( e ) {
+		$( '.editbox' ).on('click', function(e) {
 			// prevent
 			e.preventDefault();
 			$( '.action' ).removeClass( 'active' );
@@ -400,19 +408,19 @@ WITHApp.ui = function( custom ){
 
 		});
 		
-		$( '.videobox' ).click( function( e ) {
+		$( '.videobox' ).on('click', function(e) {
 			e.preventDefault();
 			$( '.action' ).removeClass( 'active' );
 			$( '.action.editvideo' ).addClass( 'active' );
 		});
 
 		// multiple select
-		$( '#multiplecollect' ).click( function( e ){
+		$( '#multiplecollect' ).on('click', function(e) {
 			// prevent
 			e.preventDefault();
 
 			$( '.action' ).removeClass( 'active' );
-			$( '.action.collectmultiple' ).addClass( 'active' );
+			$( '.action.collect' ).addClass( 'active' );
 		});
 		
 		initTooltip();
