@@ -859,7 +859,7 @@ public class CollectionObjectController extends WithResourceController {
 					if (!response.toString().equals(ok().toString())) {
 						continue;
 					}
-					if (contentFormat.equals("noContent")) {
+					if (contentFormat.equals("noContent") && r.getContent() != null) {
 						r.getContent().clear();
 						recordsList.add(Json.toJson(r));
 						continue;
