@@ -171,6 +171,7 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
 		var $request;
 		self.filterselect=ko.observable(false);
 		self.filterselection=ko.observableArray([]);
+		self.multipleSelection=ko.observableArray([]);
 		self.route = params.route;
 		self.term = ko.observable("");
 		self.sourceview=ko.observable(true);
@@ -262,6 +263,7 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
 			self.mixresults([]);
 			self.results([]);
 			$( '.searchresults' ).removeClass( 'openfilter');
+			$('#multiplecollect').removeClass('show');
 			if ($container.data('isotope')){
 				 $container.isotope( 'remove', $(".media"));}
 			$container.isotope({
@@ -277,13 +279,15 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
 		}
 
 		self._search = function(facetinit,facetrecacl) {
+			
 		 if(facetinit){self.filterselection.removeAll();}
-	   $('#facet_tags').tagsinput({
+	     $('#facet_tags').tagsinput({
 		        allowDuplicates: false,
 		          itemValue: 'id',  // this will be used to set id of tag
 		          itemText: 'label' // this will be used to set text of tag
 		      });
 		 $(".searchinput").devbridgeAutocomplete("hide");
+		 $('#multiplecollect').removeClass('show');
 		 self.currentTerm($(".searchinput").val());
 		 if(self.searching()==false && self.currentTerm()!=""){
 			self.searching(true);
@@ -717,6 +721,31 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
             }, 600);
         }
 
+        
+        multipleSelect= function(data,event){
+        	//event.preventDefault();
+				// save
+				var box = $(event.target);
+
+				// check 
+				if (box.is(':checked')) {
+					
+					// set selected
+				 	box.closest( '.item' ).addClass( 'selected' );
+					addSelection(data,event);
+
+					// show
+					showHideCollectButton();
+				} else {
+					// set selected
+					 box.closest( '.item' ).removeClass( 'selected' );
+					removeSelection(data,event);
+					// show
+					showHideCollectButton();
+				}
+			
+        }
+        
         recordSelect = function (data,event) {
         	
         	event.preventDefault();
@@ -727,6 +756,25 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
 			return false;
 
 		}
+        
+        
+        addSelection = function(data,event){
+        	//event.preventDefault();
+			var selrecord = ko.utils.arrayFirst(self.mixresults(), function(record) {
+				   return record.externalId === data;
+				});
+			self.multipleSelection.push(selrecord);
+			
+        }
+        
+        removeSelection = function(data,event){
+        	//event.preventDefault();
+			var selrecord = ko.utils.arrayFirst(self.mixresults(), function(record) {
+				   return record.externalId === data;
+				});
+			self.multipleSelection.remove(selrecord);
+			
+        }
         
         likeRecord = function (id,event) {
         	event.preventDefault();
@@ -755,27 +803,25 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
 
  
         function getItem(record) {
-        
+        	var tile= '<div class="item media" id="'+record.externalId+'"> <div class="wrap">';
+ 		    
+        	tile+='<a href="#" onclick="recordSelect(\''+record.externalId+'\',event)" class="mediaviewer">'
+        			+'<div class="thumb"><img src="'+record.thumb+'" onError="this.src=\'img/content/thumb-empty.png\'"></div>'
+        			+' <div class="info"><h1 class="title">'+record.displayTitle()+'</h1></div>';
+            tile+='<div class="action-group"><div class="wrap"><a href="' + record.view_url + '" target="_new" class="links">'+ record.sourceCredits() +'</a><ul>';
+            if (isLogged()) {
+          	    if (record.isLiked()) {
+              	  tile+='<li><a data-toggle="tooltip" data-placement="top" title="Add to favorites"  onclick="likeRecord(\'' + record.externalId + '\',event);" class="fa fa-heart" style="color: #ec5a62;"></a></li>'
+                }
+                else{
+                	  tile+='<li><a  data-toggle="tooltip" data-placement="top" title="Add to favorites" onclick="likeRecord(\'' + record.externalId + '\',event);" class="fa fa-heart"></a></li>'
+              	  }
+          	  tile+='<li><a data-toggle="tooltip" data-placement="top" title="Collect it" class="fa fa-download" onclick="collect(\'' + record.externalId + '\',event);" ></a></li>'
+          	  tile+='<li><input type="checkbox" class="selectitem" onclick="multipleSelect(\'' + record.externalId + '\',event);"></li>';
+            }
+        	tile+="</ul></div></div></a></div></div>";
         	
-			 var tile= '<div class="item media" id="'+record.externalId+'"> <div class="wrap">';
-		     tile+='<a href="#" onclick="recordSelect(\''+record.externalId+'\',event)" class="mediaviewer">'
-                      +'<div class="thumb"><img src="'+record.thumb+'" onError="this.src=\'img/content/thumb-empty.png\'"></div>'
-                      +' <div class="info"><h1 class="title">'+record.displayTitle()+'</h1></div>';
-                     
-                     //+'</a>';
-                     tile+='<div class="action-group"><a href="' + record.view_url + '" target="_new" class="links">'+ record.sourceCredits() +'</a>';
-                     if (isLogged()) {
-                  	    if (record.isLiked()) {
-                      	  tile+='<a data-toggle="tooltip" data-placement="top" title="Add to favorites"  onclick="likeRecord(\'' + record.externalId + '\',event);" class="fa fa-heart" style="color: #ec5a62;"></a>'
-                        }
-                        else{
-                        	  tile+='<a  data-toggle="tooltip" data-placement="top" title="Add to favorites" onclick="likeRecord(\'' + record.externalId + '\',event);" class="fa fa-heart"></a>'
-                            
-                      	  }
-                  	  tile+='<a data-toggle="tooltip" data-placement="top" title="Collect it" class="fa fa-download" onclick="collect(\'' + record.externalId + '\',event);" ></a>'
-                        }
-                     
-                     tile+='</div></a></div> </div>';
+			
 			return tile;
 			
 		}
@@ -802,7 +848,18 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
         	return "#" + myid.replace( /(:|\.|\[|\]|,)/g, "\\$1" );
          
         }
+        
+        function showHideCollectButton() {
 
+			// check
+			if( $( '.item.selected').length > 0 ) {
+				$( '#multiplecollect').addClass( 'show' );
+			} else {
+				$( '#multiplecollect').removeClass( 'show' );
+			}
+		}
+        
+     
 
   }
 
