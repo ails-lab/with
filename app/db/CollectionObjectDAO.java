@@ -31,9 +31,9 @@ import model.MediaObject;
 import model.annotations.ContextData;
 import model.annotations.ContextData.ContextDataBody;
 import model.basicDataTypes.WithAccess.Access;
-import model.resources.CollectionObject;
-import model.resources.CollectionObject.CollectionAdmin.CollectionType;
+import model.resources.collection.CollectionObject;
 import model.resources.RecordResource;
+import model.resources.WithResource.WithResourceType;
 
 import org.bson.types.ObjectId;
 import org.mongodb.morphia.query.Criteria;
@@ -128,10 +128,10 @@ public class CollectionObjectDAO extends WithResourceDAO<CollectionObject> {
 	public List<CollectionObject> getBySpecificAccess(
 			List<ObjectId> effectiveIds, Access access, Boolean isExhibition,
 			int offset, int count) {
-		CollectionType collectionType = isExhibition ? CollectionType.Exhibition
-				: CollectionType.SimpleCollection;
+		WithResourceType collectionType = isExhibition ? WithResourceType.Exhibition
+				: WithResourceType.SimpleCollection;
 		Query<CollectionObject> q = this.createQuery()
-				.field("administrative.collectionType").equal(collectionType)
+				.field("resourceType").equal(collectionType)
 				.order("-administrative.lastModified").offset(offset)
 				.limit(count);
 		Criteria[] criteria = new Criteria[effectiveIds.size()];
@@ -145,19 +145,20 @@ public class CollectionObjectDAO extends WithResourceDAO<CollectionObject> {
 	}
 
 	public Tuple<Integer, Integer> getHits(Query<CollectionObject> q,
-			Optional<CollectionType> collectionType) {
+			Optional<WithResourceType> collectionType) {
 		Tuple<Integer, Integer> hits = new Tuple<Integer, Integer>(0, 0);
 		if (!collectionType.isPresent()) {
 			Query<CollectionObject> q2 = q.cloneQuery();
-			q2.field("administrative.collectionType").equal("Exhibition");
-			q.field("administrative.collectionType").equal("SimpleCollection");
+			q2.field("resourceType").equal("Exhibition");
+			q.field("resourceType").equal("SimpleCollection");
 			hits.x = (int) this.find(q).countAll();
 			hits.y = (int) this.find(q2).countAll();
 		} else {
-			CollectionType collectionTypeValue = collectionType.get();
-			q.field("administrative.collectionType")
-					.equal(collectionTypeValue.toString());
-			if (collectionTypeValue.equals(CollectionType.Exhibition))
+
+			WithResourceType collectionTypeValue = collectionType.get();
+			q.field("resourceType").equal(
+					collectionTypeValue.toString());
+			if (collectionTypeValue.equals(WithResourceType.Exhibition))
 				hits.y = (int) this.find(q).countAll();
 			else
 				hits.x = (int) this.find(q).countAll();
@@ -174,17 +175,16 @@ public class CollectionObjectDAO extends WithResourceDAO<CollectionObject> {
 			result = this.find(q);
 			collections = result.asList();
 			Query<CollectionObject> q2 = q.cloneQuery().disableValidation();
-			q2.field("administrative.collectionType")
-					.equal(CollectionType.Exhibition);
-			q.disableValidation().field("administrative.collectionType")
-					.equal(CollectionType.SimpleCollection);
+			q2.field("WithResourceType").equal(
+					WithResourceType.Exhibition);
+			q.disableValidation().field("resourceType")
+					.equal(WithResourceType.SimpleCollection);
 			hits.x = (int) this.find(q).countAll();
 			hits.y = (int) this.find(q2).countAll();
 		} else {
-			CollectionType collectionType = isExhibition
-					? CollectionType.Exhibition
-					: CollectionType.SimpleCollection;
-			q.disableValidation().field("administrative.collectionType")
+			WithResourceType collectionType = isExhibition ? WithResourceType.Exhibition
+					: WithResourceType.SimpleCollection;
+			q.disableValidation().field("resourceType")
 					.equal(collectionType);
 			result = this.find(q);
 			collections = result.asList();
@@ -209,17 +209,16 @@ public class CollectionObjectDAO extends WithResourceDAO<CollectionObject> {
 		Tuple<Integer, Integer> hits = new Tuple<Integer, Integer>(0, 0);
 		if (isExhibition == null) {
 			Query<CollectionObject> q2 = q.cloneQuery();
-			q2.field("administrative.collectionType")
-					.equal(CollectionType.Exhibition);
-			q.field("administrative.collectionType")
-					.equal(CollectionType.SimpleCollection);
+			q2.field("resourceType").equal(
+					WithResourceType.Exhibition);
+			q.field("resourceType").equal(
+					WithResourceType.SimpleCollection);
 			hits.x = (int) this.find(q).countAll();
 			hits.y = (int) this.find(q2).countAll();
 		} else {
-			CollectionType collectionType = isExhibition
-					? CollectionType.Exhibition
-					: CollectionType.SimpleCollection;
-			q.field("administrative.collectionType").equal(collectionType);
+			WithResourceType collectionType = isExhibition ? WithResourceType.Exhibition
+					: WithResourceType.SimpleCollection;
+			q.field("resourceType").equal(collectionType);
 			if (isExhibition)
 				hits.y = (int) this.find(q).countAll();
 			else
@@ -315,10 +314,9 @@ public class CollectionObjectDAO extends WithResourceDAO<CollectionObject> {
 			return getCollectionsWithCount(q, isExhibition);
 		} else {
 			if (isExhibition != null) {
-				CollectionType collectionType = isExhibition
-						? CollectionType.Exhibition
-						: CollectionType.SimpleCollection;
-				q.field("administrative.collectionType").equal(collectionType);
+				WithResourceType collectionType = isExhibition ? WithResourceType.Exhibition
+						: WithResourceType.SimpleCollection;
+				q.field("resourceType").equal(collectionType);
 			}
 			return new Tuple<List<CollectionObject>, Tuple<Integer, Integer>>(
 					this.find(q).asList(), null);
@@ -351,9 +349,9 @@ public class CollectionObjectDAO extends WithResourceDAO<CollectionObject> {
 
 	public ObjectNode countPerCollectionType(Query<CollectionObject> q) {
 		ObjectNode result = Json.newObject().objectNode();
-		for (CollectionType collectionType : CollectionType.values()) {
+		for (WithResourceType collectionType: WithResourceType.values()) {
 			Query<CollectionObject> qi = q.cloneQuery();
-			qi.field("administrative.collectionType").equal(collectionType);
+			qi.field("resourceType").equal(collectionType);
 			long count = this.find(qi).countAll();
 			result.put(collectionType.toString(), count);
 		}
@@ -411,7 +409,7 @@ public class CollectionObjectDAO extends WithResourceDAO<CollectionObject> {
 			if (!resource.getTarget().getRecordId().equals(recordId))
 				throw new Exception("Invalid position");
 		} else {
-			for (ContextData data : collection.getCollectedResources()) {
+			for (ContextData data : (List<ContextData>) collection.getCollectedResources()) {
 				if (data.getTarget().getRecordId().equals(recordId)) {
 					if (first) {
 						newCollectedResources.remove(i);

@@ -42,12 +42,12 @@ import model.basicDataTypes.WithAccess;
 import model.basicDataTypes.WithAccess.Access;
 import model.basicDataTypes.WithAccess.AccessEntry;
 import model.basicDataTypes.WithDate;
-import model.resources.CollectionObject;
-import model.resources.CollectionObject.CollectionAdmin;
-import model.resources.CollectionObject.CollectionAdmin.CollectionType;
-import model.resources.CollectionObject.CollectionDescriptiveData;
 import model.resources.WithResource.ExternalCollection;
 import model.resources.WithResource.WithResourceType;
+import model.resources.collection.CollectionObject;
+import model.resources.collection.CollectionObject.CollectionAdmin;
+import model.resources.collection.CollectionObject.CollectionDescriptiveData;
+import model.resources.collection.CollectionObject.CollectionAdmin.CollectionType;
 import model.usersAndGroups.User;
 
 import org.apache.commons.io.FileUtils;
@@ -55,7 +55,6 @@ import org.apache.commons.io.IOUtils;
 import org.junit.Test;
 
 import play.libs.Json;
-
 import db.DB;
 
 public class CollectionObjectTest {

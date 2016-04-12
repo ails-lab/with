@@ -20,10 +20,10 @@ package elastic;
 import java.util.List;
 import java.util.Map;
 
-import model.resources.CollectionObject;
 import model.resources.RecordResource;
 import model.resources.ThesaurusObject;
 import model.resources.WithResource;
+import model.resources.collection.CollectionObject;
 
 import org.bson.types.ObjectId;
 import org.elasticsearch.action.bulk.BulkProcessor;

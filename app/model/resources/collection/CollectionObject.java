@@ -14,7 +14,7 @@
  */
 
 
-package model.resources;
+package model.resources.collection;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -25,6 +25,9 @@ import model.DescriptiveData;
 import model.annotations.ContextData;
 import model.annotations.ContextData.ContextDataBody;
 import model.basicDataTypes.MultiLiteralOrResource;
+import model.resources.WithResource;
+import model.resources.WithResource.WithAdmin;
+import model.resources.WithResource.WithResourceType;
 
 import org.mongodb.morphia.annotations.Embedded;
 import org.mongodb.morphia.annotations.Entity;
@@ -38,12 +41,12 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import play.libs.Json;
 
 @Entity("CollectionObject")
-public class CollectionObject extends WithResource<CollectionObject.CollectionDescriptiveData, CollectionObject.CollectionAdmin> {
+public class CollectionObject<T extends CollectionObject.CollectionDescriptiveData> extends WithResource<CollectionObject.CollectionDescriptiveData, CollectionObject.CollectionAdmin> {
 
 	public CollectionObject() {
 		super();
 		this.administrative = new CollectionAdmin();
-		this.descriptiveData = new CollectionDescriptiveData();
+		//this.descriptiveData = new CollectionDescriptiveData();
 		this.resourceType = WithResourceType.valueOf(this.getClass()
 				.getSimpleName());
 		this.collectedResources = new ArrayList<ContextData<ContextDataBody>>();
@@ -65,10 +68,10 @@ public class CollectionObject extends WithResource<CollectionObject.CollectionDe
 	@Embedded
 	public static class CollectionAdmin extends WithResource.WithAdmin {
 
-		public enum CollectionType {SimpleCollection, Exhibition};
+		//public enum CollectionType {SimpleCollection, Exhibition};
 
-		private int entryCount = 0;
-		private CollectionType collectionType = CollectionType.SimpleCollection;
+		protected int entryCount = 0;
+		//protected CollectionType collectionType = CollectionType.SimpleCollection;
 
 		public int getEntryCount() {
 			return entryCount;
@@ -82,13 +85,13 @@ public class CollectionObject extends WithResource<CollectionObject.CollectionDe
 			this.entryCount++;
 		}
 
-		public CollectionType getCollectionType() {
+		/*public CollectionType getCollectionType() {
 			return collectionType;
 		}
 
 		public void setCollectionType(CollectionType collectionType) {
 			this.collectionType = collectionType;
-		}
+		}*/
 
 	}
 
@@ -130,7 +133,6 @@ public class CollectionObject extends WithResource<CollectionObject.CollectionDe
 
 	}
 
-
 	/*
 	 * Elastic transformations
 	 */
@@ -141,7 +143,7 @@ public class CollectionObject extends WithResource<CollectionObject.CollectionDe
 	 */
 	public Map<String, Object> transform() {
 		Map<String, Object> idx_map =  this.transformWR();
-		idx_map.put("collectionType", this.getAdministrative().getCollectionType());
+		//idx_map.put("collectionType", this.getAdministrative().getCollectionType());
 
 		idx_map.put("dccreator", this.getDescriptiveData().getDccreator());
 		idx_map.put("dctermsaudience", this.getDescriptiveData().getDctermsaudience());

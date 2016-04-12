@@ -25,7 +25,7 @@ import java.util.Set;
 import java.util.function.Function;
 
 import model.basicDataTypes.WithAccess.Access;
-import model.resources.CollectionObject;
+import model.resources.collection.CollectionObject;
 import model.usersAndGroups.Organization;
 import model.usersAndGroups.Page;
 import model.usersAndGroups.Project;

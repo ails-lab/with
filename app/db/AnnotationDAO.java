@@ -25,7 +25,7 @@ import org.mongodb.morphia.query.UpdateOperations;
 import com.fasterxml.jackson.databind.JsonNode;
 
 import model.annotations.Annotation;
-import model.resources.CollectionObject;
+import model.resources.collection.CollectionObject;
 
 
 public class AnnotationDAO extends DAO<Annotation> {

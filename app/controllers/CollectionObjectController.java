@@ -35,14 +35,13 @@ import model.basicDataTypes.ProvenanceInfo;
 import model.basicDataTypes.WithAccess;
 import model.basicDataTypes.WithAccess.Access;
 import model.basicDataTypes.WithAccess.AccessEntry;
-import model.resources.CollectionObject;
-import model.resources.CollectionObject.CollectionAdmin;
-import model.resources.CollectionObject.CollectionAdmin.CollectionType;
 import model.resources.CulturalObject;
 import model.resources.CulturalObject.CulturalObjectData;
 import model.resources.RecordResource;
 import model.resources.WithResource;
 import model.resources.WithResource.WithResourceType;
+import model.resources.collection.CollectionObject;
+import model.resources.collection.CollectionObject.CollectionAdmin;
 import model.usersAndGroups.Organization;
 import model.usersAndGroups.Page;
 import model.usersAndGroups.Project;
@@ -184,7 +183,7 @@ public class CollectionObjectController extends WithResourceController {
 		ObjectNode resultInfo = Json.newObject();
 		ObjectId creatorDbId = new ObjectId(session().get("user"));
 		boolean success = internalAddCollection(collection,
-				CollectionType.SimpleCollection, creatorDbId, resultInfo);
+				WithResourceType.SimpleCollection, creatorDbId, resultInfo);
 		if (!success)
 			return Promise.pure((Result) badRequest(resultInfo));
 		CommonQuery q = new CommonQuery();
@@ -253,17 +252,23 @@ public class CollectionObjectController extends WithResourceController {
 		}
 		return itemsCount;
 	}
+	
+	public static Result updateCollections() {
+		ObjectNode result = Json.newObject();
+		
+		return ok(result);
+	}
 
 	public static Result sortCollectionObject(String collectionId) {
 		ObjectNode result = Json.newObject();
 		try {
 			ObjectId collectionDbId = new ObjectId(collectionId);
-			int entryCount = DB
+			int entryCount = ((CollectionAdmin) DB
 					.getCollectionObjectDAO()
 					.getById(collectionDbId,
 							Arrays.asList("administrative.entryCount"))
-					.getAdministrative().getEntryCount();
-			// Logger.info("Sorting collection "+collectionId);
+					.getAdministrative()).getEntryCount();
+			//Logger.info("Sorting collection "+collectionId);
 			List<RecordResource> records = DB.getRecordResourceDAO()
 					.getByCollectionBetweenPositions(collectionDbId, 0,
 							Math.min(entryCount, 1000));
@@ -347,22 +352,24 @@ public class CollectionObjectController extends WithResourceController {
 			error.put("error", "Invalid JSON");
 			return badRequest(error);
 		}
-		CollectionType colType = CollectionType.SimpleCollection;
-		JsonNode adm = json.get("administrative");
-		if (adm != null) {
-			JsonNode ct = adm.get("collectionType");
-			if (ct != null)
-				colType = CollectionType.valueOf(ct.asText());
-		}
+
+		String colType = null;
+		if (json.has("resourceType"))
+			colType = json.get("resourceType").asText();
+		if ((colType == null)
+				|| (WithResourceType.valueOf(colType) == null))
+			colType = WithResourceType.SimpleCollection.toString();
 		try {
 			if (session().get("user") == null) {
 				error.put("error", "No rights for WITH resource creation");
 				return forbidden(error);
 			}
 			ObjectId creatorDbId = new ObjectId(session().get("user"));
-			CollectionObject collection = Json.fromJson(json,
-					CollectionObject.class);
-			boolean success = internalAddCollection(collection, colType,
+			Class<?> clazz = Class.forName("model.resources.collection"
+					+ colType);
+			CollectionObject collection = (CollectionObject) Json.fromJson(json,
+					clazz);
+			boolean success = internalAddCollection(collection, WithResourceType.valueOf(colType),
 					creatorDbId, error);
 			if (!success)
 				return badRequest(error);
@@ -382,7 +389,7 @@ public class CollectionObjectController extends WithResourceController {
 	}
 
 	private static boolean internalAddCollection(CollectionObject collection,
-			CollectionType colType, ObjectId creatorDbId, ObjectNode error) {
+			WithResourceType colType, ObjectId creatorDbId, ObjectNode error) {
 		if (collection.getDescriptiveData().getLabel() == null) {
 			error.put("error", "Missing collection title");
 			return false;
@@ -411,13 +418,13 @@ public class CollectionObjectController extends WithResourceController {
 			return false;
 		}
 		// Fill with all the administrative metadata
-		collection.getAdministrative().setCollectionType(colType);
+		collection.setResourceType(colType);
 		collection.setResourceType(WithResourceType.CollectionObject);
 		collection.getAdministrative().setWithCreator(creatorDbId);
 		collection.getAdministrative().setCreated(new Date());
 		collection.getAdministrative().setLastModified(new Date());
 		if (collection.getAdministrative() instanceof CollectionAdmin) {
-			collection.getAdministrative().setEntryCount(0);
+			((CollectionAdmin) collection.getAdministrative()).setEntryCount(0);
 		}
 		DB.getCollectionObjectDAO().makePermanent(collection);
 		DB.getCollectionObjectDAO().updateWithURI(collection.getDbId(),
@@ -517,6 +524,7 @@ public class CollectionObjectController extends WithResourceController {
 				result.put("error", "Invalid JSON");
 				return badRequest(result);
 			}
+			String colType = null;
 			CollectionObject collectionChanges = Json.fromJson(json,
 					CollectionObject.class);
 			ObjectId creatorDbId = new ObjectId(session().get("user"));
@@ -530,6 +538,7 @@ public class CollectionObjectController extends WithResourceController {
 				error.put("error", "Not unique collection title");
 				return badRequest(error);
 			}
+			//TODO: check resourceType of collectionDbId and call fromJson accordingly
 			DB.getCollectionObjectDAO().editCollection(collectionDbId, json);
 			return ok(Json.toJson(DB.getCollectionObjectDAO().get(
 					collectionDbId)));
@@ -935,12 +944,12 @@ public class CollectionObjectController extends WithResourceController {
 				}
 				result.put(
 						"entryCount",
-						DB.getCollectionObjectDAO()
+						((CollectionAdmin) DB.getCollectionObjectDAO()
 								.getById(
 										colId,
 										new ArrayList<String>(
 												Arrays.asList("administrative.entryCount")))
-								.getAdministrative().getEntryCount());
+								.getAdministrative()).getEntryCount());
 				result.put("records", recordsList);
 				return ok(result);
 			}

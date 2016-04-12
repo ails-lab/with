@@ -50,10 +50,10 @@ import model.basicDataTypes.WithAccess;
 import model.basicDataTypes.WithDate;
 import model.basicDataTypes.WithAccess.Access;
 import model.basicDataTypes.WithAccess.AccessEntry;
-import model.resources.CollectionObject;
 import model.resources.RecordResource;
 import model.resources.RecordResource.RecordDescriptiveData;
 import model.resources.WithResource.ExternalCollection;
+import model.resources.collection.CollectionObject;
 import model.usersAndGroups.User;
 
 import org.apache.commons.io.FileUtils;

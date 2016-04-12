@@ -21,10 +21,10 @@ import java.util.Map;
 
 import model.ApiKey;
 import model.annotations.Annotation;
-import model.resources.CollectionObject;
 import model.resources.RecordResource;
 import model.resources.ThesaurusObject;
 import model.resources.WithResource;
+import model.resources.collection.CollectionObject;
 import model.usersAndGroups.User;
 import model.usersAndGroups.UserGroup;
 import notifications.Notification;
@@ -33,6 +33,7 @@ import org.mongodb.morphia.Datastore;
 import org.mongodb.morphia.Morphia;
 
 import play.Logger;
+
 import com.mongodb.MongoClient;
 import com.mongodb.WriteConcern;
 import com.mongodb.gridfs.GridFS;

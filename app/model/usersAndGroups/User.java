@@ -20,7 +20,7 @@ import java.security.MessageDigest;
 import java.util.HashSet;
 import java.util.Set;
 
-import model.resources.CollectionObject;
+import model.resources.collection.CollectionObject;
 import notifications.Notification;
 
 import org.apache.commons.codec.binary.Hex;

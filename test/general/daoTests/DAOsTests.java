@@ -56,16 +56,16 @@ import model.basicDataTypes.WithAccess.Access;
 import model.basicDataTypes.WithAccess.AccessEntry;
 import model.basicDataTypes.WithDate;
 import model.resources.AgentObject;
-import model.resources.CollectionObject;
-import model.resources.CollectionObject.CollectionAdmin;
 import model.resources.CulturalObject;
 import model.resources.RecordResource;
 import model.resources.RecordResource.RecordDescriptiveData;
 import model.resources.WithResource;
-import model.resources.CollectionObject.CollectionDescriptiveData;
 import model.resources.WithResource.ExternalCollection;
 import model.resources.WithResource.WithAdmin;
 import model.resources.WithResource.WithResourceType;
+import model.resources.collection.CollectionObject;
+import model.resources.collection.CollectionObject.CollectionAdmin;
+import model.resources.collection.CollectionObject.CollectionDescriptiveData;
 import model.usersAndGroups.User;
 
 public class DAOsTests {

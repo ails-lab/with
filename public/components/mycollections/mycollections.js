@@ -284,7 +284,6 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 						access: {
 							isPublic: self.isPublicToEdit()
 						},
-						collectionType: collectionType
 					},
 					descriptiveData : {
 						label : {
@@ -293,7 +292,8 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 						description : {
 							default : [self.descriptionToEdit()]
 						}
-					}
+					},
+					resourceType: collectionType
 				});
 				$.ajax({
 					"url": "/collection",
