@@ -105,13 +105,16 @@ define(['knockout', 'text!./_exhibition-view.html', 'app', 'magnific-popup', 'sl
 				var result = data[i];
 				var record = new Record(result);
 				record.annotation = '';
-				if (result.contextData != null) {
-					for (var j in result.contextData) {
-						if (result.contextData[j].target.collectionId == self.id() && result.contextData[j].target.position == i) {
-							record.annotation = result.contextData[j].body.text.default;
-							record.videoUrl = result.contextData[j].body.videoUrl;
-						}
-					}
+				if (result.contextData != null && result.contextData.body != null) {
+					console.log(result);
+					record.annotation = result.contextData.body.text.default;
+					record.videoUrl = result.contextData.body.videoUrl;
+//					for (var j in result.contextData) {
+//						if (result.contextData[j].target.collectionId == self.id() && result.contextData[j].target.position == i) {
+//							record.annotation = result.contextData[j].body.text.default;
+//							record.videoUrl = result.contextData[j].body.videoUrl;
+//						}
+//					}
 				}
 				var styleId = self.exhItems().length % 5 || 0;
 				var styleIdMapping = {

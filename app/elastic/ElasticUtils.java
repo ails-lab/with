@@ -203,7 +203,7 @@ public class ElasticUtils {
 		/*
 		 * CollectedIn field
 		 */
-		idx_doc.put("collectedIn", Json.toJson(rr.getCollectedIn()));
+		//idx_doc.put("collectedIn", Json.toJson(rr.getCollectedIn()));
 
 		/*
 		 * Add the username and email of the creator

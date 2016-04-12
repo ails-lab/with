@@ -53,11 +53,17 @@
 										</div>
 									</div>
 									<!--  ko if: containsText -->
-											   <div class="right">
-												<div class="boxtitle" data-bind="text: contextData()[0].body.text.default"></div>
-												</div>
-				        			<!-- /ko -->
-					                
+										<div class="right">
+											<div class="boxtitle" data-bind="text: contextData.body.text.default"></div>
+				                        </div>
+									<!-- /ko -->
+									<!-- ko else -->
+										<!-- ko if: description -->
+											<div class="right">
+												<div class="boxtitle" data-bind="text: description"></div>
+					                        </div>
+										<!--  /ko -->
+									<!-- /ko -->
 								    <!--  ko if: containsVideo -->
 									<div class="video">
 				                        <div class="imgwrap">
@@ -68,11 +74,11 @@
 				                          <!-- /ko -->
 				                          <!-- ko else -->
 				                          <div>Invalid video url:</div>
-				                          <span style="color:red" data-bind="text: contextData()[0].body.videoUrl"></span>
+				                          <span style="color:red" data-bind="text: contextData.body.videoUrl"></span>
 				                          <!-- /ko -->
 				                        </div>
 				                        <!--  ko if: containsVideoDescription -->
-				                        <div class="imginfo"><span class="mediatitle" data-bind="text: contextData()[0].body.videoDescription"></span></div>
+				                        <div class="imginfo"><span class="mediatitle" data-bind="text: contextData.body.videoDescription"></span></div>
 				                        <!-- /ko -->
 				                        <ul class="action">
 				                          <li><a href="#" data-toggle="tooltip" data-placement="top" title="Edit video" data-bind="click: $parent.prepareForItemEdit"><i class="fa fa-pencil videobox"></i></a></li>

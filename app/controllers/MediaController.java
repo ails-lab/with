@@ -281,7 +281,6 @@ public class MediaController extends Controller {
 		default:
 			break;
 		}
-
 		InputStream mediaBytes = new ByteArrayInputStream(mediaObject.getMediaBytes());
 		BufferedImage originalImage = ImageIO
 				.read(mediaBytes);

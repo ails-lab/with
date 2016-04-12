@@ -21,6 +21,20 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
+import model.DescriptiveData;
+import model.EmbeddedMediaObject;
+import model.EmbeddedMediaObject.MediaVersion;
+import model.annotations.ContextData;
+import model.annotations.ContextData.ContextDataBody;
+import model.basicDataTypes.Language;
+import model.basicDataTypes.ProvenanceInfo;
+import model.basicDataTypes.WithAccess;
+import model.basicDataTypes.WithAccess.Access;
+import model.basicDataTypes.WithAccess.AccessEntry;
+import model.resources.CollectionObject;
+import model.resources.WithResource;
+import model.usersAndGroups.User;
+
 import org.bson.types.ObjectId;
 import org.elasticsearch.common.lang3.ArrayUtils;
 import org.mongodb.morphia.query.Criteria;
@@ -28,21 +42,10 @@ import org.mongodb.morphia.query.CriteriaContainer;
 import org.mongodb.morphia.query.Query;
 import org.mongodb.morphia.query.UpdateOperations;
 
-import com.mongodb.BasicDBObject;
-
-import model.DescriptiveData;
-import model.EmbeddedMediaObject;
-import model.EmbeddedMediaObject.MediaVersion;
-import model.basicDataTypes.CollectionInfo;
-import model.basicDataTypes.Language;
-import model.basicDataTypes.ProvenanceInfo;
-import model.basicDataTypes.WithAccess;
-import model.basicDataTypes.WithAccess.Access;
-import model.basicDataTypes.WithAccess.AccessEntry;
-import model.resources.WithResource;
-import model.usersAndGroups.User;
 import utils.AccessManager.Action;
 import utils.Tuple;
+
+import com.mongodb.BasicDBObject;
 
 /*
  * The class consists of methods that can be both query
@@ -52,6 +55,7 @@ import utils.Tuple;
  * Special methods referring to one of these entities go to the
  * specific DAO class.
  */
+@SuppressWarnings({ "rawtypes", "unchecked" })
 public class WithResourceDAO<T extends WithResource> extends DAO<T> {
 
 	/*
@@ -70,25 +74,6 @@ public class WithResourceDAO<T extends WithResource> extends DAO<T> {
 		elemMatch1.put("$elemMatch", colIdQuery);
 		q.filter("collectedIn", elemMatch1);
 		return q;
-	}
-
-	/**
-	 * Return all resources that belong to a collection throwing away duplicate
-	 * entries in a collection TODO: Return only some fields for these
-	 * resources.
-	 *
-	 * @param colId
-	 * @param offset
-	 * @param count
-	 * @return
-	 */
-	public List<T> getSingletonCollectedResources(ObjectId colId, int offset,
-			int count) {
-		// Query<T> q =
-		// this.createQuery().field("collectedIn.collectionId").equal(colId).offset(offset).limit(count);
-		return this.find(
-				createColIdElemMatchQuery(colId).offset(offset).limit(count))
-				.asList();
 	}
 
 	/**
@@ -409,8 +394,8 @@ public class WithResourceDAO<T extends WithResource> extends DAO<T> {
 		T record = this.getById(resourceId,
 				new ArrayList<String>(Arrays.asList("collectedIn")));
 		List<ObjectId> parentCollections = new ArrayList<ObjectId>();
-		for (CollectionInfo ci : (List<CollectionInfo>) record.getCollectedIn()) {
-			parentCollections.add(ci.getCollectionId());
+		for (ObjectId ci : (List<ObjectId>) record.getCollectedIn()) {
+			parentCollections.add(ci);
 		}
 		return parentCollections;
 	}
@@ -427,14 +412,18 @@ public class WithResourceDAO<T extends WithResource> extends DAO<T> {
 		return ((WithResource) this.findOne(q)).getUsage().getLikes();
 	}
 
-	public List<Integer> getPositionsInCollection(ObjectId id,
+	public List<Integer> getPositionsInCollection(ObjectId recordId,
 			ObjectId collectionId) {
-		T record = this.getById(id,
-				new ArrayList<String>(Arrays.asList("collectedIn")));
+		CollectionObject collection = DB.getCollectionObjectDAO().getById(
+				collectionId,
+				Arrays.asList("collectedResources"));
 		List<Integer> positions = new ArrayList<Integer>();
-		for (CollectionInfo ci : (List<CollectionInfo>) record.getCollectedIn()) {
-			if (ci.getCollectionId().equals(collectionId))
-				positions.add(ci.getPosition());
+		int i = 0;
+		for (ContextData<ContextDataBody> collectedResources : collection
+				.getCollectedResources()) {
+			if (collectedResources.getTarget().getRecordId().equals(recordId))
+				positions.add(i);
+			i++;
 		}
 		return positions;
 	}

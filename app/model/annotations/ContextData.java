@@ -16,15 +16,9 @@
 
 package model.annotations;
 
-
-import javax.validation.constraints.NotNull;
-
-import model.resources.WithResource.WithResourceType;
+import model.basicDataTypes.WithAccess;
 
 import org.bson.types.ObjectId;
-import org.hibernate.validator.constraints.NotBlank;
-import org.hibernate.validator.constraints.NotEmpty;
-import org.mongodb.morphia.annotations.Embedded;
 
 import utils.Deserializer;
 import utils.Serializer;
@@ -33,51 +27,74 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 public class ContextData<T1 extends ContextData.ContextDataBody> {
-	
+
 	public static enum ContextDataType {
-		ExhibitionData
+		ExhibitionData, None
 	}
-	
-	public static class ContextDataBody {
-	}
-	
-	public ContextData() {
-		this.target = new ContextDataTarget();
-		//default
-		this.contextDataType = ContextDataType.ExhibitionData;
-	}
-	
-	public ContextData(ObjectId colId, int position) {
-		this.target = new ContextDataTarget();
-		this.target.collectionId = colId;
-		this.target.position = position;
-		this.contextDataType = ContextDataType.ExhibitionData;
-		//this.body = (T1) new ContextDataBody();
-	}
-	
-	public static class ContextDataTarget {		
+
+	protected ContextDataType contextDataType;
+	protected ContextDataTarget target;
+	protected T1 body;
+
+	public static class ContextDataTarget {
 		@JsonSerialize(using = Serializer.ObjectIdSerializer.class)
 		ObjectId collectionId;
-		int position;
-		
+		@JsonSerialize(using = Serializer.ObjectIdSerializer.class)
+		ObjectId recordId;
+		@JsonSerialize(using = Serializer.WithAccessSerializer.class)
+		@JsonDeserialize(using = Deserializer.WithAccessDeserializer.class)
+		WithAccess access;
+
 		public ObjectId getCollectionId() {
 			return collectionId;
 		}
+
 		public void setCollectionId(ObjectId collectionId) {
 			this.collectionId = collectionId;
 		}
-		public int getPosition() {
-			return position;
+
+		public ObjectId getRecordId() {
+			return recordId;
 		}
-		public void setPosition(int position) {
-			this.position = position;
+
+		public void setRecordId(ObjectId recordId) {
+			this.recordId = recordId;
+		}
+
+		public WithAccess getAccess() {
+			return access;
+		}
+
+		public void setAccess(WithAccess access) {
+			this.access = access;
 		}
 	}
+
+	public static class ContextDataBody {
+	}
+
+	public ContextData() {
+	}
 	
-	T1 body;
-	ContextDataTarget target;
-	
-	ContextDataType contextDataType;
+	public ContextData(ObjectId recordId) {
+		this.target = new ContextDataTarget();
+		this.getTarget().setRecordId(recordId);
+		this.contextDataType = ContextDataType.None;
+	}
+
+	public ContextData(ObjectId recordId, ContextDataType contextDataType) {
+		this.target = new ContextDataTarget();
+		this.getTarget().setRecordId(recordId);
+		this.contextDataType = contextDataType;
+	}
+
+	public ContextData(ObjectId recordId, ContextDataType contextDataType,
+			T1 body) {
+		this.target = new ContextDataTarget();
+		this.getTarget().setRecordId(recordId);
+		this.contextDataType = contextDataType;
+		this.body = body;
+	}
 
 	public T1 getBody() {
 		return body;
@@ -87,20 +104,20 @@ public class ContextData<T1 extends ContextData.ContextDataBody> {
 		this.body = body;
 	}
 
-	public ContextDataTarget getTarget() {
-		return target;
-	}
-
-	public void setTarget(ContextDataTarget target) {
-		this.target = target;
-	}
-
 	public ContextDataType getContextDataType() {
 		return contextDataType;
 	}
 
 	public void setContextDataType(ContextDataType contextDataType) {
 		this.contextDataType = contextDataType;
+	}
+
+	public ContextDataTarget getTarget() {
+		return target;
+	}
+
+	public void setTarget(ContextDataTarget target) {
+		this.target = target;
 	}
 
 }
