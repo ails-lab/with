@@ -28,6 +28,7 @@ import org.json.JSONObject;
 import com.fasterxml.jackson.databind.JsonNode;
 
 import model.basicDataTypes.ProvenanceInfo.Sources;
+import model.resources.CulturalObject;
 import model.resources.RecordResource;
 import model.resources.WithResource;
 import play.Logger;
@@ -404,7 +405,7 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 			if (response != null) {
 				jsonMetadata.add(new RecordJSONMetadata(Format.JSON_EDM, record.toString()));
 				EuropeanaItemRecordFormatter f = new EuropeanaItemRecordFormatter();
-				String json = Json.toJson(f.readObjectFrom(record)).toString();
+				String json = Json.toJson(f.overwritedObjectFrom((CulturalObject)fullRecord,record)).toString();
 				jsonMetadata.add(new RecordJSONMetadata(Format.JSON_WITH, json));
 			}
 			response = getHttpConnector()
