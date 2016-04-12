@@ -49,7 +49,7 @@ public abstract class CulturalRecordFormatter extends JsonContextRecordFormatRea
 			}
 		}
 		List<Language> res =StringUtils.getLanguages(full);
-        Logger.info("["+full+"] Item Detected Languages " + res);
+//        Logger.info("["+full+"] Item Detected Languages " + res);
 		return res.toArray(new Language[]{});
 	}
 	

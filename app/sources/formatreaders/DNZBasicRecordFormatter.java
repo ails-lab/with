@@ -59,7 +59,7 @@ public class DNZBasicRecordFormatter extends CulturalRecordFormatter {
 			for (int i = 0; i < langs.size(); i++) {
 				language[i] = Language.getLanguage(langs.get(i).asText());
 			}
-			Logger.info("["+id+"] Item Languages " + Arrays.toString(language));
+//			Logger.info("["+id+"] Item Languages " + Arrays.toString(language));
 		}
 		if (!Utils.hasInfo(language)){
 			language = getLanguagesFromText(rec.getStringValue("title"),
@@ -90,14 +90,16 @@ public class DNZBasicRecordFormatter extends CulturalRecordFormatter {
 		//TODO EmbeddedMediaObject.originalRights <- rights_url
 		List<String> rights = rec.getStringArrayValue("usage");
 		String stringValue = rec.getStringValue("category");
-		List<Object> translateToCommon = getValuesMap().translateToCommon(CommonFilters.TYPE.getId(), stringValue);
 		WithMediaType type = null;
-		for (Object object : translateToCommon) {
-			WithMediaType type2 = WithMediaType.getType(object.toString());
-			if (type2!=null){
-				type = type2;
-				if (!type.equals(WithMediaType.OTHER))
-				break;
+		if (Utils.hasAny(stringValue)){
+			List<Object> translateToCommon = getValuesMap().translateToCommon(CommonFilters.TYPE.getId(), stringValue);
+			for (Object object : translateToCommon) {
+				WithMediaType type2 = WithMediaType.getType(object.toString());
+				if (type2!=null){
+					type = type2;
+					if (!type.equals(WithMediaType.OTHER))
+					break;
+				}
 			}
 		}
 		WithMediaRights withRights = (rights==null || rights.size()==0)?null:(WithMediaRights) getValuesMap().translateToCommon(CommonFilters.RIGHTS.getId(), rights.get(0)).get(0);
