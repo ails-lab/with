@@ -31,45 +31,14 @@
                   <div class="tab-content">
                     <div class="tab-pane active" id="datasources">
 				     <ul class="sources list">
+				     <!-- ko foreach: facetFilter -->
+				     <li><label>
+				      <input type="checkbox" data-bind="checked: $parents[1].sources, click: $parent.listClick, value: $data"/>
+				      <span data-bind ="text: $data"></span>
+				     </label>
+				     </li>
+				     <!--  /ko -->
 				     
-				     <li><label>
-				      <input type="checkbox" value="Europeana" data-bind="checked: $parent.sources, click: listClick"/>
-				      <span>Europeana</span>
-				     </label>
-				     </li>
-				       
-				       <li><label>
-				      <input type="checkbox" value="DPLA" data-bind="checked: $parent.sources, click:listClick"/>
-				       <span>DPLA</span>
-				      </label>
-				     </li>
-				     <li><label>
-				      <input type="checkbox" value="NLA" data-bind="checked: $parent.sources, click:listClick"/>
-				      <span>NLA</span>
-				      </label>
-				     </li>
-				     <li><label>
-				      <input type="checkbox" value="DigitalNZ" data-bind="checked: $parent.sources, click:listClick"/>
-				      <span>DigitalNZ</span>
-				      </label>
-				     </li>
-				     
-				     <li><label>
-				      <input type="checkbox" value="YouTube" data-bind="checked: $parent.sources, click: listClick"/></span>
-				     <span>YouTube</span>
-				     </label>
-				     </li>
-				    
-				    <li><label>
-				      <input type="checkbox" value="WITHin" data-bind="checked: $parent.sources, click: listClick"/></span>
-				      <span>WITHin</span>
-				     </label>
-				     </li>
-				      <li><label>
-				      <input type="checkbox" value="Rijksmuseum" data-bind="checked: $parent.sources, click: listClick"/></span>
-				      <span>Rijksmuseum</span>
-				     </label>
-				     </li>
 				    </ul>
 				  </div>
 				  

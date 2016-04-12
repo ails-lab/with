@@ -177,7 +177,21 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
 		/*self.sources= ko.observableArray([ "Europeana", "DPLA","DigitalNZ","WITHin", "Rijksmuseum"]);
 		 * no WITHin until it's fully functional
 		 */
-		self.sources= ko.observableArray([ "Europeana", "DPLA","DigitalNZ", "WITHin", "Rijksmuseum"]);
+	//	self.sources= ko.observableArray([ "Europeana", "DPLA","DigitalNZ", "WITHin", "Rijksmuseum"]);
+		
+		self.sources = ko.observableArray();
+		
+		$.ajax({
+         	"url": "/api/searchsources",
+			"method": "get",
+			"contentType": "application/json",
+        	"success": function (data){
+           		self.sources(data);
+        	}
+     	});
+ 		
+		
+		
 		self.mixresults=ko.observableArray();
 		self.selectedSource=ko.observable(self.sources()[0]);
 		self.results = ko.observableArray([]);
@@ -208,6 +222,7 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
 		self.noResults = ko.computed(function() {
 			return (!self.searching() && self.results().length == 0 && self.mixresults().length == 0 && self.currentTerm() != "");
 		})
+		
 
 		self.toggleSourceview = function (data,event) { 
 			if($(event.currentTarget).find("a").attr('data-view')=='column' && self.sourceview()==false){
@@ -276,6 +291,7 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
 			
 		}
 
+		
 		self._search = function(facetinit,facetrecacl) {
 		 if(facetinit){self.filterselection.removeAll();}
 	   $('#facet_tags').tagsinput({
