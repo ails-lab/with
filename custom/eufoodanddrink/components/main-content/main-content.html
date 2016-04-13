@@ -3,13 +3,13 @@
       <section class="featured">
         <div class="container">
           <!-- title-->
-          <div class="sectionhead">FEATURED EXHIBITION</div>
+          <div class="sectionhead">FEATURED COLLECTION</div>
           <!-- featured exhibition-->
           <div id="featuredExhibit" class="exhibition" data-bind="with: featuredExhibition">
             <div class="hue">
               <!-- info-->
               <div class="info">
-                <div class="type">EXHIBITION</div>
+                <div class="type">COLLECTION</div>
                 <h1 class="title"><!-- ko text:data.title --><!-- /ko --> </h1>
                 <div class="description">
                   <!-- description-->
@@ -17,7 +17,7 @@
                
                   </div>
                   <!-- view button-->
-                  <div class="view"><a data-bind="attr: {href: data.url()}" title="VIEW EXHIBITION" class="btn btn-view blue"><img src="img/ic-right-arrow.png" alt="view"></a></div>
+                  <div class="view"><a data-bind="attr: {href: '#collectionview/'+data.dbId}" title="VIEW EXHIBITION" class="btn btn-view blue"><img src="img/ic-right-arrow.png" alt="view"></a></div>
                 </div>
               </div>
               <!-- thumbnails-->
