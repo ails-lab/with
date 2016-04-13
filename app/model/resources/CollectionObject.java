@@ -17,6 +17,7 @@
 package model.resources;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -27,6 +28,14 @@ import model.basicDataTypes.MultiLiteralOrResource;
 
 import org.mongodb.morphia.annotations.Embedded;
 import org.mongodb.morphia.annotations.Entity;
+
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+
+import play.libs.Json;
 
 @Entity("CollectionObject")
 public class CollectionObject extends WithResource<CollectionObject.CollectionDescriptiveData, CollectionObject.CollectionAdmin> {
@@ -42,7 +51,7 @@ public class CollectionObject extends WithResource<CollectionObject.CollectionDe
 
 	@Embedded
 	private List<ContextData<ContextDataBody>> collectedResources;
-	
+
 
 	public List<ContextData<ContextDataBody>> getCollectedResources() {
 		return collectedResources;
@@ -52,7 +61,7 @@ public class CollectionObject extends WithResource<CollectionObject.CollectionDe
 			List<ContextData<ContextDataBody>> collectedResources) {
 		this.collectedResources = collectedResources;
 	}
-	
+
 	@Embedded
 	public static class CollectionAdmin extends WithResource.WithAdmin {
 
@@ -137,6 +146,12 @@ public class CollectionObject extends WithResource<CollectionObject.CollectionDe
 		idx_map.put("dccreator", this.getDescriptiveData().getDccreator());
 		idx_map.put("dctermsaudience", this.getDescriptiveData().getDctermsaudience());
 		idx_map.put("dclanguage", this.getDescriptiveData().getDclanguage());
+
+		ArrayNode cd = (ArrayNode) Json.toJson(this.getCollectedResources());
+		ObjectMapper mapper = new ObjectMapper();
+		mapper.setSerializationInclusion(Include.NON_NULL);
+		List<Object> cd_map = mapper.convertValue(cd, List.class);
+		idx_map.put("collectedResources", cd_map);
 
 		return idx_map;
 	}

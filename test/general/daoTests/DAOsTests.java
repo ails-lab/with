@@ -38,8 +38,15 @@ import db.RecordResourceDAO;
 import model.DescriptiveData;
 import model.EmbeddedMediaObject;
 import model.EmbeddedMediaObject.MediaVersion;
+import model.annotations.ContextData;
+import model.annotations.ContextData.ContextDataBody;
+import model.annotations.ContextData.ContextDataTarget;
+import model.annotations.ContextData.ContextDataType;
+import model.annotations.ExhibitionData;
+import model.annotations.ExhibitionData.ExhibitionAnnotationBody;
 import model.basicDataTypes.CollectionInfo;
 import model.basicDataTypes.Language;
+import model.basicDataTypes.Literal;
 import model.basicDataTypes.LiteralOrResource;
 import model.basicDataTypes.MultiLiteral;
 import model.basicDataTypes.MultiLiteralOrResource;
@@ -74,14 +81,14 @@ public class DAOsTests {
 		//RecordResource<RecordDescriptiveData> wres = new RecordResource<RecordDescriptiveData>();
 		CollectionObject wres = new CollectionObject();
 
-		User u = DB.getUserDAO().getByUsername("eirini1");
+		User u = DB.getUserDAO().getByUsername("maria.ralli");
 		if(u == null) {
 			System.out.println("No user found");
 			return;
 		}
 
-		User u1 = DB.getUserDAO().getByUsername("qwerty");
-		User u2 = DB.getUserDAO().getByUsername("annac");
+		User u1 = DB.getUserDAO().getByUsername("maria.ralli");
+		User u2 = DB.getUserDAO().getByUsername("maria.ralli");
 
 		/*
 		 * Administative metadata
@@ -134,7 +141,6 @@ public class DAOsTests {
 		ci.setPosition(6);
 		ArrayList<CollectionInfo> ents = new ArrayList<CollectionInfo>();
 		ents.add(ci);
-		wres.setCollectedIn(ents);
 
 
 		//no externalCollections
@@ -218,6 +224,26 @@ public class DAOsTests {
 		EmbeddedMediaObject emo = new EmbeddedMediaObject();
 		wres.addMedia(MediaVersion.Thumbnail, emo);
 
+		ExhibitionData cd = new ExhibitionData();
+		ExhibitionAnnotationBody eab = new ExhibitionAnnotationBody();
+		eab.setAudioUrl("http://hello.com");
+		eab.setText(new Literal("Text"));
+		eab.setVideoDescription("aaa");
+		eab.setVideoUrl("http://dasda");
+		cd.setBody(eab);
+		cd.setContextDataType(ContextDataType.ExhibitionData);
+		ContextDataTarget cdt =  new ContextDataTarget();
+		cdt.setCollectionId(new ObjectId());
+		cdt.setRecordId(new ObjectId());
+		cd.setTarget(cdt);
+		List<ContextData<ContextDataBody>> list = new ArrayList<ContextData<ContextDataBody>>();
+		list.add((ContextData)cd);
+		wres.setCollectedResources(list );
+
+		MultiLiteralOrResource dccreator = new MultiLiteralOrResource();
+		dccreator.put("es", new ArrayList<String>(Arrays.asList("Buenos", "Córdoba", "La Plata")));
+		wres.getDescriptiveData().setDccreator(dccreator);
+
 
 		if(DB.getCollectionObjectDAO().makePermanent(wres) == null) { System.out.println("No storage!"); return; }
 		System.out.println("Stored! 1");
@@ -253,7 +279,6 @@ public class DAOsTests {
 				"EN", "My record Title");
 		System.out.println("Retrieved by owner and label: " + Json.toJson(co5));
 
-		System.out.println("The owner of this Resource is: " + Json.toJson(wres.retrieveCreator()));
 
 		/*List<RecordResource> cos7 = DB.getRecordResourceDAO().getByProvider("Europeana");
 		System.out.println("retrieved All Resources provided from Europeana: " + Json.toJson(cos7));*/
