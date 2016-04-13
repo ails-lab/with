@@ -69,7 +69,7 @@ public class RecordResource<T extends RecordResource.RecordDescriptiveData>
 		Map<String, Object> idx_map =  this.transformWR();
 
 		List<ObjectId> colIn = new ArrayList<ObjectId>();
-		this.getCollectedIn().forEach( (ci) -> (colIn.add(ci)) );
+		this.getCollectedIn().forEach( (ci) -> {colIn.add(ci);} );
 
 		idx_map.put("collectedId", colIn);
 
