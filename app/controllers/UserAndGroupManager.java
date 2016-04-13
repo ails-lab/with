@@ -587,7 +587,7 @@ public class UserAndGroupManager extends Controller {
 		
 	}
 	
-	public static Result RemoveAdminFromGroup(String id, String groupId){
+	public static Result removeAdminFromGroup(String id, String groupId){
 		ObjectNode result = Json.newObject();
 		try {
 			String adminId = AccessManager.effectiveUserId(session().get(
