@@ -3058,7 +3058,7 @@ body.expand [role='main'] .exhibitionplayer {
   body [role='main'] .featured .exhibition .thumbnails .imagewrapper {
     height: 180px;
     width: 180px;
-    overflow: auto;
+    overflow: hidden;
   }
   body [role='main'] .featured .exhibition .thumbnails .imagewrapper img {
     width: 180px;
@@ -3217,7 +3217,7 @@ body.expand [role='main'] .exhibitionplayer {
   body [role='main'] .featured .exhibition .thumbnails .imagewrapper {
     width: 219px;
     height: 219px;
-    overflow: auto;
+    overflow: hidden;
   }
   body [role='main'] .featured .exhibition .thumbnails .imagewrapper img {
     width: 219px;
