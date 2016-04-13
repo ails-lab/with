@@ -27,6 +27,8 @@ import java.util.Set;
 
 import javax.validation.ConstraintViolation;
 
+import model.annotations.ContextData;
+import model.annotations.ContextData.ContextDataBody;
 import model.basicDataTypes.Language;
 import model.basicDataTypes.MultiLiteral;
 import model.basicDataTypes.ProvenanceInfo;
@@ -298,18 +300,18 @@ public class CollectionObjectController extends WithResourceController {
 	public static Result createCollectionObject() {
 		ObjectNode error = Json.newObject();
 		JsonNode json = request().body().asJson();
-		CollectionType colType = null;
+		if (json == null) {
+			error.put("error", "Invalid JSON");
+			return badRequest(error);
+		}
+		CollectionType colType = CollectionType.SimpleCollection;
 		JsonNode adm = json.get("administrative");
 		if (adm != null) {
 			JsonNode ct = adm.get("collectionType");
 			if (ct != null)
 				colType = CollectionType.valueOf(ct.asText());
 		}
-		try {
-			if ((colType == null) && (json == null)) {
-				error.put("error", "Invalid JSON");
-				return badRequest(error);
-			}
+		try {	
 			if (session().get("user") == null) {
 				error.put("error", "No rights for WITH resource creation");
 				return forbidden(error);
@@ -859,15 +861,18 @@ public class CollectionObjectController extends WithResourceController {
 					if (!response.toString().equals(ok().toString())) {
 						continue;
 					}
-					if (contentFormat.equals("noContent") && r.getContent() != null) {
-						r.getContent().clear();
-						recordsList.add(Json.toJson(r));
-						continue;
-					}
 					if (contentFormat.equals("contentOnly")) {
 						if (r.getContent() != null) {
 							recordsList.add(Json.toJson(r.getContent()));
 						}
+						continue;
+					}
+					if (contentFormat.equals("noContent") && r.getContent() != null) {
+						r.getContent().clear();
+						recordsList.add(Json.toJson(r));
+						fillContextData(DB.getCollectionObjectDAO()
+								.getById(colId, Arrays.asList("collectedResources"))
+								.getCollectedResources(), recordsList);
 						continue;
 					}
 					if (r.getContent() != null
@@ -899,6 +904,12 @@ public class CollectionObjectController extends WithResourceController {
 			if (locks != null)
 				locks.release();
 		}
+	}
+
+	private static void fillContextData(
+			List<ContextData<ContextDataBody>> collectedResources,
+			ArrayNode recordsList) {
+				
 	}
 
 	public static Result listUsersWithRights(String collectionId) {
