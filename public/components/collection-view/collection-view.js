@@ -584,13 +584,14 @@ define(['bridget', 'knockout', 'text!./_collection-view.html', 'isotope', 'image
 		self.editCollection = function () {
 			if (self.validationModel.isValid()) {
 			var jsondata = JSON.stringify({
+				resourceType: "SimpleCollection",
 				descriptiveData: {
 					label: {default: [self.titleToEdit()]},
 					description: {default: [self.descriptionToEdit()]},
 				},
 				administrative: { access: {
 					isPublic: self.isPublicEdit()},
-					collectionType: "SimpleCollection"}
+				}
 				
 			});
 			$.ajax({

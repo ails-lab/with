@@ -126,7 +126,6 @@ public class DDBSpaceSource extends ISpaceSource {
 			if (response != null) {
 				jsonMetadata.add(new RecordJSONMetadata(Format.JSON_EDM, record.toString()));
 				DDBItemRecordFormatter f = new DDBItemRecordFormatter();
-				System.out.println(record.toString());
 				String json = Json.toJson(f.readObjectFrom(record)).toString();
 				jsonMetadata.add(new RecordJSONMetadata(Format.JSON_WITH, json));
 			}

@@ -35,30 +35,30 @@ define(['bridget','knockout', 'text!./provider.html','isotope','imagesloaded','a
 				        });
 
 				        self.type=ko.computed(function() {
-				        	if(self.administrative){
-				        		if (self.administrative.collectionType.indexOf("Collection")!=-1)
+				        	if(self.resourceType){
+				        		if (self.resourceType.indexOf("Collection")!=-1)
 				        		  return "COLLECTION";
-				        		else if (self.administrative.collectionType.indexOf("Space")!=-1)
+				        		else if (self.resourceType.indexOf("Space")!=-1)
 				        			return "SPACE";
 				        	    else return "EXHIBITION";
 				        	}else return "";
 				        });
 				        
 				        self.css=ko.computed(function() {
-				        	if(self.administrative){
-				        		if (self.administrative.collectionType.indexOf("Collection")!=-1)
+				        	if(self.resourceType){
+				        		if (self.resourceType.indexOf("Collection")!=-1)
 				        		  return "item collection";
-				        		else if (self.administrative.collectionType.indexOf("Space")!=-1)
+				        		else if (self.resourceType.indexOf("Space")!=-1)
 				        			return "item space";
 				        	    else return "item space";
 				        	}else return "item exhibition";
 				        });
 				        
 				        self.url=ko.computed(function() {
-				        	if(self.administrative){
-				        		if (self.administrative.collectionType.indexOf("Collection")==-1)
+				        	if(self.resourceType){
+				        		if (self.resourceType.indexOf("Collection")==-1)
 					    		  return 'index.html#exhibitionview/'+ self.dbId;
-				        		else if (self.administrative.collectionType.indexOf("Space")>-1){
+				        		else if (self.resourceType.indexOf("Space")>-1){
 				        			return self.administrative.isShownAt;
 				        		}
 					    		else{

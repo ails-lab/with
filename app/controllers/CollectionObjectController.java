@@ -165,7 +165,6 @@ public class CollectionObjectController extends WithResourceController {
 			record.addToProvenance(new ProvenanceInfo(source, null, oid));
 			internalAddRecordToCollection(ccid.getDbId().toString(), record,
 					F.Option.None(), resultInfo);
-			System.out.println("added " + oid);
 		}
 		return ok(resultInfo);
 	}
@@ -382,7 +381,6 @@ public class CollectionObjectController extends WithResourceController {
 			error.put("error", "Invalid JSON");
 			return badRequest(error);
 		}
-
 		String colType = null;
 		if (json.has("resourceType"))
 			colType = json.get("resourceType").asText();
@@ -395,7 +393,7 @@ public class CollectionObjectController extends WithResourceController {
 				return forbidden(error);
 			}
 			ObjectId creatorDbId = new ObjectId(session().get("user"));
-			Class<?> clazz = Class.forName("model.resources.collection"
+			Class<?> clazz = Class.forName("model.resources.collection."
 					+ colType);
 			CollectionObject collection = (CollectionObject) Json.fromJson(json,
 					clazz);
@@ -420,11 +418,7 @@ public class CollectionObjectController extends WithResourceController {
 
 	private static boolean internalAddCollection(CollectionObject collection,
 			WithResourceType colType, ObjectId creatorDbId, ObjectNode error) {
-		if (collection.getDescriptiveData().getLabel() == null) {
-			error.put("error", "Missing collection title");
-			return false;
-		}
-		if (collection.getDescriptiveData().getLabel().isEmpty()) {
+		if (collection.getDescriptiveData().getLabel() == null || collection.getDescriptiveData().getLabel().isEmpty()) {
 			error.put("error", "Missing collection title");
 			return false;
 		}
@@ -449,7 +443,6 @@ public class CollectionObjectController extends WithResourceController {
 		}
 		// Fill with all the administrative metadata
 		collection.setResourceType(colType);
-		collection.setResourceType(WithResourceType.CollectionObject);
 		collection.getAdministrative().setWithCreator(creatorDbId);
 		collection.getAdministrative().setCreated(new Date());
 		collection.getAdministrative().setLastModified(new Date());
@@ -554,7 +547,6 @@ public class CollectionObjectController extends WithResourceController {
 				result.put("error", "Invalid JSON");
 				return badRequest(result);
 			}
-			String colType = null;
 			CollectionObject collectionChanges = Json.fromJson(json,
 					CollectionObject.class);
 			ObjectId creatorDbId = new ObjectId(session().get("user"));

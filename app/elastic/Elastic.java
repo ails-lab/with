@@ -216,7 +216,6 @@ public class Elastic {
 					.prepareState().execute().actionGet()
 					.getState().getMetaData().indices();
 		if(indices.containsKey(index)) {
-			System.out.println("ELASTIC OK!");
 			return;
 		}
 

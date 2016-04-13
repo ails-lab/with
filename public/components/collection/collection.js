@@ -249,9 +249,10 @@ define(['knockout', 'text!./collection.html', 'selectize', 'app', 'knockout-vali
 					isPublic: $("#publiccoll .active").data("value")
 				});*/
 				var jsondata = JSON.stringify({
+					resourceType: "SimpleCollection",
 					administrative: { access: {
 				        isPublic: self.isPublic()},
-				        collectionType: "SimpleCollection"},
+				        },
 				        descriptiveData : {
 				        	 label : {
 						            default : [self.collname()],
@@ -340,9 +341,10 @@ define(['knockout', 'text!./collection.html', 'selectize', 'app', 'knockout-vali
 				} else {
 					/*otherwise save this collection and then add the item */	
 					var jsondata = JSON.stringify({
+						resourceType: "SimpleCollection",
 						administrative: { access: {
 				        isPublic: self.isPublic()},
-				        collectionType: "SimpleCollection"},
+				        },
 				        descriptiveData : {
 				        	 label : {
 						            default : [item],
@@ -367,9 +369,10 @@ define(['knockout', 'text!./collection.html', 'selectize', 'app', 'knockout-vali
 				} else {
 					/*otherwise save this collection and then add the item */	
 					var jsondata = JSON.stringify({
+						resourceType: "SimpleCollection",
 						administrative: { access: {
 				        isPublic: self.isPublic()},
-				        collectionType: "SimpleCollection"},
+				        },
 				        descriptiveData : {
 				        	 label : {
 						            default : [item],

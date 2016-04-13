@@ -76,20 +76,20 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 			        });
 
 			        self.type=ko.computed(function() {
-			        	if(self.administrative){
-			        		if (self.administrative.collectionType.indexOf("Collection")!=-1)
+			        	if(self.resourceType){
+			        		if (self.resourceType.indexOf("Collection")!=-1)
 			        		  return "COLLECTION";
-			        		else if (self.administrative.collectionType.indexOf("Space")!=-1)
+			        		else if (self.resourceType.indexOf("Space")!=-1)
 			        			return "SPACE";
 			        	    else return "EXHIBITION";
 			        	}else return "";
 			        });
 			        
 			        self.css=ko.computed(function() {
-			        	if(self.administrative){
-			        		if (self.administrative.collectionType.indexOf("Collection")!=-1)
+			        	if(self.resourceType){
+			        		if (self.resourceType.indexOf("Collection")!=-1)
 			        		  return "item collection";
-			        		else if (self.administrative.collectionType.indexOf("Space")!=-1)
+			        		else if (self.resourceType.indexOf("Space")!=-1)
 			        			return "item space";
 			        		else return "item exhibition";
 			        	}
@@ -97,10 +97,10 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 			        });
 			        
 			        self.url=ko.computed(function() {
-			        	if(self.administrative){
-			        		if (self.administrative.collectionType.indexOf("Collection")>-1)
+			        	if(self.resourceType){
+			        		if (self.resourceType.indexOf("Collection")>-1)
 				    		  return 'index.html#collectionview/'+ self.dbId;
-			        		else if (self.administrative.collectionType.indexOf("Space")>-1){
+			        		else if (self.resourceType.indexOf("Space")>-1){
 			        			return self.administrative.isShownAt;
 			        		}
 				    		else{
@@ -259,7 +259,7 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 						url=page.url;
 					}
 					
-					var spacetocollection={administrative:{collectionType:'Space',isShownAt:url}, descriptiveData:{label:{default:[data[i].friendlyName]}},media:[{Thumbnail:{url: thumb}}]};
+					var spacetocollection={resourceType: 'Space', administrative:{isShownAt:url}, descriptiveData:{label:{default:[data[i].friendlyName]}},media:[{Thumbnail:{url: thumb}}]};
 					var c=new Collection(
 								spacetocollection				
 					);

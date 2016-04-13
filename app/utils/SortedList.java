@@ -89,6 +89,5 @@ public class SortedList<T> extends ArrayList<T> {
 		l.add(1);
 		l.add(4);
 		l.add(4);
-		System.out.println(l);
 	}
 }
