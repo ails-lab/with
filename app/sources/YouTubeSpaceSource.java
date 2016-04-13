@@ -19,7 +19,17 @@ package sources;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import model.DescriptiveData;
+import model.EmbeddedMediaObject;
+import model.EmbeddedMediaObject.MediaVersion;
+import model.EmbeddedMediaObject.WithMediaType;
+import model.basicDataTypes.LiteralOrResource;
+import model.basicDataTypes.ProvenanceInfo;
+import model.resources.CulturalObject;
 import model.resources.RecordResource;
+import model.resources.RecordResource.RecordDescriptiveData;
+import model.resources.WithResource.WithResourceType;
+import play.libs.Json;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -31,11 +41,15 @@ import sources.core.ISpaceSource;
 import sources.core.RecordJSONMetadata;
 import sources.core.SourceResponse;
 import sources.core.Utils;
+import sources.utils.JsonContextRecord;
 import sources.core.AutocompleteResponse.DataJSON;
 import sources.core.AutocompleteResponse.Suggestion;
+import sources.core.CommonFilters;
 import sources.core.RecordJSONMetadata.Format;
+import sources.formatreaders.EuropeanaItemRecordFormatter;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.google.common.net.MediaType;
 
 public class YouTubeSpaceSource extends ISpaceSource {
 
@@ -46,6 +60,7 @@ public class YouTubeSpaceSource extends ISpaceSource {
 
 	public YouTubeSpaceSource() {
 		super();
+		LABEL = "YouTube";
 		roots = new HashMap<String, String>();
 	}
 
@@ -75,73 +90,140 @@ public class YouTubeSpaceSource extends ISpaceSource {
 		return "https://www.googleapis.com/youtube/v3/";
 	}
 
-	public String getSourceName() {
-		return "YouTube";
-	}
 
 	@Override
 	public SourceResponse getResults(CommonQuery q) {
 		SourceResponse res = new SourceResponse();
-//		res.source = getSourceName();
-//		String httpQuery = getHttpQuery(q);
-//		res.query = httpQuery;
-//		JsonNode response;
-//		
-//		if (q.filters==null || q.filters.size()==0 ||
-//				(q.filters.size()==1 && 
-//				q.filters.get(0).filterID.equals(CommonFilters.TYPE_ID) &&
-//				q.filters.get(0).values.contains(TypeValues.VIDEO)
-//				)){
-//			try {
-//				response = HttpConnector.getURLContent(httpQuery);
-//				// System.out.println(httpQuery);
-//				// System.out.println(response.toString());
-//				JsonNode docs = response.path("items");
-//				res.totalCount = Utils.readIntAttr(response.path("pageInfo"),
-//						"totalResults", true);
-//				res.count = docs.size();
-//				res.startIndex = 0;
-//				ArrayList<ItemsResponse> a = new ArrayList<ItemsResponse>();
-//
-//				for (JsonNode item : docs) {
-//					ItemsResponse it = new ItemsResponse();
-//					it.id = Utils.readAttr(item.path("id"), "videoId", true);
-//					it.thumb = Utils
-//							.readArrayAttr(item.path("snippet").path("thumbnails")
-//									.path("default"), "url", false);
-//					it.fullresolution = Utils.readArrayAttr(item.path("snippet")
-//							.path("thumbnails").path("high"), "url", false);
-//					it.title = Utils.readAttr(item.path("snippet"), "title",
-//							false);
-//					it.description = Utils.readAttr(item.path("snippet"),
-//							"description", false);
-//					it.creator = null;// Utils.readLangAttr(item.path("sourceResource"),
-//										// "creator", false);
-//					it.year = null;
-//					it.dataProvider = Utils.readAttr(item.path("snippet"),
-//							"channelTitle", false);
-//					it.url = new MyURL();
-//					it.url.fromSourceAPI = "https://www.youtube.com/watch?v="
-//							+ it.id;
-//					it.url.original = new ArrayList<String>();
-//					it.url.original.add(it.url.fromSourceAPI);
-//					it.externalId = it.url.fromSourceAPI;
-//					it.externalId = DigestUtils.md5Hex(it.externalId);
-//					a.add(it);
-//				}
-//				res.items = a;
-//				// res.facets = response.path("facets");
-//
-//				savePageDetails(q.searchTerm, q.page, q.pageSize,
-//						response.path("nextPageToken").asText());
-//
-//			} catch (Exception e) {
-//				// TODO Auto-generated catch block
-//				e.printStackTrace();
-//			}
-//		} 
+		res.source = getSourceName();
+		String httpQuery = getHttpQuery(q);
+		res.query = httpQuery;
+		JsonNode response;
+		
+		if (q.filters==null || q.filters.size()==0 ||
+				(q.filters.size()==1 && 
+				q.filters.get(0).filterID.equals(CommonFilters.TYPE.getId()) &&
+				q.filters.get(0).values.contains(WithMediaType.VIDEO)
+				)){
+			try {
+				response = getHttpConnector().getURLContent(httpQuery);
+				// System.out.println(httpQuery);
+				// System.out.println(response.toString());
+				JsonNode docs = response.path("items");
+				res.totalCount = Utils.readIntAttr(response.path("pageInfo"),
+						"totalResults", true);
+				res.count = docs.size();
+				res.startIndex = 0;
+
+				for (JsonNode item : docs) {
+					RecordResource it = parseRecord(new JsonContextRecord(item));
+					res.addItem(it);
+				}
+				// res.facets = response.path("facets");
+
+				savePageDetails(q.searchTerm, q.page, q.pageSize,
+						response.path("nextPageToken").asText());
+
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		} 
 
 		return res;
+	}
+
+	private RecordResource parseRecord(JsonContextRecord item) throws Exception {
+		RecordResource it = new RecordResource();
+		String id = item.getStringValue("id.videoId");
+		String isAt = "https://www.youtube.com/watch?v="+id;
+		it.addToProvenance(new ProvenanceInfo(LABEL, isAt, id));
+
+		EmbeddedMediaObject th = new EmbeddedMediaObject();
+		th.setType(WithMediaType.VIDEO);
+		th.setUrl(item.getStringValue("snippet.thumbnails.default.url"));
+		th.setWidth(item.getIntValue("snippet.thumbnails.default.width"));
+		th.setHeight(item.getIntValue("snippet.thumbnails.default.height"));
+		it.addMedia(MediaVersion.Thumbnail, th );
+		
+		th = new EmbeddedMediaObject();
+		th.setType(WithMediaType.VIDEO);
+		th.setUrl(isAt);
+		it.addMedia(MediaVersion.Original, th);
+
+		addOtherThumbs(item, it);
+		
+		RecordDescriptiveData model;
+		it.setDescriptiveData(model=new RecordDescriptiveData());
+		model.setIsShownAt(new LiteralOrResource(isAt).fillDEF());
+		model.setLabel(item.getMultiLiteralValue("snippet.title"));
+		model.setDescription(item.getMultiLiteralValue("snippet.title"));
+
+		return it;
+	}
+	
+	
+	private RecordResource parseRecord2(JsonContextRecord item) throws Exception {
+		RecordResource it = new RecordResource();
+		String id = item.getStringValue("id");
+		String isAt = "https://www.youtube.com/watch?v="+id;
+		it.addToProvenance(new ProvenanceInfo(LABEL, isAt, id));
+
+		EmbeddedMediaObject th = new EmbeddedMediaObject();
+		th.setType(WithMediaType.VIDEO);
+		th.setUrl(item.getStringValue("snippet.thumbnails.default.url"));
+		th.setWidth(item.getIntValue("snippet.thumbnails.default.width"));
+		th.setHeight(item.getIntValue("snippet.thumbnails.default.height"));
+		it.addMedia(MediaVersion.Thumbnail, th );
+		
+		th = new EmbeddedMediaObject();
+		th.setType(WithMediaType.VIDEO);
+		th.setUrl(isAt);
+		it.addMedia(MediaVersion.Original, th);
+
+		addOtherThumbs(item, it);
+		RecordDescriptiveData model;
+		it.setDescriptiveData(model=new RecordDescriptiveData());
+		model.setIsShownAt(new LiteralOrResource(isAt).fillDEF());
+		model.setLabel(item.getMultiLiteralValue("snippet.title"));
+		model.setDescription(item.getMultiLiteralValue("snippet.title"));
+		model.setKeywords(item.getMultiLiteralOrResourceValue("snippet.tags"));
+		return it;
+	}
+
+	private void addOtherThumbs(JsonContextRecord item, RecordResource it) {
+		EmbeddedMediaObject th;
+		if (Utils.hasInfo(item.getValue("snippet.thumbnails.medium"))) {
+			th = new EmbeddedMediaObject();
+			th.setType(WithMediaType.VIDEO);
+			th.setUrl(item.getStringValue("snippet.thumbnails.medium.url"));
+			th.setWidth(item.getIntValue("snippet.thumbnails.medium.width"));
+			th.setHeight(item.getIntValue("snippet.thumbnails.medium.height"));
+			it.addMediaView(MediaVersion.Thumbnail, th);
+		}
+		if (Utils.hasInfo(item.getValue("snippet.thumbnails.high"))) {
+			th = new EmbeddedMediaObject();
+			th.setType(WithMediaType.VIDEO);
+			th.setUrl(item.getStringValue("snippet.thumbnails.high.url"));
+			th.setWidth(item.getIntValue("snippet.thumbnails.high.width"));
+			th.setHeight(item.getIntValue("snippet.thumbnails.high.height"));
+			it.addMediaView(MediaVersion.Thumbnail, th);
+		}
+		if (Utils.hasInfo(item.getValue("snippet.thumbnails.standard"))) {
+			th = new EmbeddedMediaObject();
+			th.setType(WithMediaType.VIDEO);
+			th.setUrl(item.getStringValue("snippet.thumbnails.standard.url"));
+			th.setWidth(item.getIntValue("snippet.thumbnails.standard.width"));
+			th.setHeight(item.getIntValue("snippet.thumbnails.standard.height"));
+			it.addMediaView(MediaVersion.Thumbnail, th);
+		}
+		if (Utils.hasInfo(item.getValue("snippet.thumbnails.maxres"))) {
+			th = new EmbeddedMediaObject();
+			th.setType(WithMediaType.VIDEO);
+			th.setUrl(item.getStringValue("snippet.thumbnails.maxres.url"));
+			th.setWidth(item.getIntValue("snippet.thumbnails.maxres.width"));
+			th.setHeight(item.getIntValue("snippet.thumbnails.maxres.height"));
+			it.addMediaView(MediaVersion.Thumbnail, th);
+		}
 	}
 
 	private void savePageDetails(String q, String page, String pageSize,
@@ -202,9 +284,18 @@ public class YouTubeSpaceSource extends ISpaceSource {
 			response = getHttpConnector()
 					.getURLContent("https://www.googleapis.com/youtube/v3/videos?id="
 							+ recordId + "&part=snippet&key=" + getKey());
-			JsonNode record = response.get("items").get(0);
-			jsonMetadata.add(new RecordJSONMetadata(Format.JSON_YOUTUBE, record
-					.toString()));
+			
+			
+			if (response != null) {
+				JsonNode record = response.get("items").get(0);
+				jsonMetadata.add(new RecordJSONMetadata(Format.JSON_YOUTUBE, record
+						.toString()));
+				Object item = parseRecord2(new JsonContextRecord(record));
+				String json = Json.toJson(item).toString();
+				jsonMetadata.add(new RecordJSONMetadata(Format.JSON_WITH, json));
+			}
+			
+			
 			return jsonMetadata;
 		} catch (Exception e) {
 			return jsonMetadata;

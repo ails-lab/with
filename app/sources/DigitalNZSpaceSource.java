@@ -183,7 +183,6 @@ public class DigitalNZSpaceSource extends ISpaceSource {
 				jsonMetadata.add(new RecordJSONMetadata(Format.JSON_DNZ, record.toString()));
 				String json = Json.toJson(formatreader.readObjectFrom(record.path("record"))).toString();
 				jsonMetadata.add(new RecordJSONMetadata(Format.JSON_WITH, json));
-				System.out.println(json);
 			}
 			Document xmlResponse = getHttpConnector()
 					.getURLContentAsXML("http://api.digitalnz.org/v3/records/" + recordId + ".xml?api_key=" + apiKey);
