@@ -23,9 +23,13 @@ import org.bson.types.ObjectId;
 import utils.Deserializer;
 import utils.Serializer;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
+@JsonInclude(value = JsonInclude.Include.NON_EMPTY)
 public class ContextData<T1 extends ContextData.ContextDataBody> {
 
 	public static enum ContextDataType {
@@ -75,7 +79,7 @@ public class ContextData<T1 extends ContextData.ContextDataBody> {
 
 	public ContextData() {
 	}
-	
+
 	public ContextData(ObjectId recordId) {
 		this.target = new ContextDataTarget();
 		this.getTarget().setRecordId(recordId);
