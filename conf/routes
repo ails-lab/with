@@ -56,6 +56,7 @@ POST     /collection		                    controllers.CollectionObjectController
 POST     /collection/importSearch		        controllers.CollectionObjectController.importSearch()
 POST     /collection/importIDs 					controllers.CollectionObjectController.importIDs(cname, source, ids)
 GET     /collection/importEuropeanaCollection	controllers.CollectionObjectController.createAndFillEuropeanaCollection(id: String, limit:Integer ?=-1)
+GET      /collection/exportToOWL 			    controllers.CollectionObjectController.exportCollectionObjectToOWL(cname)
 
 GET	     /collection/:id 	        			controllers.CollectionObjectController.getCollectionObject(id)
 PUT		 /collection/:id 						controllers.CollectionObjectController.editCollectionObject(id)

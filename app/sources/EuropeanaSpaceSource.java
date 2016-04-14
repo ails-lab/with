@@ -403,7 +403,7 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 			// todo read the other format;
 			JsonNode record = response.get("object");
 			if (response != null) {
-				jsonMetadata.add(new RecordJSONMetadata(Format.JSON_EDM, record.toString()));
+//				jsonMetadata.add(new RecordJSONMetadata(Format.JSON_EDM, record.toString()));
 				EuropeanaItemRecordFormatter f = new EuropeanaItemRecordFormatter();
 				String json = Json.toJson(f.overwritedObjectFrom((CulturalObject)fullRecord,record)).toString();
 				jsonMetadata.add(new RecordJSONMetadata(Format.JSON_WITH, json));
