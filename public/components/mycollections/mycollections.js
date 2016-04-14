@@ -141,7 +141,8 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 					var withUrl = value.Thumbnail.withUrl();
 				    var url     = value.Thumbnail.url();
 				        
-					if (withUrl == "" || withUrl == null || value.Thumbnail.mediaVersion == null) {
+					//if (withUrl == "" || withUrl == null || value.Thumbnail.mediaVersion == null) {
+					if (withUrl == "" || withUrl == null) {
 						if(innerModel.administrative.entryCount() > 0)
 							innerModel.media()[index].thumbnailUrl = ko.observable("img/content/thumb-empty.png");
 					} 						
