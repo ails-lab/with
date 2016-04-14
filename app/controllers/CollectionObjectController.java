@@ -354,7 +354,7 @@ public class CollectionObjectController extends WithResourceController {
 			if (ct != null)
 				colType = CollectionType.valueOf(ct.asText());
 		}
-		try {	
+		try {
 			if (session().get("user") == null) {
 				error.put("error", "No rights for WITH resource creation");
 				return forbidden(error);
@@ -910,12 +910,16 @@ public class CollectionObjectController extends WithResourceController {
 						}
 						continue;
 					}
-					if (contentFormat.equals("noContent") && r.getContent() != null) {
+					if (contentFormat.equals("noContent")
+							&& r.getContent() != null) {
 						r.getContent().clear();
 						recordsList.add(Json.toJson(r));
-						fillContextData(DB.getCollectionObjectDAO()
-								.getById(colId, Arrays.asList("collectedResources"))
-								.getCollectedResources(), recordsList);
+						fillContextData(
+								DB.getCollectionObjectDAO()
+										.getById(
+												colId,
+												Arrays.asList("collectedResources"))
+										.getCollectedResources(), recordsList);
 						continue;
 					}
 					if (r.getContent() != null
@@ -950,9 +954,19 @@ public class CollectionObjectController extends WithResourceController {
 	}
 
 	private static void fillContextData(
-			List<ContextData<ContextDataBody>> collectedResources,
+			List<ContextData<ContextDataBody>> contextData,
 			ArrayNode recordsList) {
-				
+		for (JsonNode record : recordsList) {
+			for (ContextData<ContextDataBody> data : contextData) {
+				if (data.getTarget().getRecordId().toString()
+						.equals(record.get("dbId").asText())) {
+					((ObjectNode) record).put("contextData", Json.toJson(data));
+					contextData.remove(data);
+					break;
+				}
+			}
+		}
+
 	}
 
 	public static Result listUsersWithRights(String collectionId) {

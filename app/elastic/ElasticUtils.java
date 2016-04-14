@@ -210,8 +210,8 @@ public class ElasticUtils {
 		 * NOT the dbId
 		 */
 		if(rr.getWithCreatorInfo() != null ) {
-			idx_doc.put("creatorUsername", rr.getWithCreatorInfo().getUsername());
-			idx_doc.put("creatorEmail", rr.getWithCreatorInfo().getEmail());
+			idx_doc.put("creatorUsername", rr.getWithCreator().getUsername());
+			idx_doc.put("creatorEmail", rr.getWithCreator().getEmail());
 		}
 
 

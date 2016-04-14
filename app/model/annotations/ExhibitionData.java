@@ -16,9 +16,14 @@
 
 package model.annotations;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
+
 import model.basicDataTypes.Literal;
 import model.annotations.ContextData.ContextDataBody;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
+@JsonInclude(value = JsonInclude.Include.NON_EMPTY)
 public class ExhibitionData extends ContextData<ExhibitionData.ExhibitionAnnotationBody> {
 
 	public ExhibitionData() {
@@ -27,7 +32,9 @@ public class ExhibitionData extends ContextData<ExhibitionData.ExhibitionAnnotat
 		this.body = new ExhibitionAnnotationBody();
 		this.contextDataType = ContextDataType.valueOf(this.getClass().getSimpleName());
 	}
-	
+
+	@JsonIgnoreProperties(ignoreUnknown = true)
+	@JsonInclude(value = JsonInclude.Include.NON_EMPTY)
 	public static class ExhibitionAnnotationBody extends ContextDataBody {
 		Literal text = new Literal();
 		String audioUrl="";
@@ -52,7 +59,7 @@ public class ExhibitionData extends ContextData<ExhibitionData.ExhibitionAnnotat
 		public void setVideoUrl(String videoUrl) {
 			this.videoUrl = videoUrl;
 		}
-		
+
 		public String getVideoDescription() {
 			return videoDescription;
 		}
