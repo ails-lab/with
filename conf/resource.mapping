@@ -15,6 +15,24 @@
             }
           }
         }
+      },
+      "collectedResources": {
+      	"type": "object",
+      	"properties": {
+      		"body": {
+      			"type": "object",
+      			"properties": {
+      				"audioUrl": {
+      					"type":     "string",
+        				"index":    "no"
+      				},
+      				"videoUrl": {
+      					"type":     "string",
+        				"index":    "no"
+      				}
+      			}
+      		}
+      	}
       }
     },
     "dynamic_date_formats": [

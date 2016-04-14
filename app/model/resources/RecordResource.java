@@ -33,7 +33,7 @@ public class RecordResource<T extends RecordResource.RecordDescriptiveData>
 		super();
 		this.administrative = new RecordAdmin();
 	}
-	
+
 	public RecordResource(ObjectId id) {
 		this.administrative = new RecordAdmin();
 		this.setDbId(id);
@@ -67,13 +67,12 @@ public class RecordResource<T extends RecordResource.RecordDescriptiveData>
 	 */
 	public Map<String, Object> transform() {
 		Map<String, Object> idx_map =  this.transformWR();
-		
+
 		List<ObjectId> colIn = new ArrayList<ObjectId>();
-//		this.getCollectedIn().forEach( (ci) -> (colIn.add(ci)) );
-		
-//		idx_map.put("collectedId", colIn);
-		idx_map.put("contextData", this.getContextData());
-		
+		this.getCollectedIn().forEach( (ci) -> {colIn.add(ci);} );
+
+		idx_map.put("collectedId", colIn);
+
 		return idx_map;
 	}
 }
