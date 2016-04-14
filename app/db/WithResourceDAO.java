@@ -78,7 +78,7 @@ public class WithResourceDAO<T extends WithResource> extends DAO<T> {
 
 	/**
 	 * Given a list of ObjectId's (dbId's) return the specified resources
-	 * 
+	 *
 	 * @param ids
 	 * @return
 	 */
@@ -90,7 +90,7 @@ public class WithResourceDAO<T extends WithResource> extends DAO<T> {
 	/**
 	 * List all CollectionObjects with the title provided for the language
 	 * specified
-	 * 
+	 *
 	 * @param title
 	 * @return
 	 */
@@ -110,7 +110,7 @@ public class WithResourceDAO<T extends WithResource> extends DAO<T> {
 
 	/**
 	 * Get a user's CollectionObject according to the title given
-	 * 
+	 *
 	 * @param creatorId
 	 * @param title
 	 * @return
@@ -146,7 +146,7 @@ public class WithResourceDAO<T extends WithResource> extends DAO<T> {
 
 	/**
 	 * Get all CollectionObject using the creator's/owner's id.
-	 * 
+	 *
 	 * @param creatorId
 	 * @param offset
 	 * @param count
@@ -161,7 +161,7 @@ public class WithResourceDAO<T extends WithResource> extends DAO<T> {
 	/**
 	 * Get the first CollectionObject that a user has created using the
 	 * creator's/owner's id. We are using MongoDB's paging.
-	 * 
+	 *
 	 * @param id
 	 * @return
 	 */
@@ -171,19 +171,19 @@ public class WithResourceDAO<T extends WithResource> extends DAO<T> {
 
 	/**
 	 * Retrieve the owner/creator of a Resource using collection's dbId
-	 * 
+	 *
 	 * @param id
 	 * @return
 	 */
 	public User getOwner(ObjectId id) {
 		Query<T> q = this.createQuery().field("_id").equal(id)
 				.retrievedFields(true, "administrative.withCreator");
-		return ((WithResource) findOne(q)).getWithCreatorInfo();
+		return ((WithResource) findOne(q)).getWithCreator();
 	}
 
 	/**
 	 * Retrieve a resource if the provenanceChain contains the providerName
-	 * 
+	 *
 	 * @param sourceName
 	 * @return
 	 */
@@ -199,7 +199,7 @@ public class WithResourceDAO<T extends WithResource> extends DAO<T> {
 
 	/**
 	 * Return the number of resources that belong to a source
-	 * 
+	 *
 	 * @param sourceId
 	 * @return
 	 */
@@ -238,7 +238,7 @@ public class WithResourceDAO<T extends WithResource> extends DAO<T> {
 
 	/**
 	 * Create a Mongo access query criteria
-	 * 
+	 *
 	 * @param userAccess
 	 * @return
 	 */
@@ -283,7 +283,7 @@ public class WithResourceDAO<T extends WithResource> extends DAO<T> {
 	/**
 	 * Create a basic Mongo query with withCreator field matching, offset, limit
 	 * and criteria.
-	 * 
+	 *
 	 * @param criteria
 	 * @param creator
 	 * @param offset
@@ -402,7 +402,7 @@ public class WithResourceDAO<T extends WithResource> extends DAO<T> {
 
 	/**
 	 * Return the total number of likes for a resource.
-	 * 
+	 *
 	 * @param id
 	 * @return
 	 */
@@ -483,7 +483,7 @@ public class WithResourceDAO<T extends WithResource> extends DAO<T> {
 
 	/**
 	 * Increment likes for this specific resource
-	 * 
+	 *
 	 * @param externalId
 	 */
 	public void incrementLikes(ObjectId dbId) {
@@ -492,7 +492,7 @@ public class WithResourceDAO<T extends WithResource> extends DAO<T> {
 
 	/**
 	 * Decrement likes for this specific resource
-	 * 
+	 *
 	 * @param dbId
 	 */
 	public void decrementLikes(ObjectId dbId) {
