@@ -547,8 +547,16 @@ public class CollectionObjectController extends WithResourceController {
 				result.put("error", "Invalid JSON");
 				return badRequest(result);
 			}
-			CollectionObject collectionChanges = Json.fromJson(json,
-					CollectionObject.class);
+			String colType = null;
+			if (json.has("resourceType"))
+				colType = json.get("resourceType").asText();
+			if ((colType == null)
+					|| (WithResourceType.valueOf(colType) == null))
+				colType = WithResourceType.SimpleCollection.toString();
+			Class<?> clazz = Class.forName("model.resources.collection."
+						+ colType);
+			CollectionObject collectionChanges = (CollectionObject) Json.fromJson(json,
+					clazz);
 			ObjectId creatorDbId = new ObjectId(session().get("user"));
 			if ((collectionChanges.getDescriptiveData().getLabel() != null)
 					&& DB.getCollectionObjectDAO().existsOtherForOwnerAndLabel(
@@ -560,7 +568,6 @@ public class CollectionObjectController extends WithResourceController {
 				error.put("error", "Not unique collection title");
 				return badRequest(error);
 			}
-			//TODO: check resourceType of collectionDbId and call fromJson accordingly
 			DB.getCollectionObjectDAO().editCollection(collectionDbId, json);
 			return ok(Json.toJson(DB.getCollectionObjectDAO().get(
 					collectionDbId)));

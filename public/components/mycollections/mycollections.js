@@ -79,9 +79,7 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 				"error": function (result) {
 					$.smkAlert({ text: 'An error occured', type: 'danger', time: 10 });
 					self.closeSideBar();
-				}
-		            
-		          
+				}         
 		 });		
 		};
 		
@@ -687,16 +685,21 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 					collId = self.sharedCollections()[collIndex].dbId();
 				}
 				if (collId != -1) {
+					var jsondata = JSON.stringify({
+						descriptiveData : {
+							label : {
+								default : [self.titleToEdit()]
+							},
+							description : {
+								default : [self.descriptionToEdit()]
+							}
+						}
+					});
 					$.ajax({
 						"url": "/collection/" + collId,
 						"method": "PUT",
 						"contentType": "application/json",
-						"data": JSON.stringify(
-							{descriptiveData: {
-								label: {default: [self.titleToEdit()]},
-								description: {default: [self.descriptionToEdit()]}
-							}
-						}),
+						"data": jsondata,
 						success: function (result) {
 							if (self.collectionSet() == "my") {
 								self.updateCollectionData(self.myCollections(), collIndex);
