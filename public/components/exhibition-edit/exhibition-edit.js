@@ -607,10 +607,8 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 		}
 		
 		self.bindFileUpload = function() {
-			$('#coverImg').on("click", function( e ) {
-				$('.action').removeClass('active');
-				$('.action.upload').addClass('active');				
-			});
+			$('.action').removeClass('active');
+			$('.action.upload').addClass('active');				
 			$('#mediaupload').fileupload({
 				type: "POST",
 				url: '/media/create',
@@ -766,7 +764,32 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 		};
 		
 		ko.bindingHandlers.dropBackgroundImg = {
-				
+				init: function (element, valueAccessor, allBindingsAccessor, viewModel, bindingContext) {
+					var dropElement = $(element);
+					var dropOptions = {
+						hoverClass: "drop-hover",
+						tolerance: "intersect",
+						over: function (event, ui) {
+							if (!_bIsMoveOperation) {
+								dropElement.animate({
+									width: "150px"
+								}, 200);
+							}
+						},
+						out: function (event, ui) {
+							dropElement.animate({
+								width: "60px"
+							}, 200);
+						},
+						drop: function (event, ui) {
+							var indexNewItem = ko.utils.unwrapObservable(valueAccessor().index);
+							dropElement.animate({
+								width: "60px"
+							}, 200);
+						}
+					};
+					dropElement.droppable(dropOptions);
+				}	
 		};
 
 		ko.bindingHandlers.hscroll = {
