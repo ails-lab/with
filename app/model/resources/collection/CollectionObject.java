@@ -41,7 +41,8 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import play.libs.Json;
 
 @Entity("CollectionObject")
-public class CollectionObject<T extends CollectionObject.CollectionDescriptiveData> extends WithResource<CollectionObject.CollectionDescriptiveData, CollectionObject.CollectionAdmin> {
+public class CollectionObject<T extends CollectionObject.CollectionDescriptiveData> 
+	extends WithResource<T, CollectionObject.CollectionAdmin> {
 
 	public CollectionObject() {
 		super();

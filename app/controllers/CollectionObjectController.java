@@ -51,10 +51,13 @@ import model.basicDataTypes.WithAccess.AccessEntry;
 import model.resources.CulturalObject;
 import model.resources.CulturalObject.CulturalObjectData;
 import model.resources.RecordResource;
+import model.resources.RecordResource.RecordDescriptiveData;
 import model.resources.WithResource;
 import model.resources.WithResource.WithResourceType;
 import model.resources.collection.CollectionObject;
 import model.resources.collection.CollectionObject.CollectionAdmin;
+import model.resources.collection.Exhibition;
+import model.resources.collection.Exhibition.ExhibitionDescriptiveData;
 import model.usersAndGroups.Organization;
 import model.usersAndGroups.Page;
 import model.usersAndGroups.Project;
@@ -472,14 +475,8 @@ public class CollectionObjectController extends WithResourceController {
 			if (!response.toString().equals(ok().toString()))
 				return response;
 			else {
-				CollectionObject collection = DB.getCollectionObjectDAO().get(
+				CollectionObject collection = (Exhibition) DB.getCollectionObjectDAO().get(
 						new ObjectId(id));
-				/*
-				 * List<RecordResource> firstEntries =
-				 * DB.getCollectionObjectDAO() .getFirstEntries(collectionDbId,
-				 * 3); result = (ObjectNode) Json.toJson(collection);
-				 * result.put("firstEntries", Json.toJson(firstEntries));
-				 */
 				return ok(Json.toJson(collection));
 			}
 		} catch (Exception e) {

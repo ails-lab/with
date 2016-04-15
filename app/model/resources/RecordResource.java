@@ -27,7 +27,7 @@ import model.annotations.ContextData;
 
 
 public class RecordResource<T extends RecordResource.RecordDescriptiveData>
-	extends WithResource<RecordResource.RecordDescriptiveData, RecordResource.RecordAdmin> {
+	extends WithResource<T, RecordResource.RecordAdmin> {
 
 	public RecordResource() {
 		super();

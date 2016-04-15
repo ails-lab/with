@@ -91,7 +91,19 @@ define(['knockout', 'text!./_exhibition-view.html', 'app', 'magnific-popup', 'sl
 		self.desc = ko.observable('');
 		self.loading = ko.observable(false);
 		self.showCarousel = ko.observable(false);
-
+		self.backgroundImgWithUrl = ko.observable('');
+		self.backgroundImgShowUrl = ko.pureComputed(function () {
+			if (self.backgroundImgWithUrl == null || self.backgroundImgWithUrl() == "" || self.backgroundImgWithUrl.Original.mediaVersion == null) {
+					return self.exhItems()[0].fullres();
+			} 						
+			else {
+				if (self.backgroundImgWithUrl.indexOf("/media") == 0) {
+					return window.location.origin + backgroundImgWithUrl();
+				} else {
+					backgroundImgWithUrl();
+				}
+			}
+		}	
 		self.initCarousel = function () {
 			WITHApp.initTooltip();
 			WITHApp.initCarousel();

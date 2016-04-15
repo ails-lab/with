@@ -44,6 +44,7 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 	function updateExhibitionProperty(exhibition, propertyName, newValue) {
 		var jsonObject = {};
 		jsonObject[propertyName] = newValue;
+		jsonObject["resourceType"] = "Exhibition";
 		var jsonData = JSON.stringify(jsonObject);
 		return $.ajax({
 			type: "PUT",
@@ -172,33 +173,32 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 			        		return false;
 			        	else
 			        		return (newRecord.contextData.body.audioUrl() !== '');
-
-					});
-					newRecord.containsVideo = ko.pureComputed(function () {
-						if (newRecord.contextData.body.videoUrl == undefined) {
-							return false;
-						} else {
-							return (newRecord.contextData.body.videoUrl() !== '');
-						}
-						return result;
-					});
-					newRecord.containsVideoDescription = ko.pureComputed(function () {
-						if (newRecord.contextData.body.videoDescription == undefined) {
-							return false;
-						} else {
-							return (newRecord.contextData.body.videoDescription() !== '');
-						}
-						return result;
-					});
-					newRecord.containsText = ko.pureComputed(function () {
-						if (newRecord.contextData.body == undefined 
-							|| newRecord.contextData.body.text == undefined 
-							|| newRecord.contextData.body.text.default == undefined) {
-							return false;
-						} else {
-							return newRecord.contextData.body.text.default() !== '';
-						}
-					});
+				});
+				newRecord.containsVideo = ko.pureComputed(function () {
+					if (newRecord.contextData.body.videoUrl == undefined) {
+						return false;
+					} else {
+						return (newRecord.contextData.body.videoUrl() !== '');
+					}
+					return result;
+				});
+				newRecord.containsVideoDescription = ko.pureComputed(function () {
+					if (newRecord.contextData.body.videoDescription == undefined) {
+						return false;
+					} else {
+						return (newRecord.contextData.body.videoDescription() !== '');
+					}
+					return result;
+				});
+				newRecord.containsText = ko.pureComputed(function () {
+					if (newRecord.contextData.body == undefined 
+						|| newRecord.contextData.body.text == undefined 
+						|| newRecord.contextData.body.text.default == undefined) {
+						return false;
+					} else {
+						return newRecord.contextData.body.text.default() !== '';
+					}
+				});
 				newRecord.embeddedVideoUrl = ko.pureComputed(function () {
 					if (newRecord.containsVideo()) {
 						var urlMatch = newRecord.contextData.body.videoUrl().match(/youtube\.com.*(\?v=|\/embed\/)(.{11})/);
@@ -222,28 +222,27 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 				}	
 		        var fullres="";
 			    
-		        if(newRecord.media()!=null &&  newRecord.media()[0] !=null && newRecord.media()[0].Original!=null  && newRecord.media()[0].Original.url()!="null"){
+		        if(newRecord.media()!=null &&  newRecord.media()[0] !=null && newRecord.media()[0].Original!=null  && newRecord.media()[0].Original.url()!="null") {
 		        	 fullres=newRecord.media()[0].Original.url();
 		        }
 		        if (fullres.indexOf("empty")!=-1) {fullres="";}
 		        newRecord.fullres=ko.observable(fullres);
 		        
 		        var withUrl = "";
-		        if(newRecord.media()!=null &&  newRecord.media()[0] !=null && newRecord.media()[0].Thumbnail!=null  && newRecord.media()[0].Thumbnail.url()!="null"){
+		        if (newRecord.media()!=null &&  newRecord.media()[0] !=null && newRecord.media()[0].Thumbnail!=null  && newRecord.media()[0].Thumbnail.url()!="null") {
 		        	withUrl=newRecord.media()[0].Thumbnail.url();
-		        }
-			        
-		       if (withUrl.indexOf("empty")!=-1) {withUrl="";}
-			   if (withUrl == "")
+		        }       
+			    if (withUrl == "") {
 						newRecord.thumbnailUrl = ko.observable("img/content/thumb-empty.png");
-			   else {
-						if (withUrl.indexOf("/media") == 0) {
-							newRecord.thumbnailUrl = ko.observable(window.location.origin + withUrl);
-					   } else {
-							newRecord.thumbnailUrl = ko.observable(withUrl);
-					   }
-					}
-				return newRecord;
+			    }
+			    else {
+				   if (withUrl.indexOf("/media") == 0) {
+						newRecord.thumbnailUrl = ko.observable(window.location.origin + withUrl);
+				   } else {
+						newRecord.thumbnailUrl = ko.observable(withUrl);
+				   }
+			    }
+			    return newRecord;
 		    }
 		}		
 		self.searchPage = 0;
@@ -322,6 +321,18 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 			self.title(app.findByLang(data.descriptiveData.label));
 			self.description(app.findByLang(data.descriptiveData.description));
 			setUpSwitch(self);
+			if (self.descriptiveData.backgroundImg.Original ==null || 
+					self.descriptiveData.backgroundImg.Original.withUrl == null || 
+					self.descriptiveData.backgroundImg.Original.withUrl == "") {
+				self.backgroundImg("");
+			} 						
+			else {
+				if (self.descriptiveData.backgroundImg.Original.withUrl().indexOf("/media") == 0) {
+					self.backgroundImg(window.location.origin + self.descriptiveData.backgroundImg.Original.withUrl());
+				} else {
+					self.backgroundImg(self.descriptiveData.backgroundImg.Original.withUrl());
+				}
+			}
 			$.ajax({
 				url: "/collection/" + self.dbId() + "/list?count="+exhibitionItemCount+"&start=0",
 				method: "get",
@@ -568,8 +579,31 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 		}
 		
 		self.saveExhBackrImg = function() {
-			if (self.newBackgroundImg()) 
-				updateExhibitionProperty(self, "backgroundImg", self.backgroundImg());
+			if (self.newBackgroundImg()) {
+				var jsonData = {
+					descriptiveData: {
+						backgroundImg: {
+								Original: {
+									url: self.backgroundImg()
+								},
+								Thumbnail: {
+									url: self.thumbnailBIUrl
+								}
+						}
+					},
+					resourceType: "Exhibition"
+				};
+				return $.ajax({
+					type: "PUT",
+					url: "/collection/" + self.dbId(),
+					data: JSON.stringify(jsonData),
+					contentType: "application/json",
+					success: function () {
+						// Empty
+					}
+				});
+			}
+			//updateExhibitionProperty(self, "descriptiveData.backgroundImg", self.backgroundImg());
 		}
 		
 		self.bindFileUpload = function() {
@@ -583,7 +617,10 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 				success: function (data, textStatus, jqXHR) {
 					self.backgroundImg(data.original);
 					self.newBackgroundImg(true);
-					//console.log(self.displayCoverImage());
+					//self.mediumBIUrl(data.medium);
+					self.thumbnailBIUrl = data.thumbnail;
+					//self.squareBIUrl(data.square);
+					//self.tinyBIUrl(data.tiny);
 				},
 				error: function (e, data) {
 					console.log(data);

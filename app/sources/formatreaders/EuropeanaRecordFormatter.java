@@ -86,7 +86,7 @@ public class EuropeanaRecordFormatter extends CulturalRecordFormatter {
 		List<String> rights = rec.getStringArrayValue("rights");
 		List<Object> translateToCommon = getValuesMap().translateToCommon(CommonFilters.TYPE.getId(), rec.getStringValue("type"));
 		WithMediaType type = (WithMediaType.getType(translateToCommon.get(0).toString())) ;
-		WithMediaRights withRights = (!Utils.hasInfo(rights))?null:WithMediaRights.getRighs(
+		WithMediaRights withRights = (!Utils.hasInfo(rights))?null:WithMediaRights.getRights(
 				getValuesMap().translateToCommon(CommonFilters.RIGHTS.getId(), rights.get(0)).get(0).toString());
 		String uri3 = rec.getStringValue("edmPreview");
 		String uri2 = model.getIsShownBy()==null?null:model.getIsShownBy().getURI();
