@@ -599,7 +599,7 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 					data: JSON.stringify(jsonData),
 					contentType: "application/json",
 					success: function () {
-						// Empty
+						self.closeSideBar();
 					}
 				});
 			}

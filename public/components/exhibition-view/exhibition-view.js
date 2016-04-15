@@ -1,11 +1,11 @@
 define(['knockout', 'text!./_exhibition-view.html', 'app', 'magnific-popup', 'slick'], function (ko, template, app, magnificPopup, slick) {
 
 	ko.bindingHandlers.backgroundImage = {
-		update: function (element, valueAccessor) {
+		update: function (element, valueAccessor, allBindingsAccessor, viewModel, context) {
 			ko.bindingHandlers.style.update(element,
 				function () {
 					return {
-						backgroundImage: "url('" + valueAccessor() + "')"
+						backgroundImage: "url('" + viewModel.backgroundImgWithUrl() + "')"
 					};
 				});
 		}
@@ -92,18 +92,6 @@ define(['knockout', 'text!./_exhibition-view.html', 'app', 'magnific-popup', 'sl
 		self.loading = ko.observable(false);
 		self.showCarousel = ko.observable(false);
 		self.backgroundImgWithUrl = ko.observable('');
-		self.backgroundImgShowUrl = ko.pureComputed(function () {
-			if (self.backgroundImgWithUrl == null || self.backgroundImgWithUrl() == "" || self.backgroundImgWithUrl.Original.mediaVersion == null) {
-					return self.exhItems()[0].fullres();
-			} 						
-			else {
-				if (self.backgroundImgWithUrl.indexOf("/media") == 0) {
-					return window.location.origin + backgroundImgWithUrl();
-				} else {
-					backgroundImgWithUrl();
-				}
-			}
-		}	
 		self.initCarousel = function () {
 			WITHApp.initTooltip();
 			WITHApp.initCarousel();
@@ -171,6 +159,7 @@ define(['knockout', 'text!./_exhibition-view.html', 'app', 'magnific-popup', 'sl
 					self.owner(data.withCreatorInfo.username);
 					self.ownerId(data.administrative.withCreator);
 					self.entryCount(data.administrative.entryCount);
+					var backgroundImg = data.descriptiveData.backgroundImg;
 					//self.access(adminData.access);
 					if (self.entryCount() && self.entryCount() > 0) {
 						$.ajax({
@@ -179,6 +168,18 @@ define(['knockout', 'text!./_exhibition-view.html', 'app', 'magnific-popup', 'sl
 							"contentType": "application/json",
 							"success": function (data) {
 								var items = self.revealItems(data.records);
+								if (backgroundImg == null || backgroundImg.Original ==null || 
+										backgroundImg.Original.withUrl == null || 
+										backgroundImg.Original.withUrl == "") {
+									self.backgroundImgWithUrl(self.exhItems()[0].fullres());
+								} 						
+								else {
+									if (backgroundImg.Original.withUrl.indexOf("/media") == 0) {
+										self.backgroundImgWithUrl(window.location.origin + backgroundImg.Original.withUrl);
+									} else {
+										self.backgroundImgWithUrl(self.backgroundImg.Original.withUrl);
+									}
+								}
 								self.loading(false);
 							},
 							"error": function (result) {
