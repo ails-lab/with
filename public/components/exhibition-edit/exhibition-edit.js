@@ -158,7 +158,8 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 		        var record = options.data;
 		        var newRecord =  ko.mapping.fromJS(record, {});
 				console.log(newRecord.contextData.body);
-				if (typeof newRecord.contextData.body.audioUrl === 'undefined') {
+				if ($.isEmptyObject(newRecord.contextData.body) 
+						|| typeof newRecord.contextData.body.audioUrl === 'undefined') {
 					body = ko.mapping.fromJS({
 							"audioUrl": "",
 							"text": {"default": ""},
