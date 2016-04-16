@@ -108,8 +108,8 @@ public class SearchController extends Controller {
 		List<Sources> res = new ArrayList<>();
 		for (final ISpaceSource src : ESpaceSources.getESources()) {
 			Sources sourceByID = Sources.getSourceByID(src.LABEL);
-			if (sourceByID!=null)
-			res.add(sourceByID);
+			if (sourceByID!=null && !sourceByID.equals(Sources.Europeana))
+				res.add(sourceByID);
 		}
 		return ok(Json.toJson(res));
 	}
