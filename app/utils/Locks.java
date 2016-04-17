@@ -31,6 +31,7 @@ import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
 import akka.actor.Props;
 import akka.actor.UntypedActor;
+import db.DB;
 import play.Logger;
 import play.Logger.ALogger;
 import play.libs.Akka;
@@ -151,6 +152,8 @@ public class Locks implements Serializable {
 	public Locks acquire() throws Exception {
 		// wait some to get the lock
 		// either return this or throw
+		
+		if( DB.getConf().getBoolean("locks.disabled")) return this;
 		Semaphore waitHere = new Semaphore(0);
 		threadPark.put( lockId, waitHere);	
 		try {
