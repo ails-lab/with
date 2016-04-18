@@ -16,20 +16,21 @@
 
 package model.resources.collection;
 
-import java.util.HashMap;
-
 import org.mongodb.morphia.annotations.Entity;
 
-import model.EmbeddedMediaObject;
-import model.EmbeddedMediaObject.MediaVersion;
-import model.resources.WithResource.WithResourceType;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
+
 import model.resources.collection.CollectionObject.CollectionDescriptiveData;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
+@JsonInclude(value = JsonInclude.Include.NON_EMPTY)
 @Entity("CollectionObject")
 public class SimpleCollection extends CollectionObject<CollectionDescriptiveData> {
-	
+
 	public SimpleCollection() {
 		super();
 		this.resourceType = WithResourceType.SimpleCollection;
 	}
+
 }

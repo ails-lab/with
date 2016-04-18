@@ -22,7 +22,9 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import model.resources.RecordResource;
 import model.resources.WithResource.WithResourceType;
@@ -74,18 +76,9 @@ public class Elastic {
 	public static String mappingResource    = getConf().getString("elasticsearch.index.mapping.resource");
 
 	public static final String typeResource       = WithResourceType.RecordResource.toString().toLowerCase();
-	public static final String typeCollection     = WithResourceType.CollectionObject.toString().toLowerCase();
-	public static final String typeCultural       = WithResourceType.CulturalObject.toString().toLowerCase();
-	public static final String typeAgent          = WithResourceType.AgentObject.toString().toLowerCase();
-	public static final String typeEvent		  = WithResourceType.EventObject.toString().toLowerCase();
-	public static final String typePlace	      = WithResourceType.PlaceObject.toString().toLowerCase();
-	public static final String typeTimespan	      = WithResourceType.TimespanObject.toString().toLowerCase();
-	public static final String typeEuscreen	      = WithResourceType.EuScreenObject.toString().toLowerCase();
-	public static final String typeThesaurus 	  = WithResourceType.ThesaurusObject.toString().toLowerCase();
-	public static final List<String> allTypes 	  = new ArrayList<String>() {{
-														add(typeCultural);
-														add(typeResource);add(typeCollection); add(typeThesaurus);
-														add(typeAgent);add(typeEvent);add(typePlace);add(typeTimespan); }};
+	public static final List<String> allTypes 	  = Arrays.asList(WithResourceType.values()).stream()
+														.map(wr -> wr.toString())
+														.collect(Collectors.toList());
 
 
 

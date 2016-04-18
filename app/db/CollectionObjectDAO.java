@@ -117,7 +117,7 @@ public class CollectionObjectDAO extends WithResourceDAO<CollectionObject> {
 		/* update collection index and mongo records */
 		BiFunction<ObjectId, Map<String, Object>, Boolean> updateCollection = (
 				ObjectId colId, Map<String, Object> doc) -> {
-			return ElasticUpdater.updateOne(Elastic.typeCollection, colId, doc);
+			return ElasticUpdater.updateOne(WithResourceType.CollectionObject.toString(), colId, doc);
 		};
 		ObjectMapper mapper = new ObjectMapper();
 		mapper.setSerializationInclusion(Include.NON_NULL);
@@ -199,7 +199,7 @@ public class CollectionObjectDAO extends WithResourceDAO<CollectionObject> {
 
 	/**
 	 * Return the total number of CollectionObject entities for a specific query
-	 * 
+	 *
 	 * @param q
 	 * @param isExhibition
 	 * @return
@@ -230,7 +230,7 @@ public class CollectionObjectDAO extends WithResourceDAO<CollectionObject> {
 	/**
 	 * Return CollectionObjects (bounded by a limit) that satisfy the logged in
 	 * user's access criteria and optionally some other user access criteria.
-	 * 
+	 *
 	 * @param loggeInEffIds
 	 * @param accessedByUserOrGroup
 	 * @param creator
@@ -255,7 +255,7 @@ public class CollectionObjectDAO extends WithResourceDAO<CollectionObject> {
 	/**
 	 * Return public CollectionObjects (bounded by a limit) that also satisfy
 	 * some user access criteria.
-	 * 
+	 *
 	 * @param accessedByUserOrGroup
 	 * @param creator
 	 * @param isExhibition
@@ -548,7 +548,7 @@ public class CollectionObjectDAO extends WithResourceDAO<CollectionObject> {
 	 * recordId) { BiFunction<ObjectId, ObjectId, Boolean> methodQuery =
 	 * (ObjectId colId, ObjectId recId) -> { try { addCollectionMedia(colId,
 	 * recId); return true; } catch (Exception e) { return false; }
-	 * 
+	 *
 	 * }; ParallelAPICall.createPromise(methodQuery, collectionId, recordId); }
 	 */
 	public void removeCollectionMedia(ObjectId collectionId, int position) {
@@ -589,7 +589,7 @@ public class CollectionObjectDAO extends WithResourceDAO<CollectionObject> {
 		this.update(cq, colUpdate);
 
 	}
-	
+
 	public void updateBackgroundImg(ObjectId exhId, HashMap<MediaVersion, EmbeddedMediaObject> media) {
 		UpdateOperations<CollectionObject> colUpdate = DB
 				.getCollectionObjectDAO().createUpdateOperations()

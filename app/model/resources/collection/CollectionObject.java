@@ -17,7 +17,6 @@
 package model.resources.collection;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -26,22 +25,21 @@ import model.annotations.ContextData;
 import model.annotations.ContextData.ContextDataBody;
 import model.basicDataTypes.MultiLiteralOrResource;
 import model.resources.WithResource;
-import model.resources.WithResource.WithAdmin;
-import model.resources.WithResource.WithResourceType;
-
 import org.mongodb.morphia.annotations.Embedded;
 import org.mongodb.morphia.annotations.Entity;
 
-import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-
 import play.libs.Json;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+
+@JsonIgnoreProperties(ignoreUnknown = true)
+@JsonInclude(value = JsonInclude.Include.NON_EMPTY)
 @Entity("CollectionObject")
-public class CollectionObject<T extends CollectionObject.CollectionDescriptiveData> 
+public class CollectionObject<T extends CollectionObject.CollectionDescriptiveData>
 	extends WithResource<T, CollectionObject.CollectionAdmin> {
 
 	public CollectionObject() {
@@ -69,8 +67,6 @@ public class CollectionObject<T extends CollectionObject.CollectionDescriptiveDa
 	@Embedded
 	public static class CollectionAdmin extends WithResource.WithAdmin {
 
-		//public enum CollectionType {SimpleCollection, Exhibition};
-
 		protected int entryCount = 0;
 		//protected CollectionType collectionType = CollectionType.SimpleCollection;
 
@@ -85,14 +81,6 @@ public class CollectionObject<T extends CollectionObject.CollectionDescriptiveDa
 		public void incEntryCount() {
 			this.entryCount++;
 		}
-
-		/*public CollectionType getCollectionType() {
-			return collectionType;
-		}
-
-		public void setCollectionType(CollectionType collectionType) {
-			this.collectionType = collectionType;
-		}*/
 
 	}
 
@@ -144,7 +132,6 @@ public class CollectionObject<T extends CollectionObject.CollectionDescriptiveDa
 	 */
 	public Map<String, Object> transform() {
 		Map<String, Object> idx_map =  this.transformWR();
-		//idx_map.put("collectionType", this.getAdministrative().getCollectionType());
 
 		idx_map.put("dccreator", this.getDescriptiveData().getDccreator());
 		idx_map.put("dctermsaudience", this.getDescriptiveData().getDctermsaudience());
