@@ -332,7 +332,6 @@ public class WithResource<T extends DescriptiveData, U extends WithResource.With
 
 	public ObjectId getDbId() {
 		return dbId;
-		// TODO: fill in withURI (with postLoad?)
 	}
 
 	public void setDbId(ObjectId dbId) {
