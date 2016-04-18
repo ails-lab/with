@@ -31,12 +31,10 @@
                 <div class="infowrap">
                   <!-- title-->
                   <h1><!-- ko text: record().title --><!-- /ko --> 
-                  <span data-bind="visible: record().source()=='Europeana'">
                   <span 
 					 class="pnd-resource" onclick="dispatchDocumentEvent('Pundit.showBootstrap')">
-					</span>
-					</span>
-                  </h1>
+				  </span>
+				  </h1>
                   <div class="owner" data-bind="text:record().dataProvider"></div>
                   <!-- metadata-->
                   
