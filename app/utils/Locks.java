@@ -203,6 +203,7 @@ public class Locks implements Serializable {
 	 * correctness of the code to come
 	 */
 	public Locks release() {
+		if( DB.getConf().getBoolean("locks.disabled")) return this;
 		proxy.tell( new ReleaseLock(lockId), ActorRef.noSender());
 		return this;
 	}
