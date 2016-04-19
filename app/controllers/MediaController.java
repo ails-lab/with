@@ -95,19 +95,18 @@ public class MediaController extends Controller {
 			} else {
 				mediaVersion = MediaVersion.Original;
 			}
-			media = DB.getMediaObjectDAO().getByUrlAndVersion(url,
-					mediaVersion);
+			media = DB.getMediaObjectDAO()
+					.getByUrlAndVersion(url, mediaVersion);
 			if (media != null) {
-				return ok(media.getMediaBytes())
-						.as(media.getMimeType().toString());
+				return ok(media.getMediaBytes()).as(
+						media.getMimeType().toString());
 			}
 			// Cache media
 			downloadMediaAsync(url, mediaVersion);
 			return redirect(url);
 		} catch (Exception e) {
 			log.error("Cannot retrieve media document from database", e);
-			return internalServerError(
-					"Cannot retrieve media document from database");
+			return internalServerError("Cannot retrieve media document from database");
 		}
 	}
 
@@ -129,23 +128,24 @@ public class MediaController extends Controller {
 	public static MediaObject downloadMedia(String url, MediaVersion version) {
 		try {
 			MediaObject media = new MediaObject();
-			if ((media = DB.getMediaObjectDAO().getByUrlAndVersion(url,
-					version)) != null)
+			if ((media = DB.getMediaObjectDAO()
+					.getByUrlAndVersion(url, version)) != null)
 				return media;
 			media = new MediaObject();
 			Logger.info("Downloading " + url);
-			File img = HttpConnector.getWSHttpConnector().getURLContentAsFile(url);
+			File img = HttpConnector.getWSHttpConnector().getURLContentAsFile(
+					url);
 			byte[] mediaBytes = IOUtils.toByteArray(new FileInputStream(img));
 			media.setUrl(url);
 			media.setMediaBytes(mediaBytes);
 			if (version != null) {
 				media.setMediaVersion(version);
-				media.setMimeType(
-						MediaType.parse(Files.probeContentType(img.toPath())));
+				media.setMimeType(MediaType.parse(Files.probeContentType(img
+						.toPath())));
 				DB.getMediaObjectDAO().makePermanent(media);
 				MediaCheckMessage mcm = new MediaCheckMessage(media);
-				ActorSelection api = Akka.system()
-						.actorSelection("user/mediaChecker");
+				ActorSelection api = Akka.system().actorSelection(
+						"user/mediaChecker");
 				api.tell(mcm, ActorRef.noSender());
 			} else {
 				throw new Exception("Media version is null");
@@ -160,19 +160,21 @@ public class MediaController extends Controller {
 	// Make a thumbnail for a specific media object
 	public static MediaObject makeThumbnail(MediaObject media) {
 		if (media.getType() != WithMediaType.IMAGE)
-		 try {
-			 	MediaObject thumbnail = makeThumbNew(media, MediaVersion.Thumbnail);
-			 	thumbnail.setMediaVersion(MediaVersion.Thumbnail);
-			 	thumbnail.setParentId(media.getDbId());
-			 	DB.getMediaObjectDAO().makePermanent(thumbnail);
-			 	thumbnail.setUrl("/media/" + thumbnail.getDbId().toString() + "?file=true");
-			 	DB.getMediaObjectDAO().makePermanent(thumbnail);
-			 	return thumbnail;
+			try {
+				MediaObject thumbnail = makeThumbNew(media,
+						MediaVersion.Thumbnail);
+				thumbnail.setMediaVersion(MediaVersion.Thumbnail);
+				thumbnail.setParentId(media.getDbId());
+				DB.getMediaObjectDAO().makePermanent(thumbnail);
+				thumbnail.setUrl("/media/" + thumbnail.getDbId().toString()
+						+ "?file=true");
+				DB.getMediaObjectDAO().makePermanent(thumbnail);
+				return thumbnail;
 			} catch (Exception e) {
-			    return null;
-		      }
+				return null;
+			}
 		else
-			   return null;
+			return null;
 	}
 
 	/**
@@ -208,8 +210,8 @@ public class MediaController extends Controller {
 					File x = fp.getFile();
 					result = storeMedia(med, x);
 					MediaCheckMessage mcm = new MediaCheckMessage(med);
-					ActorSelection api = Akka.system()
-							.actorSelection("user/mediaChecker");
+					ActorSelection api = Akka.system().actorSelection(
+							"user/mediaChecker");
 					api.tell(mcm, ActorRef.noSender());
 				} else {
 					result.put("error", "no image file");
@@ -240,8 +242,8 @@ public class MediaController extends Controller {
 						.getURLContentAsFile(jsonn.get("url").asText());
 				result = storeMedia(med, x);
 				MediaCheckMessage mcm = new MediaCheckMessage(med);
-				ActorSelection api = Akka.system()
-						.actorSelection("user/mediaChecker");
+				ActorSelection api = Akka.system().actorSelection(
+						"user/mediaChecker");
 				api.tell(mcm, ActorRef.noSender());
 				return ok(result);
 			} catch (Exception e) {
@@ -257,7 +259,7 @@ public class MediaController extends Controller {
 	}
 
 	private static MediaObject makeThumbNew(MediaObject mediaObject,
-		MediaVersion version) throws IOException {
+			MediaVersion version) throws IOException {
 
 		int newWidth = 0;
 		int newHeight;
@@ -281,9 +283,9 @@ public class MediaController extends Controller {
 		default:
 			break;
 		}
-		InputStream mediaBytes = new ByteArrayInputStream(mediaObject.getMediaBytes());
-		BufferedImage originalImage = ImageIO
-				.read(mediaBytes);
+		InputStream mediaBytes = new ByteArrayInputStream(
+				mediaObject.getMediaBytes());
+		BufferedImage originalImage = ImageIO.read(mediaBytes);
 		int originalWidth = originalImage.getWidth();
 		int originalHeight = originalImage.getHeight();
 		MediaObject thumbnailObject = new MediaObject(mediaObject);
@@ -308,8 +310,8 @@ public class MediaController extends Controller {
 					.toOutputStream(baos);
 		else
 			Thumbnails.of(originalImage).size(newWidth, newHeight)
-					.crop(Positions.CENTER)
-					.outputFormat("jpeg").toOutputStream(baos);
+					.crop(Positions.CENTER).outputFormat("jpeg")
+					.toOutputStream(baos);
 		thumbnailObject.setMimeType(MediaType.JPEG);
 		thumbnailObject.setMediaBytes(baos.toByteArray());
 		thumbnailObject.setWidth(newWidth);
@@ -379,8 +381,8 @@ public class MediaController extends Controller {
 
 	private static void editMediaAfterChecker(MediaObject med, JsonNode json) {
 
-		MediaType mime = MediaType
-				.parse(json.get("mimetype").asText().toLowerCase());
+		MediaType mime = MediaType.parse(json.get("mimetype").asText()
+				.toLowerCase());
 		med.setMimeType(mime);
 		med.setHeight(json.get("height").asInt());
 		med.setWidth(json.get("width").asInt());
@@ -439,8 +441,8 @@ public class MediaController extends Controller {
 
 		tiny.setUrl("/media/" + tiny.getDbId().toString() + "?file=true");
 		square.setUrl("/media/" + square.getDbId().toString() + "?file=true");
-		thumbnail.setUrl(
-				"/media/" + thumbnail.getDbId().toString() + "?file=true");
+		thumbnail.setUrl("/media/" + thumbnail.getDbId().toString()
+				+ "?file=true");
 		medium.setUrl("/media/" + medium.getDbId().toString() + "?file=true");
 
 		DB.getMediaObjectDAO().makePermanent(tiny);
@@ -579,8 +581,8 @@ public class MediaController extends Controller {
 				builder.addPart("mediafile", fileBody);
 				aFile.setEntity(builder.build());
 				CloseableHttpResponse response = hc.execute(aFile);
-				String jsonResponse = EntityUtils.toString(response.getEntity(),
-						"UTF8");
+				String jsonResponse = EntityUtils.toString(
+						response.getEntity(), "UTF8");
 				// String id =
 				// JsonPath.parse(jsonResponse).read("$['results'][0]['mediaId']");
 				resp = Json.parse(jsonResponse);
@@ -615,7 +617,8 @@ public class MediaController extends Controller {
 		// Logger.info("URL: " + queryURL);
 		JsonNode response = null;
 		try {
-			response = HttpConnector.getWSHttpConnector().postURLContent(url, mediaURL, "url");
+			response = HttpConnector.getWSHttpConnector().postURLContent(url,
+					mediaURL, "url");
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -694,8 +697,7 @@ public class MediaController extends Controller {
 			media = DB.getMediaObjectDAO().findById(new ObjectId(mediaId));
 		} catch (Exception e) {
 			log.error("Cannot retrieve media document from database", e);
-			return internalServerError(
-					"Cannot retrieve media document from database");
+			return internalServerError("Cannot retrieve media document from database");
 		}
 		if (file) {
 			// confirm this is right! .as Changes the Content-Type header for
@@ -710,16 +712,24 @@ public class MediaController extends Controller {
 
 	}
 
-	public static boolean hasAccessToMedia(String mediaUrl, List<ObjectId> effectiveIds, Action action) {
-		List<RecordResource> resources = DB.getRecordResourceDAO().getByMedia(mediaUrl);
+	public static boolean hasAccessToMedia(String mediaUrl,
+			List<ObjectId> effectiveIds, Action action) {
+		List<RecordResource> resources = DB.getRecordResourceDAO().getByMedia(
+				mediaUrl);
 		if (!resources.isEmpty()) {
-			for (RecordResource r: resources) {
-				if (DB.getRecordResourceDAO().hasAccess(effectiveIds, action, r.getDbId()))
+			for (RecordResource r : resources) {
+				if (DB.getRecordResourceDAO().hasAccess(effectiveIds, action,
+						r.getDbId()))
 					return true;
 			}
 			return false;
-		}
-		else
+		} else
 			return true;
 	}
+
+	public static Result deleteOrphanMadia() {
+		DB.getMediaObjectDAO().deleteOrphanMediaObjects();
+		return ok();
+	}
+
 }

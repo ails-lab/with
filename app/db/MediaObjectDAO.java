@@ -20,6 +20,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import org.apache.commons.io.IOUtils;
 import org.bson.types.ObjectId;
@@ -253,6 +254,19 @@ public class MediaObjectDAO {
 			log.error("Cannot delete files from GridFS", e);
 			throw e;
 		}
+	}
+
+	/* Not avatar, not cover, not in Embedded media Object */
+	public void deleteOrphanMediaObjects() {
+		BasicDBObject query = new BasicDBObject();
+		List<String> list = new ArrayList<String>();
+		for (int i =0; i<1000000; i++) {
+			list.add(UUID.randomUUID().toString());
+		}
+		query.put("url", new BasicDBObject("$nin", list));
+		List<GridFSDBFile> a = DB.getGridFs().find(query);
+		System.out.println(a.size());
+
 	}
 
 }
