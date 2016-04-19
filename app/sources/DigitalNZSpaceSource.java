@@ -101,7 +101,7 @@ public class DigitalNZSpaceSource extends ISpaceSource {
 
 	@Override
 	public SourceResponse getResults(CommonQuery q) {
-		if (q.searchTerm == null)
+		if (!Utils.hasInfo(q.searchTerm) || q.searchTerm.equals("*"))
 			q.searchTerm = "format:(picture OR book OR music OR article)";
 		SourceResponse res = new SourceResponse();
 		res.source = getSourceName();
