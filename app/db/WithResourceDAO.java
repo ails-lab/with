@@ -31,7 +31,7 @@ import model.basicDataTypes.ProvenanceInfo;
 import model.basicDataTypes.WithAccess;
 import model.basicDataTypes.WithAccess.Access;
 import model.basicDataTypes.WithAccess.AccessEntry;
-import model.resources.CollectionObject;
+import model.resources.collection.CollectionObject;
 import model.resources.WithResource;
 import model.usersAndGroups.User;
 
@@ -419,7 +419,7 @@ public class WithResourceDAO<T extends WithResource> extends DAO<T> {
 				Arrays.asList("collectedResources"));
 		List<Integer> positions = new ArrayList<Integer>();
 		int i = 0;
-		for (ContextData<ContextDataBody> collectedResources : collection
+		for (ContextData<ContextDataBody> collectedResources : (List<ContextData>) collection
 				.getCollectedResources()) {
 			if (collectedResources.getTarget().getRecordId().equals(recordId))
 				positions.add(i);

@@ -116,7 +116,7 @@ public class CollectionObjectController extends WithResourceController {
 					collection.getDescriptiveData().setLabel(
 							new MultiLiteral(cname).fillDEF());
 					boolean success = internalAddCollection(collection,
-							CollectionType.SimpleCollection, creatorDbId,
+							WithResourceType.SimpleCollection, creatorDbId,
 							resultInfo);
 					if (!success)
 						return Promise
@@ -150,7 +150,7 @@ public class CollectionObjectController extends WithResourceController {
 			collection.getDescriptiveData().setLabel(
 					new MultiLiteral(cname).fillDEF());
 			boolean success = internalAddCollection(collection,
-					CollectionType.SimpleCollection, creatorDbId, resultInfo);
+					WithResourceType.SimpleCollection, creatorDbId, resultInfo);
 			if (!success)
 				return badRequest(resultInfo);
 			ccid = collection;
@@ -339,17 +339,15 @@ public class CollectionObjectController extends WithResourceController {
 					.getByLabel(Language.DEFAULT, cname);
 			ccid = col.get(0);
 		}
-		
-		
 		ObjectNode result = Json.newObject();
 		CulturalItemOWLExporter exporter = new CulturalItemOWLExporter(ccid.getDbId().toString());
 		try {
 			ObjectId collectionDbId = ccid.getDbId();
-			int entryCount = DB
+			int entryCount = ((CollectionAdmin) DB
 					.getCollectionObjectDAO()
 					.getById(collectionDbId,
 							Arrays.asList("administrative.entryCount"))
-					.getAdministrative().getEntryCount();
+					.getAdministrative()).getEntryCount();
 			// Logger.info("Sorting collection "+collectionId);
 			List<RecordResource> records = DB.getRecordResourceDAO()
 					.getByCollectionBetweenPositions(collectionDbId, 0,
@@ -1069,17 +1067,4 @@ public class CollectionObjectController extends WithResourceController {
 		}
 		return 0;
 	}
-
-	public static Result changeCollected() throws JsonProcessingException,
-			IOException {
-		DBObject c = DB.getDs().getDB().getCollection("CollectionObject")
-				.findOne(new ObjectId("56fcf34976eee2526591ec94"));
-		ObjectNode node = (ObjectNode) new ObjectMapper()
-				.readTree(c.toString());
-		node.remove("className");
-
-		CollectionObject col = Json.fromJson(node, CollectionObject.class);
-		return null;
-	}
-
 }
