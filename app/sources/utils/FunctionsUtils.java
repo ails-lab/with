@@ -68,5 +68,13 @@ public class FunctionsUtils {
 	public static Function<String, String> quote() {
 		return (String s) -> "\"" + s + "\"";
 	}
+	public static Function<String, String> smartquote() {
+		return (String s) -> {
+			if (s.contains(" ")){
+				return "\"" + s + "\"";
+			} else
+				return s;
+		};
+	}
 
 }

@@ -105,7 +105,10 @@ define(['knockout', 'text!./_exhibition-view.html', 'app', 'magnific-popup', 'sl
 				var result = data[i];
 				var record = new Record(result);
 				record.annotation = '';
-				if (result.contextData != null && result.contextData.body != null) {
+				if (result.contextData !== undefined && result.contextData !== null && 
+						result.contextData.body != undefined 
+						&& result.contextData.body != null
+						&& ! $.isEmptyObject(result.contextData.body)) {
 					console.log(result);
 					record.annotation = result.contextData.body.text.default;
 					record.videoUrl = result.contextData.body.videoUrl;

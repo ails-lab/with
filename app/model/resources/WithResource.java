@@ -45,6 +45,7 @@ import org.mongodb.morphia.annotations.Indexes;
 import org.mongodb.morphia.annotations.Version;
 import org.mongodb.morphia.utils.IndexType;
 
+import play.libs.Json;
 import utils.Deserializer;
 import utils.Serializer;
 
@@ -53,6 +54,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import db.DB;
 import elastic.ElasticUtils;
@@ -330,7 +332,6 @@ public class WithResource<T extends DescriptiveData, U extends WithResource.With
 
 	public ObjectId getDbId() {
 		return dbId;
-		// TODO: fill in withURI (with postLoad?)
 	}
 
 	public void setDbId(ObjectId dbId) {
@@ -530,7 +531,24 @@ public class WithResource<T extends DescriptiveData, U extends WithResource.With
 		this.annotations = annotations;
 	}
 
-	public User getWithCreatorInfo() {
+	public ObjectNode getWithCreatorInfo() {
+		if (administrative.getWithCreator() != null) {
+			User u = DB.getUserDAO().getById(
+					this.administrative.getWithCreator(),
+					new ArrayList<String>(Arrays.asList("username",
+							"firstName", "lastName")));
+			ObjectNode withCreator = Json.newObject();
+			withCreator.put("username", u.getUsername());
+			withCreator.put("firstName", u.getFirstName());
+			withCreator.put("lastName", u.getLastName());
+			return withCreator;
+		}
+		else
+			return null;
+	}
+
+	@JsonIgnore
+	public User getWithCreator() {
 		if (administrative.getWithCreator() != null)
 			return DB.getUserDAO().getById(
 					this.administrative.getWithCreator(),
@@ -540,6 +558,7 @@ public class WithResource<T extends DescriptiveData, U extends WithResource.With
 			return null;
 	}
 
+
 	/* Elastic Transformations */
 
 	/*
@@ -548,4 +567,6 @@ public class WithResource<T extends DescriptiveData, U extends WithResource.With
 	public Map<String, Object> transformWR() {
 		return ElasticUtils.basicTransformation(this);
 	}
+
+
 }

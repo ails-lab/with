@@ -16,45 +16,23 @@
 
 package model;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 
-import model.EmbeddedMediaObject.MediaVersion;
-import model.EmbeddedMediaObject.Quality;
-import model.EmbeddedMediaObject.WithMediaRights;
-import model.EmbeddedMediaObject.WithMediaType;
-import model.ExampleDataModels.LiteralOrResource.ResourceType;
 import model.basicDataTypes.Language;
-import model.basicDataTypes.LiteralOrResource;
 import model.basicDataTypes.MultiLiteral;
 import model.basicDataTypes.ProvenanceInfo;
 import model.basicDataTypes.WithAccess;
-import model.resources.CollectionObject;
 import model.resources.CulturalObject;
 import model.resources.RecordResource;
-import model.resources.CollectionObject.CollectionDescriptiveData;
+import model.resources.WithResource;
+import model.resources.WithResource.WithAdmin;
 import model.usersAndGroups.User;
 import static org.fest.assertions.Assertions.assertThat;
 
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
 import org.bson.types.ObjectId;
 import org.junit.Test;
-
-import play.libs.Json;
-
-import com.google.common.net.MediaType;
-import com.google.common.net.MediaType;
 
 import play.libs.Json;
 import utils.AccessManager.Action;
@@ -62,9 +40,23 @@ import db.DB;
 
 public class WithResourceDAOTest {
 
+
+	@Test
+	public void checkWithCreatorInfo() {
+
+		WithResource<DescriptiveData, WithAdmin> wr = DB.getWithResourceDAO().get(new ObjectId("570e4ae4388d812b9644e5f3"));
+
+		User u = wr.getWithCreatorInfo();
+		if(u != null)
+			System.out.println(Json.toJson(u));
+		else
+			System.out.println("No creator");
+
+	}
+
 	@Test
 	public void storeWithResource() {
-		
+
 		User u = DB.getUserDAO().getByUsername("eirini1");
 
 		for (int i = 0; i < 1; i++) {
@@ -90,10 +82,10 @@ public class WithResourceDAOTest {
 			withResource.setDescriptiveData(model);
 			int j=0;
 			if (i==0) j=i; else j=i+1;
-			withResource.addPositionToCollectedIn(new ObjectId("5656dd6ce4b0b19378e1cb80"), 0+j);
-			withResource.addPositionToCollectedIn(new ObjectId("5656dd6ce4b0b19378e1cb80"), 1+j);
-			withResource.addPositionToCollectedIn(new ObjectId("5656dd6ce4b0b19378e1cb81"), 0+j);
-			withResource.addPositionToCollectedIn(new ObjectId("5656dd6ce4b0b19378e1cb81"), 1+j);
+			withResource.addPositionToCollectedIn(new ObjectId("5656dd6ce4b0b19378e1cb80"));
+			withResource.addPositionToCollectedIn(new ObjectId("5656dd6ce4b0b19378e1cb80"));
+			withResource.addPositionToCollectedIn(new ObjectId("5656dd6ce4b0b19378e1cb81"));
+			withResource.addPositionToCollectedIn(new ObjectId("5656dd6ce4b0b19378e1cb81"));
 			assertThat(DB.getRecordResourceDAO().makePermanent(withResource)).isNotEqualTo(null);
 
 			/*
@@ -129,7 +121,7 @@ public class WithResourceDAOTest {
 			 * //System.out.println(o.getProvenance().get(0).getProvider() + " "
 			 * + o.getProvenance().get(0).getUri());
 			 * //System.out.println(Json.toJson(o));
-			 * 
+			 *
 			 */
 		}
 		/*List<RecordResource> cos = DB.getRecordResourceDAO().getByCollectionBtwPositions(new ObjectId("5656dd6ce4b0b19378e1cb81"), 0, 2);

@@ -24,7 +24,13 @@ public enum CommonFilters {
 		COUNTRY("dctermsspatial.default","Spatial"),
 		YEAR("dates","Dates"),
 		CONTRIBUTOR("dccontributor.default","Contributor"),
-		DATA_PROVIDER("dataProvider","Data Provider");
+		DATA_PROVIDER("dataProvider","Data Provider"),
+		MIME_TYPE("MIME_TYPE","Mime Type"),
+		IMAGE_SIZE("IMAGE_SIZE","Image Size"),
+		IMAGE_COLOUR("IMAGE_COLOUR","Image Color"),
+		COLOURPALETE("COLOURPALETE","Color Palete")
+		
+		;
 
 		private final String text;
 		private final String id;

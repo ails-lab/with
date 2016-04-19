@@ -132,9 +132,7 @@ public class EuropeanaItemRecordFormatter extends CulturalRecordFormatter {
 		LiteralOrResource isShownBy = model.getIsShownBy();
 		String uri2 = isShownBy==null?null:isShownBy.getURI();
 		String uri3 = ro==null?null:ro.getURI();
-		if (Utils.hasInfo(object.getMedia()) && 
-				object.getMedia().get(0).containsKey(MediaVersion.Thumbnail)  
-				&& Utils.hasInfo(uri3)){
+		if (Utils.hasInfo(uri3)){
 			EmbeddedMediaObject medThumb = new EmbeddedMediaObject();
 			medThumb.setUrl(uri3);
 			medThumb.setType(type);

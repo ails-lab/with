@@ -63,6 +63,8 @@ import play.libs.Json;
 import play.mvc.Result;
 import sources.EuropeanaCollectionSpaceSource;
 import sources.EuropeanaSpaceSource;
+import sources.OWLExporter;
+import sources.OWLExporter.CulturalItemOWLExporter;
 import sources.core.CommonQuery;
 import sources.core.SourceResponse;
 import sources.core.Utils;
@@ -283,6 +285,47 @@ public class CollectionObjectController extends WithResourceController {
 			 * +"th item was updated"); }
 			 */
 			return ok();
+		} catch (Exception e) {
+			result.put("error", e.getMessage());
+			return internalServerError(result);
+		}
+	}
+	
+	public static Result exportCollectionObjectToOWL(String cname) {
+		
+		ObjectNode resultInfo = Json.newObject();
+		ObjectId creatorDbId = new ObjectId(session().get("user"));
+		CollectionObject ccid = null;
+		if (!isCollectionCreated(creatorDbId, cname)) {
+			return badRequest(resultInfo);
+		} else {
+			List<CollectionObject> col = DB.getCollectionObjectDAO()
+					.getByLabel(Language.DEFAULT, cname);
+			ccid = col.get(0);
+		}
+		
+		
+		ObjectNode result = Json.newObject();
+		CulturalItemOWLExporter exporter = new CulturalItemOWLExporter(ccid.getDbId().toString());
+		try {
+			ObjectId collectionDbId = ccid.getDbId();
+			int entryCount = DB
+					.getCollectionObjectDAO()
+					.getById(collectionDbId,
+							Arrays.asList("administrative.entryCount"))
+					.getAdministrative().getEntryCount();
+			// Logger.info("Sorting collection "+collectionId);
+			List<RecordResource> records = DB.getRecordResourceDAO()
+					.getByCollectionBetweenPositions(collectionDbId, 0,
+							Math.min(entryCount, 1000));
+			
+			for (RecordResource recordResource : records) {
+				if (recordResource instanceof CulturalObject) {
+					CulturalObject new_record = (CulturalObject) recordResource;
+					exporter.exportItem(new_record);
+				}
+			}
+			return ok(exporter.export());
 		} catch (Exception e) {
 			result.put("error", e.getMessage());
 			return internalServerError(result);

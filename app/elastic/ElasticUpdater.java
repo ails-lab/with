@@ -21,26 +21,21 @@ import static org.elasticsearch.common.xcontent.XContentFactory.jsonBuilder;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import model.basicDataTypes.CollectionInfo;
-import model.basicDataTypes.WithAccess.Access;
-
 import org.bson.types.ObjectId;
 import org.elasticsearch.ElasticsearchException;
+import org.elasticsearch.action.get.GetRequest;
+import org.elasticsearch.action.get.GetResponse;
 import org.elasticsearch.action.update.UpdateRequest;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.script.ScriptService.ScriptType;
+import org.elasticsearch.search.fetch.source.FetchSourceContext;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-
 import play.Logger;
 import play.libs.Json;
-import db.DB;
 
 public class ElasticUpdater {
 	static private final Logger.ALogger log = Logger.of(ElasticUpdater.class);
@@ -54,6 +49,30 @@ public class ElasticUpdater {
 			Elastic.getTransportClient().prepareUpdate(
 					Elastic.index,
 					type,
+					id.toString())
+					.setDoc(doc)
+					.get();
+		} catch(Exception e) {
+			log.error("Cannot update (reindex) resource", e );
+			return false;
+		}
+		return true;
+	}
+
+
+	/*
+	 * Update one document with the structure provided
+	 * retrieving dynamically the type.
+	 */
+	public static boolean updateOneNoType(ObjectId id, Map<String, Object> doc) {
+		try{
+			GetResponse resp = Elastic.getTransportClient().get(new GetRequest(Elastic.index, "_all", id.toString())
+			.fetchSourceContext(FetchSourceContext.DO_NOT_FETCH_SOURCE))
+			.actionGet();
+
+			Elastic.getTransportClient().prepareUpdate(
+					Elastic.index,
+					resp.getType(),
 					id.toString())
 					.setDoc(doc)
 					.get();
@@ -97,6 +116,111 @@ public class ElasticUpdater {
 							types.get(i),
 							ids.get(i).toString())
 					.doc(doc));
+					i++;
+				}
+				Elastic.getBulkProcessor().close();
+				return true;
+		}
+
+	}
+
+	/*
+	 * Bulk updates. Updates all documents provided with the structure
+	 * provided.
+	 */
+	public static boolean updateManyNoType(List<ObjectId> ids, List<Map<String, Object>> docs) throws Exception {
+
+		if((ids.size() != docs.size())) {
+			throw new Exception("Error: ids list does not have the same size with upDocs list");
+		}
+
+		if( ids.size() == 0 ) {
+			log.debug("No resources to update!");
+			return true;
+		} else if( ids.size() == 1 ) {
+					GetResponse resp = Elastic.getTransportClient().get(new GetRequest(Elastic.index, "_all", ids.get(0).toString())
+					.fetchSourceContext(FetchSourceContext.DO_NOT_FETCH_SOURCE))
+					.actionGet();
+
+					Elastic.getTransportClient().prepareUpdate(
+							Elastic.index,
+							resp.getType(),
+							ids.get(0).toString())
+							.setDoc(docs.get(0))
+							.get();
+					return true;
+		} else {
+				List<String> types = new ArrayList<String>();
+				for(ObjectId id: ids) {
+					GetResponse resp = Elastic.getTransportClient().get(new GetRequest(Elastic.index, "_all", id.toString())
+					.fetchSourceContext(FetchSourceContext.DO_NOT_FETCH_SOURCE))
+					.actionGet();
+					types.add(resp.getType());
+				}
+
+				int i = 0;
+				for(Map<String, Object> doc: docs) {
+					Elastic.getBulkProcessor().add(new UpdateRequest(
+							Elastic.index,
+							types.get(i),
+							ids.get(i).toString())
+					.doc(doc));
+					i++;
+				}
+				Elastic.getBulkProcessor().close();
+				return true;
+		}
+
+	}
+
+
+	/*
+	 * Update Context Data on many records
+	 * Op stands for '+', '-', '/'
+	 */
+	public static boolean scriptAddOrRemoveToListField(List<ObjectId> ids, List<Map<String, Object>> docs, String field, String op) throws Exception {
+
+		if((ids.size() != docs.size())) {
+			throw new Exception("Error: ids list does not have the same size with upDocs list");
+		}
+
+		String script = "ctx._source." + field + " " + op + "= param";
+
+		if( ids.size() == 0 ) {
+			log.debug("No resources to update!");
+			return true;
+		} else if( ids.size() == 1 ) {
+					GetResponse resp = Elastic.getTransportClient().get(new GetRequest(Elastic.index, "_all", ids.get(0).toString())
+					.fetchSourceContext(FetchSourceContext.DO_NOT_FETCH_SOURCE))
+					.actionGet();
+
+					Elastic.getTransportClient().prepareUpdate(
+							Elastic.index,
+							resp.getType(),
+							ids.get(0).toString())
+							.addScriptParam("param", docs.get(0))
+							.setScript(script, ScriptType.INLINE)
+			.setRetryOnConflict(5)
+			.execute().actionGet();
+					return true;
+		} else {
+				List<String> types = new ArrayList<String>();
+				for(ObjectId id: ids) {
+					GetResponse resp = Elastic.getTransportClient().get(new GetRequest(Elastic.index, "_all", id.toString())
+					.fetchSourceContext(FetchSourceContext.DO_NOT_FETCH_SOURCE))
+					.actionGet();
+					types.add(resp.getType());
+				}
+
+				int i = 0;
+				for(Map<String, Object> doc: docs) {
+					Elastic.getBulkProcessor().add(new UpdateRequest(
+							Elastic.index,
+							types.get(i),
+							ids.get(i).toString())
+					.addScriptParam("param", docs.get(0))
+					.script(script, ScriptType.INLINE)
+					.retryOnConflict(5));
 					i++;
 				}
 				Elastic.getBulkProcessor().close();

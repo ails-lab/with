@@ -16,7 +16,6 @@
 
 package db;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -27,9 +26,6 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 
 import play.libs.F.Promise;
-import play.libs.Json;
-import model.resources.CulturalObject;
-import model.resources.RecordResource;
 import model.resources.WithResource.WithResourceType;
 
 import org.bson.types.ObjectId;
@@ -47,17 +43,14 @@ import sources.core.ParallelAPICall;
 import utils.Tuple;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
 import com.mongodb.MongoException;
 import com.mongodb.WriteConcern;
 import com.mongodb.WriteResult;
-import com.mongodb.client.result.UpdateResult;
 import com.mongodb.util.JSON;
 
-import elastic.Elastic;
 import elastic.ElasticEraser;
 import elastic.ElasticIndexer;
 
@@ -237,6 +230,7 @@ public class DAO<E> extends BasicDAO<E, ObjectId> {
 				ParallelAPICall.createPromise(deleteCollection, (ObjectId) doc
 						.getClass().getMethod("getDbId", new Class<?>[0])
 						.invoke(doc));
+
 			}
 			return this.delete(doc).getN();
 		} catch (Exception e) {

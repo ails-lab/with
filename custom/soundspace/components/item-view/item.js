@@ -63,9 +63,9 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 			self.description=data.description;
 			self.source(data.source);
 			if(self.source() && self.source()=="Europeana"){
-				console.log("about property value:"+$("span.pnd-resource").attr('about'));
-				console.log("setting about property to:"+self.view_url());
-
+				$("span.pnd-resource").show();
+				$("div.pnd-resource").show();
+				
 				$("span.pnd-resource").attr('about',self.view_url());
 				$("div.pnd-resource").attr('about',self.view_url());
 				dispatchDocumentEvent('Pundit.loadAnnotations');
@@ -73,6 +73,9 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 				
 				
 			}
+			else{$("span.pnd-resource").hide();
+				$("div.pnd-resource").hide();
+				}
 			self.creator=data.creator;
 			self.provider=data.provider;
 			self.dataProvider=data.dataProvider;
@@ -319,6 +322,8 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 		});
 		self.record = ko.observable(new Record());
 		self.id = ko.observable(params.id);
+		
+
 		itemShow = function (e) {
 			data = ko.toJS(e);
 			$('.nav-tabs a[href="#information"]').tab('show');

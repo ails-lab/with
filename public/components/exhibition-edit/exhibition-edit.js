@@ -157,8 +157,7 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 				//TODO: support multilinguality, have to be observable arrays of type [{lang: default, values: []}, ...]
 		        var record = options.data;
 		        var newRecord =  ko.mapping.fromJS(record, {});
-				console.log(newRecord.contextData.body);
-				if (typeof newRecord.contextData.body.audioUrl === 'undefined') {
+				if ($.isEmptyObject(newRecord.contextData.body)) {
 					body = ko.mapping.fromJS({
 							"audioUrl": "",
 							"text": {"default": ""},
@@ -366,11 +365,6 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 			}
 		});
 
-		/*showViewModel = function () {
-			console.log(ko.toJSON(self));
-			console.log(self.myCollections());
-		};*/
-
 		self.textfieldsLostFocus = function (isTitleUpdate) {
 			updateExhibition(self, isTitleUpdate);
 		};
@@ -455,7 +449,6 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 				}
 				var promise = self.updateRecord(self.itemId(), self.itemText(), itemEmbeddedVideoUrl, self.itemVideoDescription(), self.dbId(), self.itemPosition());
 				$.when(promise).done(function (data) {
-					console.log(self.itemPosition());
 					//console.log(JSON.stringify(self.collectionItemsArray()[self.itemPosition()].contextData.body()));
 					if (typeof self.collectionItemsArray()[self.itemPosition()].contextData.body.text === 'undefined'
 						&& typeof self.collectionItemsArray()[self.itemPosition()].contextData.body.videoUrl === 'undefined') {
@@ -467,8 +460,6 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 							videoDescription : ko.observable("")
 						};
 					}
-					console.log(editMode);
-					console.log(self.itemText());
 					if (editMode == "editText") {
 						self.collectionItemsArray()[self.itemPosition()].contextData.body.text.default(self.itemText());
 					} else if (editMode == "editVideo") {
@@ -595,14 +586,12 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 					//console.log(self.displayCoverImage());
 				},
 				error: function (e, data) {
-					console.log(e);
 					console.log(data);
 					$.smkAlert({ text: 'Error uploading the file', type: 'danger', time: 10});
 				}
 			});
 		}
 		
-		//custom binding
 		var _draggedItem;
 		var _bIsMoveOperation = false;
 		
@@ -883,7 +872,6 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 		$('.leftscr').droppable({
 			tolerance: "touch",
 			over: function (event, ui) {
-				console.log("left");
 				$('.scroll').autoscroll({
 					direction: 'left',
 					step: 1000,
@@ -898,7 +886,6 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 		$('.rightscr').droppable({
 			tolerance: "touch",
 			over: function (event, ui) {
-				console.log("left");
 				$('.scroll').autoscroll({
 					direction: 'right',
 					step: 1000,
