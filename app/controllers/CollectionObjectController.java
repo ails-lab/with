@@ -472,7 +472,7 @@ public class CollectionObjectController extends WithResourceController {
 			if (!response.toString().equals(ok().toString()))
 				return response;
 			else {
-				CollectionObject collection = (Exhibition) DB.getCollectionObjectDAO().get(
+				CollectionObject collection = DB.getCollectionObjectDAO().get(
 						new ObjectId(id));
 				return ok(Json.toJson(collection));
 			}
