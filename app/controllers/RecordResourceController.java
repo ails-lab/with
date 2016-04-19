@@ -19,16 +19,13 @@ package controllers;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import javax.validation.ConstraintViolation;
 
 import model.annotations.ContextData;
 import model.annotations.ContextData.ContextDataType;
-import model.basicDataTypes.WithAccess.Access;
-import model.resources.CollectionObject;
 import model.resources.RecordResource;
-import model.resources.WithResource;
+import model.resources.collection.CollectionObject;
 
 import org.bson.types.ObjectId;
 
@@ -38,7 +35,6 @@ import play.data.validation.Validation;
 import play.libs.F.Option;
 import play.libs.Json;
 import play.mvc.Result;
-import utils.AccessManager;
 import utils.AccessManager.Action;
 
 import com.fasterxml.jackson.databind.JsonNode;

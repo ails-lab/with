@@ -90,7 +90,7 @@ public class DDBItemRecordFormatter extends CulturalRecordFormatter {
 			getValuesMap().translateToCommon(CommonFilters.RIGHTS.getId(),
 		 rights.getURI());
 		WithMediaRights withMediaRights = !Utils.hasInfo(rights)?null:
-			(WithMediaRights.getRighs((String) translateToCommon.get(0)));
+			(WithMediaRights.getRights((String) translateToCommon.get(0)));
 		
 		model.setIsShownAt(rec.getLiteralOrResourceValue("Aggregation.isShownAt"));
 		model.setIsShownBy(rec.getLiteralOrResourceValue("Aggregation.isShownBy"));

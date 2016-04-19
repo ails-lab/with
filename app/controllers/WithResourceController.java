@@ -29,7 +29,6 @@ import java.util.function.Function;
 import model.DescriptiveData;
 import model.EmbeddedMediaObject;
 import model.EmbeddedMediaObject.MediaVersion;
-import model.EmbeddedMediaObject.WithMediaRights;
 import model.MediaObject;
 import model.annotations.ContextData;
 import model.annotations.ContextData.ContextDataBody;
@@ -42,6 +41,7 @@ import model.basicDataTypes.ProvenanceInfo.Sources;
 import model.resources.CulturalObject.CulturalObjectData;
 import model.resources.RecordResource;
 import model.resources.WithResource.WithResourceType;
+
 
 import org.bson.types.ObjectId;
 

@@ -27,9 +27,9 @@ import java.util.Set;
 import model.basicDataTypes.ProvenanceInfo.Sources;
 import model.basicDataTypes.WithAccess;
 import model.basicDataTypes.WithAccess.Access;
-import model.resources.CollectionObject;
 import model.resources.RecordResource;
 import model.resources.WithResource;
+import model.resources.collection.CollectionObject;
 import model.usersAndGroups.User;
 
 import org.bson.types.ObjectId;

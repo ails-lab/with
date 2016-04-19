@@ -23,7 +23,7 @@ import java.util.Set;
 import java.util.function.Function;
 
 import model.basicDataTypes.WithAccess.Access;
-import model.resources.CollectionObject;
+import model.resources.collection.CollectionObject;
 import model.usersAndGroups.User;
 import model.usersAndGroups.UserGroup;
 import model.usersAndGroups.UserOrGroup;

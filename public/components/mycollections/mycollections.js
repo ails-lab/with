@@ -79,9 +79,7 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 				"error": function (result) {
 					$.smkAlert({ text: 'An error occured', type: 'danger', time: 10 });
 					self.closeSideBar();
-				}
-		            
-		          
+				}         
 		 });		
 		};
 		
@@ -140,8 +138,6 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 					//withUrl = value.Thumbnail.withUrl(); still not fully working
 					var withUrl = value.Thumbnail.withUrl();
 				    var url     = value.Thumbnail.url();
-				        
-					//if (withUrl == "" || withUrl == null || value.Thumbnail.mediaVersion == null) {
 					if (withUrl == "" || withUrl == null) {
 						if(innerModel.administrative.entryCount() > 0)
 							innerModel.media()[index].thumbnailUrl = ko.observable("img/content/thumb-empty.png");
@@ -284,7 +280,6 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 						access: {
 							isPublic: self.isPublicToEdit()
 						},
-						collectionType: collectionType
 					},
 					descriptiveData : {
 						label : {
@@ -293,7 +288,8 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 						description : {
 							default : [self.descriptionToEdit()]
 						}
-					}
+					},
+					resourceType: collectionType
 				});
 				$.ajax({
 					"url": "/collection",
@@ -375,7 +371,7 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 		};
 
 		self.more = function (isExhibition, funcToExecute, my) {
-			if (self.loading === true) {
+			if (self.loading() === true) {
 				setTimeout(self.moreCollections(isExhibition), 300);
 			}
 			if (self.loading() === false && self.moreCollectionData() === true) {
@@ -687,16 +683,21 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 					collId = self.sharedCollections()[collIndex].dbId();
 				}
 				if (collId != -1) {
+					var jsondata = JSON.stringify({
+						descriptiveData : {
+							label : {
+								default : [self.titleToEdit()]
+							},
+							description : {
+								default : [self.descriptionToEdit()]
+							}
+						}
+					});
 					$.ajax({
 						"url": "/collection/" + collId,
 						"method": "PUT",
 						"contentType": "application/json",
-						"data": JSON.stringify(
-							{descriptiveData: {
-								label: {default: [self.titleToEdit()]},
-								description: {default: [self.descriptionToEdit()]}
-							}
-						}),
+						"data": jsondata,
 						success: function (result) {
 							if (self.collectionSet() == "my") {
 								self.updateCollectionData(self.myCollections(), collIndex);

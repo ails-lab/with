@@ -323,7 +323,10 @@ public class WithResource<T extends DescriptiveData, U extends WithResource.With
 	}
 
 	public static enum WithResourceType {
-		WithResource, CollectionObject, RecordResource, CulturalObject, EuScreenObject, EventObject, PlaceObject, TimespanObject, ThesaurusObject, AgentObject;
+		WithResource, CollectionObject, SimpleCollection, Exhibition, RecordResource,
+		CulturalObject, EuScreenObject, EventObject,
+		PlaceObject, TimespanObject, ThesaurusObject,
+		AgentObject;
 	}
 
 	@Id

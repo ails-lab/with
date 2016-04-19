@@ -14,7 +14,7 @@
 						<!-- control-->
 						<div class="list-control">
 							<a title="Preview Exhibition" data-placement="top" data-toggle="tooltip" data-bind="attr: {href: 'index.html#exhibitionview/'+dbId()}" class="fa fa-eye"></a>
-							<!--<a id="coverImg" href="#" data-bind="click: bindFileUpload" data-toggle="tooltip" data-placement="top" title="Upload background image" class="fa fa-image exhibition"></a>-->
+							<a id="coverImg" href="#" data-bind="click: bindFileUpload" data-toggle="tooltip" data-placement="top" title="Upload background image" class="fa fa-image exhibition"></a>
 							<div class="toggle">
 								<input type="checkbox" id="toggle2">
 								<label for="toggle2"></label><span class="private">private</span><span class="public">public</span>
@@ -36,7 +36,10 @@
 								</div>
 								<!-- add-->
 								<!-- ko template: { foreach: collectionItemsArray, beforeRemove: removeItem, afterAdd: showNewItem } -->
-								  <div data-toggle="tooltip" data-placement="top" title="Drag an item here" class="add" data-bind="drop: {index: $index}"><span><a href="javascript:void(null);"><img src="img/ui/ic-add.png"></a></span></div><div class="box fill" data-bind="{css: {videoadded: containsVideo}, drag: {item: $data, move: true}}">
+								  <div data-toggle="tooltip" data-placement="top" title="Drag an item here" class="add" data-bind="drop: {index: $index}">
+								  	<span><a href="javascript:void(null);"><img src="img/ui/ic-add.png"></a></span>
+								  </div>
+								  <div class="box fill" data-bind="{css: {videoadded: containsVideo}, drag: {item: $data, move: true}}">
 									<div class="boxaction">
 										<ul>
 										<li><a href="#" data-toggle="tooltip" data-placement="top" title="Edit item text" data-bind="click: $parent.prepareForItemEdit" class="editbox"> <i class="fa fa-pencil-square-o"></i></a></li>
@@ -96,7 +99,9 @@
 									</div>
 			                    </div>
 								<!-- /ko -->
-								<div data-toggle="tooltip" data-placement="top" title="Drag an item here" class="add" data-bind="drop: {index: collectionItemsArray().length}"><span><a><img src="img/ui/ic-add.png"></a></span></div>
+								<div data-toggle="tooltip" data-placement="top" title="Drag an item here" class="add" data-bind="drop: {index: collectionItemsArray().length}">
+									<span><a><img src="img/ui/ic-add.png"></a></span>
+								</div>
 							</div>	
 							<div class="rightscr"></div><!-- for scrolling the page when dragging item at right of page-->						
 						</div>
@@ -135,7 +140,7 @@
 					</div>
 					<!--rights of cover img media document, if uploaded by user?-->
 					<div class="action-body">
-						<div id="uploaded-image">
+						<div id="uploaded-image" data-bind="backgroundImgDrop">
 						<label for="mediaupload">
 							<img class="upload-img" data-bind="attr: { src: displayCoverImage }" />
 						</label>

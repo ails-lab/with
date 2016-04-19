@@ -25,7 +25,7 @@ import java.util.Set;
 import java.util.function.Function;
 
 import model.basicDataTypes.WithAccess.Access;
-import model.resources.CollectionObject;
+import model.resources.collection.CollectionObject;
 import model.usersAndGroups.Organization;
 import model.usersAndGroups.Page;
 import model.usersAndGroups.Project;
@@ -512,7 +512,7 @@ public class GroupManager extends Controller {
 			Criteria criteria2 = DB.getCollectionObjectDAO()
 					.formAccessLevelQuery(
 							new Tuple(group.getDbId(), Access.READ),
-							QueryOperator.GTE);
+							QueryOperator.GT);
 			// Criteria criteria3 = DB.getCollectionObjectDAO().createQuery()
 			// .criteria("administrative.access.isPublic").equal(true);
 			// q.and(criteria1, criteria2);

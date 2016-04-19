@@ -28,11 +28,15 @@ import model.resources.CulturalObject;
 import model.resources.RecordResource;
 import model.resources.WithResource;
 import model.resources.WithResource.WithAdmin;
+import model.resources.collection.CollectionObject;
+import model.resources.collection.CollectionObject.CollectionDescriptiveData;
 import model.usersAndGroups.User;
 import static org.fest.assertions.Assertions.assertThat;
 
 import org.bson.types.ObjectId;
 import org.junit.Test;
+
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import play.libs.Json;
 import utils.AccessManager.Action;
@@ -46,7 +50,7 @@ public class WithResourceDAOTest {
 
 		WithResource<DescriptiveData, WithAdmin> wr = DB.getWithResourceDAO().get(new ObjectId("570e4ae4388d812b9644e5f3"));
 
-		User u = wr.getWithCreatorInfo();
+		ObjectNode u = wr.getWithCreatorInfo();
 		if(u != null)
 			System.out.println(Json.toJson(u));
 		else

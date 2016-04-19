@@ -177,7 +177,6 @@ public class RijksmuseumSpaceSource extends ISpaceSource {
 				}
 					
 				String json = Json.toJson(res).toString();
-				System.out.println(json);
 				jsonMetadata.add(new RecordJSONMetadata(Format.JSON_WITH, json));
 			}
 			Document xmlResponse = getHttpConnector().getURLContentAsXML(

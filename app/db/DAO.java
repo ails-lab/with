@@ -417,6 +417,14 @@ public class DAO<E> extends BasicDAO<E, ObjectId> {
 		updateOps.set(field, value);
 		this.updateFirst(q, updateOps);
 	}
+	
+	public void deleteField(ObjectId id, String field) {
+		Query<E> q = this.createQuery().field("_id").equal(id);
+		UpdateOperations<E> updateOps = this.createUpdateOperations()
+				.disableValidation();
+		updateOps.unset(field);
+		this.updateFirst(q, updateOps);
+	}
 
 	/**
 	 * Increment the specified field in a CollectionObject

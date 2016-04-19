@@ -16,17 +16,7 @@
 
 package model.annotations;
 
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
-
-import model.EmbeddedMediaObject;
-import model.EmbeddedMediaObject.MediaVersion;
-import model.basicDataTypes.CollectionInfo;
-import model.basicDataTypes.ProvenanceInfo;
-import model.resources.WithResource.Usage;
-import model.resources.WithResource.WithAdmin;
-import model.resources.WithResource.WithResourceType;
 
 import org.bson.types.ObjectId;
 import org.mongodb.morphia.annotations.Embedded;

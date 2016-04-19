@@ -295,10 +295,10 @@ define(['knockout', 'text!./organization-page.html', 'app', 'bridget', 'isotope'
 				});
 
 				self.type = ko.computed(function () {
-					if (self.administrative) {
-						if (self.administrative.collectionType.indexOf("Collection") != -1) {
+					if (self.resourceType) {
+						if (self.resourceType.indexOf("Collection") != -1) {
 							return "COLLECTION";
-						} else if (self.administrative.collectionType.indexOf("Space") != -1) {
+						} else if (self.resourceType.indexOf("Space") != -1) {
 							return "SPACE";
 						} else {
 							return "EXHIBITION";
@@ -309,10 +309,10 @@ define(['knockout', 'text!./organization-page.html', 'app', 'bridget', 'isotope'
 				});
 
 				self.css = ko.computed(function () {
-					if (self.administrative) {
-						if (self.administrative.collectionType.indexOf("Collection") != -1) {
+					if (self.resourceType) {
+						if (self.resourceType.indexOf("Collection") != -1) {
 							return "item collection";
-						} else if (self.administrative.collectionType.indexOf("Space") != -1) {
+						} else if (self.resourceType.indexOf("Space") != -1) {
 							return "item space";
 						} else {
 							return "item space";
@@ -323,10 +323,10 @@ define(['knockout', 'text!./organization-page.html', 'app', 'bridget', 'isotope'
 				});
 
 				self.url = ko.computed(function () {
-					if (self.administrative) {
-						if (self.administrative.collectionType.indexOf("Collection") > -1) {
+					if (self.resourceType) {
+						if (self.resourceType.indexOf("Collection") > -1) {
 							return 'index.html#collectionview/' + self.dbId;
-						} else if (self.administrative.collectionType.indexOf("Space") > -1) {
+						} else if (self.resourceType.indexOf("Space") > -1) {
 							return self.administrative.isShownAt;
 						} else {
 							return 'index.html#exhibitionview/' + self.dbId;
