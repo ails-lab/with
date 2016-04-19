@@ -622,6 +622,7 @@ public class CollectionObjectController extends WithResourceController {
 			}
 			for (CollectionObject collection : userCollections) {
 				ObjectNode c = (ObjectNode) Json.toJson(collection);
+				c.remove("collectedResources");
 				if (effectiveUserIds.isEmpty())
 					c.put("access", Access.READ.toString());
 				collArray.add(c);
@@ -646,8 +647,10 @@ public class CollectionObjectController extends WithResourceController {
 			}
 			List<ObjectNode> collections = collectionsWithMyAccessData(info.x,
 					effectiveUserIds);
-			for (ObjectNode c : collections)
+			for (ObjectNode c : collections) {
+				c.remove("collectedResources");
 				collArray.add(c);
+			}
 			result.put("collectionsOrExhibitions", collArray);
 			return ok(result);
 		}
@@ -697,8 +700,10 @@ public class CollectionObjectController extends WithResourceController {
 
 			List<ObjectNode> collections = collectionsWithMyAccessData(info.x,
 					effectiveUserIds);
-			for (ObjectNode c : collections)
+			for (ObjectNode c : collections) {
+				c.remove("collectedResources");
 				collArray.add(c);
+			}
 			result.put("collectionsOrExhibitions", collArray);
 			return ok(result);
 		}
