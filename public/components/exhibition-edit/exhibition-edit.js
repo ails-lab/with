@@ -165,32 +165,33 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 							"videoUrl": "",
 							"videoDescription": ""
 						}, {});
-					newRecord.contextData.body = body;
+					newRecord.contextData.body =body;
 				}
-				 newRecord.containsAudio = ko.pureComputed(function() {
-			        	if (newRecord.contextData.body == undefined 
-			        		|| newRecord.contextData.body.audioUrl == undefined)
-			        		return false;
-			        	else
-			        		return (newRecord.contextData.body.audioUrl() !== '');
-				});
-				newRecord.containsVideo = ko.pureComputed(function () {
+			    newRecord.containsAudio = ko.pureComputed(function() {
+		        	if (newRecord.contextData.body == undefined 
+		        		|| newRecord.contextData.body.audioUrl == undefined)
+		        		return false;
+		        	else
+		        		return (newRecord.contextData.body.audioUrl() !== '');
+
+				 });
+				 newRecord.containsVideo = ko.pureComputed(function () {
 					if (newRecord.contextData.body.videoUrl == undefined) {
 						return false;
 					} else {
 						return (newRecord.contextData.body.videoUrl() !== '');
 					}
 					return result;
-				});
-				newRecord.containsVideoDescription = ko.pureComputed(function () {
+				 });
+				 newRecord.containsVideoDescription = ko.pureComputed(function () {
 					if (newRecord.contextData.body.videoDescription == undefined) {
 						return false;
 					} else {
 						return (newRecord.contextData.body.videoDescription() !== '');
 					}
 					return result;
-				});
-				newRecord.containsText = ko.pureComputed(function () {
+				 });
+				 newRecord.containsText = ko.pureComputed(function () {
 					if (newRecord.contextData.body == undefined 
 						|| newRecord.contextData.body.text == undefined 
 						|| newRecord.contextData.body.text.default == undefined) {
@@ -198,8 +199,8 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 					} else {
 						return newRecord.contextData.body.text.default() !== '';
 					}
-				});
-				newRecord.embeddedVideoUrl = ko.pureComputed(function () {
+				 });
+				 newRecord.embeddedVideoUrl = ko.pureComputed(function () {
 					if (newRecord.containsVideo()) {
 						var urlMatch = newRecord.contextData.body.videoUrl().match(/youtube\.com.*(\?v=|\/embed\/)(.{11})/);
 						if (urlMatch !== null) {
@@ -321,7 +322,7 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 			self.title(app.findByLang(data.descriptiveData.label));
 			self.description(app.findByLang(data.descriptiveData.description));
 			setUpSwitch(self);
-			if (self.descriptiveData.backgroundImg.Original ==null || 
+			if (self.descriptiveData.backgroundImg == null || self.descriptiveData.backgroundImg.Original == null || 
 					self.descriptiveData.backgroundImg.Original.withUrl == null || 
 					self.descriptiveData.backgroundImg.Original.withUrl == "") {
 				self.backgroundImg("");
