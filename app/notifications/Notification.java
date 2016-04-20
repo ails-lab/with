@@ -44,7 +44,6 @@ import utils.Serializer;
 @Indexes({
 	@Index(fields = @Field(value = "receiver", type = IndexType.ASC), options = @IndexOptions()),
 	@Index(fields = @Field(value = "readAt", type = IndexType.ASC), options = @IndexOptions()),
-	@Index(fields = @Field(value = "readAt,receiver")),
 	@Index(fields = @Field(value = "pendingResponse", type = IndexType.ASC), options = @IndexOptions()),
 	@Index(fields = @Field(value = "activity", type = IndexType.ASC), options = @IndexOptions())})
 public class Notification {
