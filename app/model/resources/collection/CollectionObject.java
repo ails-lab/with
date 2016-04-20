@@ -39,13 +39,12 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
 @Entity("CollectionObject")
-public class CollectionObject<T extends CollectionObject.CollectionDescriptiveData>
+public abstract class CollectionObject<T extends CollectionObject.CollectionDescriptiveData>
 	extends WithResource<T, CollectionObject.CollectionAdmin> {
 
 	public CollectionObject() {
 		super();
 		this.administrative = new CollectionAdmin();
-		//this.descriptiveData = new CollectionDescriptiveData();
 		this.resourceType = WithResourceType.valueOf(this.getClass()
 				.getSimpleName());
 		this.collectedResources = new ArrayList<ContextData<ContextDataBody>>();
