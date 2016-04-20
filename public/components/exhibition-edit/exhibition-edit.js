@@ -636,29 +636,30 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 				var dragElement = $(element);
 				var dragOptions = {
 					start: function (event, ui) {
-						$('#collscroll').css({
+						/*$('#collscroll').css({
 							"overflow": 'visible'
-						});
+						});*/
 						$('.bottom-box').removeClass("box-Hover");
-						
+						dragElement.parent().css("overflow", "visible");
 						_draggedItem = ko.utils.unwrapObservable(valueAccessor().item);
 						_bIsMoveOperation = ko.utils.unwrapObservable(valueAccessor().move);
 						ui.helper.css({
-							"z-index": 500
+							"z-index": 10000001
 						});
+						ui.helper = 'clone';
 						//if (!_bIsMoveOperation) {
-							if (ui.helper.width() > 80) {
+							/*if (ui.helper.width() > 80) {
 								//var newAspectHeight = 80 / ui.helper.width() * ui.helper.height();
 								ui.helper.css({
 									"width": 80
 								});
 								ui.helper.css({
-									"height": 80//newAspectHeight
+									"height": newAspectHeight
 								});
 								ui.helper.css({
 									opacity: 0.8
 								});
-							}
+							}*/
 						//}
 					},
 					stop: function (event, ui) {
@@ -674,6 +675,7 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 					}
 				};
 				if (dragElement.hasClass('box fill')) { //if item selected from exhibitions
+					console.log("1");
 					//dragOptions.appendTo = $('.left');
 					dragOptions.helper = function () {
 						var $imageElementHelper = $(this).find('#itemImage').clone();
@@ -690,6 +692,7 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 					dragOptions.cursor = "move";
 					dragOptions.revert = false;
 				} else {
+					console.log("2");
 					dragOptions.helper = 'clone';
 					dragOptions.cursor = 'pointer';
 					dragOptions.revert = 'invalid';
