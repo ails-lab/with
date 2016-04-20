@@ -176,7 +176,7 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 		if (access != null)
 			recordUpdate.set("administrative.access", access);
 		if (isPublic)
-			recordUpdate.set("administrative.access.isPubic", true);
+			recordUpdate.set("administrative.access.isPublic", true);
 		if (DB.getCollectionObjectDAO().isFavorites(collectionId))
 			recordUpdate.inc("usage.likes");
 		else
