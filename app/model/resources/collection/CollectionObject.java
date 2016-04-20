@@ -27,6 +27,11 @@ import model.basicDataTypes.MultiLiteralOrResource;
 import model.resources.WithResource;
 import org.mongodb.morphia.annotations.Embedded;
 import org.mongodb.morphia.annotations.Entity;
+import org.mongodb.morphia.annotations.Field;
+import org.mongodb.morphia.annotations.Index;
+import org.mongodb.morphia.annotations.IndexOptions;
+import org.mongodb.morphia.annotations.Indexes;
+import org.mongodb.morphia.utils.IndexType;
 
 import play.libs.Json;
 
@@ -39,7 +44,11 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
 @Entity("CollectionObject")
-public abstract class CollectionObject<T extends CollectionObject.CollectionDescriptiveData>
+
+@Indexes({
+	@Index(fields = @Field(value = "resourceType", type = IndexType.ASC), options = @IndexOptions()),
+	@Index(fields = @Field(value = "collectedIn", type = IndexType.ASC), options = @IndexOptions()) })
+public class CollectionObject<T extends CollectionObject.CollectionDescriptiveData>
 	extends WithResource<T, CollectionObject.CollectionAdmin> {
 
 	public CollectionObject() {
@@ -63,6 +72,14 @@ public abstract class CollectionObject<T extends CollectionObject.CollectionDesc
 		this.collectedResources = collectedResources;
 	}
 
+	@Indexes({
+		@Index(fields = @Field(value = "withCreator", type = IndexType.ASC), options = @IndexOptions()),
+		@Index(fields = @Field(value = "externalId", type = IndexType.ASC), options = @IndexOptions()),
+		@Index(fields = @Field(value = "access.user,access.level")) // compound/multikey
+																	// index
+																	// for
+																	// access
+	})
 	@Embedded
 	public static class CollectionAdmin extends WithResource.WithAdmin {
 
@@ -83,6 +100,9 @@ public abstract class CollectionObject<T extends CollectionObject.CollectionDesc
 
 	}
 
+	@Indexes({
+		@Index(fields = @Field(value = "label", type = IndexType.ASC), options = @IndexOptions())
+	})
 	@Embedded
 	public static class CollectionDescriptiveData extends DescriptiveData {
 		//TODO: change these to camelCase!
