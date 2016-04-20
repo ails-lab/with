@@ -103,12 +103,25 @@ define(["knockout", "crossroads", "hasher"], function (ko, crossroads, hasher) {
 
 					sessionStorage.setItem("collection-viewscroll" + oldHash, scrollPosition);
 				}
+				else if (oldHash.indexOf("search") === 0) {
+					var scrollPosition = $(window).scrollTop();
+					oldHash = oldHash.substring(6);
+					if (oldHash.indexOf('/') != -1) {
+						oldHash = oldHash.substring(0, oldHash.indexOf('/'));
+					}
+
+					sessionStorage.setItem("search-viewscroll" + oldHash, scrollPosition);
+				}
 			}
 			if(newHash.indexOf('search')!=-1){
 			
 				self.showSearch(true);
 				$('div[role="main"]').toggleClass( "homepage", false );
 				$('div[role="main"]').toggleClass( "searchpage", true );
+				if(sessionStorage.getItem("search-viewscroll")){
+					    var scrollTop=sessionStorage.getItem("search-viewscroll");
+						setTimeout(function(){$(window).scrollTop(scrollTop);},500);
+				}
 				
 			}
 			else{
