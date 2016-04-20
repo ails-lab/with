@@ -16,7 +16,6 @@
 
 package controllers;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -27,6 +26,7 @@ import java.util.Set;
 
 import javax.validation.ConstraintViolation;
 
+import org.bson.Document;
 import org.bson.types.ObjectId;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -50,20 +50,18 @@ import model.basicDataTypes.WithAccess.AccessEntry;
 import model.resources.CulturalObject;
 import model.resources.CulturalObject.CulturalObjectData;
 import model.resources.RecordResource;
-import model.resources.RecordResource.RecordDescriptiveData;
 import model.resources.WithResource;
 import model.resources.WithResource.WithResourceType;
 import model.resources.collection.CollectionObject;
 import model.resources.collection.CollectionObject.CollectionAdmin;
 import model.resources.collection.Exhibition;
-import model.resources.collection.Exhibition.ExhibitionDescriptiveData;
+import model.resources.collection.SimpleCollection;
 import model.usersAndGroups.Organization;
 import model.usersAndGroups.Page;
 import model.usersAndGroups.Project;
 import model.usersAndGroups.User;
 import model.usersAndGroups.UserGroup;
 import model.usersAndGroups.UserOrGroup;
-
 import play.Logger;
 import play.Logger.ALogger;
 import play.data.validation.Validation;
@@ -75,7 +73,6 @@ import play.libs.Json;
 import play.mvc.Result;
 import sources.EuropeanaCollectionSpaceSource;
 import sources.EuropeanaSpaceSource;
-import sources.OWLExporter;
 import sources.OWLExporter.CulturalItemOWLExporter;
 import sources.core.CommonQuery;
 import sources.core.SourceResponse;
@@ -84,8 +81,6 @@ import utils.AccessManager;
 import utils.AccessManager.Action;
 import utils.Locks;
 import utils.Tuple;
-
-import org.bson.Document;
 
 /**
  * @author mariaral
@@ -112,7 +107,7 @@ public class CollectionObjectController extends WithResourceController {
 						.asInt() : -1;
 				CollectionObject ccid = null;
 				if (!isCollectionCreated(creatorDbId, cname)) {
-					CollectionObject collection = new CollectionObject();
+					CollectionObject collection = new SimpleCollection();
 					collection.getDescriptiveData().setLabel(
 							new MultiLiteral(cname).fillDEF());
 					boolean success = internalAddCollection(collection,
@@ -146,7 +141,7 @@ public class CollectionObjectController extends WithResourceController {
 		ObjectId creatorDbId = new ObjectId(session().get("user"));
 		CollectionObject ccid = null;
 		if (!isCollectionCreated(creatorDbId, cname)) {
-			CollectionObject collection = new CollectionObject();
+			CollectionObject collection = new SimpleCollection();
 			collection.getDescriptiveData().setLabel(
 					new MultiLiteral(cname).fillDEF());
 			boolean success = internalAddCollection(collection,
@@ -180,7 +175,7 @@ public class CollectionObjectController extends WithResourceController {
 	 */
 	public static Promise<Result> createAndFillEuropeanaCollection(String id,
 			int limit) {
-		CollectionObject collection = new CollectionObject();
+		CollectionObject collection = new SimpleCollection();
 		collection.getDescriptiveData()
 				.setLabel(new MultiLiteral(id).fillDEF());
 		ObjectNode resultInfo = Json.newObject();
@@ -897,7 +892,7 @@ public class CollectionObjectController extends WithResourceController {
 	}
 
 	public static ObjectId createFavorites(ObjectId userId) {
-		CollectionObject fav = new CollectionObject();
+		CollectionObject fav = new SimpleCollection();
 		fav.getAdministrative().setCreated(new Date());
 		fav.getAdministrative().setWithCreator(userId);
 		fav.getDescriptiveData().setLabel(

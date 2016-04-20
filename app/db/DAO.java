@@ -29,7 +29,10 @@ import play.libs.F.Promise;
 import model.resources.WithResource.WithResourceType;
 
 import org.bson.types.ObjectId;
+import org.elasticsearch.action.get.GetRequest;
+import org.elasticsearch.action.get.GetResponse;
 import org.elasticsearch.action.index.IndexResponse;
+import org.elasticsearch.search.fetch.source.FetchSourceContext;
 import org.mongodb.morphia.Key;
 import org.mongodb.morphia.dao.BasicDAO;
 import org.mongodb.morphia.query.Query;
@@ -51,6 +54,7 @@ import com.mongodb.WriteConcern;
 import com.mongodb.WriteResult;
 import com.mongodb.util.JSON;
 
+import elastic.Elastic;
 import elastic.ElasticEraser;
 import elastic.ElasticIndexer;
 
@@ -278,10 +282,22 @@ public class DAO<E> extends BasicDAO<E, ObjectId> {
 		WriteResult wr = super.deleteById(id);
 
 		if (wr.getN() == 1) {
-			Function<String, Boolean> deleteResource = (indexId) -> (ElasticEraser
-					.deleteResourceByQuery(indexId));
-			Promise<Boolean> deleteResp = ParallelAPICall.createPromise(
-					deleteResource, id.toString());
+
+			GetResponse resp = Elastic.getTransportClient().get(new GetRequest(Elastic.index, "_all", id.toString())
+			.fetchSourceContext(FetchSourceContext.DO_NOT_FETCH_SOURCE))
+			.actionGet();
+
+			List<String> enumNames = new ArrayList<String>();
+			Arrays.asList(WithResourceType.values()).forEach((t) -> {
+				enumNames.add(t.toString());
+				return;
+			});
+			if(enumNames.contains(resp.getType())) {
+				Function<String, Boolean> deleteResource = (indexId) -> (ElasticEraser
+						.deleteResourceByQuery(indexId));
+				Promise<Boolean> deleteResp = ParallelAPICall.createPromise(
+						deleteResource, id.toString());
+			}
 		}
 
 		return wr;
@@ -417,7 +433,7 @@ public class DAO<E> extends BasicDAO<E, ObjectId> {
 		updateOps.set(field, value);
 		this.updateFirst(q, updateOps);
 	}
-	
+
 	public void deleteField(ObjectId id, String field) {
 		Query<E> q = this.createQuery().field("_id").equal(id);
 		UpdateOperations<E> updateOps = this.createUpdateOperations()

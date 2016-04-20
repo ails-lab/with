@@ -60,7 +60,7 @@
 						</span>
 					</div>
                   </div>
-                 <div class="more" data-bind="visible: searching, scroll: mixresults(), scrollOptions: { loadFunc: searchNext, offset: 0 }"> <i class="fa fa-spinner fa-pulse"></i></div>
+                 <div class="more" data-bind="visible: searching, scrollsearch: mixresults(), scrollOptions: { loadFunc: searchNext, offset: 0 }"> <i class="fa fa-spinner fa-pulse"></i></div>
 		        
                 </section>
               </section>
@@ -105,6 +105,7 @@
               <!-- /ko -->
             </div>
           </div>
+           <!-- ko if:showSearch()==true --> 
            <!-- item view-->
                <item-view params="route: route"></item-view>
           
@@ -115,7 +116,7 @@
              
              
           <facets id="search-facets" params="name:'search-filters',params: {}"></facets>
- 
+ 		<!-- /ko -->
         </div>
       </div>
       </div>

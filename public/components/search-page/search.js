@@ -2,6 +2,56 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
 
 	$.bridget('isotope', Isotope);
 	
+	
+	ko.bindingHandlers.scrollsearch = {
+			updating: true,
+
+			init: function (element, valueAccessor, allBindingsAccessor) {
+				var self = this;
+				self.updating = true;
+				ko.utils.domNodeDisposal.addDisposeCallback(element, function () {
+					$(window).off("scroll.ko.scrollHandler");
+					self.updating = false;
+				});
+			},
+
+			update: function (element, valueAccessor, allBindingsAccessor) {
+				var props = allBindingsAccessor().scrollOptions;
+				var offset = props.offset ? props.offset : "0";
+				var loadFunc = props.loadFunc;
+				var functPar1 = props.functPar1;
+				var load = ko.utils.unwrapObservable(valueAccessor());
+				var self = this;
+
+				if (load) {
+					$(window).on("scroll.ko.scrollHandler", function () {
+						if ($(window).scrollTop() >= $(document).height() - $(window).height() - 300) {
+							if (self.updating) {
+								if (functPar1 !== undefined && functPar1 !== null)
+
+									loadFunc(functPar1);
+								else
+									loadFunc();
+								    //self.updating = false;
+							}
+						} else {
+							self.updating = true;
+						}
+
+						if ($(window).scrollTop() > 100) {
+							$('.scroll-top-wrapper').addClass('show');
+						} else {
+							$('.scroll-top-wrapper').removeClass('show');
+						}
+					});
+				} else {
+					element.style.display = "none";
+					$(window).off("scroll.ko.scrollHandler");
+					self.updating = false;
+				}
+			}
+		};
+	
 	$.fn.isotopeImagesReveal = function( $items ) {
 		  var iso = this.data('isotope');
 		  var itemSelector = iso.options.itemSelector;
@@ -12,12 +62,18 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
 		// hide by default
 		  $items.hide();
 		  $items.imagesLoaded().progress( function( imgLoad, image ) {
+		   if(iso){	  
 		    // get item
 		    var $item = $( image.img ).parents( itemSelector );
 		    // un-hide item
 		    $item.show();
-		    iso.appended( $item );
-		   
+		    if(iso)
+				  iso.appended($item);
+				else{
+					$.error("iso gone");
+				}
+		    
+		   }
 		    
 		  });
 		  
@@ -161,7 +217,7 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
 		var self = this;
 		 
 		setTimeout(function(){ WITHApp.init(); WITHApp.tabAction();}, 300);
-		var $container = $(".grid").isotope({
+		var $container = $("#gridlist").find("div.grid").isotope({
 			itemSelector: '.media',
 			masonry: {
 				columnWidth		: '.sizer',
@@ -612,7 +668,9 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
 		self.searchNext = function() {
 		if(self.next()>0){
 			self.page(self.next());
-			self._search(false,false);}
+			if(window.location.hash=="#search")
+			  self._search(false,false);
+			}
 		};
 
 		self.searchPrevious = function() {
@@ -762,7 +820,7 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
 			
         }
         
-        recordSelect = function (data,event) {
+        srecordSelect = function (data,event) {
         	
         	event.preventDefault();
 			var selrecord = ko.utils.arrayFirst(self.mixresults(), function(record) {
@@ -821,7 +879,7 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
         function getItem(record) {
         	var tile= '<div class="item media" id="'+record.externalId+'"> <div class="wrap">';
  		    
-        	tile+='<a href="#" onclick="recordSelect(\''+record.externalId+'\',event)" class="mediaviewer">'
+        	tile+='<a href="#" onclick="srecordSelect(\''+record.externalId+'\',event)" class="mediaviewer">'
         			+'<div class="thumb"><img src="'+record.thumb+'" onError="this.src=\'img/content/thumb-empty.png\'"></div>'
         			+' <div class="info"><h1 class="title">'+record.displayTitle()+'</h1></div>';
             tile+='<div class="action-group"><div class="wrap"><a href="' + record.view_url + '" target="_new" class="links">'+ record.sourceCredits() +'</a><ul>';

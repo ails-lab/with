@@ -29,11 +29,6 @@ import utils.Serializer;
 
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
-@Indexes({
-	@Index(fields = @Field(value = "collectionId", type = IndexType.ASC), options = @IndexOptions()),
-	@Index(fields = @Field(value = "position", type = IndexType.ASC), options = @IndexOptions()),
-	@Index(fields = { @Field(value = "collectionId", type = IndexType.ASC), @Field(value = "position", type = IndexType.DESC)}, options = @IndexOptions())
-})
 public class CollectionInfo {
 	@JsonSerialize(using = Serializer.ObjectIdSerializer.class)
 	private ObjectId collectionId;
@@ -60,5 +55,5 @@ public class CollectionInfo {
 	public void setPosition(Integer position) {
 		this.position = position;
 	}
-	
+
 }
