@@ -30,6 +30,7 @@ public class SimpleCollection extends CollectionObject<CollectionDescriptiveData
 
 	public SimpleCollection() {
 		super();
+		this.descriptiveData = new CollectionDescriptiveData();
 		this.resourceType = WithResourceType.SimpleCollection;
 	}
 
