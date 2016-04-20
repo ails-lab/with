@@ -9,6 +9,8 @@ define(["knockout", "crossroads", "hasher"], function (ko, crossroads, hasher) {
 	// Knockout that requires or even knows about this technique. It's just one of
 	// many possible ways of setting up client-side routes.
 
+	this.showSearch=ko.observable(false);
+	
 	return new Router({
 		routes: [
 			{ url: '',          params: { page: 'home-page',     title: 'Home' } },
@@ -102,10 +104,21 @@ define(["knockout", "crossroads", "hasher"], function (ko, crossroads, hasher) {
 					sessionStorage.setItem("collection-viewscroll" + oldHash, scrollPosition);
 				}
 			}
+			if(newHash.indexOf('search')!=-1){
+			
+				self.showSearch(true);
+				$('div[role="main"]').toggleClass( "homepage", false );
+				$('div[role="main"]').toggleClass( "searchpage", true );
+				
+			}
+			else{
+				self.showSearch(false);
+				$('div[role="main"]').toggleClass( "searchpage", false);
+			}
 			crossroads.parse(newHash);
 		}
 
-		crossroads.ignoreState = true;
+		//crossroads.ignoreState = true;
 		crossroads.normalizeFn = crossroads.NORM_AS_OBJECT;
 		hasher.initialized.add(parseHash);
 		hasher.changed.add(parseHash);

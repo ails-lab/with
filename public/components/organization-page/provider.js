@@ -176,7 +176,7 @@ define(['bridget','knockout', 'text!./provider.html','isotope','imagesloaded','a
 		self.totalCollections = ko.observable(0);
 		self.totalExhibitions = ko.observable(0);
 		self.totalOrganizations = ko.observable(0);
-		var $container = $(".grid").isotope({
+		var $container = $("#orggrid").isotope({
 			itemSelector: '.item',
 			transitionDuration: transDuration,
 			masonry: {
@@ -427,14 +427,19 @@ define(['bridget','knockout', 'text!./provider.html','isotope','imagesloaded','a
 				var $item = $(image.img).parents(itemSelector);
 				// un-hide item
 				$item.show();
-				iso.appended($item);
+				if(iso)
+					  iso.appended($item);
+					else{
+						$.error("iso gone");
+					}
+				
 				// $container.isotope("layout");
 				var scrollpos = sessionStorage.getItem("groupview" + self.id());
-				if (scrollpos && $(".grid").height() > scrollpos) {
+				if (scrollpos && $("#orggrid").height() > scrollpos) {
 					$(window).scrollTop(scrollpos);
 					sessionStorage.removeItem("groupview" + self.id());
-				} else if (scrollpos != null && $(".grid").height() < scrollpos) {
-					$(window).scrollTop($(".grid").height());
+				} else if (scrollpos != null && $("#orggrid").height() < scrollpos) {
+					$(window).scrollTop($("#orggrid").height());
 				}
 			});
 

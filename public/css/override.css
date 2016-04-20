@@ -4340,7 +4340,7 @@ body div[role='main'] .wrapper main section.exhibition .assets .assetlisting ul 
   height: 100%;
   display: inline-block;
   width: auto;
-  cursor: move;
+  /*cursor: move;*/
 }
 body div[role='main'] .wrapper main section.exhibition .assets .assetlisting ul li a .hue {
   max-height: 100%;
@@ -8474,6 +8474,53 @@ body div.about[role="main"] .aboutlink .left ul li a {
   text-align: center;
   margin: 20px auto;
 }
-body div[role=main] .wrapper main section.exhibition .assets .assetlisting ul li .bottom-box a img {
+body div[role=main] .wrapper main section.exhibition .assets .assetlisting ul li a img {
   height: 110px !important;
+}
+.rightscr {
+  width: 40px;
+  right: 0;
+  position: fixed;
+  height: 100%;
+  z-index: 10;
+  top: 0;
+}
+.leftscr {
+  top: 0;
+  width: 40px;
+  position: fixed;
+  height: 100%;
+  z-index: 10;
+}
+body div[role=main] .wrapper main section.exhibition .assets {
+  position: fixed;
+  bottom: 0;
+  background-color: #FFFFFF;
+  z-index: 1;
+  overflow: visible;
+  width: 90%;
+  height: 160px;
+}
+body div[role=main] .wrapper main section.exhibition .assets .assetlisting {
+  position: absolute;
+  display: inline-block;
+  height: 100px;
+  background-color: #FFF;
+}
+body div[role=main] .wrapper main section.exhibition .editorbox {
+  margin-top: 5px;
+  margin-bottom: 2em;
+}
+body div[role=main] .wrapper main section.exhibition .assets .actions .notification {
+  float: left;
+  padding-left: 10px;
+  padding-right: 0;
+}
+body div[role=main] .wrapper section.exhibitionviewer .exhibitionplayer .carouselexhibition .item .container {
+  overflow: hidden;
+}
+body div[role=main] .wrapper section.exhibitionviewer .exhibitionplayer .carouselexhibition .item.style1 .textbox,
+body div[role=main] .wrapper section.exhibitionviewer .exhibitionplayer .carouselexhibition .item.style2 .textbox,
+body div[role=main] .wrapper section.exhibitionviewer .exhibitionplayer .carouselexhibition .item.style3 .textbox {
+  overflow: auto;
 }

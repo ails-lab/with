@@ -77,8 +77,6 @@ define(['knockout', 'text!./_exhibition-view.html', 'app', 'magnific-popup', 'sl
 		// $("div[role='main']").toggleClass("homepage", false);
 
 		var self = this;
-
-		var $container = $(".grid");
 		self.route = params.route;
 		var counter = 1;
 		self.exhName = ko.observable('');
