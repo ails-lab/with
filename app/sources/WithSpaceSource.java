@@ -24,6 +24,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import model.basicDataTypes.ProvenanceInfo.Sources;
 import model.basicDataTypes.WithAccess;
 import model.basicDataTypes.WithAccess.Access;
 import model.resources.RecordResource;
@@ -86,7 +87,7 @@ public class WithSpaceSource extends ISpaceSource {
 
 	@Override
 	public String getSourceName() {
-		return "WITHin";
+		return Sources.WITHin.getID();
 	}
 
 	@Override
@@ -132,12 +133,14 @@ public class WithSpaceSource extends ISpaceSource {
 		/* Filters */
 		//elasticoptions.addFilter("isPublic", "true");
 		List<CommonFilter> filters = q.filters;
-		for (CommonFilter f: filters) {
-			for (String filterValue: f.values) {
-	    		elasticoptions.addFilter(f.filterID+".all", filterValue);
+		if (filters!=null){
+			for (CommonFilter f: filters) {
+				for (String filterValue: f.values) {
+		    		elasticoptions.addFilter(f.filterID+".all", filterValue);
+				}
 			}
-		}
 
+		}
 
 
 		/*
