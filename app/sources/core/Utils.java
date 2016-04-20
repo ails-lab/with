@@ -19,6 +19,7 @@ package sources.core;
 import java.awt.image.BufferedImage;
 import java.io.UnsupportedEncodingException;
 import java.net.URL;
+import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -352,6 +353,15 @@ public class Utils {
 	public static boolean isValidURL(String str) {
 		UrlValidator val = new UrlValidator();
 		return str!=null && val.isValid(str);
+	}
+	
+	public static String decodeURL(String str) {
+		try {
+			return URLDecoder.decode(str, "UTF-8");
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+		}
+		return str;
 	}
 
 	public static boolean isNumericInteger(String date) {
