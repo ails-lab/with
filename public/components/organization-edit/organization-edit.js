@@ -189,7 +189,7 @@ define(['bridget','knockout', 'text!./organization-edit.html', 'isotope','images
 
 		self.name = params.name;				// Project or Organization (display field)
 		self.namePlural = params.name + 's';	// Projects or Organizations (display field)
-		var $container = $(".grid").isotope({
+		var $container = $("#orggrid").isotope({
 			itemSelector: '.item',
 			transitionDuration: transDuration,
 			masonry: {
@@ -723,8 +723,14 @@ define(['bridget','knockout', 'text!./organization-edit.html', 'isotope','images
 		    // get item
 		    var $item = $( image.img ).parents( itemSelector );
 		    // un-hide item
+		    
 		    $item.show();
-		    iso.appended( $item );
+		    if(iso)
+				  iso.appended($item);
+				else{
+					$.error("iso gone");
+				}
+		    
 
 		  });
 

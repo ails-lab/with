@@ -195,7 +195,7 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 	  self.loadingex=ko.observable(false);
 	  self.loadingcoll=ko.observable(false);
 	  self.loadingspaces=ko.observable(false);
-	  var $container = $(".grid").isotope({
+	  var $container = $("#homemasonry").isotope({
 			itemSelector: '.item',
 			transitionDuration: transDuration,
 			masonry: {
@@ -533,10 +533,10 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 		
 
 		isotopeImagesReveal = function ($items) {
-			var $container=$(".grid");
+			var $container=$("#homemasonry");
 			var iso = $container.data('isotope');
 			if(!iso){
-				var $container = $(".grid").isotope({
+				var $container = $("#homemasonry").isotope({
 					itemSelector: '.item',
 					transitionDuration: transDuration,
 					masonry: {
@@ -557,8 +557,11 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 				var $item = $(image.img).parents(itemSelector);
 				// un-hide item
 				$item.show();
-				iso.appended($item);
-				
+				if(iso)
+				  iso.appended($item);
+				else{console.log("leaving");
+					$.error("iso gone");
+				}
 			});
 
 			return this;

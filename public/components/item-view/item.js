@@ -373,7 +373,7 @@ define(['knockout', 'text!./_item.html', 'app','smoke'], function (ko, template,
 			}	
 			
 			if (isOpen){
-				toggleSearch(event,'');
+				//toggleSearch(event,'');
 			}
 			self.close();
 		};
