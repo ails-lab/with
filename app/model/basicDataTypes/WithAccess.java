@@ -40,12 +40,6 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
  */
 public class WithAccess  {
 
-	@Indexes({
-		@Index(fields = @Field(value = "user", type = IndexType.ASC), options = @IndexOptions(disableValidation=true)),
-		@Index(fields = @Field(value = "level", type = IndexType.ASC), options = @IndexOptions()),
-		@Index(fields = {@Field(value = "user", type = IndexType.ASC), @Field(value = "level", type = IndexType.DESC) }, options = @IndexOptions())
-	})
-
 	@Converters(AccessEnumConverter.class)
 	public static class AccessEntry {
 

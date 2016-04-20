@@ -27,6 +27,7 @@ import model.resources.WithResource;
 import model.resources.collection.CollectionObject;
 import model.usersAndGroups.User;
 import model.usersAndGroups.UserGroup;
+import model.usersAndGroups.UserOrGroup;
 import notifications.Notification;
 
 import org.mongodb.morphia.Datastore;
@@ -121,9 +122,20 @@ public class DB {
 				ds = getMorphia().createDatastore(getMongo(),
 						getConf().getString("mongo.dbname"));
 				ds.setDefaultWriteConcern(WriteConcern.ACKNOWLEDGED);
-				ds.ensureIndexes();
+				//ds.ensureIndexes();
 			} catch (Exception e) {
 				log.error("Cannot create Datastore!", e);
+				System.exit(-1);
+			}
+
+			try {
+				ds.ensureIndexes(Notification.class);
+				ds.ensureIndexes(CollectionObject.class);
+				ds.ensureIndexes(User.class);
+				ds.ensureIndexes(UserGroup.class);
+				ds.ensureIndexes(WithResource.class);
+			} catch(Exception e) {
+				log.error("Error initializing Mongo indexes!", e);
 			}
 		}
 		return ds;
@@ -172,7 +184,7 @@ public class DB {
 	public static RecordResourceDAO getRecordResourceDAO() {
 		return (RecordResourceDAO) getDAO(RecordResource.class);
 	}
-	
+
 	public static AnnotationDAO getAnnotationDAO() {
 		return (AnnotationDAO) getDAO(Annotation.class);
 	}
