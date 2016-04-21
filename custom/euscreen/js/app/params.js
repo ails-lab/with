@@ -2,9 +2,9 @@ define(function () {
 
     var _args = {}; // private
     
-    _args.projectName = 'EUscreenXL';
-    _args.projectId = '561033bfe4b03e1878ccaf73';
-    _args.featuredExhibition='5614f353569e48389d111281';
+    _args.projectName = 'euscreen_new';
+    _args.projectId = '5718b1fb4c74793e0b371dae';
+    _args.featuredExhibition='571816e24c74793e0b3238f7';
     _args.featuredCollection='';
     
     return {

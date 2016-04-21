@@ -17,7 +17,9 @@
 package model.usersAndGroups;
 
 import java.security.MessageDigest;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import model.resources.collection.CollectionObject;
@@ -380,7 +382,8 @@ public class User extends UserOrGroup {
 								20 - unreadNotifications.size()));
 				notifications.addAll(unreadNotifications);
 			} else {
-				notifications = unreadNotifications;
+				List<Notification> subNotifications = new ArrayList<Notification>(unreadNotifications);
+				notifications = new HashSet<Notification>(subNotifications.subList(0, 19));
 			}
 			return notifications;
 		} catch (Exception e) {
