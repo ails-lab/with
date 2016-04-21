@@ -64,15 +64,15 @@ import elastic.ElasticUtils;
 @Entity("RecordResource")
 @Indexes({
 		@Index(fields = @Field(value = "resourceType", type = IndexType.ASC), options = @IndexOptions()),
+		@Index(fields = @Field(value = "administrative.withCreator", type = IndexType.ASC), options = @IndexOptions()),
+		@Index(fields = @Field(value = "administrative.externalId", type = IndexType.ASC), options = @IndexOptions()),
+		@Index(fields = @Field(value = "provenance.provider", type = IndexType.ASC), options = @IndexOptions()),
+		@Index(fields = @Field(value = "provenance.resourceId", type = IndexType.ASC), options = @IndexOptions()),
+		@Index(fields = @Field(value = "descriptiveData.label", type = IndexType.ASC), options = @IndexOptions()),
 		@Index(fields = @Field(value = "collectedIn", type = IndexType.ASC), options = @IndexOptions()) })
 @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
 public class WithResource<T extends DescriptiveData, U extends WithResource.WithAdmin> {
 
-	// TODO: compound indexes for common queries on multiple fields
-	@Indexes({
-			@Index(fields = @Field(value = "withCreator", type = IndexType.ASC), options = @IndexOptions()),
-			@Index(fields = @Field(value = "externalId", type = IndexType.ASC), options = @IndexOptions()),
-	})
 	public static class WithAdmin {
 
 		// index

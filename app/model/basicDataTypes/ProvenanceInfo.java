@@ -26,22 +26,19 @@ import org.mongodb.morphia.utils.IndexType;
 import db.converters.ProvenanceInfoConverter;
 
 @Converters(ProvenanceInfoConverter.class)
-@Indexes({
-		@Index(fields = @Field(value = "provider", type = IndexType.ASC), options = @IndexOptions()),
-		@Index(fields = @Field(value = "resourceId", type = IndexType.ASC), options = @IndexOptions()) })
 public class ProvenanceInfo {
 
 	public enum Sources {
 		Mint("Mint"), Europeana("Europeana"), UploadedByUser("UploadedByUser"),
 		BritishLibrary("BritishLibrary", "The British Library"),
 		InternetArchive("InternetArchive","Internet Archive"), DDB("DDB","Deutsche Digitale Bibliothek"),
-		DigitalNZ("DigitalNZ"), DPLA("DPLA","Digital Public Library of America"), 
-		EFashion("EFashion"), 
+		DigitalNZ("DigitalNZ"), DPLA("DPLA","Digital Public Library of America"),
+		EFashion("EFashion"),
 		NLA("NLA","National Library of Australia"),
 		WITHin("WITHin"),
 		Rijksmuseum("Rijksmuseum","Rijksmuseum");
-		
-		
+
+
 		private final String text;
 		private final String ID;
 
@@ -49,7 +46,7 @@ public class ProvenanceInfo {
 			this.text = text;
 			this.ID = id;
 		}
-		
+
 		private Sources(String textid) {
 			this.text = textid;
 			this.ID = textid;
@@ -67,7 +64,7 @@ public class ProvenanceInfo {
 		public String getID() {
 			return ID;
 		}
-		
+
 		public static Sources getSourceByID(String id){
 			for (Sources e : Sources.values()) {
 				if (e.getID().equals(id)){
@@ -76,7 +73,7 @@ public class ProvenanceInfo {
 			}
 			return null;
 		}
-		
+
 
 	}
 

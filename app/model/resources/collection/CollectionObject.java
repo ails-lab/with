@@ -47,6 +47,11 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 
 @Indexes({
 	@Index(fields = @Field(value = "resourceType", type = IndexType.ASC), options = @IndexOptions()),
+	@Index(fields = @Field(value = "administrative.withCreator", type = IndexType.ASC), options = @IndexOptions()),
+	@Index(fields = @Field(value = "administrative.externalId", type = IndexType.ASC), options = @IndexOptions()),
+	@Index(fields = @Field(value = "provenance.provider", type = IndexType.ASC), options = @IndexOptions()),
+	@Index(fields = @Field(value = "provenance.resourceId", type = IndexType.ASC), options = @IndexOptions()),
+	@Index(fields = @Field(value = "descriptiveData.label", type = IndexType.ASC), options = @IndexOptions()),
 	@Index(fields = @Field(value = "collectedIn", type = IndexType.ASC), options = @IndexOptions()) })
 public class CollectionObject<T extends CollectionObject.CollectionDescriptiveData>
 	extends WithResource<T, CollectionObject.CollectionAdmin> {
@@ -72,10 +77,7 @@ public class CollectionObject<T extends CollectionObject.CollectionDescriptiveDa
 		this.collectedResources = collectedResources;
 	}
 
-	@Indexes({
-		@Index(fields = @Field(value = "withCreator", type = IndexType.ASC), options = @IndexOptions()),
-		@Index(fields = @Field(value = "externalId", type = IndexType.ASC), options = @IndexOptions()),
-	})
+
 	@Embedded
 	public static class CollectionAdmin extends WithResource.WithAdmin {
 
@@ -96,9 +98,7 @@ public class CollectionObject<T extends CollectionObject.CollectionDescriptiveDa
 
 	}
 
-	@Indexes({
-		@Index(fields = @Field(value = "label", type = IndexType.ASC), options = @IndexOptions())
-	})
+
 	@Embedded
 	public static class CollectionDescriptiveData extends DescriptiveData {
 		//TODO: change these to camelCase!
