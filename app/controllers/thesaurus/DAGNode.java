@@ -28,6 +28,7 @@ import org.apache.jena.atlas.lib.SetUtils;
 import org.bson.types.ObjectId;
 
 import model.basicDataTypes.Language;
+import model.basicDataTypes.Literal;
 import model.resources.ThesaurusObject.SKOSSemantic;
 
 public class DAGNode<T> implements Comparable<DAGNode<T>> {
@@ -199,11 +200,22 @@ public class DAGNode<T> implements Comparable<DAGNode<T>> {
 		StringBuffer sb = new StringBuffer();
 
 		if (id != null) {
-			String ss = map.get(s).getPrefLabel().getLiteral(lang) + " ";
-//			String ss = map.get(s).getPrefLabel().getLiteral(lang);
+			Literal plabel = map.get(s).getPrefLabel();
+			String ss = "";
+			if (plabel != null) {
+				ss = plabel.getLiteral(lang);
+				if (ss == null && plabel.values().size() > 0) {
+					ss = plabel.values().iterator().next();
+				}
+			} else {
+				String sv = s.toString();
+				
+				ss = sv.substring(Math.max(sv.lastIndexOf("/"), sv.lastIndexOf("#")));
+			}
 			
-//			sb.append("{ \"id\":\"" + idMap.get(s).toString() + "\", \"uri\":\"" + s + "\", \"label\":\"" + ss + "\", \"size\":\"" + size + "\", \"children\": [");
-			sb.append("{ \"id\":\"" + idMap.get(s).toString() + "\", \"uri\":\"" + s + "\", \"label\":\"" + ss + "\", \"size\":\"" + size + "\", \"children\": [");
+//			String ss = map.get(s).getPrefLabel().getLiteral(lang);
+
+			sb.append("{ \"id\":\"" + idMap.get(s).toString() + "\", \"uri\":\"" + s + "\", \"label\":\"" + ss + " \", \"size\":\"" + size + "\", \"children\": [");
 			
 			int i = 0;
 			for (DAGNode<T> node : children) {

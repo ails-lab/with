@@ -1,6 +1,5 @@
-define(['knockout', 'text!./_item.html', 'app','smoke'], function (ko, template, app) {
+define(['knockout', 'text!./_item.html', 'app','smoke', 'knockout-else'], function (ko, template, app, KnockoutElse) {
 
-	
 	function Record(data,showMeta) {
 		var self = this;
 	    self.recordId = "-1";
@@ -44,7 +43,10 @@ define(['knockout', 'text!./_item.html', 'app','smoke'], function (ko, template,
 		    "&description="+desc,'','height=500,width=750');
 		    return false;
 		};
-		 
+		
+		self.mtype = false;
+		self.vtype = 'IMAGE';
+		self.identifier = '';
 		
 		self.isLiked = ko.pureComputed(function () {
 			return app.isLiked(self.externalId);
@@ -52,6 +54,7 @@ define(['knockout', 'text!./_item.html', 'app','smoke'], function (ko, template,
 		self.isLoaded = ko.observable(false);
 		
 		self.load = function(data) {
+			
 			if(data.title==undefined){
 				self.title="No title";
 			}else{self.title=data.title;}
@@ -85,7 +88,12 @@ define(['knockout', 'text!./_item.html', 'app','smoke'], function (ko, template,
 			var likeval=app.isLiked(self.externalId);
 			self.isLike(likeval);
 			self.loading(false);
+			self.mtype = data.mtype;
 			
+			if (self.mtype) {
+				self.vtype = "VIDEO";
+				$('#videodiv').html('<video autoplay="true" controls width="576" height="324"><source src="' + data.identifier + '" type="video/mp4"></source>Your browser does not support HTML5</video>');
+			}
 		 
 		};
 
@@ -121,11 +129,14 @@ define(['knockout', 'text!./_item.html', 'app','smoke'], function (ko, template,
 								 var usage=result.usage;
 										
 								 var rights=null;
+								 var type = null;
 								 if(media){
 								 if(media[0].Original){
 									 rights=findResOrLit(media[0].Original.originalRights);
+									 type = media[0].Original.type;
 								 }else if(media[0].Thumbnail){
 									 rights=findResOrLit(media[0].Thumbnail.originalRights);
+									 type = media[0].Thmbnail.type;
 								 }}
 									
 								 var source=findProvenanceValues(provenance,"source");
@@ -149,7 +160,8 @@ define(['knockout', 'text!./_item.html', 'app','smoke'], function (ko, template,
 											likes: usage.likes,
 											collected: usage.collected,
 											collectedIn:result.collectedIn,
-											data: result
+											data: result,
+											mtype: type
 								  });
 						        if(record.thumb && record.thumb.length>0 && record.externalId!=self.externalId)
 							       items.push(record);
@@ -171,6 +183,7 @@ define(['knockout', 'text!./_item.html', 'app','smoke'], function (ko, template,
 				self.similarsearch=true;  
 				
 				self.loading(true);
+				
 	           $.ajax({
 					type    : "post",
 					url     : "/api/advancedsearch",
@@ -195,10 +208,13 @@ define(['knockout', 'text!./_item.html', 'app','smoke'], function (ko, template,
 									var provenance=result.provenance;
 									var usage=result.usage;
 									 var rights=null;
+									 var type=null;
 									 if(media){
 									 if(media[0].Original){
+										 type = media[0].Orignal.type;
 										 rights=findResOrLit(media[0].Original.originalRights);
 									 }else if(media[0].Thumbnail){
+										 type = media[0].Thumbnail.type;
 										 rights=findResOrLit(media[0].Thumbnail.originalRights);
 									 }}
 									 var source=findProvenanceValues(provenance,"source");
@@ -222,7 +238,8 @@ define(['knockout', 'text!./_item.html', 'app','smoke'], function (ko, template,
 												likes: usage.likes,
 												collected: usage.collected,
 												collectedIn:result.collectedIn,
-												data: result
+												data: result,
+												mtype : type
 									  });
 							        if(record.thumb && record.thumb.length>0 && record.externalId!=self.externalId)
 								       items.push(record);
@@ -425,11 +442,15 @@ define(['knockout', 'text!./_item.html', 'app','smoke'], function (ko, template,
 					var provenance=result.provenance;
 					var usage=result.usage;
 					 var rights=null;
-					 if(media){
+					 var type=null;
+					if(media){
 					 if(media[0].Original){
 						 rights=findResOrLit(media[0].Original.originalRights);
+						 type = media[0].Orignal.type;
+						 
 					 }else if(media[0].Thumbnail){
 						 rights=findResOrLit(media[0].Thumbnail.originalRights);
+						 type = media[0].Thumbnail.type;
 					 }}
 					 var source=findProvenanceValues(provenance,"source");
 						
@@ -453,7 +474,8 @@ define(['knockout', 'text!./_item.html', 'app','smoke'], function (ko, template,
 									likes: usage.likes,
 									collected: usage.collected,
 									collectedIn:result.collectedIn,
-									data: result
+									data: result,
+									mtype: type
 						  });
 					self.record(record);
 					self.open();

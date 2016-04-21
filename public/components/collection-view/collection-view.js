@@ -57,6 +57,10 @@ define(['bridget', 'knockout', 'text!./_collection-view.html', 'isotope', 'image
 		self.position = 0;
 		self.dbId = "";
 		self.data = ko.observable('');
+		self.video = false;
+		
+		self.identifier = "";
+		
 		self.thumbnail = ko.pureComputed(function () {
 
 			if (self.thumb) {
@@ -165,6 +169,12 @@ define(['bridget', 'knockout', 'text!./_collection-view.html', 'isotope', 'image
 				self.rights=findResOrLit(media[0].Thumbnail.originalRights);
 				
 			}
+			
+			self.mtype = media[0] != null && media[0].Original != null && media[0].Original.type == "VIDEO";
+			if (self.mtype) {
+				self.identifier = descdata.dcidentifier.uri;
+			}
+			
 			self.data(options);
 			self.isLoaded = ko.observable(true);
 			

@@ -23,6 +23,7 @@ import java.util.List;
 import org.w3c.dom.Document;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import model.EmbeddedMediaObject.MediaVersion;
 import model.EmbeddedMediaObject;
@@ -60,7 +61,7 @@ public class DBPediaSpaceSource extends ISpaceSource {
 		agentformatreader = formatreader; 
 		placeformatreader = new DBPediaPlaceRecordFormatter(FilterValuesMap.getDBPediaMap());
 	}
-
+	
 	public String getHttpQuery(CommonQuery q) {
 		QueryBuilder builder = new QueryBuilder("http://zenon.image.ece.ntua.gr/fres/service/dbpedia-with");
 		builder.addSearchParam("type", "Person,Place");

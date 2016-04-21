@@ -120,3 +120,5 @@ GET	/api/idxthes									controllers.ReindexController.reindexAllThesaurus()
 POST	/collectionindex/:id 	        			controllers.thesaurus.CollectionIndexController.getCollectionIndex(id)
 POST	/collection/:id/indexedlist		   			controllers.CollectionObjectController.facetedListRecordResources(id, format: String ?="noContent", start: Integer ?=0, count: Integer ?=10)
 GET	/collection/:id/similarlist		   			controllers.CollectionObjectController.similarListRecordResources(id, itemid: java.lang.String, format: String ?="noContent", start: Integer ?=0, count: Integer ?=10)
+
+GET /source/dbpedia/lookup	controllers.DBPediaController.dbpediaLookup(type: java.lang.String, query: java.lang.String, start: Integer ?=0, count: Integer ?=10)

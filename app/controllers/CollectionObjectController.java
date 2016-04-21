@@ -921,7 +921,7 @@ public class CollectionObjectController extends WithResourceController {
 				
 				QueryBuilder query = CollectionIndexController.getIndexCollectionQuery(colId, json);
 				
-//				log.info("QUERY " + query.toString());
+				log.info("QUERY " + query.toString());
 //				log.info("QUERC " + start + " " + count);
 //				
 				SearchOptions so = new SearchOptions(start, start + count);

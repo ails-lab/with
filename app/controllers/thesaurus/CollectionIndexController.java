@@ -68,7 +68,8 @@ public class CollectionIndexController extends WithResourceController	{
 	public static String[] indexFacetFields = new String[] {
 		"keywords.uri.all",
 		"dctype.uri.all",
-		"dcformat.uri.all"
+		"dcformat.uri.all",
+		"dctermsmedium.uri.all"
 	};
 
 	
@@ -214,6 +215,7 @@ public class CollectionIndexController extends WithResourceController	{
 		if (dd instanceof CulturalObjectData) {
 			addMultiLiteralOrResource(((CulturalObjectData)dd).getDctype(), "dctype", thesaurusDAO, query);
 			addMultiLiteralOrResource(((CulturalObjectData)dd).getDcformat(), "dcformat", thesaurusDAO, query);
+			addMultiLiteralOrResource(((CulturalObjectData)dd).getDctermsmedium(), "dctermsmedium", thesaurusDAO, query);
 		} else if (dd instanceof PlaceData) {
 			addMultiLiteralOrResource(((PlaceData)dd).getNation(), "nation", thesaurusDAO, query);
 			addMultiLiteralOrResource(((PlaceData)dd).getContinent(), "continent", thesaurusDAO, query);

@@ -103,7 +103,7 @@
 						
 <section class="action thesaurus">
 	<div class="action-header">
-		<div class="title">Thesauri Terms</div>
+		<div class="title">Thesauri</div>
 		</div>
 			<div class="action-body">
 				<div id="nav-bar" data-bind="template: { name: 'scheme-template', data: index }"></div>
@@ -126,10 +126,11 @@
 
 <script type="text/html" id="scheme-name-template">
  
-    <span data-bind="
+    <span style="text-transform: capitalize; font-weight: bold" data-bind="
     text: label, 
     attr: { 'title': uri }, 
     tooltip: { delay: { show: 500, hide: 10 } }"></span>
+
  
 </script>
 
