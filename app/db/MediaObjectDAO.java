@@ -18,9 +18,11 @@ package db;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.Iterator;
+import java.util.function.Consumer;
+
+import model.EmbeddedMediaObject.MediaVersion;
+import model.MediaObject;
 
 import org.apache.commons.io.IOUtils;
 import org.bson.types.ObjectId;
@@ -30,12 +32,10 @@ import play.Logger;
 import play.Logger.ALogger;
 
 import com.mongodb.BasicDBObject;
+import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
 import com.mongodb.gridfs.GridFSDBFile;
 import com.mongodb.gridfs.GridFSFile;
-
-import model.EmbeddedMediaObject.MediaVersion;
-import model.MediaObject;
 
 public class MediaObjectDAO {
 	public static final ALogger log = Logger.of(MediaObjectDAO.class);
@@ -258,15 +258,12 @@ public class MediaObjectDAO {
 
 	/* Not avatar, not cover, not in Embedded media Object */
 	public void deleteOrphanMediaObjects() {
-		BasicDBObject query = new BasicDBObject();
-		List<String> list = new ArrayList<String>();
-		for (int i =0; i<1000000; i++) {
-			list.add(UUID.randomUUID().toString());
+		DBCursor mediaList = DB.getGridFs().getFileList(new BasicDBObject(),
+				new BasicDBObject("_id", 1));
+		int mediaCount = mediaList.size();
+		int i = 0;
+		for (DBObject media : mediaList) {
+			System.out.println(i++);
 		}
-		query.put("url", new BasicDBObject("$nin", list));
-		List<GridFSDBFile> a = DB.getGridFs().find(query);
-		System.out.println(a.size());
-
 	}
-
 }
