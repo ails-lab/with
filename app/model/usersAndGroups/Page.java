@@ -38,7 +38,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
-@Indexes({ @Index(fields = @Field(value = "coordinates", type = IndexType.GEO2DSPHERE), options = @IndexOptions(background = true)) })
 public class Page {
 
 	private String address;
@@ -114,7 +113,7 @@ public class Page {
 	public List<ObjectId> getFeaturedExhibitions() {
 		return featuredExhibitions;
 	}
-	
+
 	@JsonIgnore
 	public void setFeaturedExhibitions(List<ObjectId> featuredExhibitions) {
 		this.featuredExhibitions = featuredExhibitions;
