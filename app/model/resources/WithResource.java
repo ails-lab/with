@@ -72,10 +72,6 @@ public class WithResource<T extends DescriptiveData, U extends WithResource.With
 	@Indexes({
 			@Index(fields = @Field(value = "withCreator", type = IndexType.ASC), options = @IndexOptions()),
 			@Index(fields = @Field(value = "externalId", type = IndexType.ASC), options = @IndexOptions()),
-			@Index(fields = @Field(value = "access.user,access.level")) // compound/multikey
-																		// index
-																		// for
-																		// access
 	})
 	public static class WithAdmin {
 
