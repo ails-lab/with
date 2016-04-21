@@ -28,6 +28,7 @@ import javax.validation.ConstraintViolation;
 
 import org.bson.Document;
 import org.bson.types.ObjectId;
+import org.mongodb.morphia.query.Query;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -82,10 +83,7 @@ import utils.AccessManager.Action;
 import utils.Locks;
 import utils.Tuple;
 
-/**
- * @author mariaral
- *
- */
+
 @SuppressWarnings("rawtypes")
 public class CollectionObjectController extends WithResourceController {
 
@@ -252,37 +250,79 @@ public class CollectionObjectController extends WithResourceController {
 	}
 	
 	@SuppressWarnings("unchecked")
-	public static Result updateCollections(String host, Integer port, String dbName) {
-		MongoClient mongoClient = null;
+	public static Result shareEuscreenCollections(String host, Integer port, String dbName) {
 		ObjectNode result = Json.newObject();
-		try {
-		mongoClient = new MongoClient(host, port);
-		MongoDatabase db = mongoClient.getDatabase(dbName);
-		// get all records and store the information in a HashMap
-		FindIterable<Document> collections = db.getCollection("CollectionObject")
-				.find();
-		long collectionCount = db.getCollection("CollectionObject").count();
-		for (Document collection : collections) {
-			//System.out.println(((ArrayList) ((Document) ((Document) collection.get("descriptiveData")).get("label")).get("default")).get(0));
-			ObjectId id = collection.getObjectId("_id");
-			if (((Document) collection.get("administrative")).getString("collectionType") != null) {
-				if (((Document) collection.get("administrative")).getString("collectionType").equals("Exhibition")) {
-				DB.getCollectionObjectDAO().updateField(id, "resourceType", "Exhibition");
-				DB.getCollectionObjectDAO().updateField(id, "className", "model.resources.collection.Exhibition");
+		HashMap<String, String> mintToWithOrgNames = new HashMap<String, String>();
+		mintToWithOrgNames.put("Romanian Television", "Romanian Television");
+		mintToWithOrgNames.put("Austrian Broadcasting Corporation", "Austrian Broadcasting Corporation");
+		mintToWithOrgNames.put("National Library of Sweden", "National Library of Sweden");
+		mintToWithOrgNames.put("Netherlands Institute for Sound and Vision", "Netherlands Institute for Sound and Vision");
+		mintToWithOrgNames.put("Old euscreen data", "");
+		mintToWithOrgNames.put("Cinecittà Luce_#8080ff", "Istituto Luce - Cinecittà");
+		mintToWithOrgNames.put("Czech Televison_#8080ff", "Czech Television");
+		mintToWithOrgNames.put("Romanian Television_#8080ff", "");
+		mintToWithOrgNames.put("National Audiovisual Institute", "National Audiovisual Institute");
+		mintToWithOrgNames.put("Radio-television Slovenia", "Radio-television Slovenia");
+		mintToWithOrgNames.put("National Audiovisual Archive_#8080ff", "National Audiovisual Institute");
+		mintToWithOrgNames.put("Radio and Television of Portugal", "Radio and Television of Portugal");
+		mintToWithOrgNames.put("RTÉ_#8080ff", "RTÉ");
+		mintToWithOrgNames.put("ORF Austrian Broadcasting Corporation_#8080ff", "Austrian Broadcasting Corporation");
+		mintToWithOrgNames.put("Czech Television", "Czech Television");
+		mintToWithOrgNames.put("VRT_#8080ff", "");
+		mintToWithOrgNames.put("RTV Slovenia_#8080ff", "Radio-television Slovenia");
+	    mintToWithOrgNames.put("Istituto Luce - Cinecittà", "Istituto Luce - Cinecittà");
+	    mintToWithOrgNames.put("Hungarian National Audiovisual Archive", "");
+	    mintToWithOrgNames.put("Lithuanian Central Archive", "Lithuanian Central Archive");
+	    mintToWithOrgNames.put("INA_#8080ff", "");
+	    mintToWithOrgNames.put("British Broadcasting Organisation", "");
+	    mintToWithOrgNames.put("TV3 Television of Catalonia", "TV3 Television of Catalonia");
+	    mintToWithOrgNames.put("INA_#8080ff", "");
+	    mintToWithOrgNames.put("British Broadcasting Organisation", "");
+	    mintToWithOrgNames.put("RTÉ", "RTÉ");
+	    mintToWithOrgNames.put("Netherlands Institute for Sound and Vision_#8080ff", "Netherlands Institute for Sound and Vision");
+	    mintToWithOrgNames.put("RTBF_#8080ff", "RTBF");
+	    mintToWithOrgNames.put("Memoriav - SRF_#8080ff", "");
+	    mintToWithOrgNames.put("RAI Public Italian Television_#8080ff", "");
+	    mintToWithOrgNames.put("Hellenic National Audiovisual Archive_#8080ff", "");
+	    mintToWithOrgNames.put("Hellenic Broadcast Corporation_#8080ff", "ERT");
+	    mintToWithOrgNames.put("Deutsche Welle_#8080ff", "Deutsche Welle");
+	    mintToWithOrgNames.put("Television of Catalonia_#8080ff", "TV3 Television of Catalonia");
+	    mintToWithOrgNames.put("INA", "");
+	    mintToWithOrgNames.put("Polish Television_#8080ff", "Polish Television");
+	    mintToWithOrgNames.put("Hellenic public audiovisual broadcasting archive", "");
+	    mintToWithOrgNames.put("Danish Broadcast corporation", "Danish Broadcast corporation");
+	    mintToWithOrgNames.put("RTBF", "RTBF");
+	    mintToWithOrgNames.put("Danish Broadcasting Corporation_#8080ff", "Danish Broadcast corporation");
+	    mintToWithOrgNames.put("National Library of Sweden_#8080ff", "National Library of Sweden");
+	    mintToWithOrgNames.put("Memoriav - RTS_#8080ff", "");
+	    mintToWithOrgNames.put("Screen Archive South East", "Screen Archive South East");
+	    mintToWithOrgNames.put("British Broadcasting Corporation_#8080ff", "");
+	    mintToWithOrgNames.put("Deutsche Welle", "Deutsche Welle");
+		List<String> retrievedFields1 = new ArrayList<String>(Arrays.asList("descriptiveData.label", "descriptiveData.description"));
+		for (String mintOrgName: mintToWithOrgNames.keySet()) {
+			//System.out.println("!!! " + mintOrgName);
+			List<CollectionObject> collections = DB.getCollectionObjectDAO().getByFieldAndValue("descriptiveData.description.default", mintOrgName, retrievedFields1);
+			for (CollectionObject collection: collections) {
+				//System.out.println(collection.getDescriptiveData().getLabel().get(Language.DEFAULT) + ": " + 
+						//collection.getDescriptiveData().getDescription().get(Language.DEFAULT));
+				ObjectId colId = collection.getDbId();
+				List<String> retrievedFields2 = new ArrayList<String>(Arrays.asList("username"));
+				String withOrgName = mintToWithOrgNames.get(mintOrgName);
+				List<UserGroup> withOrgs = DB.getUserGroupDAO().getByFieldAndValue("friendlyName", withOrgName, retrievedFields2);
+				if (withOrgs != null) {
+					for (UserGroup withOrg: withOrgs) {
+						String withOrgUsername = withOrg.getUsername();
+						if (withOrgName.equals("Netherlands Institute for Sound and Vision"))
+							withOrgUsername = "nisv";
+						//System.out.println("Give WRITE rights to " + withOrgName + " and euscreen_new");
+						RightsController.editCollectionRights(colId.toString(), "WRITE", withOrgUsername, false);
+						RightsController.editCollectionRights(colId.toString(), "WRITE", "euscreen_new", false);
+					}
 				}
-				else if (((Document) collection.get("administrative")).getString("collectionType").equals("SimpleCollection")) {
-					DB.getCollectionObjectDAO().updateField(id, "resourceType", "SimpleCollection");
-					DB.getCollectionObjectDAO().updateField(id, "className", "model.resources.collection.SimpleCollection");
-				}
-				DB.getCollectionObjectDAO().deleteField(id, "administrative.collectionType");
 			}
 		}
-		} catch (Exception e) {
-			e.printStackTrace();
-		} finally {
-			mongoClient.close();
-			return ok(result);
-		}
+		result.put("result", "OK");
+		return ok();
 	}
 
 	public static Result sortCollectionObject(String collectionId) {
@@ -916,11 +956,6 @@ public class CollectionObjectController extends WithResourceController {
 			if (!response.toString().equals(ok().toString()))
 				return response;
 			else {
-				/*
-				 * List<String> retrievedFields = new ArrayList<String>(
-				 * Arrays.asList("descriptiveData.label",
-				 * "descriptiveData.description", "media", "collectedIn"));
-				 */
 				List<RecordResource> records = DB.getRecordResourceDAO()
 						.getByCollectionBetweenPositions(colId, start,
 								start + count);
