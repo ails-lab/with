@@ -102,7 +102,16 @@ public class GroupManager extends Controller {
 			if (!json.has("username")) {
 				error.put("error", "Must specify name for the group");
 				return badRequest(error);
+			} else if(json.get("username").asText().length() < 3) {
+				error.put("error", "Username of " + groupType + " must contain at least 3 characters");
+				return badRequest(error);
 			}
+			if(json.has("friendlyName") &&
+				(json.get("friendlyName").asText().length() < 3)) {
+				error.put("error", "Short Name of  " + groupType + " must contain at least 3 characters");
+				return badRequest(error);
+			}
+
 			if (!uniqueGroupName(json.get("username").asText())) {
 				error.put("error",
 						"Group name already exists! Please specify another name");
