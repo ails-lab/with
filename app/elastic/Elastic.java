@@ -77,7 +77,7 @@ public class Elastic {
 
 	public static final String typeResource       = WithResourceType.RecordResource.toString().toLowerCase();
 	public static final List<String> allTypes 	  = Arrays.asList(WithResourceType.values()).stream()
-														.map(wr -> wr.toString())
+														.map(wr -> wr.toString().toLowerCase())
 														.collect(Collectors.toList());
 
 
