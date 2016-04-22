@@ -132,26 +132,27 @@
 								</li>
 							</ul>
 						</div>
+						<section class="action upload">
+							<div class="action-header">
+								<div class="title">Upload background image</div>
+							</div>
+							<!--rights of cover img media document, if uploaded by user?-->
+							<div class="action-body">
+								<div id="uploaded-image" data-bind="backgroundImgDrop">
+								<label for="mediaupload">
+									<img class="upload-img" data-bind="attr: { src: displayCoverImage }" />
+								</label>
+								<input type="file" id="mediaupload" name="image"/>
+								</div>
+							</div>
+							<div class="button-group">
+								<a href="#" class="btn-green-o cancel">Cancel</a>
+								<a href="#" data-bind="click: saveExhBackrImg" class="btn-green">Save</a>
+							</div>
+						</section>
 					</div>
 				</section>
-				<section class="action upload">
-					<div class="action-header">
-						<div class="title">Upload background image</div>
-					</div>
-					<!--rights of cover img media document, if uploaded by user?-->
-					<div class="action-body">
-						<div id="uploaded-image" data-bind="backgroundImgDrop">
-						<label for="mediaupload">
-							<img class="upload-img" data-bind="attr: { src: displayCoverImage }" />
-						</label>
-						<input type="file" id="mediaupload" name="image"/>
-						</div>
-					</div>
-					<div class="button-group">
-						<a href="#" class="btn-green-o cancel">Cancel</a>
-						<a href="#" data-bind="click: saveExhBackrImg" class="btn-green">Save</a>
-					</div>
-				</section>
+				
 				<section class="action editsection">
 					<div class="action-header">
 						<div class="title">Edit text</div>

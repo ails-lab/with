@@ -646,6 +646,7 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 						ui.helper.css({
 							"z-index": 500
 						});
+						/*
 						//if (!_bIsMoveOperation) {
 							if (ui.helper.width() > 80) {
 								//var newAspectHeight = 80 / ui.helper.width() * ui.helper.height();
@@ -660,6 +661,7 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 								});
 							}
 						//}
+						*/
 					},
 					stop: function (event, ui) {
 						$("#collscroll").css({
