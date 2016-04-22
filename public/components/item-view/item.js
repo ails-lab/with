@@ -19,6 +19,7 @@ define(['knockout', 'text!./_item.html', 'app','smoke'], function (ko, template,
 		self.rights="";
 		self.url="";
 		self.externalId = "";
+		self.mediatype="";
 		self.likes=0;
 		self.collected=0;
 		self.data=ko.observable('');
@@ -64,7 +65,7 @@ define(['knockout', 'text!./_item.html', 'app','smoke'], function (ko, template,
 			} else {
 				self.fullres(self.thumb);
 			}
-			//self.fullres=data.fullres;
+			self.mediatype=data.mediatype;
 			self.description=data.description;
 			self.source=data.source;
 			self.creator=data.creator;
@@ -136,6 +137,14 @@ define(['knockout', 'text!./_item.html', 'app','smoke'], function (ko, template,
 									if(source=="Rijksmuseum" && media){
 										media[0].Thumbnail=media[0].Original;
 									} 
+								var mediatype="";
+								if(media &&  media[0]){
+									if(media[0].Original && media[0].Original.type){
+										mediatype=media[0].Original.type;
+									}else if(media[0].Thumbnail && media[0].Thumbnail.type){
+										mediatype=media[0].Thumbnail.type;
+									}
+								}
 						        var record = new Record({
 									        thumb: media!=null &&  media[0] !=null  && media[0].Thumbnail!=null  && media[0].Thumbnail.url!="null" && media[0].Thumbnail.url.indexOf("empty")==-1 ? media[0].Thumbnail.url:"img/content/thumb-empty.png",
 											fullres: media!=null &&  media[0] !=null && media[0].Original!=null  && media[0].Original.url!="null"  && media[0].Original.url.indexOf("empty")==-1 ? media[0].Original.url : "",
@@ -147,6 +156,7 @@ define(['knockout', 'text!./_item.html', 'app','smoke'], function (ko, template,
 											dataProvider_uri: findProvenanceValues(provenance,"dataProvider_uri"),
 											provider: findProvenanceValues(provenance,"provider"),
 											rights: rights,
+											mediatype: mediatype,
 											externalId: admindata.externalId,
 											source: source,
 											likes: usage.likes,
@@ -159,7 +169,7 @@ define(['knockout', 'text!./_item.html', 'app','smoke'], function (ko, template,
 							}
 							 if(items.length>3){break;}
 						}	
-					self.related.push.apply(self.related,items);
+					self.related().push.apply(self.related(),items);
 					self.related.valueHasMutated();}
 					self.loading(false);
 				},
@@ -209,6 +219,14 @@ define(['knockout', 'text!./_item.html', 'app','smoke'], function (ko, template,
 										if(source=="Rijksmuseum" && media){
 											media[0].Thumbnail=media[0].Original;
 										}
+									 var mediatype="";
+									 if(media &&  media[0]){
+											if(media[0].Original && media[0].Original.type){
+												mediatype=media[0].Original.type;
+											}else if(media[0].Thumbnail && media[0].Thumbnail.type){
+												mediatype=media[0].Thumbnail.type;
+											}
+										}
 							        var record = new Record({
 							            		thumb: media!=null &&  media[0] !=null  && media[0].Thumbnail!=null  && media[0].Thumbnail.url!="null" && media[0].Thumbnail.url.indexOf("empty")==-1? media[0].Thumbnail.url:"img/content/thumb-empty.png",
 												fullres: media!=null &&  media[0] !=null && media[0].Original!=null  && media[0].Original.url!="null"  && media[0].Original.url.indexOf("empty")==-1? media[0].Original.url : "",
@@ -220,6 +238,7 @@ define(['knockout', 'text!./_item.html', 'app','smoke'], function (ko, template,
 												dataProvider_uri: findProvenanceValues(provenance,"dataProvider_uri"),
 												provider: findProvenanceValues(provenance,"provider"),
 												rights: rights,
+												mediatype: mediatype,
 												externalId: admindata.externalId,
 												source: source,
 												likes: usage.likes,
@@ -232,7 +251,7 @@ define(['knockout', 'text!./_item.html', 'app','smoke'], function (ko, template,
 								}
 								 if(items.length>3){break;}
 							}	
-						self.similar.push.apply(self.similar,items);
+						self.similar().push.apply(self.similar(),items);
 						self.similar.valueHasMutated();}
 						self.loading(false);
 					},
@@ -435,6 +454,14 @@ define(['knockout', 'text!./_item.html', 'app','smoke'], function (ko, template,
 						if(source=="Rijksmuseum" && media){
 							media[0].Thumbnail=media[0].Original;
 						}
+					var mediatype="";
+					if(media &&  media[0]){
+						if(media[0].Original && media[0].Original.type){
+							mediatype=media[0].Original.type;
+						}else if(media[0].Thumbnail && media[0].Thumbnail.type){
+							mediatype=media[0].Thumbnail.type;
+						}
+					}
 					 var record = new Record({
 						            thumb: media!=null &&  media[0] !=null  && media[0].Thumbnail!=null  && media[0].Thumbnail.url!="null" && media[0].Thumbnail.url.indexOf("empty")==-1 ? media[0].Thumbnail.url:"img/content/thumb-empty.png",
 								    fullres: media!=null &&  media[0] !=null && media[0].Original!=null  && media[0].Original.url!="null"  && media[0].Original.url.indexOf("empty")==-1 ? media[0].Original.url : "",
@@ -445,6 +472,7 @@ define(['knockout', 'text!./_item.html', 'app','smoke'], function (ko, template,
 									dataProvider: findProvenanceValues(provenance,"dataProvider"),
 									dataProvider_uri: findProvenanceValues(provenance,"dataProvider_uri"),
 									provider: findProvenanceValues(provenance,"provider"),
+									mediatype: mediatype, 
 									rights: rights,
 									externalId: admindata.externalId,
 									source: source,

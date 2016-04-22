@@ -23,6 +23,7 @@ define(['knockout', 'text!./_exhibition-view.html', 'app', 'magnific-popup', 'sl
 		self.creator = "";
 		self.provider = "";
 		self.rights = "";
+		self.mediatype="";
 		self.url = "";
 		self.externalId = "";
 		self.isLoaded = ko.observable(false);
@@ -61,6 +62,13 @@ define(['knockout', 'text!./_exhibition-view.html', 'app', 'magnific-popup', 'sl
 			//self.fullres = media[0] != null && media[0].Original != null && media[0].Original.url != "null" ? media[0].Original.url : null,
 			if(media[0] != null && media[0].Original != null && media[0].Original.url != "null"){
 				self.fullres(media[0].Original.url);
+			}
+			if(media &&  media[0]){
+				if(media[0].Original && media[0].Original.type){
+					self.mediatype=media[0].Original.type;
+				}else if(media[0].Thumbnail && media[0].Thumbnail.type){
+					self.mediatype=media[0].Thumbnail.type;
+				}
 			}
 		    self.isLoaded = ko.observable(false);
 			if(self.fullres()==null || self.fullres().length==0){

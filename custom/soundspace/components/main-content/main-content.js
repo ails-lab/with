@@ -52,8 +52,8 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 			        });
 			        
 			        self.url=ko.computed(function() {
-			        	if(self.administrative){
-			        		if (self.resourceType.indexOf("Collection")==-1)
+			        	if(self.resourceType){
+			        		if (self.resourceType.indexOf("Collection")>-1)
 				    		  return 'index.html#collectionview/'+ self.dbId;
 			        		else if (self.resourceType.indexOf("Space")>-1){
 			        			return self.administrative.isShownAt;
@@ -67,6 +67,7 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 			        	if(self.withCreatorInfo){
 			        		return self.withCreatorInfo.username;
 			        	}
+			        	return "";
 			        });
 			        
 			        return self;

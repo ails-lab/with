@@ -1,5 +1,8 @@
 define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, app) {
 
+	self.disqusLoaded=ko.observable(false);
+	
+
 	function Record(data) {
 		var self = this;
 	    self.recordId = "-1";
@@ -16,6 +19,7 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 		self.rights="";
 		self.url="";
 		self.externalId = "";
+		self.mediatype="";
 		self.likes=0;
 		self.collected=0;
 		self.data=ko.observable('');
@@ -60,7 +64,7 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 			} else {
 				self.fullres(self.calcThumbnail());
 			}
-			//self.fullres=data.fullres;
+			self.mediatype=data.mediatype;
 			self.description=data.description;
 			self.source=data.source;
 			self.creator=data.creator;
@@ -129,7 +133,14 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 									if(source=="Rijksmuseum" && media){
 										media[0].Thumbnail=media[0].Original;
 									} 		
-									
+								var mediatype="";
+								if(media &&  media[0]){
+									if(media[0].Original && media[0].Original.type){
+										mediatype=media[0].Original.type;
+									}else if(media[0].Thumbnail && media[0].Thumbnail.type){
+										mediatype=media[0].Thumbnail.type;
+									}
+								}
 						        var record = new Record({
 									        thumb: media!=null &&  media[0] !=null  && media[0].Thumbnail!=null  && media[0].Thumbnail.url!="null" ? media[0].Thumbnail.url:"img/content/thumb-empty.png",
 											fullres: media!=null &&  media[0] !=null && media[0].Original!=null  && media[0].Original.url!="null"  ? media[0].Original.url : "",
@@ -141,6 +152,7 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 											dataProvider_uri: findProvenanceValues(provenance,"dataProvider_uri"),
 											provider: findProvenanceValues(provenance,"provider"),
 											rights: rights,
+											mediatype: mediatype,
 											externalId: admindata.externalId,
 											source: source,
 											likes: usage.likes,
@@ -204,6 +216,14 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 									if(source=="Rijksmuseum" && media){
 										media[0].Thumbnail=media[0].Original;
 									} 	
+									 var mediatype="";
+									 if(media &&  media[0]){
+											if(media[0].Original && media[0].Original.type){
+												mediatype=media[0].Original.type;
+											}else if(media[0].Thumbnail && media[0].Thumbnail.type){
+												mediatype=media[0].Thumbnail.type;
+											}
+										}
 							        var record = new Record({
 							            		thumb: media!=null &&  media[0] !=null  && media[0].Thumbnail!=null  && media[0].Thumbnail.url!="null" ? media[0].Thumbnail.url:"img/content/thumb-empty.png",
 												fullres: media!=null &&  media[0] !=null && media[0].Original!=null  && media[0].Original.url!="null"  ? media[0].Original.url : "",
@@ -215,6 +235,7 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 												dataProvider_uri: findProvenanceValues(provenance,"dataProvider_uri"),
 												provider: findProvenanceValues(provenance,"provider"),
 												rights: rights,
+												mediatype: mediatype,
 												externalId: admindata.externalId,
 												source: source,
 												likes: usage.likes,
@@ -251,7 +272,7 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 					return self.thumb;
 				}
 			   else{
-				   return "img/content/thumb-empty.png";
+				   return "images/no_image.jpg";
 			   }
 			});
 		self.sourceCredits = ko.pureComputed(function() {
@@ -316,6 +337,9 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 			self.open();
 			self.record(new Record(data
 					));
+			if(self.record().recordId!="-1"){
+				self.addDisqus();
+			}
 			
 		};
 
@@ -397,6 +421,8 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 					var media=result.media;
 					var provenance=result.provenance;
 					var usage=result.usage;
+					var rights=null;
+					
 					if(media){
 						 if(media[0].Original){
 							 rights=findResOrLit(media[0].Original.originalRights);
@@ -409,6 +435,14 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 					if(source=="Rijksmuseum" && media){
 								media[0].Thumbnail=media[0].Original;
 							} 	
+					var mediatype="";
+					if(media &&  media[0]){
+						if(media[0].Original && media[0].Original.type){
+							mediatype=media[0].Original.type;
+						}else if(media[0].Thumbnail && media[0].Thumbnail.type){
+							mediatype=media[0].Thumbnail.type;
+						}
+					}
 					 var record = new Record({
 						            thumb: media!=null &&  media[0] !=null  && media[0].Thumbnail!=null  && media[0].Thumbnail.url!="null" ? media[0].Thumbnail.url:"img/content/thumb-empty.png",
 								    fullres: media!=null &&  media[0] !=null && media[0].Original!=null  && media[0].Original.url!="null"  ? media[0].Original.url : "",
@@ -419,6 +453,7 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 									dataProvider: findProvenanceValues(provenance,"dataProvider"),
 									dataProvider_uri: findProvenanceValues(provenance,"dataProvider_uri"),
 									provider: findProvenanceValues(provenance,"provider"),
+									mediatype: mediatype, 
 									rights: rights,
 									externalId: admindata.externalId,
 									source: source,
@@ -431,6 +466,7 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 					self.record(record);
 					$('.nav-tabs a[href="#information"]').tab('show');
 					self.open();
+					self.addDisqus();
 					$( '.itemview' ).fadeIn();
 					
 				},
@@ -440,6 +476,42 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 				}
 			});
 		};
+		
+		self.addDisqus= function(){
+			$("#disqus_thread").hide();
+			if(disqusLoaded()==false){
+		        var disqus_shortname = 'withculture';
+		        var disqus_identifier = self.record().recordId;
+		        var disqus_url = location.href.replace(location.hash,"")+"#!item/"+self.record().recordId;
+		       
+
+		        /* * * DON'T EDIT BELOW THIS LINE * * */
+		        (function() {
+		            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+		            dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+		            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+		        })();
+		        disqusLoaded(true);
+		        
+			}
+			    setTimeout(function(){
+			    	DISQUS.reset({
+			        reload: true,
+			        config: function () {
+			            this.page.identifier = self.record().recordId;
+			            this.page.url =  location.href.replace(location.hash,"")+"#!item/"+self.record().recordId;
+			            this.page.title = self.record().title;
+			            this.language = "en";
+			        }
+			    	
+			    });
+			    	$("#disqus_thread").show();
+			    }, 2000);
+		    
+			
+		}
+		
+		
 		if(self.id()!=undefined){
 			
 			self.loadItem();

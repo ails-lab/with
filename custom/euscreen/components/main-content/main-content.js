@@ -54,12 +54,12 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 			        self.url=ko.computed(function() {
 			        	if(self.resourceType){
 			        		if (self.resourceType.indexOf("Collection")==-1)
-				    		  return 'index.html#collectionview/'+ self.dbId;
+				    		  return 'index.html#exhibitionview/'+ self.dbId;
 			        		else if (self.resourceType.indexOf("Space")>-1){
 			        			return self.administrative.isShownAt;
 			        		}
 				    		else{
-				    			return 'index.html#exhibitionview/'+ self.dbId;
+				    			return 'index.html#collectionview/'+ self.dbId;
 				    		}
 			        	}else return "";
 			        });
@@ -293,7 +293,7 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 			  var tile= '<div class="'+collection.data.css()+'"> <div class="wrap">';
 			
                    tile+='<a href="#" onclick="loadUrl(\''+collection.data.url()+'\',event)">'
-                    +'<div class="thumb"><img src="'+collection.data.thumbnail()+'"></div>'
+                    +'<div class="thumb"><img src="'+collection.data.thumbnail()+'" onError="this.src=\'img/content/thumb-empty.png\'"></div>'
                     +' <div class="info"><span class="type">'+collection.data.type()+'</span><h1 class="title">'+collection.data.title+'</h1><span class="owner">'+ collection.data.owner()+'</span></div>'
                     +'</a></div></div>';
 			return tile;
