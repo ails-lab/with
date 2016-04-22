@@ -147,7 +147,7 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 			if(self.source=="Rijksmuseum" && media){
 				media[0].Thumbnail=media[0].Original;
 			}
-			self.thumb = media[0] != null && media[0].Thumbnail != null && media[0].Thumbnail.withUrl != "null" ? media[0].Thumbnail.url : null;
+			self.thumb = media[0] != null && media[0].Thumbnail != null && media[0].Thumbnail.withUrl != "null" ? media[0].Thumbnail.withUrl : null;
 			self.fullres = media[0] != null && media[0].Original != null && media[0].Original.url != "null" ? media[0].Original.url : null;
 			self.data(options);
 			if(self.fullres){
