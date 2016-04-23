@@ -21,29 +21,32 @@ import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-
-import model.EmbeddedMediaObject;
-import model.EmbeddedMediaObject.MediaVersion;
-import model.MediaObject;
-import model.resources.RecordResource;
-import model.usersAndGroups.User;
-import model.usersAndGroups.UserGroup;
+import java.util.Set;
 
 import org.apache.commons.io.IOUtils;
 import org.bson.types.ObjectId;
 import org.mongodb.morphia.mapping.cache.DefaultEntityCache;
-
-import play.Logger;
-import play.Logger.ALogger;
-import scala.collection.mutable.HashSet;
 
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
 import com.mongodb.gridfs.GridFSDBFile;
 import com.mongodb.gridfs.GridFSFile;
+
+import model.EmbeddedMediaObject;
+import model.EmbeddedMediaObject.MediaVersion;
+import model.MediaObject;
+import model.resources.RecordResource;
+import model.usersAndGroups.Organization;
+import model.usersAndGroups.Page;
+import model.usersAndGroups.Project;
+import model.usersAndGroups.User;
+import model.usersAndGroups.UserGroup;
+import play.Logger;
+import play.Logger.ALogger;
 
 public class MediaObjectDAO {
 	public static final ALogger log = Logger.of(MediaObjectDAO.class);
@@ -65,13 +68,10 @@ public class MediaObjectDAO {
 		// some things are not quite right, so we repair those
 
 		try {
-			MediaObject media = DB
-					.getMorphia()
-					.getMapper()
-					.fromDBObject(MediaObject.class, gridfsDbFile,
-							new DefaultEntityCache());
-			media.setMediaBytes(IOUtils.toByteArray(gridfsDbFile
-					.getInputStream()));
+			MediaObject media = DB.getMorphia().getMapper().fromDBObject(
+					MediaObject.class, gridfsDbFile, new DefaultEntityCache());
+			media.setMediaBytes(
+					IOUtils.toByteArray(gridfsDbFile.getInputStream()));
 			return media;
 		} catch (IOException e) {
 			log.error(
@@ -141,8 +141,8 @@ public class MediaObjectDAO {
 					mediaGridFsFile = DB.getGridFs().createFile(
 							new ByteArrayInputStream(tmp.getBytes()));
 				} else
-					mediaGridFsFile = DB.getGridFs().createFile(
-							media.getMediaBytes());
+					mediaGridFsFile = DB.getGridFs()
+							.createFile(media.getMediaBytes());
 			}
 			DBObject mediaDbObj = DB.getMorphia().getMapper().toDBObject(media);
 			// remove stuff we don't want on the media object
@@ -178,7 +178,7 @@ public class MediaObjectDAO {
 	}
 
 	/**
-	 * Retrive a MediaObject from GridFS according to it's external url.
+	 * Retrieve a MediaObject from GridFS according to it's external url.
 	 * According to the value specified, we return either the thumbnail or the
 	 * original media.
 	 * 
@@ -203,7 +203,7 @@ public class MediaObjectDAO {
 	}
 
 	/**
-	 * Retrive a MediaObject from GridFS according to it's external url.
+	 * Retrieve a MediaObject from GridFS according to it's external url.
 	 * According to the value specified, we return either the thumbnail or the
 	 * original media.
 	 * 
@@ -264,28 +264,72 @@ public class MediaObjectDAO {
 		}
 	}
 
-	/* Not avatar, not cover, not in Embedded media Object */
+	/*
+	 * Delete all media objects which are neither avatar, not cover, not in
+	 * embedded media objects in records. All these records are referenced
+	 * through their urls
+	 */
 	public void deleteOrphanMediaObjects() {
-		HashSet urls = new HashSet();
+		// Find all media urls of medias that are needed: user and group
+		// avatars, cover images for organizations/projects and images of
+		// stored records at the database
+		Set<String> urls = new HashSet<String>();
 		findUrlsFromAvatars(urls);
+		findUrlsFromCovers(urls);
 		findUrlsFromRecords(urls);
+		// A query at the database for deleting media objects whose url is not
+		// in this list ($nin) would be very convenient. Unfortunately, this
+		// list is expected to be very big (hundreds of thousand urls) which
+		// makes the query impossible to send.
 		DBCursor mediaList = DB.getGridFs().getFileList(new BasicDBObject(),
 				new BasicDBObject("_id", 1));
 		int mediaCount = mediaList.size();
 		int i = 1;
 		for (DBObject media : mediaList) {
-			System.out.println("Check media "
-					+ i
-					+ " of "
-					+ mediaCount
-					+ " - "
-					+ new DecimalFormat("##.##").format((float) 100 * i
-							/ mediaCount) + "%");
+			System.out
+					.println("Check media " + i + " of "
+							+ mediaCount + " - " + new DecimalFormat("##.##")
+									.format((float) 100 * i / mediaCount)
+							+ "%");
 			existsReferenceToMediaUrl(media.get("url").toString());
 		}
 	}
 
-	private void findUrlsFromRecords(HashSet urls) {
+	private void findUrlsFromAvatars(Set<String> urls) {
+		Iterator<User> userIterator = DB.getUserDAO().createQuery().iterator();
+		while (userIterator.hasNext()) {
+			User user = userIterator.next();
+			if (user.getAvatar() != null && !user.getAvatar().isEmpty())
+				urls.addAll(user.getAvatar().values());
+		}
+		Iterator<UserGroup> groupIterator = DB.getUserGroupDAO().createQuery()
+				.iterator();
+		while (groupIterator.hasNext()) {
+			UserGroup group = groupIterator.next();
+			if (group.getAvatar() != null && !group.getAvatar().isEmpty())
+				urls.addAll(group.getAvatar().values());
+		}
+	}
+
+	private void findUrlsFromCovers(Set<String> urls) {
+		Iterator<UserGroup> groupIterator = DB.getUserGroupDAO().createQuery()
+				.iterator();
+		while (groupIterator.hasNext()) {
+			UserGroup group = groupIterator.next();
+			Page page = null;
+			if (group instanceof Organization)
+				page = ((Organization) group).getPage();
+			if (group instanceof Project)
+				page = ((Project) group).getPage();
+			if (page == null || page.getCover() == null
+					|| page.getCover().isEmpty())
+				continue;
+			urls.addAll(page.getCover().values());
+		}
+	}
+
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	private void findUrlsFromRecords(Set<String> urls) {
 		Iterator<RecordResource> recordIterator = DB.getRecordResourceDAO()
 				.createQuery().iterator();
 		while (recordIterator.hasNext()) {
@@ -298,21 +342,6 @@ public class MediaObjectDAO {
 					urls.add(mediaObject.getUrl());
 				}
 			}
-		}
-	}
-
-	private void findUrlsFromAvatars(HashSet urls) {
-		Iterator<User> userIterator = DB.getUserDAO().createQuery().iterator();
-		while (userIterator.hasNext()) {
-			User user = userIterator.next();
-			if (user.getAvatar()!= null && !user.getAvatar().isEmpty())
-			urls.addAll(user.getAvatar().values());
-		}
-		Iterator<UserGroup> groupIterator = DB.getUserGroupDAO().createQuery()
-				.iterator();
-		while (groupIterator.hasNext()) {
-			UserGroup group = groupIterator.next();
-			urls.add(group.getAvatar().values());
 		}
 	}
 
