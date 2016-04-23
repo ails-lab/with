@@ -284,37 +284,54 @@ public class MediaObjectDAO {
 		DBCursor mediaList = DB.getGridFs().getFileList(new BasicDBObject(),
 				new BasicDBObject("_id", 1));
 		int mediaCount = mediaList.size();
+		log.info("Valid urls found at the database: " + urls.size());
 		int i = 1;
+		int deletedCount = 0;
 		for (DBObject media : mediaList) {
-			System.out
-					.println("Check media " + i + " of "
+			log.info(
+					"Check media " + i + " of "
 							+ mediaCount + " - " + new DecimalFormat("##.##")
 									.format((float) 100 * i / mediaCount)
 							+ "%");
-			existsReferenceToMediaUrl(media.get("url").toString());
+			if (media.get("url") != null
+					&& urls.contains(media.get("url").toString()))
+				continue;
+			log.info("Deleting orphan media object #" + ++deletedCount);
+			DB.getMediaObjectDAO()
+					.deleteById(new ObjectId(media.get("_id").toString()));
 		}
+		log.info("Deleted orphan media objects: " + deletedCount);
 	}
 
 	private void findUrlsFromAvatars(Set<String> urls) {
+		log.info("Retrieving urls from user avatars");
 		Iterator<User> userIterator = DB.getUserDAO().createQuery().iterator();
+		int i = 1;
 		while (userIterator.hasNext()) {
 			User user = userIterator.next();
+			log.info("Getting the urls for #" + i++ + " user");
 			if (user.getAvatar() != null && !user.getAvatar().isEmpty())
 				urls.addAll(user.getAvatar().values());
 		}
+		log.info("Retrieving urls from group avatars");
 		Iterator<UserGroup> groupIterator = DB.getUserGroupDAO().createQuery()
 				.iterator();
+		i = 1;
 		while (groupIterator.hasNext()) {
 			UserGroup group = groupIterator.next();
+			log.info("Getting the urls for #" + i++ + " group");
 			if (group.getAvatar() != null && !group.getAvatar().isEmpty())
 				urls.addAll(group.getAvatar().values());
 		}
 	}
 
 	private void findUrlsFromCovers(Set<String> urls) {
+		log.info("Retrieving urls from organizations/projects covers");
 		Iterator<UserGroup> groupIterator = DB.getUserGroupDAO().createQuery()
 				.iterator();
+		int i = 1;
 		while (groupIterator.hasNext()) {
+			log.info("Getting the urls for #" + i++ + " group");
 			UserGroup group = groupIterator.next();
 			Page page = null;
 			if (group instanceof Organization)
@@ -330,9 +347,12 @@ public class MediaObjectDAO {
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	private void findUrlsFromRecords(Set<String> urls) {
+		log.info("Retrieving urls from the records");
 		Iterator<RecordResource> recordIterator = DB.getRecordResourceDAO()
 				.createQuery().iterator();
+		int i = 1;
 		while (recordIterator.hasNext()) {
+			log.info("Getting the urls for #" + i++ + " record");
 			RecordResource record = recordIterator.next();
 			List<HashMap<MediaVersion, EmbeddedMediaObject>> mediaList = record
 					.getMedia();
@@ -343,11 +363,5 @@ public class MediaObjectDAO {
 				}
 			}
 		}
-	}
-
-	private boolean existsReferenceToMediaUrl(String url) {
-		if (url == null)
-			return false;
-		return false;
 	}
 }
