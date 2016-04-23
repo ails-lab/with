@@ -18,11 +18,18 @@ package db;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.text.DecimalFormat;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.Iterator;
-import java.util.function.Consumer;
+import java.util.List;
 
+import model.EmbeddedMediaObject;
 import model.EmbeddedMediaObject.MediaVersion;
 import model.MediaObject;
+import model.resources.RecordResource;
+import model.usersAndGroups.User;
+import model.usersAndGroups.UserGroup;
 
 import org.apache.commons.io.IOUtils;
 import org.bson.types.ObjectId;
@@ -30,6 +37,7 @@ import org.mongodb.morphia.mapping.cache.DefaultEntityCache;
 
 import play.Logger;
 import play.Logger.ALogger;
+import scala.collection.mutable.HashSet;
 
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBCursor;
@@ -258,12 +266,59 @@ public class MediaObjectDAO {
 
 	/* Not avatar, not cover, not in Embedded media Object */
 	public void deleteOrphanMediaObjects() {
+		HashSet urls = new HashSet();
+		findUrlsFromAvatars(urls);
+		findUrlsFromRecords(urls);
 		DBCursor mediaList = DB.getGridFs().getFileList(new BasicDBObject(),
 				new BasicDBObject("_id", 1));
 		int mediaCount = mediaList.size();
-		int i = 0;
+		int i = 1;
 		for (DBObject media : mediaList) {
-			System.out.println(i++);
+			System.out.println("Check media "
+					+ i
+					+ " of "
+					+ mediaCount
+					+ " - "
+					+ new DecimalFormat("##.##").format((float) 100 * i
+							/ mediaCount) + "%");
+			existsReferenceToMediaUrl(media.get("url").toString());
 		}
+	}
+
+	private void findUrlsFromRecords(HashSet urls) {
+		Iterator<RecordResource> recordIterator = DB.getRecordResourceDAO()
+				.createQuery().iterator();
+		while (recordIterator.hasNext()) {
+			RecordResource record = recordIterator.next();
+			List<HashMap<MediaVersion, EmbeddedMediaObject>> mediaList = record
+					.getMedia();
+			for (HashMap<MediaVersion, EmbeddedMediaObject> media : mediaList) {
+				Collection<EmbeddedMediaObject> mediaObjects = media.values();
+				for (EmbeddedMediaObject mediaObject : mediaObjects) {
+					urls.add(mediaObject.getUrl());
+				}
+			}
+		}
+	}
+
+	private void findUrlsFromAvatars(HashSet urls) {
+		Iterator<User> userIterator = DB.getUserDAO().createQuery().iterator();
+		while (userIterator.hasNext()) {
+			User user = userIterator.next();
+			if (user.getAvatar()!= null && !user.getAvatar().isEmpty())
+			urls.addAll(user.getAvatar().values());
+		}
+		Iterator<UserGroup> groupIterator = DB.getUserGroupDAO().createQuery()
+				.iterator();
+		while (groupIterator.hasNext()) {
+			UserGroup group = groupIterator.next();
+			urls.add(group.getAvatar().values());
+		}
+	}
+
+	private boolean existsReferenceToMediaUrl(String url) {
+		if (url == null)
+			return false;
+		return false;
 	}
 }
