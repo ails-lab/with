@@ -134,11 +134,11 @@
 						</div>
 						<section class="action upload">
 							<div class="action-header">
-								<div class="title">Upload background image</div>
+								<div class="title">Upload or drag/drop from collections a background image</div>
 							</div>
 							<!--rights of cover img media document, if uploaded by user?-->
 							<div class="action-body">
-								<div id="uploaded-image" data-bind="backgroundImgDrop">
+								<div id="uploaded-image" data-bind="backgroundImgDrop,  dropBackgroundImg">
 								<label for="mediaupload">
 									<img class="upload-img" data-bind="attr: { src: displayCoverImage }" />
 								</label>

@@ -106,7 +106,6 @@ define(['knockout', 'text!./_exhibition-view.html', 'app', 'magnific-popup', 'sl
 		};
 
 		self.revealItems = function (data) {
-			console.log(data);
 			for (var i in data) {
 				var result = data[i];
 				var record = new Record(result);
@@ -115,7 +114,6 @@ define(['knockout', 'text!./_exhibition-view.html', 'app', 'magnific-popup', 'sl
 						result.contextData.body != undefined 
 						&& result.contextData.body != null
 						&& ! $.isEmptyObject(result.contextData.body)) {
-					console.log(result);
 					record.annotation = result.contextData.body.text.default;
 					record.videoUrl = result.contextData.body.videoUrl;
 //					for (var j in result.contextData) {
@@ -137,7 +135,6 @@ define(['knockout', 'text!./_exhibition-view.html', 'app', 'magnific-popup', 'sl
 				record.css = 'item style' + styleId; //0, 1, 2, 3, 4 -> 2 x style1, 2 x style2 , 1 x style3
 				self.exhItems().push(record);
 			}
-			console.log(self.exhItems()[0]);
 			self.exhItems.valueHasMutated();
 			setTimeout(function () {
 				self.initCarousel();
@@ -174,7 +171,7 @@ define(['knockout', 'text!./_exhibition-view.html', 'app', 'magnific-popup', 'sl
 							"contentType": "application/json",
 							"success": function (data) {
 								var items = self.revealItems(data.records);
-								if (backgroundImg == null || backgroundImg.Original ==null || 
+								if (backgroundImg == null || backgroundImg.Original == null || 
 										backgroundImg.Original.withUrl == null || 
 										backgroundImg.Original.withUrl == "") {
 									self.backgroundImgWithUrl(self.exhItems()[0].fullres());
@@ -183,7 +180,7 @@ define(['knockout', 'text!./_exhibition-view.html', 'app', 'magnific-popup', 'sl
 									if (backgroundImg.Original.withUrl.indexOf("/media") == 0) {
 										self.backgroundImgWithUrl(window.location.origin + backgroundImg.Original.withUrl);
 									} else {
-										self.backgroundImgWithUrl(self.backgroundImg.Original.withUrl);
+										self.backgroundImgWithUrl(backgroundImg.Original.withUrl);
 									}
 								}
 								self.loading(false);
@@ -229,7 +226,6 @@ define(['knockout', 'text!./_exhibition-view.html', 'app', 'magnific-popup', 'sl
 					"method": "get",
 					"contentType": "application/json",
 					"success": function (data) {
-						console.log(data.administrative.entryCount);
 						self.revealItems(data.records);
 						self.loading(false);
 					},
