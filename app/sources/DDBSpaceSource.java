@@ -38,8 +38,7 @@ import sources.formatreaders.DDBRecordFormatter;
 public class DDBSpaceSource extends ISpaceSource {
 
 	public DDBSpaceSource() {
-		super();
-		LABEL = Sources.DDB.toString();
+		super(Sources.DDB);
 		apiKey = "SECRET_KEY";
 		vmap = FilterValuesMap.getDDBMap();
 		formatreader = new DDBRecordFormatter();
@@ -72,7 +71,7 @@ public class DDBSpaceSource extends ISpaceSource {
 	@Override
 	public SourceResponse getResults(CommonQuery q) {
 		SourceResponse res = new SourceResponse();
-		res.source = getSourceName();
+		res.source = getSourceName().toString();
 		// String httpQuery = getHttpQuery(q);
 		QueryBuilder builder = getBuilder(q);
 		res.query = builder.getHttp();

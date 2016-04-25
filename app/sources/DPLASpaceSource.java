@@ -56,8 +56,7 @@ public class DPLASpaceSource extends ISpaceSource {
 	}
 
 	public DPLASpaceSource() {
-		super();
-		LABEL = Sources.DPLA.toString();
+		super(Sources.DPLA);
 		apiKey = "SECRET_KEY";
 		vmap = FilterValuesMap.getDPLAMap();
 
@@ -110,7 +109,7 @@ public class DPLASpaceSource extends ISpaceSource {
 	@Override
 	public SourceResponse getResults(CommonQuery q) {
 		SourceResponse res = new SourceResponse();
-		res.source = getSourceName();
+		res.source = getSourceName().toString();
 		String httpQuery = getHttpQuery(q);
 		res.query = httpQuery;
 		JsonNode response;

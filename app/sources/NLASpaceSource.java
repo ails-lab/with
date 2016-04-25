@@ -48,7 +48,7 @@ import utils.Serializer;
 public class NLASpaceSource extends ISpaceSource {
 
 	public NLASpaceSource() {
-		LABEL = Sources.NLA.toString();
+		super(Sources.NLA);
 		apiKey = "SECRET_KEY";
 		vmap = FilterValuesMap.getNLAMap();
 		addDefaultQueryModifier(CommonFilters.TYPE.getId(), qfwriter("format"));
@@ -111,7 +111,7 @@ public class NLASpaceSource extends ISpaceSource {
 	@Override
 	public SourceResponse getResults(CommonQuery q) {
 		SourceResponse res = new SourceResponse();
-		res.source = getSourceName();
+		res.source = getSourceName().toString();
 		String httpQuery = getHttpQuery(q);
 		res.query = httpQuery;
 		JsonNode response;
