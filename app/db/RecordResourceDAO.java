@@ -18,17 +18,23 @@ package db;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 import java.util.function.Function;
 
+import model.EmbeddedMediaObject;
+import model.EmbeddedMediaObject.MediaVersion;
 import model.annotations.ContextData;
 import model.annotations.ContextData.ContextDataBody;
 import model.basicDataTypes.WithAccess;
 import model.basicDataTypes.WithAccess.Access;
 import model.basicDataTypes.WithAccess.AccessEntry;
-import model.resources.collection.CollectionObject;
 import model.resources.RecordResource;
+import model.resources.collection.CollectionObject;
 
 import org.apache.commons.beanutils.BeanToPropertyValueTransformer;
 import org.apache.commons.collections.CollectionUtils;
@@ -36,6 +42,8 @@ import org.bson.types.ObjectId;
 import org.mongodb.morphia.query.Query;
 import org.mongodb.morphia.query.UpdateOperations;
 
+import play.Logger;
+import play.Logger.ALogger;
 import sources.core.ParallelAPICall;
 import utils.AccessManager.Action;
 
@@ -59,6 +67,7 @@ import elastic.ElasticEraser;
  */
 @SuppressWarnings({ "unchecked", "rawtypes" })
 public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
+	public static final ALogger log = Logger.of(RecordResourceDAO.class);
 
 	public RecordResourceDAO() {
 		super(RecordResource.class);
@@ -108,8 +117,8 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 		List<ContextData<ContextDataBody>> contextData = collectedResources
 				.subList(lowerBound, upperBound);
 		List<ObjectId> recordIds = (List<ObjectId>) CollectionUtils.collect(
-				contextData,
-				new BeanToPropertyValueTransformer("target.recordId"));
+				contextData, new BeanToPropertyValueTransformer(
+						"target.recordId"));
 		q.field("_id").in(recordIds);
 		List<RecordResource> records = this.find(q).asList();
 		List<RecordResource> orderedRecords = new ArrayList<RecordResource>();
@@ -154,9 +163,10 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 			List<ContextData<ContextDataBody>> collectedResources,
 			Query<RecordResource> q) {
 		try {
-			List<ObjectId> recordIds = (List<ObjectId>) CollectionUtils.collect(
-					collectedResources,
-					new BeanToPropertyValueTransformer("target.recordId"));
+			List<ObjectId> recordIds = (List<ObjectId>) CollectionUtils
+					.collect(collectedResources,
+							new BeanToPropertyValueTransformer(
+									"target.recordId"));
 			q.field("_id").in(recordIds);
 			return this.find(q).asList();
 		} catch (Exception e) {
@@ -217,10 +227,11 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 	// TODO Refactor
 	public WithAccess mergeParentCollectionRights(ObjectId recordId,
 			ObjectId newCollectionId, WithAccess newCollectionAccess) {
-		RecordResource record = this.getById(recordId,
-				new ArrayList<String>(
-						Arrays.asList("administrative.access.isPublic",
-								"administrative.withCreator")));
+		RecordResource record = this.getById(
+				recordId,
+				new ArrayList<String>(Arrays.asList(
+						"administrative.access.isPublic",
+						"administrative.withCreator")));
 		List<ObjectId> parentCollections = getParentCollections(recordId);
 		List<WithAccess> parentColAccess = new ArrayList<WithAccess>();
 		for (ObjectId colId : parentCollections) {
@@ -228,18 +239,20 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 				parentColAccess.add(newCollectionAccess);
 			else {
 				CollectionObject parentCollection = DB.getCollectionObjectDAO()
-						.getById(colId, new ArrayList<String>(
-								Arrays.asList("administrative.access")));
-				parentColAccess
-						.add(parentCollection.getAdministrative().getAccess());
+						.getById(
+								colId,
+								new ArrayList<String>(Arrays
+										.asList("administrative.access")));
+				parentColAccess.add(parentCollection.getAdministrative()
+						.getAccess());
 			}
 		}
 		// hope there aren't too many collections containing the resource
 		// if the record is public, it should remain public. Acl rights are
 		// determined by the collections the record belongs to
-		return mergeRights(parentColAccess,
-				record.getAdministrative().getWithCreator(),
-				record.getAdministrative().getAccess().getIsPublic());
+		return mergeRights(parentColAccess, record.getAdministrative()
+				.getWithCreator(), record.getAdministrative().getAccess()
+				.getIsPublic());
 	}
 
 	public boolean mergeParentCollectionPublicity(ObjectId recordId,
@@ -248,8 +261,10 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 		List<ObjectId> parentCollections = getParentCollections(recordId);
 		for (ObjectId colId : parentCollections) {
 			CollectionObject parentCollection = DB.getCollectionObjectDAO()
-					.getById(colId, new ArrayList<String>(
-							Arrays.asList("administrative.access")));
+					.getById(
+							colId,
+							new ArrayList<String>(Arrays
+									.asList("administrative.access")));
 			if (parentCollection.getAdministrative().getAccess().getIsPublic())
 				return true;
 		}
@@ -267,8 +282,8 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 		List<RecordResource> memberRecords = getByCollection(collectionId,
 				retrievedFields);
 		for (RecordResource r : memberRecords) {
-			if (DB.getRecordResourceDAO().hasAccess(effectiveIds, Action.DELETE,
-					r.getDbId())) {
+			if (DB.getRecordResourceDAO().hasAccess(effectiveIds,
+					Action.DELETE, r.getDbId())) {
 				WithAccess mergedAccess = mergeParentCollectionRights(
 						r.getDbId(), collectionId, colAccess);
 				updateField(r.getDbId(), "administrative.access", mergedAccess);
@@ -276,15 +291,15 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 		}
 	}
 
-	public void updateMembersToMergedPublicity(ObjectId colId, boolean isPublic,
-			List<ObjectId> effectiveIds) {
+	public void updateMembersToMergedPublicity(ObjectId colId,
+			boolean isPublic, List<ObjectId> effectiveIds) {
 		ArrayList<String> retrievedFields = new ArrayList<String>(
 				Arrays.asList("_id", "administrative.access"));
 		List<RecordResource> memberRecords = getByCollection(colId,
 				retrievedFields);
 		for (RecordResource r : memberRecords) {
-			if (DB.getRecordResourceDAO().hasAccess(effectiveIds, Action.DELETE,
-					r.getDbId())) {
+			if (DB.getRecordResourceDAO().hasAccess(effectiveIds,
+					Action.DELETE, r.getDbId())) {
 				boolean mergedPublicity = mergeParentCollectionPublicity(
 						r.getDbId(), isPublic, colId);
 				updateField(r.getDbId(), "administrative.access",
@@ -295,7 +310,8 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 
 	public void updateRecordRightsUponRemovalFromCollection(ObjectId recordId,
 			ObjectId collectionId) {
-		RecordResource record = this.getById(recordId,
+		RecordResource record = this.getById(
+				recordId,
 				new ArrayList<String>(Arrays.asList("collectedIn",
 						"administrative.access.isPublic",
 						"administrative.withCreator")));
@@ -304,27 +320,28 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 		List<WithAccess> parentColAccess = new ArrayList<WithAccess>();
 		for (ObjectId parentId : parentCollections) {
 			CollectionObject parentCollection;
-			if ((parentCollection = DB.getCollectionObjectDAO()
-					.getById(parentId, new ArrayList<String>(
-							Arrays.asList("administrative.access")))) != null)
-				parentColAccess
-						.add(parentCollection.getAdministrative().getAccess());
+			if ((parentCollection = DB.getCollectionObjectDAO().getById(
+					parentId,
+					new ArrayList<String>(Arrays
+							.asList("administrative.access")))) != null)
+				parentColAccess.add(parentCollection.getAdministrative()
+						.getAccess());
 		}
-		WithAccess mergedAccess = mergeRights(parentColAccess,
-				record.getAdministrative().getWithCreator(),
-				record.getAdministrative().getAccess().getIsPublic());
+		WithAccess mergedAccess = mergeRights(parentColAccess, record
+				.getAdministrative().getWithCreator(), record
+				.getAdministrative().getAccess().getIsPublic());
 		updateField(recordId, "administrative.access", mergedAccess);
 	}
 
-	public void updateMembersToNewAccess(ObjectId collectionId, ObjectId userId,
-			Access newAccess, List<ObjectId> effectiveIds) {
+	public void updateMembersToNewAccess(ObjectId collectionId,
+			ObjectId userId, Access newAccess, List<ObjectId> effectiveIds) {
 		ArrayList<String> retrievedFields = new ArrayList<String>(
 				Arrays.asList("_id"));
 		List<RecordResource> memberRecords = getByCollection(collectionId,
 				retrievedFields);
 		for (RecordResource r : memberRecords) {
-			if (DB.getRecordResourceDAO().hasAccess(effectiveIds, Action.DELETE,
-					r.getDbId()))
+			if (DB.getRecordResourceDAO().hasAccess(effectiveIds,
+					Action.DELETE, r.getDbId()))
 				changeAccess(r.getDbId(), userId, newAccess);
 		}
 	}
@@ -336,8 +353,8 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 		List<RecordResource> memberRecords = getByCollection(colId,
 				retrievedFields);
 		for (RecordResource r : memberRecords) {
-			if (DB.getRecordResourceDAO().hasAccess(effectiveIds, Action.DELETE,
-					r.getDbId()))
+			if (DB.getRecordResourceDAO().hasAccess(effectiveIds,
+					Action.DELETE, r.getDbId()))
 				DB.getRecordResourceDAO().updateField(r.getDbId(),
 						"administrative.access.isPublic", isPublic);
 		}
@@ -345,8 +362,8 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 
 	public void removeFromCollection(ObjectId recordId, ObjectId collectionId,
 			int position, boolean first, boolean all) throws Exception {
-		DB.getCollectionObjectDAO().removeFromCollection(collectionId, recordId,
-				position, first, all);
+		DB.getCollectionObjectDAO().removeFromCollection(collectionId,
+				recordId, position, first, all);
 		UpdateOperations<RecordResource> recordUpdate = this
 				.createUpdateOperations();
 		Query<RecordResource> q = this.createQuery().field("_id")
@@ -435,9 +452,28 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 		memberRecords.forEach((r) -> {
 			resourceIds.add(r.getDbId());
 		});
-		Function<List<ObjectId>, Boolean> deleteResources = (
-				List<ObjectId> ids) -> (ElasticEraser.deleteManyResources(ids));
+		Function<List<ObjectId>, Boolean> deleteResources = (List<ObjectId> ids) -> (ElasticEraser
+				.deleteManyResources(ids));
 		ParallelAPICall.createPromise(deleteResources, resourceIds);
+	}
+
+	public void findUrlsFromRecords(Set<String> urls) {
+		log.info("Retrieving urls from the records");
+		Iterator<RecordResource> recordIterator = DB.getRecordResourceDAO()
+				.createQuery().iterator();
+		int i = 1;
+		while (recordIterator.hasNext()) {
+			log.info("Getting the urls for #" + i++ + " record");
+			RecordResource record = recordIterator.next();
+			List<HashMap<MediaVersion, EmbeddedMediaObject>> mediaList = record
+					.getMedia();
+			for (HashMap<MediaVersion, EmbeddedMediaObject> media : mediaList) {
+				Collection<EmbeddedMediaObject> mediaObjects = media.values();
+				for (EmbeddedMediaObject mediaObject : mediaObjects) {
+					urls.add(mediaObject.getUrl());
+				}
+			}
+		}
 	}
 
 }
