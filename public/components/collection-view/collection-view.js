@@ -48,6 +48,7 @@ define(['bridget', 'knockout', 'text!./_collection-view.html', 'isotope', 'image
 		self.dataProvider = "";
 		self.dataProvider_uri = "";
 		self.rights = "";
+		self.mediatype="";
 		self.url = "";
 		self.externalId = "";
 		self.thumbnail = "";
@@ -152,7 +153,7 @@ define(['bridget', 'knockout', 'text!./_collection-view.html', 'isotope', 'image
 			if(self.source=="Rijksmuseum" && media){
 				media[0].Thumbnail=media[0].Original;
 			}
-			self.thumb = media[0] != null && media[0].Thumbnail != null && media[0].Thumbnail.withUrl != "null" ? media[0].Thumbnail.url : null;
+			self.thumb = media[0] != null && media[0].Thumbnail != null && media[0].Thumbnail.withUrl != "null" ? media[0].Thumbnail.withUrl : null;
 			self.fullres = media[0] != null && media[0].Original != null && media[0].Original.url != "null" ? media[0].Original.url : null;
 			if(self.fullres){
 				self.rights=findResOrLit(media[0].Original.originalRights);
@@ -161,6 +162,14 @@ define(['bridget', 'knockout', 'text!./_collection-view.html', 'isotope', 'image
 			else if (self.thumb){
 				self.rights=findResOrLit(media[0].Thumbnail.originalRights);
 				
+			}
+			
+			if(media &&  media[0]){
+				if(media[0].Original && media[0].Original.type){
+					self.mediatype=media[0].Original.type;
+				}else if(media[0].Thumbnail && media[0].Thumbnail.type){
+					self.mediatype=media[0].Thumbnail.type;
+				}
 			}
 			self.data(options);
 			self.isLoaded = ko.observable(true);

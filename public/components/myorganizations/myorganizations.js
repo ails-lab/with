@@ -77,7 +77,12 @@ define(['knockout', 'text!./myorganizations.html', 'app', 'moment', 'async!https
 			}
 		});
 		self.friendlyName = ko.observable().extend({
-			required: true
+			required: true,
+			minLength: 3,
+			pattern: {
+				message: 'Your username must be alphanumeric.',
+				params: /^\w+$/
+			}
 		});
 		self.about = ko.observable();
 		self.validationModel = ko.validatedObservable({
