@@ -38,8 +38,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 public class EuropeanaFashionSpaceSource extends ISpaceSource {
 
 	public EuropeanaFashionSpaceSource() {
-		super();
-		LABEL = Sources.EFashion.toString();
+		super(Sources.EFashion);
 		// addDefaultWriter(CommonFilters.TYPE_ID, qfwriter("TYPE"));
 		// addDefaultQueryModifier(CommonFilters.TYPE_ID, getFunction("219",
 		// "objectType"));

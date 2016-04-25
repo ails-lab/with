@@ -34,6 +34,7 @@ public class ProvenanceInfo {
 		InternetArchive("InternetArchive","Internet Archive"), DDB("DDB","Deutsche Digitale Bibliothek"),
 		DigitalNZ("DigitalNZ"), DPLA("DPLA","Digital Public Library of America"),
 		EFashion("EFashion"),
+		YouTube("Youtube"),
 		NLA("NLA","National Library of Australia"),
 		WITHin("WITHin"),
 		Rijksmuseum("Rijksmuseum","Rijksmuseum");

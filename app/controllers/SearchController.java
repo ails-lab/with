@@ -107,9 +107,7 @@ public class SearchController extends Controller {
 	public static Result searchSources() {
 		List<Sources> res = new ArrayList<>();
 		for (final ISpaceSource src : ESpaceSources.getESources()) {
-			Sources sourceByID = Sources.getSourceByID(src.LABEL);
-			if (sourceByID!=null)
-				res.add(sourceByID);
+			res.add(src.getSourceName());
 		}
 		return ok(Json.toJson(res));
 	}
@@ -279,12 +277,12 @@ public class SearchController extends Controller {
 		});
 	}
 
-	public static List<String> getTheSources() {
-		Function<ISpaceSource, String> function = (ISpaceSource x) -> {
-			return x.getSourceName();
-		};
-		return ListUtils.transform(ESpaceSources.getESources(), function);
-	}
+//	public static List<String> getTheSources() {
+//		Function<ISpaceSource, String> function = (ISpaceSource x) -> {
+//			return x.getSourceName();
+//		};
+//		return ListUtils.transform(ESpaceSources.getESources(), function);
+//	}
 
 	private static Iterable<Promise<SourceResponse>> callSources(final CommonQuery q) {
 		List<Promise<SourceResponse>> promises = new ArrayList<Promise<SourceResponse>>();

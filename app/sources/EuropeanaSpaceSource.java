@@ -61,10 +61,9 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 	private String nextCursor;
 	
 	public EuropeanaSpaceSource() {
-		super();
+		super(Sources.Europeana);
 		vmap = FilterValuesMap.getEuropeanaMap();
 		
-		LABEL = Sources.Europeana.toString();
 		apiKey = "SECRET_KEY";
 		
 	    /*filtersSupportedBySource = new ArrayList<CommonFilters>(
@@ -366,7 +365,7 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 	@Override
 	public SourceResponse getResults(CommonQuery q) {
 		SourceResponse res = new SourceResponse();
-		res.source = getSourceName();
+		res.source = getSourceName().toString();
 		String httpQuery = getHttpQuery(q);
 		res.query = httpQuery;
 		JsonNode response;
