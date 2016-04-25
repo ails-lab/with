@@ -211,6 +211,17 @@ public class CommonQuery implements Cloneable , QueryStringBindable<CommonQuery>
 			q.source = Utils.parseArray(srcs);
 		}
 		
+		q.filters = new ArrayList<>();
+		for (String key : arg1.keySet()) {
+			if (key.startsWith("filter.")){
+				String filterID = key.substring(key.indexOf(".")+1);
+				CommonFilter f = new CommonFilter();
+				f.filterID = filterID;
+				f.values = Utils.parseArray(arg1.get(key));
+				q.filters.add(f);
+			}
+		}
+		
 		return Option.Some(q);
 	}
 
