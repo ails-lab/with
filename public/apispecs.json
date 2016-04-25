@@ -211,10 +211,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/Filters"
-                            }
+                            "$ref": "#/definitions/Filters"
                         }
                     },
                     "400": {
@@ -285,10 +282,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/Filters"
                         }
                     },
                     "400": {
@@ -3065,7 +3059,7 @@
                 "media": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/MediaObjectEmbedded"
+                        "$ref": "#/definitions/MediaRecord"
                     }
                 },
                 "descriptiveData": {
@@ -3727,9 +3721,23 @@
                         "type": "integer"
                     },
                     "items": {
-                        "type": "array",
-                        "items": {
-                            "$ref": "#/definitions/InternalRecord"
+                        "type": "object",
+                        "properties": {
+                            "culturalCHO": {
+                                "type": "array",
+                                "items": {
+                                    "$ref": "#/definitions/InternalRecord"
+                                }
+                            },
+                            "recordResource": {
+                                "type": "array",
+                                "items": {
+                                    "$ref": "#/definitions/InternalRecord"
+                                }
+                            },
+                            "itemsCount": {
+                                "type": "integer"
+                            }
                         }
                     },
                     "source": {
@@ -3799,6 +3807,27 @@
                 },
                 "medium": {
                     "type": "string"
+                }
+            }
+        },
+        "MediaRecord": {
+            "description": "This is an object with paths to the call that returns the original media object and four different types of thumbnail (also media objects).",
+            "type": "object",
+            "properties": {
+                "original": {
+                    "$ref": "#/definitions/MediaObjectEmbedded"
+                },
+                "tiny": {
+                    "$ref": "#/definitions/MediaObjectEmbedded"
+                },
+                "square": {
+                    "$ref": "#/definitions/MediaObjectEmbedded"
+                },
+                "thumbnail": {
+                    "$ref": "#/definitions/MediaObjectEmbedded"
+                },
+                "medium": {
+                    "$ref": "#/definitions/MediaObjectEmbedded"
                 }
             }
         },
