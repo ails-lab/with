@@ -300,7 +300,7 @@ public class SearchController extends Controller {
 			}
 			};
 		for (final ISpaceSource src : ESpaceSources.getESources()) {
-			if ((q.source == null) || (q.source.size() == 0) || q.source.contains(src.getSourceName())) {
+			if ((q.source == null) || (q.source.size() == 0) || q.source.contains(src.getSourceName().toString())) {
 				List<CommonQuery> list = src.splitFilters(q);
 				for (CommonQuery commonQuery : list) {
 					promises.add(ParallelAPICall.<ISpaceSource, CommonQuery, SourceResponse> createPromise(methodQuery,
