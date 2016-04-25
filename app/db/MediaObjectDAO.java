@@ -274,9 +274,9 @@ public class MediaObjectDAO {
 		// avatars, cover images for organizations/projects and images of
 		// stored records at the database
 		Set<String> urls = new HashSet<String>();
-		findUrlsFromAvatars(urls);
-		findUrlsFromCovers(urls);
-		findUrlsFromRecords(urls);
+		DB.getUserGroupDAO().findUrlsFromAvatars(urls);
+		DB.getUserGroupDAO().findUrlsFromCovers(urls);
+		DB.getRecordResourceDAO().findUrlsFromRecords(urls);
 		// A query at the database for deleting media objects whose url is not
 		// in this list ($nin) would be very convenient. Unfortunately, this
 		// list is expected to be very big (hundreds of thousand urls) which
@@ -302,66 +302,5 @@ public class MediaObjectDAO {
 		}
 		log.info("Deleted orphan media objects: " + deletedCount);
 	}
-
-	private void findUrlsFromAvatars(Set<String> urls) {
-		log.info("Retrieving urls from user avatars");
-		Iterator<User> userIterator = DB.getUserDAO().createQuery().iterator();
-		int i = 1;
-		while (userIterator.hasNext()) {
-			User user = userIterator.next();
-			log.info("Getting the urls for #" + i++ + " user");
-			if (user.getAvatar() != null && !user.getAvatar().isEmpty())
-				urls.addAll(user.getAvatar().values());
-		}
-		log.info("Retrieving urls from group avatars");
-		Iterator<UserGroup> groupIterator = DB.getUserGroupDAO().createQuery()
-				.iterator();
-		i = 1;
-		while (groupIterator.hasNext()) {
-			UserGroup group = groupIterator.next();
-			log.info("Getting the urls for #" + i++ + " group");
-			if (group.getAvatar() != null && !group.getAvatar().isEmpty())
-				urls.addAll(group.getAvatar().values());
-		}
-	}
-
-	private void findUrlsFromCovers(Set<String> urls) {
-		log.info("Retrieving urls from organizations/projects covers");
-		Iterator<UserGroup> groupIterator = DB.getUserGroupDAO().createQuery()
-				.iterator();
-		int i = 1;
-		while (groupIterator.hasNext()) {
-			log.info("Getting the urls for #" + i++ + " group");
-			UserGroup group = groupIterator.next();
-			Page page = null;
-			if (group instanceof Organization)
-				page = ((Organization) group).getPage();
-			if (group instanceof Project)
-				page = ((Project) group).getPage();
-			if (page == null || page.getCover() == null
-					|| page.getCover().isEmpty())
-				continue;
-			urls.addAll(page.getCover().values());
-		}
-	}
-
-	@SuppressWarnings({ "rawtypes", "unchecked" })
-	private void findUrlsFromRecords(Set<String> urls) {
-		log.info("Retrieving urls from the records");
-		Iterator<RecordResource> recordIterator = DB.getRecordResourceDAO()
-				.createQuery().iterator();
-		int i = 1;
-		while (recordIterator.hasNext()) {
-			log.info("Getting the urls for #" + i++ + " record");
-			RecordResource record = recordIterator.next();
-			List<HashMap<MediaVersion, EmbeddedMediaObject>> mediaList = record
-					.getMedia();
-			for (HashMap<MediaVersion, EmbeddedMediaObject> media : mediaList) {
-				Collection<EmbeddedMediaObject> mediaObjects = media.values();
-				for (EmbeddedMediaObject mediaObject : mediaObjects) {
-					urls.add(mediaObject.getUrl());
-				}
-			}
-		}
-	}
+	
 }
