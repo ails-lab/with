@@ -143,6 +143,30 @@ public class SearchController extends Controller {
 		}
 	}
 	
+	public static Promise<Result> searchwithfilterGET(CommonQuery q) {
+//		Form<CommonQuery> qf = Form.form(CommonQuery.class).bindFromRequest();
+//		CommonQuery q = qf.get();
+		// Parse the query.
+		try {
+			q.setTypes(Elastic.allTypes);
+			if (session().containsKey("effectiveUserIds")) {
+				List<String> userIds = AccessManager.effectiveUserIds(session().get("effectiveUserIds"));
+				q.setEffectiveUserIds(userIds);
+			}
+			Promise<SearchResponse> myResults = getMyResutlsPromise(q);
+			play.libs.F.Function<SearchResponse, Result> function = new play.libs.F.Function<SearchResponse, Result>() {
+				public Result apply(SearchResponse r) {
+					return ok(Json.toJson(r));
+				}
+			};
+			return myResults.map(function);
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			return Promise.pure((Result) badRequest(e.getMessage()));
+		}
+	}
+	
 	public static Promise<Result> getfilters() {
 		JsonNode json = request().body().asJson();
 		if (json == null) {

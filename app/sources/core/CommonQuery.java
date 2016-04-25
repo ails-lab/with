@@ -20,19 +20,24 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import org.bson.types.ObjectId;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
+import controllers.parameterTypes.MyPlayList;
 import db.DB;
 import model.basicDataTypes.WithAccess.Access;
 import model.usersAndGroups.User;
 import model.usersAndGroups.UserGroup;
+import play.libs.F.Option;
+import play.mvc.Controller;
+import play.mvc.QueryStringBindable;
 import utils.Tuple;
 
-public class CommonQuery implements Cloneable {
+public class CommonQuery implements Cloneable , QueryStringBindable<CommonQuery>{
 
 	@JsonIgnoreProperties(ignoreUnknown=true)
 	public String page = "1";
@@ -192,5 +197,32 @@ public class CommonQuery implements Cloneable {
 		if (filters==null)
 			filters = new ArrayList<>();
 		filters.add(commonFilter);
+	}
+
+	@Override
+	public Option<CommonQuery> bind(String arg0, Map<String, String[]> arg1) {
+		// TODO Auto-generated method stub
+		CommonQuery q = new CommonQuery();
+		q.searchTerm = arg1.get("searchTerm")[0];
+		q.page = arg1.get("page")[0];
+		q.pageSize = arg1.get("pageSize")[0];
+		String[] srcs = arg1.get("source");
+		if(Utils.hasInfo(srcs)){
+			q.source = Utils.parseArray(srcs);
+		}
+		
+		return Option.Some(q);
+	}
+
+	@Override
+	public String javascriptUnbind() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String unbind(String arg0) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }

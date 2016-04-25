@@ -400,5 +400,17 @@ public class Utils {
 	public static <K,T> boolean hasInfo(HashMap<K,T> res) {
 		return res!=null && !res.isEmpty();
 	}
+	
+	public static List<String> parseArray(String[] array){
+		ArrayList<String> res = new ArrayList<>();
+		for (String string : array) {
+			for (String string1 : string.split("\\s*,\\s*")) {
+				if (Utils.hasInfo(string1)){
+					res.add(string1);
+				}
+			}
+		}
+		return res;
+	}
 
 }
