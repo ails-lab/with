@@ -28,6 +28,7 @@ import javax.validation.ConstraintViolation;
 
 import org.bson.Document;
 import org.bson.types.ObjectId;
+import org.mongodb.morphia.query.Query;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -82,10 +83,7 @@ import utils.AccessManager.Action;
 import utils.Locks;
 import utils.Tuple;
 
-/**
- * @author mariaral
- *
- */
+
 @SuppressWarnings("rawtypes")
 public class CollectionObjectController extends WithResourceController {
 
@@ -249,40 +247,6 @@ public class CollectionObjectController extends WithResourceController {
 			itemsCount++;
 		}
 		return itemsCount;
-	}
-	
-	@SuppressWarnings("unchecked")
-	public static Result updateCollections(String host, Integer port, String dbName) {
-		MongoClient mongoClient = null;
-		ObjectNode result = Json.newObject();
-		try {
-		mongoClient = new MongoClient(host, port);
-		MongoDatabase db = mongoClient.getDatabase(dbName);
-		// get all records and store the information in a HashMap
-		FindIterable<Document> collections = db.getCollection("CollectionObject")
-				.find();
-		long collectionCount = db.getCollection("CollectionObject").count();
-		for (Document collection : collections) {
-			//System.out.println(((ArrayList) ((Document) ((Document) collection.get("descriptiveData")).get("label")).get("default")).get(0));
-			ObjectId id = collection.getObjectId("_id");
-			if (((Document) collection.get("administrative")).getString("collectionType") != null) {
-				if (((Document) collection.get("administrative")).getString("collectionType").equals("Exhibition")) {
-				DB.getCollectionObjectDAO().updateField(id, "resourceType", "Exhibition");
-				DB.getCollectionObjectDAO().updateField(id, "className", "model.resources.collection.Exhibition");
-				}
-				else if (((Document) collection.get("administrative")).getString("collectionType").equals("SimpleCollection")) {
-					DB.getCollectionObjectDAO().updateField(id, "resourceType", "SimpleCollection");
-					DB.getCollectionObjectDAO().updateField(id, "className", "model.resources.collection.SimpleCollection");
-				}
-				DB.getCollectionObjectDAO().deleteField(id, "administrative.collectionType");
-			}
-		}
-		} catch (Exception e) {
-			e.printStackTrace();
-		} finally {
-			mongoClient.close();
-			return ok(result);
-		}
 	}
 
 	public static Result sortCollectionObject(String collectionId) {
@@ -916,11 +880,6 @@ public class CollectionObjectController extends WithResourceController {
 			if (!response.toString().equals(ok().toString()))
 				return response;
 			else {
-				/*
-				 * List<String> retrievedFields = new ArrayList<String>(
-				 * Arrays.asList("descriptiveData.label",
-				 * "descriptiveData.description", "media", "collectedIn"));
-				 */
 				List<RecordResource> records = DB.getRecordResourceDAO()
 						.getByCollectionBetweenPositions(colId, start,
 								start + count);

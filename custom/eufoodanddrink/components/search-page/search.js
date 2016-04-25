@@ -15,7 +15,12 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
 		    var $item = $( image.img ).parents( itemSelector );
 		    // un-hide item
 		    $item.show();
-		    iso.appended( $item );
+		    if(iso)
+				  iso.appended($item);
+				else{
+					$.error("iso gone");
+				}
+		    
 		    
 		  });
 		  
@@ -41,6 +46,7 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
 			self.dataProvider="";
 			self.dataProvider_uri="";
 			self.rights="";
+			self.mediatype="";
 			self.url="";
 			self.externalId = "";
 			self.likes=0;
@@ -60,6 +66,7 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
 				//self.url="#item/"+data.recordId;
 				self.view_url=data.view_url;
 				self.thumb=data.thumb;
+				self.mediatype=data.mediatype;
 				self.fullres=data.fullres;
 				self.description=data.description;
 				self.source=data.source;
@@ -450,6 +457,14 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
 									if(source=="Rijksmuseum" && media){
 										media[0].Thumbnail=media[0].Original;
 									}
+									var mediatype="";
+									if(media &&  media[0]){
+										if(media[0].Original && media[0].Original.type){
+											mediatype=media[0].Original.type;
+										}else if(media[0].Thumbnail && media[0].Thumbnail.type){
+											mediatype=media[0].Thumbnail.type;
+										}
+									}
 							        var record = new Record({
 										//recordId: result.recordId || result.id,
 										thumb: media!=null &&  media[0] !=null  && media[0].Thumbnail!=null  && media[0].Thumbnail.url!="null" ? media[0].Thumbnail.url:"img/content/thumb-empty.png",
@@ -462,6 +477,7 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
 										dataProvider_uri: findProvenanceValues(provenance,"dataProvider_uri"),
 										provider: findProvenanceValues(provenance,"provider"),
 										rights: rights,
+										mediatype: mediatype,
 										externalId: admindata.externalId,
 										source: source,
 										likes: usage.likes,
@@ -659,6 +675,14 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
 					if(source=="Rijksmuseum" && media){
 						media[0].Thumbnail=media[0].Original;
 					}
+					var mediatype="";
+					if(media &&  media[0]){
+						if(media[0].Original && media[0].Original.type){
+							mediatype=media[0].Original.type;
+						}else if(media[0].Thumbnail && media[0].Thumbnail.type){
+							mediatype=media[0].Thumbnail.type;
+						}
+					}
 			        var record = new Record({
 						//recordId: result.recordId || result.id,
 						thumb: media!=null &&  media[0] !=null  && media[0].Thumbnail!=null  && media[0].Thumbnail.url!="null" ? media[0].Thumbnail.url:"img/content/thumb-empty.png",
@@ -671,6 +695,7 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
 						dataProvider_uri: findProvenanceValues(provenance,"dataProvider_uri"),
 						provider: findProvenanceValues(provenance,"provider"),
 						rights: rights,
+						mediatype: mediatype,
 						externalId: admindata.externalId,
 						source: source,
 						likes: usage.likes,

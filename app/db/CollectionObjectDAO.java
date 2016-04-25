@@ -114,15 +114,6 @@ public class CollectionObjectDAO extends WithResourceDAO<CollectionObject> {
 		updateFields("", json, updateOps);
 		updateOps.set("administrative.lastModified", new Date());
 		this.update(q, updateOps);
-		/* update collection index and mongo records */
-		BiFunction<ObjectId, Map<String, Object>, Boolean> updateCollection = (
-				ObjectId colId, Map<String, Object> doc) -> {
-			return ElasticUpdater.updateOne(WithResourceType.CollectionObject.toString(), colId, doc);
-		};
-		ObjectMapper mapper = new ObjectMapper();
-		mapper.setSerializationInclusion(Include.NON_NULL);
-		Map<String, Object> idx_map = mapper.convertValue(json, Map.class);
-		ParallelAPICall.createPromise(updateCollection, dbId, idx_map);
 	}
 
 	public List<CollectionObject> getBySpecificAccess(

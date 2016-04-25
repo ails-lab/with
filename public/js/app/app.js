@@ -968,10 +968,9 @@ define("app", ['knockout', 'facebook', 'imagesloaded', 'moment', './js/app/plugi
 			else if (selection=="source_uri"){
 				var size=array.length-1;
 				if(array[size].uri && array[size].uri.length>0){
-
 	        			selvalue=array[size].uri;
-
-
+	        	} else if (size>0 && array[size-1].uri && array[size-1].uri.length>0) {
+        			selvalue=array[size-1].uri;
 	        	}
 
 		     }

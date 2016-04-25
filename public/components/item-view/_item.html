@@ -68,6 +68,12 @@
                                   </div>
                                   <div class="field" data-bind="text:record().rights"></div>
                                 </div>
+                                 <div class="list" data-bind="if: record().mediatype && record().mediatype!=''">
+                                  <div class="title">
+                                    <div class="titlewrap">Media Type</div>
+                                  </div>
+                                  <div class="field" data-bind="text:record().mediatype"></div>
+                                </div>
                                  <div class="list" data-bind="if: record().recordId!='-1'">
                                   <div class="title">
                                     <div class="titlewrap">Item url</div>

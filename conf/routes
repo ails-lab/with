@@ -30,8 +30,6 @@ GET 	/custom/:customName					    controllers.CustomAssets.redirect(customName)
 GET 	/custom/:customName/					controllers.CustomAssets.redirect(customName)
 GET 	/custom/:customName/*file				controllers.CustomAssets.getFile(customName:String, file:String)
 
-GET /collection/updateCollections					controllers.CollectionObjectController.updateCollections(host: String, port: Integer, dbName: String)
-
 PUT		/record/contextData			            controllers.RecordResourceController.editContextData()
 GET		/record/:id							    controllers.RecordResourceController.getRecordResource(id, format: play.libs.F.Option[String])
 PUT		/record/:id								controllers.RecordResourceController.editRecordResource(id)

@@ -47,6 +47,7 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 		self.dataProvider = "";
 		self.dataProvider_uri = "";
 		self.rights = "";
+		self.mediatype="";
 		self.url = "";
 		self.externalId = "";
 		self.thumbnail = "";
@@ -146,7 +147,7 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 			if(self.source=="Rijksmuseum" && media){
 				media[0].Thumbnail=media[0].Original;
 			}
-			self.thumb = media[0] != null && media[0].Thumbnail != null && media[0].Thumbnail.withUrl != "null" ? media[0].Thumbnail.url : null;
+			self.thumb = media[0] != null && media[0].Thumbnail != null && media[0].Thumbnail.withUrl != "null" ? media[0].Thumbnail.withUrl : null;
 			self.fullres = media[0] != null && media[0].Original != null && media[0].Original.url != "null" ? media[0].Original.url : null;
 			self.data(options);
 			if(self.fullres){
@@ -156,6 +157,13 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 			else if (self.thumb){
 				self.rights=findResOrLit(media[0].Thumbnail.originalRights);
 				
+			}
+			if(media &&  media[0]){
+				if(media[0].Original && media[0].Original.type){
+					self.mediatype=media[0].Original.type;
+				}else if(media[0].Thumbnail && media[0].Thumbnail.type){
+					self.mediatype=media[0].Thumbnail.type;
+				}
 			}
 			self.isLoaded = ko.observable(false);
 			
@@ -337,8 +345,7 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 					if (items.length > 0) {
 						var $newitems = getItems(items);
 
-						self.isotopeImagesReveal(self.$container, $newitems);
-
+						 self.isotopeImagesReveal($newitems );
 					}
 					loading(false);
 				});
@@ -460,7 +467,7 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
        self.isotopeImagesReveal = function($items ) {
  		  self.$container = $(".grid#" + self.id());
 			var iso = self.$container.data('isotope');
-			var itemSelector = null;
+			var itemSelector = '.media';
 			if (iso)
 				itemSelector = iso.options.itemSelector;
 			else {
