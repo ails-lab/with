@@ -341,12 +341,13 @@ public class CollectionObjectDAO extends WithResourceDAO<CollectionObject> {
 
 	public ObjectNode countPerCollectionType(Query<CollectionObject> q) {
 		ObjectNode result = Json.newObject().objectNode();
-		Query<CollectionObject> qi = q.cloneQuery();
-		qi.field("resourceType").equal(WithResourceType.SimpleCollection);
-		long count = this.find(qi).countAll();
+		Query<CollectionObject> q1 = q.cloneQuery();
+		q1.field("resourceType").equal(WithResourceType.SimpleCollection);
+		long count = this.find(q1).countAll();
 		result.put(WithResourceType.SimpleCollection.toString(), count);
-		qi.field("resourceType").equal(WithResourceType.Exhibition);
-		count = this.find(qi).countAll();
+		Query<CollectionObject> q2 = q.cloneQuery();
+		q2.field("resourceType").equal(WithResourceType.Exhibition);
+		count = this.find(q2).countAll();
 		result.put(WithResourceType.Exhibition.toString(), count);
 		return result;
 	}
