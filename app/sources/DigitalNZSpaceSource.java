@@ -41,6 +41,7 @@ import sources.core.SourceResponse;
 import sources.core.Utils;
 import sources.core.Utils.Pair;
 import sources.formatreaders.DNZBasicRecordFormatter;
+import sources.utils.FunctionsUtils;
 import utils.ListUtils;
 import utils.Serializer;
 
@@ -51,8 +52,7 @@ public class DigitalNZSpaceSource extends ISpaceSource {
 	 */
 
 	public DigitalNZSpaceSource() {
-		super();
-		LABEL = Sources.DigitalNZ.toString();
+		super(Sources.DigitalNZ);
 		apiKey = "SECRET_KEY";
 		vmap = FilterValuesMap.getDNZMap();
 		addDefaultWriter(CommonFilters.TYPE.getId(), fwriter("and[category][]"));
@@ -62,22 +62,12 @@ public class DigitalNZSpaceSource extends ISpaceSource {
 
 		// TODO: rights_url shows the license in the search
 
-		
 		formatreader = new DNZBasicRecordFormatter();
 
 	}
 
 	private Function<List<String>, Pair<String>> fwriter(String parameter) {
-
-		Function<String, String> function = (String s) -> {
-			return s;
-		};
-		return new Function<List<String>, Pair<String>>() {
-			@Override
-			public Pair<String> apply(List<String> t) {
-				return new Pair<String>(parameter, Utils.getORList(ListUtils.transform(t, function), false));
-			}
-		};
+		return FunctionsUtils.toORList(parameter, false);
 	}
 
 	private Function<List<String>, Pair<String>> qfwriterYEAR() {
@@ -110,10 +100,10 @@ public class DigitalNZSpaceSource extends ISpaceSource {
 
 	@Override
 	public SourceResponse getResults(CommonQuery q) {
-		if (q.searchTerm==null)
+		if (!Utils.hasInfo(q.searchTerm) || q.searchTerm.equals("*"))
 			q.searchTerm = "format:(picture OR book OR music OR article)";
 		SourceResponse res = new SourceResponse();
-		res.source = getSourceName();
+		res.source = getSourceName().toString();
 		String httpQuery = getHttpQuery(q);
 		res.query = httpQuery;
 		JsonNode response;
@@ -188,9 +178,9 @@ public class DigitalNZSpaceSource extends ISpaceSource {
 			response = getHttpConnector()
 					.getURLContent("http://api.digitalnz.org/v3/records/" + recordId + ".json?api_key=" + apiKey);
 			JsonNode record = response;
-			if (record!=null){
+			if (record != null) {
 				jsonMetadata.add(new RecordJSONMetadata(Format.JSON_DNZ, record.toString()));
-				String json = Json.toJson(formatreader.readObjectFrom(record)).toString();
+				String json = Json.toJson(formatreader.readObjectFrom(record.path("record"))).toString();
 				jsonMetadata.add(new RecordJSONMetadata(Format.JSON_WITH, json));
 			}
 			Document xmlResponse = getHttpConnector()

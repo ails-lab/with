@@ -35,6 +35,11 @@ import elastic.ElasticSearcher;
  */
 public class ElasticSource extends ISpaceSource {
 	public static final Logger.ALogger log = Logger.of(ElasticSource.class);
+	
+	public ElasticSource(){
+		super(null);
+		throw new RuntimeException("This source needs to be defined on Sources enum");
+	}
 
 	@Override
 	public String getHttpQuery(CommonQuery q) {

@@ -16,7 +16,6 @@
 
 package db;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -27,13 +26,13 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 
 import play.libs.F.Promise;
-import play.libs.Json;
-import model.resources.CulturalObject;
-import model.resources.RecordResource;
 import model.resources.WithResource.WithResourceType;
 
 import org.bson.types.ObjectId;
+import org.elasticsearch.action.get.GetRequest;
+import org.elasticsearch.action.get.GetResponse;
 import org.elasticsearch.action.index.IndexResponse;
+import org.elasticsearch.search.fetch.source.FetchSourceContext;
 import org.mongodb.morphia.Key;
 import org.mongodb.morphia.dao.BasicDAO;
 import org.mongodb.morphia.query.Query;
@@ -47,14 +46,12 @@ import sources.core.ParallelAPICall;
 import utils.Tuple;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
 import com.mongodb.MongoException;
 import com.mongodb.WriteConcern;
 import com.mongodb.WriteResult;
-import com.mongodb.client.result.UpdateResult;
 import com.mongodb.util.JSON;
 
 import elastic.Elastic;
@@ -237,6 +234,7 @@ public class DAO<E> extends BasicDAO<E, ObjectId> {
 				ParallelAPICall.createPromise(deleteCollection, (ObjectId) doc
 						.getClass().getMethod("getDbId", new Class<?>[0])
 						.invoke(doc));
+
 			}
 			return this.delete(doc).getN();
 		} catch (Exception e) {
@@ -284,10 +282,22 @@ public class DAO<E> extends BasicDAO<E, ObjectId> {
 		WriteResult wr = super.deleteById(id);
 
 		if (wr.getN() == 1) {
-			Function<String, Boolean> deleteResource = (indexId) -> (ElasticEraser
-					.deleteResourceByQuery(indexId));
-			Promise<Boolean> deleteResp = ParallelAPICall.createPromise(
-					deleteResource, id.toString());
+
+			GetResponse resp = Elastic.getTransportClient().get(new GetRequest(Elastic.index, "_all", id.toString())
+			.fetchSourceContext(FetchSourceContext.DO_NOT_FETCH_SOURCE))
+			.actionGet();
+
+			List<String> enumNames = new ArrayList<String>();
+			Arrays.asList(WithResourceType.values()).forEach((t) -> {
+				enumNames.add(t.toString());
+				return;
+			});
+			if(enumNames.contains(resp.getType())) {
+				Function<String, Boolean> deleteResource = (indexId) -> (ElasticEraser
+						.deleteResourceByQuery(indexId));
+				Promise<Boolean> deleteResp = ParallelAPICall.createPromise(
+						deleteResource, id.toString());
+			}
 		}
 
 		return wr;
@@ -421,6 +431,14 @@ public class DAO<E> extends BasicDAO<E, ObjectId> {
 		UpdateOperations<E> updateOps = this.createUpdateOperations()
 				.disableValidation();
 		updateOps.set(field, value);
+		this.updateFirst(q, updateOps);
+	}
+
+	public void deleteField(ObjectId id, String field) {
+		Query<E> q = this.createQuery().field("_id").equal(id);
+		UpdateOperations<E> updateOps = this.createUpdateOperations()
+				.disableValidation();
+		updateOps.unset(field);
 		this.updateFirst(q, updateOps);
 	}
 

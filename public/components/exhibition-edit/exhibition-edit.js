@@ -1,6 +1,5 @@
-define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', 'app', 'jquery.lazyload', 'knockout-else', 'knockout-validation'], function (ko, template, jqueryUI, autoscroll, app, jqueryLazyLoad, KnockoutElse) {
-	
-	
+define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', 'app', 'jquery.lazyload', 'knockout-else', 'knockout-validation','smoke', 'jquery.fileupload'], 
+		function (ko, template, jqueryUI, autoscroll, app, jqueryLazyLoad, KnockoutElse) {
 	
 	collectionItemCount = 14;
 	exhibitionItemCount = 4;
@@ -45,6 +44,7 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 	function updateExhibitionProperty(exhibition, propertyName, newValue) {
 		var jsonObject = {};
 		jsonObject[propertyName] = newValue;
+		jsonObject["resourceType"] = "Exhibition";
 		var jsonData = JSON.stringify(jsonObject);
 		return $.ajax({
 			type: "PUT",
@@ -95,11 +95,13 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 	}
 
 	function saveItemToExhibition(record, position, exhibitionId) {
+		var recordJS = ko.toJS(record);
+		delete recordJS.__ko_mapping__;
 		return $.ajax({
 			"url": "/collection/" + exhibitionId + "/addRecord?position=" + position,
 			"method": "post",
 			"contentType": "application/json",
-			"data": ko.toJSON(record),
+			"data": JSON.stringify(recordJS),
 			"success": function (data) {
 				// Empty
 			},
@@ -150,62 +152,57 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 				window.location.href = "#login";
 			}
 		};
-
 		self.mapping = {
 			create: function (options) {
 				//customize at the root level: add title and description observables, based on multiliteral
 				//TODO: support multilinguality, have to be observable arrays of type [{lang: default, values: []}, ...]
 		        var record = options.data;
 		        var newRecord =  ko.mapping.fromJS(record, {});
-		        newRecord.containsAudio = ko.pureComputed(function() {
-		        	if (newRecord.contextData == undefined || newRecord.contextData()[0].body.audioUrl == undefined)
-		        		return false;
-		        	else
-		        		return (newRecord.contextData()[0].body.audioUrl() !== '');
-
-				});
-				newRecord.containsVideo = ko.pureComputed(function () {
-					if (newRecord.contextData == undefined || newRecord.contextData()[0].body.videoUrl == undefined) {
-						return false;
-					} else {
-						return (newRecord.contextData()[0].body.videoUrl() !== '');
-					}
-					return result;
-				});
-				newRecord.containsVideoDescription = ko.pureComputed(function () {
-					if (newRecord.contextData == undefined || newRecord.contextData()[0].body.videoDescription == undefined) {
-						return false;
-					} else {
-						return (newRecord.contextData()[0].body.videoDescription() !== '');
-					}
-					return result;
-				});
-				newRecord.containsText = ko.pureComputed(function () {
-					if (newRecord.contextData == undefined || newRecord.contextData()[0].body.text.default == undefined) {
-						return false;
-					} else {
-						return newRecord.contextData()[0].body.text.default() !== '';
-					}
-				});
-				if (newRecord.contextData == undefined) {
-					contextData = ko.mapping.fromJS([{
-						"contextDataType": "ExhibitionData",
-						"target": {
-							"position": -1,
-							"collectionId": newRecord.dbId()
-						},
-						"body" : {
+				if ($.isEmptyObject(newRecord.contextData.body)) {
+					body = ko.mapping.fromJS({
 							"audioUrl": "",
 							"text": {"default": ""},
 							"videoUrl": "",
 							"videoDescription": ""
-						}
-					}], {});
-					newRecord.contextData = contextData;
+						}, {});
+					newRecord.contextData.body =body;
 				}
-				newRecord.embeddedVideoUrl = ko.pureComputed(function () {
+			    newRecord.containsAudio = ko.pureComputed(function() {
+		        	if (newRecord.contextData.body == undefined 
+		        		|| newRecord.contextData.body.audioUrl == undefined)
+		        		return false;
+		        	else
+		        		return (newRecord.contextData.body.audioUrl() !== '');
+
+				 });
+				 newRecord.containsVideo = ko.pureComputed(function () {
+					if (newRecord.contextData.body.videoUrl == undefined) {
+						return false;
+					} else {
+						return (newRecord.contextData.body.videoUrl() !== '');
+					}
+					return result;
+				 });
+				 newRecord.containsVideoDescription = ko.pureComputed(function () {
+					if (newRecord.contextData.body.videoDescription == undefined) {
+						return false;
+					} else {
+						return (newRecord.contextData.body.videoDescription() !== '');
+					}
+					return result;
+				 });
+				 newRecord.containsText = ko.pureComputed(function () {
+					if (newRecord.contextData.body == undefined 
+						|| newRecord.contextData.body.text == undefined 
+						|| newRecord.contextData.body.text.default == undefined) {
+						return false;
+					} else {
+						return newRecord.contextData.body.text.default() !== '';
+					}
+				 });
+				 newRecord.embeddedVideoUrl = ko.pureComputed(function () {
 					if (newRecord.containsVideo()) {
-						var urlMatch = newRecord.contextData()[0].body.videoUrl().match(/youtube\.com.*(\?v=|\/embed\/)(.{11})/);
+						var urlMatch = newRecord.contextData.body.videoUrl().match(/youtube\.com.*(\?v=|\/embed\/)(.{11})/);
 						if (urlMatch !== null) {
 							var youtube_video_id = urlMatch.pop();
 							var embeddedVideoPath = 'https://www.youtube.com/embed/' + youtube_video_id;
@@ -217,28 +214,38 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 					else
 						return null;
 				});
+				newRecord.description = ko.observable("");
 				newRecord.title = ko.mapping.fromJS(app.findByLang(record.descriptiveData.label), {});
-				var dbDescription = record.descriptiveData.description;
-		        if (dbDescription === undefined || dbDescription === null || dbDescription.default[0] === undefined || dbDescription.default[0] === "null")
-		        	newRecord.description = ko.observable("");
-		        else
-		        	newRecord.description = ko.observable(app.findByLang(dbDescription));
-		        var withUrl = newRecord.media()[0].Thumbnail.url();
-		        if (withUrl != "empty") {
-					if (withUrl == "")
+				if (record.descriptiveData.description  === undefined || typeof record.descriptiveData.description.default  === 'undefined') {
+					newRecord.description = ko.observable("");
+				} else {
+					newRecord.description = ko.observable(app.findByLang(record.descriptiveData.description.default[0]));
+				}	
+		        var fullres="";
+			    
+		        if(newRecord.media()!=null &&  newRecord.media()[0] !=null && newRecord.media()[0].Original!=null  && newRecord.media()[0].Original.url()!="null") {
+		        	 fullres=newRecord.media()[0].Original.url();
+		        }
+		        if (fullres.indexOf("empty")!=-1) {fullres="";}
+		        newRecord.fullres=ko.observable(fullres);
+		        
+		        var withUrl = "";
+		        if (newRecord.media()!=null &&  newRecord.media()[0] !=null && newRecord.media()[0].Thumbnail!=null  && newRecord.media()[0].Thumbnail.url()!="null") {
+		        	withUrl=newRecord.media()[0].Thumbnail.url();
+		        }       
+			    if (withUrl == "") {
 						newRecord.thumbnailUrl = ko.observable("img/content/thumb-empty.png");
-					else {
-						if (withUrl.indexOf("/media") == 0) {
-							newRecord.thumbnailUrl = ko.observable(window.location.origin + withUrl);
-						} else {
-							newRecord.thumbnailUrl = ko.observable(withUrl);
-						}
-					}
-				}
-		        return newRecord;
+			    }
+			    else {
+				   if (withUrl.indexOf("/media") == 0) {
+						newRecord.thumbnailUrl = ko.observable(window.location.origin + withUrl);
+				   } else {
+						newRecord.thumbnailUrl = ko.observable(withUrl);
+				   }
+			    }
+			    return newRecord;
 		    }
-		}
-		
+		}		
 		self.searchPage = 0;
 		self.checkLogged();
 		self.loading = ko.observable(false);
@@ -267,7 +274,15 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 		self.validationModel = ko.validatedObservable({
 			itemVideoUrl: self.itemVideoUrl
 		});
-		
+		self.backgroundImg = ko.observable("");
+		self.displayCoverImage = ko.pureComputed(function () {
+			if (self.backgroundImg && self.backgroundImg() != "") {
+				return self.backgroundImg();
+			} else {
+				return 'img/ui/upload-placeholder.png';
+			}
+		});
+		self.newBackgroundImg = ko.observable(false);
 		var collections = [];
 		var promise = app.getAllUserCollections();
 		self.myCollections = ko.mapping.fromJS([]); //holds all the collections
@@ -298,6 +313,7 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 			'copy': ["media"]
 		};
 
+        self.creationMode=true;
 		self.loadingExhibitionItems = true;
 		var promise = getExhibition(self.dbId());
 		$.when(promise).done(function (data) {
@@ -306,6 +322,18 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 			self.title(app.findByLang(data.descriptiveData.label));
 			self.description(app.findByLang(data.descriptiveData.description));
 			setUpSwitch(self);
+			if (self.descriptiveData.backgroundImg == null || self.descriptiveData.backgroundImg.Original == null || 
+					self.descriptiveData.backgroundImg.Original.withUrl == null || 
+					self.descriptiveData.backgroundImg.Original.withUrl == "") {
+				self.backgroundImg("");
+			} 						
+			else {
+				if (self.descriptiveData.backgroundImg.Original.withUrl().indexOf("/media") == 0) {
+					self.backgroundImg(window.location.origin + self.descriptiveData.backgroundImg.Original.withUrl());
+				} else {
+					self.backgroundImg(self.descriptiveData.backgroundImg.Original.withUrl());
+				}
+			}
 			$.ajax({
 				url: "/collection/" + self.dbId() + "/list?count="+exhibitionItemCount+"&start=0",
 				method: "get",
@@ -349,11 +377,6 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 			}
 		});
 
-		/*showViewModel = function () {
-			console.log(ko.toJSON(self));
-			console.log(self.myCollections());
-		};*/
-
 		self.textfieldsLostFocus = function (isTitleUpdate) {
 			updateExhibition(self, isTitleUpdate);
 		};
@@ -369,12 +392,14 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 		};
 
 		self.itemsLoaded = 0;
-
+        
 		self.showNewItem = function (elem, index, record) {
 			$(elem).hide().fadeIn(500);
 			if ($(elem).hasClass('box fill')) { //it gets called for all elements rendered with the foreach
-				if (self.itemsLoaded < self.loadingInitialItemsCount) {
+				
+				if (self.creationMode && self.itemsLoaded < self.loadingInitialItemsCount) {
 					self.itemsLoaded++;
+					if(self.itemsLoaded==self.loadingInitialItemsCount){self.creationMode=false;}
 					$(elem).find('#loadingIcon').fadeOut();
 					return;
 				}
@@ -383,12 +408,15 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 						moveItemInExhibition(self.dbId(), record.dbId(), _startIndex, index);
 						_startIndex = -1;		// Move was successful, reset the startIndex
 					} else {
+						if(self.itemsLoaded<self.loadingInitialItemsCount){self.creationMode=true;}
 						saveItemToExhibition(record, index, self.dbId());
 						_removeItem = true;		// Item was added but not removed, so mark it for removal
 					}
 					$(elem).find('#loadingIcon').fadeOut();
 				} else {
 					saveItemToExhibition(record, index, self.dbId());
+					if(self.itemsLoaded<self.loadingInitialItemsCount){self.creationMode=true;}
+					
 					$(elem).find('#loadingIcon').fadeOut();
 				}
 			}
@@ -409,12 +437,18 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 			var context = ko.contextFor(event.target);
 			var index = context.$index();
 			self.itemPosition(index);
-			self.itemText(exhibitionItem.contextData()[0].body.text.default());
-			self.itemVideoUrl(exhibitionItem.contextData()[0].body.videoUrl());
-			self.itemVideoDescription(exhibitionItem.contextData()[0].body.videoDescription());
+			if (typeof exhibitionItem.contextData.body.text !== 'undefined') {
+				self.itemText(exhibitionItem.contextData.body.text.default());
+			}
+			if (typeof exhibitionItem.contextData.body.videoUrl !== 'undefined') {
+				self.itemVideoUrl(exhibitionItem.contextData.body.videoUrl());
+			}
+			if (typeof exhibitionItem.contextData.body.videoDescription !== 'undefined') {
+				self.itemVideoDescription(exhibitionItem.contextData.body.videoDescription());
+			}
 			self.itemId(exhibitionItem.dbId());
-			$( '.action' ).removeClass( 'active' );
-			$( '.action.editvideo' ).addClass( 'active' );
+			$('.action').removeClass('active');
+			$('.action.editvideo').addClass('active');
 		};
 		
 		self.editItem = function (editMode) {
@@ -427,11 +461,22 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 				}
 				var promise = self.updateRecord(self.itemId(), self.itemText(), itemEmbeddedVideoUrl, self.itemVideoDescription(), self.dbId(), self.itemPosition());
 				$.when(promise).done(function (data) {
+					//console.log(JSON.stringify(self.collectionItemsArray()[self.itemPosition()].contextData.body()));
+					if (typeof self.collectionItemsArray()[self.itemPosition()].contextData.body.text === 'undefined'
+						&& typeof self.collectionItemsArray()[self.itemPosition()].contextData.body.videoUrl === 'undefined') {
+						self.collectionItemsArray()[self.itemPosition()].contextData.body = {
+							text: {
+								default: ko.observable("")
+							},
+							videoUrl : ko.observable(""),
+							videoDescription : ko.observable("")
+						};
+					}
 					if (editMode == "editText") {
-						self.collectionItemsArray()[self.itemPosition()].contextData()[0].body.text.default(self.itemText());
+						self.collectionItemsArray()[self.itemPosition()].contextData.body.text.default(self.itemText());
 					} else if (editMode == "editVideo") {
-						self.collectionItemsArray()[self.itemPosition()].contextData()[0].body.videoUrl(self.itemVideoUrl());
-						self.collectionItemsArray()[self.itemPosition()].contextData()[0].body.videoDescription(self.itemVideoDescription());
+						self.collectionItemsArray()[self.itemPosition()].contextData.body.videoUrl(self.itemVideoUrl());
+						self.collectionItemsArray()[self.itemPosition()].contextData.body.videoDescription(self.itemVideoDescription());
 					}
 					self.closeSideBar();
 				}).fail(function (data) {
@@ -448,8 +493,8 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 			var index = context.$index();
 			var promise = self.updateRecord(exhibitionItem.dbId(), self.itemText(), "", "", self.dbId(), index);
 			$.when(promise).done(function (data) {
-				self.collectionItemsArray()[index].contextData()[0].body.videoUrl("");
-				self.collectionItemsArray()[index].contextData()[0].body.videoDescription("");
+				self.collectionItemsArray()[index].contextData.body.videoUrl("");
+				self.collectionItemsArray()[index].contextData.body.videoDescription("");
 			});
 		}
 		
@@ -459,6 +504,7 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 			self.itemVideoUrl("");
 			self.itemVideoDescription("");
 			self.itemId("");
+			self.newBackgroundImg(false);
 			//$('textarea').hide();
 			//$('.add').show();
 			$('.action').removeClass('active');
@@ -470,6 +516,7 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 				"contextDataType": "ExhibitionData",
 				"target": {
 					"collectionId": colId,
+					"recordId": dbId,
 					"position": position
 				},
 				"body" : {
@@ -515,7 +562,7 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 				    filters:[]
 				}),
 				"success": function(reply) {
-					if (reply.responses[0] !== undefined && reply.responses[0].items !== undefined) {
+					if (reply.responses && reply.responses[0] && reply.responses[0].items) {
 						var records = reply.responses[0].items.culturalCHO;
 						if (self.searchPage > 1) {
 							$.each(records, function( index, value ) {
@@ -532,7 +579,55 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 			});
 		}
 		
-		//custom binding
+		self.saveExhBackrImg = function() {
+			if (self.newBackgroundImg()) {
+				var jsonData = {
+					descriptiveData: {
+						backgroundImg: {
+								Original: {
+									url: self.backgroundImg()
+								},
+								Thumbnail: {
+									url: self.thumbnailBIUrl
+								}
+						}
+					},
+					resourceType: "Exhibition"
+				};
+				return $.ajax({
+					type: "PUT",
+					url: "/collection/" + self.dbId(),
+					data: JSON.stringify(jsonData),
+					contentType: "application/json",
+					success: function () {
+						self.closeSideBar();
+					}
+				});
+			}
+			//updateExhibitionProperty(self, "descriptiveData.backgroundImg", self.backgroundImg());
+		}
+		
+		self.bindFileUpload = function() {
+			$('.action').removeClass('active');
+			$('.action.upload').addClass('active');				
+			$('#mediaupload').fileupload({
+				type: "POST",
+				url: '/media/create',
+				success: function (data, textStatus, jqXHR) {
+					self.backgroundImg(data.original);
+					self.newBackgroundImg(true);
+					//self.mediumBIUrl(data.medium);
+					self.thumbnailBIUrl = data.thumbnail;
+					//self.squareBIUrl(data.square);
+					//self.tinyBIUrl(data.tiny);
+				},
+				error: function (e, data) {
+					console.log(data);
+					$.smkAlert({ text: 'Error uploading the file', type: 'danger', time: 10});
+				}
+			});
+		}
+		
 		var _draggedItem;
 		var _bIsMoveOperation = false;
 		
@@ -551,6 +646,7 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 						ui.helper.css({
 							"z-index": 500
 						});
+						/*
 						//if (!_bIsMoveOperation) {
 							if (ui.helper.width() > 80) {
 								//var newAspectHeight = 80 / ui.helper.width() * ui.helper.height();
@@ -565,6 +661,7 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 								});
 							}
 						//}
+						*/
 					},
 					stop: function (event, ui) {
 						$("#collscroll").css({
@@ -611,18 +708,12 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 					tolerance: "intersect",
 					over: function (event, ui) {
 						if (!_bIsMoveOperation) {
-							/*$(this).find('#droppable-Children').css({
-								display: "block"
-							});*/
 							dropElement.animate({
 								width: "150px"
 							}, 200);
 						}
 					},
 					out: function (event, ui) {
-						/*$(this).find('#droppable-Children').css({
-							display: "none"
-						});*/
 						dropElement.animate({
 							width: "60px"
 						}, 200);
@@ -630,7 +721,15 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 					drop: function (event, ui) {
 						var indexNewItem = ko.utils.unwrapObservable(valueAccessor().index);
 						var newItem = ko.mapping.fromJS(_draggedItem, self.mapping);
-						newItem.contextData()[0].target.position(indexNewItem);
+						if (newItem.fullres().length==0) {
+							newItem.fullres(newItem.thumbnailUrl());
+							$.smkAlert({
+								text: 'Full resolution image not found! Thumbnail image will be used which might be unsuitable for exhibition.',
+								type: 'danger',
+								permanent: true
+							});
+						}
+						//newItem.contextData()[0].target.position(indexNewItem);
 						var indexDraggedItem = self.collectionItemsArray.indexOf(_draggedItem);
 						_startIndex = indexDraggedItem;
 						//don't do anything if it is moved to its direct left or right dashed box
@@ -646,6 +745,7 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 						/*dropElement.find('#droppable-Children').css({
 							display: "none"
 						});*/
+						self.creationMode=false;
 						if (_bIsMoveOperation) {
 							_removeItem = false;
 							self.collectionItemsArray.splice(indexDraggedItem, 1);
@@ -658,6 +758,36 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 				};
 				dropElement.droppable(dropOptions);
 			}
+		};
+		
+		ko.bindingHandlers.dropBackgroundImg = {
+				init: function (element, valueAccessor, allBindingsAccessor, viewModel, bindingContext) {
+					var dropElement = $(element);
+					var dropOptions = {
+						drop: function (event, ui) {
+							console.log(_draggedItem);
+							var newItem = ko.mapping.fromJS(_draggedItem, self.mapping);
+							if (newItem.fullres().length==0) {
+								$.smkAlert({
+									text: 'Full resolution image not found! Thumbnail image will be used which might be unsuitable for exhibition.',
+									type: 'danger',
+									permanent: true
+								});
+								self.backgroundImg(newItem.thumbnailUrl());
+							}
+							else {
+								self.backgroundImg(newItem.fullres());								
+							}
+							if (newItem.thumbnail)
+								self.thumbnailBIUrl = newItem.thumbnail();
+							else {
+								self.thumbnailBIUrl = newItem.fullres();
+							}
+							self.newBackgroundImg(true);
+						}
+					};
+					dropElement.droppable(dropOptions);
+				}	
 		};
 
 		ko.bindingHandlers.hscroll = {
@@ -680,12 +810,10 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 				if (load) {
 					$(element).on("scroll.ko.scrollHandler", function () {
 						var parentContainer = element.parentElement;
-						//console.log('Is scrolling');
-						//console.log('left: ' + parentContainer.scrollLeft + ' offset: ' + parentContainer.offsetWidth  + 'scrollview width' + parentContainer.scrollWidth);
 						if (parentContainer.scrollWidth - (parentContainer.scrollLeft + parentContainer.offsetWidth) < 150) {
 							if (self.updating) {
 								loadFunc();
-								self.updating = false;
+								//self.updating = false;
 							}
 						} else {
 							self.updating = true;
@@ -719,12 +847,9 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 					if (load) {
 						$(element).on("scroll.ko.scrollHandler", function () {
 							var parentContainer = element;
-							//console.log('Is scrolling');
-							//console.log('left: ' + parentContainer.scrollLeft + ' offset: ' + parentContainer.offsetWidth  + 'scrollview width' + parentContainer.scrollWidth);
 							if (parentContainer.scrollWidth - (parentContainer.scrollLeft + parentContainer.offsetWidth) < 150) {
 								if (self.updating) {
 									loadFunc();
-									self.updating = false;
 								}
 							} else {
 								self.updating = true;
@@ -805,7 +930,6 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 		$('.leftscr').droppable({
 			tolerance: "touch",
 			over: function (event, ui) {
-				console.log("left");
 				$('.scroll').autoscroll({
 					direction: 'left',
 					step: 1000,
@@ -820,7 +944,6 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 		$('.rightscr').droppable({
 			tolerance: "touch",
 			over: function (event, ui) {
-				console.log("left");
 				$('.scroll').autoscroll({
 					direction: 'right',
 					step: 1000,
@@ -840,11 +963,8 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 
 		//hide the nav bar
 		$('#bottomBar').fadeOut(500);
-		
 	};
 	
-	
-
 	return {
 		viewModel: ExhibitionEditModel,
 		template: template

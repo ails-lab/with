@@ -1,0 +1,9 @@
+           <!-- collection give access-->
+            <div class="action-header">
+              <div class="title">Collect multiple items</div>
+            </div>
+           <div class="action-body">
+                  <select  class="form-control input-sm xxs" id="select_col" data-bind="selectize: collectionlist, selectedOptions: selected_items2, options: {maxItems: null,create: true,closeAfterSelect: true,persist:false}" multiple></select>
+		    </div>
+            <div class="button-group"><a class="btn-green-o cancel" data-bind="click: reset">Cancel</a><a class="btn-green" data-bind="click: addMultipleToCollections">Add items to collection/s</a></div>
+            <div class="loading" data-bind="visible: saving"></div>

@@ -32,10 +32,23 @@
 			  </ul>
 			  <!-- /ko -->
 			  <!-- ko if: showsExhibitions -->
-			    <a href="#" class="new" }><span class="plus"></span><span class="text" >New Exhibition</span></a>
+			    <a href="#" class="new" ><span class="plus"></span><span class="text" >New Exhibition</span></a>
 			  <!-- /ko -->
 			  <!-- ko else -->
-			    <a href="#" class="new" } ><span class="plus"></span><span class="text" >New Collection</span></a>
+			  
+			    <a href="#" class="new" ><span class="plus"></span><span class="text" >New Collection</span></a>
+			    <!-- ko if: showImportFromEuropeana -->
+			    <div class="dropdown1">
+			    <a id="picker1" href="#" data-toggle="dropdown" 
+			      ><span class="plus"></span><span id="pickerTitle1" class="text" >Import Collection</span>
+			    <span class="arrow"></span>
+			    </a>
+			    <ul aria-labelledby="picker1" class="dropdown-menu">
+				<li data-bind="click: openAction.bind($data,'importEuropeana')"><a style="cursor:pointer;" >Europeana Collection</a></li>
+				<li data-bind="click: openAction.bind($data,'importEuropeanaSearch')"><a style="cursor:pointer;" >Europeana Search</a></li>
+			  </ul>
+			  </div>
+			  <!-- /ko -->
 			  <!-- /ko -->
 			</section>
 			<!-- message-->
@@ -81,25 +94,14 @@
 			  <ul class="list-body grids">
 					<div data-bind="{visible: collectionSet() == 'my', template: { name: 'collectionsTemplate', foreach: myCollections()}}"></div>
 					<div data-bind="{visible: collectionSet() == 'shared', template: { name: 'collectionsTemplate', foreach: sharedCollections()}}"></div>
-			  <!-- ko if: collectionSet() == 'my' -->
 			  <a style="cursor:pointer;" class="loadmore"
-			  data-bind="{visible: (!showsExhibitions && collectionCount() > myCollections().length) || (showsExhibitions && exhibitionCount() > myCollections().length),
+			  data-bind="{visible: moreCollectionData(),
 			  event: {click: moreCollections.bind($data, showsExhibitions)}}">load more
 			      <div class="left"></div>
                   <div class="right"></div>
                   <div class="top"></div>
                   <div class="bot"></div>
               </a>
-			  <!-- /ko -->
-			  <!-- ko if: collectionSet() == "shared" -->
-			  	<a style="cursor:pointer;" class="loadmore"
-			  	data-bind="event: {click: moreCollections.bind($data, showsExhibitions)}">load more
-			   <div class="left"></div>
-                  <div class="right"></div>
-                  <div class="top"></div>
-                  <div class="bot"></div>
-              </a>
-			  <!-- /ko -->
 			  </ul>
 			</section>
 			<section class="action edit">
@@ -168,7 +170,68 @@
 			   </div>
 			    <!-- /ko -->
 			</section>
-			<!-- collection give access-->
+			
+			<!-- import collection -->
+
+				<section class="action importEuropeana">
+					<div class="action-header">
+						<div class="title">Import Europeana Collection</div>
+					</div>
+					<div class="action-body">
+
+						<div>
+							<input type="text"
+								data-bind="value: europeanaID, valueUpdate: 'afterkeypress', hasFocus: true"
+								placeholder="Europeana collection ID">
+						</div>
+					</div>
+					<div class="button-group">
+						<a class="btn-green-o cancel" data-bind="click: closeSideBar">Cancel</a>
+						<a data-bind="click: importEuropeanaCollection " class="btn-green">Import</a>
+					</div>
+
+
+				</section>
+				
+				<section class="action importEuropeanaSearch">
+					<div class="action-header">
+						<div class="title">Import Europeana Search</div>
+					</div>
+					<div class="action-body">
+
+						<div>
+							<input type="text"
+								data-bind="value: importCollectionName, valueUpdate: 'afterkeypress', hasFocus: true"
+								placeholder="Collection Name">
+
+						</div>
+						<div>
+							<input type="text"
+								data-bind="value: europeanaSearch, valueUpdate: 'afterkeypress', hasFocus: true"
+								placeholder="Europeana Search Term">
+						</div>
+						
+						<div>
+							<input type="text"
+								data-bind="value: europeanaSearchTail, valueUpdate: 'afterkeypress', hasFocus: true"
+								placeholder="Europeana Query Tail">
+						</div>
+						
+						<div>
+							<input type="text"
+								data-bind="value: europeanaLimit, valueUpdate: 'afterkeypress', hasFocus: true"
+								placeholder="Import Limit (-1 means no limit)">
+						</div>
+					</div>
+					<div class="button-group">
+						<a class="btn-green-o cancel" data-bind="click: closeSideBar">Cancel</a>
+						<a data-bind="click: importEuropeanaSearch " class="btn-green">Import</a>
+					</div>
+
+				</section>
+				
+
+				<!-- collection give access-->
 			<section class="action access">
 			  <div class="action-header">
 				<div class="title">Give access to users and user groups</div>
@@ -226,10 +289,11 @@
 			  	<a href="#" class="btn-green cancel" data-bind="click: closeSideBar">Close</a>
 			  </div>
 
+
 			   <script type="text/html" id="collectionsTemplate">
 			   	<li data-bind="css: { private: !administrative.access.isPublic()}">
 				  <div class="thumbnails">
-				  	<a href="#" data-bind="attr: {href: $parent.showsExhibitions? 'index.html#exhibitionview/'+dbId(): 'index.html#collectionview/'+dbId()}" title="view"> 
+				  	<a href="#" data-bind="attr: {href: $parent.showsExhibitions? (administrative.entryCount() > 0? 'index.html#exhibitionview/'+dbId(): 'index.html#exhibition-edit/'+dbId()): 'index.html#collectionview/'+dbId()}" title="view"> 
 				  	<!-- ko if: administrative.access.isPublic()-->
 					<div class="category">public</div>
 					<!--/ko-->
@@ -237,7 +301,7 @@
 					<div class="category">private</div>
 					<!--/ko-->
 					<!-- ko if: media()[0]-->
-					<div class="wrap"><img data-bind="attr: {src: media()[0].thumbnailUrl}"/></div>
+					<div class="wrap"><img data-bind="attr: {src: media()[0].thumbnailUrl}" onError="this.src='img/content/thumb-empty.png'"/></div>
 					<!-- /ko -->
 					<!-- ko else -->
 					<div class="wrap"></div>

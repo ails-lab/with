@@ -48,7 +48,7 @@ import utils.Serializer;
 public class NLASpaceSource extends ISpaceSource {
 
 	public NLASpaceSource() {
-		LABEL = Sources.NLA.toString();
+		super(Sources.NLA);
 		apiKey = "SECRET_KEY";
 		vmap = FilterValuesMap.getNLAMap();
 		addDefaultQueryModifier(CommonFilters.TYPE.getId(), qfwriter("format"));
@@ -73,27 +73,20 @@ public class NLASpaceSource extends ISpaceSource {
 	}
 
 	private Function<List<String>, QueryModifier> qfwriter(String parameter) {
-		Function<String, String> function = (String s) -> {
-			return s;
-		};
 		return new Function<List<String>, QueryModifier>() {
 			@Override
 			public AdditionalQueryModifier apply(List<String> t) {
 				return new AdditionalQueryModifier(
-						" " + parameter + ":(" + Utils.getORList(ListUtils.transform(t, function), false) + ")");
+						" " + parameter + ":(" + Utils.getORList(t, false) + ")");
 			}
 		};
 	}
 
 	private Function<List<String>, Pair<String>> fwriter(String parameter) {
-
-		Function<String, String> function = (String s) -> {
-			return s;
-		};
 		return new Function<List<String>, Pair<String>>() {
 			@Override
 			public Pair<String> apply(List<String> t) {
-				return new Pair<String>(parameter, Utils.getORList(ListUtils.transform(t, function), false));
+				return new Pair<String>(parameter, Utils.getORList(t, false));
 			}
 		};
 	}
@@ -118,7 +111,7 @@ public class NLASpaceSource extends ISpaceSource {
 	@Override
 	public SourceResponse getResults(CommonQuery q) {
 		SourceResponse res = new SourceResponse();
-		res.source = getSourceName();
+		res.source = getSourceName().toString();
 		String httpQuery = getHttpQuery(q);
 		res.query = httpQuery;
 		JsonNode response;

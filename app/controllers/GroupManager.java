@@ -25,7 +25,7 @@ import java.util.Set;
 import java.util.function.Function;
 
 import model.basicDataTypes.WithAccess.Access;
-import model.resources.CollectionObject;
+import model.resources.collection.CollectionObject;
 import model.usersAndGroups.Organization;
 import model.usersAndGroups.Page;
 import model.usersAndGroups.Project;
@@ -102,7 +102,16 @@ public class GroupManager extends Controller {
 			if (!json.has("username")) {
 				error.put("error", "Must specify name for the group");
 				return badRequest(error);
+			} else if(json.get("username").asText().length() < 3) {
+				error.put("error", "Username of " + groupType + " must contain at least 3 characters");
+				return badRequest(error);
 			}
+			if(json.has("friendlyName") &&
+				(json.get("friendlyName").asText().length() < 3)) {
+				error.put("error", "Short Name of  " + groupType + " must contain at least 3 characters");
+				return badRequest(error);
+			}
+
 			if (!uniqueGroupName(json.get("username").asText())) {
 				error.put("error",
 						"Group name already exists! Please specify another name");
@@ -187,7 +196,7 @@ public class GroupManager extends Controller {
 					"Only an admin of the group has the right to edit the group.");
 			return forbidden(result);
 		}
-		if (json.has("username") && json.get("username") != null
+		if (json.has("username") && (json.get("username") != null)
 				&& !group.getUsername().equals(json.get("username").asText())) {
 			if (!uniqueGroupName(json.get("username").asText())) {
 				result.put("error",
@@ -200,16 +209,16 @@ public class GroupManager extends Controller {
 		return ok(Json.toJson(DB.getUserGroupDAO().get(groupDbId)));
 	}
 
-	
-	
+
+
 	private static void updatePage(ObjectId groupId, JsonNode json) {
 		UserGroup group = DB.getUserGroupDAO().get(groupId);
-		if (!json.has("page") || !(group instanceof Organization)
-				&& !(group instanceof Project))
+		if (!json.has("page") || (!(group instanceof Organization)
+				&& !(group instanceof Project)))
 			return;
 		Page newPage = Json.fromJson(json.get("page"), Page.class);
-		if (newPage.getAddress() == null && newPage.getCity() == null
-				&& newPage.getCountry() == null)
+		if ((newPage.getAddress() == null) && (newPage.getCity() == null)
+				&& (newPage.getCountry() == null))
 			return;
 		Page oldPage = null;
 		// Keep previous page fields
@@ -360,7 +369,15 @@ public class GroupManager extends Controller {
 				g.put("totalCollections", hits.x);
 				g.put("totalExhibitions", hits.y);
 			}
-			result.add(g);
+			boolean add = true;
+			for(int i=0; i<result.size(); i++) {
+				if(group.getDbId().toString().equals(result.get(i).get("dbId").asText())) {
+					add=false;
+					break;
+				}
+			}
+			if(add)
+				result.add(g);
 		}
 		return result;
 	}
@@ -504,7 +521,7 @@ public class GroupManager extends Controller {
 			Criteria criteria2 = DB.getCollectionObjectDAO()
 					.formAccessLevelQuery(
 							new Tuple(group.getDbId(), Access.READ),
-							QueryOperator.GTE);
+							QueryOperator.GT);
 			// Criteria criteria3 = DB.getCollectionObjectDAO().createQuery()
 			// .criteria("administrative.access.isPublic").equal(true);
 			// q.and(criteria1, criteria2);

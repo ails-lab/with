@@ -84,7 +84,7 @@ public class DPLARecordFormatter extends CulturalRecordFormatter {
 		List<Object> translateToCommon = getValuesMap().translateToCommon(CommonFilters.TYPE.getId(), stringValue);
 		WithMediaType type = translateToCommon==null?null:(WithMediaType.getType(translateToCommon.get(0).toString())) ;
 		WithMediaRights withRights = ((rights==null) || (rights.size()==0))?WithMediaRights.UNKNOWN
-				:WithMediaRights.getRighs(getValuesMap().translateToCommon(CommonFilters.RIGHTS.getId(), rights.get(0)).get(0).toString());
+				:WithMediaRights.getRights(getValuesMap().translateToCommon(CommonFilters.RIGHTS.getId(), rights.get(0)).get(0).toString());
 		String uri3 = rec.getStringValue("object");
 		String uri2 = model.getIsShownBy()==null?null:model.getIsShownBy().getURI();
 		if (Utils.hasInfo(uri3)){

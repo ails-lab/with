@@ -33,12 +33,10 @@ define(['bridget','knockout', 'text!./organization-edit.html', 'isotope','images
 				return "img/content/thumb-empty.png";
 			});
 			self.type = ko.computed(function () {
-				if (self.administrative) {
-					if (self.administrative.collectionType.indexOf("Collection") != -1) {
+				if (self.resourceType) {
+					if (self.resourceType.indexOf("SimpleCollection") != -1) {
 						return "COLLECTION";
-					} else if (self.administrative.collectionType.indexOf("Space") != -1) {
-						return "SPACE";
-					} else {
+					} else if (self.resourceType.indexOf("Exhibition") != -1) {
 						return "EXHIBITION";
 					}
 				} else {
@@ -46,12 +44,10 @@ define(['bridget','knockout', 'text!./organization-edit.html', 'isotope','images
 				}
 			});
 			self.css = ko.computed(function () {
-				if (self.administrative) {
-					if (self.administrative.collectionType.indexOf("Collection") != -1) {
+				if (self.resourceType) {
+					if (self.resourceType.indexOf("SimpleCollection") != -1) {
 						return "item collection";
-					} else if (self.administrative.collectionType.indexOf("Space") != -1) {
-						return "item space";
-					} else {
+					} else if (self.resourceType.indexOf("Exhibition") != -1) {
 						return "item space";
 					}
 				} else {
@@ -59,12 +55,10 @@ define(['bridget','knockout', 'text!./organization-edit.html', 'isotope','images
 				}
 			});
 			self.url = ko.computed(function () {
-				if (self.administrative) {
-					if (self.administrative.collectionType.indexOf("Collection") > -1) {
+				if (self.resourceType) {
+					if (selfself.resourceType.indexOf("SimpleCollection") > -1) {
 						return 'index.html#collectionview/' + self.dbId;
-					} else if (self.administrative.collectionType.indexOf("Space") > -1) {
-						return self.administrative.isShownAt;
-					} else {
+					} else if (self.resourceType.indexOf("Exhibition") > -1) {
 						return 'index.html#exhibitionview/' + self.dbId;
 					}
 				} else {
@@ -113,34 +107,33 @@ define(['bridget','knockout', 'text!./organization-edit.html', 'isotope','images
 			        });
 
 			        self.type=ko.computed(function() {
-			        	if(self.administrative){
-			        		if (self.administrative.collectionType.indexOf("Collection")!=-1)
+			        	if(self.resourceType){
+			        		if (self.resourceType.indexOf("Collection")!=-1)
 			        		  return "COLLECTION";
-			        		else if (self.administrative.collectionType.indexOf("Space")!=-1)
-			        			return "SPACE";
-			        	    else return "EXHIBITION";
+			        		else if (self.resourceType.indexOf("Exhibition")!=-1)
+			        			return "EXHIBITION";
 			        	}else return "";
 			        });
 
 			        self.css=ko.computed(function() {
-			        	if(self.administrative){
-			        		if (self.administrative.collectionType.indexOf("Collection")!=-1)
+			        	if(self.resourceType){
+			        		if (self.resourceType.indexOf("Collection")!=-1)
 			        		  return "item collection";
-			        		else if (self.administrative.collectionType.indexOf("Space")!=-1)
-			        			return "item space";
-			        	    else return "item space";
+			        		else if (self.resourceType.indexOf("Exhibition")!=-1)
+			        			return "item exhibition";
+
 			        	}else return "item exhibition";
 			        });
 
 			        self.url=ko.computed(function() {
-			        	if(self.administrative){
-			        		if (self.administrative.collectionType.indexOf("Collection")==-1)
-				    		  return 'index.html#exhibitionview/'+ self.dbId;
-			        		else if (self.administrative.collectionType.indexOf("Space")>-1){
+			        	if(self.resourceType){
+			        		if (self.resourceType.indexOf("Collection")==-1)
+				    		  return 'index.html#cοllectionview/'+ self.dbId;
+			        		else if (self.resourceType.indexOf("Space")>-1){
 			        			return self.administrative.isShownAt;
 			        		}
 				    		else{
-				    			return 'index.html#collectionview/'+ self.dbId;
+				    			return 'index.html#exhibitionview/'+ self.dbId;
 				    		}
 			        	}else return "";
 			        });
@@ -196,7 +189,7 @@ define(['bridget','knockout', 'text!./organization-edit.html', 'isotope','images
 
 		self.name = params.name;				// Project or Organization (display field)
 		self.namePlural = params.name + 's';	// Projects or Organizations (display field)
-		var $container = $(".grid").isotope({
+		var $container = $("#orggrid").isotope({
 			itemSelector: '.item',
 			transitionDuration: transDuration,
 			masonry: {
@@ -730,8 +723,14 @@ define(['bridget','knockout', 'text!./organization-edit.html', 'isotope','images
 		    // get item
 		    var $item = $( image.img ).parents( itemSelector );
 		    // un-hide item
+		    
 		    $item.show();
-		    iso.appended( $item );
+		    if(iso)
+				  iso.appended($item);
+				else{
+					$.error("iso gone");
+				}
+		    
 
 		  });
 

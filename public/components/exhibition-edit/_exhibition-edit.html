@@ -14,7 +14,7 @@
 						<!-- control-->
 						<div class="list-control">
 							<a title="Preview Exhibition" data-placement="top" data-toggle="tooltip" data-bind="attr: {href: 'index.html#exhibitionview/'+dbId()}" class="fa fa-eye"></a>
-							<!-- <a href="#" data-toggle="tooltip" data-placement="top" title="Upload background image" class="fa fa-image upload exhibition"></a> -->
+							<a id="coverImg" href="#" data-bind="click: bindFileUpload" data-toggle="tooltip" data-placement="top" title="Upload background image" class="fa fa-image exhibition"></a>
 							<div class="toggle">
 								<input type="checkbox" id="toggle2">
 								<label for="toggle2"></label><span class="private">private</span><span class="public">public</span>
@@ -26,22 +26,20 @@
 						<div class="wrap" >
 							<!-- scroll-->
 							<div class="leftscr"></div>  <!-- for scrolling the page when dragging item at left of page-->
-				
 							<div class="scroll" data-bind="hscroll: collectionItemsArray(), scrollOptions: { loadFunc: loadNextExhibition }">
 								<!-- box-->
 								<div class="box">
 								 <div class="boxinputs">
 									<input data-bind="{textInput: title, event: { blur: textfieldsLostFocus.bind($data, true) }}" class="editortext" />
-									<textarea class="editortextarea" data-bind="{textInput: description, event: { blur: textfieldsLostFocus.bind($data, false) }}"/>
+									<textarea class="editortextarea" data-bind="{textInput: description, event: { blur: textfieldsLostFocus.bind($data, false) }}"></textarea>
 								</div>
 								</div>
 								<!-- add-->
 								<!-- ko template: { foreach: collectionItemsArray, beforeRemove: removeItem, afterAdd: showNewItem } -->
-								  <div data-toggle="tooltip" data-placement="top" title="Drag an item here" class="add" data-bind="drop: {index: $index}"><span><a href="javascript:void(0)"><img src="img/ui/ic-add.png"></a></span></div>
-                  
-								
-								<!-- box-->
-								<div class="box fill" data-bind="{css: {videoadded: containsVideo}, drag: {item: $data, move: true}}">
+								  <div data-toggle="tooltip" data-placement="top" title="Drag an item here" class="add" data-bind="drop: {index: $index}">
+								  	<span><a href="javascript:void(null);"><img src="img/ui/ic-add.png"></a></span>
+								  </div>
+								  <div class="box fill" data-bind="{css: {videoadded: containsVideo}, drag: {item: $data, move: true}}">
 									<div class="boxaction">
 										<ul>
 										<li><a href="#" data-toggle="tooltip" data-placement="top" title="Edit item text" data-bind="click: $parent.prepareForItemEdit" class="editbox"> <i class="fa fa-pencil-square-o"></i></a></li>
@@ -50,7 +48,7 @@
 									</div>
 									<div class="left">
 										<div class="imgwrap">
-											<img data-bind="attr: { src: thumbnailUrl }" id="itemImage"/>
+											<img data-bind="attr: { src: fullres.length>0 ? fullres : thumbnailUrl }" id="itemImage" onError="javascript:this.src='img/content/thumb-empty.png'"/>
 										</div>
 										<div class="imginfo">
 											<span class="mediatitle" data-bind="text: title"></span><br/>
@@ -59,7 +57,7 @@
 									</div>
 									<!--  ko if: containsText -->
 										<div class="right">
-											<div class="boxtitle" data-bind="text: contextData()[0].body.text.default"></div>
+											<div class="boxtitle" data-bind="text: contextData.body.text.default"></div>
 				                        </div>
 									<!-- /ko -->
 									<!-- ko else -->
@@ -79,11 +77,11 @@
 				                          <!-- /ko -->
 				                          <!-- ko else -->
 				                          <div>Invalid video url:</div>
-				                          <span style="color:red" data-bind="text: contextData()[0].body.videoUrl"></span>
+				                          <span style="color:red" data-bind="text: contextData.body.videoUrl"></span>
 				                          <!-- /ko -->
 				                        </div>
 				                        <!--  ko if: containsVideoDescription -->
-				                        <div class="imginfo"><span class="mediatitle" data-bind="text: contextData()[0].body.videoDescription"></span></div>
+				                        <div class="imginfo"><span class="mediatitle" data-bind="text: contextData.body.videoDescription"></span></div>
 				                        <!-- /ko -->
 				                        <ul class="action">
 				                          <li><a href="#" data-toggle="tooltip" data-placement="top" title="Edit video" data-bind="click: $parent.prepareForItemEdit"><i class="fa fa-pencil videobox"></i></a></li>
@@ -101,13 +99,13 @@
 									</div>
 			                    </div>
 								<!-- /ko -->
-								<div data-toggle="tooltip" data-placement="top" title="Drag an item here" class="add" data-bind="drop: {index: collectionItemsArray().length}"><span><a href="#"><img src="img/ui/ic-add.png"></a></span></div>
-                				
-							</div>							
+								<div data-toggle="tooltip" data-placement="top" title="Drag an item here" class="add" data-bind="drop: {index: collectionItemsArray().length}">
+									<span><a><img src="img/ui/ic-add.png"></a></span>
+								</div>
+							</div>	
+							<div class="rightscr"></div><!-- for scrolling the page when dragging item at right of page-->						
 						</div>
 					</div>
-					<div class="rightscr"></div><!-- for scrolling the page when dragging item at right of page-->
-					
 					<!-- assets-->
 					<div class="assets">
 						<!-- actions-->
@@ -124,25 +122,37 @@
 						<div class="assetlisting" id="outer-bottom">
 							<ul id="collscroll" data-bind="foreach: userSavedItemsArray, hscroll2: userSavedItemsArray(), scrollOptions: { loadFunc: loadNextCollection }">
 								<li>
-									<a class="bottom-box" href="javascript:void(0)" data-toggle="tooltip" data-placement="top" 
+									<a class="bottom-box"  data-toggle="tooltip" data-placement="top" 
 									data-bind="{drag: {item: $data, move: false}, attr: {title: title}}">
 										<div class="hue">
-											<img data-bind="attr: { src: thumbnailUrl }" class="itemImage"/>
+											<img data-bind="attr: { src: thumbnailUrl }" class="itemImage" onerror="javascript:this.src='img/content/thumb-empty.png';"/>
 											<div class="color"></div>
 										</div>
 									</a>
 								</li>
 							</ul>
 						</div>
+						<section class="action upload">
+							<div class="action-header">
+								<div class="title">Upload or drag/drop from collections a background image</div>
+							</div>
+							<!--rights of cover img media document, if uploaded by user?-->
+							<div class="action-body">
+								<div id="uploaded-image" data-bind="backgroundImgDrop,  dropBackgroundImg">
+								<label for="mediaupload">
+									<img class="upload-img" data-bind="attr: { src: displayCoverImage }" />
+								</label>
+								<input type="file" id="mediaupload" name="image"/>
+								</div>
+							</div>
+							<div class="button-group">
+								<a href="#" class="btn-green-o cancel">Cancel</a>
+								<a href="#" data-bind="click: saveExhBackrImg" class="btn-green">Save</a>
+							</div>
+						</section>
 					</div>
 				</section>
-				<section class="action upload">
-					<div class="action-header">
-						<div class="title">Upload background image</div>
-					</div>
-					<div class="action-body"><img src="img/ui/upload-placeholder.png" class="upload-img"><span style="width:40%;" class="progress"></span></div>
-					<div class="button-group"><a href="#" class="btn-green-o cancel">Cancel</a><a href="#" class="btn-green">Save</a></div>
-				</section>
+				
 				<section class="action editsection">
 					<div class="action-header">
 						<div class="title">Edit text</div>

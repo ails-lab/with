@@ -2,6 +2,56 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
 
 	$.bridget('isotope', Isotope);
 	
+	
+	ko.bindingHandlers.scrollsearch = {
+			updating: true,
+
+			init: function (element, valueAccessor, allBindingsAccessor) {
+				var self = this;
+				self.updating = true;
+				ko.utils.domNodeDisposal.addDisposeCallback(element, function () {
+					$(window).off("scroll.ko.scrollHandler");
+					self.updating = false;
+				});
+			},
+
+			update: function (element, valueAccessor, allBindingsAccessor) {
+				var props = allBindingsAccessor().scrollOptions;
+				var offset = props.offset ? props.offset : "0";
+				var loadFunc = props.loadFunc;
+				var functPar1 = props.functPar1;
+				var load = ko.utils.unwrapObservable(valueAccessor());
+				var self = this;
+
+				if (load) {
+					$(window).on("scroll.ko.scrollHandler", function () {
+						if ($(window).scrollTop() >= $(document).height() - $(window).height() - 300) {
+							if (self.updating) {
+								if (functPar1 !== undefined && functPar1 !== null)
+
+									loadFunc(functPar1);
+								else
+									loadFunc();
+								    //self.updating = false;
+							}
+						} else {
+							self.updating = true;
+						}
+
+						if ($(window).scrollTop() > 100) {
+							$('.scroll-top-wrapper').addClass('show');
+						} else {
+							$('.scroll-top-wrapper').removeClass('show');
+						}
+					});
+				} else {
+					element.style.display = "none";
+					$(window).off("scroll.ko.scrollHandler");
+					self.updating = false;
+				}
+			}
+		};
+	
 	$.fn.isotopeImagesReveal = function( $items ) {
 		  var iso = this.data('isotope');
 		  var itemSelector = iso.options.itemSelector;
@@ -16,8 +66,12 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
 		    var $item = $( image.img ).parents( itemSelector );
 		    // un-hide item
 		    $item.show();
-		    iso.appended( $item );
-		   
+		    if(iso)
+				  iso.appended($item);
+				else{
+					$.error("iso gone");
+				}
+		    
 		    
 		  });
 		  
@@ -39,6 +93,7 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
 			self.dataProvider="";
 			self.dataProvider_uri="";
 			self.rights="";
+			self.mediatype="";
 			self.url="";
 			self.externalId = "";
 			self.likes=0;
@@ -58,6 +113,7 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
 				//self.url="#item/"+data.recordId;
 				self.view_url=data.view_url;
 				self.thumb=data.thumb;
+				self.mediatype=data.mediatype;
 				self.fullres=data.fullres;
 				self.description=data.description;
 				self.source=data.source;
@@ -159,7 +215,7 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
 		var self = this;
 		 
 		setTimeout(function(){ WITHApp.init(); WITHApp.tabAction();}, 300);
-		var $container = $(".grid").isotope({
+		var $container = $("#gridlist").find("div.grid").isotope({
 			itemSelector: '.media',
 			masonry: {
 				columnWidth		: '.sizer',
@@ -169,13 +225,28 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
 		var $request;
 		self.filterselect=ko.observable(false);
 		self.filterselection=ko.observableArray([]);
+		self.multipleSelection=ko.observableArray([]);
 		self.route = params.route;
 		self.term = ko.observable("");
 		self.sourceview=ko.observable(true);
 		/*self.sources= ko.observableArray([ "Europeana", "DPLA","DigitalNZ","WITHin", "Rijksmuseum"]);
 		 * no WITHin until it's fully functional
 		 */
-		self.sources= ko.observableArray([ "Europeana", "DPLA","DigitalNZ", "WITHin", "Rijksmuseum"]);
+	//	self.sources= ko.observableArray([ "Europeana", "DPLA","DigitalNZ", "WITHin", "Rijksmuseum"]);
+		
+		self.sources = ko.observableArray();
+		
+		$.ajax({
+         	"url": "/api/searchsources",
+			"method": "get",
+			"contentType": "application/json",
+        	"success": function (data){
+           		self.sources(data);
+        	}
+     	});
+ 		
+		
+		
 		self.mixresults=ko.observableArray();
 		self.selectedSource=ko.observable(self.sources()[0]);
 
@@ -207,6 +278,7 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
 		self.noResults = ko.computed(function() {
 			return (!self.searching() && self.results().length == 0 && self.mixresults().length == 0 && self.currentTerm() != "");
 		})
+		
 
 		self.toggleSourceview = function (data,event) { 
 			if($(event.currentTarget).find("a").attr('data-view')=='column' && self.sourceview()==false){
@@ -261,6 +333,7 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
 			self.mixresults([]);
 			self.results([]);
 			$( '.searchresults' ).removeClass( 'openfilter');
+			$('#multiplecollect').removeClass('show');
 			if ($container.data('isotope')){
 				 $container.isotope( 'remove', $(".media"));}
 			$container.isotope({
@@ -275,14 +348,17 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
 			
 		}
 
+		
 		self._search = function(facetinit,facetrecacl) {
+			
 		 if(facetinit){self.filterselection.removeAll();}
-	   $('#facet_tags').tagsinput({
+	     $('#facet_tags').tagsinput({
 		        allowDuplicates: false,
 		          itemValue: 'id',  // this will be used to set id of tag
 		          itemText: 'label' // this will be used to set text of tag
 		      });
 		 $(".searchinput").devbridgeAutocomplete("hide");
+		 $('#multiplecollect').removeClass('show');
 		 self.currentTerm($(".searchinput").val());
 		 if(self.searching()==false && self.currentTerm()!=""){
 			self.searching(true);
@@ -476,7 +552,14 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
 									if(source=="Rijksmuseum" && media){
 										media[0].Thumbnail=media[0].Original;
 									}
-									
+									var mediatype="";
+									if(media &&  media[0]){
+										if(media[0].Original && media[0].Original.type){
+											mediatype=media[0].Original.type;
+										}else if(media[0].Thumbnail && media[0].Thumbnail.type){
+											mediatype=media[0].Thumbnail.type;
+										}
+									}
 							        var record = new Record({
 										//recordId: result.recordId || result.id,
 										thumb: media!=null &&  media[0] !=null  && media[0].Thumbnail!=null  && media[0].Thumbnail.url!="null" ? media[0].Thumbnail.url:"img/content/thumb-empty.png",
@@ -489,6 +572,7 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
 										dataProvider_uri: findProvenanceValues(provenance,"dataProvider_uri"),
 										provider: findProvenanceValues(provenance,"provider"),
 										rights: rights,
+										mediatype: mediatype,
 										externalId: admindata.externalId,
 										source: source,
 										likes: usage.likes,
@@ -597,7 +681,9 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
 		self.searchNext = function() {
 		if(self.next()>0){
 			self.page(self.next());
-			self._search(false,false);}
+			if(window.location.hash=="#search")
+			  self._search(false,false);
+			}
 		};
 
 		self.searchPrevious = function() {
@@ -686,6 +772,14 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
 					if(source=="Rijksmuseum" && media){
 						media[0].Thumbnail=media[0].Original;
 					}
+					var mediatype="";
+					if(media &&  media[0]){
+						if(media[0].Original && media[0].Original.type){
+							mediatype=media[0].Original.type;
+						}else if(media[0].Thumbnail && media[0].Thumbnail.type){
+							mediatype=media[0].Thumbnail.type;
+						}
+					}
 			        var record = new Record({
 						//recordId: result.recordId || result.id,
 						thumb: media!=null &&  media[0] !=null  && media[0].Thumbnail!=null  && media[0].Thumbnail.url!="null" ? media[0].Thumbnail.url:"img/content/thumb-empty.png",
@@ -698,6 +792,7 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
 						dataProvider_uri: findProvenanceValues(provenance,"dataProvider_uri"),
 						provider: findProvenanceValues(provenance,"provider"),
 						rights: rights,
+						mediatype: mediatype,
 						externalId: admindata.externalId,
 						source: source,
 						likes: usage.likes,
@@ -722,7 +817,32 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
             }, 600);
         }
 
-        recordSelect = function (data,event) {
+        
+        multipleSelect= function(data,event){
+        	//event.preventDefault();
+				// save
+				var box = $(event.target);
+
+				// check 
+				if (box.is(':checked')) {
+					
+					// set selected
+				 	box.closest( '.item' ).addClass( 'selected' );
+					addSelection(data,event);
+
+					// show
+					showHideCollectButton();
+				} else {
+					// set selected
+					 box.closest( '.item' ).removeClass( 'selected' );
+					removeSelection(data,event);
+					// show
+					showHideCollectButton();
+				}
+			
+        }
+        
+        srecordSelect = function (data,event) {
         	
         	event.preventDefault();
 			var selrecord = ko.utils.arrayFirst(self.mixresults(), function(record) {
@@ -732,6 +852,25 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
 			return false;
 
 		}
+        
+        
+        addSelection = function(data,event){
+        	//event.preventDefault();
+			var selrecord = ko.utils.arrayFirst(self.mixresults(), function(record) {
+				   return record.externalId === data;
+				});
+			self.multipleSelection.push(selrecord);
+			
+        }
+        
+        removeSelection = function(data,event){
+        	//event.preventDefault();
+			var selrecord = ko.utils.arrayFirst(self.mixresults(), function(record) {
+				   return record.externalId === data;
+				});
+			self.multipleSelection.remove(selrecord);
+			
+        }
         
         likeRecord = function (id,event) {
         	event.preventDefault();
@@ -760,27 +899,25 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
 
  
         function getItem(record) {
-        
+        	var tile= '<div class="item media" id="'+record.externalId+'"> <div class="wrap">';
+ 		    
+        	tile+='<a href="#" onclick="srecordSelect(\''+record.externalId+'\',event)" class="mediaviewer">'
+        			+'<div class="thumb"><img src="'+record.thumb+'" onError="this.src=\'img/content/thumb-empty.png\'"></div>'
+        			+' <div class="info"><h1 class="title">'+record.displayTitle()+'</h1></div>';
+            tile+='<div class="action-group"><div class="wrap"><a href="' + record.view_url + '" target="_new" class="links">'+ record.sourceCredits() +'</a><ul>';
+            if (isLogged()) {
+          	    if (record.isLiked()) {
+              	  tile+='<li><a data-toggle="tooltip" data-placement="top" title="Add to favorites"  onclick="likeRecord(\'' + record.externalId + '\',event);" class="fa fa-heart" style="color: #ec5a62;"></a></li>'
+                }
+                else{
+                	  tile+='<li><a  data-toggle="tooltip" data-placement="top" title="Add to favorites" onclick="likeRecord(\'' + record.externalId + '\',event);" class="fa fa-heart"></a></li>'
+              	  }
+          	  tile+='<li><a data-toggle="tooltip" data-placement="top" title="Collect it" class="fa fa-download" onclick="collect(\'' + record.externalId + '\',event);" ></a></li>'
+          	  tile+='<li><input type="checkbox" class="selectitem" onclick="multipleSelect(\'' + record.externalId + '\',event);"></li>';
+            }
+        	tile+="</ul></div></div></a></div></div>";
         	
-			 var tile= '<div class="item media" id="'+record.externalId+'"> <div class="wrap">';
-		     tile+='<a href="#" onclick="recordSelect(\''+record.externalId+'\',event)" class="mediaviewer">'
-                      +'<div class="thumb"><img src="'+record.thumb+'" onError="this.src=\'img/content/thumb-empty.png\'"></div>'
-                      +' <div class="info"><h1 class="title">'+record.displayTitle()+'</h1></div>';
-                     
-                     //+'</a>';
-                     tile+='<div class="action-group"><a href="' + record.view_url + '" target="_new" class="links">'+ record.sourceCredits() +'</a>';
-                     if (isLogged()) {
-                  	    if (record.isLiked()) {
-                      	  tile+='<a data-toggle="tooltip" data-placement="top" title="Add to favorites"  onclick="likeRecord(\'' + record.externalId + '\',event);" class="fa fa-heart" style="color: #ec5a62;"></a>'
-                        }
-                        else{
-                        	  tile+='<a  data-toggle="tooltip" data-placement="top" title="Add to favorites" onclick="likeRecord(\'' + record.externalId + '\',event);" class="fa fa-heart"></a>'
-                            
-                      	  }
-                  	  tile+='<a data-toggle="tooltip" data-placement="top" title="Collect it" class="fa fa-download" onclick="collect(\'' + record.externalId + '\',event);" ></a>'
-                        }
-                     
-                     tile+='</div></a></div> </div>';
+			
 			return tile;
 			
 		}
@@ -807,7 +944,18 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
         	return "#" + myid.replace( /(:|\.|\[|\]|,)/g, "\\$1" );
          
         }
+        
+        function showHideCollectButton() {
 
+			// check
+			if( $( '.item.selected').length > 0 ) {
+				$( '#multiplecollect').addClass( 'show' );
+			} else {
+				$( '#multiplecollect').removeClass( 'show' );
+			}
+		}
+        
+     
 
   }
 

@@ -23,59 +23,47 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
 import model.DescriptiveData;
 import model.EmbeddedMediaObject;
 import model.EmbeddedMediaObject.MediaVersion;
-import model.EmbeddedMediaObject.WithMediaRights;
 import model.MediaObject;
-import model.basicDataTypes.CollectionInfo;
+import model.annotations.ContextData;
+import model.annotations.ContextData.ContextDataBody;
+import model.annotations.ContextData.ContextDataTarget;
+import model.annotations.ContextData.ContextDataType;
 import model.basicDataTypes.Language;
 import model.basicDataTypes.MultiLiteral;
 import model.basicDataTypes.ProvenanceInfo;
 import model.basicDataTypes.ProvenanceInfo.Sources;
-import model.basicDataTypes.WithAccess;
-import model.resources.CollectionObject;
-import model.resources.CulturalObject;
 import model.resources.CulturalObject.CulturalObjectData;
 import model.resources.RecordResource;
-import model.resources.WithResource;
 import model.resources.WithResource.WithResourceType;
-import model.annotations.ContextData;
-import model.annotations.ContextData.ContextDataTarget;
-import model.annotations.ContextData.ContextDataBody;
-import model.annotations.ContextData.ContextDataType;
-import model.annotations.ExhibitionData;
 
 import org.bson.types.ObjectId;
 
 import play.Logger;
 import play.Logger.ALogger;
-import play.api.i18n.Lang;
 import play.libs.F.Option;
 import play.libs.Json;
 import play.mvc.Controller;
 import play.mvc.Result;
 import sources.core.ISpaceSource;
 import sources.core.ParallelAPICall;
+import sources.core.ParallelAPICall.Priority;
 import sources.core.RecordJSONMetadata;
 import utils.AccessManager;
 import utils.AccessManager.Action;
 import utils.Locks;
-import utils.Tuple;
 
-import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
-import controllers.parameterTypes.StringTuple;
 import db.DB;
 import db.WithResourceDAO;
 
@@ -83,7 +71,7 @@ import db.WithResourceDAO;
  * @author mariaral
  *
  */
-@SuppressWarnings("rawtypes")
+@SuppressWarnings({ "rawtypes", "unchecked" })
 public class WithResourceController extends Controller {
 
 	public static final ALogger log = Logger.of(WithResourceController.class);
@@ -152,7 +140,8 @@ public class WithResourceController extends Controller {
 					result.put("error", "Invalid JSON");
 					return badRequest(result);
 				}
-				return addRecordToCollection(json, collectionDbId, position, noDouble);
+				return addRecordToCollection(json, collectionDbId, position,
+						noDouble);
 			}
 		} catch (Exception e) {
 			result.put("error", e.getMessage());
@@ -162,19 +151,22 @@ public class WithResourceController extends Controller {
 				locks.release();
 		}
 	}
-	
-	public static Result internalAddRecordToCollection(String colId, RecordResource record, Option<Integer> position,
-			ObjectNode result) {
-		return addRecordToCollection(Json.toJson(record), new ObjectId(colId), position, false);
+
+	public static Result internalAddRecordToCollection(String colId,
+			RecordResource record, Option<Integer> position, ObjectNode result) {
+		return addRecordToCollection(Json.toJson(record), new ObjectId(colId),
+				position, false);
 	}
-	
-	public static Result internalAddRecordToCollection(String colId, RecordResource record, Option<Integer> position,
-			ObjectNode result, boolean noRepeated) {
-		return addRecordToCollection(Json.toJson(record), new ObjectId(colId), position, noRepeated);
+
+	public static Result internalAddRecordToCollection(String colId,
+			RecordResource record, Option<Integer> position, ObjectNode result,
+			boolean noRepeated) {
+		return addRecordToCollection(Json.toJson(record), new ObjectId(colId),
+				position, noRepeated);
 	}
-	
-	public static Result addRecordToCollection(JsonNode json, ObjectId collectionDbId,
-			Option<Integer> position, Boolean noDouble) {
+
+	public static Result addRecordToCollection(JsonNode json,
+			ObjectId collectionDbId, Option<Integer> position, Boolean noDouble) {
 		ObjectNode result = Json.newObject();
 		String resourceType = null;
 		ObjectId userId = AccessManager.effectiveUserDbIds(
@@ -185,15 +177,17 @@ public class WithResourceController extends Controller {
 				|| (WithResourceType.valueOf(resourceType) == null))
 			resourceType = WithResourceType.CulturalObject.toString();
 		try {
-			Class<?> clazz = Class.forName("model.resources."
-					+ resourceType);
-			if (position.isDefined())
-				fillInContextTarget(json, collectionDbId.toString(), position.get());
-			RecordResource record = (RecordResource) Json.fromJson(json,
-					clazz);
-			MultiLiteral label =  record.getDescriptiveData().getLabel();
-			if (label == null || label.get(Language.DEFAULT) == null || 
-					label.get(Language.DEFAULT).isEmpty() || label.get(Language.DEFAULT).get(0) == "") 
+			if (json.has("contextData"))
+				((ObjectNode) json).remove("contextData");
+			Class<?> clazz = Class.forName("model.resources." + resourceType);
+			// if (position.isDefined())
+			// fillInContextTarget(json, collectionDbId.toString(),
+			// position.get());
+			RecordResource record = (RecordResource) Json.fromJson(json, clazz);
+			MultiLiteral label = record.getDescriptiveData().getLabel();
+			if (label == null || label.get(Language.DEFAULT) == null
+					|| label.get(Language.DEFAULT).isEmpty()
+					|| label.get(Language.DEFAULT).get(0) == "")
 				return badRequest("A label for the record has to be provided");
 			int last = 0;
 			Sources source = Sources.UploadedByUser;
@@ -205,8 +199,8 @@ public class WithResourceController extends Controller {
 			} else
 				record.setProvenance(new ArrayList<ProvenanceInfo>(Arrays
 						.asList(new ProvenanceInfo(source.toString()))));
-			String externalId = ((ProvenanceInfo) record.getProvenance()
-					.get(last)).getResourceId();
+			String externalId = ((ProvenanceInfo) record.getProvenance().get(
+					last)).getResourceId();
 			if (externalId == null)
 				externalId = record.getAdministrative().getExternalId();
 			ObjectId recordId = null;
@@ -216,10 +210,9 @@ public class WithResourceController extends Controller {
 			if ((externalId != null)// get dbId of existring resource
 					&& DB.getRecordResourceDAO().existsWithExternalId(
 							externalId)) {
-				RecordResource resource = DB
-						.getRecordResourceDAO()
-						.getUniqueByFieldAndValue(
-								"administrative.externalId", externalId,
+				RecordResource resource = DB.getRecordResourceDAO()
+						.getUniqueByFieldAndValue("administrative.externalId",
+								externalId,
 								new ArrayList<String>(Arrays.asList("_id")));
 				recordId = resource.getDbId();
 				Status response = errorIfNoAccessToRecord(Action.READ, recordId);
@@ -227,34 +220,36 @@ public class WithResourceController extends Controller {
 					return response;
 				} else {// In case the record already exists we overwrite
 						// the existing record's descriptive data for the fields
-					    // included in the json, if the user has WRITE access.
+						// included in the json, if the user has WRITE access.
 					if (noDouble) {
-						if (DB.getRecordResourceDAO().existsSameExternaIdInCollection
-								(externalId, collectionDbId)) {
+						if (DB.getRecordResourceDAO()
+								.existsSameExternaIdInCollection(externalId,
+										collectionDbId)) {
 							result.put("error", "double");
 							return forbidden(result);
 						}
 					}
-					if (DB.getRecordResourceDAO().hasAccess(
-							AccessManager.effectiveUserDbIds(session().get(
-									"effectiveUserIds")), Action.EDIT,
-							recordId)
+					if (DB.getRecordResourceDAO()
+							.hasAccess(
+									AccessManager.effectiveUserDbIds(session()
+											.get("effectiveUserIds")),
+									Action.EDIT, recordId)
 							&& (json.get("descriptiveData") != null))
-						DB.getRecordResourceDAO().editRecord(
-								"descriptiveData", resource.getDbId(),
-								json.get("descriptiveData"));
-					addToCollection(position, recordId, collectionDbId,
-							owns);
+						DB.getRecordResourceDAO()
+								.editRecord("descriptiveData",
+										resource.getDbId(),
+										json.get("descriptiveData"));
+					addToCollection(position, recordId, collectionDbId, owns);
 					// TODO: if record has annotations, update/add
 					// annotations (already filtered so that they refer to
 					// colId)
-					if (record.getContextData() != null
-							&& !record.getContextData().isEmpty()) {
-						ContextData contextData = (ContextData) record
-								.getContextData().get(0);
-						DB.getRecordResourceDAO().updateContextData(
-								contextData);
-					}
+					// if (record.getContextData() != null
+					// && !record.getContextData().isEmpty()) {
+					// ContextData contextData = (ContextData) record
+					// .getContextData().get(0);
+					// DB.getRecordResourceDAO()
+					// .updateContextData(contextData);
+					// }
 				}
 			} else { // create new record in db
 				ObjectNode errors;
@@ -274,17 +269,27 @@ public class WithResourceController extends Controller {
 								mediaUrl = media.getUrl();
 								EmbeddedMediaObject existingMedia = null;
 								if (!mediaUrl.isEmpty()) {
-									MediaObject mediaObject = DB.getMediaObjectDAO().getByUrl(mediaUrl);
+									MediaObject mediaObject = DB
+											.getMediaObjectDAO().getByUrl(
+													mediaUrl);
 									if (mediaObject != null) {
-										//if user has access to at least one recordResource pointing to that media, or if media is an orphan
-										//then the user has write access to the media
-										boolean hasAccessToMedia = MediaController.hasAccessToMedia(mediaUrl, AccessManager.effectiveUserDbIds(session().get(
-												"effectiveUserIds")), Action.EDIT);
+										// if user has access to at least one
+										// recordResource pointing to that
+										// media, or if media is an orphan
+										// then the user has write access to the
+										// media
+										boolean hasAccessToMedia = MediaController
+												.hasAccessToMedia(
+														mediaUrl,
+														AccessManager
+																.effectiveUserDbIds(session()
+																		.get("effectiveUserIds")),
+														Action.EDIT);
 										if (!hasAccessToMedia)
-											media = new EmbeddedMediaObject(existingMedia);
+											media = new EmbeddedMediaObject(
+													existingMedia);
 									}
-								}
-								else {
+								} else {
 									return badRequest("A media url has to be provided.");
 								}
 								// TODO: careful, the user is allowed to set
@@ -324,15 +329,12 @@ public class WithResourceController extends Controller {
 							new ProvenanceInfo("UploadedByUser", "record/"
 									+ recordId, recordId.toString()));
 					DB.getRecordResourceDAO().updateField(recordId,
-							"administrative.externalId",
-							recordId.toString());
+							"administrative.externalId", recordId.toString());
 					break;
 				case Mint:
-					errors = RecordResourceController
-							.validateRecord(record);
+					errors = RecordResourceController.validateRecord(record);
 					record.getAdministrative().setWithCreator(userId);
-					List<ProvenanceInfo> provenance = record
-							.getProvenance();
+					List<ProvenanceInfo> provenance = record.getProvenance();
 					record.getAdministrative().setExternalId(
 							provenance.get(last).getResourceId());
 					if (errors != null) {
@@ -340,15 +342,13 @@ public class WithResourceController extends Controller {
 					}
 					DB.getRecordResourceDAO().makePermanent(record);
 					recordId = record.getDbId();
-					DB.getRecordResourceDAO().updateWithURI(
-							record.getDbId(), "/record/" + recordId);
+					DB.getRecordResourceDAO().updateWithURI(record.getDbId(),
+							"/record/" + recordId);
 					break;
 				default:// imported first time from other sources
 					// there is no withCreator and the record is public
-					record.getAdministrative().getAccess()
-							.setIsPublic(true);
-					errors = RecordResourceController
-							.validateRecord(record);
+					record.getAdministrative().getAccess().setIsPublic(true);
+					errors = RecordResourceController.validateRecord(record);
 					provenance = record.getProvenance();
 					record.getAdministrative().setExternalId(
 							provenance.get(last).getResourceId());
@@ -371,10 +371,10 @@ public class WithResourceController extends Controller {
 		} catch (Exception e) {
 			result.put("error", e.getMessage());
 			return internalServerError(result);
-		} 
+		}
 	}
-	
-	public static Result addRecordsToCollection(String colId) {
+
+	public static Result addRecordsToCollection(String colId, Boolean noDouble) {
 		JsonNode json = request().body().asJson();
 		ObjectNode result = Json.newObject();
 		ObjectId collectionDbId = new ObjectId(colId);
@@ -389,17 +389,18 @@ public class WithResourceController extends Controller {
 				if (json == null || !json.isArray()) {
 					result.put("error", "Invalid JSON");
 					return badRequest(result);
-				}
-				else {
+				} else {
 					Iterator<JsonNode> iterator = json.iterator();
 					while (iterator.hasNext()) {
 						JsonNode recordJson = iterator.next();
-						Result r = addRecordToCollection(recordJson, new ObjectId(colId), Option.None(), false);
+						Result r = addRecordToCollection(recordJson,
+								new ObjectId(colId), Option.None(), noDouble);
 						if (!r.toString().equals(ok().toString())) {
 							return r;
 						}
 					}
-					result.put("message", "Records have been successfully added to to collection.");
+					result.put("message",
+							"Records have been successfully added to to collection.");
 					return ok(result);
 				}
 			}
@@ -465,7 +466,6 @@ public class WithResourceController extends Controller {
 			}
 		}
 	}
-	
 
 	// ignores context data that do not refer to the colId-position where the
 	// record is added
@@ -501,7 +501,7 @@ public class WithResourceController extends Controller {
 							} else {
 								target = new ContextDataTarget();
 								target.setCollectionId(colId);
-								target.setPosition(position);
+								// target.setPosition(position);
 							}
 							if (c.has("body")) {
 								JsonNode bodyNode = c.get("body");
@@ -550,7 +550,7 @@ public class WithResourceController extends Controller {
 			}
 			return true;
 		};
-		ParallelAPICall.createPromise(methodQuery, recordId);
+		ParallelAPICall.createPromise(methodQuery, recordId, Priority.BACKEND);
 	}
 
 	/**
@@ -570,44 +570,21 @@ public class WithResourceController extends Controller {
 			Result response = errorIfNoAccessToCollection(Action.EDIT,
 					collectionDbId);
 			ObjectId recordDbId = new ObjectId(recordId);
-			List<Integer> positions = new ArrayList<Integer>();
 			if (!response.toString().equals(ok().toString()))
 				return response;
-			else {
-				if (!position.isDefined()) {
-					List<Integer> pos = DB.getRecordResourceDAO()
-							.getPositionsInCollection(recordDbId,
-									collectionDbId);
-					if (all) {
-						positions.addAll(pos);
-					} else {
-						if (!pos.isEmpty())
-							positions = pos.subList(0, 1);
-					}
-				} else {
-					positions.add(position.get());
-				}
-				for (int p : positions) {
-					DB.getRecordResourceDAO().removeFromCollection(recordDbId,
-							collectionDbId, p);
-					DB.getRecordResourceDAO()
-							.updateRecordRightsUponRemovalFromCollection(
-									recordDbId, collectionDbId);
-					DB.getCollectionObjectDAO().removeCollectionMedia(
-							collectionDbId, p);
-					if (DB.getCollectionObjectDAO().isFavorites(collectionDbId)) {
-						DB.getRecordResourceDAO().decrementLikes(recordDbId);
-					} else
-						DB.getRecordResourceDAO().decField("usage.collected",
-								recordDbId);
-					DB.getCollectionObjectDAO().decEntryCount(collectionDbId);
-					DB.getCollectionObjectDAO().updateField(collectionDbId,
-							"administrative.lastModified", new Date());
-				}
-				result.put("message",
-						"Record succesfully removed from collection");
-				return ok(result);
+			int pos;
+			boolean first = false;
+			if (position.isDefined()) {
+				pos = position.get();
+			} else {
+				pos = -1;
+				if (!all)
+					first = true;
 			}
+			DB.getRecordResourceDAO().removeFromCollection(recordDbId,
+					collectionDbId, pos, first, all);
+			result.put("message", "Record succesfully removed from collection");
+			return ok(result);
 		} catch (FileNotFoundException e) {
 			result.put("error", "Wrong record id or position in the collection");
 			return badRequest(result);
@@ -634,26 +611,10 @@ public class WithResourceController extends Controller {
 					collectionDbId);
 			if (!response.toString().equals(ok().toString()))
 				return response;
-			else {
-				if (oldPosition > newPosition) {
-					DB.getRecordResourceDAO().shiftRecordsToRight(
-							collectionDbId, oldPosition - 1, newPosition);
-				} else if (newPosition > oldPosition) {
-					DB.getRecordResourceDAO().shiftRecordsToLeft(
-							collectionDbId, oldPosition + 1, newPosition - 1);
-					newPosition--;
-				}
-				DB.getRecordResourceDAO().updatePosition(recordDbId,
-						collectionDbId, oldPosition, newPosition);
-				DB.getCollectionObjectDAO().updateField(collectionDbId,
-						"administrative.lastModified", new Date());
-				DB.getCollectionObjectDAO().removeCollectionMedia(
-						collectionDbId, oldPosition);
-				DB.getCollectionObjectDAO().addCollectionMedia(collectionDbId,
-						recordDbId);
-				result.put("message", "Record succesfully added to collection");
-				return ok(result);
-			}
+			DB.getCollectionObjectDAO().moveInCollection(collectionDbId,
+					recordDbId, oldPosition, newPosition);
+			result.put("message", "Record succesfully moved in collection");
+			return ok(result);
 		} catch (Exception e) {
 			result.put("error", e.getMessage());
 			return internalServerError(result);
@@ -662,8 +623,6 @@ public class WithResourceController extends Controller {
 				locks.release();
 		}
 	}
-	
-	
 
 	/**
 	 * @param recordId
@@ -714,7 +673,8 @@ public class WithResourceController extends Controller {
 		};
 		RecordResource record = DB.getRecordResourceDAO().getById(recordId);
 		String sourceClassName = "sources." + source + "SpaceSource";
-		ParallelAPICall.createPromise(methodQuery, record, sourceClassName);
+		ParallelAPICall.createPromise(methodQuery, record, sourceClassName,
+				Priority.BACKEND);
 	}
 
 	/**
@@ -731,32 +691,41 @@ public class WithResourceController extends Controller {
 	/**
 	 * @return
 	 */
+	public static Result removeFromFavorites(String externalId) {
+		ObjectId userId = new ObjectId(session().get("user"));
+		String fav = DB.getCollectionObjectDAO()
+				.getByOwnerAndLabel(userId, null, "_favorites").getDbId()
+				.toString();
+		RecordResource record = DB.getRecordResourceDAO().getByExternalId(
+				externalId);
+		/*
+		 * List<CollectionInfo> collected = record.getCollectedIn(); for
+		 * (CollectionInfo c : collected) { if
+		 * (c.getCollectionId().toString().equals(fav)) { return
+		 * removeRecordFromCollection(fav, record.getDbId() .toString(),
+		 * Option.Some(c.getPosition()), false); } }
+		 */
+		return removeRecordFromCollection(fav, record.getDbId().toString(),
+				Option.None(), true);
+	}
 
 	public static Result removeFromFavorites() {
 		JsonNode json = request().body().asJson();
 		JsonNode externalIdNode = json.get("externalId");
-		if (externalIdNode != null) {
-			String externalId = externalIdNode.asText();
-			ObjectId userId = new ObjectId(session().get("user"));
-			String fav = DB.getCollectionObjectDAO()
-					.getByOwnerAndLabel(userId, null, "_favorites").getDbId()
-					.toString();
-			RecordResource record = DB.getRecordResourceDAO().getByExternalId(
-					externalId);
-			List<CollectionInfo> collected = record.getCollectedIn();
-			for (CollectionInfo c : collected) {
-				if (c.getCollectionId().toString().equals(fav)) {
-					return removeRecordFromCollection(fav, record.getDbId()
-							.toString(), Option.Some(c.getPosition()), false);
-				}
-			}
-			return removeRecordFromCollection(fav, record.getDbId().toString(),
-					Option.None(), false);
-		}
-		else {
+		if (externalIdNode == null) {
 			ObjectNode result = Json.newObject();
-			result.put("error", "Json request should have format {externalId: id}");
-			return internalServerError(result);
+			result.put("error",
+					"Json request should have format {externalId: id}");
+			return badRequest(result);
 		}
+		String externalId = externalIdNode.asText();
+		ObjectId userId = new ObjectId(session().get("user"));
+		String fav = DB.getCollectionObjectDAO()
+				.getByOwnerAndLabel(userId, null, "_favorites").getDbId()
+				.toString();
+		RecordResource record = DB.getRecordResourceDAO().getByExternalId(
+				externalId);
+		return removeRecordFromCollection(fav, record.getDbId().toString(),
+				Option.None(), false);
 	}
 }

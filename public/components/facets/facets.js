@@ -14,6 +14,9 @@ define(['bridget','knockout', 'text!./facets.html','inputtags','liveFilter', 'ba
     self.barheights=ko.observableArray([]);
     self.yaxislabels=ko.observableArray([]);
     self.numvalues=ko.observableArray([]);
+    
+    self.facetFilter=ko.contextFor(withsearchid).$data.sources().slice();   // deep copy of the array
+    //self.facetFilter=ko.contextFor(withsearchid).$data.sources();
     $('#facet_tags').tagsinput({
         allowDuplicates: false,
           itemValue: 'id',  // this will be used to set id of tag
@@ -22,7 +25,7 @@ define(['bridget','knockout', 'text!./facets.html','inputtags','liveFilter', 'ba
     
     
     self.initFacets=function(){
-    	//self.visiblePanel(false);
+    	self.visiblePanel(false);
     	self.filters.removeAll();
     	$("#facet_tags").tagsinput('removeAll');
     	var selsources=ko.contextFor(withsearchid).$data.sources();
@@ -171,7 +174,7 @@ define(['bridget','knockout', 'text!./facets.html','inputtags','liveFilter', 'ba
     	
     	if(event.item.id.indexOf("source#")>-1){
     	 if(ko.contextFor(this).$data.sources().length>=2)	{
-    	  ko.contextFor(this).$data.sources.remove(event.item.label);
+    	  ko.contextFor(this).$data.sources.remove(event.item.label);   	  
     	  ko.contextFor(this).$data.filterselect(true);
       	  ko.contextFor(this).$data.filtersearch();}
     	 else{
@@ -220,16 +223,19 @@ define(['bridget','knockout', 'text!./facets.html','inputtags','liveFilter', 'ba
     
     
     self.listClick=function(data, event){
+    	
+    
     	if(event.target.checked){
     		//new filter added
     		var id=$(event.target).parents('div.active').attr('id');
     		if(id=='datasources'){
-    				self.initFacets();
+    			self.initFacets();
     			
     		}
     		
     	}
     	if(!event.target.checked){
+
     		//filter remove
     		var id=$(event.target).parents('div.active').attr('id');
     		if(id=='datasources'){
@@ -238,7 +244,8 @@ define(['bridget','knockout', 'text!./facets.html','inputtags','liveFilter', 'ba
     		}
     		
     	}
-    	 self.setFilters();
+    	
+    	self.setFilters();
     	return true;
     }
    
@@ -454,7 +461,7 @@ define(['bridget','knockout', 'text!./facets.html','inputtags','liveFilter', 'ba
 		  }
 	  return max;
 	};
-
+	
 	
 	self.filterTooBig=function(value) {
 		if(!isNaN(parseFloat(value)) && isFinite(value))

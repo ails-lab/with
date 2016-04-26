@@ -143,7 +143,6 @@ public class Deserializer {
 							contextData = (ContextData) Json.fromJson((JsonNode) c, clazz);
 							contextDataList.add(contextData);
 						} catch (ClassNotFoundException e) {
-							e.printStackTrace();
 						}
 					}
 				}

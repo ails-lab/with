@@ -41,16 +41,83 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 			console.log(JSON.parse(request.responseText));
 		});
 	}
+	
+	
 
 	function MyCollectionsModel(params) {
 		KnockoutElse.init([spec = {}]);
-		//$("div[role='main']").toggleClass( "homepage", false );
 		var self = this;
+		//WITHApp.tabAction();
+		//WITHApp.initTooltip();
 		self.route = params.route;
 		self.showsExhibitions = params.showsExhibitions;
-		//self.collections = [];
+		self.showImportFromEuropeana = true;//(app.currentUser.username()=="foodanddrink");
+		
 		self.index = ko.observable(0);
 		self.collectionSet = ko.observable("my");
+		
+		self.openAction = function (myclass){
+			$( '.action' ).removeClass( 'active' );
+			$( '.action.'+myclass ).addClass( 'active' );				
+		};
+		
+		self.europeanaID = ko.observable("");
+		self.importEuropeanaCollection = function () {
+		    $.ajax({
+		    	"url": "/collection/importEuropeanaCollection?id="+self.europeanaID(),
+		    	"method": "GET",
+		    	"success": function( data, textStatus, jQxhr ){
+		    	    $.smkAlert({text: 'Collection Imported', type: 'success'});
+		    		self.reloadCollection(data);
+		    		app.currentUser.collectionCount(app.currentUser.collectionCount() + 1);
+		    		self.collectionCount(self.collectionCount() + 1);
+		    		self.closeSideBar();
+				},
+				"error": function (result) {
+					$.smkAlert({ text: 'An error occured', type: 'danger', time: 10 });
+					self.closeSideBar();
+				}         
+		 });		
+		};
+		
+		self.importCollectionName = ko.observable("");
+		self.europeanaLimit = ko.observable(-1);
+		self.europeanaSearch = ko.observable("");
+		self.europeanaSearchTail = ko.observable("");
+		self.importEuropeanaSearch = function () {
+		    var jsondata = JSON.stringify({
+		    	collectionName: self.importCollectionName(),
+				limit : self.europeanaLimit(),
+				query : {
+					searchTerm : self.europeanaSearch(),
+					tail : self.europeanaSearchTail(),
+					page : 1,
+					pageSize : 20
+				}
+			});
+
+		    $.ajax({
+					"url": "/collection/importSearch",
+					"method": "POST",
+					"contentType": "application/json",
+					"data":  jsondata,
+					"success": function( data, textStatus, jQxhr ){
+			    	    $.smkAlert({text: 'Collection Imported', type: 'success'});
+			    		self.reloadCollection(data);
+			    		app.currentUser.collectionCount(app.currentUser.collectionCount() + 1);
+			    		self.collectionCount(self.collectionCount() + 1);
+			    		self.closeSideBar();
+					},
+					"error": function (result) {
+						$.smkAlert({ text: 'An error occured', type: 'danger', time: 10 });
+						self.closeSideBar();
+					}
+        
+				});
+
+		};
+		
+
 		var mapping = {
 			create: function (options) {
 				//customize at the root level: add title and description observables, based on multiliteral
@@ -65,18 +132,19 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 				}
 				$.each(innerModel.media(), function (index, value) {
 					//withUrl = value.Thumbnail.withUrl(); still not fully working
-//					withUrl = value.Thumbnail.url();
-//					if (withUrl != "empty") {
-//						if (withUrl == "")
-//							innerModel.media()[index].thumbnailUrl = "img/content/thumb-empty.png";
-//						else {
-//							if (withUrl.indexOf("/media") == 0) {
-//								innerModel.media()[index].thumbnailUrl = window.location.origin + withUrl;
-//							} else {
-//								innerModel.media()[index].thumbnailUrl = withUrl;
-//							}
-//						}
-//					}
+					var withUrl = value.Thumbnail.withUrl();
+				    var url     = value.Thumbnail.url();
+					if (withUrl == "" || withUrl == null) {
+						if(innerModel.administrative.entryCount() > 0)
+							innerModel.media()[index].thumbnailUrl = ko.observable("img/content/thumb-empty.png");
+					} 						
+					else {
+						if (withUrl.indexOf("/media") == 0) {
+							innerModel.media()[index].thumbnailUrl = window.location.origin + withUrl;
+						} else {
+							innerModel.media()[index].thumbnailUrl = withUrl;
+						}
+					}
 				});
 				innerModel.itemCount = ko.pureComputed(function () {
 					var count = innerModel.administrative.entryCount();
@@ -109,7 +177,7 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 		};
 
 		self.myCollections = ko.mapping.fromJS([], mapping);
-		self.titleToEdit = ko.observable("").extend({ required: true });
+		self.titleToEdit = ko.observable("").extend({ required: true, minLength: 2});
 		self.descriptionToEdit = ko.observable("");
 		self.isPublicToEdit = ko.observable(false);
 		self.apiUrl = ko.observable("");
@@ -202,45 +270,49 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 
 
 		self.createCollection = function (collectionType) {
-			var jsondata = JSON.stringify({
-				administrative: {
-					access: {
-						isPublic: self.isPublicToEdit()
+			if (self.validationModel.isValid()) {
+				var jsondata = JSON.stringify({
+					administrative: {
+						access: {
+							isPublic: self.isPublicToEdit()
+						},
 					},
-					collectionType: collectionType
-				},
-				descriptiveData : {
-					label : {
-						default : [self.titleToEdit()]
+					descriptiveData : {
+						label : {
+							default : [self.titleToEdit()]
+						},
+						description : {
+							default : [self.descriptionToEdit()]
+						}
 					},
-					description : {
-						default : [self.descriptionToEdit()]
+					resourceType: collectionType
+				});
+				$.ajax({
+					"url": "/collection",
+					"method": "post",
+					"contentType": "application/json",
+					"data": jsondata,
+					"success": function (data) {
+						self.reloadCollection(data);
+						if (collectionType == 'SimpleCollection') {
+							app.currentUser.collectionCount(app.currentUser.collectionCount() + 1);
+							self.collectionCount(self.collectionCount() + 1);
+				    	}
+				        if (collectionType == 'Exhibition') {
+							app.currentUser.exhibitionCount(app.currentUser.exhibitionCount() + 1);
+							self.exhibitionCount(self.exhibitionCount() + 1);
+							window.location = '#exhibition-edit/'+data.dbId;
+				        }
+						self.closeSideBar();
+					},
+					"error": function (result) {
+						$.smkAlert({ text: 'An error occured', type: 'danger', time: 10 });
+						self.closeSideBar();
 					}
-				}
-			});
-			$.ajax({
-				"url": "/collection",
-				"method": "post",
-				"contentType": "application/json",
-				"data": jsondata,
-				"success": function (data) {
-					self.reloadCollection(data);
-					if (collectionType == 'SimpleCollection') {
-						app.currentUser.collectionCount(app.currentUser.collectionCount() + 1);
-						self.collectionCount(self.collectionCount() + 1);
-			    	}
-			        if (collectionType == 'Exhibition') {
-						app.currentUser.exhibitionCount(app.currentUser.exhibitionCount() + 1);
-						self.exhibitionCount(self.exhibitionCount() + 1);
-						window.location = '#exhibition-edit/'+data.dbId;
-			        }
-					self.closeSideBar();
-				},
-				"error": function (result) {
-					$.smkAlert({ text: 'An error occured', type: 'danger', time: 10 });
-					self.closeSideBar();
-				}
-			});
+				});
+			} else {
+				self.validationModel.errors.showAllMessages();
+			}
 		};
 
 
@@ -295,7 +367,7 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 		};
 
 		self.more = function (isExhibition, funcToExecute, my) {
-			if (self.loading === true) {
+			if (self.loading() === true) {
 				setTimeout(self.moreCollections(isExhibition), 300);
 			}
 			if (self.loading() === false && self.moreCollectionData() === true) {
@@ -598,7 +670,6 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 		//TODO: currently changes fisrt entry of label.default and description.default
 		//have to support multilinguality (both in presentation of collection, as well as in edit - drop-down list with languages)
 		self.editCollection = function () {
-			console.log(self.validationModel.isValid());
 			if(self.validationModel.isValid()) {
 				var collIndex = self.index();
 				var collId = -1;
@@ -608,16 +679,21 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 					collId = self.sharedCollections()[collIndex].dbId();
 				}
 				if (collId != -1) {
+					var jsondata = JSON.stringify({
+						descriptiveData : {
+							label : {
+								default : [self.titleToEdit()]
+							},
+							description : {
+								default : [self.descriptionToEdit()]
+							}
+						}
+					});
 					$.ajax({
 						"url": "/collection/" + collId,
 						"method": "PUT",
 						"contentType": "application/json",
-						"data": JSON.stringify(
-							{descriptiveData: {
-								label: {default: [self.titleToEdit()]},
-								description: {default: [self.descriptionToEdit()]}
-							}
-						}),
+						"data": jsondata,
 						success: function (result) {
 							if (self.collectionSet() == "my") {
 								self.updateCollectionData(self.myCollections(), collIndex);
@@ -724,6 +800,7 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 			} else {
 				$.smkAlert({ text: 'Not a valid operation!', type: 'danger', time: 10 });
 			}
+			self.moreCollectionData(true);
 		};
 
 		self.checkCollectionSet = function (dbId) {

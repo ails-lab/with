@@ -3,13 +3,13 @@
       <section class="featured">
         <div class="container">
           <!-- title-->
-          <div class="sectionhead">FEATURED EXHIBITION</div>
+          <div class="sectionhead">FEATURED COLLECTION</div>
           <!-- featured exhibition-->
           <div id="featuredExhibit" class="exhibition" data-bind="with: featuredExhibition">
             <div class="hue">
               <!-- info-->
               <div class="info">
-                <div class="type">EXHIBITION</div>
+                <div class="type">COLLECTION</div>
                 <h1 class="title"><!-- ko text:data.title --><!-- /ko --> </h1>
                 <div class="description">
                   <!-- description-->
@@ -17,7 +17,7 @@
                
                   </div>
                   <!-- view button-->
-                  <div class="view"><a data-bind="attr: {href: data.url()}" title="VIEW EXHIBITION" class="btn btn-view blue"><img src="img/ic-right-arrow.png" alt="view"></a></div>
+                  <div class="view"><a data-bind="attr: {href: '#collectionview/'+data.dbId}" title="VIEW EXHIBITION" class="btn btn-view blue"><img src="img/ic-right-arrow.png" alt="view"></a></div>
                 </div>
               </div>
               <!-- thumbnails-->
@@ -44,9 +44,9 @@
           <div class="wrap">
             <!-- menu-->
             <ul class="nav">
-              <li class="active" data-filter="*" data-bind="click: filter"><a href="#" title="ALL">All</a></li>
-              <li data-filter=".exhibition" data-bind="click: filter"><a href="#" title="EXHIBITION">Exhibition</a></li>
-              <li data-filter=".collection" data-bind="click: filter"><a href="#" title="COLLECTION">Collection</a></li>
+              <li class="active" data-filter="*" data-bind="click: filter"><a href="javascript:void(0)" title="ALL">All</a></li>
+              <li data-filter=".exhibition" data-bind="click: filter"><a href="javascript:void(0)" title="EXHIBITION">Exhibition</a></li>
+              <li data-filter=".collection" data-bind="click: filter"><a href="javascript:void(0)" title="COLLECTION">Collection</a></li>
             </ul>
             <!-- menu-->
             <ul class="counter">

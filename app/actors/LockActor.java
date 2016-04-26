@@ -72,9 +72,9 @@ public class LockActor extends UntypedActor {
 			Pair<Locks,ActorRef> lockP = grantedLocks.get( rl.lockId);
 			if( lockP == null ) {
 				log.info( "Received a release of a lock that is not hold.");
+			} else {
+				releaseLocks(lockP.getLeft());
 			}
-			releaseLocks(lockP.getLeft());
-			
 			// see if any waiting on locks can receive a grant.
 			tryWaiting();
 		}

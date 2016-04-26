@@ -49,7 +49,7 @@ public abstract class CulturalRecordFormatter extends JsonContextRecordFormatRea
 			}
 		}
 		List<Language> res =StringUtils.getLanguages(full);
-        Logger.info("["+full+"] Item Detected Languages " + res);
+//        Logger.info("["+full+"] Item Detected Languages " + res);
 		return res.toArray(new Language[]{});
 	}
 	
@@ -63,8 +63,32 @@ public abstract class CulturalRecordFormatter extends JsonContextRecordFormatRea
 		model.setRdfType("http://www.europeana.eu/schemas/edm/ProvidedCHO");
 
 		try {
-		fillObjectFrom(text);
-		} catch (Exception e){
+			fillObjectFrom(text);
+		} catch (Exception e) {
+			e.printStackTrace();
+			Logger.error(e.getMessage());
+		}
+		List<ProvenanceInfo> provenance = object.getProvenance();
+		int index = provenance.size() - 1;
+		String resourceId = provenance.get(index).getResourceId();
+		object.getAdministrative().setExternalId(resourceId);
+
+		return object;
+	}
+	
+	public CulturalObject overwriteObjectFrom(JsonContextRecord text) {
+		object.getAdministrative().getAccess().setIsPublic(true);
+		CulturalObjectData model = (CulturalObjectData) object.getDescriptiveData();
+		if (model==null){
+			model = new CulturalObjectData();
+			object.setDescriptiveData(model);
+		}
+		model.setMetadataRights(new LiteralOrResource("http://creativecommons.org/publicdomain/zero/1.0/"));
+		model.setRdfType("http://www.europeana.eu/schemas/edm/ProvidedCHO");
+
+		try {
+			fillObjectFrom(text);
+		} catch (Exception e) {
 			e.printStackTrace();
 			Logger.error(e.getMessage());
 		}
@@ -78,6 +102,11 @@ public abstract class CulturalRecordFormatter extends JsonContextRecordFormatRea
 
 	public CulturalObject readObjectFrom(JsonNode text) {
 		return readObjectFrom(new JsonContextRecord(text));
+	}
+	
+	public CulturalObject overwritedObjectFrom(CulturalObject object, JsonNode text) {
+		this.object = object;
+		return overwriteObjectFrom(new JsonContextRecord(text));
 	}
 
 	public FilterValuesMap getValuesMap() {

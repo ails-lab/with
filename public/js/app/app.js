@@ -833,6 +833,7 @@ define("app", ['knockout', 'facebook', 'imagesloaded', 'moment', './js/app/plugi
 				s += ' <span class="label pull-right">' + suggestion.data.category + '</span>';
 				return s;
 			},
+			triggerSelectOnValidInput: false,
 			onSelect: function (suggestion) {
 				if (callback !== undefined && callback != null)
 					callback.call(this, suggestion.value);
@@ -894,9 +895,12 @@ define("app", ['knockout', 'facebook', 'imagesloaded', 'moment', './js/app/plugi
 		if (language == undefined || language == null)
 			language = "default";
 		if (val !== undefined && val !== null)
-			if (val[language] !== undefined && val[language] !== null) {
-				var label = val[language][0]
-				if (label !== undefined && label !== null)
+			if (val[language]) {
+				var label = val[language];
+				if(val[language][0]){
+					label = val[language][0];
+				}
+				if (label)
 					return label;
 			}
 		return "";
@@ -965,10 +969,9 @@ define("app", ['knockout', 'facebook', 'imagesloaded', 'moment', './js/app/plugi
 			else if (selection=="source_uri"){
 				var size=array.length-1;
 				if(array[size].uri && array[size].uri.length>0){
-
 	        			selvalue=array[size].uri;
-
-
+	        	} else if (size>0 && array[size-1].uri && array[size-1].uri.length>0) {
+        			selvalue=array[size-1].uri;
 	        	}
 
 		     }

@@ -28,6 +28,7 @@ import org.json.JSONObject;
 import com.fasterxml.jackson.databind.JsonNode;
 
 import model.basicDataTypes.ProvenanceInfo.Sources;
+import model.resources.CulturalObject;
 import model.resources.RecordResource;
 import model.resources.WithResource;
 import play.Logger;
@@ -51,6 +52,7 @@ import sources.core.Utils;
 import sources.core.Utils.Pair;
 import sources.formatreaders.EuropeanaItemRecordFormatter;
 import sources.formatreaders.EuropeanaRecordFormatter;
+import sources.utils.FunctionsUtils;
 import utils.ListUtils;
 
 public class EuropeanaSpaceSource extends ISpaceSource {
@@ -59,10 +61,9 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 	private String nextCursor;
 	
 	public EuropeanaSpaceSource() {
-		super();
+		super(Sources.Europeana);
 		vmap = FilterValuesMap.getEuropeanaMap();
 		
-		LABEL = Sources.Europeana.toString();
 		apiKey = "SECRET_KEY";
 		
 	    /*filtersSupportedBySource = new ArrayList<CommonFilters>(
@@ -75,7 +76,13 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 	    			put(filter.name(), filter);
 	    		}
 	    	}};*/
-
+		
+		addDefaultWriter(CommonFilters.MIME_TYPE.getId(), qfwriter("MIME_TYPE"));
+		addDefaultWriter(CommonFilters.IMAGE_SIZE.getId(), qfwriter("IMAGE_SIZE"));
+		addDefaultWriter(CommonFilters.IMAGE_COLOUR.getId(), qfwriter("IMAGE_COLOUR"));
+		addDefaultWriter(CommonFilters.COLOURPALETE.getId(), qfwriter("COLOURPALETE"));
+		
+		
 		addDefaultWriter(CommonFilters.PROVIDER.getId(), qfwriter("PROVIDER"));
 		addDefaultWriter(CommonFilters.DATA_PROVIDER.getId(), qfwriter("DATA_PROVIDER"));
 		addDefaultWriter(CommonFilters.COUNTRY.getId(), qfwriter("COUNTRY"));
@@ -94,6 +101,10 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 		
 		formatreader = new EuropeanaRecordFormatter();
 
+	}
+
+	private void addIdentityWriter(String filterId) {
+		addDefaultWriter(filterId, qfwriter(filterId));
 	}
 
 	private Function<List<String>, QueryModifier> qrightwriter() {
@@ -117,15 +128,18 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 		if (parameter.equals(CommonFilters.YEAR.name())) {
 			return qfwriterYEAR();
 		}
-		Function<String, String> function = (String s) -> {
-			return "\"" + s+ "\"";
-		};
-		return new Function<List<String>, Pair<String>>() {
-			@Override
-			public Pair<String> apply(List<String> t) {
-				return new Pair<String>("qf", parameter + ":" + Utils.getORList(ListUtils.transform(t, function)));
-			}
-		};
+//		Function<String, String> function = (String s) -> {
+//			return "\"" + s+ "\"";
+//		};
+//		return new Function<List<String>, Pair<String>>() {
+//			@Override
+//			public Pair<String> apply(List<String> t) {
+//				return new Pair<String>("qf", parameter + ":" + Utils.getORList(ListUtils.transform(t, function)));
+//			}
+//		};
+		return FunctionsUtils.toORList("qf", 
+				(s)-> parameter + ":" + FunctionsUtils.smartquote().apply(s)
+				);
 	}
 
 	private Function<List<String>, Pair<String>> qfwriterYEAR() {
@@ -176,6 +190,9 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 					res += string + next.getHttp();
 				}
 			}
+			if (Utils.hasInfo(tail)){
+				res+=tail;
+			}
 			return res;
 		}
 
@@ -204,13 +221,18 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 				facets = "proxy_dc_creator," + facets;
 				break;
 			case FacetsModes.ALL:
-				facets = "proxy_dc_creator,proxy_dc_contributor," + facets;
+				facets = "proxy_dc_creator,proxy_dc_contributor," + 
+			             "MIME_TYPE,IMAGE_SIZE,IMAGE_COLOUR,IMAGE_GREYSCALE,"+
+						facets;
 				break;
 			default:
 				break;
 			}
 		}
-		builder.addSearchParam("facet", facets);
+		if (q.hasMedia)
+			builder.addSearchParam("media", "true");
+//		builder.addSearchParam("facet", facets);
+		builder.setTail(q.tail);
 		return addfilters(q, builder).getHttp();
 	}
 
@@ -254,6 +276,11 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 		CommonFilterLogic country = new CommonFilterLogic(CommonFilters.COUNTRY);
 		CommonFilterLogic year = new CommonFilterLogic(CommonFilters.YEAR);
 		
+		CommonFilterLogic mtype = new CommonFilterLogic(CommonFilters.MIME_TYPE);
+		CommonFilterLogic isize = new CommonFilterLogic(CommonFilters.IMAGE_SIZE);
+		CommonFilterLogic icolor = new CommonFilterLogic(CommonFilters.IMAGE_COLOUR);
+		CommonFilterLogic cpalete = new CommonFilterLogic(CommonFilters.COLOURPALETE);
+				
 		List<CommonFilterLogic> filters = new ArrayList<CommonFilterLogic>();
 		for (JsonNode facet : response.path("facets")) {
 			String filterType = facet.path("name").asText();
@@ -287,6 +314,18 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 				case "YEAR":
 					countValue(year, label, false, count);
 					break;
+				case "MIME_TYPE":
+					countValue(mtype, label, false, count);
+					break;
+				case "IMAGE_SIZE":
+					countValue(isize, label, false, count);
+					break;
+				case "IMAGE_COLOUR":
+					countValue(icolor, label, false, count);
+					break;
+				case "COLOURPALETE":
+					countValue(cpalete, label, false, count);
+					break;
 
 				default:
 					break;
@@ -301,6 +340,10 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 		filters.add(rights);
 		filters.add(country);
 		filters.add(year);
+		filters.add(mtype);
+		filters.add(isize);
+		filters.add(icolor);
+		filters.add(cpalete);
 		return filters;
 	}
 
@@ -322,7 +365,7 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 	@Override
 	public SourceResponse getResults(CommonQuery q) {
 		SourceResponse res = new SourceResponse();
-		res.source = getSourceName();
+		res.source = getSourceName().toString();
 		String httpQuery = getHttpQuery(q);
 		res.query = httpQuery;
 		JsonNode response;
@@ -343,7 +386,7 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
-				// e.printStackTrace();
+				e.printStackTrace();
 			}
 		}
 		return res;
@@ -392,9 +435,9 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 			// todo read the other format;
 			JsonNode record = response.get("object");
 			if (response != null) {
-				jsonMetadata.add(new RecordJSONMetadata(Format.JSON_EDM, record.toString()));
+//				jsonMetadata.add(new RecordJSONMetadata(Format.JSON_EDM, record.toString()));
 				EuropeanaItemRecordFormatter f = new EuropeanaItemRecordFormatter();
-				String json = Json.toJson(f.readObjectFrom(record)).toString();
+				String json = Json.toJson(f.overwritedObjectFrom((CulturalObject)fullRecord,record)).toString();
 				jsonMetadata.add(new RecordJSONMetadata(Format.JSON_WITH, json));
 			}
 			response = getHttpConnector()

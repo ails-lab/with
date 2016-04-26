@@ -16,6 +16,7 @@
 
 package controllers;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -27,7 +28,13 @@ import java.util.function.Function;
 
 import org.elasticsearch.action.suggest.SuggestResponse;
 
+import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import elastic.Elastic;
@@ -98,11 +105,9 @@ public class SearchController extends Controller {
 	}
 	
 	public static Result searchSources() {
-		List<Sources> res = new ArrayList<>();
+		List<String> res = new ArrayList<>();
 		for (final ISpaceSource src : ESpaceSources.getESources()) {
-			Sources sourceByID = Sources.getSourceByID(src.LABEL);
-			if (sourceByID!=null)
-			res.add(sourceByID);
+			res.add(src.getSourceName().toString());
 		}
 		return ok(Json.toJson(res));
 	}
@@ -136,6 +141,30 @@ public class SearchController extends Controller {
 		}
 	}
 	
+	public static Promise<Result> searchwithfilterGET(CommonQuery q) {
+//		Form<CommonQuery> qf = Form.form(CommonQuery.class).bindFromRequest();
+//		CommonQuery q = qf.get();
+		// Parse the query.
+		try {
+			q.setTypes(Elastic.allTypes);
+			if (session().containsKey("effectiveUserIds")) {
+				List<String> userIds = AccessManager.effectiveUserIds(session().get("effectiveUserIds"));
+				q.setEffectiveUserIds(userIds);
+			}
+			Promise<SearchResponse> myResults = getMyResutlsPromise(q);
+			play.libs.F.Function<SearchResponse, Result> function = new play.libs.F.Function<SearchResponse, Result>() {
+				public Result apply(SearchResponse r) {
+					return ok(Json.toJson(r));
+				}
+			};
+			return myResults.map(function);
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			return Promise.pure((Result) badRequest(e.getMessage()));
+		}
+	}
+	
 	public static Promise<Result> getfilters() {
 		JsonNode json = request().body().asJson();
 		if (json == null) {
@@ -164,6 +193,34 @@ public class SearchController extends Controller {
 				return Promise.pure((Result)badRequest(e.getMessage()));
 			}
 		}
+	}
+	
+	public static Result mergeFilters(){
+		ArrayList<CommonFilterLogic> merge = new ArrayList<CommonFilterLogic>();
+		JsonNode json = request().body().asJson(); 
+		Collection<Collection<CommonFilterResponse>> filters = new ArrayList<>();
+		ObjectMapper m = new ObjectMapper();
+		try {
+			filters = m.readValue(json.toString(), 
+					new TypeReference<Collection<Collection<CommonFilterResponse>>>() {
+			        }
+					);
+		} catch (JsonParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (JsonMappingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		for (Collection<CommonFilterResponse> fresponse : filters) {
+			if (fresponse!=null){
+				FiltersHelper.mergeAux(merge, fresponse);
+			}
+		}
+		return ok(Json.toJson(ListUtils.transform(merge, (x)->x.export())));
 	}
 
 	static Promise<SearchResponse> getMyResutlsPromise(final CommonQuery q) {
@@ -220,12 +277,12 @@ public class SearchController extends Controller {
 		});
 	}
 
-	public static List<String> getTheSources() {
-		Function<ISpaceSource, String> function = (ISpaceSource x) -> {
-			return x.getSourceName();
-		};
-		return ListUtils.transform(ESpaceSources.getESources(), function);
-	}
+//	public static List<String> getTheSources() {
+//		Function<ISpaceSource, String> function = (ISpaceSource x) -> {
+//			return x.getSourceName();
+//		};
+//		return ListUtils.transform(ESpaceSources.getESources(), function);
+//	}
 
 	private static Iterable<Promise<SourceResponse>> callSources(final CommonQuery q) {
 		List<Promise<SourceResponse>> promises = new ArrayList<Promise<SourceResponse>>();
@@ -243,7 +300,7 @@ public class SearchController extends Controller {
 			}
 			};
 		for (final ISpaceSource src : ESpaceSources.getESources()) {
-			if ((q.source == null) || (q.source.size() == 0) || q.source.contains(src.getSourceName())) {
+			if ((q.source == null) || (q.source.size() == 0) || q.source.contains(src.getSourceName().toString())) {
 				List<CommonQuery> list = src.splitFilters(q);
 				for (CommonQuery commonQuery : list) {
 					promises.add(ParallelAPICall.<ISpaceSource, CommonQuery, SourceResponse> createPromise(methodQuery,

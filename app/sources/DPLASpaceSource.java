@@ -38,6 +38,7 @@ import sources.core.SourceResponse;
 import sources.core.Utils;
 import sources.core.Utils.Pair;
 import sources.formatreaders.DPLARecordFormatter;
+import sources.utils.FunctionsUtils;
 import utils.ListUtils;
 
 public class DPLASpaceSource extends ISpaceSource {
@@ -55,8 +56,7 @@ public class DPLASpaceSource extends ISpaceSource {
 	}
 
 	public DPLASpaceSource() {
-		super();
-		LABEL = Sources.DPLA.toString();
+		super(Sources.DPLA);
 		apiKey = "SECRET_KEY";
 		vmap = FilterValuesMap.getDPLAMap();
 
@@ -103,21 +103,13 @@ public class DPLASpaceSource extends ISpaceSource {
 	}
 
 	private Function<List<String>, Pair<String>> fwriter(String parameter) {
-		Function<String, String> function = (String s) -> {
-			return "\"" + s + "\"";
-		};
-		return new Function<List<String>, Pair<String>>() {
-			@Override
-			public Pair<String> apply(List<String> t) {
-				return new Pair<String>(parameter, Utils.getORList(ListUtils.transform(t, function), false));
-			}
-		};
+		return FunctionsUtils.toORList(parameter);
 	}
 
 	@Override
 	public SourceResponse getResults(CommonQuery q) {
 		SourceResponse res = new SourceResponse();
-		res.source = getSourceName();
+		res.source = getSourceName().toString();
 		String httpQuery = getHttpQuery(q);
 		res.query = httpQuery;
 		JsonNode response;

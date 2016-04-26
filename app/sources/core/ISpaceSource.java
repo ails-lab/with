@@ -16,6 +16,7 @@
 
 package sources.core;
 
+import java.nio.channels.Pipe.SourceChannel;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -23,6 +24,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.function.Function;
 
+import model.basicDataTypes.ProvenanceInfo.Sources;
 import model.resources.RecordResource;
 import sources.FilterValuesMap;
 import sources.core.Utils.Pair;
@@ -33,17 +35,21 @@ public abstract class ISpaceSource {
 	protected HashMap<String, CommonFilters> sourceToFiltersMappings = new HashMap<String, CommonFilters>();
 	protected HashMap<CommonFilters, String> filtersToSourceMappings = new HashMap<CommonFilters, String>();
 	protected FilterValuesMap vmap = new FilterValuesMap();
-	public String LABEL = "";
+	protected Sources sourceLABEL = null;
 	protected String apiKey="";
 	protected JsonContextRecordFormatReader formatreader;
+	
+	public ISpaceSource(Sources source) {
+		this.sourceLABEL = source;
+	}
 	
 	public HttpConnector getHttpConnector() {
 		return ApacheHttpConnector.getApacheHttpConnector();
 	}
 
 
-	public String getSourceName() {
-		return LABEL;
+	public Sources getSourceName() {
+		return sourceLABEL;
 	}
 	
 	public String getHttpQuery(CommonQuery q) {

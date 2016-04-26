@@ -29,7 +29,7 @@ import javax.net.ssl.HttpsURLConnection;
 
 import model.ApiKey;
 import model.basicDataTypes.MultiLiteral;
-import model.resources.CollectionObject;
+import model.resources.collection.CollectionObject;
 import model.usersAndGroups.User;
 import model.usersAndGroups.UserGroup;
 

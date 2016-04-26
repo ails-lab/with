@@ -1,9 +1,9 @@
 {
     "swagger": "2.0",
     "info": {
-        "version": "v0.5",
+        "version": "v0.6",
         "title": "WITH API",
-        "description": "Welcome to the WITH API documentation! \n If you are completely new to the API, please visit '''link available soon''' for an introduction to the model and basic functionalities. \n We are still in a development phase, so expect changes. We will keep this documentation updated and this text will include a memo of the latest changes. \n \n NEW: \n \n (since v. 0.5) Fixed some issues with ```collection/list``` parameters not being displayed properly. \n \n (since v. 0.4): We have updated our model to a richer, more flexible one! We kept most of the calls the same, however we simplified a lot of the parameters in requests. Make sure you see the new response schemas as there have been some major changes. For any questions and help to implement our API feel free to contact us! ~ LAST UPDATE(v. 0.51): March 2, 2016\n \n Note for using test calls: Testing calls with path parameters now works! Create a new collection and some records and you can try out calls by pasting the IDs in the forms."
+        "description": "Welcome to the WITH API documentation! \n If you are completely new to the API, please visit ```link available soon``` for an introduction to the model and basic functionalities. \n We are still in a development phase, so expect changes. We will keep this documentation updated and this text will include a memo of the latest changes. \n \n NEW: \n \n (since v. 0.6) Added a new call in search that merges filters, updated responses in record, collections with context data. \n \n (since v. 0.5) Fixed some issues with ```collection/list``` parameters not being displayed properly. \n \n (since v. 0.4): We have updated our model to a richer, more flexible one! We kept most of the calls the same, however we simplified a lot of the parameters in requests. Make sure you see the new response schemas as there have been some major changes. For any questions and help to implement our API feel free to contact us! ~ LAST UPDATE(v. 0.6): April 12, 2016"
     },
     "paths": {
         "/api/search": {
@@ -211,10 +211,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/Filters"
-                            }
+                            "$ref": "#/definitions/Filters"
                         }
                     },
                     "400": {
@@ -260,6 +257,47 @@
                 }
             }
         },
+        "/api/mergefilters": {
+            "post": {
+                "summary": "Merge filters from a search response.",
+                "description": "Merges a list of  the \"filters\" field found in the SourceResponse. It returns the result of merging values with equal filterID.",
+                "tags": [
+                    "Search"
+                ],
+                "parameters": [
+                    {
+                        "in": "body",
+                        "name": "body",
+                        "required": true,
+                        "description": "Sources.",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/Filters"
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/Filters"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request (invalid json)",
+                        "schema": {
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/record/{recordId}": {
             "parameters": [
                 {
@@ -282,7 +320,7 @@
                     {
                         "name": "format",
                         "in": "query",
-                        "description": "The serialization of the response. One of the following:  JSON_UNKNOWN, JSONLD_UNKNOWN, XML_UNKNOWN, JSON_EDM, JSONLD_EDM, XML_EDM, JSONLD_DPLA, JSON_NLA, XML_NLA, JSON_DNZ, XML_DNZ, JSON_YOUTUBE, “UKNOWN”, “all”. If not specified, no content is returned, only basic collection fields.",
+                        "description": "The serialization of the response. One of the following:  JSON_UNKNOWN, JSONLD_UNKNOWN, XML_UNKNOWN, JSON_EDM, JSONLD_EDM, XML_EDM, JSONLD_DPLA, JSON_NLA, XML_NLA, JSON_DNZ, XML_DNZ, JSON_YOUTUBE, UKNOWN, all. If not specified, no content is returned, only basic collection fields.",
                         "type": "array",
                         "items": {
                             "type": "string"
@@ -290,7 +328,7 @@
                     }
                 ],
                 "summary": "Retrieve a record.",
-                "description": "Retrieve a JSON with the metadata of the record specified in the path, by its Id. To retrieve the Ids of records in collections, you can use the ```collection/{colId}/list``` call see the ```dbid``` field in the response. Many different serilizations are available for the record's metadata. To select one, or more of them, use the \"format\" parameter. The different serializations will appear in the \"content\" field in the record response.",
+                "description": "Retrieve a JSON with the metadata of the record specified in the path, by its Id. To retrieve the Ids of records in collections, you can use the ```collection/{colId}/list``` call see the ```dbid``` field in the response. Many different serializations are available for the record's metadata. To select one, or more of them, use the \"format\" parameter. The different serializations will appear in the \"content\" field in the record response.",
                 "tags": [
                     "Record"
                 ],
@@ -368,7 +406,7 @@
                         }
                     },
                     "403": {
-                        "description": "Forbiden (no edit permissions)",
+                        "description": "Forbidden (no edit permissions)",
                         "schema": {
                             "properties": {
                                 "error": {
@@ -561,7 +599,7 @@
         "/collection/favorites": {
             "get": {
                 "summary": "Get a list of your favorite records.",
-                "description": "This will return an array of Ids for all the favorited records of the logged in user.",
+                "description": "This call will return an array of Ids for all the favorited records of the logged in user.",
                 "tags": [
                     "Record",
                     "Collection"
@@ -627,7 +665,7 @@
                         }
                     },
                     "403": {
-                        "description": "Forbiden (invalid collection id, no read access)",
+                        "description": "Forbidden (invalid collection id, no read access)",
                         "schema": {
                             "properties": {
                                 "error": {
@@ -692,7 +730,7 @@
                     {
                         "name": "format",
                         "in": "query",
-                        "description": "One of the following:  JSON_UNKNOWN, JSONLD_UNKNOWN, XML_UNKNOWN, JSON_EDM, JSONLD_EDM, XML_EDM, JSONLD_DPLA, JSON_NLA, XML_NLA, JSON_DNZ, XML_DNZ, JSON_YOUTUBE, “UKNOWN”, “all”. If not specified, no content is returned, only basic collection fields.",
+                        "description": "One of the following:  JSON_UNKNOWN, JSONLD_UNKNOWN, XML_UNKNOWN, JSON_EDM, JSONLD_EDM, XML_EDM, JSONLD_DPLA, JSON_NLA, XML_NLA, JSON_DNZ, XML_DNZ, JSON_YOUTUBE, UKNOWN, all. If not specified, no content is returned, only basic collection fields.",
                         "type": "string",
                         "default": "noContent"
                     }
@@ -716,7 +754,7 @@
                         }
                     },
                     "403": {
-                        "description": "Forbiden (invalid collection id, no read access)",
+                        "description": "Forbidden (invalid collection id, no read access)",
                         "schema": {
                             "properties": {
                                 "error": {
@@ -749,7 +787,7 @@
                 }
             ],
             "post": {
-                "description": "Adds a record to the collection specified in the path, creating a new internal record that containts the specified metadata. You will need to be logged in and have write access or be the owner of the collection in order to add records to it. Note that calls to this path can also be used for exhibitions. Position is a Mandatory field for exhibitions, the default is 0 i.e. the record will be displayed first. IMPORTANT This is the preferred way to create a new record! Different serializations for the new record will be created automatically and can be retrieved with ```GET /record/{recordId}```. You do not need to provide values for all the available fields. Finally, please note that this call will only return a message. To see the collection and the new record, you will need to use ```GET /collection/{collectionId}/list``` and parse the results for a list of the record metadata in the collection and the corresponding record dbids. For individual record metadata, use ```GET /record/{recordId}``` with the dbids retrieved.",
+                "description": "Adds a record to the collection specified in the path, creating a new internal record that containts the submitted metadata. You will need to be logged in and have write access or be the owner of the collection in order to add records to it. Note that calls to this path can also be used for exhibitions. Position is a Mandatory field for exhibitions, the default is 0 i.e. the record will be displayed first. IMPORTANT This is the preferred way to create a new record! Different serializations for the new record will be created automatically and can be retrieved with ```GET /record/{recordId}```. You do not need to provide values for all the available fields. Finally, please note that this call will only return a message. To see the collection and the new record, you will need to use ```GET /collection/{collectionId}/list``` and parse the results for a list of the record metadata in the collection and the corresponding record dbids. For individual record metadata, use ```GET /record/{recordId}``` with the dbids retrieved.",
                 "summary": "Create a new record and add it to a collection.",
                 "tags": [
                     "Collection",
@@ -1052,7 +1090,7 @@
                         }
                     },
                     "403": {
-                        "description": "Forbiden (no read-access)",
+                        "description": "Forbidden (no read-access)",
                         "schema": {
                             "properties": {
                                 "error": {
@@ -1346,7 +1384,7 @@
                     "Group"
                 ],
                 "summary": "Find a user or group by name or email.",
-                "description": "Returns a JSON object with metadata for the group that has the specified or email address. This call can be applied to all group types, i.e. organizations and projects. An optional functionality of this call is to check what access rights a group or user has to a collection. Just use the ```collectionId``` parameter. The access rights will be returned as an extra field named ```accessRights``` in the group or user json response.",
+                "description": "Returns a JSON object with metadata for the group that has the specified or email address. This call can be applied to all group types, i.e. organizations and projects. An optional functionality of this call is to check what access rights a group or user has to a collection by filling the ```collectionId``` parameter. The access rights will be returned as an extra field named ```accessRights``` in the group JSON response.",
                 "responses": {
                     "200": {
                         "description": "OK (found group)",
@@ -1438,7 +1476,7 @@
                     "Organization"
                 ],
                 "summary": "Find subgroups of an organization.",
-                "description": "Retrieves the specified group's descendant groups in the group hierarchy. See '''/group/addUserOrGroup/{groupId}'''.",
+                "description": "Retrieves the specified group's descendant organizations in the group hierarchy. See '''/group/addUserOrGroup/{groupId}'''.",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -1479,7 +1517,7 @@
                     "Project"
                 ],
                 "summary": "Find subgroups of a project.",
-                "description": "Retrieves the specified group's descendant groups in the group hierarchy. See '''/group/addUserOrGroup/{groupId}'''.",
+                "description": "Retrieves the specified group's descendant projects in the group hierarchy. See '''/group/addUserOrGroup/{groupId}'''.",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -1732,7 +1770,7 @@
                     "type": "string"
                 }
             ],
-            "put": {
+            "delete": {
                 "parameters": [
                     {
                         "name": "id",
@@ -1989,7 +2027,24 @@
         "/media/create": {
             "post": {
                 "summary": "Upload new media.",
-                "description": "Upload a new media object (currently only support for images is implemented). You can either upload a file or provide an external url to a file (as a multipart/form-data). You can optionally provide rights for the media, if none are provided the default value will be \"UNKNOWN\". All metadata for the new media will be automatically extracted. The return object for this call is a list of URLs that return the cached media object and its various thumbnails. You can use the \"original\" url to create a record with the new media. The media ID is encoded in that url. See the call \"media/byUrl\", on how to use the url to get the media metadata.",
+                "description": "Upload a new media object (currently only supports  images). This call works in two ways. You can either upload a file or provide an external url to a file. An IMPORTANT difference is, when uploading a file, the request should be a multipart/form-data. When creating from a url however, it should be a JSON body. In any case, the fields are the same. You can optionally provide rights for the media, if none are provided the default value will be \"UNKNOWN\". Technical metadata for the new media will be automatically extracted. The returned object for this call is a list of URLs that point to the cached media object and its various representations. You can use the \"original\" url to create a record with the new media. The media ID is encoded in that url. See the call ```media/byUrl```, on how to use the url to get the media metadata.",
+                "parameters": [
+                    {
+                        "name": "body",
+                        "in": "body",
+                        "description": "New group metadata. You only need to provide the fields you want to change.",
+                        "schema": {
+                            "properties": {
+                                "url": {
+                                    "type": "string"
+                                },
+                                "withMediaRights": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                ],
                 "tags": [
                     "Media"
                 ],
@@ -1997,10 +2052,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/InternalRecord"
-                            }
+                            "$ref": "#/definitions/MediaReply"
                         }
                     },
                     "400": {
@@ -2026,20 +2078,90 @@
                 }
             }
         },
-        "/media/byUrl": {
+        "/media/{mediaId}": {
+            "parameters": [
+                {
+                    "name": "mediaId",
+                    "in": "path",
+                    "required": true,
+                    "description": "Internal Id of a media object.",
+                    "type": "string"
+                }
+            ],
             "get": {
                 "summary": "Get metadata for a media object.",
-                "description": "Returns the metadata for the media object specified by the url (see \"media/create\").",
+                "description": "Returns the metadata for the media object specified by the mediaId. The response of the ```media/create``` call contains values that are url paths to this call. The response depends on the \"file” parameter`s value. If true, it returs the media file, if false it returns the media metadata as indicated in the response sample.",
                 "tags": [
                     "Media"
+                ],
+                "parameters": [
+                    {
+                        "name": "file",
+                        "type": "boolean",
+                        "required": true,
+                        "in": "query",
+                        "description": "Returns metadata or file."
+                    },
+                    {
+                        "name": "mediaId",
+                        "in": "path",
+                        "required": true,
+                        "description": "Internal Id of a media object.",
+                        "type": "string"
+                    }
                 ],
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/InternalRecord"
+                            "$ref": "#/definitions/MediaObjectEmbedded"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request (invalid request)",
+                        "schema": {
+                            "properties": {
+                                "message": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error (database error)",
+                        "schema": {
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "summary": "Delete a media object.",
+                "description": "Removes the database entry for the media object specified by the url parameter.",
+                "tags": [
+                    "Media"
+                ],
+                "parameters": [
+                    {
+                        "name": "mediaId",
+                        "in": "path",
+                        "required": true,
+                        "description": "Internal Id of a media object.",
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "properties": {
+                                "message": {
+                                    "type": "string"
+                                }
                             }
                         }
                     },
@@ -2161,7 +2283,7 @@
                                 "googleId": {
                                     "type": "string"
                                 },
-                                "facebokId": {
+                                "facebookId": {
                                     "type": "string"
                                 }
                             }
@@ -2856,6 +2978,49 @@
                     "items": {
                         "type": "string"
                     }
+                },
+                "page": {
+                    "type": "object",
+                    "properties": {
+                        "address": {
+                            "type": "string"
+                        },
+                        "city": {
+                            "type": "string"
+                        },
+                        "country": {
+                            "type": "string"
+                        },
+                        "url": {
+                            "type": "string"
+                        },
+                        "cover": {
+                            "$ref": "#/definitions/MediaReply"
+                        },
+                        "coordinates": {
+                            "type": "object",
+                            "properties": {
+                                "latitude": {
+                                    "type": "integer"
+                                },
+                                "longitude": {
+                                    "type": "integer"
+                                }
+                            }
+                        },
+                        "featuredCollections": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        },
+                        "featuredExhibitions": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    }
                 }
             }
         },
@@ -2882,7 +3047,7 @@
                 "collectedIn": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/CollectionInfo"
+                        "type": "string"
                     }
                 },
                 "administrative": {
@@ -2894,7 +3059,7 @@
                 "media": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/MediaObjectEmbedded"
+                        "$ref": "#/definitions/MediaRecord"
                     }
                 },
                 "descriptiveData": {
@@ -2908,6 +3073,9 @@
                     "items": {
                         "$ref": "#/definitions/Provenance"
                     }
+                },
+                "contextData": {
+                    "$ref": "#/definitions/ContextData"
                 }
             }
         },
@@ -2967,6 +3135,36 @@
                 }
             ]
         },
+        "ContextDataTarget": {
+            "description": "Describes context of this resource.",
+            "type": "object",
+            "properties": {
+                "collectionId": {
+                    "type": "string"
+                },
+                "recordId": {
+                    "type": "string"
+                },
+                "access": {
+                    "$ref": "#/definitions/Access"
+                }
+            }
+        },
+        "ContextData": {
+            "description": "Contains resources collected in this collection.",
+            "type": "object",
+            "properties": {
+                "contextDataType": {
+                    "type": "string"
+                },
+                "target": {
+                    "$ref": "#/definitions/ContextDataTarget"
+                },
+                "body": {
+                    "$ref": "#/definitions/ContextDataTarget"
+                }
+            }
+        },
         "Collection": {
             "description": "Collection metadata.",
             "allOf": [
@@ -2976,6 +3174,12 @@
                 {
                     "type": "object",
                     "properties": {
+                        "collectedResources": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/ContextData"
+                            }
+                        },
                         "descriptiveData": {
                             "$ref": "#/definitions/CollectionDescriptiveData"
                         }
@@ -3461,6 +3665,14 @@
                 }
             ]
         },
+        "SampleFilters": {
+            "description": "This JSON Array contains details about the different filter values available as well as counts of records for each filter.",
+            "type": "array",
+            "items": {
+                "type": "string",
+                "default": "{ \"filterName\": \"Media Type\", \"filterID\": \"media.type\", \"suggestedValues\": [ { \"value\": \"IMAGE\", \"count\": 17104 }, { \"value\": \"AUDIO\", \"count\": 9792 }, { \"value\": \"VIDEO\", \"count\": 3454 }, { \"value\": \"TEXT\", \"count\": 2173 }, { \"value\": \"THREED\", \"count\": 6 } ] }, { \"filterName\": \"Provider\", \"filterID\": \"provider\", \"suggestedValues\": [ { \"value\": \"The European Library\", \"count\": 5978 } ] } ], [ { \"filterName\": \"Media Type\", \"filterID\": \"media.type\", \"suggestedValues\": [ { \"value\": \"IMAGE\", \"count\": 25734 }, { \"value\": \"TEXT\", \"count\": 3713 }, { \"value\": \"VIDEO\", \"count\": 373 }, { \"value\": \"AUDIO\", \"count\": 142 }, { \"value\": \"physical object\", \"count\": 2 } ] }, { \"filterName\": \"Provider\", \"filterID\": \"provider\", \"suggestedValues\": [ { \"value\": \"The New York Public Library\", \"count\": 10063 }, { \"value\": \"Mountain West Digital Library\", \"count\": 3110 }, { \"value\": \"Smithsonian Institution\", \"count\": 2731 }, { \"value\": \"California Digital Library\", \"count\": 2614 }, { \"value\": \"Minnesota Digital Library\", \"count\": 1752 }, { \"value\": \"The Portal to Texas History\", \"count\": 1616 }, { \"value\": \"University of Southern California. Libraries\", \"count\": 1429 }, { \"value\": \"North Carolina Digital Heritage Center\", \"count\": 1385 }, { \"value\": \"HathiTrust\", \"count\": 1300 }, { \"value\": \"Digital Commonwealth\", \"count\": 922 }, { \"value\": \"Empire State Digital Network\", \"count\": 816 }, { \"value\": \"Missouri Hub\", \"count\": 779 }, { \"value\": \"Digital Library of Georgia\", \"count\": 765 }, { \"value\": \"University of Washington\", \"count\": 629 }, { \"value\": \"National Archives and Records Administration\", \"count\": 580 }, { \"value\": \"Tennessee Digital Library\", \"count\": 507 }, { \"value\": \"ARTstor\", \"count\": 353 }, { \"value\": \"J. Paul Getty Trust\", \"count\": 289 }, { \"value\": \"Indiana Memory\", \"count\": 245 }, { \"value\": \"Internet Archive\", \"count\": 227 }, { \"value\": \"Kentucky Digital Library\", \"count\": 185 }, { \"value\": \"University of Virginia Library\", \"count\": 142 }, { \"value\": \"South Carolina Digital Library\", \"count\": 138 }, { \"value\": \"David Rumsey\", \"count\": 16 }, { \"value\": \"University of Illinois at Urbana-Champaign\", \"count\": 14 }, { \"value\": \"United States Government Publishing Office (GPO)\", \"count\": 13 }, { \"value\": \"Biodiversity Heritage Library\", \"count\": 6 }, { \"value\": \"Harvard Library\", \"count\": 5 } ] }"
+            }
+        },
         "Filters": {
             "description": "This JSON Array contains details about the different filter values available as well as counts of records for each filter.",
             "type": "array",
@@ -3509,9 +3721,23 @@
                         "type": "integer"
                     },
                     "items": {
-                        "type": "array",
-                        "items": {
-                            "$ref": "#/definitions/InternalRecord"
+                        "type": "object",
+                        "properties": {
+                            "culturalCHO": {
+                                "type": "array",
+                                "items": {
+                                    "$ref": "#/definitions/InternalRecord"
+                                }
+                            },
+                            "recordResource": {
+                                "type": "array",
+                                "items": {
+                                    "$ref": "#/definitions/InternalRecord"
+                                }
+                            },
+                            "itemsCount": {
+                                "type": "integer"
+                            }
                         }
                     },
                     "source": {
@@ -3560,6 +3786,48 @@
                 },
                 "filters": {
                     "$ref": "#/definitions/Filters"
+                }
+            }
+        },
+        "MediaReply": {
+            "description": "This is an object with paths to the call that returns the original media object and four different types of thumbnail (also media objects).",
+            "type": "object",
+            "properties": {
+                "original": {
+                    "type": "string"
+                },
+                "tiny": {
+                    "type": "string"
+                },
+                "square": {
+                    "type": "string"
+                },
+                "thumbnail": {
+                    "type": "string"
+                },
+                "medium": {
+                    "type": "string"
+                }
+            }
+        },
+        "MediaRecord": {
+            "description": "This is an object with paths to the call that returns the original media object and four different types of thumbnail (also media objects).",
+            "type": "object",
+            "properties": {
+                "original": {
+                    "$ref": "#/definitions/MediaObjectEmbedded"
+                },
+                "tiny": {
+                    "$ref": "#/definitions/MediaObjectEmbedded"
+                },
+                "square": {
+                    "$ref": "#/definitions/MediaObjectEmbedded"
+                },
+                "thumbnail": {
+                    "$ref": "#/definitions/MediaObjectEmbedded"
+                },
+                "medium": {
+                    "$ref": "#/definitions/MediaObjectEmbedded"
                 }
             }
         },

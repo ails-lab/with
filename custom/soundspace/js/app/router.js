@@ -89,6 +89,8 @@ define(["knockout", "crossroads", "hasher"], function(ko, crossroads, hasher) {
 				}
 				else if (oldHash.indexOf("collectionview/")==0){
 					var scrollPosition = $(window).scrollTop();
+					dispatchDocumentEvent('Pundit.hide');
+					
 					 oldHash=oldHash.substring(15);
 					 oldHash=oldHash.substring(0,oldHash.indexOf('/'));
 					 

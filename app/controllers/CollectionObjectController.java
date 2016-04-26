@@ -27,15 +27,23 @@ import java.util.Set;
 
 import javax.validation.ConstraintViolation;
 
+import org.bson.Document;
 import org.bson.types.ObjectId;
+//<<<<<<< HEAD
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
+//=======
+import org.mongodb.morphia.query.Query;
+//>>>>>>> develop
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.mongodb.MongoClient;
+import com.mongodb.client.FindIterable;
+import com.mongodb.client.MongoDatabase;
 
 import controllers.parameterTypes.MyPlayList;
 import controllers.parameterTypes.StringTuple;
@@ -46,17 +54,24 @@ import elastic.ElasticSearcher;
 import elastic.ElasticSearcher.SearchOptions;
 import model.DescriptiveData;
 import model.annotations.ContextData;
-import model.basicDataTypes.CollectionInfo;
+import model.annotations.ContextData.ContextDataBody;
 import model.basicDataTypes.Language;
 import model.basicDataTypes.LiteralOrResource;
 import model.basicDataTypes.MultiLiteral;
-import model.basicDataTypes.MultiLiteralOrResource;
+//<<<<<<< HEAD
+//import model.basicDataTypes.MultiLiteralOrResource;
+//import model.basicDataTypes.WithAccess;
+//import model.basicDataTypes.WithAccess.Access;
+//import model.basicDataTypes.WithAccess.AccessEntry;
+//import model.resources.CollectionObject;
+//import model.resources.CollectionObject.CollectionAdmin;
+//import model.resources.CollectionObject.CollectionAdmin.CollectionType;
+//=======
+import model.basicDataTypes.ProvenanceInfo;
 import model.basicDataTypes.WithAccess;
 import model.basicDataTypes.WithAccess.Access;
 import model.basicDataTypes.WithAccess.AccessEntry;
-import model.resources.CollectionObject;
-import model.resources.CollectionObject.CollectionAdmin;
-import model.resources.CollectionObject.CollectionAdmin.CollectionType;
+//>>>>>>> develop
 import model.resources.CulturalObject;
 import model.resources.CulturalObject.CulturalObjectData;
 import model.resources.RecordResource;
@@ -64,6 +79,10 @@ import model.resources.RecordResource.RecordDescriptiveData;
 import model.resources.ThesaurusObject.SKOSTerm;
 import model.resources.WithResource;
 import model.resources.WithResource.WithResourceType;
+import model.resources.collection.CollectionObject;
+import model.resources.collection.CollectionObject.CollectionAdmin;
+import model.resources.collection.Exhibition;
+import model.resources.collection.SimpleCollection;
 import model.usersAndGroups.Organization;
 import model.usersAndGroups.Page;
 import model.usersAndGroups.Project;
@@ -80,6 +99,8 @@ import play.libs.F.Promise;
 import play.libs.Json;
 import play.mvc.Result;
 import sources.EuropeanaCollectionSpaceSource;
+import sources.EuropeanaSpaceSource;
+import sources.OWLExporter.CulturalItemOWLExporter;
 import sources.core.CommonQuery;
 import sources.core.SourceResponse;
 import sources.core.Utils;
@@ -88,14 +109,86 @@ import utils.AccessManager.Action;
 import utils.Locks;
 import utils.Tuple;
 
-/**
- * @author mariaral
- *
- */
+
+@SuppressWarnings("rawtypes")
 public class CollectionObjectController extends WithResourceController {
 
 	public static final ALogger log = Logger
 			.of(CollectionObjectController.class);
+
+	public static Promise<Result> importSearch() {
+		JsonNode json = request().body().asJson();
+		if (json == null) {
+			return Promise.pure((Result) badRequest("Expecting Json query"));
+		} else {
+			// Parse the query.
+			try {
+				ObjectNode resultInfo = Json.newObject();
+				ObjectId creatorDbId = new ObjectId(session().get("user"));
+				final CommonQuery q = Utils.parseJson(json.get("query"));
+				final String cname = json.get("collectionName").toString();
+				final int limit = (json.has("limit")) ? json.get("limit")
+						.asInt() : -1;
+				CollectionObject ccid = null;
+				if (!isCollectionCreated(creatorDbId, cname)) {
+					CollectionObject collection = new SimpleCollection();
+					collection.getDescriptiveData().setLabel(
+							new MultiLiteral(cname).fillDEF());
+					boolean success = internalAddCollection(collection,
+							WithResourceType.SimpleCollection, creatorDbId,
+							resultInfo);
+					if (!success)
+						return Promise
+								.pure((Result) badRequest("Expecting Json query"));
+					ccid = collection;
+				} else {
+					List<CollectionObject> col = DB.getCollectionObjectDAO()
+							.getByLabel(Language.DEFAULT, cname);
+					ccid = col.get(0);
+				}
+
+				EuropeanaSpaceSource src = new EuropeanaSpaceSource();
+				src.setUsingCursor(true);
+
+				return internalImport(src, ccid, q, limit, resultInfo, true,
+						true);
+
+			} catch (Exception e) {
+				e.printStackTrace();
+				return Promise.pure((Result) badRequest(e.getMessage()));
+			}
+		}
+	}
+
+	public static Result importIDs(String cname, String source, String ids) {
+		ObjectNode resultInfo = Json.newObject();
+		ObjectId creatorDbId = new ObjectId(session().get("user"));
+		CollectionObject ccid = null;
+		if (!isCollectionCreated(creatorDbId, cname)) {
+			CollectionObject collection = new SimpleCollection();
+			collection.getDescriptiveData().setLabel(
+					new MultiLiteral(cname).fillDEF());
+			boolean success = internalAddCollection(collection,
+					WithResourceType.SimpleCollection, creatorDbId, resultInfo);
+			if (!success)
+				return badRequest(resultInfo);
+			ccid = collection;
+		} else {
+			List<CollectionObject> col = DB.getCollectionObjectDAO()
+					.getByLabel(Language.DEFAULT, cname);
+			ccid = col.get(0);
+		}
+		for (String oid : ids.split("[,\\s]+")) {
+			CulturalObject record = new CulturalObject();
+			CulturalObjectData descriptiveData = new CulturalObjectData();
+			descriptiveData.setLabel(new MultiLiteral(oid).fillDEF());
+			record.setDescriptiveData(descriptiveData);
+			record.addToProvenance(new ProvenanceInfo(source, null, oid));
+			internalAddRecordToCollection(ccid.getDbId().toString(), record,
+					F.Option.None(), resultInfo);
+		}
+		return ok(resultInfo);
+	}
 
 	/**
 	 * creates a new collection corresponding to a collection in Europeana and
@@ -104,94 +197,155 @@ public class CollectionObjectController extends WithResourceController {
 	 * @param id
 	 * @return
 	 */
-	public static Result createAndFillEuropeanaCollection(String id) {
-
-		CollectionObject collection = new CollectionObject();
+	public static Promise<Result> createAndFillEuropeanaCollection(String id,
+			int limit) {
+		CollectionObject collection = new SimpleCollection();
 		collection.getDescriptiveData()
 				.setLabel(new MultiLiteral(id).fillDEF());
 		ObjectNode resultInfo = Json.newObject();
 		ObjectId creatorDbId = new ObjectId(session().get("user"));
 		boolean success = internalAddCollection(collection,
-				CollectionType.SimpleCollection, creatorDbId, resultInfo);
+				WithResourceType.SimpleCollection, creatorDbId, resultInfo);
 		if (!success)
-			return badRequest(resultInfo);
 
+			return Promise.pure((Result) badRequest(resultInfo));
 		CommonQuery q = new CommonQuery();
-		q.page = "1";
-		q.pageSize = "20";
+
 		EuropeanaCollectionSpaceSource src = new EuropeanaCollectionSpaceSource(
 				id);
+		return internalImport(src, collection, q, limit, resultInfo, false,
+				false);
+	}
 
+	private static Promise<Result> internalImport(EuropeanaSpaceSource src,
+			CollectionObject collection, CommonQuery q, int limit,
+			ObjectNode resultInfo, boolean dontDuplicate, boolean waitToFinish) {
 		q.page = 1 + "";
-		SourceResponse result = src.getAllResults(q);
+		q.pageSize = "20";
+		SourceResponse result = src.getResults(q);
 		int total = result.totalCount;
-		for (WithResource<?, ?> item : result.items.getCulturalCHO()) {
-			WithResourceController.internalAddRecordToCollection(collection
-					.getDbId().toString(), (RecordResource) item, F.Option
-					.None(), resultInfo);
-		}
-		;
+		final int mylimit = (limit == -1) ? total : Math.min(limit, total);
 
-		Promise<Integer> promiseOfInt = Promise
-				.promise(new Function0<Integer>() {
-					public Integer apply() {
-						SourceResponse result;
-						System.out.println("more pages?");
-						int page = 1;
-						int pageSize = 20;
-						while ((page * pageSize) < total) {
-							page++;
-							q.page = page + "";
-							result = src.getAllResults(q);
-							for (WithResource<?, ?> item : result.items
-									.getCulturalCHO()) {
-								WithResourceController
-										.internalAddRecordToCollection(
-												collection.getDbId().toString(),
-												(RecordResource) item,
-												F.Option.None(), resultInfo);
-							}
-							;
-							System.out.println("more pages? " + page + " of "
-									+ result.totalCount);
-						}
-						System.out.println("Done? " + page);
-						return 0;
-					}
-				});
+		int firstPageCount1 = addResultToCollection(result, collection
+				.getDbId().toString(), mylimit, resultInfo, dontDuplicate);
 
+		Promise<Result> promiseOfInt = Promise.promise(new Function0<Result>() {
+			public Result apply() {
+				SourceResponse result;
+				int page = 1;
+				int itemsCount = firstPageCount1;
+				while (itemsCount < mylimit) {
+					page++;
+					q.page = page + "";
+					result = src.getResults(q);
+					int c = addResultToCollection(result, collection.getDbId()
+							.toString(), mylimit - itemsCount, resultInfo,
+							dontDuplicate);
+					itemsCount = itemsCount + c;
+				}
+				return ok(Json.toJson(collectionWithMyAccessData(
+						collection,
+						AccessManager.effectiveUserIds(session().get(
+								"effectiveUserIds")))));
+			}
+		});
 		if (resultInfo.has("error"))
-			return badRequest(resultInfo);
-		return ok(resultInfo);
+			return Promise.pure((Result) badRequest(resultInfo));
+		if (waitToFinish)
+			return promiseOfInt;
+		else
+			return Promise.pure(ok(Json.toJson(collectionWithMyAccessData(
+					collection,
+					AccessManager.effectiveUserIds(session().get(
+							"effectiveUserIds"))))));
+	}
+
+	private static int addResultToCollection(SourceResponse result,
+			String collectionID, int limit, ObjectNode resultInfo,
+			boolean dontRepeat) {
+		int itemsCount = 0;
+		for (Iterator<WithResource<?, ?>> iterator = result.items
+				.getCulturalCHO().iterator(); iterator.hasNext()
+				&& (itemsCount < limit);) {
+			WithResource<?, ?> item = iterator.next();
+			WithResourceController.internalAddRecordToCollection(collectionID,
+					(RecordResource) item, F.Option.None(), resultInfo,
+					dontRepeat);
+			itemsCount++;
+		}
+		return itemsCount;
 	}
 
 	public static Result sortCollectionObject(String collectionId) {
 		ObjectNode result = Json.newObject();
 		try {
 			ObjectId collectionDbId = new ObjectId(collectionId);
-			int entryCount = DB
+			int entryCount = ((CollectionAdmin) DB
 					.getCollectionObjectDAO()
 					.getById(collectionDbId,
 							Arrays.asList("administrative.entryCount"))
-					.getAdministrative().getEntryCount();
-			Logger.info("Sorting collection "+collectionId);
+					.getAdministrative()).getEntryCount();
+			//Logger.info("Sorting collection "+collectionId);
 			List<RecordResource> records = DB.getRecordResourceDAO()
 					.getByCollectionBetweenPositions(collectionDbId, 0,
 							Math.min(entryCount, 1000));
-			RecordResource<?>[] array = records.toArray(new RecordResource<?>[]{});
-			Arrays.sort(array,Utils.compareThumbs);
-			Logger.info("Items sorted based on image quality");
+			RecordResource<?>[] array = records
+					.toArray(new RecordResource<?>[] {});
+			Arrays.sort(array, Utils.compareThumbs);
+			// Logger.info("Items sorted based on image quality");
 			for (int i = 0, pos = 0; i < array.length; i++) {
-				RecordResource<?> recordResource = array[i];
-				for (CollectionInfo ci : recordResource.getCollectedIn()) {
-					if (ci.getCollectionId().equals(collectionDbId)) {
-						ci.setPosition(pos++);
-					}
-				}
-				DB.getRecordResourceDAO().makePermanent(recordResource);
-				Logger.info(pos +"th item was updated");
+				Logger.info("Items sorted based on image quality");
 			}
+			/*
+			 * for (int i = 0, pos = 0; i < array.length; i++) {
+			 * RecordResource<?> recordResource = array[i]; for (CollectionInfo
+			 * ci : recordResource.getCollectedIn()) { if
+			 * (ci.getCollectionId().equals(collectionDbId)) {
+			 * ci.setPosition(pos++); } }
+			 * DB.getRecordResourceDAO().makePermanent(recordResource);
+			 * //Logger.info(pos +"th item was updated"); } Logger.info(pos
+			 * +"th item was updated"); }
+			 */
 			return ok();
+		} catch (Exception e) {
+			result.put("error", e.getMessage());
+			return internalServerError(result);
+		}
+	}
+	
+	public static Result exportCollectionObjectToOWL(String cname) {
+		
+		ObjectNode resultInfo = Json.newObject();
+		ObjectId creatorDbId = new ObjectId(session().get("user"));
+		CollectionObject ccid = null;
+		if (!isCollectionCreated(creatorDbId, cname)) {
+			return badRequest(resultInfo);
+		} else {
+			List<CollectionObject> col = DB.getCollectionObjectDAO()
+					.getByLabel(Language.DEFAULT, cname);
+			ccid = col.get(0);
+		}
+		ObjectNode result = Json.newObject();
+		CulturalItemOWLExporter exporter = new CulturalItemOWLExporter(ccid.getDbId().toString());
+		try {
+			ObjectId collectionDbId = ccid.getDbId();
+			int entryCount = ((CollectionAdmin) DB
+					.getCollectionObjectDAO()
+					.getById(collectionDbId,
+							Arrays.asList("administrative.entryCount"))
+					.getAdministrative()).getEntryCount();
+			// Logger.info("Sorting collection "+collectionId);
+			List<RecordResource> records = DB.getRecordResourceDAO()
+					.getByCollectionBetweenPositions(collectionDbId, 0,
+							Math.min(entryCount, 1000));
+			
+			for (RecordResource recordResource : records) {
+				if (recordResource instanceof CulturalObject) {
+					CulturalObject new_record = (CulturalObject) recordResource;
+					exporter.exportItem(new_record);
+				}
+			}
+			return ok(exporter.export());
 		} catch (Exception e) {
 			result.put("error", e.getMessage());
 			return internalServerError(result);
@@ -209,26 +363,27 @@ public class CollectionObjectController extends WithResourceController {
 	public static Result createCollectionObject() {
 		ObjectNode error = Json.newObject();
 		JsonNode json = request().body().asJson();
-		CollectionType colType = null;
-		JsonNode adm = json.get("administrative");
-		if (adm != null) {
-			JsonNode ct = adm.get("collectionType");
-			if (ct != null)
-				colType = CollectionType.valueOf(ct.asText());
+		if (json == null) {
+			error.put("error", "Invalid JSON");
+			return badRequest(error);
 		}
+		String colType = null;
+		if (json.has("resourceType"))
+			colType = json.get("resourceType").asText();
+		if ((colType == null)
+				|| (WithResourceType.valueOf(colType) == null))
+			colType = WithResourceType.SimpleCollection.toString();
 		try {
-			if ((colType == null) && (json == null)) {
-				error.put("error", "Invalid JSON");
-				return badRequest(error);
-			}
 			if (session().get("user") == null) {
 				error.put("error", "No rights for WITH resource creation");
 				return forbidden(error);
 			}
 			ObjectId creatorDbId = new ObjectId(session().get("user"));
-			CollectionObject collection = Json.fromJson(json,
-					CollectionObject.class);
-			boolean success = internalAddCollection(collection, colType,
+			Class<?> clazz = Class.forName("model.resources.collection."
+					+ colType);
+			CollectionObject collection = (CollectionObject) Json.fromJson(json,
+					clazz);
+			boolean success = internalAddCollection(collection, WithResourceType.valueOf(colType),
 					creatorDbId, error);
 			if (!success)
 				return badRequest(error);
@@ -241,14 +396,15 @@ public class CollectionObjectController extends WithResourceController {
 			return internalServerError(error);
 		}
 	}
+	private static boolean isCollectionCreated(ObjectId creatorDbId, String name) {
+		return DB.getCollectionObjectDAO().existsForOwnerAndLabel(creatorDbId,
+				null, Arrays.asList(name));
+	}
+
 
 	private static boolean internalAddCollection(CollectionObject collection,
-			CollectionType colType, ObjectId creatorDbId, ObjectNode error) {
-		if (collection.getDescriptiveData().getLabel() == null) {
-			error.put("error", "Missing collection title");
-			return false;
-		}
-		if (collection.getDescriptiveData().getLabel().isEmpty()) {
+			WithResourceType colType, ObjectId creatorDbId, ObjectNode error) {
+		if (collection.getDescriptiveData().getLabel() == null || collection.getDescriptiveData().getLabel().isEmpty()) {
 			error.put("error", "Missing collection title");
 			return false;
 		}
@@ -272,28 +428,17 @@ public class CollectionObjectController extends WithResourceController {
 			return false;
 		}
 		// Fill with all the administrative metadata
-		collection.getAdministrative().setCollectionType(colType);
-		collection.setResourceType(WithResourceType.CollectionObject);
+		collection.setResourceType(colType);
 		collection.getAdministrative().setWithCreator(creatorDbId);
 		collection.getAdministrative().setCreated(new Date());
 		collection.getAdministrative().setLastModified(new Date());
 		if (collection.getAdministrative() instanceof CollectionAdmin) {
-			collection.getAdministrative().setEntryCount(0);
+			((CollectionAdmin) collection.getAdministrative()).setEntryCount(0);
 		}
 		DB.getCollectionObjectDAO().makePermanent(collection);
 		DB.getCollectionObjectDAO().updateWithURI(collection.getDbId(),
 				"/collection/" + collection.getDbId());
 		return true;
-	}
-
-	/* Find a unique dummy title for the user exhibition */
-	/**
-	 * @param user
-	 * @return
-	 */
-	private static MultiLiteral createExhibitionDummyTitle() {
-		return new MultiLiteral(Language.DEFAULT, "New Exhibition ("
-				+ new Date() + ")");
 	}
 
 	/**
@@ -315,12 +460,6 @@ public class CollectionObjectController extends WithResourceController {
 			else {
 				CollectionObject collection = DB.getCollectionObjectDAO().get(
 						new ObjectId(id));
-				/*
-				 * List<RecordResource> firstEntries =
-				 * DB.getCollectionObjectDAO() .getFirstEntries(collectionDbId,
-				 * 3); result = (ObjectNode) Json.toJson(collection);
-				 * result.put("firstEntries", Json.toJson(firstEntries));
-				 */
 				return ok(Json.toJson(collection));
 			}
 		} catch (Exception e) {
@@ -388,8 +527,16 @@ public class CollectionObjectController extends WithResourceController {
 				result.put("error", "Invalid JSON");
 				return badRequest(result);
 			}
-			CollectionObject collectionChanges = Json.fromJson(json,
-					CollectionObject.class);
+			String colType = null;
+			if (json.has("resourceType"))
+				colType = json.get("resourceType").asText();
+			if ((colType == null)
+					|| (WithResourceType.valueOf(colType) == null))
+				colType = WithResourceType.SimpleCollection.toString();
+			Class<?> clazz = Class.forName("model.resources.collection."
+						+ colType);
+			CollectionObject collectionChanges = (CollectionObject) Json.fromJson(json,
+					clazz);
 			ObjectId creatorDbId = new ObjectId(session().get("user"));
 			if ((collectionChanges.getDescriptiveData().getLabel() != null)
 					&& DB.getCollectionObjectDAO().existsOtherForOwnerAndLabel(
@@ -438,7 +585,10 @@ public class CollectionObjectController extends WithResourceController {
 		Boolean isExhibitionBoolean = isExhibition.isDefined() ? isExhibition
 				.get() : null;
 		ObjectId creatorId = null;
-		if (creator.isDefined()) {
+		if (creator.isDefined() && creator.get().equals("undefined")) {
+			result.put("collectionsOrExhibitions", Json.newObject().arrayNode());
+			return ok(result);
+		} else if (creator.isDefined() && !creator.get().equals("undefined")) {
 			User creatorUser = DB.getUserDAO().getByUsername(creator.get());
 			if (creatorUser != null)
 				creatorId = creatorUser.getDbId();
@@ -457,9 +607,8 @@ public class CollectionObjectController extends WithResourceController {
 				result.put("totalExhibitions", info.y.y);
 			}
 			for (CollectionObject collection : userCollections) {
-				ObjectId withCreator = collection.getAdministrative()
-						.getWithCreator();
 				ObjectNode c = (ObjectNode) Json.toJson(collection);
+				c.remove("collectedResources");
 				if (effectiveUserIds.isEmpty())
 					c.put("access", Access.READ.toString());
 				collArray.add(c);
@@ -484,8 +633,10 @@ public class CollectionObjectController extends WithResourceController {
 			}
 			List<ObjectNode> collections = collectionsWithMyAccessData(info.x,
 					effectiveUserIds);
-			for (ObjectNode c : collections)
+			for (ObjectNode c : collections) {
+				c.remove("collectedResources");
 				collArray.add(c);
+			}
 			result.put("collectionsOrExhibitions", collArray);
 			return ok(result);
 		}
@@ -535,8 +686,10 @@ public class CollectionObjectController extends WithResourceController {
 
 			List<ObjectNode> collections = collectionsWithMyAccessData(info.x,
 					effectiveUserIds);
-			for (ObjectNode c : collections)
+			for (ObjectNode c : collections) {
+				c.remove("collectedResources");
 				collArray.add(c);
+			}
 			result.put("collectionsOrExhibitions", collArray);
 			return ok(result);
 		}
@@ -730,7 +883,7 @@ public class CollectionObjectController extends WithResourceController {
 	}
 
 	public static ObjectId createFavorites(ObjectId userId) {
-		CollectionObject fav = new CollectionObject();
+		CollectionObject fav = new SimpleCollection();
 		fav.getAdministrative().setCreated(new Date());
 		fav.getAdministrative().setWithCreator(userId);
 		fav.getDescriptiveData().setLabel(
@@ -754,12 +907,6 @@ public class CollectionObjectController extends WithResourceController {
 			if (!response.toString().equals(ok().toString()))
 				return response;
 			else {
-
-				/*
-				 * List<String> retrievedFields = new ArrayList<String>(
-				 * Arrays.asList("descriptiveData.label",
-				 * "descriptiveData.description", "media", "collectedIn"));
-				 */
 				List<RecordResource> records = DB.getRecordResourceDAO()
 						.getByCollectionBetweenPositions(colId, start,
 								start + count);
@@ -769,52 +916,49 @@ public class CollectionObjectController extends WithResourceController {
 					return internalServerError(result);
 				}
 				ArrayNode recordsList = Json.newObject().arrayNode();
-				int position = start;
-				for (RecordResource e : records) {
+				for (RecordResource r : records) {
 					// filter out records to which the user has no read access
+					response = errorIfNoAccessToRecord(Action.READ, r.getDbId());
 					if (!response.toString().equals(ok().toString())) {
-						recordsList.add(Json.toJson(new RecordResource(e
-								.getDbId())));
-					} else {
-						// filter out all context annotations that do not refer
-						// to this collection-position
-						List<ContextData> contextAnns = e.getContextData();
-						List<ContextData> filteredContextAnns = new ArrayList<ContextData>();
-						for (ContextData ca : contextAnns) {
-							if (ca.getTarget().getCollectionId().equals(colId)
-									&& (ca.getTarget().getPosition() == position)) {
-								filteredContextAnns.add(ca);
-								break;
-							}
-						}
-						e.setContextData(filteredContextAnns);
-						if (e.getContent() != null) {
-							if (contentFormat.equals("contentOnly")
-									&& (e.getContent() != null)) {
-								recordsList.add(Json.toJson(e.getContent()));
-							} else if (contentFormat.equals("noContent")) {
-								e.getContent().clear();
-							} else if (e.getContent()
-									.containsKey(contentFormat)) {
-								HashMap<String, String> newContent = new HashMap<String, String>(
-										1);
-								newContent.put(contentFormat, (String) e
-										.getContent().get(contentFormat));
-								e.setContent(newContent);
-							}
-						}
-						recordsList.add(Json.toJson(e));
+						continue;
 					}
-					position += 1;
+					if (contentFormat.equals("contentOnly")) {
+						if (r.getContent() != null) {
+							recordsList.add(Json.toJson(r.getContent()));
+						}
+						continue;
+					}
+					if (contentFormat.equals("noContent")
+							&& r.getContent() != null) {
+						r.getContent().clear();
+						recordsList.add(Json.toJson(r));
+						fillContextData(
+								DB.getCollectionObjectDAO()
+										.getById(
+												colId,
+												Arrays.asList("collectedResources"))
+										.getCollectedResources(), recordsList);
+						continue;
+					}
+					if (r.getContent() != null
+							&& r.getContent().containsKey(contentFormat)) {
+						HashMap<String, String> newContent = new HashMap<String, String>(
+								1);
+						newContent.put(contentFormat, (String) r.getContent()
+								.get(contentFormat));
+						recordsList.add(Json.toJson(newContent));
+						continue;
+					}
+					recordsList.add(Json.toJson(r));
 				}
 				result.put(
 						"entryCount",
-						DB.getCollectionObjectDAO()
+						((CollectionAdmin) DB.getCollectionObjectDAO()
 								.getById(
 										colId,
 										new ArrayList<String>(
 												Arrays.asList("administrative.entryCount")))
-								.getAdministrative().getEntryCount());
+								.getAdministrative()).getEntryCount());
 				result.put("records", recordsList);
 				return ok(result);
 			}
@@ -827,6 +971,22 @@ public class CollectionObjectController extends WithResourceController {
 		}
 	}
 
+	private static void fillContextData(
+			List<ContextData<ContextDataBody>> contextData,
+			ArrayNode recordsList) {
+		for (JsonNode record : recordsList) {
+			for (ContextData<ContextDataBody> data : contextData) {
+				if (data.getTarget().getRecordId().toString()
+						.equals(record.get("dbId").asText())) {
+					((ObjectNode) record).put("contextData", Json.toJson(data));
+					contextData.remove(data);
+					break;
+				}
+			}
+		}
+
+	}
+
 	public static Result listUsersWithRights(String collectionId) {
 		ArrayNode result = Json.newObject().arrayNode();
 		List<String> retrievedFields = new ArrayList<String>(
@@ -835,7 +995,7 @@ public class CollectionObjectController extends WithResourceController {
 				new ObjectId(collectionId), retrievedFields);
 		WithAccess access = collection.getAdministrative().getAccess();
 		for (AccessEntry ae : access.getAcl()) {
-			if(ae.getLevel().ordinal() > 0) {
+			if (ae.getLevel().ordinal() > 0) {
 				ObjectId userId = ae.getUser();
 				User user = DB.getUserDAO().getById(userId, null);
 				Access accessRights = ae.getLevel();
@@ -1018,6 +1178,7 @@ public class CollectionObjectController extends WithResourceController {
 
 			Result response = errorIfNoAccessToCollection(Action.READ, colId);
 
+<<<<<<< HEAD
 			if (!response.toString().equals(ok().toString())) {
 				return response;
 			} else {
@@ -1112,4 +1273,24 @@ public class CollectionObjectController extends WithResourceController {
 		}
 	}
 
+
+	private static Integer doTheImport(ObjectNode resultInfo,
+			final CommonQuery q, final String cid, EuropeanaSpaceSource src,
+			int total, int firstPageCount1) {
+		SourceResponse result;
+		int page = 1;
+		int pageSize = 20;
+		int itemsCount = firstPageCount1;
+		while (itemsCount < total) {
+			page++;
+			q.page = page + "";
+			result = src.getResults(q);
+			for (WithResource<?, ?> item : result.items.getCulturalCHO()) {
+				WithResourceController.internalAddRecordToCollection(cid,
+						(RecordResource) item, F.Option.None(), resultInfo,
+						true);
+				itemsCount++;
+			}
+		}
+	}
 }

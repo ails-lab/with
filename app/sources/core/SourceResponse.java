@@ -132,9 +132,11 @@ public class SourceResponse {
 	}
 
 	public void addItem(WithResource<?, ?> record) {
-		if (record!=null){
-		if (record instanceof CulturalObject || record instanceof AgentObject || record instanceof PlaceObject)
-			items.getCulturalCHO().add(record);
+		if (record != null) {
+			if (record instanceof CulturalObject)
+				items.getCulturalCHO().add(record);
+			else if (record instanceof RecordResource)
+				items.getRecordResource().add(record);
 		}
 	}
 

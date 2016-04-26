@@ -21,7 +21,12 @@ import java.sql.Timestamp;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.bson.types.ObjectId;
 import org.mongodb.morphia.annotations.Entity;
+import org.mongodb.morphia.annotations.Field;
 import org.mongodb.morphia.annotations.Id;
+import org.mongodb.morphia.annotations.Index;
+import org.mongodb.morphia.annotations.IndexOptions;
+import org.mongodb.morphia.annotations.Indexes;
+import org.mongodb.morphia.utils.IndexType;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -36,6 +41,11 @@ import utils.Serializer;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Entity("Notification")
 @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
+@Indexes({
+	@Index(fields = @Field(value = "receiver", type = IndexType.ASC), options = @IndexOptions()),
+	@Index(fields = @Field(value = "readAt", type = IndexType.ASC), options = @IndexOptions()),
+	@Index(fields = @Field(value = "pendingResponse", type = IndexType.ASC), options = @IndexOptions()),
+	@Index(fields = @Field(value = "activity", type = IndexType.ASC), options = @IndexOptions())})
 public class Notification {
 
 	public enum Activity {
@@ -44,7 +54,7 @@ public class Notification {
 		GROUP_REQUEST, GROUP_REQUEST_ACCEPT, GROUP_REQUEST_DENIED,
 		//resource related
 		RECORD_ADDED_TO_COLLECTION, RECORD_REMOVED_FROM_COLLECTION,
-		COLLECTION_SHARE, COLLECTION_SHARED, COLLECTION_UNSHARED, COLLECTION_REJECTED, 
+		COLLECTION_SHARE, COLLECTION_SHARED, COLLECTION_UNSHARED, COLLECTION_REJECTED,
 		// messages
 		MESSAGE
 	}

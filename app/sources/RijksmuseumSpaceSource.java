@@ -46,7 +46,7 @@ import utils.Serializer;
 public class RijksmuseumSpaceSource extends ISpaceSource {
 
 	public RijksmuseumSpaceSource() {
-		LABEL = Sources.Rijksmuseum.toString();
+		super(Sources.Rijksmuseum);
 		apiKey = "SECRET_KEY";
 		formatreader = new RijksmuseumRecordFormatter(FilterValuesMap.getRijksMap());
 	}
@@ -55,7 +55,8 @@ public class RijksmuseumSpaceSource extends ISpaceSource {
 		QueryBuilder builder = new QueryBuilder("https://www.rijksmuseum.nl/api/en/collection");
 		builder.addSearchParam("key", apiKey);
 		builder.addSearchParam("format", "json");
-		builder.addSearchParam("imgonly", "True");
+		if (q.hasMedia)
+			builder.addSearchParam("imgonly", "True");
 		builder.addSearchParam("f", "1");
 		
 		builder.addQuery("q", q.searchTerm);
@@ -69,7 +70,7 @@ public class RijksmuseumSpaceSource extends ISpaceSource {
 	@Override
 	public SourceResponse getResults(CommonQuery q) {
 		SourceResponse res = new SourceResponse();
-		res.source = getSourceName();
+		res.source = getSourceName().toString();
 		String httpQuery = getHttpQuery(q);
 		res.query = httpQuery;
 		JsonNode response;
@@ -176,7 +177,6 @@ public class RijksmuseumSpaceSource extends ISpaceSource {
 				}
 					
 				String json = Json.toJson(res).toString();
-				System.out.println(json);
 				jsonMetadata.add(new RecordJSONMetadata(Format.JSON_WITH, json));
 			}
 			Document xmlResponse = getHttpConnector().getURLContentAsXML(

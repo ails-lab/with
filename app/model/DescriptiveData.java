@@ -18,9 +18,6 @@ package model;
 
 import java.util.List;
 
-import javax.validation.constraints.NotNull;
-
-import org.hibernate.validator.constraints.NotBlank;
 import org.mongodb.morphia.annotations.Field;
 import org.mongodb.morphia.annotations.Index;
 import org.mongodb.morphia.annotations.IndexOptions;
@@ -44,11 +41,9 @@ import model.basicDataTypes.WithDate;
 @JsonInclude(value = JsonInclude.Include.NON_NULL)
 
 //TODO: check how to index MultiLiteral in mongo. Actually only need to query based on the "default" value.
-@Indexes({
-	@Index(fields = @Field(value = "label", type = IndexType.ASC), options = @IndexOptions())
-})
+@DescriptiveDataAnnotation
 public class DescriptiveData {
-	
+
 	public static enum Quality {
 		POOR, AVERAGE, GOOD, EXCELLENT
 	}
@@ -61,8 +56,8 @@ public class DescriptiveData {
 	}
 
 	// one line content description with identifiable characteristic
-	@NotNull
-	@NotBlank
+	//@NotNull
+	//@Pattern(regexp="[^\\s]")
 	private MultiLiteral label;
 
 	// arbitrary length content description
@@ -88,7 +83,7 @@ public class DescriptiveData {
 
 	// alternative title or name or placename
 	private MultiLiteral altLabels;
-	
+
 	// The country at which the resource is currently located
 	//in case of Agents, Places, Timespan
 	private MultiLiteralOrResource country;
@@ -96,18 +91,18 @@ public class DescriptiveData {
 	// The city at which the resource is currently located
 	//in case of Agents, Places, Timespan
 	private MultiLiteralOrResource city;
-	
+
 	@JsonDeserialize(using = PointDeserializer.class)
 	@JsonSerialize(using = PointSerializer.class)
 	private org.mongodb.morphia.geo.Point coordinates;
-	
+
 	private Quality metadataQuality;
 
-	
+
 	public MultiLiteral getLabel() {
 		return label;
 	}
-	
+
 	public void setLabel(MultiLiteral label) {
 		this.label = label;
 	}
@@ -183,7 +178,7 @@ public class DescriptiveData {
 	public void setAltLabels(MultiLiteral altLabels) {
 		this.altLabels = altLabels;
 	}
-	
+
 	public MultiLiteralOrResource getCountry() {
 		return country;
 	}

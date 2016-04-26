@@ -16,6 +16,8 @@
 
 package model.resources;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import org.bson.types.ObjectId;
@@ -25,13 +27,13 @@ import model.annotations.ContextData;
 
 
 public class RecordResource<T extends RecordResource.RecordDescriptiveData>
-	extends WithResource<RecordResource.RecordDescriptiveData, RecordResource.RecordAdmin> {
+	extends WithResource<T, RecordResource.RecordAdmin> {
 
 	public RecordResource() {
 		super();
 		this.administrative = new RecordAdmin();
 	}
-	
+
 	public RecordResource(ObjectId id) {
 		this.administrative = new RecordAdmin();
 		this.setDbId(id);
@@ -64,7 +66,13 @@ public class RecordResource<T extends RecordResource.RecordDescriptiveData>
 	 * collected records
 	 */
 	public Map<String, Object> transform() {
-		return this.transformWR();
+		Map<String, Object> idx_map =  this.transformWR();
 
+		List<ObjectId> colIn = new ArrayList<ObjectId>();
+		this.getCollectedIn().forEach( (ci) -> {colIn.add(ci);} );
+
+		idx_map.put("collectedId", colIn);
+
+		return idx_map;
 	}
 }

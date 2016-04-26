@@ -49,6 +49,7 @@ define(['bridget', 'knockout', 'text!./_collection-view.html', 'isotope', 'image
 		self.dataProvider = "";
 		self.dataProvider_uri = "";
 		self.rights = "";
+		self.mediatype="";
 		self.url = "";
 		self.externalId = "";
 		self.thumbnail = "";
@@ -160,7 +161,7 @@ define(['bridget', 'knockout', 'text!./_collection-view.html', 'isotope', 'image
 			if(self.source=="Rijksmuseum" && media){
 				media[0].Thumbnail=media[0].Original;
 			}
-			self.thumb = media[0] != null && media[0].Thumbnail != null && media[0].Thumbnail.withUrl != "null" ? media[0].Thumbnail.url : null;
+			self.thumb = media[0] != null && media[0].Thumbnail != null && media[0].Thumbnail.withUrl != "null" ? media[0].Thumbnail.withUrl : null;
 			self.fullres = media[0] != null && media[0].Original != null && media[0].Original.url != "null" ? media[0].Original.url : null;
 			self.fullrestype = media[0] != null && media[0].Original != null && media[0].Original.type != "null" ? media[0].Original.type : null;
 			
@@ -173,9 +174,17 @@ define(['bridget', 'knockout', 'text!./_collection-view.html', 'isotope', 'image
 				
 			}
 			
+			if(media &&  media[0]){
+				if(media[0].Original && media[0].Original.type){
+					self.mediatype=media[0].Original.type;
+				}else if(media[0].Thumbnail && media[0].Thumbnail.type){
+					self.mediatype=media[0].Thumbnail.type;
+				}
+			}
 			self.data(options);
 			self.isLoaded = ko.observable(true);
-			
+			self.fullrestype = media[0] != null && media[0].Original != null 
+			&& media[0].Original.type != "null" ? media[0].Original.type : null; 
 		};
 
 		if (data !== undefined) {
@@ -869,7 +878,7 @@ define(['bridget', 'knockout', 'text!./_collection-view.html', 'isotope', 'image
 				} else {
 					tile += '<li><a  data-toggle="tooltip" data-placement="top" title="Add to favorites" onclick="likeRecord(\'' + record.dbId + '\',event);" class="fa fa-heart"></a></li>';
 				}}
-				tile += '<li><a data-toggle="tooltip" data-placement="top" title="Collect it" class="fa fa-download collectbutton" onclick="collect(\'' + record.dbId + '\',event);" ></a></li>';
+				tile += '<li><a data-toggle="tooltip" data-placement="top" title="Collect it" class="fa fa-download collectbutton" onclick="collect(\'' + record.dbId + '\',event);" ></a></li></ul>';
 			}
 			tile += '<li><a data-toggle="tooltip" data-placement="top" title="Get similar" class="fa" onclick="similar(\'' + record.dbId + '\',event);" >S</a></li>';
 			tile += '</ul>';
@@ -913,13 +922,14 @@ define(['bridget', 'knockout', 'text!./_collection-view.html', 'isotope', 'image
 		self.editCollection = function () {
 			if (self.validationModel.isValid()) {
 			var jsondata = JSON.stringify({
+				resourceType: "SimpleCollection",
 				descriptiveData: {
 					label: {default: [self.titleToEdit()]},
 					description: {default: [self.descriptionToEdit()]},
 				},
 				administrative: { access: {
 					isPublic: self.isPublicEdit()},
-					collectionType: "SimpleCollection"}
+				}
 				
 			});
 			$.ajax({
@@ -985,7 +995,12 @@ define(['bridget', 'knockout', 'text!./_collection-view.html', 'isotope', 'image
 				var $item = $(image.img).parents(itemSelector);
 				// un-hide item
 				$item.show();
-				iso.appended($item);
+				if(iso)
+					  iso.appended($item);
+					else{
+						$.error("iso gone");
+					}
+				
 				self.$container.isotope('layout');
 				var scrollpos = sessionStorage.getItem("collection-viewscroll" + self.id());
 				if (scrollpos && $(".grid#" + self.id()).height() > scrollpos) {

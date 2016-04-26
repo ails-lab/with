@@ -77,7 +77,12 @@ define(['knockout', 'text!./myorganizations.html', 'app', 'moment', 'async!https
 			}
 		});
 		self.friendlyName = ko.observable().extend({
-			required: true
+			required: true,
+			minLength: 3,
+			pattern: {
+				message: 'Your username must be alphanumeric.',
+				params: /^\w+$/
+			}
 		});
 		self.about = ko.observable();
 		self.validationModel = ko.validatedObservable({
@@ -242,6 +247,7 @@ define(['knockout', 'text!./myorganizations.html', 'app', 'moment', 'async!https
 
 		self.myUsername = ko.observable(app.currentUser.username());
 		self.userId = ko.observable(app.currentUser._id());
+		self.groupId = ko.observable();
 		if (params.id !== undefined) {
 			self.groupId(params.id);
 		}
@@ -276,8 +282,8 @@ define(['knockout', 'text!./myorganizations.html', 'app', 'moment', 'async!https
 			return -1;
 		};
 
-		self.getMembersInfo = function (category) {
-			self.groupId = ko.observable(self.groups()[0].dbId());
+		self.getMembersInfo = function (category, group) {
+			self.groupId(group.dbId());
 			console.log("members info");
 			$.ajax({
 				method : "GET",

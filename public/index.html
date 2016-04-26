@@ -48,13 +48,17 @@
     </header>
     <!-- main-->
 
-
+     
+    <!-- ko if:showSearch()==false --> 
 	<!-- ko component: {
-    name: route().page,
-    params: route
+    name: $data.route().page,
+    params: $data.route()
 	} -->
 	<!-- /ko -->
-
+    <!-- /ko -->
+    
+     <search-page params="route: route" data-bind="visible: showSearch()==true"></search-page>
+    
 
      <div id="fb-root"></div>
 

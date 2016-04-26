@@ -17,10 +17,12 @@
 package model.usersAndGroups;
 
 import java.security.MessageDigest;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
-import model.resources.CollectionObject;
+import model.resources.collection.CollectionObject;
 import notifications.Notification;
 
 import org.apache.commons.codec.binary.Hex;
@@ -54,7 +56,8 @@ import db.DB;
 		@Index(fields = @Field(value = "username", type = IndexType.TEXT), options = @IndexOptions(background = true, name = "username_text")),
 		@Index(fields = @Field(value = "facebookId", type = IndexType.ASC), options = @IndexOptions()),
 		@Index(fields = @Field(value = "googleId", type = IndexType.ASC), options = @IndexOptions()),
-		@Index(fields = @Field(value = "userGroupsIds", type = IndexType.ASC), options = @IndexOptions()) })
+		@Index(fields = @Field(value = "userGroupsIds", type = IndexType.ASC), options = @IndexOptions()),
+		@Index(fields = @Field(value = "page.coordinates", type = IndexType.GEO2DSPHERE), options = @IndexOptions(background = true)) })
 @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
 public class User extends UserOrGroup {
 
@@ -125,7 +128,7 @@ public class User extends UserOrGroup {
 	/*
 	 * public void addToHistory(Search search) { if (search.getDbID() == null) {
 	 * log.error("Search is  not saved!"); return; }
-	 * 
+	 *
 	 * searchHistory.add(search); if (searchHistory.size() > EMBEDDED_CAP) {
 	 * searchHistory.remove(0); } }
 	 */
@@ -208,7 +211,7 @@ public class User extends UserOrGroup {
 
 	/*
 	 * public List<Search> getSearchHistory() { return searchHistory; }
-	 * 
+	 *
 	 * public void setSearchHistory(List<Search> searcHistory) {
 	 * this.searchHistory = searcHistory; }
 	 */
@@ -291,10 +294,10 @@ public class User extends UserOrGroup {
 
 	/*
 	 * public int getExhibitionsCreated() { return exhibitionsCreated; }
-	 * 
+	 *
 	 * public void setExhibitionsCreated(int exhibitionsCreated) {
 	 * this.exhibitionsCreated = exhibitionsCreated; }
-	 * 
+	 *
 	 * public void addExhibitionsCreated() { this.exhibitionsCreated++; }
 	 */
 
@@ -380,7 +383,8 @@ public class User extends UserOrGroup {
 								20 - unreadNotifications.size()));
 				notifications.addAll(unreadNotifications);
 			} else {
-				notifications = unreadNotifications;
+				List<Notification> subNotifications = new ArrayList<Notification>(unreadNotifications);
+				notifications = new HashSet<Notification>(subNotifications.subList(0, 19));
 			}
 			return notifications;
 		} catch (Exception e) {

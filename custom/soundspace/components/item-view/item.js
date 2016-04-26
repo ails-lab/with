@@ -1,5 +1,8 @@
 define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, app) {
 
+    self.disqusLoaded=ko.observable(false);
+	
+
 	function Record(data) {
 		var self = this;
 	    self.recordId = "-1";
@@ -7,8 +10,8 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 		self.description="";
 		self.thumb = "";
 		self.fullres=ko.observable('');
-		self.view_url="";
-		self.source="";
+		self.view_url=ko.observable('');
+		self.source=ko.observable("");
 		self.creator="";
 		self.provider="";
 		self.dataProvider="";
@@ -16,6 +19,7 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 		self.rights="";
 		self.url="";
 		self.externalId = "";
+		self.mediatype="";
 		self.likes=0;
 		self.collected=0;
 		self.data=ko.observable('');
@@ -53,16 +57,30 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 			if(data.title==undefined){
 				self.title="No title";
 			}else{self.title=data.title;}
-			self.view_url=data.view_url;
+			self.view_url(data.view_url);
 			self.thumb=data.thumb;
 			if ( data.fullres && data.fullres.length > 0 ) {
 				self.fullres(data.fullres);
 			} else {
 				self.fullres(self.calcThumbnail());
 			}
-			//self.fullres=data.fullres;
+			self.mediatype=data.mediatype;
 			self.description=data.description;
-			self.source=data.source;
+			self.source(data.source);
+			if(self.source() && self.source()=="Europeana"){
+				$("span.pnd-resource").show();
+				$("div.pnd-resource").show();
+				
+				$("span.pnd-resource").attr('about',self.view_url());
+				$("div.pnd-resource").attr('about',self.view_url());
+				dispatchDocumentEvent('Pundit.loadAnnotations');
+				dispatchDocumentEvent('Pundit.forceCompileButton');
+				
+				
+			}
+			else{$("span.pnd-resource").hide();
+				$("div.pnd-resource").hide();
+				}
 			self.creator=data.creator;
 			self.provider=data.provider;
 			self.dataProvider=data.dataProvider;
@@ -83,7 +101,15 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 			var likeval=app.isLiked(self.externalId);
 			self.isLike(likeval);
 			self.loading(false);
-		 
+			if (data.fullrestype != null) {
+				if (data.fullrestype == "VIDEO") {
+					self.vtype = "MEDIA";
+					$('#mediadiv').html('<video id="mediaplayer" autoplay="true" controls width="576" height="324"><source src="' + self.fullres() + '" type="video/mp4">Your browser does not support HTML5</video>');        
+				} else if (data.fullrestype == "AUDIO") {
+					self.vtype = "MEDIA";
+					$('#mediadiv').html('<audio id="mediaplayer" autoplay="true" controls width="576" height="324"><source src="' + self.fullres() + '" type="audio/mpeg">Your browser does not support HTML5</audio>');
+				}
+			}		 
 		};
 
 		self.findsimilar=function(){
@@ -101,7 +127,7 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 					searchTerm: self.forrelated(),
 					page: 1,
 					pageSize:10,
-				    source:[self.source],
+				    source:[self.source()],
 				    filters:[]
 				}),
 				success : function(result) {
@@ -129,7 +155,14 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 									if(source=="Rijksmuseum" && media){
 										media[0].Thumbnail=media[0].Original;
 									} 		
-									
+								var mediatype="";
+								if(media &&  media[0]){
+									if(media[0].Original && media[0].Original.type){
+										mediatype=media[0].Original.type;
+									}else if(media[0].Thumbnail && media[0].Thumbnail.type){
+										mediatype=media[0].Thumbnail.type;
+									}
+								}
 						        var record = new Record({
 									        thumb: media!=null &&  media[0] !=null  && media[0].Thumbnail!=null  && media[0].Thumbnail.url!="null" ? media[0].Thumbnail.url:"img/content/thumb-empty.png",
 											fullres: media!=null &&  media[0] !=null && media[0].Original!=null  && media[0].Original.url!="null"  ? media[0].Original.url : "",
@@ -141,12 +174,15 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 											dataProvider_uri: findProvenanceValues(provenance,"dataProvider_uri"),
 											provider: findProvenanceValues(provenance,"provider"),
 											rights: rights,
+											mediatype: mediatype,
 											externalId: admindata.externalId,
 											source: source,
 											likes: usage.likes,
 											collected: usage.collected,
 											collectedIn:result.collectedIn,
-											data: result
+											data: result,
+											fullrestype: media[0] != null && media[0].Original != null 
+											&& media[0].Original.type != "null" ? media[0].Original.type : ""
 								  });
 						        if(record.thumb && record.thumb.length>0 && record.externalId!=self.externalId)
 							       items.push(record);
@@ -156,6 +192,7 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 					self.related().push.apply(self.related(),items);
 					self.related.valueHasMutated();}
 					self.loading(false);
+					self.vtype = "IMAGE";
 				},
 				error   : function(request, status, error) {
 					self.loading(false);
@@ -176,7 +213,7 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 						searchTerm: self.title,
 						page: 1,
 						pageSize:10,
-					    source:[self.source],
+					    source:[self.source()],
 					    filters:[]
 					}),
 					success : function(result) {
@@ -204,6 +241,14 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 									if(source=="Rijksmuseum" && media){
 										media[0].Thumbnail=media[0].Original;
 									} 	
+									 var mediatype="";
+									 if(media &&  media[0]){
+											if(media[0].Original && media[0].Original.type){
+												mediatype=media[0].Original.type;
+											}else if(media[0].Thumbnail && media[0].Thumbnail.type){
+												mediatype=media[0].Thumbnail.type;
+											}
+										}
 							        var record = new Record({
 							            		thumb: media!=null &&  media[0] !=null  && media[0].Thumbnail!=null  && media[0].Thumbnail.url!="null" ? media[0].Thumbnail.url:"img/content/thumb-empty.png",
 												fullres: media!=null &&  media[0] !=null && media[0].Original!=null  && media[0].Original.url!="null"  ? media[0].Original.url : "",
@@ -215,12 +260,15 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 												dataProvider_uri: findProvenanceValues(provenance,"dataProvider_uri"),
 												provider: findProvenanceValues(provenance,"provider"),
 												rights: rights,
+												mediatype: mediatype,
 												externalId: admindata.externalId,
 												source: source,
 												likes: usage.likes,
 												collected: usage.collected,
 												collectedIn:result.collectedIn,
-												data: result
+												data: result,
+												fullrestype: media[0] != null && media[0].Original != null 
+												&& media[0].Original.type != "null" ? media[0].Original.type : ""
 									  });
 							        if(record.thumb && record.thumb.length>0 && record.externalId!=self.externalId)
 								       items.push(record);
@@ -230,6 +278,7 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 						self.similar().push.apply(self.similar(),items);
 						self.similar.valueHasMutated();}
 						self.loading(false);
+						self.vtype = "IMAGE";
 					},
 					error   : function(request, status, error) {
 						self.loading(false);
@@ -255,7 +304,7 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 			   }
 			});
 		self.sourceCredits = ko.pureComputed(function() {
-			 switch(self.source) {
+			 switch(self.source()) {
 			    case "DPLA":
 			    	return "dp.la";
 			    case "Europeana":
@@ -298,7 +347,8 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 	function ItemViewModel(params) {
 		var self = this;
 		document.body.setAttribute("data-page","item");
-		setTimeout(function(){ WITHApp.init(); }, 300);   
+		setTimeout(function(){ WITHApp.init(); }, 300);
+		
 		self.route = params.route;
 		self.from=window.location.href;	
 		var thumb = "";
@@ -308,14 +358,20 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 		});
 		self.record = ko.observable(new Record());
 		self.id = ko.observable(params.id);
+		
+
 		itemShow = function (e) {
 			data = ko.toJS(e);
 			$('.nav-tabs a[href="#information"]').tab('show');
 			$(".mediathumb > img").attr("src","");
+			$("span.pnd-resource").attr('about','');
 			
 			self.open();
 			self.record(new Record(data
 					));
+			if(self.record().recordId!="-1"){
+				self.addDisqus();
+			}
 			
 		};
 
@@ -337,9 +393,13 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 
 		self.close = function () {
 			//self.record(new Record());
+			dispatchDocumentEvent('Pundit.hide');
 			$('body').css('overflow','visible');
 			$( '.itemview' ).fadeOut();
-			
+			var vid = document.getElementById("mediaplayer");
+			if (vid != null) {
+				vid.pause();
+			}
 		};
 
 		self.changeSource = function (item) {
@@ -397,6 +457,8 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 					var media=result.media;
 					var provenance=result.provenance;
 					var usage=result.usage;
+					var rights=null;
+					
 					if(media){
 						 if(media[0].Original){
 							 rights=findResOrLit(media[0].Original.originalRights);
@@ -409,6 +471,14 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 					if(source=="Rijksmuseum" && media){
 								media[0].Thumbnail=media[0].Original;
 							} 	
+					var mediatype="";
+					if(media &&  media[0]){
+						if(media[0].Original && media[0].Original.type){
+							mediatype=media[0].Original.type;
+						}else if(media[0].Thumbnail && media[0].Thumbnail.type){
+							mediatype=media[0].Thumbnail.type;
+						}
+					}
 					 var record = new Record({
 						            thumb: media!=null &&  media[0] !=null  && media[0].Thumbnail!=null  && media[0].Thumbnail.url!="null" ? media[0].Thumbnail.url:"img/content/thumb-empty.png",
 								    fullres: media!=null &&  media[0] !=null && media[0].Original!=null  && media[0].Original.url!="null"  ? media[0].Original.url : "",
@@ -419,6 +489,7 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 									dataProvider: findProvenanceValues(provenance,"dataProvider"),
 									dataProvider_uri: findProvenanceValues(provenance,"dataProvider_uri"),
 									provider: findProvenanceValues(provenance,"provider"),
+									mediatype: mediatype, 
 									rights: rights,
 									externalId: admindata.externalId,
 									source: source,
@@ -426,13 +497,16 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 									likes: usage.likes,
 									collected: usage.collected,
 									collectedIn:result.collectedIn,
-									data: result
+									data: result,
+									fullrestype: media[0] != null && media[0].Original != null
+									&& media[0].Original.type != "null" ? media[0].Original.type : ""
 						  });
 					self.record(record);
 					$('.nav-tabs a[href="#information"]').tab('show');
 					self.open();
+					self.addDisqus();
 					$( '.itemview' ).fadeIn();
-					
+					self.vtype = "IMAGE"; 
 				},
 				error: function (xhr, textStatus, errorThrown) {
 					self.open();
@@ -440,6 +514,41 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 				}
 			});
 		};
+		self.addDisqus= function(){
+			$("#disqus_thread").hide();
+			if(disqusLoaded()==false){
+		        var disqus_shortname = 'withculture';
+		        var disqus_identifier = self.record().recordId;
+		        var disqus_url = location.href.replace(location.hash,"")+"#!item/"+self.record().recordId;
+		       
+
+		        /* * * DON'T EDIT BELOW THIS LINE * * */
+		        (function() {
+		            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+		            dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+		            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+		        })();
+		        disqusLoaded(true);
+		        
+			}
+			    setTimeout(function(){
+			    	DISQUS.reset({
+			        reload: true,
+			        config: function () {
+			            this.page.identifier = self.record().recordId;
+			            this.page.url =  location.href.replace(location.hash,"")+"#!item/"+self.record().recordId;
+			            this.page.title = self.record().title;
+			            this.language = "en";
+			        }
+			    	
+			    });
+			    	$("#disqus_thread").show();
+			    }, 2000);
+		    
+			
+		}
+		
+		
 		if(self.id()!=undefined){
 			
 			self.loadItem();

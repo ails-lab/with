@@ -2022,7 +2022,7 @@ public enum Language {
 				return lang;
 		}
 		Logger.warn("unkown language "+code);
-		return null;
+		return UNKNOWN;
 	}
 
 	private static boolean match(String code, Language lang) {

@@ -24,11 +24,12 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import model.basicDataTypes.ProvenanceInfo.Sources;
 import model.basicDataTypes.WithAccess;
 import model.basicDataTypes.WithAccess.Access;
-import model.resources.CollectionObject;
 import model.resources.RecordResource;
 import model.resources.WithResource;
+import model.resources.collection.CollectionObject;
 import model.usersAndGroups.User;
 
 import org.bson.types.ObjectId;
@@ -84,10 +85,7 @@ public class WithSpaceSource extends ISpaceSource {
 	    }
 	}*/
 
-	@Override
-	public String getSourceName() {
-		return "WITHin";
-	}
+	
 
 	@Override
 	public SourceResponse getResults(CommonQuery q) {
@@ -132,12 +130,14 @@ public class WithSpaceSource extends ISpaceSource {
 		/* Filters */
 		//elasticoptions.addFilter("isPublic", "true");
 		List<CommonFilter> filters = q.filters;
-		for (CommonFilter f: filters) {
-			for (String filterValue: f.values) {
-	    		elasticoptions.addFilter(f.filterID+".all", filterValue);
+		if (filters!=null){
+			for (CommonFilter f: filters) {
+				for (String filterValue: f.values) {
+		    		elasticoptions.addFilter(f.filterID+".all", filterValue);
+				}
 			}
-		}
 
+		}
 
 
 		/*
@@ -155,7 +155,7 @@ public class WithSpaceSource extends ISpaceSource {
 		searcher.closeClient();
 		SourceResponse sourceResponse =
 				new SourceResponse((int)elasticResponse.getHits().getTotalHits(), offset, count);
-		sourceResponse.source = getSourceName();
+		sourceResponse.source = getSourceName().toString();
 
 		sourceResponse.setResourcesPerType(resourcesPerType);
 
@@ -182,6 +182,10 @@ public class WithSpaceSource extends ISpaceSource {
 		}
 
 		return sourceResponse;
+	}
+
+	public WithSpaceSource() {
+		super(Sources.WITHin);
 	}
 
 	private List<SearchHit> getTotalHitsFromScroll(SearchResponse scrollResp) {

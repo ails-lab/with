@@ -122,7 +122,7 @@ public class EmbeddedMediaObject {
 		public String toString() {
 			return text;
 		}
-		public static WithMediaRights getRighs(String code){
+		public static WithMediaRights getRights(String code){
 			if (Utils.hasInfo(code)){
 				for (WithMediaRights v : WithMediaRights.values()) {
 					if (v.toString().equals(code))
@@ -140,7 +140,7 @@ public class EmbeddedMediaObject {
 	private WithMediaRights withRights;
 
 	// the media object URL
-	private String url= "empty";
+	private String url= "";
 
 	private MediaVersion mediaVersion;
 

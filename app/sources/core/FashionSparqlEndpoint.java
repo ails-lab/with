@@ -128,7 +128,6 @@ public class FashionSparqlEndpoint {
 	}
 
 	private String getDataProvider(String dataProvider) {
-		System.out.println(dataProvider);
 		String cleanDP = dataProvider.replace("http://mint-projects.image.ntua.gr/europeana-fashion/", "");
 		StringTokenizer st = new StringTokenizer(cleanDP,"_");
 		for(int i=0; i< 5; i++)

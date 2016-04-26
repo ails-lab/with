@@ -23,6 +23,17 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import model.DescriptiveData;
+import model.EmbeddedMediaObject;
+import model.EmbeddedMediaObject.MediaVersion;
+import model.annotations.Annotation;
+import model.annotations.ContextData;
+import model.basicDataTypes.CollectionInfo;
+import model.basicDataTypes.ProvenanceInfo;
+import model.basicDataTypes.WithAccess;
+import model.basicDataTypes.WithAccess.Access;
+import model.usersAndGroups.User;
+
 import org.bson.types.ObjectId;
 import org.mongodb.morphia.annotations.Embedded;
 import org.mongodb.morphia.annotations.Entity;
@@ -34,7 +45,7 @@ import org.mongodb.morphia.annotations.Indexes;
 import org.mongodb.morphia.annotations.Version;
 import org.mongodb.morphia.utils.IndexType;
 
-import utils.AccessManager;
+import play.libs.Json;
 import utils.Deserializer;
 import utils.Serializer;
 
@@ -43,40 +54,28 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import db.DB;
 import elastic.ElasticUtils;
-import model.DescriptiveData;
-import model.EmbeddedMediaObject;
-import model.EmbeddedMediaObject.MediaVersion;
-import model.annotations.Annotation;
-import model.annotations.ContextData;
-import model.basicDataTypes.CollectionInfo;
-import model.basicDataTypes.Language;
-import model.basicDataTypes.ProvenanceInfo;
-import model.basicDataTypes.WithAccess;
-import model.basicDataTypes.WithAccess.Access;
-import model.usersAndGroups.User;
 
+@SuppressWarnings("rawtypes")
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Entity("RecordResource")
 @Indexes({
-	@Index(fields = @Field(value = "resourceType", type = IndexType.ASC), options = @IndexOptions()),
-	@Index(fields = @Field(value = "collectedIn", type = IndexType.ASC), options = @IndexOptions())
-	})
+		@Index(fields = @Field(value = "resourceType", type = IndexType.ASC), options = @IndexOptions()),
+		@Index(fields = @Field(value = "administrative.withCreator", type = IndexType.ASC), options = @IndexOptions()),
+		@Index(fields = @Field(value = "administrative.externalId", type = IndexType.ASC), options = @IndexOptions()),
+		@Index(fields = @Field(value = "provenance.provider", type = IndexType.ASC), options = @IndexOptions()),
+		@Index(fields = @Field(value = "provenance.resourceId", type = IndexType.ASC), options = @IndexOptions()),
+		@Index(fields = @Field(value = "descriptiveData.label", type = IndexType.ASC), options = @IndexOptions()),
+		@Index(fields = @Field(value = "collectedIn", type = IndexType.ASC), options = @IndexOptions()) })
 @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
 public class WithResource<T extends DescriptiveData, U extends WithResource.WithAdmin> {
 
-
-	//TODO: compound indexes for common queries on multiple fields
-	@Indexes({
-		@Index(fields = @Field(value = "withCreator", type = IndexType.ASC), options = @IndexOptions()),
-		@Index(fields = @Field(value = "externalId", type = IndexType.ASC), options = @IndexOptions(unique = true)),
-		@Index(fields = @Field(value = "access.user,access.level"))//compound/multikey index for access
-	})
 	public static class WithAdmin {
 
-		//index
+		// index
 		@JsonSerialize(using = Serializer.WithAccessSerializer.class)
 		@JsonDeserialize(using = Deserializer.WithAccessDeserializer.class)
 		private WithAccess access = new WithAccess();
@@ -87,7 +86,7 @@ public class WithResource<T extends DescriptiveData, U extends WithResource.With
 		 * who uploaded that resource. For collections, it links to the userId
 		 * who created the collection.
 		 */
-		//index
+		// index
 		@JsonSerialize(using = Serializer.ObjectIdSerializer.class)
 		private ObjectId withCreator = null;
 
@@ -104,10 +103,10 @@ public class WithResource<T extends DescriptiveData, U extends WithResource.With
 		private Date lastModified;
 
 		@Embedded
-		//@JsonSerialize(using = Serializer.AccessMapSerializer.class)
-		//@JsonDeserialize(using = Deserializer.AccessMapDeserializer.class)
-		//private final Map<ObjectId, Access> underModeration = new HashMap<ObjectId, Access>();
-
+		// @JsonSerialize(using = Serializer.AccessMapSerializer.class)
+		// @JsonDeserialize(using = Deserializer.AccessMapDeserializer.class)
+		// private final Map<ObjectId, Access> underModeration = new
+		// HashMap<ObjectId, Access>();
 		// recordId of last entry of provenance chain id the resource has been
 		// imported from external resource
 		// dbId if uploaded by user
@@ -154,7 +153,8 @@ public class WithResource<T extends DescriptiveData, U extends WithResource.With
 		}
 
 		public void setWithCreator(ObjectId creatorId) {
-			//OWN rights from old creator are not withdrawn (ownership is not identical to creation role)
+			// OWN rights from old creator are not withdrawn (ownership is not
+			// identical to creation role)
 			this.withCreator = creatorId;
 			if (withCreator != null)
 				this.getAccess().addToAcl(creatorId, Access.OWN);
@@ -177,7 +177,6 @@ public class WithResource<T extends DescriptiveData, U extends WithResource.With
 		}
 
 	}
-
 
 	public static class Usage {
 		// in how many favorites is it
@@ -320,7 +319,7 @@ public class WithResource<T extends DescriptiveData, U extends WithResource.With
 	}
 
 	public static enum WithResourceType {
-		WithResource, CollectionObject, RecordResource,
+		WithResource, CollectionObject, SimpleCollection, Exhibition, RecordResource,
 		CulturalObject, EuScreenObject, EventObject,
 		PlaceObject, TimespanObject, ThesaurusObject,
 		AgentObject;
@@ -332,7 +331,6 @@ public class WithResource<T extends DescriptiveData, U extends WithResource.With
 
 	public ObjectId getDbId() {
 		return dbId;
-		//TODO: fill in withURI (with postLoad?)
 	}
 
 	public void setDbId(ObjectId dbId) {
@@ -343,7 +341,8 @@ public class WithResource<T extends DescriptiveData, U extends WithResource.With
 	protected U administrative;
 
 	@Embedded
-	private List<CollectionInfo > collectedIn;
+	@JsonSerialize(using = Serializer.ObjectIdArraySerializer.class)
+	private List<ObjectId> collectedIn;
 
 	@Embedded
 	private Usage usage;
@@ -353,7 +352,8 @@ public class WithResource<T extends DescriptiveData, U extends WithResource.With
 	private List<ExternalCollection> externalCollections;
 
 	@Embedded
-	//depending on the source, we know which entry is the dataProvider and which the provider
+	// depending on the source, we know which entry is the dataProvider and
+	// which the provider
 	private List<ProvenanceInfo> provenance;
 
 	// enum of classes that are derived from DescriptiveData
@@ -372,16 +372,16 @@ public class WithResource<T extends DescriptiveData, U extends WithResource.With
 	private List<HashMap<MediaVersion, EmbeddedMediaObject>> media;
 
 	@Embedded
-	@JsonDeserialize(using = Deserializer.ContextDataDeserializer.class)
-	private List<ContextData> contextData;
+	//@JsonDeserialize(using = Deserializer.ContextDataDeserializer.class)
+	private ContextData contextData;
 
 	private List<Annotation> annotations;
 
 	public WithResource() {
 		this.usage = new Usage();
 		this.provenance = new ArrayList<ProvenanceInfo>();
-		this.collectedIn = new ArrayList<CollectionInfo>();
-		this.contextData = new ArrayList<ContextData>();
+		this.collectedIn = new ArrayList<ObjectId>();
+		this.contextData = new ContextData();
 		this.media = new ArrayList<>();
 		HashMap<MediaVersion, EmbeddedMediaObject> embedded = new HashMap<MediaVersion, EmbeddedMediaObject>();
 		embedded.put(MediaVersion.Thumbnail, new EmbeddedMediaObject());
@@ -391,9 +391,9 @@ public class WithResource<T extends DescriptiveData, U extends WithResource.With
 	public WithResource(Class<?> clazz) {
 		this.usage = new Usage();
 		this.provenance = new ArrayList<ProvenanceInfo>();
-		this.collectedIn = new ArrayList<CollectionInfo>();
+		this.collectedIn = new ArrayList<ObjectId>();
 		this.media = new ArrayList<>();
-		this.contextData = new ArrayList<ContextData>();
+		this.contextData = new ContextData();
 		HashMap<MediaVersion, EmbeddedMediaObject> embedded = new HashMap<MediaVersion, EmbeddedMediaObject>();
 		embedded.put(MediaVersion.Thumbnail, new EmbeddedMediaObject());
 		this.media.add(embedded);
@@ -411,19 +411,18 @@ public class WithResource<T extends DescriptiveData, U extends WithResource.With
 		this.administrative = administrative;
 	}
 
-	public List<CollectionInfo> getCollectedIn() {
+	public List<ObjectId> getCollectedIn() {
 		return collectedIn;
 	}
 
-	public void setCollectedIn(List<CollectionInfo> collectedIn) {
+	public void setCollectedIn(List<ObjectId> collectedIn) {
 		this.collectedIn = collectedIn;
 	}
 
-	public void addPositionToCollectedIn(ObjectId colId, Integer position) {
-		CollectionInfo entry = new CollectionInfo(colId, position);
+	public void addPositionToCollectedIn(ObjectId colId) {
 		if (collectedIn == null)
-			collectedIn = new ArrayList<CollectionInfo>();
-		collectedIn.add(entry);
+			collectedIn = new ArrayList<ObjectId>();
+		collectedIn.add(colId);
 
 	}
 
@@ -496,12 +495,14 @@ public class WithResource<T extends DescriptiveData, U extends WithResource.With
 		this.media = media;
 	}
 
-	public void addMediaView(MediaVersion mediaVersion, EmbeddedMediaObject media, int viewIndex) {
+	public void addMediaView(MediaVersion mediaVersion,
+			EmbeddedMediaObject media, int viewIndex) {
 		media.setMediaVersion(mediaVersion);
 		this.media.get(viewIndex).put(mediaVersion, media);
 	}
 
-	public void addMediaView(MediaVersion mediaVersion, EmbeddedMediaObject media) {
+	public void addMediaView(MediaVersion mediaVersion,
+			EmbeddedMediaObject media) {
 		HashMap<MediaVersion, EmbeddedMediaObject> e = new HashMap<>();
 		e.put(mediaVersion, media);
 		media.setMediaVersion(mediaVersion);
@@ -513,12 +514,11 @@ public class WithResource<T extends DescriptiveData, U extends WithResource.With
 		this.media.get(0).put(mediaVersion, media);
 	}
 
-	public List<ContextData> getContextData() {
+	public ContextData getContextData() {
 		return contextData;
 	}
 
-	public void setContextData(
-			List<ContextData> contextData) {
+	public void setContextData(ContextData contextData) {
 		this.contextData = contextData;
 	}
 
@@ -530,9 +530,29 @@ public class WithResource<T extends DescriptiveData, U extends WithResource.With
 		this.annotations = annotations;
 	}
 
-	public User getWithCreatorInfo() {
-		if(administrative.getWithCreator() != null)
-			return DB.getUserDAO().getById(this.administrative.getWithCreator(), new ArrayList<String>(Arrays.asList("username", "firstName", "lastName")));
+	public ObjectNode getWithCreatorInfo() {
+		if (administrative.getWithCreator() != null) {
+			User u = DB.getUserDAO().getById(
+					this.administrative.getWithCreator(),
+					new ArrayList<String>(Arrays.asList("username",
+							"firstName", "lastName")));
+			ObjectNode withCreator = Json.newObject();
+			withCreator.put("username", u.getUsername());
+			withCreator.put("firstName", u.getFirstName());
+			withCreator.put("lastName", u.getLastName());
+			return withCreator;
+		}
+		else
+			return null;
+	}
+
+	@JsonIgnore
+	public User getWithCreator() {
+		if (administrative.getWithCreator() != null)
+			return DB.getUserDAO().getById(
+					this.administrative.getWithCreator(),
+					new ArrayList<String>(Arrays.asList("username",
+							"firstName", "lastName")));
 		else
 			return null;
 	}
@@ -541,10 +561,11 @@ public class WithResource<T extends DescriptiveData, U extends WithResource.With
 	/* Elastic Transformations */
 
 	/*
-	 * Currently we are indexing only Resources that represent
-	 * collected records
+	 * Currently we are indexing only Resources that represent collected records
 	 */
 	public Map<String, Object> transformWR() {
 		return ElasticUtils.basicTransformation(this);
 	}
+
+
 }

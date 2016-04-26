@@ -9,6 +9,8 @@ define(["knockout", "crossroads", "hasher"], function (ko, crossroads, hasher) {
 	// Knockout that requires or even knows about this technique. It's just one of
 	// many possible ways of setting up client-side routes.
 
+	this.showSearch=ko.observable(false);
+	
 	return new Router({
 		routes: [
 			{ url: '',          params: { page: 'home-page',     title: 'Home' } },
@@ -22,6 +24,7 @@ define(["knockout", "crossroads", "hasher"], function (ko, crossroads, hasher) {
 			{ url: 'register',  params: { page: 'register-page', title: 'Register'} },
 			{ url: 'email',     params: { page: 'email-page',    title: 'Register' } },
 			{ url: 'item/{id}',     params: { page: 'itemview',    title: 'Media Item' } },
+			{ url: '!item/{id}',     params: { page: 'itemview',    title: 'Media Item' } },
 			{ url: 'collect/{id}',     params: { page: 'item-view',    title: 'Collect' } },
 			{ url: 'collectionview/{id}',     params: { page: 'collection-view',    title: 'Collection View', type: 'collection' } },
 			{ url: 'collectionview/{id}/count/{count}',     params: { page: 'collection-view',    title: 'Collection View', type: 'collection' } },
@@ -100,11 +103,35 @@ define(["knockout", "crossroads", "hasher"], function (ko, crossroads, hasher) {
 
 					sessionStorage.setItem("collection-viewscroll" + oldHash, scrollPosition);
 				}
+				else if (oldHash.indexOf("search") === 0) {
+					var scrollPosition = $(window).scrollTop();
+					oldHash = oldHash.substring(6);
+					if (oldHash.indexOf('/') != -1) {
+						oldHash = oldHash.substring(0, oldHash.indexOf('/'));
+					}
+
+					sessionStorage.setItem("search-viewscroll" + oldHash, scrollPosition);
+				}
+			}
+			if(newHash.indexOf('search')!=-1){
+			
+				self.showSearch(true);
+				$('div[role="main"]').toggleClass( "homepage", false );
+				$('div[role="main"]').toggleClass( "searchpage", true );
+				if(sessionStorage.getItem("search-viewscroll")){
+					    var scrollTop=sessionStorage.getItem("search-viewscroll");
+						setTimeout(function(){$(window).scrollTop(scrollTop);},500);
+				}
+				
+			}
+			else{
+				self.showSearch(false);
+				$('div[role="main"]').toggleClass( "searchpage", false);
 			}
 			crossroads.parse(newHash);
 		}
 
-		crossroads.ignoreState = true;
+		//crossroads.ignoreState = true;
 		crossroads.normalizeFn = crossroads.NORM_AS_OBJECT;
 		hasher.initialized.add(parseHash);
 		hasher.changed.add(parseHash);

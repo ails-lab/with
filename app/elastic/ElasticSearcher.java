@@ -359,8 +359,8 @@ public class ElasticSearcher {
 			OrFilterBuilder or_filter = FilterBuilders.orFilter();
 			for(Tuple<ObjectId, Access> t: ands) {
 				BoolFilterBuilder bool = FilterBuilders.boolFilter();
-				RangeFilterBuilder range_filter = FilterBuilders.rangeFilter("access.level").gte(t.y.ordinal());
-				bool.must(this.filter("access.user", t.x.toString()));
+				RangeFilterBuilder range_filter = FilterBuilders.rangeFilter("access.acl.level").gte(t.y.ordinal());
+				bool.must(this.filter("access.acl.user", t.x.toString()));
 				bool.must(range_filter);
 				or_filter.add(bool);
 			}

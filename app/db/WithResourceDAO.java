@@ -21,6 +21,20 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
+import model.DescriptiveData;
+import model.EmbeddedMediaObject;
+import model.EmbeddedMediaObject.MediaVersion;
+import model.annotations.ContextData;
+import model.annotations.ContextData.ContextDataBody;
+import model.basicDataTypes.Language;
+import model.basicDataTypes.ProvenanceInfo;
+import model.basicDataTypes.WithAccess;
+import model.basicDataTypes.WithAccess.Access;
+import model.basicDataTypes.WithAccess.AccessEntry;
+import model.resources.collection.CollectionObject;
+import model.resources.WithResource;
+import model.usersAndGroups.User;
+
 import org.bson.types.ObjectId;
 import org.elasticsearch.common.lang3.ArrayUtils;
 import org.mongodb.morphia.query.Criteria;
@@ -28,21 +42,10 @@ import org.mongodb.morphia.query.CriteriaContainer;
 import org.mongodb.morphia.query.Query;
 import org.mongodb.morphia.query.UpdateOperations;
 
-import com.mongodb.BasicDBObject;
-
-import model.DescriptiveData;
-import model.EmbeddedMediaObject;
-import model.EmbeddedMediaObject.MediaVersion;
-import model.basicDataTypes.CollectionInfo;
-import model.basicDataTypes.Language;
-import model.basicDataTypes.ProvenanceInfo;
-import model.basicDataTypes.WithAccess;
-import model.basicDataTypes.WithAccess.Access;
-import model.basicDataTypes.WithAccess.AccessEntry;
-import model.resources.WithResource;
-import model.usersAndGroups.User;
 import utils.AccessManager.Action;
 import utils.Tuple;
+
+import com.mongodb.BasicDBObject;
 
 /*
  * The class consists of methods that can be both query
@@ -52,6 +55,7 @@ import utils.Tuple;
  * Special methods referring to one of these entities go to the
  * specific DAO class.
  */
+@SuppressWarnings({ "rawtypes", "unchecked" })
 public class WithResourceDAO<T extends WithResource> extends DAO<T> {
 
 	/*
@@ -73,27 +77,8 @@ public class WithResourceDAO<T extends WithResource> extends DAO<T> {
 	}
 
 	/**
-	 * Return all resources that belong to a collection throwing away duplicate
-	 * entries in a collection TODO: Return only some fields for these
-	 * resources.
-	 *
-	 * @param colId
-	 * @param offset
-	 * @param count
-	 * @return
-	 */
-	public List<T> getSingletonCollectedResources(ObjectId colId, int offset,
-			int count) {
-		// Query<T> q =
-		// this.createQuery().field("collectedIn.collectionId").equal(colId).offset(offset).limit(count);
-		return this.find(
-				createColIdElemMatchQuery(colId).offset(offset).limit(count))
-				.asList();
-	}
-
-	/**
 	 * Given a list of ObjectId's (dbId's) return the specified resources
-	 * 
+	 *
 	 * @param ids
 	 * @return
 	 */
@@ -105,7 +90,7 @@ public class WithResourceDAO<T extends WithResource> extends DAO<T> {
 	/**
 	 * List all CollectionObjects with the title provided for the language
 	 * specified
-	 * 
+	 *
 	 * @param title
 	 * @return
 	 */
@@ -125,7 +110,7 @@ public class WithResourceDAO<T extends WithResource> extends DAO<T> {
 
 	/**
 	 * Get a user's CollectionObject according to the title given
-	 * 
+	 *
 	 * @param creatorId
 	 * @param title
 	 * @return
@@ -161,7 +146,7 @@ public class WithResourceDAO<T extends WithResource> extends DAO<T> {
 
 	/**
 	 * Get all CollectionObject using the creator's/owner's id.
-	 * 
+	 *
 	 * @param creatorId
 	 * @param offset
 	 * @param count
@@ -176,7 +161,7 @@ public class WithResourceDAO<T extends WithResource> extends DAO<T> {
 	/**
 	 * Get the first CollectionObject that a user has created using the
 	 * creator's/owner's id. We are using MongoDB's paging.
-	 * 
+	 *
 	 * @param id
 	 * @return
 	 */
@@ -186,19 +171,19 @@ public class WithResourceDAO<T extends WithResource> extends DAO<T> {
 
 	/**
 	 * Retrieve the owner/creator of a Resource using collection's dbId
-	 * 
+	 *
 	 * @param id
 	 * @return
 	 */
 	public User getOwner(ObjectId id) {
 		Query<T> q = this.createQuery().field("_id").equal(id)
 				.retrievedFields(true, "administrative.withCreator");
-		return ((WithResource) findOne(q)).getWithCreatorInfo();
+		return ((WithResource) findOne(q)).getWithCreator();
 	}
 
 	/**
 	 * Retrieve a resource if the provenanceChain contains the providerName
-	 * 
+	 *
 	 * @param sourceName
 	 * @return
 	 */
@@ -214,7 +199,7 @@ public class WithResourceDAO<T extends WithResource> extends DAO<T> {
 
 	/**
 	 * Return the number of resources that belong to a source
-	 * 
+	 *
 	 * @param sourceId
 	 * @return
 	 */
@@ -253,7 +238,7 @@ public class WithResourceDAO<T extends WithResource> extends DAO<T> {
 
 	/**
 	 * Create a Mongo access query criteria
-	 * 
+	 *
 	 * @param userAccess
 	 * @return
 	 */
@@ -298,7 +283,7 @@ public class WithResourceDAO<T extends WithResource> extends DAO<T> {
 	/**
 	 * Create a basic Mongo query with withCreator field matching, offset, limit
 	 * and criteria.
-	 * 
+	 *
 	 * @param criteria
 	 * @param creator
 	 * @param offset
@@ -409,15 +394,15 @@ public class WithResourceDAO<T extends WithResource> extends DAO<T> {
 		T record = this.getById(resourceId,
 				new ArrayList<String>(Arrays.asList("collectedIn")));
 		List<ObjectId> parentCollections = new ArrayList<ObjectId>();
-		for (CollectionInfo ci : (List<CollectionInfo>) record.getCollectedIn()) {
-			parentCollections.add(ci.getCollectionId());
+		for (ObjectId ci : (List<ObjectId>) record.getCollectedIn()) {
+			parentCollections.add(ci);
 		}
 		return parentCollections;
 	}
 
 	/**
 	 * Return the total number of likes for a resource.
-	 * 
+	 *
 	 * @param id
 	 * @return
 	 */
@@ -427,14 +412,18 @@ public class WithResourceDAO<T extends WithResource> extends DAO<T> {
 		return ((WithResource) this.findOne(q)).getUsage().getLikes();
 	}
 
-	public List<Integer> getPositionsInCollection(ObjectId id,
+	public List<Integer> getPositionsInCollection(ObjectId recordId,
 			ObjectId collectionId) {
-		T record = this.getById(id,
-				new ArrayList<String>(Arrays.asList("collectedIn")));
+		CollectionObject collection = DB.getCollectionObjectDAO().getById(
+				collectionId,
+				Arrays.asList("collectedResources"));
 		List<Integer> positions = new ArrayList<Integer>();
-		for (CollectionInfo ci : (List<CollectionInfo>) record.getCollectedIn()) {
-			if (ci.getCollectionId().equals(collectionId))
-				positions.add(ci.getPosition());
+		int i = 0;
+		for (ContextData<ContextDataBody> collectedResources : (List<ContextData>) collection
+				.getCollectedResources()) {
+			if (collectedResources.getTarget().getRecordId().equals(recordId))
+				positions.add(i);
+			i++;
 		}
 		return positions;
 	}
@@ -494,7 +483,7 @@ public class WithResourceDAO<T extends WithResource> extends DAO<T> {
 
 	/**
 	 * Increment likes for this specific resource
-	 * 
+	 *
 	 * @param externalId
 	 */
 	public void incrementLikes(ObjectId dbId) {
@@ -503,7 +492,7 @@ public class WithResourceDAO<T extends WithResource> extends DAO<T> {
 
 	/**
 	 * Decrement likes for this specific resource
-	 * 
+	 *
 	 * @param dbId
 	 */
 	public void decrementLikes(ObjectId dbId) {

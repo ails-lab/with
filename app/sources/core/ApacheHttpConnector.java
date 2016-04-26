@@ -23,6 +23,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -91,8 +92,8 @@ public class ApacheHttpConnector extends HttpConnector {
 		return (T) response;
 	}
 
-	private HttpGet buildGet(String url) {
-		return new HttpGet(Utils.replaceQuotes(url));
+	private HttpGet buildGet(String url) throws URISyntaxException {
+		return new HttpGet(url);
 	}
 
 //	public File getContentAsFile(String url) throws Exception {
