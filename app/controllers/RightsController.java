@@ -55,10 +55,6 @@ public class RightsController extends WithResourceController {
 	
 	public static Result editCollectionPublicity(String colId, Boolean isPublic, boolean membersDowngrade) {
 		ObjectNode result = Json.newObject();
-		/*if (isPublic == null) {
-			result.put("error", "isPublic should be true or false");
-			return badRequest(result);
-		}*/
 		ObjectId colDbId = new ObjectId(colId);
 		Result response = errorIfNoAccessToCollection(Action.DELETE, colDbId);
 		if (!response.toString().equals(ok().toString()))
@@ -68,14 +64,18 @@ public class RightsController extends WithResourceController {
 				getUniqueByFieldAndValue("_id", colDbId, new ArrayList<String>(Arrays.asList("administrative.access")));
 			boolean oldIsPublic = collection.getAdministrative().getAccess().getIsPublic();
 			if (oldIsPublic != isPublic) {
+				List<ObjectId> effectiveIds = AccessManager.effectiveUserDbIds(session().get("effectiveUserIds"));
 				DB.getCollectionObjectDAO().updateField(colDbId, "administrative.access.isPublic", isPublic);
 				if (!isPublic) //downgrade
 					if (membersDowngrade) {
-						
+						changePublicity(colDbId, isPublic, effectiveIds, true, membersDowngrade);
 					}
 					else {
-						
+						changePublicity(colDbId, isPublic, effectiveIds, false, membersDowngrade);
 					}
+				else {
+					DB.getRecordResourceDAO().updateMembersToNewPublicity(colDbId, isPublic, effectiveIds);
+				}
 			}
 			return ok(result);
 		}
