@@ -29,6 +29,7 @@ import java.util.function.Function;
 import model.DescriptiveData;
 import model.EmbeddedMediaObject;
 import model.EmbeddedMediaObject.MediaVersion;
+import model.EmbeddedMediaObject.WithMediaType;
 import model.MediaObject;
 import model.annotations.ContextData;
 import model.annotations.ContextData.ContextDataBody;
@@ -535,7 +536,9 @@ public class WithResourceController extends Controller {
 			for (HashMap<MediaVersion, EmbeddedMediaObject> embeddedMedia : (List<HashMap<MediaVersion, EmbeddedMediaObject>>) record
 					.getMedia()) {
 				if (embeddedMedia.containsKey(MediaVersion.Original)
-						&& !embeddedMedia.containsKey(MediaVersion.Thumbnail)) {
+						&& !embeddedMedia.containsKey(MediaVersion.Thumbnail)
+						&& embeddedMedia.get(MediaVersion.Original).getType()
+								.equals(WithMediaType.IMAGE)) {
 					String originalUrl = embeddedMedia.get(
 							MediaVersion.Original).getUrl();
 					MediaObject original = MediaController.downloadMedia(
