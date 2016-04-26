@@ -89,10 +89,11 @@ public class IndexTest {
 	@Test
 	public void genericTest() throws FileNotFoundException {
 
-		Object d = DB.getRecordResourceDAO().getById(new ObjectId("56fa7b92c743431f1cd7264c"));
-		System.out.println(d);
+//		Object d = DB.getRecordResourceDAO().getById(new ObjectId("56fa7b92c743431f1cd7264c"));
+//		System.out.println(d);
 		
-		String id = "56fa7b8fc743431f1cd72645";
+		
+		String id = "571a1b25c743434b2c454c79";
 //		String[] uris = new String[] {"http://bib.arts.kuleuven.be/photoVocabulary/30214"};
 		
 //	Result x = CollectionIndexController.getCollectionIndex(id);
@@ -114,40 +115,29 @@ public class IndexTest {
 		
 		SearchOptions so = new SearchOptions(0, Integer.MAX_VALUE);
 
-		String[] fields = new String[] { "_id", "keywords.uri", "dctype.uri" };
-		
-		SearchResponse res = es.execute(query, so, fields);
+		SearchResponse res = es.execute(query, so, CollectionIndexController.indexFacetFields);
 		
 		SearchHits sh = res.getHits();
 
 		List<String[]> list = new ArrayList<>();
 
-		Set<Object> all = new HashSet<>();
-		
 		for (Iterator<SearchHit> iter = sh.iterator(); iter.hasNext();) {
 			SearchHit hit = iter.next();
-			SearchHitField keywords = hit.field("keywords.uri");
-			SearchHitField dctypes = hit.field("dctype.uri");
 
 			List<Object> olist = new ArrayList<>();
 			
-			if (keywords != null) {
-				olist.addAll(keywords.getValues());
-				
-				all.addAll(keywords.getValues());
+			for (String field : CollectionIndexController.indexFacetFields) {
+				SearchHitField shf = hit.field(field);
+			
+				if (shf != null) {
+					olist.addAll(shf.getValues());
+				}				
 			}				
 			
-			if (dctypes != null) {
-				olist.addAll(dctypes.getValues());
-				
-				all.addAll(dctypes.getValues());
-			}			
-			
 			if (olist.size() > 0 ) {
-				System.out.println(" > " + olist);
 				list.add(olist.toArray(new String[] {}));
 			}
-		}
+		}		
 		
 		Set<String> selected = new HashSet<>();
 		if (json != null) {
@@ -156,14 +146,15 @@ public class IndexTest {
 			}
 		}
 		
+		
 		ThesaurusFacet tf = new ThesaurusFacet();
 		tf.create(list, selected);
 		
-		PrintWriter out = new PrintWriter("collection-index.txt");
+//		PrintWriter out = new PrintWriter("collection-index.txt");
 		
-//		System.out.println("RES " + tf.toJSON(Language.EN));
-		out.print(tf.toJSON(Language.EN));
-		out.close();
+		System.out.println("RES " + tf.toJSON(Language.EN));
+//		out.print(tf.toJSON(Language.EN));
+//		out.close();
 		
 //		JsonNode json = Json.parse("{ \"administrative\": { \"externalId\": \"http://vocab.getty.edu/aat/300073692\", \"created\": { \"$date\": 1450700821484 } , \"lastModified\": { \"$date\": 1450700821484 } }, \"semantic\": { \"uri\": \"http://vocab.getty.edu/aat/300073692\", \"type\": \"http://www.w3.org/2004/02/skos/core#Collection\", \"prefLabel\": { \"en\": \"<balustrades, railings and their components>\", \"es\": \"<balaustradas, barandas y sus componentes>\", \"nl\": \"<balustrades, leuningen en hun onderdelen>\" }, \"members\": [ { \"uri\": \"http://vocab.getty.edu/aat/300001988\", \"type\": \"http://www.w3.org/2004/02/skos/core#Concept\", \"prefLabel\": { \"en\": \"barrier elements\", \"es\": \"elementos de barrera\", \"nl\": \"hekwerkelementen\" }, \"altLabel\": { \"en\": [ \"barrier element\", \"elements, barrier\" ] } }, { \"uri\": \"http://vocab.getty.edu/aat/300163880\", \"type\": \"http://www.w3.org/2004/02/skos/core#Concept\", \"prefLabel\": { \"en\": \"barriers and barrier elements\", \"es\": \"barreras y elementos de barrera\", \"nl\": \"hekwerken en hekwerkonderdelen\" } }, { \"uri\": \"http://vocab.getty.edu/aat/300000885\", \"type\": \"http://www.w3.org/2004/02/skos/core#Concept\", \"prefLabel\": { \"en\": \"architectural elements\", \"es\": \"elementos de arquitectura\", \"nl\": \"architecturale elementen\", \"zh\": \"建築元素\" }, \"altLabel\": { \"en\": [ \"architectural element\", \"elements, architectural\" ], \"es\": [ \"elemento de arquitectura\" ], \"nl\": [ \"architecturaal element\", \"bouwfragment\", \"bouwfragmenten\" ], \"zh\": [ \"jiàn zhú yuán sù\", \"jian zhu yuan su\", \"chien chu yüan su\" ] } }, { \"uri\": \"http://vocab.getty.edu/aat/300241584\", \"type\": \"http://www.w3.org/2004/02/skos/core#Collection\", \"prefLabel\": { \"en\": \"<components by specific context>\", \"es\": \"<componentes según contexto específico>\", \"nl\": \"<onderdelen naar specifieke context>\" }, \"altLabel\": { \"nl\": [ \"<onderdeel naar specifieke context>\" ] } }, { \"uri\": \"http://vocab.getty.edu/aat/300241583\", \"type\": \"http://www.w3.org/2004/02/skos/core#Concept\", \"prefLabel\": { \"en\": \"components (objects parts)\", \"es\": \"componentes\", \"nl\": \"onderdelen\" }, \"altLabel\": { \"en\": [ \"component (component object)\", \"parts (component objects)\" ], \"es\": [ \"componente\" ], \"nl\": [ \"onderdeel\" ] } }, { \"uri\": \"http://vocab.getty.edu/aat/300241490\", \"type\": \"http://www.w3.org/2004/02/skos/core#Collection\", \"prefLabel\": { \"en\": \"Components (hierarchy name)\", \"es\": \"componentes\", \"fr\": \"Composantes\", \"nl\": \"Onderdelen\" } }, { \"uri\": \"http://vocab.getty.edu/aat/300264092\", \"type\": \"http://www.w3.org/2004/02/skos/core#Collection\", \"prefLabel\": { \"en\": \"Objects Facet\", \"es\": \"faceta objetos\", \"nl\": \"Facet Objecten\" } }, { \"uri\": \"http://vocab.getty.edu/aat/300241508\", \"type\": \"http://www.w3.org/2004/02/skos/core#Collection\", \"prefLabel\": { \"en\": \"<object groupings by general context>\", \"es\": \"<grupos de objetos por contexto general>\", \"nl\": \"<objectgroepen naar algemene context>\" }, \"altLabel\": { \"nl\": [ \"<objectgroep naar algemene context>\" ] } }, { \"uri\": \"http://vocab.getty.edu/aat/300241507\", \"type\": \"http://www.w3.org/2004/02/skos/core#Concept\", \"prefLabel\": { \"en\": \"object groupings\", \"es\": \"grupos de objetos\", \"fr\": \"groupements d'objets\", \"nl\": \"objectgroepen\" }, \"altLabel\": { \"en\": [ \"object grouping\", \"groupings, object\" ], \"nl\": [ \"objectgroep\" ] } }, { \"uri\": \"http://vocab.getty.edu/aat/300241489\", \"type\": \"http://www.w3.org/2004/02/skos/core#Collection\", \"prefLabel\": { \"en\": \"Object Groupings and Systems (hierarchy name)\", \"es\": \"sistemas y grupos de objetos\", \"fr\": \"Ensembles d'objets et systèmes\", \"nl\": \"Objectgroepen en systemen\" } } ] } }");
 		

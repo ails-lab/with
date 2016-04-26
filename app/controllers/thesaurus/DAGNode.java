@@ -27,6 +27,11 @@ import java.util.TreeSet;
 import org.apache.jena.atlas.lib.SetUtils;
 import org.bson.types.ObjectId;
 
+import play.libs.Json;
+
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+
 import model.basicDataTypes.Language;
 import model.basicDataTypes.Literal;
 import model.resources.ThesaurusObject.SKOSSemantic;
@@ -183,22 +188,22 @@ public class DAGNode<T> implements Comparable<DAGNode<T>> {
 		return (label !=null?label.toString():"NULL") + "  :  " + size;
 	}
 
-	public String toJSON(Map<String, ObjectId> idMap, Map<String, SKOSSemantic> map, Language lang) {
-		Set<DAGNode<T>> used = new HashSet<>();
-		return itoJSON(idMap, map, lang, used).toString();
+	public ObjectNode toJSON(Map<String, ObjectId> idMap, Map<String, SKOSSemantic> map, Language lang) {
+		return itoJSON(idMap, map, lang, new HashSet<>());
 	}
+
 	
-	private StringBuffer itoJSON(Map<String, ObjectId> idMap, Map<String, SKOSSemantic> map, Language lang, Set<DAGNode<T>> used) {
+	private ObjectNode itoJSON(Map<String, ObjectId> idMap, Map<String, SKOSSemantic> map, Language lang, Set<DAGNode<T>> used) {
 		if (!used.add(this)) {
-			return new StringBuffer();
+			return Json.newObject();
 		}
 
 		T s = label.iterator().next();
 
 		ObjectId id = idMap.get(s);
 		
-		StringBuffer sb = new StringBuffer();
-
+		ObjectNode element = Json.newObject();
+		
 		if (id != null) {
 			Literal plabel = map.get(s).getPrefLabel();
 			String ss = "";
@@ -214,28 +219,22 @@ public class DAGNode<T> implements Comparable<DAGNode<T>> {
 			}
 			
 //			String ss = map.get(s).getPrefLabel().getLiteral(lang);
-
-			sb.append("{ \"id\":\"" + idMap.get(s).toString() + "\", \"uri\":\"" + s + "\", \"label\":\"" + ss + " \", \"size\":\"" + size + "\", \"children\": [");
 			
-			int i = 0;
+			element.put("id", idMap.get(s).toString());
+			element.put("uri", s.toString());
+			element.put("label", ss);
+			element.put("size", size);
+			
+			ArrayNode jchildren = Json.newObject().arrayNode();
+			
+			element.put("children", jchildren);
+			
 			for (DAGNode<T> node : children) {
-				StringBuffer r1 = node.itoJSON(idMap, map, lang, used);
-				if (r1.length() > 0) {
-					if (i++ > 0) {
-						sb.append(", ");
-					}
-					sb.append(r1);
-				}
+				jchildren.add(node.itoJSON(idMap, map, lang, used));
 			}
-			
-			sb.append("] }");
 		}
 		
-		return sb;
-
-		
-		
-
+		return element;
 	}
 
 

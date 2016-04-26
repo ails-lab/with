@@ -196,6 +196,10 @@
 	            <span data-bind="text: indexCount"></span>
 	        </div>
 
+			<div class="searchbox">
+                 <input autocomplete="off" data-bind="value: keyword, event: {change: addKeyword}" placeholder="Keywords" class="searchinput" type="text">
+            </div>
+
 			<div class="button-group"><a class="btn-green cancel" data-bind="click: closeThesaurus">Close</a></div>			
 			</div>
 </section>

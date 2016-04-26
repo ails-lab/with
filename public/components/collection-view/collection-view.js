@@ -41,6 +41,7 @@ define(['bridget', 'knockout', 'text!./_collection-view.html', 'isotope', 'image
 		self.description = "";
 		self.thumb = "";
 		self.fullres = "";
+		self.fullrestype = "";
 		self.view_url = "";
 		self.source = "";
 		self.creator = "";
@@ -57,9 +58,9 @@ define(['bridget', 'knockout', 'text!./_collection-view.html', 'isotope', 'image
 		self.position = 0;
 		self.dbId = "";
 		self.data = ko.observable('');
-		self.video = false;
+//		self.video = false;
 		
-		self.identifier = "";
+//		self.identifier = "";
 		
 		self.thumbnail = ko.pureComputed(function () {
 
@@ -161,6 +162,8 @@ define(['bridget', 'knockout', 'text!./_collection-view.html', 'isotope', 'image
 			}
 			self.thumb = media[0] != null && media[0].Thumbnail != null && media[0].Thumbnail.withUrl != "null" ? media[0].Thumbnail.url : null;
 			self.fullres = media[0] != null && media[0].Original != null && media[0].Original.url != "null" ? media[0].Original.url : null;
+			self.fullrestype = media[0] != null && media[0].Original != null && media[0].Original.type != "null" ? media[0].Original.type : null;
+			
 			if(self.fullres){
 				self.rights=findResOrLit(media[0].Original.originalRights);
 				
@@ -168,11 +171,6 @@ define(['bridget', 'knockout', 'text!./_collection-view.html', 'isotope', 'image
 			else if (self.thumb){
 				self.rights=findResOrLit(media[0].Thumbnail.originalRights);
 				
-			}
-			
-			self.mtype = media[0] != null && media[0].Original != null && media[0].Original.type == "VIDEO";
-			if (self.mtype) {
-				self.identifier = descdata.dcidentifier.uri;
 			}
 			
 			self.data(options);
@@ -193,6 +191,8 @@ define(['bridget', 'knockout', 'text!./_collection-view.html', 'isotope', 'image
 		
 		self.indexCount = ko.observable("");
 		self.terms = ko.observableArray([]);
+		self.keywords = ko.observableArray([]);
+		self.keyword = ko.observable('');
 		
 		self.title = ko.observable('');
 		self.titleToEdit = ko.observable('').extend({ required: true });
@@ -212,8 +212,8 @@ define(['bridget', 'knockout', 'text!./_collection-view.html', 'isotope', 'image
 	    
 		$('#term_tags').tagsinput({
 	        allowDuplicates: false,
-	          itemValue: 'uri',  // this will be used to set id of tag
-	          itemText: 'label' // this will be used to set text of tag
+	          itemValue: 'uri',  
+	          itemText: 'label' 
 	      });
 		
 	    $('#term_tags').on('itemRemoved', function(event) {
@@ -239,19 +239,27 @@ define(['bridget', 'knockout', 'text!./_collection-view.html', 'isotope', 'image
 			selfx.subterms = ko.observableArray([]);
 			
 			ko.mapping.fromJS(data, {}, selfx);
-
-//			selfx.removeTerm = function() {
-//				for (var i = 0; i < self.terms().length; i++) {
-//					if (self.terms()[i].uri() === data.uri) {
-//						self.terms.splice(i,1);
-////						alert(self.terms().length);
-//						self.reload();
-//						break;
-//					}
-//				}
-//			};
 		}
 
+		self.onEnter = function(data,event){
+		    event.keyCode === 13 && self.addKeyword(data);  
+		    return true;
+		};
+		
+		self.addKeyword = function(data) {
+			
+			for (var i = 0; i < self.terms().length; i++) {
+				if (self.terms()[i].uri() == self.keyword()) {
+					return;
+				}
+			}
+
+			self.terms.push(new Term({ uri: self.keyword(), label: self.keyword() }));
+    	    $("#term_tags").tagsinput('add',{ uri: self.keyword(), label: self.keyword() });
+
+    	    self.keyword('');
+			self.reload();
+		};
 
 		var NodeModel = function(data) {
 			var selfx = this;
@@ -320,12 +328,12 @@ define(['bridget', 'knockout', 'text!./_collection-view.html', 'isotope', 'image
 		
 		self.loadIndex = function() {
 			$.ajax({
-				"url": "/collectionindex/" + self.id(),
+				"url": "/collection/" + self.id() + "/facets",
 				"method": "post",
 				"data" : convertTerms(self.terms()),
 				"contentType": "application/json",
 				"success": function (data) {
-					self.index(new NodeModel(JSON.parse(data)));
+					self.index(new NodeModel(data));
 				},
 				"error": function (result) {
 					$.smkAlert({
@@ -535,7 +543,7 @@ define(['bridget', 'knockout', 'text!./_collection-view.html', 'isotope', 'image
 				});
 			} else {
 				$.ajax({
-					"url": "/collection/" + self.id() + "/indexedlist?count=" + self.count() + "&start=0",
+					"url": "/collection/" + self.id() + "/selectionlist?count=" + self.count() + "&start=0",
 					"method": "post",
 					"contentType": "application/json",
 					"data" : convertTerms(self.terms()),
@@ -612,7 +620,7 @@ define(['bridget', 'knockout', 'text!./_collection-view.html', 'isotope', 'image
 						type: "POST",
 						contentType: "application/json",
 						dataType: "json",
-						url: "/collection/" + self.id() + "/indexedlist?count=" + self.fetchitemnum + "&start=" + self.citems().length,
+						url: "/collection/" + self.id() + "/selectionlist?count=" + self.fetchitemnum + "&start=" + self.citems().length,
 						processData: false,
 						data : convertTerms(self.terms()) 
 					}).success (function (data) {
@@ -623,10 +631,19 @@ define(['bridget', 'knockout', 'text!./_collection-view.html', 'isotope', 'image
 		
 		function convertTerms(terms) {
 			var uitems = [];
+			var kitems = [];
+			
 			for (i in terms) {
-				uitems.push({ top: terms[i].uri(), sub: terms[i].subterms() });
+				var str = terms[i].uri();
+				
+				if (str.substring(0, 7) === "http://") {
+					uitems.push({ top: str, sub: terms[i].subterms() });
+				} else {
+					kitems.push(str);
+				}
 			}
-			return "{ \"terms\": " + JSON.stringify(uitems) + "}";
+
+			return "{ \"terms\": " + JSON.stringify(uitems) + ", \"keywords\": " + JSON.stringify(kitems) +"}";
 		}
 
 		self.addCollectionRecord = function (e) {
@@ -841,8 +858,8 @@ define(['bridget', 'knockout', 'text!./_collection-view.html', 'isotope', 'image
 			var tile = '<div class="item ' + record.dbId + '"><div class="wrap"><a href="#"  onclick="recordSelect(\'' + record.dbId + '\',event)"><div class="thumb"><img style="width:100%" src="' + record.thumbnail() + '" onError="this.src=\'img/content/thumb-empty.png\'"/></div>';
 			tile += '<div class="info"><h2 class="title">' + record.displayTitle() + '</h2></div></a>';
 			tile += '<div class="action-group"><div class="wrap"><a href="' + record.view_url + '" target="_new" class="links">' + record.sourceCredits() + '</a>';
+			tile+="<ul>"
 			if (isLogged()) {
-				tile+="<ul>"
 				if ((self.access() == "WRITE" || self.access() == "OWN")) {
 					tile += '<li><a  data-toggle="tooltip" data-placement="top" title="Remove media" class="fa fa-trash-o"  onclick="removeRecord(\'' + record.dbId + '\',event)"></a></li>';
 				}
@@ -853,9 +870,9 @@ define(['bridget', 'knockout', 'text!./_collection-view.html', 'isotope', 'image
 					tile += '<li><a  data-toggle="tooltip" data-placement="top" title="Add to favorites" onclick="likeRecord(\'' + record.dbId + '\',event);" class="fa fa-heart"></a></li>';
 				}}
 				tile += '<li><a data-toggle="tooltip" data-placement="top" title="Collect it" class="fa fa-download collectbutton" onclick="collect(\'' + record.dbId + '\',event);" ></a></li>';
-				tile += '<li><a data-toggle="tooltip" data-placement="top" title="Get similar" class="fa" onclick="similar(\'' + record.dbId + '\',event);" >S</a></li>';
-				tile += '</ul>';
 			}
+			tile += '<li><a data-toggle="tooltip" data-placement="top" title="Get similar" class="fa" onclick="similar(\'' + record.dbId + '\',event);" >S</a></li>';
+			tile += '</ul>';
 
 			tile += "</div></div></div></div>";
 			

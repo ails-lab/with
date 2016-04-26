@@ -18,6 +18,7 @@ package controllers.thesaurus;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -52,6 +53,7 @@ import utils.AccessManager.Action;
 import akka.japi.Util;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import controllers.CollectionObjectController;
@@ -72,8 +74,14 @@ public class CollectionIndexController extends WithResourceController	{
 		"dctermsmedium.uri.all"
 	};
 
+	public static String[] indexAutocompleteFields = new String[] {
+		"keywords_all",
+		"dctype_all",
+		"dcformat_all",
+		"dctermsmedium_all"
+	};
 	
-	public static Result getCollectionIndex(String id) {
+	public static Result getCollectionFacets(String id) {
 		ObjectNode result = Json.newObject();
 		
 		try {
@@ -132,7 +140,77 @@ public class CollectionIndexController extends WithResourceController	{
 			return internalServerError(result);
 		}
 	}
-	
+
+	public static Result getCollectionKeywords(String id) {
+		ObjectNode result = Json.newObject();
+		
+		try {
+			JsonNode json = request().body().asJson();
+
+//			System.out.println("QUERYING FOR TREE CONSTUCTION");
+			ElasticSearcher es = new ElasticSearcher();
+			
+//			MatchQueryBuilder query = QueryBuilders.matchQuery("collectedIn.collectionId", id);
+			QueryBuilder query = getIndexCollectionQuery(new ObjectId(id), json);
+
+			SearchResponse res = es.execute(query, new SearchOptions(0, Integer.MAX_VALUE), indexAutocompleteFields);
+			SearchHits sh = res.getHits();
+
+			Map<Object, Counter> list = new HashMap<>();
+
+			for (Iterator<SearchHit> iter = sh.iterator(); iter.hasNext();) {
+				SearchHit hit = iter.next();
+
+				Set<Object> olist = new HashSet<>();
+				
+				for (String field : indexAutocompleteFields) {
+					SearchHitField shf = hit.field(field);
+				
+					if (shf != null) {
+						olist.addAll(shf.getValues());
+					}				
+				}		
+				
+				for (Object t : olist) {
+					if (!t.toString().startsWith("http")) {
+						Counter c = list.get(t);
+						if (c == null) {
+							c = new Counter(0);
+							list.put(t, c);
+						}
+						c.increase();
+					}
+				}
+			}
+			
+			ObjectNode reply = Json.newObject();
+			ArrayNode terms = Json.newObject().arrayNode();
+
+			for (Map.Entry<Object, Counter> entry : list.entrySet()) {
+				ObjectNode element = Json.newObject();
+				element.put("word", entry.getKey().toString());
+				element.put("count", entry.getValue().getValue());
+				
+				terms.add(element);
+			}
+			
+			reply.put("terms", terms);
+			
+			ObjectId collectionDbId = new ObjectId(id);
+			Result response = errorIfNoAccessToCollection(Action.READ, collectionDbId);
+			
+			if (!response.toString().equals(ok().toString()))
+				return response;
+			else {
+				return ok(reply);
+			}
+		} catch (Exception e) {
+//			e.printStackTrace();
+			result.put("error", e.getMessage());
+			return internalServerError(result);
+		}
+	}
+
 	public static QueryBuilder getIndexCollectionQuery(ObjectId colId, JsonNode json) {
 		BoolQueryBuilder query = QueryBuilders.boolQuery();
 		query.must(QueryBuilders.termQuery("collectedIn.collectionId", colId));
@@ -152,6 +230,18 @@ public class CollectionIndexController extends WithResourceController	{
 				
 				query.must(boolQuery);
 			}
+			
+			for (Iterator<JsonNode> iter = json.get("keywords").elements(); iter.hasNext();) {
+				BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
+	
+				String s = iter.next().asText();
+				for (String f : indexAutocompleteFields) {
+					boolQuery = boolQuery.should(QueryBuilders.termQuery(f, s));
+				}
+				
+				query.must(boolQuery);
+			}
+
 		}
 
 		return query;

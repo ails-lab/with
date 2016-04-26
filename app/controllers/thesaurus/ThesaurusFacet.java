@@ -27,6 +27,10 @@ import java.util.Set;
 import org.apache.jena.atlas.lib.SetUtils;
 import org.bson.types.ObjectId;
 
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+
+import play.libs.Json;
 import model.basicDataTypes.Language;
 import model.resources.ThesaurusObject;
 import model.resources.ThesaurusObject.SKOSSemantic;
@@ -92,24 +96,17 @@ public class ThesaurusFacet {
 	
 	private Collection<DAGNode<String>> tops;
 	
-	public String toJSON(Language lang) {
-		StringBuffer res = new StringBuffer("{ \"schemes\": [");
+	public ObjectNode toJSON(Language lang) {
+		ObjectNode json = Json.newObject();
 		
-		int i = 0;
+		ArrayNode schemes = Json.newObject().arrayNode();
+		json.put("schemes", schemes);
+		
 		for (DAGNode<String> node : tops) {
-			String r1 = node.toJSON(idMap, map, lang);
-			if (r1.length() > 0) {
-				if (i++ > 0) {
-					res.append(", ");
-				}
-				res.append(r1);
-			}
-			
+			schemes.add(node.toJSON(idMap, map, lang));
 		}
-		
-		res.append("] }");
-		
-		return res.toString();
+
+		return json;
 	}
 	
 	private Set<DAGNode<String>> schemeNodes;
@@ -149,8 +146,7 @@ public class ThesaurusFacet {
 	}
 	
 	public void create(List<String[]> list, Set<String> selected) {
-//		long start = System.currentTimeMillis();
-		
+
 		schemeNodes = new HashSet<>();
 		
 		Map<String, DAGNode<String>> nodeMap = new HashMap<>();
@@ -162,7 +158,7 @@ public class ThesaurusFacet {
 		
 //		DAGNode<String> flattop = new DAGNode<String>();
 		
-		boolean computeBroader = false;
+//		boolean computeBroader = false;
 		for (String[] uris : list) {
 			Set<String> used = new HashSet<>();
 
@@ -180,7 +176,7 @@ public class ThesaurusFacet {
 //						}
 
 						if (broader != null) {
-							computeBroader = true;
+//							computeBroader = true;
 							for (SKOSTerm term : broader) {
 								count(counterMap, term.getUri(), used);
 							}
@@ -190,24 +186,28 @@ public class ThesaurusFacet {
 			}
 		}
 		
-//		System.out.println("A " + (System.currentTimeMillis() - start));
-
+		
 		points = new HashSet<>();
 		
 		Set<String> used = new HashSet<>();
 		
 		for (Map.Entry<String, Counter> entry : counterMap.entrySet()) {
 			String term = entry.getKey();
+			
+//			System.out.println(term);
 			if (!used.add(term)) {
 				continue;
 			}
 			
-			DAGNode<String> node = addNode(nodeMap, term, entry.getValue().getValue(), selected);
-			
-			SKOSSemantic semantic = getSemantic(term);			
+			SKOSSemantic semantic = getSemantic(term);
 
-			if (semantic != null && computeBroader) {
+//			if (semantic != null && computeBroader) {
+			if (semantic != null) {
+				DAGNode<String> node = addNode(nodeMap, term, entry.getValue().getValue(), selected);
+				
 				List<SKOSTerm> broaderList = semantic.getBroader();
+				
+//				System.out.println(">>> " + broaderList);
 				
 				if (broaderList != null) {
 					for (SKOSTerm broader : broaderList) {
@@ -221,11 +221,11 @@ public class ThesaurusFacet {
 				}
 			}
 		}
-		
-		
+
 		Set<DAGNode<String>> changedParents = new HashSet<>();
 
 		for (DAGNode<String> p : points) {
+			
 			Set<DAGNode<String>> pcopy = new HashSet<>(p.getParents());
 			
 			for (DAGNode<String> parent : pcopy) {
@@ -244,7 +244,6 @@ public class ThesaurusFacet {
 			}
 		}
 
-				
 		for (DAGNode<String> p : schemeNodes) {
 			Set<DAGNode<String>> pcopy = new HashSet<>(p.getParents());
 			
@@ -272,6 +271,9 @@ public class ThesaurusFacet {
 			
 			changedParents = newChangedParents;
 		}
+		
+	
+//		System.out.println(toJSON(Language.EN));
 		
 		for (DAGNode<String> top : tops) {
 			top.normalize(selected);

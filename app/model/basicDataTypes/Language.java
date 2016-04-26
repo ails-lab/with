@@ -519,7 +519,7 @@ public enum Language {
 	/**
 	* English
 	*/
-	EN("English", "en", "eng"),
+	EN("English", "en", "eng", "en-us"),
 	/**
 	* English, Middle (1100-1500)
 	*/

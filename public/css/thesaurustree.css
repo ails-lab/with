@@ -23,3 +23,7 @@
 .invisible-icon {
 	visibility: hidden;
 }
+
+.newlines {
+	white-space: pre-wrap;
+}
