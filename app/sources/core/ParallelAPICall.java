@@ -128,19 +128,16 @@ public class ParallelAPICall {
 			Iterable<Promise<R>> promises,
 			final Function<List<R>, List<R>> filter) {
 		Promise<List<R>> promisesSequence = Promise.sequence(promises);
-		Promise<Result> promiseResult = promisesSequence
-				.map(new play.libs.F.Function<Iterable<R>, Result>() {
-					public Result apply(Iterable<R> responses) {
-						List<R> combinedResponses, finalResponses = new ArrayList<R>();
-						combinedResponses = iterateResponses(
-								responseCollectionMethod, responses);
-						finalResponses = filter.apply(combinedResponses);
-						return toStatus(finalResponses);
-						// Logger.debug("Total time for all sources to respond: "
-						// + (System.currentTimeMillis()- initTime));
-					}
-				});
-		return promiseResult;
+        Promise<Result> promiseResult = promisesSequence.map(
+    		new play.libs.F.Function<Iterable<R>, Result>() {
+    			public Result apply(Iterable<R> responses) {
+    				List<R> combinedResponses = iterateResponses(responseCollectionMethod, responses);
+					List<R> finalResponses = filter.apply(combinedResponses);
+    				return toStatus(finalResponses);
+    			}
+    		}
+        );
+        return promiseResult;
 	}
 
 	public static <R> List<R> iterateResponses(
