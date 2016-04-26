@@ -46,15 +46,13 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 
 	function MyCollectionsModel(params) {
 		KnockoutElse.init([spec = {}]);
-		//$("div[role='main']").toggleClass( "homepage", false );
 		var self = this;
-//		WITHApp.tabAction();
-//		WITHApp.initTooltip();
+		WITHApp.tabAction();
+		WITHApp.initTooltip();
 		self.route = params.route;
 		self.showsExhibitions = params.showsExhibitions;
-		self.superUser = true || (app.currentUser.username()=="foodanddrink");
+		self.showImportFromEuropeana = true;//(app.currentUser.username()=="foodanddrink");
 		
-		//self.collections = [];
 		self.index = ko.observable(0);
 
 		self.collectionSet = ko.observable("my");
