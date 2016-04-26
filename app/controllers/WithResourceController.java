@@ -550,7 +550,7 @@ public class WithResourceController extends Controller {
 			}
 			return true;
 		};
-		ParallelAPICall.createPromise(methodQuery, recordId, Priority.LOW);
+		ParallelAPICall.createPromise(methodQuery, recordId, Priority.BACKEND);
 	}
 
 	/**
@@ -674,7 +674,7 @@ public class WithResourceController extends Controller {
 		RecordResource record = DB.getRecordResourceDAO().getById(recordId);
 		String sourceClassName = "sources." + source + "SpaceSource";
 		ParallelAPICall.createPromise(methodQuery, record, sourceClassName,
-				Priority.LOW);
+				Priority.BACKEND);
 	}
 
 	/**

@@ -32,10 +32,9 @@ import scala.concurrent.ExecutionContext;
 public class ParallelAPICall {
 
 	public enum Priority {
-		LOW(ExecutionContexts.fromExecutorService(Executors
-				.newFixedThreadPool(2))), MEDIUM(ExecutionContexts
-				.fromExecutorService(Executors.newFixedThreadPool(4))), HIGH(
-				ExecutionContexts.global());
+		BACKEND(ExecutionContexts.fromExecutorService(Executors
+				.newFixedThreadPool(4))),
+		FRONTEND(ExecutionContexts.global());
 		private ExecutionContext excon;
 
 		private Priority(ExecutionContext excon) {
@@ -58,7 +57,7 @@ public class ParallelAPICall {
 	public static <I, U, R> Promise<R> createPromise(
 			final BiFunction<I, U, R> methodQuery, final I input1,
 			final U input2) {
-		return createPromise(methodQuery, input1, input2, Priority.HIGH);
+		return createPromise(methodQuery, input1, input2, Priority.BACKEND);
 
 	}
 
@@ -72,7 +71,7 @@ public class ParallelAPICall {
 
 	public static <I, U, R> Promise<R> createPromise(
 			final Function<I, R> methodQuery, final I input) {
-		return createPromise(methodQuery, input, Priority.HIGH);
+		return createPromise(methodQuery, input, Priority.BACKEND);
 	}
 
 	public static <I, U, R> Promise<R> createPromise(
