@@ -18,24 +18,35 @@ package db;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.util.ArrayList;
+import java.text.DecimalFormat;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
-import java.util.UUID;
+import java.util.Set;
 
 import org.apache.commons.io.IOUtils;
 import org.bson.types.ObjectId;
 import org.mongodb.morphia.mapping.cache.DefaultEntityCache;
 
-import play.Logger;
-import play.Logger.ALogger;
-
 import com.mongodb.BasicDBObject;
+import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
 import com.mongodb.gridfs.GridFSDBFile;
 import com.mongodb.gridfs.GridFSFile;
 
+import model.EmbeddedMediaObject;
 import model.EmbeddedMediaObject.MediaVersion;
 import model.MediaObject;
+import model.resources.RecordResource;
+import model.usersAndGroups.Organization;
+import model.usersAndGroups.Page;
+import model.usersAndGroups.Project;
+import model.usersAndGroups.User;
+import model.usersAndGroups.UserGroup;
+import play.Logger;
+import play.Logger.ALogger;
 
 public class MediaObjectDAO {
 	public static final ALogger log = Logger.of(MediaObjectDAO.class);
@@ -57,13 +68,10 @@ public class MediaObjectDAO {
 		// some things are not quite right, so we repair those
 
 		try {
-			MediaObject media = DB
-					.getMorphia()
-					.getMapper()
-					.fromDBObject(MediaObject.class, gridfsDbFile,
-							new DefaultEntityCache());
-			media.setMediaBytes(IOUtils.toByteArray(gridfsDbFile
-					.getInputStream()));
+			MediaObject media = DB.getMorphia().getMapper().fromDBObject(
+					MediaObject.class, gridfsDbFile, new DefaultEntityCache());
+			media.setMediaBytes(
+					IOUtils.toByteArray(gridfsDbFile.getInputStream()));
 			return media;
 		} catch (IOException e) {
 			log.error(
@@ -133,8 +141,8 @@ public class MediaObjectDAO {
 					mediaGridFsFile = DB.getGridFs().createFile(
 							new ByteArrayInputStream(tmp.getBytes()));
 				} else
-					mediaGridFsFile = DB.getGridFs().createFile(
-							media.getMediaBytes());
+					mediaGridFsFile = DB.getGridFs()
+							.createFile(media.getMediaBytes());
 			}
 			DBObject mediaDbObj = DB.getMorphia().getMapper().toDBObject(media);
 			// remove stuff we don't want on the media object
@@ -170,7 +178,7 @@ public class MediaObjectDAO {
 	}
 
 	/**
-	 * Retrive a MediaObject from GridFS according to it's external url.
+	 * Retrieve a MediaObject from GridFS according to it's external url.
 	 * According to the value specified, we return either the thumbnail or the
 	 * original media.
 	 * 
@@ -195,7 +203,7 @@ public class MediaObjectDAO {
 	}
 
 	/**
-	 * Retrive a MediaObject from GridFS according to it's external url.
+	 * Retrieve a MediaObject from GridFS according to it's external url.
 	 * According to the value specified, we return either the thumbnail or the
 	 * original media.
 	 * 
@@ -256,17 +264,43 @@ public class MediaObjectDAO {
 		}
 	}
 
-	/* Not avatar, not cover, not in Embedded media Object */
+	/*
+	 * Delete all media objects which are neither avatar, not cover, not in
+	 * embedded media objects in records. All these records are referenced
+	 * through their urls
+	 */
 	public void deleteOrphanMediaObjects() {
-		BasicDBObject query = new BasicDBObject();
-		List<String> list = new ArrayList<String>();
-		for (int i =0; i<1000000; i++) {
-			list.add(UUID.randomUUID().toString());
+		// Find all media urls of medias that are needed: user and group
+		// avatars, cover images for organizations/projects and images of
+		// stored records at the database
+		Set<String> urls = new HashSet<String>();
+		DB.getUserGroupDAO().findUrlsFromAvatars(urls);
+		DB.getUserGroupDAO().findUrlsFromCovers(urls);
+		DB.getRecordResourceDAO().findUrlsFromRecords(urls);
+		// A query at the database for deleting media objects whose url is not
+		// in this list ($nin) would be very convenient. Unfortunately, this
+		// list is expected to be very big (hundreds of thousand urls) which
+		// makes the query impossible to send.
+		DBCursor mediaList = DB.getGridFs().getFileList(new BasicDBObject(),
+				new BasicDBObject("_id", 1));
+		int mediaCount = mediaList.size();
+		log.info("Valid urls found at the database: " + urls.size());
+		int i = 1;
+		int deletedCount = 0;
+		for (DBObject media : mediaList) {
+			log.info(
+					"Check media " + i + " of "
+							+ mediaCount + " - " + new DecimalFormat("##.##")
+									.format((float) 100 * i / mediaCount)
+							+ "%");
+			if (media.get("url") != null
+					&& urls.contains(media.get("url").toString()))
+				continue;
+			log.info("Deleting orphan media object #" + ++deletedCount);
+			DB.getMediaObjectDAO()
+					.deleteById(new ObjectId(media.get("_id").toString()));
 		}
-		query.put("url", new BasicDBObject("$nin", list));
-		List<GridFSDBFile> a = DB.getGridFs().find(query);
-		System.out.println(a.size());
-
+		log.info("Deleted orphan media objects: " + deletedCount);
 	}
-
+	
 }

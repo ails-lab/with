@@ -833,6 +833,7 @@ define("app", ['knockout', 'facebook', 'imagesloaded', 'moment', './js/app/plugi
 				s += ' <span class="label pull-right">' + suggestion.data.category + '</span>';
 				return s;
 			},
+			triggerSelectOnValidInput: false,
 			onSelect: function (suggestion) {
 				if (callback !== undefined && callback != null)
 					callback.call(this, suggestion.value);

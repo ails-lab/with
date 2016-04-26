@@ -52,8 +52,7 @@ public class DigitalNZSpaceSource extends ISpaceSource {
 	 */
 
 	public DigitalNZSpaceSource() {
-		super();
-		LABEL = Sources.DigitalNZ.toString();
+		super(Sources.DigitalNZ);
 		apiKey = "SECRET_KEY";
 		vmap = FilterValuesMap.getDNZMap();
 		addDefaultWriter(CommonFilters.TYPE.getId(), fwriter("and[category][]"));
@@ -104,7 +103,7 @@ public class DigitalNZSpaceSource extends ISpaceSource {
 		if (!Utils.hasInfo(q.searchTerm) || q.searchTerm.equals("*"))
 			q.searchTerm = "format:(picture OR book OR music OR article)";
 		SourceResponse res = new SourceResponse();
-		res.source = getSourceName();
+		res.source = getSourceName().toString();
 		String httpQuery = getHttpQuery(q);
 		res.query = httpQuery;
 		JsonNode response;

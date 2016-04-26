@@ -73,10 +73,9 @@ public abstract class FlickrSpaceSource extends ISpaceSource {
 		return licencesId.get(name);
 	}
 
-	public FlickrSpaceSource(String source, String userID) {
-		super();
+	public FlickrSpaceSource(Sources source, String userID) {
+		super(source);
 		apiKey = "SECRET_KEY";
-		LABEL = source;
 		setLicences();
 		this.vmap = FilterValuesMap.getFlickrMap();
 		this.userID = userID;
@@ -156,7 +155,7 @@ public abstract class FlickrSpaceSource extends ISpaceSource {
 	@Override
 	public SourceResponse getResults(CommonQuery q) {
 		SourceResponse res = new SourceResponse();
-		res.source = getSourceName();
+		res.source = getSourceName().toString();
 		String httpQuery = getHttpQuery(q);
 		res.query = httpQuery;
 		JsonNode response;
@@ -196,7 +195,7 @@ public abstract class FlickrSpaceSource extends ISpaceSource {
 	public static class InternetArchiveSpaceSource extends FlickrSpaceSource{
 
 		public InternetArchiveSpaceSource() {
-			super(Sources.InternetArchive.toString(),"126377022@N07");
+			super(Sources.InternetArchive,"126377022@N07");
 			formatreader = new FlickrRecordFormatter.InternetArchiveRecordFormatter();
 		}
 		

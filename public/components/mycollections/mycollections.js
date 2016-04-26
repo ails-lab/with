@@ -52,7 +52,7 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 //		WITHApp.initTooltip();
 		self.route = params.route;
 		self.showsExhibitions = params.showsExhibitions;
-		self.superUser = (app.currentUser.username()=="foodanddrink");
+		self.superUser = true || (app.currentUser.username()=="foodanddrink");
 		
 		//self.collections = [];
 		self.index = ko.observable(0);

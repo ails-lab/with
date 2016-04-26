@@ -14,6 +14,7 @@ PUT      /notifications/read                       controllers.NotificationContr
 POST     /notifications/send                       controllers.NotificationController.sendMessage(receiverId)
 
 POST     /api/advancedsearch        controllers.SearchController.searchwithfilter()
+GET     /api/advancedsearchGET        controllers.SearchController.searchwithfilterGET(q: sources.core.CommonQuery)
 POST     /api/initialfilters        controllers.SearchController.getfilters()
 GET      /api/searchsources        controllers.SearchController.searchSources()
 POST     /api/mergefilters         controllers.SearchController.mergeFilters()
@@ -99,6 +100,7 @@ POST	/media/create							controllers.MediaController.createMedia(file: Boolean ?
 GET		/media/byUrl							controllers.MediaController.getMediaByUrl(url, version: String ?= "Original")
 GET 	/media/:id								controllers.MediaController.getMetadataOrFile(id, file: Boolean ?=true)
 POST 	/media/:id 								controllers.MediaController.editMetadataOrFile(id, file: Boolean ?=false)
+DELETE  /media/orphan							controllers.MediaController.deleteOrphanMadia()
 DELETE 	/media/:id								controllers.MediaController.deleteMedia(id)
 
 # User Manager Controller

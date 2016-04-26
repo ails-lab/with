@@ -85,10 +85,7 @@ public class WithSpaceSource extends ISpaceSource {
 	    }
 	}*/
 
-	@Override
-	public String getSourceName() {
-		return Sources.WITHin.getID();
-	}
+	
 
 	@Override
 	public SourceResponse getResults(CommonQuery q) {
@@ -158,7 +155,7 @@ public class WithSpaceSource extends ISpaceSource {
 		searcher.closeClient();
 		SourceResponse sourceResponse =
 				new SourceResponse((int)elasticResponse.getHits().getTotalHits(), offset, count);
-		sourceResponse.source = getSourceName();
+		sourceResponse.source = getSourceName().toString();
 
 		sourceResponse.setResourcesPerType(resourcesPerType);
 
@@ -185,6 +182,10 @@ public class WithSpaceSource extends ISpaceSource {
 		}
 
 		return sourceResponse;
+	}
+
+	public WithSpaceSource() {
+		super(Sources.WITHin);
 	}
 
 	private List<SearchHit> getTotalHitsFromScroll(SearchResponse scrollResp) {

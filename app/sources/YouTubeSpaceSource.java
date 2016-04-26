@@ -25,6 +25,7 @@ import model.EmbeddedMediaObject.MediaVersion;
 import model.EmbeddedMediaObject.WithMediaType;
 import model.basicDataTypes.LiteralOrResource;
 import model.basicDataTypes.ProvenanceInfo;
+import model.basicDataTypes.ProvenanceInfo.Sources;
 import model.resources.CulturalObject;
 import model.resources.RecordResource;
 import model.resources.RecordResource.RecordDescriptiveData;
@@ -59,8 +60,7 @@ public class YouTubeSpaceSource extends ISpaceSource {
 	private int autoCompleteLimit = 0;
 
 	public YouTubeSpaceSource() {
-		super();
-		LABEL = "YouTube";
+		super(Sources.YouTube);
 		roots = new HashMap<String, String>();
 	}
 
@@ -94,7 +94,7 @@ public class YouTubeSpaceSource extends ISpaceSource {
 	@Override
 	public SourceResponse getResults(CommonQuery q) {
 		SourceResponse res = new SourceResponse();
-		res.source = getSourceName();
+		res.source = getSourceName().toString();
 		String httpQuery = getHttpQuery(q);
 		res.query = httpQuery;
 		JsonNode response;
@@ -136,7 +136,7 @@ public class YouTubeSpaceSource extends ISpaceSource {
 		RecordResource it = new RecordResource();
 		String id = item.getStringValue("id.videoId");
 		String isAt = "https://www.youtube.com/watch?v="+id;
-		it.addToProvenance(new ProvenanceInfo(LABEL, isAt, id));
+		it.addToProvenance(new ProvenanceInfo(sourceLABEL.toString(), isAt, id));
 
 		EmbeddedMediaObject th = new EmbeddedMediaObject();
 		th.setType(WithMediaType.VIDEO);
@@ -166,7 +166,7 @@ public class YouTubeSpaceSource extends ISpaceSource {
 		RecordResource it = new RecordResource();
 		String id = item.getStringValue("id");
 		String isAt = "https://www.youtube.com/watch?v="+id;
-		it.addToProvenance(new ProvenanceInfo(LABEL, isAt, id));
+		it.addToProvenance(new ProvenanceInfo(sourceLABEL.toString(), isAt, id));
 
 		EmbeddedMediaObject th = new EmbeddedMediaObject();
 		th.setType(WithMediaType.VIDEO);
