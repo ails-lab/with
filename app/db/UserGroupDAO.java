@@ -138,11 +138,19 @@ public class UserGroupDAO extends DAO<UserGroup> {
 		return find(q).asList();
 	}
 
+	//Is this fast or should we use ElasticSearch
 	public List<UserGroup> getByGroupNamePrefix(String prefix) {
 		Query<UserGroup> q = this.createQuery().field("username")
 				.startsWithIgnoreCase(prefix);
 		return find(q).asList();
 
+	}
+
+	//Is this fast or should we use ElasticSearch
+	public List<UserGroup> getByFriendlyNamePrefix(String prefix) {
+		Query<UserGroup> q = this.createQuery().field("friendlyName")
+				.startsWithIgnoreCase(prefix);
+		return find(q).asList();
 	}
 
 	public void setCreated() {
@@ -181,7 +189,7 @@ public class UserGroupDAO extends DAO<UserGroup> {
 		while (userIterator.hasNext()) {
 			User user = userIterator.next();
 			log.info("Getting the urls for #" + i++ + " user");
-			if (user.getAvatar() != null && !user.getAvatar().isEmpty())
+			if ((user.getAvatar() != null) && !user.getAvatar().isEmpty())
 				urls.addAll(user.getAvatar().values());
 		}
 		log.info("Retrieving urls from group avatars");
@@ -191,7 +199,7 @@ public class UserGroupDAO extends DAO<UserGroup> {
 		while (groupIterator.hasNext()) {
 			UserGroup group = groupIterator.next();
 			log.info("Getting the urls for #" + i++ + " group");
-			if (group.getAvatar() != null && !group.getAvatar().isEmpty())
+			if ((group.getAvatar() != null) && !group.getAvatar().isEmpty())
 				urls.addAll(group.getAvatar().values());
 		}
 	}
@@ -209,7 +217,7 @@ public class UserGroupDAO extends DAO<UserGroup> {
 				page = ((Organization) group).getPage();
 			if (group instanceof Project)
 				page = ((Project) group).getPage();
-			if (page == null || page.getCover() == null
+			if ((page == null) || (page.getCover() == null)
 					|| page.getCover().isEmpty())
 				continue;
 			urls.addAll(page.getCover().values());
