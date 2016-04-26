@@ -434,7 +434,7 @@ define(['knockout', 'text!./collection.html', 'selectize', 'app', 'knockout-vali
 				"error": function (result) {
 					saving(false);
 					self.ajaxConnections--;
-					if (result.responseJSON.error === 'double') {
+					if (result.responseJSON && result.responseJSON.error === 'double') {
 						$.smkConfirm({text:'Record already exists in collection.', accept:'Do you want to add it again?', cancel:'Cancel'}, function(e){if(e){
 							self.addRecord(collid, false);
 						}});
@@ -464,6 +464,8 @@ define(['knockout', 'text!./collection.html', 'selectize', 'app', 'knockout-vali
 						resourceId: item.externalId}]
 						});
 			}
+			if (noDouble === undefined)
+				noDouble = true;
 			var jsondata=JSON.stringify(jsonArray);
 			$.ajax({
 				"beforeSend": function (xhr) {
@@ -495,7 +497,7 @@ define(['knockout', 'text!./collection.html', 'selectize', 'app', 'knockout-vali
 				"error": function (result) {
 					self.ajaxConnections--;
 					saving(false);
-					if (result.responseJSON.error === 'double') {
+					if (result.responseJSON && result.responseJSON.error === 'double') {
 						$.smkConfirm({text:'One of the selected records already exists in collection.', accept:'Do you want to add it again?', cancel:'Cancel'}, function(e){if(e){
 							self.addRecords(collid, false);
 						}else{self.close();}});
