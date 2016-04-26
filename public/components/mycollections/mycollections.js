@@ -47,8 +47,8 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 	function MyCollectionsModel(params) {
 		KnockoutElse.init([spec = {}]);
 		var self = this;
-		WITHApp.tabAction();
-		WITHApp.initTooltip();
+		//WITHApp.tabAction();
+		//WITHApp.initTooltip();
 		self.route = params.route;
 		self.showsExhibitions = params.showsExhibitions;
 		self.showImportFromEuropeana = true;//(app.currentUser.username()=="foodanddrink");
