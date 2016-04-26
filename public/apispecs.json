@@ -48,7 +48,8 @@
                                             "BritishLibrary",
                                             "NLA",
                                             "DDB",
-                                            "InternetArchive"
+                                            "InternetArchive",
+                                            "Youtube"
                                         ]
                                     }
                                 }
@@ -118,7 +119,8 @@
                                             "BritishLibrary",
                                             "NLA",
                                             "DDB",
-                                            "InternetArchive"
+                                            "InternetArchive",
+                                            "Youtube"
                                         ]
                                     }
                                 },
@@ -196,7 +198,8 @@
                                             "BritishLibrary",
                                             "NLA",
                                             "DDB",
-                                            "InternetArchive"
+                                            "InternetArchive",
+                                            "Youtube"
                                         ]
                                     }
                                 }
@@ -598,8 +601,8 @@
         },
         "/collection/favorites": {
             "get": {
-                "summary": "Get a list of your favorite records.",
-                "description": "This call will return an array of Ids for all the favorited records of the logged in user.",
+                "summary": "Returns the external ids of your favorite records.",
+                "description": "This call will return an array of external Ids for all the favorited records of the logged in user.",
                 "tags": [
                     "Record",
                     "Collection"
@@ -623,6 +626,68 @@
                                 }
                             }
                         }
+                    }
+                }
+            }
+        },
+        "/collection/liked": {
+            "post": {
+                "summary": "Adds a record to favourites.",
+                "description": "This call adds a record in the favourites collection.",
+                "tags": [
+                    "Record",
+                    "Collection"
+                ],
+                "parameters": [
+                    {
+                        "in": "body",
+                        "name": "body",
+                        "description": "Record JSON schema",
+                        "schema": {
+                            "$ref": "#/definitions/InternalRecord"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden (double entry)",
+                        "schema": {
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/collection/favoriteCollection": {
+            "get": {
+                "summary": "Get a collection that contains your favorite records.",
+                "description": "This call will return a collection that contains all records marked as favourites.",
+                "tags": [
+                    "Record",
+                    "Collection"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/Collection"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden (user not logged in)"
                     }
                 }
             }
