@@ -42,7 +42,6 @@ import model.resources.CulturalObject.CulturalObjectData;
 import model.resources.RecordResource;
 import model.resources.WithResource.WithResourceType;
 
-
 import org.bson.types.ObjectId;
 
 import play.Logger;
@@ -53,6 +52,7 @@ import play.mvc.Controller;
 import play.mvc.Result;
 import sources.core.ISpaceSource;
 import sources.core.ParallelAPICall;
+import sources.core.ParallelAPICall.Priority;
 import sources.core.RecordJSONMetadata;
 import utils.AccessManager;
 import utils.AccessManager.Action;
@@ -550,7 +550,7 @@ public class WithResourceController extends Controller {
 			}
 			return true;
 		};
-		ParallelAPICall.createPromise(methodQuery, recordId);
+		ParallelAPICall.createPromise(methodQuery, recordId, Priority.LOW);
 	}
 
 	/**
@@ -673,7 +673,8 @@ public class WithResourceController extends Controller {
 		};
 		RecordResource record = DB.getRecordResourceDAO().getById(recordId);
 		String sourceClassName = "sources." + source + "SpaceSource";
-		ParallelAPICall.createPromise(methodQuery, record, sourceClassName);
+		ParallelAPICall.createPromise(methodQuery, record, sourceClassName,
+				Priority.LOW);
 	}
 
 	/**
