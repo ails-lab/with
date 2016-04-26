@@ -302,7 +302,7 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 					Action.DELETE, r.getDbId())) {
 				boolean mergedPublicity = mergeParentCollectionPublicity(
 						r.getDbId(), isPublic, colId);
-				updateField(r.getDbId(), "administrative.access",
+				updateField(r.getDbId(), "administrative.access.isPublic",
 						mergedPublicity);
 			}
 		}
