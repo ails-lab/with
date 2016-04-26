@@ -89,8 +89,15 @@ define(['knockout', 'text!./_item.html', 'app','smoke'], function (ko, template,
 			var likeval=app.isLiked(self.externalId);
 			self.isLike(likeval);
 			self.loading(false);
-			
-		 
+			if (data.fullrestype != null) {
+				if (data.fullrestype == "VIDEO") {
+					self.vtype = "MEDIA";
+					$('#mediadiv').html('<video id="mediaplayer" autoplay="true" controls width="576" height="324"><source src="' + self.fullres() + '" type="video/mp4">Your browser does not support HTML5</video>');        
+				} else if (data.fullrestype == "AUDIO") {
+					self.vtype = "MEDIA";
+					$('#mediadiv').html('<audio id="mediaplayer" autoplay="true" controls width="576" height="324"><source src="' + self.fullres() + '" type="audio/mpeg">Your browser does not support HTML5</audio>');
+				}
+			} 			
 		};
 
 	   self.findsimilar=function(){
@@ -162,7 +169,10 @@ define(['knockout', 'text!./_item.html', 'app','smoke'], function (ko, template,
 											likes: usage.likes,
 											collected: usage.collected,
 											collectedIn:result.collectedIn,
-											data: result
+											data: result,
+											fullrestype: media[0] != null && media[0].Original != null 
+											&& media[0].Original.type != "null" ? media[0].Original.type : ""
+
 								  });
 						        if(record.thumb && record.thumb.length>0 && record.externalId!=self.externalId)
 							       items.push(record);
@@ -172,6 +182,7 @@ define(['knockout', 'text!./_item.html', 'app','smoke'], function (ko, template,
 					self.related().push.apply(self.related(),items);
 					self.related.valueHasMutated();}
 					self.loading(false);
+					self.vtype = "IMAGE";
 				},
 				error   : function(request, status, error) {
 					self.loading(false);
@@ -244,7 +255,10 @@ define(['knockout', 'text!./_item.html', 'app','smoke'], function (ko, template,
 												likes: usage.likes,
 												collected: usage.collected,
 												collectedIn:result.collectedIn,
-												data: result
+												data: result,
+												fullrestype: media[0] != null && media[0].Original != null 
+												&& media[0].Original.type != "null" ? media[0].Original.type : ""
+
 									  });
 							        if(record.thumb && record.thumb.length>0 && record.externalId!=self.externalId)
 								       items.push(record);
@@ -254,6 +268,7 @@ define(['knockout', 'text!./_item.html', 'app','smoke'], function (ko, template,
 						self.similar().push.apply(self.similar(),items);
 						self.similar.valueHasMutated();}
 						self.loading(false);
+						self.vtype = "IMAGE"; 
 					},
 					error   : function(request, status, error) {
 						self.loading(false);
@@ -362,6 +377,10 @@ define(['knockout', 'text!./_item.html', 'app','smoke'], function (ko, template,
 			//self.record(new Record());
 			$('body').css('overflow','visible');
 			$( '.itemview' ).fadeOut();
+			var vid = document.getElementById("mediaplayer");
+			 if (vid != null) {
+			    vid.pause();
+			}
 		};
 
 		self.changeSource = function (item) {
@@ -480,12 +499,15 @@ define(['knockout', 'text!./_item.html', 'app','smoke'], function (ko, template,
 									likes: usage.likes,
 									collected: usage.collected,
 									collectedIn:result.collectedIn,
-									data: result
+									data: result,
+									fullrestype: media[0] != null && media[0].Original != null
+									&& media[0].Original.type != "null" ? media[0].Original.type : ""
+
 						  });
 					self.record(record);
 					self.open();
 					self.addDisqus();
-					
+					self.vtype = "IMAGE"; 
 				},
 				error: function (xhr, textStatus, errorThrown) {
 					
