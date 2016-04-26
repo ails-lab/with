@@ -37,7 +37,7 @@
 			  <!-- ko else -->
 			  
 			    <a href="#" class="new" ><span class="plus"></span><span class="text" >New Collection</span></a>
-			    <!-- ko if: superUser -->
+			    <!-- ko if: showImportFromEuropeana -->
 			    <div class="dropdown1">
 			    <a id="picker1" href="#" data-toggle="dropdown" 
 			      ><span class="plus"></span><span id="pickerTitle1" class="text" >Import Collection</span>
@@ -220,7 +220,7 @@
 						<div>
 							<input type="text"
 								data-bind="value: europeanaLimit, valueUpdate: 'afterkeypress', hasFocus: true"
-								placeholder="Import Limit">
+								placeholder="Import Limit (-1 means no limit)">
 						</div>
 					</div>
 					<div class="button-group">
