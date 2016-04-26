@@ -166,9 +166,8 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 				}
 			}
 			self.isLoaded = ko.observable(false);
-			
-			
-			
+			self.fullrestype = media[0] != null && media[0].Original != null 
+			&& media[0].Original.type != "null" ? media[0].Original.type : null;
 		};
 
 		if (data !== undefined) self.load(data);
