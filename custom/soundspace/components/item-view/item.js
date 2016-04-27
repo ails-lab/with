@@ -1,7 +1,11 @@
 define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, app) {
 
     self.disqusLoaded=ko.observable(false);
-	
+    helper_thumb = "";
+    self.myFunction = function() {
+		console.log(helper_thumb);
+		return helper_thumb;
+	}
 
 	function Record(data) {
 		var self = this;
@@ -25,7 +29,7 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 		self.data=ko.observable('');
 		self.collectedIn =  [];
 		self.isLike=ko.observable(false);
-		
+		self.vtype = "IMAGE";
 		self.related =  ko.observableArray([]);
 		self.similar =  ko.observableArray([]);
 		self.facebook='';
@@ -109,9 +113,12 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 					self.vtype = "MEDIA";
 					$('#mediadiv').html('<audio id="mediaplayer" autoplay="true" controls width="576" height="324"><source src="' + self.fullres() + '" type="audio/mpeg">Your browser does not support HTML5</audio>');
 				}
-			}		 
+			}
+			helper_thumb = self.calcThumbnail();
 		};
 
+		
+		
 		self.findsimilar=function(){
 		  if(self.related().length==0 && self.relatedsearch==false){
 			self.relatedsearch=true;  
@@ -192,7 +199,6 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 					self.related().push.apply(self.related(),items);
 					self.related.valueHasMutated();}
 					self.loading(false);
-					self.vtype = "IMAGE";
 				},
 				error   : function(request, status, error) {
 					self.loading(false);
@@ -268,7 +274,8 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 												collectedIn:result.collectedIn,
 												data: result,
 												fullrestype: media[0] != null && media[0].Original != null 
-												&& media[0].Original.type != "null" ? media[0].Original.type : ""
+												&& media[0].Original.type != "null" ? media[0].Original.type : "",
+												vtype : "IMAGE"	
 									  });
 							        if(record.thumb && record.thumb.length>0 && record.externalId!=self.externalId)
 								       items.push(record);
@@ -278,7 +285,6 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 						self.similar().push.apply(self.similar(),items);
 						self.similar.valueHasMutated();}
 						self.loading(false);
-						self.vtype = "IMAGE";
 					},
 					error   : function(request, status, error) {
 						self.loading(false);
@@ -506,7 +512,6 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 					self.open();
 					self.addDisqus();
 					$( '.itemview' ).fadeIn();
-					self.vtype = "IMAGE"; 
 				},
 				error: function (xhr, textStatus, errorThrown) {
 					self.open();

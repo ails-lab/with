@@ -161,6 +161,21 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 					else
 						return 'by ' + innerModel.withCreatorInfo.username();
 				});
+				innerModel.backgroundImg = ko.pureComputed(function () {
+					if (!(innerModel.descriptiveData.backgroundImg == null || innerModel.descriptiveData.backgroundImg.Thumbnail == null || 
+							innerModel.descriptiveData.backgroundImg.Thumbnail.withUrl == null || 
+							innerModel.descriptiveData.backgroundImg.Thumbnail.withUrl() == "")) {
+						if (innerModel.descriptiveData.backgroundImg.Thumbnail.withUrl().indexOf("/media") == 0) {
+							return window.location.origin + innerModel.descriptiveData.backgroundImg.Thumbnail.withUrl();
+						} else {
+							return innerModel.descriptiveData.backgroundImg.Thumbnail.withUrl();
+						}
+					} 						
+					else {
+						return "";
+					}
+				});
+				
 				return innerModel;
 			},
 			'dbId': {
