@@ -98,8 +98,6 @@ public class MediaController extends Controller {
 			media = DB.getMediaObjectDAO()
 					.getByUrlAndVersion(url, mediaVersion);
 			if (media != null) {
-				if (!media.getMimeType().is(MediaType.ANY_IMAGE_TYPE))
-					return badRequest();
 				return ok(media.getMediaBytes()).as(
 						media.getMimeType().toString());
 			}
