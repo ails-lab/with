@@ -152,10 +152,10 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 				media[0].Thumbnail=media[0].Original;
 			}
 			if(media[0] && media[0].Thumbnail){
-				if(media[0].Thumbnail.url)
-				    self.thumb=media[0].Thumbnail.url;
-				else if(media[0].Thumbnail.withUrl)
-					self.thumb=media[0].Thumbnail.withUrl;
+				if(media[0].Thumbnail.withUrl)
+				    self.thumb=media[0].Thumbnail.withUrl;
+				else if(media[0].Thumbnail.url)
+					self.thumb=media[0].Thumbnail.url;
 			}
 			else {self.thumb=null;}
 			self.fullres = media[0] != null && media[0].Original != null && media[0].Original.url != "null" ? media[0].Original.url : null;

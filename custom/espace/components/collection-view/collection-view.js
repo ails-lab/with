@@ -431,7 +431,7 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 					
 			 }
                     tile+='<a href="#" onclick="recordSelect(\''+record.dbId+'\',event)">'
-                     +'<div class="thumb"><img src="'+record.thumbnail()+'"></div>'
+                     +'<div class="thumb"><img src="'+record.thumbnail()+'" onError="this.src=\'img/content/thumb-empty.png\';" ></div>'
                      +' <div class="info"><h1 class="title">'+record.displayTitle()+'</h1><span class="owner">'+ record.dataProvider+'</span></div>'
                      +'<span class="rights">'+record.sourceCredits()+'</span>'
                     +'</a></div> </div>';
