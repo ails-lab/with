@@ -2,10 +2,7 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 
     self.disqusLoaded=ko.observable(false);
     helper_thumb = "";
-    self.myFunction = function() {
-		console.log(helper_thumb);
-		return helper_thumb;
-	}
+    
 
 	function Record(data) {
 		var self = this;
@@ -114,7 +111,8 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 					$('#mediadiv').html('<audio id="mediaplayer" autoplay="true" controls width="576" height="324"><source src="' + self.fullres() + '" type="audio/mpeg">Your browser does not support HTML5</audio>');
 				}
 			}
-			helper_thumb = self.calcThumbnail();
+			console.log(helper_thumb);
+			helper_thumb = self.calcOnErrorThumbnail();
 		};
 
 		
@@ -309,6 +307,18 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 				   return "img/content/thumb-empty.png";
 			   }
 			});
+		
+		self.calcOnErrorThumbnail = ko.pureComputed(function() {
+
+
+			   if(self.thumb && self.thumb.indexOf('.pdf') == -1){
+					return self.thumb;
+				}
+			   else{
+				   return "img/content/thumb-empty.png";
+			   }
+			});
+		
 		self.sourceCredits = ko.pureComputed(function() {
 			 switch(self.source()) {
 			    case "DPLA":
