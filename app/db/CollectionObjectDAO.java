@@ -519,7 +519,6 @@ public class CollectionObjectDAO extends WithResourceDAO<CollectionObject> {
 
 	public void updateContextData(ContextData contextData, int position)
 			throws Exception {
-
 		ObjectId collectionId = contextData.getTarget().getCollectionId();
 		ObjectId recordId = contextData.getTarget().getRecordId();
 		List<ContextData<ContextDataBody>> collectedResources = this
