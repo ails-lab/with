@@ -55,7 +55,7 @@ public class DBPediaSpaceSource extends ISpaceSource {
 	protected JsonContextRecordFormatReader<PlaceObject> placeformatreader;
 	
 	public DBPediaSpaceSource() {
-		LABEL = Sources.DBPedia.toString();
+		super(Sources.DBPedia);
 		formatreader = new DBPediaAgentRecordFormatter(FilterValuesMap.getDBPediaMap());
 		
 		agentformatreader = formatreader; 
@@ -75,7 +75,7 @@ public class DBPediaSpaceSource extends ISpaceSource {
 	@Override
 	public SourceResponse getResults(CommonQuery q) {
 		SourceResponse res = new SourceResponse();
-		res.source = getSourceName();
+		res.source = getSourceName().toString();
 
 		String httpQuery = getHttpQuery(q);
 		res.query = httpQuery;
@@ -85,10 +85,12 @@ public class DBPediaSpaceSource extends ISpaceSource {
 			try {
 				
 				response = getHttpConnector().getURLContent(httpQuery);
-				res.totalCount = Utils.readIntAttr(response, "totalCount", true);
-
+				res.totalCount = Utils.readIntAttr(response, "totalcount", true);
+				
+				int count = 0;
 				for (JsonNode item : response.path("results")) {
 					for (JsonNode type : item.path("type")) {
+						count++;
 						if (type.asText().equals("http://dbpedia.org/ontology/Place")) {
 							res.addItem(placeformatreader.readObjectFrom(item));
 							break;
@@ -100,11 +102,12 @@ public class DBPediaSpaceSource extends ISpaceSource {
 					
 				}
 				//TODO: what is the count?
-				res.count = res.items.getItemsCount();
+				res.count = count;
 
 //				res.facets = response.path("facets");
 
 				res.filtersLogic = new ArrayList<>();
+				
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();

@@ -29,14 +29,11 @@ import javax.validation.ConstraintViolation;
 
 import org.bson.Document;
 import org.bson.types.ObjectId;
-//<<<<<<< HEAD
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
-//=======
 import org.mongodb.morphia.query.Query;
-//>>>>>>> develop
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -58,20 +55,10 @@ import model.annotations.ContextData.ContextDataBody;
 import model.basicDataTypes.Language;
 import model.basicDataTypes.LiteralOrResource;
 import model.basicDataTypes.MultiLiteral;
-//<<<<<<< HEAD
-//import model.basicDataTypes.MultiLiteralOrResource;
-//import model.basicDataTypes.WithAccess;
-//import model.basicDataTypes.WithAccess.Access;
-//import model.basicDataTypes.WithAccess.AccessEntry;
-//import model.resources.CollectionObject;
-//import model.resources.CollectionObject.CollectionAdmin;
-//import model.resources.CollectionObject.CollectionAdmin.CollectionType;
-//=======
 import model.basicDataTypes.ProvenanceInfo;
 import model.basicDataTypes.WithAccess;
 import model.basicDataTypes.WithAccess.Access;
 import model.basicDataTypes.WithAccess.AccessEntry;
-//>>>>>>> develop
 import model.resources.CulturalObject;
 import model.resources.CulturalObject.CulturalObjectData;
 import model.resources.RecordResource;
@@ -1081,10 +1068,6 @@ public class CollectionObjectController extends WithResourceController {
 				
 				QueryBuilder query = CollectionIndexController.getIndexCollectionQuery(colId, json);
 				
-				System.out.println("QUERY " + query);
-//				log.info("QUERY " + query.toString());
-//				log.info("QUERC " + start + " " + count);
-//				
 				SearchOptions so = new SearchOptions(start, start + count);
 				
 				SearchResponse res = es.execute(query, so);
@@ -1118,42 +1101,42 @@ public class CollectionObjectController extends WithResourceController {
 					return internalServerError(result);
 				}
 				ArrayNode recordsList = Json.newObject().arrayNode();
-				int position = start;
-				for (RecordResource e : records) {
+				for (RecordResource r : records) {
 					// filter out records to which the user has no read access
+					response = errorIfNoAccessToRecord(Action.READ, r.getDbId());
 					if (!response.toString().equals(ok().toString())) {
-						recordsList.add(Json.toJson(new RecordResource(e
-								.getDbId())));
-					} else {
-						// filter out all context annotations that do not refer
-						// to this collection-position
-						List<ContextData> contextAnns = e.getContextData();
-						List<ContextData> filteredContextAnns = new ArrayList<ContextData>();
-						for (ContextData ca : contextAnns) {
-							if (ca.getTarget().getCollectionId().equals(colId)
-									&& (ca.getTarget().getPosition() == position))
-								filteredContextAnns.add(ca);
-						}
-						e.setContextData(filteredContextAnns);
-						if (e.getContent() != null) {
-							if (contentFormat.equals("contentOnly")
-									&& (e.getContent() != null)) {
-								recordsList.add(Json.toJson(e.getContent()));
-							} else if (contentFormat.equals("noContent")) {
-								e.getContent().clear();
-							} else if (e.getContent()
-									.containsKey(contentFormat)) {
-								HashMap<String, String> newContent = new HashMap<String, String>(
-										1);
-								newContent.put(contentFormat, (String) e
-										.getContent().get(contentFormat));
-								e.setContent(newContent);
-							}
-						}
-						recordsList.add(Json.toJson(e));
+						continue;
 					}
-					position += 1;
+					if (contentFormat.equals("contentOnly")) {
+						if (r.getContent() != null) {
+							recordsList.add(Json.toJson(r.getContent()));
+						}
+						continue;
+					}
+					if (contentFormat.equals("noContent")
+							&& r.getContent() != null) {
+						r.getContent().clear();
+						recordsList.add(Json.toJson(r));
+						fillContextData(
+								DB.getCollectionObjectDAO()
+										.getById(
+												colId,
+												Arrays.asList("collectedResources"))
+										.getCollectedResources(), recordsList);
+						continue;
+					}
+					if (r.getContent() != null
+							&& r.getContent().containsKey(contentFormat)) {
+						HashMap<String, String> newContent = new HashMap<String, String>(
+								1);
+						newContent.put(contentFormat, (String) r.getContent()
+								.get(contentFormat));
+						recordsList.add(Json.toJson(newContent));
+						continue;
+					}
+					recordsList.add(Json.toJson(r));
 				}
+
 				result.put("entryCount", totalHits);
 				result.put("records", recordsList);
 				return ok(result);
@@ -1178,7 +1161,6 @@ public class CollectionObjectController extends WithResourceController {
 
 			Result response = errorIfNoAccessToCollection(Action.READ, colId);
 
-<<<<<<< HEAD
 			if (!response.toString().equals(ok().toString())) {
 				return response;
 			} else {
@@ -1189,8 +1171,6 @@ public class CollectionObjectController extends WithResourceController {
 				
 				QueryBuilder query = CollectionIndexController.getSimilarItemsIndexCollectionQuery(colId, rr.getDescriptiveData());
 				
-//				log.info("QUERC " + start + " " + count);
-//				
 				SearchOptions so = new SearchOptions(start, start + count);
 				
 				SearchResponse res = es.execute(query, so);
@@ -1208,15 +1188,9 @@ public class CollectionObjectController extends WithResourceController {
 				for (Iterator<SearchHit> iter = sh.iterator(); iter.hasNext();) {
 					SearchHit hit = iter.next();
 					ids.add(hit.getId());
-//					log.info("ID " + hit.getId());
 				}
 				
 				List<RecordResource> records = DB.getRecordResourceDAO().getByCollectionIds(colId, ids);
-				
-//				System.out.println("RESULTS DB " + records.size());
-//				for (RecordResource rr : records) {
-//					log.info("DB " + rr.getDbId());
-//				}
 
 				if (records == null) {
 					result.put("message",
@@ -1224,42 +1198,44 @@ public class CollectionObjectController extends WithResourceController {
 					return internalServerError(result);
 				}
 				ArrayNode recordsList = Json.newObject().arrayNode();
+				
 				int position = start;
-				for (RecordResource e : records) {
+				for (RecordResource r : records) {
 					// filter out records to which the user has no read access
+					response = errorIfNoAccessToRecord(Action.READ, r.getDbId());
 					if (!response.toString().equals(ok().toString())) {
-						recordsList.add(Json.toJson(new RecordResource(e
-								.getDbId())));
-					} else {
-						// filter out all context annotations that do not refer
-						// to this collection-position
-						List<ContextData> contextAnns = e.getContextData();
-						List<ContextData> filteredContextAnns = new ArrayList<ContextData>();
-						for (ContextData ca : contextAnns) {
-							if (ca.getTarget().getCollectionId().equals(colId)
-									&& (ca.getTarget().getPosition() == position))
-								filteredContextAnns.add(ca);
-						}
-						e.setContextData(filteredContextAnns);
-						if (e.getContent() != null) {
-							if (contentFormat.equals("contentOnly")
-									&& (e.getContent() != null)) {
-								recordsList.add(Json.toJson(e.getContent()));
-							} else if (contentFormat.equals("noContent")) {
-								e.getContent().clear();
-							} else if (e.getContent()
-									.containsKey(contentFormat)) {
-								HashMap<String, String> newContent = new HashMap<String, String>(
-										1);
-								newContent.put(contentFormat, (String) e
-										.getContent().get(contentFormat));
-								e.setContent(newContent);
-							}
-						}
-						recordsList.add(Json.toJson(e));
+						continue;
 					}
-					position += 1;
+					if (contentFormat.equals("contentOnly")) {
+						if (r.getContent() != null) {
+							recordsList.add(Json.toJson(r.getContent()));
+						}
+						continue;
+					}
+					if (contentFormat.equals("noContent")
+							&& r.getContent() != null) {
+						r.getContent().clear();
+						recordsList.add(Json.toJson(r));
+						fillContextData(
+								DB.getCollectionObjectDAO()
+										.getById(
+												colId,
+												Arrays.asList("collectedResources"))
+										.getCollectedResources(), recordsList);
+						continue;
+					}
+					if (r.getContent() != null
+							&& r.getContent().containsKey(contentFormat)) {
+						HashMap<String, String> newContent = new HashMap<String, String>(
+								1);
+						newContent.put(contentFormat, (String) r.getContent()
+								.get(contentFormat));
+						recordsList.add(Json.toJson(newContent));
+						continue;
+					}
+					recordsList.add(Json.toJson(r));
 				}
+
 				result.put("entryCount", totalHits);
 				result.put("records", recordsList);
 				return ok(result);
@@ -1292,5 +1268,6 @@ public class CollectionObjectController extends WithResourceController {
 				itemsCount++;
 			}
 		}
+		return 0;
 	}
 }

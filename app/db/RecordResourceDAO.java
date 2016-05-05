@@ -48,6 +48,7 @@ import sources.core.ParallelAPICall;
 import utils.AccessManager.Action;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.mongodb.BasicDBObject;
 
 import elastic.ElasticEraser;
 
@@ -95,11 +96,6 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 				collection.getCollectedResources(), lowerBound, upperBound, q);
 	}
 	
-	public List<RecordResource> getByCollectionIds(ObjectId colId, List<String> ids) {
-		Query<RecordResource> q = this.createQuery();
-		return getByCollectionIds(colId, ids, q);
-	}
-
 	/**
 	 * Retrieve records from specific collection whose position is between
 	 * lowerBound and upperBound. If a record appears n times in a collection
@@ -136,6 +132,11 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 			}
 		}
 		return orderedRecords;
+	}
+
+	public List<RecordResource> getByCollectionIds(ObjectId colId, List<String> ids) {
+		Query<RecordResource> q = this.createQuery();
+		return getByCollectionIds(colId, ids, q);
 	}
 
 	public List<RecordResource> getByCollectionIds(ObjectId colId,
