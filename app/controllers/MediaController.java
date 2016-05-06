@@ -132,7 +132,7 @@ public class MediaController extends Controller {
 					.getByUrlAndVersion(url, version)) != null)
 				return media;
 			media = new MediaObject();
-			Logger.info("Downloading " + url);
+			log.info("Downloading " + url);
 			File img = HttpConnector.getWSHttpConnector().getURLContentAsFile(
 					url);
 			byte[] mediaBytes = IOUtils.toByteArray(new FileInputStream(img));
@@ -469,7 +469,6 @@ public class MediaController extends Controller {
 		// singleRes.put("isShownBy", "/media/"
 		// + med.getDbId().toString());
 
-		// Logger.info(results.asText());
 		return results;
 	}
 
@@ -587,9 +586,8 @@ public class MediaController extends Controller {
 				// JsonPath.parse(jsonResponse).read("$['results'][0]['mediaId']");
 				resp = Json.parse(jsonResponse);
 
-				Logger.info(jsonResponse);
+				log.info(jsonResponse);
 
-				Logger.info("Called!");
 				aFile.releaseConnection();
 
 				response.close();

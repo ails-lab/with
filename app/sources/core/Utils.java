@@ -29,21 +29,20 @@ import java.util.List;
 
 import javax.imageio.ImageIO;
 
-import model.EmbeddedMediaObject;
-import model.EmbeddedMediaObject.MediaVersion;
-import model.resources.WithResource;
-
 import org.apache.commons.validator.routines.UrlValidator;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.google.common.net.MediaType;
 
+import model.EmbeddedMediaObject;
+import model.EmbeddedMediaObject.MediaVersion;
+import model.resources.WithResource;
 import play.Logger;
+import play.Logger.ALogger;
 import play.libs.Json;
-import sources.utils.StringUtils;
 
 public class Utils {
-
+	public static final ALogger log = Logger.of( Utils.class );
+	
 	public static class Lang {
 		public Lang(String languageCode, String textValue) {
 			this.lang = languageCode;
@@ -75,17 +74,17 @@ public class Utils {
 		private int getRank1(WithResource<?, ?> o1) {
 			EmbeddedMediaObject f = o1.getMedia().get(0).get(MediaVersion.Thumbnail);
 			if (!Utils.hasInfo(f.getUrl()) || !Utils.isValidURL(f.getUrl())){
-				Logger.info("Rank: -1 for "+f.getUrl());
+				log.info("Rank: -1 for "+f.getUrl());
 				return -1;
 			} else {
 				try{
 					URL url = new URL(f.getUrl());
 					final BufferedImage bi = ImageIO.read(url);
 					int size = bi.getWidth()* bi.getHeight();
-					Logger.info("Rank: "+size+" for "+f.getUrl());
+					log.info("Rank: "+size+" for "+f.getUrl());
 					return size;
 				} catch(Exception e) {
-					Logger.info("Rank: -1 for "+f.getUrl());
+					log.info("Rank: -1 for "+f.getUrl());
 					return -1;
 				}
 			}

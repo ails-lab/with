@@ -94,7 +94,7 @@ public class SearchController extends Controller {
 				Iterable<Promise<SourceResponse>> promises = callSources(q);
 				// compose all futures, blocks until all futures finish
 				return ParallelAPICall.<SourceResponse> combineResponses(r -> {
-					Logger.info(r.source + " found " + r.count);
+					log.info(r.source + " found " + r.count);
 					return true;
 				} , promises);
 			} catch (Exception e) {
@@ -291,7 +291,7 @@ public class SearchController extends Controller {
 				SourceResponse res = src
 						.getResults(cq);
 					if (res.source==null){
-						System.out.println("Error "+src.getSourceName());
+						log.info("Error "+src.getSourceName());
 					}
 					return res;
 			} catch(Exception e){

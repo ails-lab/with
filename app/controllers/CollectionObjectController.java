@@ -265,20 +265,7 @@ public class CollectionObjectController extends WithResourceController {
 			RecordResource<?>[] array = records
 					.toArray(new RecordResource<?>[] {});
 			Arrays.sort(array, Utils.compareThumbs);
-			// Logger.info("Items sorted based on image quality");
-			for (int i = 0, pos = 0; i < array.length; i++) {
-				Logger.info("Items sorted based on image quality");
-			}
-			/*
-			 * for (int i = 0, pos = 0; i < array.length; i++) {
-			 * RecordResource<?> recordResource = array[i]; for (CollectionInfo
-			 * ci : recordResource.getCollectedIn()) { if
-			 * (ci.getCollectionId().equals(collectionDbId)) {
-			 * ci.setPosition(pos++); } }
-			 * DB.getRecordResourceDAO().makePermanent(recordResource);
-			 * //Logger.info(pos +"th item was updated"); } Logger.info(pos
-			 * +"th item was updated"); }
-			 */
+			log.debug("Items sorted based on image quality");
 			return ok();
 		} catch (Exception e) {
 			result.put("error", e.getMessage());
@@ -307,7 +294,6 @@ public class CollectionObjectController extends WithResourceController {
 					.getById(collectionDbId,
 							Arrays.asList("administrative.entryCount"))
 					.getAdministrative()).getEntryCount();
-			// Logger.info("Sorting collection "+collectionId);
 			List<RecordResource> records = DB.getRecordResourceDAO()
 					.getByCollectionBetweenPositions(collectionDbId, 0,
 							Math.min(entryCount, 1000));
