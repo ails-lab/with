@@ -16,9 +16,7 @@
 
 package model;
 
-import utils.Deserializer;
-import utils.MediaTypeConverter;
-import utils.Serializer;
+import java.net.URLEncoder;
 
 import org.mongodb.morphia.annotations.Converters;
 import org.mongodb.morphia.annotations.Entity;
@@ -30,14 +28,20 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.google.common.net.MediaType;
 
 import model.basicDataTypes.LiteralOrResource;
+import play.Logger;
+import play.Logger.ALogger;
 import sources.core.Utils;
+import utils.Deserializer;
+import utils.MediaTypeConverter;
+import utils.Serializer;
 
 @Entity
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(value = JsonInclude.Include.NON_NULL)
 @Converters(MediaTypeConverter.class)
 public class EmbeddedMediaObject {
-
+	public static final ALogger log = Logger.of( EmbeddedMediaObject.class );
+	
 	public static enum MediaVersion {
 		Original, Medium, Thumbnail, Square, Tiny;
 
@@ -218,8 +222,14 @@ public class EmbeddedMediaObject {
 		if ((url == null) || url.isEmpty() || url.startsWith("/media") || (mediaVersion == null)) {
 			return url;
 		}
-		else
-			return "/media/byUrl?url=" + url + "&version=" + mediaVersion.toString();
+		else {
+			try {
+			return "/media/byUrl?url=" + URLEncoder.encode(url,"UTF-8") + "&version=" + mediaVersion.toString();
+			} catch( Exception e ) {
+				log.error( "UTF-8 not known ...");
+				return "Invalid";
+			}
+		}
 	}
 
 	public LiteralOrResource getOriginalRights() {

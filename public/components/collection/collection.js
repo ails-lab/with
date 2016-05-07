@@ -1,6 +1,8 @@
 define(['knockout', 'text!./collection.html', 'selectize', 'app', 'knockout-validation','smoke'], function (ko, template, selectize, app) {
 
 	
+    self.saving=ko.observable(false);
+	
 	ko.validation.init({
 		errorElementClass: 'error',
 		errorMessageClass: 'errormsg',
@@ -152,6 +154,7 @@ define(['knockout', 'text!./collection.html', 'selectize', 'app', 'knockout-vali
 		});
 
 		self.findEditableCollections = function () {
+			saving(true);
 			var deferred = $.Deferred();
 			self.collectionlist([]);
 			if(isLogged()){
@@ -164,6 +167,7 @@ define(['knockout', 'text!./collection.html', 'selectize', 'app', 'knockout-vali
 		            
 		        });
 				self.collectionlist.push.apply(self.collectionlist, temparray);
+				saving(false);
 				deferred.resolve();
 			}
 			else{
@@ -178,6 +182,7 @@ define(['knockout', 'text!./collection.html', 'selectize', 'app', 'knockout-vali
 		            
 		        });
 				self.collectionlist.push.apply(self.collectionlist, temparray);
+				saving(false);
 				deferred.resolve();
 			 })}
 			return deferred.promise();
@@ -195,10 +200,12 @@ define(['knockout', 'text!./collection.html', 'selectize', 'app', 'knockout-vali
 			if (!isLogged()) {
 				showLoginPopup();
 			} else {
+				saving(true);
 				var promise=self.findEditableCollections();
 				$.when(promise).done(function(){
 				
 					self.templateName("multiplecollect");
+					saving(false);
 					self.open();
 				});
 			}
@@ -281,6 +288,7 @@ define(['knockout', 'text!./collection.html', 'selectize', 'app', 'knockout-vali
 		};
 
 		self.saveCollection = function (jsondata, callback) {
+			saving(true);
 			$.ajax({
 				"beforeSend": function (xhr) {
 					self.ajaxConnections++;
@@ -321,6 +329,7 @@ define(['knockout', 'text!./collection.html', 'selectize', 'app', 'knockout-vali
 				},
 
 				"error": function (result) {
+					saving(false);
 					self.ajaxConnections--;
 					//var r = JSON.parse(result.responseText);
 					$.smkAlert({text:'An error occured', type:'danger', time: 10});
@@ -386,6 +395,7 @@ define(['knockout', 'text!./collection.html', 'selectize', 'app', 'knockout-vali
 
 		
 		self.addRecord = function (collid, noDouble) {
+			saving(true);
 			 var jsondata = JSON.stringify({ 
 				    provenance : [{ provider : self.record().source(), 
 					resourceId: self.record().externalId()}]
@@ -407,6 +417,7 @@ define(['knockout', 'text!./collection.html', 'selectize', 'app', 'knockout-vali
 				"contentType": "application/json",
 				"data": jsondata,
 				"success": function (data) {
+					saving(false);
 					self.ajaxConnections--;
 					if(window.location.hash.indexOf("collectionview/"+collid)!=-1){
 						ko.contextFor(withcollection).$data.loadNext();
@@ -421,8 +432,9 @@ define(['knockout', 'text!./collection.html', 'selectize', 'app', 'knockout-vali
 					self.close();
 				},
 				"error": function (result) {
+					saving(false);
 					self.ajaxConnections--;
-					if (result.responseJSON.error === 'double') {
+					if (result.responseJSON && result.responseJSON.error === 'double') {
 						$.smkConfirm({text:'Record already exists in collection.', accept:'Do you want to add it again?', cancel:'Cancel'}, function(e){if(e){
 							self.addRecord(collid, false);
 						}});
@@ -437,6 +449,7 @@ define(['knockout', 'text!./collection.html', 'selectize', 'app', 'knockout-vali
 
 		
 		self.addRecords = function (collid,noDouble) {
+			saving(true);
 			var multipleselect=ko.dataFor(multiplecollect).multipleSelection();
 			var jsonArray=[];
 			for (i=0;i<ko.dataFor(multiplecollect).multipleSelection().length;i++){
@@ -451,6 +464,8 @@ define(['knockout', 'text!./collection.html', 'selectize', 'app', 'knockout-vali
 						resourceId: item.externalId}]
 						});
 			}
+			if (noDouble === undefined)
+				noDouble = true;
 			var jsondata=JSON.stringify(jsonArray);
 			$.ajax({
 				"beforeSend": function (xhr) {
@@ -464,6 +479,7 @@ define(['knockout', 'text!./collection.html', 'selectize', 'app', 'knockout-vali
 				"contentType": "application/json",
 				"data": jsondata,
 				"success": function (data) {
+					saving(false);
 					self.ajaxConnections--;
 					if(window.location.hash.indexOf("collectionview/"+collid)!=-1){
 						ko.contextFor(withcollection).$data.loadNext();
@@ -475,11 +491,13 @@ define(['knockout', 'text!./collection.html', 'selectize', 'app', 'knockout-vali
 					}
 
 					$.smkAlert({text:'Items added!', type:'success'});
+					
 					self.close();
 				},
 				"error": function (result) {
 					self.ajaxConnections--;
-					if (result.responseJSON.error === 'double') {
+					saving(false);
+					if (result.responseJSON && result.responseJSON.error === 'double') {
 						$.smkConfirm({text:'One of the selected records already exists in collection.', accept:'Do you want to add it again?', cancel:'Cancel'}, function(e){if(e){
 							self.addRecords(collid, false);
 						}else{self.close();}});
@@ -487,6 +505,7 @@ define(['knockout', 'text!./collection.html', 'selectize', 'app', 'knockout-vali
 					else {
 						$.smkAlert({text:'An error occured', type:'danger', time: 10});
 						self.close();
+						
 					}
 					
 				}

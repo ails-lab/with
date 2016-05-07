@@ -1,11 +1,11 @@
 define(['knockout', 'text!./exhibition-view.html', 'app', 'magnific-popup', 'slick'], function (ko, template, app, magnificPopup, slick) {
 
 	ko.bindingHandlers.backgroundImage = {
-		update: function (element, valueAccessor) {
+		update: function (element, valueAccessor, allBindingsAccessor, viewModel, context) {
 			ko.bindingHandlers.style.update(element,
 				function () {
 					return {
-						backgroundImage: "url('" + valueAccessor() + "')"
+						backgroundImage: "url('" + viewModel.backgroundImgWithUrl() + "')"
 					};
 				});
 		}
@@ -91,7 +91,8 @@ define(['knockout', 'text!./exhibition-view.html', 'app', 'magnific-popup', 'sli
 		self.desc = ko.observable('');
 		self.loading = ko.observable(false);
 		self.showCarousel = ko.observable(false);
-
+		self.backgroundImgWithUrl = ko.observable('');
+		
 		self.initCarousel = function () {
 			WITHApp.initCarousel();
 			WITHApp.initExpandExhibitionText();
@@ -103,7 +104,11 @@ define(['knockout', 'text!./exhibition-view.html', 'app', 'magnific-popup', 'sli
 				var result = data[i];
                 var record = new Record(result);
 				record.annotation = '';
-				if (result.contextData != null && result.contextData.body != null) {
+				if (result.contextData !== undefined && result.contextData !== null && 
+						result.contextData.body != undefined 
+						&& result.contextData.body != null
+						&& ! $.isEmptyObject(result.contextData.body)) {
+					
 					record.annotation = result.contextData.body.text.default;
 					record.videoUrl = result.contextData.body.videoUrl;
 //					for (var j in result.contextData) {
@@ -158,6 +163,7 @@ define(['knockout', 'text!./exhibition-view.html', 'app', 'magnific-popup', 'sli
 					self.owner(data.withCreatorInfo.username);
 					self.ownerId(data.administrative.withCreator);
 					self.entryCount(data.administrative.entryCount);
+					var backgroundImg = data.descriptiveData.backgroundImg;
 					//self.access(adminData.access);
 					if (self.entryCount() && self.entryCount() > 0) {
 						$.ajax({
@@ -166,6 +172,18 @@ define(['knockout', 'text!./exhibition-view.html', 'app', 'magnific-popup', 'sli
 							"contentType": "application/json",
 							"success": function (data) {
 								var items = self.revealItems(data.records);
+								if (backgroundImg == null || backgroundImg.Original ==null || 
+										backgroundImg.Original.withUrl == null || 
+										backgroundImg.Original.withUrl == "") {
+									self.backgroundImgWithUrl(self.exhItems()[0].fullres());
+								} 						
+								else {
+									if (backgroundImg.Original.withUrl.indexOf("/media") == 0) {
+										self.backgroundImgWithUrl(window.location.origin + backgroundImg.Original.withUrl);
+									} else {
+										self.backgroundImgWithUrl(backgroundImg.Original.withUrl);
+									}
+								}
 								self.loading(false);
 							},
 							"error": function (result) {

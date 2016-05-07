@@ -17,7 +17,11 @@
                     <!-- wrap-->
                     <div class="wrap">
                       <!-- item-->
-                      <div class="media"><img data-bind="attr: {src: record().fullres()},event: {error: function(){changeSource($data)}}"/></div>
+                      <div class="media" id="mediadiv">
+                      <!-- ko if: record().vtype == "IMAGE" --> 
+                      <img data-bind="attr: {src: record().fullres()},event: {error: function(){changeSource($data)}}"/>
+                      <!-- /ko --> 
+                      </div> 
                       <!-- metadata-->
                       <div class="metadata">
                       <div class="infowrap">

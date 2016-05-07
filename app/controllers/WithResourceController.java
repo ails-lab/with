@@ -29,6 +29,7 @@ import java.util.function.Function;
 import model.DescriptiveData;
 import model.EmbeddedMediaObject;
 import model.EmbeddedMediaObject.MediaVersion;
+import model.EmbeddedMediaObject.WithMediaType;
 import model.MediaObject;
 import model.annotations.ContextData;
 import model.annotations.ContextData.ContextDataBody;
@@ -42,7 +43,6 @@ import model.resources.CulturalObject.CulturalObjectData;
 import model.resources.RecordResource;
 import model.resources.WithResource.WithResourceType;
 
-
 import org.bson.types.ObjectId;
 
 import play.Logger;
@@ -53,6 +53,7 @@ import play.mvc.Controller;
 import play.mvc.Result;
 import sources.core.ISpaceSource;
 import sources.core.ParallelAPICall;
+import sources.core.ParallelAPICall.Priority;
 import sources.core.RecordJSONMetadata;
 import utils.AccessManager;
 import utils.AccessManager.Action;
@@ -535,7 +536,9 @@ public class WithResourceController extends Controller {
 			for (HashMap<MediaVersion, EmbeddedMediaObject> embeddedMedia : (List<HashMap<MediaVersion, EmbeddedMediaObject>>) record
 					.getMedia()) {
 				if (embeddedMedia.containsKey(MediaVersion.Original)
-						&& !embeddedMedia.containsKey(MediaVersion.Thumbnail)) {
+						&& !embeddedMedia.containsKey(MediaVersion.Thumbnail)
+						&& embeddedMedia.get(MediaVersion.Original).getType()
+								.equals(WithMediaType.IMAGE)) {
 					String originalUrl = embeddedMedia.get(
 							MediaVersion.Original).getUrl();
 					MediaObject original = MediaController.downloadMedia(
@@ -550,7 +553,7 @@ public class WithResourceController extends Controller {
 			}
 			return true;
 		};
-		ParallelAPICall.createPromise(methodQuery, recordId);
+		ParallelAPICall.createPromise(methodQuery, recordId, Priority.BACKEND);
 	}
 
 	/**
@@ -673,7 +676,8 @@ public class WithResourceController extends Controller {
 		};
 		RecordResource record = DB.getRecordResourceDAO().getById(recordId);
 		String sourceClassName = "sources." + source + "SpaceSource";
-		ParallelAPICall.createPromise(methodQuery, record, sourceClassName);
+		ParallelAPICall.createPromise(methodQuery, record, sourceClassName,
+				Priority.BACKEND);
 	}
 
 	/**

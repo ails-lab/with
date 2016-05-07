@@ -37,7 +37,7 @@
 			  <!-- ko else -->
 			  
 			    <a href="#" class="new" ><span class="plus"></span><span class="text" >New Collection</span></a>
-			    <!-- ko if: superUser -->
+			    <!-- ko if: showImportFromEuropeana -->
 			    <div class="dropdown1">
 			    <a id="picker1" href="#" data-toggle="dropdown" 
 			      ><span class="plus"></span><span id="pickerTitle1" class="text" >Import Collection</span>
@@ -220,7 +220,7 @@
 						<div>
 							<input type="text"
 								data-bind="value: europeanaLimit, valueUpdate: 'afterkeypress', hasFocus: true"
-								placeholder="Import Limit">
+								placeholder="Import Limit (-1 means no limit)">
 						</div>
 					</div>
 					<div class="button-group">
@@ -256,7 +256,7 @@
 					  	<div class="thumbnails"><img src="images/user.png"></div>
 					  <!-- /ko -->
 
-					  <a href="#" data-toggle="tooltip" data-placement="top" data-bind="{attr: {title: username}, click: $parent.removeRights}" class="trash">
+					  <a style="cursor: pointer;" data-toggle="tooltip" data-placement="top" data-bind="{attr: {title: username}, click: $parent.removeRights}" class="trash">
 					  <i class="fa fa-trash"></i></a>
 					  <div class="toggle">
 						<input type="checkbox" data-bind="{attr: {id: username}, checked: accessChecked, click: $parent.changeRights}">
@@ -301,23 +301,40 @@
 					<!-- ko else -->
 					<div class="category">private</div>
 					<!--/ko-->
-					<!-- ko if: media()[0]-->
-					<div class="wrap"><img data-bind="attr: {src: media()[0].thumbnailUrl}" onError="this.src='img/content/thumb-empty.png'"/></div>
+					<!-- ko if: backgroundImg() != "" -->
+						<div class="wrap"><img data-bind="attr: {src: backgroundImg}" onError="this.src='img/content/thumb-empty.png'"/></div>
+						<!-- ko if: media()[0]-->
+						<div class="wrap small"><img data-bind="attr: {src: media()[0].thumbnailUrl}" onError="this.src='img/content/thumb-empty.png'"/></div>
+						<!-- /ko -->
+						<!-- ko else -->
+						<div class="wrap small"></div>
+						<!-- /ko -->
+						<!-- ko if: media()[1]-->
+						<div class="wrap small"><img data-bind="attr: {src: media()[1].thumbnailUrl}"/></div>
+						<!-- /ko -->
+						<!-- ko else -->
+						<div class="wrap small"></div>
+						<!-- /ko -->
 					<!-- /ko -->
 					<!-- ko else -->
-					<div class="wrap"></div>
-					<!-- /ko -->
-					<!-- ko if: media()[1]-->
-					<div class="wrap small"><img data-bind="attr: {src: media()[1].thumbnailUrl}"/></div>
-					<!-- /ko -->
-					<!-- ko else -->
-					<div class="wrap small"></div>
-					<!-- /ko -->
-					<!-- ko if: media()[2]-->
-					<div class="wrap small"><img data-bind="attr: {src: media()[2].thumbnailUrl}"/></div>
-					<!-- /ko -->
-					<!-- ko else -->
-					<div class="wrap small"></div>
+						<!-- ko if: media()[0]-->
+						<div class="wrap"><img data-bind="attr: {src: media()[0].thumbnailUrl}" onError="this.src='img/content/thumb-empty.png'"/></div>
+						<!-- /ko -->
+						<!-- ko else -->
+						<div class="wrap"></div>
+						<!-- /ko -->
+						<!-- ko if: media()[1]-->
+						<div class="wrap small"><img data-bind="attr: {src: media()[1].thumbnailUrl}"/></div>
+						<!-- /ko -->
+						<!-- ko else -->
+						<div class="wrap small"></div>
+						<!-- /ko -->
+						<!-- ko if: media()[2]-->
+						<div class="wrap small"><img data-bind="attr: {src: media()[2].thumbnailUrl}"/></div>
+						<!-- /ko -->
+						<!-- ko else -->
+						<div class="wrap small"></div>
+						<!-- /ko -->
 					<!-- /ko -->
 					</a>
 				  </div>

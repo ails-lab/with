@@ -25,7 +25,7 @@ define(['knockout', 'text!./_item.html', 'app','smoke'], function (ko, template,
 		self.data=ko.observable('');
 		self.collectedIn =  [];
 		self.isLike=ko.observable(false);
-		
+		self.vtype = "IMAGE"; 
 		self.related =  ko.observableArray([]);
 		self.similar =  ko.observableArray([]);
 		self.facebook='';
@@ -89,8 +89,15 @@ define(['knockout', 'text!./_item.html', 'app','smoke'], function (ko, template,
 			var likeval=app.isLiked(self.externalId);
 			self.isLike(likeval);
 			self.loading(false);
-			
-		 
+			if (data.fullrestype != null) {
+				if (data.fullrestype == "VIDEO") {
+					self.vtype = "MEDIA";
+					$('#mediadiv').html('<video id="mediaplayer" autoplay="true" controls width="576" height="324"><source src="' + self.fullres() + '" type="video/mp4">Your browser does not support HTML5</video>');        
+				} else if (data.fullrestype == "AUDIO") {
+					self.vtype = "MEDIA";
+					$('#mediadiv').html('<audio id="mediaplayer" autoplay="true" controls width="576" height="324"><source src="' + self.fullres() + '" type="audio/mpeg">Your browser does not support HTML5</audio>');
+				}
+			} 			
 		};
 
 	   self.findsimilar=function(){
@@ -162,7 +169,10 @@ define(['knockout', 'text!./_item.html', 'app','smoke'], function (ko, template,
 											likes: usage.likes,
 											collected: usage.collected,
 											collectedIn:result.collectedIn,
-											data: result
+											data: result,
+											fullrestype: media[0] != null && media[0].Original != null 
+											&& media[0].Original.type != "null" ? media[0].Original.type : ""
+
 								  });
 						        if(record.thumb && record.thumb.length>0 && record.externalId!=self.externalId)
 							       items.push(record);
@@ -244,7 +254,11 @@ define(['knockout', 'text!./_item.html', 'app','smoke'], function (ko, template,
 												likes: usage.likes,
 												collected: usage.collected,
 												collectedIn:result.collectedIn,
-												data: result
+												data: result,
+												fullrestype: media[0] != null && media[0].Original != null 
+												&& media[0].Original.type != "null" ? media[0].Original.type : "",
+												vtype : "IMAGE"
+
 									  });
 							        if(record.thumb && record.thumb.length>0 && record.externalId!=self.externalId)
 								       items.push(record);
@@ -362,6 +376,10 @@ define(['knockout', 'text!./_item.html', 'app','smoke'], function (ko, template,
 			//self.record(new Record());
 			$('body').css('overflow','visible');
 			$( '.itemview' ).fadeOut();
+			var vid = document.getElementById("mediaplayer");
+			 if (vid != null) {
+			    vid.pause();
+			}
 		};
 
 		self.changeSource = function (item) {
@@ -480,12 +498,14 @@ define(['knockout', 'text!./_item.html', 'app','smoke'], function (ko, template,
 									likes: usage.likes,
 									collected: usage.collected,
 									collectedIn:result.collectedIn,
-									data: result
+									data: result,
+									fullrestype: media[0] != null && media[0].Original != null
+									&& media[0].Original.type != "null" ? media[0].Original.type : ""
+
 						  });
 					self.record(record);
 					self.open();
 					self.addDisqus();
-					
 				},
 				error: function (xhr, textStatus, errorThrown) {
 					
