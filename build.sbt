@@ -18,6 +18,7 @@ libraryDependencies ++= Seq(
 //  javaJdbc,
 //  javaEbean,
 //  cache,
+  filters,
   javaWs,
  "org.mongodb.morphia" % "morphia" % "1.0.1",
  "org.apache.jena" % "apache-jena-libs" % "2.10.1",
@@ -43,4 +44,3 @@ libraryDependencies ++= Seq(
  "org.im4java" % "im4java" % "1.4.0",
  "net.coobird" % "thumbnailator" % "0.4.8"
 )
-
