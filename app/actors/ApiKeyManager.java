@@ -136,13 +136,13 @@ public class ApiKeyManager extends UntypedActor  {
 	
 	private void onApiAccess( Access access ) {
 
+		allAccessLog.info( access.toString() );
 		// conf disabled api keys
 		if( DB.getConf().getBoolean("apikey.disabled") ) {
 			sender().tell( ApiKey.Response.ALLOWED, self());
 			return;
 		}
 		
-		allAccessLog.info( access.toString() );
 		ApiKey key = null;
 		
 			key = apiKeys.get( access.apikey);
