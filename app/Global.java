@@ -34,7 +34,6 @@ import play.Logger;
 import play.api.mvc.EssentialFilter;
 import play.libs.Akka;
 import utils.Locks;
-import filters.cors.CORSFilter;
 
 public class Global extends GlobalSettings {
 	static private final Logger.ALogger log = Logger.of(Global.class);
@@ -63,7 +62,7 @@ public class Global extends GlobalSettings {
 	//@Override
 	public <T extends EssentialFilter> Class<T>[] filters() {
 	    return new Class[] {AccessFilter.class, SessionFilter.class, 
-	    		EffektiveUserFilter.class, CORSFilter.class };
+	    		EffektiveUserFilter.class };
 	}
 
 	private void setupWithKey() {
