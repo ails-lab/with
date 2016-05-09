@@ -327,6 +327,18 @@ WITHApp.ui = function( custom ){
 			});
 
 		}
+		
+		// open uploadimage
+		if ( $( 'a.uploadimage' ).length !== 0 ) {
+
+			$( 'a.uploadimage' ).click( function( e ) {
+
+				e.preventDefault();
+				$( '.action' ).removeClass( 'active' );
+				$( '.action.upload' ).addClass( 'active' );				
+			});
+
+		}
 
 		// open new
 		if ( $( 'a.new' ).length !== 0 ) {

@@ -35,7 +35,7 @@ define(['bridget','knockout', 'text!./provider.html','isotope','imagesloaded','a
 				        });
 
 				        self.type=ko.computed(function() {
-				        	if(self.administrative){
+				        	if(self.resourceType){
 				        		if (self.resourceType.indexOf("Collection")!=-1)
 				        		  return "COLLECTION";
 				        		else if (self.resourceType.indexOf("Space")!=-1)
@@ -56,13 +56,13 @@ define(['bridget','knockout', 'text!./provider.html','isotope','imagesloaded','a
 				        
 				        self.url=ko.computed(function() {
 				        	if(self.resourceType){
-				        		if (self.resourceType.indexOf("Collection")==-1)
-					    		  return 'index.html#exhibitionview/'+ self.dbId;
+				        		if (self.resourceType.indexOf("Collection")>-1)
+					    		  return 'index.html#collectionview/'+ self.dbId;
 				        		else if (self.resourceType.indexOf("Space")>-1){
 				        			return self.administrative.isShownAt;
 				        		}
 					    		else{
-					    			return 'index.html#collectionview/'+ self.dbId;
+					    			return 'index.html#exhibitionview/'+ self.dbId;
 					    		}
 				        	}else return "";
 				        });

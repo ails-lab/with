@@ -1,7 +1,8 @@
 define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, app) {
 
     self.disqusLoaded=ko.observable(false);
-	
+    helper_thumb = "";
+    
 
 	function Record(data) {
 		var self = this;
@@ -25,7 +26,7 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 		self.data=ko.observable('');
 		self.collectedIn =  [];
 		self.isLike=ko.observable(false);
-		
+		self.vtype = "IMAGE";
 		self.related =  ko.observableArray([]);
 		self.similar =  ko.observableArray([]);
 		self.facebook='';
@@ -101,9 +102,21 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 			var likeval=app.isLiked(self.externalId);
 			self.isLike(likeval);
 			self.loading(false);
-		 
+			if (data.fullrestype != null) {
+				if (data.fullrestype == "VIDEO") {
+					self.vtype = "MEDIA";
+					$('#mediadiv').html('<video id="mediaplayer" autoplay="true" controls width="576" height="324"><source src="' + self.fullres() + '" type="video/mp4">Your browser does not support HTML5</video>');        
+				} else if (data.fullrestype == "AUDIO") {
+					self.vtype = "MEDIA";
+					$('#mediadiv').html('<audio id="mediaplayer" autoplay="true" controls width="576" height="324"><source src="' + self.fullres() + '" type="audio/mpeg">Your browser does not support HTML5</audio>');
+				}
+			}
+			console.log(helper_thumb);
+			helper_thumb = self.calcOnErrorThumbnail();
 		};
 
+		
+		
 		self.findsimilar=function(){
 		  if(self.related().length==0 && self.relatedsearch==false){
 			self.relatedsearch=true;  
@@ -172,7 +185,9 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 											likes: usage.likes,
 											collected: usage.collected,
 											collectedIn:result.collectedIn,
-											data: result
+											data: result,
+											fullrestype: media[0] != null && media[0].Original != null 
+											&& media[0].Original.type != "null" ? media[0].Original.type : ""
 								  });
 						        if(record.thumb && record.thumb.length>0 && record.externalId!=self.externalId)
 							       items.push(record);
@@ -255,7 +270,10 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 												likes: usage.likes,
 												collected: usage.collected,
 												collectedIn:result.collectedIn,
-												data: result
+												data: result,
+												fullrestype: media[0] != null && media[0].Original != null 
+												&& media[0].Original.type != "null" ? media[0].Original.type : "",
+												vtype : "IMAGE"	
 									  });
 							        if(record.thumb && record.thumb.length>0 && record.externalId!=self.externalId)
 								       items.push(record);
@@ -289,6 +307,18 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 				   return "img/content/thumb-empty.png";
 			   }
 			});
+		
+		self.calcOnErrorThumbnail = ko.pureComputed(function() {
+
+
+			   if(self.thumb && self.thumb.indexOf('.pdf') == -1){
+					return self.thumb;
+				}
+			   else{
+				   return "img/content/thumb-empty.png";
+			   }
+			});
+		
 		self.sourceCredits = ko.pureComputed(function() {
 			 switch(self.source()) {
 			    case "DPLA":
@@ -382,7 +412,10 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 			dispatchDocumentEvent('Pundit.hide');
 			$('body').css('overflow','visible');
 			$( '.itemview' ).fadeOut();
-			
+			var vid = document.getElementById("mediaplayer");
+			if (vid != null) {
+				vid.pause();
+			}
 		};
 
 		self.changeSource = function (item) {
@@ -480,14 +513,15 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 									likes: usage.likes,
 									collected: usage.collected,
 									collectedIn:result.collectedIn,
-									data: result
+									data: result,
+									fullrestype: media[0] != null && media[0].Original != null
+									&& media[0].Original.type != "null" ? media[0].Original.type : ""
 						  });
 					self.record(record);
 					$('.nav-tabs a[href="#information"]').tab('show');
 					self.open();
 					self.addDisqus();
 					$( '.itemview' ).fadeIn();
-					
 				},
 				error: function (xhr, textStatus, errorThrown) {
 					self.open();
