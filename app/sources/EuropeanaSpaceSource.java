@@ -77,26 +77,26 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 	    		}
 	    	}};*/
 		
-		addDefaultWriter(CommonFilters.MIME_TYPE.getId(), qfwriter("MIME_TYPE"));
-		addDefaultWriter(CommonFilters.IMAGE_SIZE.getId(), qfwriter("IMAGE_SIZE"));
-		addDefaultWriter(CommonFilters.IMAGE_COLOUR.getId(), qfwriter("IMAGE_COLOUR"));
-		addDefaultWriter(CommonFilters.COLOURPALETE.getId(), qfwriter("COLOURPALETE"));
+		addDefaultQueryModifier(CommonFilters.MIME_TYPE.getId(), qwriter("MIME_TYPE"));
+		addDefaultQueryModifier(CommonFilters.IMAGE_SIZE.getId(), qwriter("IMAGE_SIZE"));
+		addDefaultQueryModifier(CommonFilters.IMAGE_COLOUR.getId(), qwriter("IMAGE_COLOUR"));
+		addDefaultQueryModifier(CommonFilters.COLOURPALETE.getId(), qwriter("COLOURPALETE"));
 		
 		
-		addDefaultWriter(CommonFilters.PROVIDER.getId(), qfwriter("PROVIDER"));
-		addDefaultWriter(CommonFilters.DATA_PROVIDER.getId(), qfwriter("DATA_PROVIDER"));
-		addDefaultWriter(CommonFilters.COUNTRY.getId(), qfwriter("COUNTRY"));
+		addDefaultQueryModifier(CommonFilters.PROVIDER.getId(), qwriter("PROVIDER"));
+		addDefaultQueryModifier(CommonFilters.DATA_PROVIDER.getId(), qwriter("DATA_PROVIDER"));
+		addDefaultQueryModifier(CommonFilters.COUNTRY.getId(), qwriter("COUNTRY"));
 
 		addDefaultWriter(CommonFilters.YEAR.getId(), qfwriterYEAR());
 
-		addDefaultWriter(CommonFilters.CREATOR.getId(), qfwriter("CREATOR"));
+		addDefaultQueryModifier(CommonFilters.CREATOR.getId(), qwriter("CREATOR"));
 
 		// addDefaultWriter(CommonFilters.CONTRIBUTOR_ID,
 		// qfwriter("proxy_dc_contributor"));
 
 		addDefaultQueryModifier(CommonFilters.RIGHTS.getId(), qrightwriter());
 
-		addDefaultWriter(CommonFilters.TYPE.getId(), qfwriter("TYPE"));
+		addDefaultQueryModifier(CommonFilters.TYPE.getId(), qwriter("TYPE"));
 
 		
 		formatreader = new EuropeanaRecordFormatter();
@@ -123,6 +123,34 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 			}
 		};
 	}
+	
+	private Function<List<String>, QueryModifier> qwriter(String parameter) {
+		Function<String, String> function = (String s) -> {
+			return parameter+":" + FunctionsUtils.smartquote().apply(s) + "";
+		};
+		return new Function<List<String>, QueryModifier>() {
+			@Override
+			public AdditionalQueryModifier apply(List<String> t) {
+				return new AdditionalQueryModifier(" " + Utils.getORList(ListUtils.transform(t, function), false));
+			}
+		};
+		
+		
+	}
+	
+//	private Function<List<String>, QueryModifier> qYearwriter(String parameter) {
+//		Function<String, String> function = (String s) -> {
+//			return parameter+":" + dateRange(parameter);
+//		};
+//		return new Function<List<String>, QueryModifier>() {
+//			@Override
+//			public AdditionalQueryModifier apply(List<String> t) {
+//				return new AdditionalQueryModifier(" " + Utils.getORList(ListUtils.transform(t, function), false));
+//			}
+//		};
+//		
+//		
+//	}
 
 	private Function<List<String>, Pair<String>> qfwriter(String parameter) {
 		if (parameter.equals(CommonFilters.YEAR.name())) {
@@ -146,10 +174,7 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 		return new Function<List<String>, Pair<String>>() {
 			@Override
 			public Pair<String> apply(List<String> t) {
-				String val = "\"" + t.get(0) + "\"";
-				if (t.size() > 1) {
-					val = "[" + val + " TO \"" + t.get(1) + "\"]";
-				}
+				String val = dateRange(t);
 				return new Pair<String>("qf", "YEAR:" + val);
 			}
 		};
@@ -459,6 +484,14 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 
 	public void setUsingCursor(boolean useCursor) {
 		this.usingCursor = useCursor;
+	}
+
+	private String dateRange(List<String> t) {
+		String val = "\"" + t.get(0) + "\"";
+		if (t.size() > 1) {
+			val = "[" + val + " TO \"" + t.get(1) + "\"]";
+		}
+		return val;
 	}
 	
 }

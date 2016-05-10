@@ -96,15 +96,15 @@ public class EuropeanaRecordFormatter extends CulturalRecordFormatter {
 		String uri2 = model.getIsShownBy()==null?null:model.getIsShownBy().getURI();
 		if (Utils.hasInfo(uri3)){
 			EmbeddedMediaObject medThumb = new EmbeddedMediaObject();
-			uri3 = Utils.decodeURL(uri3);
-			Pattern p = Pattern.compile(".*uri=([^&]*)&.*");
-			Matcher m = p.matcher(uri3);
-			if (m.find()) {
-				String ref = m.group(1);
-				System.out.println("Parse "+uri3);
-				uri3 = ref;
-				System.out.println("To "+uri3);
-			}
+//			uri3 = Utils.decodeURL(uri3);
+//			Pattern p = Pattern.compile(".*uri=([^&]*)&.*");
+//			Matcher m = p.matcher(uri3);
+//			if (m.find()) {
+//				String ref = m.group(1);
+//				System.out.println("Parse "+uri3);
+//				uri3 = ref;
+//				System.out.println("To "+uri3);
+//			}
 			
 			
 			medThumb.setUrl(uri3);
