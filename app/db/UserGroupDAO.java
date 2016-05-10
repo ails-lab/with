@@ -33,6 +33,7 @@ import org.bson.types.ObjectId;
 import org.mongodb.morphia.geo.Point;
 import org.mongodb.morphia.query.Query;
 import org.mongodb.morphia.query.UpdateOperations;
+import org.mongodb.morphia.query.UpdateResults;
 
 import play.Logger;
 import play.Logger.ALogger;
@@ -179,6 +180,27 @@ public class UserGroupDAO extends DAO<UserGroup> {
 		else
 			updateOps.unset("page.coordinates");
 		this.update(q, updateOps);
+	}
+
+	public int updateFeatured(ObjectId groupId, List<ObjectId> fCols, List<ObjectId> fExhs, String op) {
+		Query<UserGroup> q = this.createQuery().field("_id").equal(groupId);
+		UpdateOperations<UserGroup> updateOps = this.createUpdateOperations()
+				.disableValidation();
+		if(op.equals("+")) {
+			if(fCols.size() != 0)
+				updateOps.addAll("page.featuredCollections", fCols, false);
+			if(fExhs.size() != 0)
+				updateOps.addAll("page.featuredExhibitions", fExhs, false);
+		} else if(op.equals("-")) {
+			if(fCols.size() != 0)
+				updateOps.removeAll("page.featuredCollections", fCols);
+			if(fExhs.size() != 0)
+				updateOps.removeAll("page.featuredExhibitions", fExhs);
+		} else {
+			log.error("This operations is not supported when updating featured");
+		}
+
+		return this.update(q, updateOps).getUpdatedCount();
 	}
 
 	public void findUrlsFromAvatars(Set<String> urls) {

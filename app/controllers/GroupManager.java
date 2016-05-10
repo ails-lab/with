@@ -256,6 +256,115 @@ public class GroupManager extends Controller {
 		}
 	}
 
+
+	/*
+	 * This method get's as input a list of Collection and Exhibition
+	 * id's and updates the featuredCollections & featuredExhibitions
+	 * lists at a Page.
+	 */
+	public static Result addFeatured(String groupId) {
+
+		ObjectNode result = Json.newObject();
+		JsonNode json = request().body().asJson();
+
+		if(groupId == null) {
+			result.put("error",
+					"Invalid groupId specified!");
+			return badRequest(result);
+		}
+
+		if( !json.has("fCollections") &&	!json.has("fExhibitions")) {
+			result.put("success",
+					"Nothing to update!");
+			return ok(result);
+		}
+
+
+		ArrayNode fCollections = null;
+		ArrayNode fExhibitions = null;
+		try{
+			if(json.has("fCollections"))
+				fCollections = (ArrayNode)json.withArray("fCollections");
+			if(json.has("fExhibitions"))
+					fExhibitions  = (ArrayNode)json.withArray("fExhibitions");
+		} catch(UnsupportedOperationException opex) {
+			log.debug("Unsupported cast", opex);
+			result.put("error", "Bad value on json fields 'fCollection' or 'fExhibitions'");
+			return internalServerError(result);
+		}
+
+		if((fCollections.size() == 0) &&
+			(fExhibitions.size() == 0)) {
+			result.put("success",
+					"Nothing to update!");
+			return ok(result);
+		}
+
+		List<ObjectId> fCols = new ArrayList<ObjectId>();
+		fCollections.forEach(  id -> fCols.add(new ObjectId(id.asText())) );
+		List<ObjectId> fExhs = new ArrayList<ObjectId>();
+		fExhibitions.forEach(  id -> fExhs.add(new ObjectId(id.asText())) );
+
+		if(DB.getUserGroupDAO().updateFeatured(new ObjectId(groupId), fCols, fExhs, "+") == 1) {
+			result.put("success", "Featured Data succesfully updated!");
+			return ok(result);
+		} else {
+			result.put("error", "Featured Data were not updated due to system error");
+			return internalServerError(result);
+		}
+	}
+
+	public static Result removeFeatured(String groupId) {
+		ObjectNode result = Json.newObject();
+		JsonNode json = request().body().asJson();
+
+		if(groupId == null) {
+			result.put("error",
+					"Invalid groupId specified!");
+			return badRequest(result);
+		}
+
+		if( !json.has("fCollections") && !json.has("fExhibitions")) {
+			result.put("success",
+					"Nothing to update!");
+			return ok(result);
+		}
+
+
+		ArrayNode fCollections = null;
+		ArrayNode fExhibitions = null;
+		try{
+			if(json.has("fCollections"))
+				fCollections = (ArrayNode)json.withArray("fCollections");
+			if(json.has("fExhibitions"))
+					fExhibitions  = (ArrayNode)json.withArray("fExhibitions");
+		} catch(UnsupportedOperationException opex) {
+			log.debug("Unsupported cast", opex);
+			result.put("error", "Bad value on json fields 'fCollection' or 'fExhibitions'");
+			return internalServerError(result);
+		}
+
+		if((fCollections.size() == 0) &&
+			(fExhibitions.size() == 0)) {
+			result.put("success",
+					"Nothing to update!");
+			return ok(result);
+		}
+
+		List<ObjectId> fCols = new ArrayList<ObjectId>();
+		fCollections.forEach(  id -> fCols.add(new ObjectId(id.asText())) );
+		List<ObjectId> fExhs = new ArrayList<ObjectId>();
+		fExhibitions.forEach(  id -> fExhs.add(new ObjectId(id.asText())) );
+
+		if(DB.getUserGroupDAO().updateFeatured(new ObjectId(groupId), fCols, fExhs, "-") == 1) {
+			result.put("success", "Featured Data succesfully updated!");
+			return ok(result);
+		} else {
+			result.put("error", "Featured Data were not updated due to system error");
+			return internalServerError(result);
+		}
+	}
+
 	/**
 	 * Deletes a group from the database. The users who participate are not
 	 * deleted as well.
