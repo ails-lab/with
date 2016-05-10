@@ -295,7 +295,7 @@ public class Utils {
 					String encoded = URLEncoder.encode(second.toString(), "UTF-8");
 					string = first + "=" + encoded;
 				} catch (UnsupportedEncodingException e) {
-					e.printStackTrace();
+					log.error( "",e );
 				}
 			}
 			return string;
@@ -318,7 +318,7 @@ public class Utils {
 			try {
 				return first + "=%22" + URLEncoder.encode(second.toString(), "UTF-8") + "%22";
 			} catch (UnsupportedEncodingException e) {
-				e.printStackTrace();
+				log.error("",e);
 				return first + "=%22" + second.toString() + "%22";
 			}
 		}
@@ -358,7 +358,7 @@ public class Utils {
 		try {
 			return URLDecoder.decode(str, "UTF-8");
 		} catch (UnsupportedEncodingException e) {
-			e.printStackTrace();
+			log.error("",e);
 		}
 		return str;
 	}

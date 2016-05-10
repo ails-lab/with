@@ -192,10 +192,10 @@ public class ElasticUtils {
 			idx_doc.put("access", aclMapper.readTree(aclString));
 		} catch (JsonProcessingException e1) {
 			// TODO Auto-generated catch block
-			e1.printStackTrace();
+			log.error("",e1);
 		} catch (IOException e1) {
 			// TODO Auto-generated catch block
-			e1.printStackTrace();
+			log.error("",e1);
 		}
 
 

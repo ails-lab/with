@@ -128,7 +128,7 @@ public class CollectionObjectController extends WithResourceController {
 						true);
 
 			} catch (Exception e) {
-				e.printStackTrace();
+				log.error( "", e );
 				return Promise.pure((Result) badRequest(e.getMessage()));
 			}
 		}

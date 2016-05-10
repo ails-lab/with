@@ -248,7 +248,7 @@ public class MediaController extends Controller {
 				return ok(result);
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
-				e.printStackTrace();
+				log.error("",e);
 				result.put("error", "error creating from url");
 				return badRequest(result);
 			}
@@ -512,10 +512,10 @@ public class MediaController extends Controller {
 			cmd.run(op, image, outfile);
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			log.error("",e);
 		} catch (IM4JavaException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			log.error("",e);
 		}
 		File newFile = new File(outfile);
 		BufferedImage ithumb = ImageIO.read(newFile);
@@ -532,10 +532,10 @@ public class MediaController extends Controller {
 				cmd2.run(op, ithumb, outfile2);
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
-				e.printStackTrace();
+				log.error("",e);
 			} catch (IM4JavaException e) {
 				// TODO Auto-generated catch block
-				e.printStackTrace();
+				log.error("",e);
 			}
 			newFile = new File(outfile);
 			ithumb = ImageIO.read(newFile);
@@ -595,7 +595,7 @@ public class MediaController extends Controller {
 
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
-				e.printStackTrace();
+				log.error("",e);
 			}
 			return resp;
 		};
@@ -619,7 +619,7 @@ public class MediaController extends Controller {
 					mediaURL, "url");
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			log.error("",e);
 		}
 		editMediaAfterChecker(med, response);
 	}

@@ -19,43 +19,39 @@ package sources;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import model.DescriptiveData;
+import org.json.JSONArray;
+import org.json.JSONException;
+
+import com.fasterxml.jackson.databind.JsonNode;
+
 import model.EmbeddedMediaObject;
 import model.EmbeddedMediaObject.MediaVersion;
 import model.EmbeddedMediaObject.WithMediaType;
 import model.basicDataTypes.LiteralOrResource;
 import model.basicDataTypes.ProvenanceInfo;
 import model.basicDataTypes.ProvenanceInfo.Sources;
-import model.resources.CulturalObject;
 import model.resources.RecordResource;
 import model.resources.RecordResource.RecordDescriptiveData;
-import model.resources.WithResource.WithResourceType;
+import play.Logger;
+import play.Logger.ALogger;
 import play.libs.Json;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-
 import sources.core.AutocompleteResponse;
-import sources.core.CommonQuery;
-import sources.core.HttpConnector;
-import sources.core.ISpaceSource;
-import sources.core.RecordJSONMetadata;
-import sources.core.SourceResponse;
-import sources.core.Utils;
-import sources.utils.JsonContextRecord;
 import sources.core.AutocompleteResponse.DataJSON;
 import sources.core.AutocompleteResponse.Suggestion;
 import sources.core.CommonFilters;
+import sources.core.CommonQuery;
+import sources.core.ISpaceSource;
+import sources.core.RecordJSONMetadata;
 import sources.core.RecordJSONMetadata.Format;
-import sources.formatreaders.EuropeanaItemRecordFormatter;
-
-import com.fasterxml.jackson.databind.JsonNode;
-import com.google.common.net.MediaType;
+import sources.core.SourceResponse;
+import sources.core.Utils;
+import sources.utils.JsonContextRecord;
 
 public class YouTubeSpaceSource extends ISpaceSource {
 
 	// TODO keep track of the pages links and go to the requested page.
-
+	public static final ALogger log = Logger.of( YouTubeSpaceSource.class);
+	
 	private HashMap<String, String> roots;
 	private int autoCompleteLimit = 0;
 
@@ -124,8 +120,7 @@ public class YouTubeSpaceSource extends ISpaceSource {
 						response.path("nextPageToken").asText());
 
 			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				log.error( "",e );
 			}
 		} 
 
@@ -271,7 +266,7 @@ public class YouTubeSpaceSource extends ISpaceSource {
 				return ar;
 			}
 		} catch (JSONException e) {
-			e.printStackTrace();
+			log.error("",e );
 			return new AutocompleteResponse();
 		}
 	}

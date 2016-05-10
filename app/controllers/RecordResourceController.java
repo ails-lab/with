@@ -199,7 +199,7 @@ public class RecordResourceController extends WithResourceController {
 						}
 						return ok("Edited context data.");
 					} catch (ClassNotFoundException e) {
-						e.printStackTrace();
+						log.error("",e);
 						return internalServerError(error);
 					}
 				} else

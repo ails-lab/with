@@ -617,7 +617,7 @@ public class UserManager extends Controller {
 			s = (String) Await.result(future, timeout.duration());
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			log.error("",e);
 		}
 
 		if (s == "") {
