@@ -31,21 +31,13 @@
  */
 package filters
 
-import play.api.libs.concurrent.Execution.Implicits.defaultContext
-import play.api.mvc._
-import actors.ApiKeyManager
 import scala.concurrent.Future
-import play.api.libs.concurrent.Akka
-import play.api.Play.current
-import akka.pattern.ask
-import akka.util.Timeout
-import scala.concurrent.duration._
-import model.ApiKey
-import play.api.mvc.Controller
-import db.DB
+
 import play.api.Logger
-import play.api.mvc.Headers
-import play.api.mvc.Headers
+import play.api.libs.concurrent.Execution.Implicits.defaultContext
+import play.api.mvc.Filter
+import play.api.mvc.RequestHeader
+import play.api.mvc.Result
 import play.mvc.Http.HeaderNames
 
 
