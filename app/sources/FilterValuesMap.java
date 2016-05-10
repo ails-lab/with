@@ -37,6 +37,7 @@ public class FilterValuesMap {
 	private static FilterValuesMap dnzMap;
 	private static FilterValuesMap rijksMap;
 	private static FilterValuesMap flickrMap;
+	private static FilterValuesMap historypinMap;
 	
 	private HashMap<String, List<Object>> specificvalues;
 	// private HashMap<String, List<Pair<String>>> queryTexts;
@@ -91,7 +92,7 @@ public class FilterValuesMap {
 			String matchexpr = getKey(filterID, specificValue);
 			List<Object> v = new ArrayList<>();			
 			for (String kk : commonvalues.keySet()) {
-				if (matchexpr.matches(kk)) {
+				if (matchexpr.matches(kk) || matchexpr.equals(kk)) {
 					// String k = getKey(filterID, specificValue);
 					List<Object> orset = getOrset(commonvalues, kk, false);
 					v.addAll(orset);
@@ -161,6 +162,21 @@ public class FilterValuesMap {
 		addMapping(CommonFilters.RIGHTS.getId(), WithMediaRights.UNKNOWN, ".*unknown.*");
 	}
 	
+	private void fillHistorypin(){
+		addMapping(CommonFilters.TYPE.getId(), WithMediaType.IMAGE, "photo");
+		addMapping(CommonFilters.TYPE.getId(), WithMediaType.VIDEO, "video");
+		addMapping(CommonFilters.TYPE.getId(), WithMediaType.AUDIO, "audio");
+		addMapping(CommonFilters.TYPE.getId(), WithMediaType.TEXT, "text");
+
+		addMapping(CommonFilters.RIGHTS.getId(), WithMediaRights.Public, "Public Domain");		
+		addMapping(CommonFilters.RIGHTS.getId(), WithMediaRights.Creative_BY, "Creative Commons Attribution (CC-BY)");
+		addMapping(CommonFilters.RIGHTS.getId(), WithMediaRights.Creative_SA, "Creative Commons Attribution-ShareAlike (CC-BY-SA)");
+		addMapping(CommonFilters.RIGHTS.getId(), WithMediaRights.Creative_Not_Commercial, "Creative Commons Attribution-NonCommercial");
+		addMapping(CommonFilters.RIGHTS.getId(), WithMediaRights.RR, "Copyright (c) all rights reserved");
+		addMapping(CommonFilters.RIGHTS.getId(), WithMediaRights.UNKNOWN, "No known copyright restrictions");
+	}
+	
+	
 	
 	private void addMapping(String id, Object obj, String... string) {
 		addMap(id, obj, string);
@@ -172,6 +188,14 @@ public class FilterValuesMap {
 			europeanaMap.fillEuropeana();
 		}
 		return europeanaMap;
+	}
+	
+	public static FilterValuesMap getHistorypinMap(){
+		if (historypinMap==null){
+			historypinMap = new FilterValuesMap();
+			historypinMap.fillHistorypin();
+		}
+		return historypinMap;
 	}
 	
 	public static FilterValuesMap getDPLAMap(){
