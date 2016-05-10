@@ -65,10 +65,6 @@ DELETE   /collection/:id	                    controllers.CollectionObjectControl
 
 # Exhibition Controller
 POST	 /exhibition/:id/addBackgroundImg		controllers.ExhibitionObjectController.addBackgroundImg(id)
- 
-#POST     /exhibition/create                    controllers.CollectionObjectController.createCollectionObject(collectionType: String ?= "Exhibition")
-
-#GET	  /record/similar/:externalId			controllers.RecordController.getSimilar(externalId)
 
 #Group Manager
 POST	/group/create							controllers.GroupManager.createGroup(adminId: String ?=null, adminUsername: String ?=null, groupType: String ?="UserGroup")
