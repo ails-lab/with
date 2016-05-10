@@ -435,7 +435,7 @@ define(['knockout', 'text!./collection.html', 'selectize', 'app', 'knockout-vali
 					saving(false);
 					self.ajaxConnections--;
 					if (result.responseJSON && result.responseJSON.error === 'double') {
-						$.smkConfirm({text:'Record already exists in collection.', accept:'Do you want to add it again?', cancel:'Cancel'}, function(e){if(e){
+						$.smkConfirm({text:'Record already exists in collection. Do you want to add it again?', accept:'Yes', cancel:'No'}, function(e){if(e){
 							self.addRecord(collid, false);
 						}});
 					}	
@@ -498,7 +498,7 @@ define(['knockout', 'text!./collection.html', 'selectize', 'app', 'knockout-vali
 					self.ajaxConnections--;
 					saving(false);
 					if (result.responseJSON && result.responseJSON.error === 'double') {
-						$.smkConfirm({text:'One of the selected records already exists in collection.', accept:'Do you want to add it again?', cancel:'Cancel'}, function(e){if(e){
+						$.smkConfirm({text:'One of the selected records already exists in collection. Do you want to add it again?', accept:'Yes', cancel:'No'}, function(e){if(e){
 							self.addRecords(collid, false);
 						}else{self.close();}});
 					}	
