@@ -14,19 +14,6 @@
  */
 
 
-import com.mongodb.WriteConcern;
-
-import actors.ApiKeyManager;
-import actors.LockActor;
-import actors.MediaCheckerActor;
-import akka.actor.ActorRef;
-import akka.actor.ActorSelection;
-import akka.actor.Props;
-import controllers.AccessFilter;
-import controllers.EffektiveUserFilter;
-import controllers.SessionFilter;
-import db.DB;
-import elastic.Elastic;
 import model.ApiKey;
 import play.Application;
 import play.GlobalSettings;
@@ -34,7 +21,20 @@ import play.Logger;
 import play.api.mvc.EssentialFilter;
 import play.libs.Akka;
 import utils.Locks;
+import actors.ApiKeyManager;
+import actors.LockActor;
+import actors.MediaCheckerActor;
+import akka.actor.ActorRef;
+import akka.actor.ActorSelection;
+import akka.actor.Props;
+import filters.AllowAccessHeaderFilter;
+import com.mongodb.WriteConcern;
 
+import controllers.AccessFilter;
+import controllers.EffektiveUserFilter;
+import controllers.SessionFilter;
+import db.DB;
+import elastic.Elastic;
 
 public class Global extends GlobalSettings {
 	static private final Logger.ALogger log = Logger.of(Global.class);
@@ -62,7 +62,8 @@ public class Global extends GlobalSettings {
 
 	//@Override
 	public <T extends EssentialFilter> Class<T>[] filters() {
-	    return new Class[] {AccessFilter.class, SessionFilter.class, EffektiveUserFilter.class };
+	    return new Class[] {AccessFilter.class, SessionFilter.class, 
+	    		EffektiveUserFilter.class, AllowAccessHeaderFilter.class };
 	}
 
 	private void setupWithKey() {

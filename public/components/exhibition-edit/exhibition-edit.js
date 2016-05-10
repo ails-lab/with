@@ -646,6 +646,7 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 						ui.helper.css({
 							"z-index": 500
 						});
+						/*
 						//if (!_bIsMoveOperation) {
 							if (ui.helper.width() > 80) {
 								//var newAspectHeight = 80 / ui.helper.width() * ui.helper.height();
@@ -660,6 +661,7 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 								});
 							}
 						//}
+						*/
 					},
 					stop: function (event, ui) {
 						$("#collscroll").css({
@@ -706,18 +708,12 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 					tolerance: "intersect",
 					over: function (event, ui) {
 						if (!_bIsMoveOperation) {
-							/*$(this).find('#droppable-Children').css({
-								display: "block"
-							});*/
 							dropElement.animate({
 								width: "150px"
 							}, 200);
 						}
 					},
 					out: function (event, ui) {
-						/*$(this).find('#droppable-Children').css({
-							display: "none"
-						});*/
 						dropElement.animate({
 							width: "60px"
 						}, 200);
@@ -725,7 +721,7 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 					drop: function (event, ui) {
 						var indexNewItem = ko.utils.unwrapObservable(valueAccessor().index);
 						var newItem = ko.mapping.fromJS(_draggedItem, self.mapping);
-						if(newItem.fullres().length==0){
+						if (newItem.fullres().length==0) {
 							newItem.fullres(newItem.thumbnailUrl());
 							$.smkAlert({
 								text: 'Full resolution image not found! Thumbnail image will be used which might be unsuitable for exhibition.',
@@ -768,25 +764,26 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 				init: function (element, valueAccessor, allBindingsAccessor, viewModel, bindingContext) {
 					var dropElement = $(element);
 					var dropOptions = {
-						hoverClass: "drop-hover",
-						tolerance: "intersect",
-						over: function (event, ui) {
-							if (!_bIsMoveOperation) {
-								dropElement.animate({
-									width: "150px"
-								}, 200);
-							}
-						},
-						out: function (event, ui) {
-							dropElement.animate({
-								width: "60px"
-							}, 200);
-						},
 						drop: function (event, ui) {
-							var indexNewItem = ko.utils.unwrapObservable(valueAccessor().index);
-							dropElement.animate({
-								width: "60px"
-							}, 200);
+							console.log(_draggedItem);
+							var newItem = ko.mapping.fromJS(_draggedItem, self.mapping);
+							if (newItem.fullres().length==0) {
+								$.smkAlert({
+									text: 'Full resolution image not found! Thumbnail image will be used which might be unsuitable for exhibition.',
+									type: 'danger',
+									permanent: true
+								});
+								self.backgroundImg(newItem.thumbnailUrl());
+							}
+							else {
+								self.backgroundImg(newItem.fullres());								
+							}
+							if (newItem.thumbnail)
+								self.thumbnailBIUrl = newItem.thumbnail();
+							else {
+								self.thumbnailBIUrl = newItem.fullres();
+							}
+							self.newBackgroundImg(true);
 						}
 					};
 					dropElement.droppable(dropOptions);

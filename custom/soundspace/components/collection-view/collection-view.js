@@ -61,7 +61,11 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 
 			if (self.thumb) {
 				return self.thumb;
-			} else {
+			} 
+			else if (self.fullres){
+				return self.fullres;
+			}
+			else {
 				return "img/content/thumb-empty.png";
 			}
 		});
@@ -147,7 +151,13 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 			if(self.source=="Rijksmuseum" && media){
 				media[0].Thumbnail=media[0].Original;
 			}
-			self.thumb = media[0] != null && media[0].Thumbnail != null && media[0].Thumbnail.withUrl != "null" ? media[0].Thumbnail.withUrl : null;
+			if(media[0] && media[0].Thumbnail){
+				if(media[0].Thumbnail.withUrl)
+				    self.thumb=media[0].Thumbnail.withUrl;
+				else if(media[0].Thumbnail.url)
+					self.thumb=media[0].Thumbnail.url;
+			}
+			else {self.thumb=null;}
 			self.fullres = media[0] != null && media[0].Original != null && media[0].Original.url != "null" ? media[0].Original.url : null;
 			self.data(options);
 			if(self.fullres){
@@ -166,9 +176,8 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 				}
 			}
 			self.isLoaded = ko.observable(false);
-			
-			
-			
+			self.fullrestype = media[0] != null && media[0].Original != null 
+			&& media[0].Original.type != "null" ? media[0].Original.type : null;			
 		};
 
 		if (data !== undefined) self.load(data);
@@ -421,7 +430,7 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 					
 			 }
                     tile+='<a href="#" onclick="recordSelect(\''+record.dbId+'\',event)">'
-                     +'<div class="thumb"><img src="'+record.thumbnail()+'" onError="this.src=\'img/content/thumb-empty.png\'"></div>'
+                     +'<div class="thumb"><img src="'+record.thumbnail()+'" onError="this.src=\'img/content/thumb-empty.png\';" ></div>'
                      +' <div class="info"><h1 class="title">'+record.displayTitle()+'</h1><span class="owner">'+ record.dataProvider+'</span></div>'
                      +'<span class="rights">'+record.sourceCredits()+'</span>'
                     +'</a></div> </div>';

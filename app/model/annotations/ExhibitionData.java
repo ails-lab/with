@@ -23,7 +23,6 @@ import model.basicDataTypes.Literal;
 import model.annotations.ContextData.ContextDataBody;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-@JsonInclude(value = JsonInclude.Include.NON_EMPTY)
 public class ExhibitionData extends ContextData<ExhibitionData.ExhibitionAnnotationBody> {
 
 	public ExhibitionData() {
@@ -34,7 +33,6 @@ public class ExhibitionData extends ContextData<ExhibitionData.ExhibitionAnnotat
 	}
 
 	@JsonIgnoreProperties(ignoreUnknown = true)
-	@JsonInclude(value = JsonInclude.Include.NON_EMPTY)
 	public static class ExhibitionAnnotationBody extends ContextDataBody {
 		Literal text = new Literal();
 		String audioUrl="";

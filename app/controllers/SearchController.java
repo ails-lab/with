@@ -105,9 +105,9 @@ public class SearchController extends Controller {
 	}
 	
 	public static Result searchSources() {
-		List<Sources> res = new ArrayList<>();
+		List<String> res = new ArrayList<>();
 		for (final ISpaceSource src : ESpaceSources.getESources()) {
-			res.add(src.getSourceName());
+			res.add(src.getSourceName().toString());
 		}
 		return ok(Json.toJson(res));
 	}

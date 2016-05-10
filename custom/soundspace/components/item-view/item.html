@@ -25,7 +25,10 @@
           <div class="container">
             <div class="wrap">
               <!-- media itself-->
-              <div class="mediathumb"><img data-bind="attr: {src: record().fullres()}" onError="this.src='img/content/thumb-empty.png'"></div>
+              <div class="mediathumb"><img data-bind="attr: {src: record().fullres()}" onError="this.src=helper_thumb"> 
+              <div class="media" id="mediadiv">
+             </div> 
+             </div>
               <!-- media information-->
               <div class="mediainfo">
                 <div class="infowrap">

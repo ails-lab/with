@@ -27,12 +27,14 @@ import java.util.function.BiFunction;
 
 import model.EmbeddedMediaObject;
 import model.EmbeddedMediaObject.MediaVersion;
+import model.EmbeddedMediaObject.WithMediaType;
 import model.MediaObject;
 import model.annotations.ContextData;
 import model.annotations.ContextData.ContextDataBody;
 import model.basicDataTypes.WithAccess.Access;
 import model.resources.collection.CollectionObject;
 import model.resources.RecordResource;
+import model.resources.WithResource;
 import model.resources.WithResource.WithResourceType;
 
 import org.bson.types.ObjectId;
@@ -166,7 +168,7 @@ public class CollectionObjectDAO extends WithResourceDAO<CollectionObject> {
 			result = this.find(q);
 			collections = result.asList();
 			Query<CollectionObject> q2 = q.cloneQuery().disableValidation();
-			q2.field("WithResourceType").equal(
+			q2.field("resourceType").equal(
 					WithResourceType.Exhibition);
 			q.disableValidation().field("resourceType")
 					.equal(WithResourceType.SimpleCollection);
@@ -340,12 +342,14 @@ public class CollectionObjectDAO extends WithResourceDAO<CollectionObject> {
 
 	public ObjectNode countPerCollectionType(Query<CollectionObject> q) {
 		ObjectNode result = Json.newObject().objectNode();
-		for (WithResourceType collectionType: WithResourceType.values()) {
-			Query<CollectionObject> qi = q.cloneQuery();
-			qi.field("resourceType").equal(collectionType);
-			long count = this.find(qi).countAll();
-			result.put(collectionType.toString(), count);
-		}
+		Query<CollectionObject> q1 = q.cloneQuery();
+		q1.field("resourceType").equal(WithResourceType.SimpleCollection);
+		long count = this.find(q1).countAll();
+		result.put(WithResourceType.SimpleCollection.toString(), count);
+		Query<CollectionObject> q2 = q.cloneQuery();
+		q2.field("resourceType").equal(WithResourceType.Exhibition);
+		count = this.find(q2).countAll();
+		result.put(WithResourceType.Exhibition.toString(), count);
 		return result;
 	}
 
@@ -480,7 +484,9 @@ public class CollectionObjectDAO extends WithResourceDAO<CollectionObject> {
 			HashMap<MediaVersion, EmbeddedMediaObject> media = recordMedia
 					.get(0);
 			if (media.containsKey(MediaVersion.Original)
-					&& !media.containsKey(MediaVersion.Thumbnail)) {
+					&& !media.containsKey(MediaVersion.Thumbnail) 
+					&& media.get(MediaVersion.Original).getType()
+					.equals(WithMediaType.IMAGE)) {
 				String originalUrl = media.get(MediaVersion.Original).getUrl();
 				MediaObject original = MediaController
 						.downloadMedia(originalUrl, MediaVersion.Original);
@@ -513,7 +519,6 @@ public class CollectionObjectDAO extends WithResourceDAO<CollectionObject> {
 
 	public void updateContextData(ContextData contextData, int position)
 			throws Exception {
-
 		ObjectId collectionId = contextData.getTarget().getCollectionId();
 		ObjectId recordId = contextData.getTarget().getRecordId();
 		List<ContextData<ContextDataBody>> collectedResources = this

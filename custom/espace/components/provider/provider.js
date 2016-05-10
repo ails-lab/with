@@ -55,9 +55,9 @@ define(['bridget','knockout', 'text!./provider.html','isotope','imagesloaded','a
 				        });
 				        
 				        self.url=ko.computed(function() {
-				        	if(self.administrative){
-				        		if (self.resourceType.indexOf("Collection")==-1)
-					    		  return 'index.html#exhibitionview/'+ self.dbId;
+				        	if(self.resourceType){
+				        		if (self.resourceType.indexOf("Collection")>-1)
+					    		  return 'index.html#collectionview/'+ self.dbId;
 				        		else if (self.resourceType.indexOf("Space")>-1){
 				        			return self.administrative.isShownAt;
 				        		}

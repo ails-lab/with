@@ -90,6 +90,8 @@ public class UserAndGroupManager extends Controller {
 		if ((specifyCategory == 0) || (specifyCategory == 2)) {
 			List<UserGroup> groups = DB.getUserGroupDAO().getByGroupNamePrefix(
 					prefix);
+			List<UserGroup> groups2 = DB.getUserGroupDAO().getByFriendlyNamePrefix(prefix);
+			groups.addAll(groups2);
 			List<String> effectiveUserIds = AccessManager
 					.effectiveUserIds(session().get("effectiveUserIds"));
 			ObjectId userId = new ObjectId(effectiveUserIds.get(0));
@@ -537,7 +539,7 @@ public class UserAndGroupManager extends Controller {
 		}
 		return null;
 	}
-	
+
 	public static Result addAdminToGroup(String id, String groupId){
 		ObjectNode result = Json.newObject();
 		try {
@@ -567,7 +569,7 @@ public class UserAndGroupManager extends Controller {
 
 				group.addAdministrator(userOrGroupId);
 				if (!(DB.getUserGroupDAO().makePermanent(group) == null)){
-					
+
 					result.put("message",
 							"User  is  a group administrator");
 					return ok(result);
@@ -584,9 +586,9 @@ public class UserAndGroupManager extends Controller {
 			result.put("error", e.getMessage());
 			return internalServerError(result);
 		}
-		
+
 	}
-	
+
 	public static Result removeAdminFromGroup(String id, String groupId){
 		ObjectNode result = Json.newObject();
 		try {
@@ -616,7 +618,7 @@ public class UserAndGroupManager extends Controller {
 				if (group.getAdminIds().contains(userOrGroupId)){
 					group.removeAdministrator(userOrGroupId);
 				}
-				if (!(DB.getUserGroupDAO().makePermanent(group) == null)){				
+				if (!(DB.getUserGroupDAO().makePermanent(group) == null)){
 					result.put("message",
 							"User is not a group administrator");
 					return ok(result);
@@ -633,8 +635,8 @@ public class UserAndGroupManager extends Controller {
 			result.put("error", e.getMessage());
 			return internalServerError(result);
 		}
-			
-		
+
+
 	}
 
 }
