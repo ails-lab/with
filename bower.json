@@ -31,7 +31,7 @@
     "bootstrap-select": "1.6.5",
     "jquery.lazyload": "~1.9.5",
     "horizontal-chart": "https://github.com/eriku/horizontal-chart/archive/master.zip",
-    "isotope": "latest",
+    "isotope": "2.2",
     "modernizr": "latest",
     "magnific-popup": "https://github.com/dimsemenov/Magnific-Popup/archive/master.zip",
     "knockout-x-editable": "latest",
@@ -42,9 +42,9 @@
   "resolutions": {
     "knockout": "~3.2.0",
     "jquery": "~2.1.1",
-    "masonry": "^4.1.0",
-    "fizzy-ui-utils": "^2.0.0",
-    "get-size": "^2.0.2",
-    "outlayer": "^2.1.0"
+    "get-size": "~1.2.2",
+    "outlayer": "~1.4.1",
+    "fizzy-ui-utils": "~1.0.1",
+    "masonry": "~3.3.0"
   }
 }
