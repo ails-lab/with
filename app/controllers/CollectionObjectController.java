@@ -23,6 +23,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.validation.ConstraintViolation;
 
@@ -833,6 +834,68 @@ public class CollectionObjectController extends WithResourceController {
 			return badRequest("User or group with name " + userOrGroupName
 					+ " does not exist or has no specified page.");
 
+	}
+	
+	public static Result deleteFeatured(String groupId) {
+		ObjectNode result = Json.newObject();
+		return ok(result);
+	}
+	
+	/*
+	 * This method gets as input a list of Collection and Exhibition
+	 * id's and updates the featuredCollections & featuredExhibitions
+	 * lists at a Page.
+	 */
+	public static Result addFeatured(String groupId) {
+		ObjectNode result = Json.newObject();
+		JsonNode json = request().body().asJson();
+		if (groupId == null) {
+			result.put("error",
+					"Invalid groupId specified!");
+			return badRequest(result);
+		}
+		List<String> fCollections = json.findValuesAsText("fCollections");
+		List<String> fExhibitions = json.findValuesAsText("fExhibitions");
+		if (((fCollections == null) || (fCollections.size() == 1)) &&
+			((fExhibitions == null) || (fExhibitions.size() == 1))) {
+			result.put("success", "Nothing to update!");
+			return ok(result);
+		}
+		UserGroup ug = DB.getUserGroupDAO().get(new ObjectId(groupId));
+		Page pg = null;
+		if (ug instanceof Organization) {
+			pg = ((Organization)ug).getPage();
+		} else if (ug instanceof Project) {
+			pg = ((Project)ug).getPage();
+		} else {
+			result.put("error",
+					"UserGroup is neither an Organization nor a Project");
+			return badRequest(result);
+		}
+		if (fCollections != null) {
+			List<ObjectId> fCols = fCollections.stream()
+					.map(id -> new ObjectId(id))
+					.collect(Collectors.toList());
+			pg.setFeaturedCollections(fCols);
+		}
+		if (fExhibitions != null) {
+			List<ObjectId> fExhs = fExhibitions.stream()
+					.map(id -> new ObjectId(id))
+					.collect(Collectors.toList());
+			pg.setFeaturedExhibitions(fExhs);
+		}
+		if (ug instanceof Organization) {
+			((Organization) ug).setPage(pg);
+		} else {
+			((Project) ug).setPage(pg);
+		}
+		if (DB.getUserGroupDAO().makePermanent(ug) != null) {
+			result.put("success", "Featured Data succesfully updated!");
+			return ok(result);
+		} else {
+			result.put("error", "Featured Data were not updated due to system error");
+			return internalServerError(result);
+		}
 	}
 
 	/**

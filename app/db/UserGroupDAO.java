@@ -22,6 +22,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import model.resources.collection.CollectionObject;
 import model.usersAndGroups.Organization;
 import model.usersAndGroups.Page;
 import model.usersAndGroups.Project;
@@ -96,10 +97,8 @@ public class UserGroupDAO extends DAO<UserGroup> {
 	}
 
 	public int getGroupCount(Set<ObjectId> groupIds, GroupType groupType) {
-
 		if (groupIds.isEmpty())
 			return 0;
-
 		Query<UserGroup> q = createQuery().disableValidation().field("_id")
 				.in(groupIds);
 		if (!groupType.equals(GroupType.All)) {
@@ -222,5 +221,17 @@ public class UserGroupDAO extends DAO<UserGroup> {
 				continue;
 			urls.addAll(page.getCover().values());
 		}
+	}
+	
+	public void addFeatured(ObjectId groupId, List<ObjectId> featured) {
+		Query<UserGroup> q = this.createQuery().field("_id").equal(groupId);
+		UpdateOperations<UserGroup> updateOps = this
+				.createUpdateOperations().disableValidation();
+
+	}
+	
+	
+	public void deleteFeatured(ObjectId groupId, List<ObjectId> featured) {
+		
 	}
 }

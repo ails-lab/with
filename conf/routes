@@ -38,12 +38,15 @@ PUT		/record/:id								controllers.RecordResourceController.editRecordResource(
 GET 	 /collection/list 						controllers.CollectionObjectController.list(directlyAccessedByUserOrGroup: play.libs.F.Option[controllers.parameterTypes.MyPlayList], recursivelyAccessedByUserOrGroup: play.libs.F.Option[controllers.parameterTypes.MyPlayList], creator: play.libs.F.Option[String], isPublic: play.libs.F.Option[java.lang.Boolean], isExhibition: play.libs.F.Option[java.lang.Boolean], collectionHits:Boolean ?= false, offset: Integer ?=0, count: Integer ?=10)
 GET 	 /collection/listShared					controllers.CollectionObjectController.listShared(direct: Boolean ?= true, directlyAccessedByUserOrGroup: play.libs.F.Option[controllers.parameterTypes.MyPlayList], recursivelyAccessedByUserOrGroup: play.libs.F.Option[controllers.parameterTypes.MyPlayList], isExhibition: play.libs.F.Option[java.lang.Boolean], collectionHits:Boolean ?= false, offset: Integer ?=0, count: Integer ?=10)
 GET 	 /collection/countMyAndShared			controllers.CollectionObjectController.countMyAndShared()
-GET 	 /collection/featured					controllers.CollectionObjectController.getFeatured(groupOrUserName: String, isExhibition: play.libs.F.Option[java.lang.Boolean], offset: Integer ?=0, countPerType: Integer ?=10)
 GET		 /collection/favorites					controllers.RecordResourceController.getFavorites()
 GET      /collection/:id/listUsers				controllers.CollectionObjectController.listUsersWithRights(id)
 GET      /collection/:id/list		   	        controllers.CollectionObjectController.listRecordResources(id, format: String ?="noContent", start: Integer ?=0, count: Integer ?=10)
 GET		 /collection/favoriteCollection			controllers.CollectionObjectController.getFavoriteCollection()
 PUT		 /collection/sort/:id					controllers.CollectionObjectController.sortCollectionObject(id)
+
+GET 	 /collection/featured					controllers.CollectionObjectController.getFeatured(groupOrUserName: String, isExhibition: play.libs.F.Option[java.lang.Boolean], offset: Integer ?=0, countPerType: Integer ?=10)
+POST	 /collection/:groupId/featured			controllers.CollectionObjectController.addFeatured(groupId)
+DELETE 	 /collection/:groupId/featured			controllers.CollectionObjectController.deleteFeatured(groupId)
 
 POST     /collection/liked			            controllers.WithResourceController.addToFavorites()
 POST     /collection/:id/addRecord              controllers.WithResourceController.addRecordToCollection(id, position: play.libs.F.Option[Integer], noDouble: Boolean ?= false)
@@ -89,7 +92,6 @@ PUT      /group/leave/:groupId                  controllers.UserAndGroupManager.
 GET		/group/membersInfo/:groupId 			controllers.GroupManager.getGroupUsersInfo(groupId, category: String ?="both")
 PUT      /group/admin/:groupId       			controllers.UserAndGroupManager.addAdminToGroup(id: String ?=null, groupId)
 DELETE   /group/admin/:groupId     			    controllers.UserAndGroupManager.removeAdminFromGroup(id: String ?=null, groupId)
-POST	/group/:groupId/updateFeatured			controllers.GroupManager.updateFeatured(groupId)
 
 
 # Rights Controller
