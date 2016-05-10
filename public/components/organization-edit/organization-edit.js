@@ -680,12 +680,19 @@ define(['bridget','knockout', 'text!./organization-edit.html', 'isotope','images
 		};
 
 
+		loadUrl = function (data,event) {
+			event.preventDefault();
+			window.location.href = data;
+
+			return false;
+		};
+		
 		function getItem(collection) {
 
 
 
 			  var tile= '<div class="'+collection.data.css()+'"> <div class="wrap">';
-			   tile+='<a href="'+collection.data.url()+'">'
+			   tile+='<a href="#" onclick="loadUrl(\'' + collection.data.url() + '\',event)">'
                 +'<div class="thumb"><img src="'+collection.data.thumbnail()+'"><div class="counter">'+collection.data.entryCount+' ITEMS</div></div>'
                 +' <div class="info"><div class="type">'+collection.data.type()+'</div><h2 class="title">'+collection.data.title+'</h2></div>'
                 +'</a></div></div>';
