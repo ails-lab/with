@@ -542,12 +542,26 @@ public class CollectionObjectController extends WithResourceController {
 			return ok(result);
 		}
 	}
-
+	
+	public static Result list(Option<MyPlayList> directlyAccessedByUserOrGroup,
+			Option<String> creator, Option<Boolean> isPublic, Option<Boolean> isExhibition,
+			 Boolean collectionHits, int offset, int count, String profile, Option<String> locale) {
+		return list(directlyAccessedByUserOrGroup, Option.<MyPlayList>None(), creator, isPublic,
+				isExhibition, collectionHits, offset, count, profile, locale);
+	}
+	
+	public static Result listPublic(Option<MyPlayList> directlyAccessedByUserOrGroup,
+			Option<String> creator, Option<Boolean> isExhibition,
+			 Boolean collectionHits, int offset, int count, String profile, Option<String> locale) {
+		return list(directlyAccessedByUserOrGroup, Option.<MyPlayList>None(), creator, Option.Some(true),
+				isExhibition, collectionHits, offset, count, profile, locale);
+	}
+	
 	public static Result list(Option<MyPlayList> directlyAccessedByUserOrGroup,
 			Option<MyPlayList> recursivelyAccessedByUserOrGroup,
 			Option<String> creator, Option<Boolean> isPublic,
 			Option<Boolean> isExhibition, Boolean collectionHits, int offset,
-			int count) {
+			int count, String profile, Option<String> locale) {
 		ObjectNode result = Json.newObject().objectNode();
 		ArrayNode collArray = Json.newObject().arrayNode();
 		List<CollectionObject> userCollections;
@@ -614,12 +628,19 @@ public class CollectionObjectController extends WithResourceController {
 			return ok(result);
 		}
 	}
+	
+	public static Result listShared(Boolean direct, Option<MyPlayList> directlyAccessedByUserOrGroup,
+			Option<Boolean> isExhibition, Boolean collectionHits, int offset, int count, 
+			String profile, Option<String> locale) {
+		return listShared(direct, directlyAccessedByUserOrGroup, Option.<MyPlayList>None(),
+				isExhibition, collectionHits, offset, count, profile, locale);
+	}
 
 	public static Result listShared(Boolean direct,
 			Option<MyPlayList> directlyAccessedByUserOrGroup,
 			Option<MyPlayList> recursivelyAccessedByUserOrGroup,
 			Option<Boolean> isExhibition, boolean collectionHits, int offset,
-			int count) {
+			int count, String profile, Option<String> locale) {
 		ObjectNode result = Json.newObject().objectNode();
 		ArrayNode collArray = Json.newObject().arrayNode();
 		List<String> effectiveUserIds = AccessManager
@@ -691,7 +712,7 @@ public class CollectionObjectController extends WithResourceController {
 				}
 			}
 		}
-		// TODO: add support for userGroups in recursively!!!!!
+		// TODO: add support for userGroups in recursive case!!!!!
 		if (recursivelyAccessedByUserOrGroup.isDefined()) {
 			MyPlayList recursivelyUserNameList = recursivelyAccessedByUserOrGroup
 					.get();
