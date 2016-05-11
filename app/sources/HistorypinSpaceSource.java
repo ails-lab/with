@@ -68,88 +68,19 @@ public class HistorypinSpaceSource extends ISpaceSource {
 		super(Sources.Historypin);
 		vmap = FilterValuesMap.getHistorypinMap();
 		addDefaultWriter(CommonFilters.TYPE.getId(), qfwriter("pin"));
-//		addDefaultWriter(CommonFilters.MIME_TYPE.getId(), qfwriter("MIME_TYPE"));
-//		addDefaultWriter(CommonFilters.IMAGE_SIZE.getId(), qfwriter("IMAGE_SIZE"));
-//		addDefaultWriter(CommonFilters.IMAGE_COLOUR.getId(), qfwriter("IMAGE_COLOUR"));
-//		addDefaultWriter(CommonFilters.COLOURPALETE.getId(), qfwriter("COLOURPALETE"));
-//		
-//		
-//		addDefaultWriter(CommonFilters.PROVIDER.getId(), qfwriter("PROVIDER"));
-//		addDefaultWriter(CommonFilters.DATA_PROVIDER.getId(), qfwriter("DATA_PROVIDER"));
-//		addDefaultWriter(CommonFilters.COUNTRY.getId(), qfwriter("COUNTRY"));
-//
-//		addDefaultWriter(CommonFilters.YEAR.getId(), qfwriterYEAR());
-//
-//		addDefaultWriter(CommonFilters.CREATOR.getId(), qfwriter("CREATOR"));
-
-		// addDefaultWriter(CommonFilters.CONTRIBUTOR_ID,
-		// qfwriter("proxy_dc_contributor"));
-
-//		addDefaultQueryModifier(CommonFilters.RIGHTS.getId(), qrightwriter());
-
-//		addDefaultWriter(CommonFilters.TYPE.getId(), qfwriter("TYPE"));
-
 		formatreader = new HistorypinRecordFormatter();
 
 	}
 
-	private void addIdentityWriter(String filterId) {
-		addDefaultWriter(filterId, qfwriter(filterId));
-	}
-
-	private Function<List<String>, QueryModifier> qrightwriter() {
-		Function<String, String> function = (String s) -> {
-//			s = s.replace("(?!.*nc)", "*%20NOT%20*nc");
-//			s = s.replace("(?!.*nd)", "*%20NOT%20*nd");
-//			return "RIGHTS%3A%28" + s.replace(".", "") + "%29";
-			s = s.replace("(?!.*nc)", "* NOT *nc");
-			s = s.replace("(?!.*nd)", "* NOT *nd");
-			return "RIGHTS:(" + s.replace(".", "") + ")";
-		};
-		return new Function<List<String>, QueryModifier>() {
-			@Override
-			public AdditionalQueryModifier apply(List<String> t) {
-				return new AdditionalQueryModifier(" " + Utils.getORList(ListUtils.transform(t, function), false));
-			}
-		};
-	}
-
 	private Function<List<String>, Pair<String>> qfwriter(String parameter) {
-		if (parameter.equals(CommonFilters.YEAR.name())) {
-			return qfwriterYEAR();
-		}
-//		Function<String, String> function = (String s) -> {
-//			return "\"" + s+ "\"";
-//		};
-//		return new Function<List<String>, Pair<String>>() {
-//			@Override
-//			public Pair<String> apply(List<String> t) {
-//				return new Pair<String>("qf", parameter + ":" + Utils.getORList(ListUtils.transform(t, function)));
-//			}
-//		};
 		return FunctionsUtils.toORList("qf", 
 				(s)-> parameter + ":" + FunctionsUtils.smartquote().apply(s)
 				);
 	}
 
-	private Function<List<String>, Pair<String>> qfwriterYEAR() {
-		return new Function<List<String>, Pair<String>>() {
-			@Override
-			public Pair<String> apply(List<String> t) {
-				String val = "\"" + t.get(0) + "\"";
-				if (t.size() > 1) {
-					val = "[" + val + " TO \"" + t.get(1) + "\"]";
-				}
-				return new Pair<String>("qf", "YEAR:" + val);
-			}
-		};
-	}
 
 	public String getHttpQuery(CommonQuery q) {
 		QueryBuilder builder = new QueryBuilder("http://www.historypin.org/en/api/pin/listing.json");
-//		builder.addSearchParam("wskey", apiKey);
-
-//		builder.addQuery("keyword", q.searchTerm);
 
 		builder.addSearchParam("page", "" +q.page);
 		builder.addSearchParam("limit", "" + q.pageSize);
@@ -169,139 +100,10 @@ public class HistorypinSpaceSource extends ISpaceSource {
 
 		});
 		
-//		builder.addSearchParam("profile", "rich facets");
-//		String facets = "DEFAULT";
-//		if (q.facetsMode != null) {
-//			switch (q.facetsMode) {
-//			case FacetsModes.SOME:
-//				facets = "proxy_dc_creator," + facets;
-//				break;
-//			case FacetsModes.ALL:
-//				facets = "proxy_dc_creator,proxy_dc_contributor," + 
-//			             "MIME_TYPE,IMAGE_SIZE,IMAGE_COLOUR,IMAGE_GREYSCALE,"+
-//						facets;
-//				break;
-//			default:
-//				break;
-//			}
-//		}
-//		if (q.hasMedia)
-//			builder.addSearchParam("media", "true");
-////		builder.addSearchParam("facet", facets);
-//		builder.setTail(q.tail);
 		return addfilters(q, builder).getHttp();
 	}
 
-	public List<CommonFilterLogic> createFilters(JsonNode response) {
-		
-//		List<CommonFilterLogic> filters = new ArrayList<CommonFilterLogic>();
-//		for (JsonNode facet : response.path("facets")) {
-//			String filterType = facet.path("name").asText();
-//			CommonFilters withFilter = CommonFilters.valueOf(filterType);//sourceToFiltersMappings.get(filterType);
-//			if (withFilter != null) {
-//				CommonFilterLogic filter = new CommonFilterLogic(withFilter);
-//				for (JsonNode jsonNode : facet.path("fields")) {
-//					String label = jsonNode.path("label").asText();
-//					int count = jsonNode.path("count").asInt();
-//					switch (filterType) {
-//						case "TYPE": 
-//						case "RIGHTS":
-//							countValue(filter, label, count);
-//							break;
-//						case "DATA_PROVIDER": 
-//						case "PROVIDER":
-//						case "proxy_dc_creator":
-//						case "COUNTRY":
-//						case "YEAR":
-//							countValue(filter, label, false, count);
-//							break;
-//						default:
-//							break;
-//					}
-//					filters.add(filter);
-//				}
-//			}
-//		}
-//		return filters;
-
-		CommonFilterLogic type = new CommonFilterLogic(CommonFilters.TYPE);
-		CommonFilterLogic provider = new CommonFilterLogic(CommonFilters.PROVIDER);
-		CommonFilterLogic dataprovider = new CommonFilterLogic(CommonFilters.DATA_PROVIDER);
-		CommonFilterLogic creator = new CommonFilterLogic(CommonFilters.CREATOR);
-		CommonFilterLogic rights = new CommonFilterLogic(CommonFilters.RIGHTS);
-		CommonFilterLogic country = new CommonFilterLogic(CommonFilters.COUNTRY);
-		CommonFilterLogic year = new CommonFilterLogic(CommonFilters.YEAR);
-		
-		CommonFilterLogic mtype = new CommonFilterLogic(CommonFilters.MIME_TYPE);
-		CommonFilterLogic isize = new CommonFilterLogic(CommonFilters.IMAGE_SIZE);
-		CommonFilterLogic icolor = new CommonFilterLogic(CommonFilters.IMAGE_COLOUR);
-		CommonFilterLogic cpalete = new CommonFilterLogic(CommonFilters.COLOURPALETE);
-				
-		List<CommonFilterLogic> filters = new ArrayList<CommonFilterLogic>();
-		for (JsonNode facet : response.path("facets")) {
-			String filterType = facet.path("name").asText();
-			for (JsonNode jsonNode : facet.path("fields")) {
-				String label = jsonNode.path("label").asText();
-				int count = jsonNode.path("count").asInt();
-				switch (filterType) {
-				case "TYPE":
-					countValue(type, label, count);
-					break;
-
-				case "DATA_PROVIDER":
-					countValue(dataprovider, label, false, count);
-					break;
-
-				case "PROVIDER":
-					countValue(provider, label, false, count);
-					break;
-
-				case "RIGHTS":
-					countValue(rights, label, count);
-					break;
-
-				case "proxy_dc_creator":
-					countValue(creator, label, false, count);
-					break;
-				case "COUNTRY":
-					countValue(country, label, false, count);
-					break;
-
-				case "YEAR":
-					countValue(year, label, false, count);
-					break;
-				case "MIME_TYPE":
-					countValue(mtype, label, false, count);
-					break;
-				case "IMAGE_SIZE":
-					countValue(isize, label, false, count);
-					break;
-				case "IMAGE_COLOUR":
-					countValue(icolor, label, false, count);
-					break;
-				case "COLOURPALETE":
-					countValue(cpalete, label, false, count);
-					break;
-
-				default:
-					break;
-				}
-
-			}
-		}
-		filters.add(type);
-		filters.add(provider);
-		filters.add(dataprovider);
-		filters.add(creator);
-		filters.add(rights);
-		filters.add(country);
-		filters.add(year);
-		filters.add(mtype);
-		filters.add(isize);
-		filters.add(icolor);
-		filters.add(cpalete);
-		return filters;
-	}
+	
 
 	public ArrayList<WithResource<?, ?>> getItems(JsonNode response) {
 		ArrayList<WithResource<?, ?>> items = new ArrayList<>();
@@ -329,8 +131,6 @@ public class HistorypinSpaceSource extends ISpaceSource {
 				res.totalCount = Utils.readIntAttr(response, "count", true);
 				res.count = Utils.readIntAttr(response, "limit", true);
 				res.items.setCulturalCHO(getItems(response));
-				// res.facets = response.path("facets");
-				//res.filtersLogic = createFilters(response);
 				if (usingCursor) {
 					nextCursor = Utils.readAttr(response, "nextCursor", true);
 					if (!Utils.hasInfo(nextCursor))
