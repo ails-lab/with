@@ -87,7 +87,7 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 		addDefaultQueryModifier(CommonFilters.DATA_PROVIDER.getId(), qwriter("DATA_PROVIDER"));
 		addDefaultQueryModifier(CommonFilters.COUNTRY.getId(), qwriter("COUNTRY"));
 
-		addDefaultWriter(CommonFilters.YEAR.getId(), qfwriterYEAR());
+		addDefaultQueryModifier(CommonFilters.YEAR.getId(), qDatewriter());
 
 		addDefaultQueryModifier(CommonFilters.CREATOR.getId(), qwriter("CREATOR"));
 
@@ -132,6 +132,18 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 			@Override
 			public AdditionalQueryModifier apply(List<String> t) {
 				return new AdditionalQueryModifier(" " + Utils.getORList(ListUtils.transform(t, function), false));
+			}
+		};
+		
+		
+	}
+	
+	private Function<List<String>, QueryModifier> qDatewriter() {
+		return new Function<List<String>, QueryModifier>() {
+			@Override
+			public AdditionalQueryModifier apply(List<String> t) {
+				String val = dateRange(t);
+				return new AdditionalQueryModifier(" YEAR:" + val);
 			}
 		};
 		
