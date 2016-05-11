@@ -16,6 +16,8 @@
 
 package sources;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -32,7 +34,6 @@ import model.resources.CulturalObject;
 import model.resources.RecordResource;
 import model.resources.WithResource;
 import play.Logger;
-import play.Logger.ALogger;
 import play.libs.Json;
 import sources.core.AdditionalQueryModifier;
 import sources.core.AutocompleteResponse;
@@ -42,6 +43,7 @@ import sources.core.CommonFilterLogic;
 import sources.core.CommonFilters;
 import sources.core.CommonQuery;
 import sources.core.FacetsModes;
+import sources.core.HttpConnector;
 import sources.core.ISpaceSource;
 import sources.core.QueryBuilder;
 import sources.core.QueryModifier;
@@ -52,56 +54,42 @@ import sources.core.Utils;
 import sources.core.Utils.Pair;
 import sources.formatreaders.EuropeanaItemRecordFormatter;
 import sources.formatreaders.EuropeanaRecordFormatter;
+import sources.formatreaders.HistorypinItemRecordFormatter;
+import sources.formatreaders.HistorypinRecordFormatter;
 import sources.utils.FunctionsUtils;
 import utils.ListUtils;
 
-public class EuropeanaSpaceSource extends ISpaceSource {
-	
-	public static final ALogger log = Logger.of( EuropeanaSpaceSource.class);
+public class HistorypinSpaceSource extends ISpaceSource {
 	
 	private boolean usingCursor = false;
 	private String nextCursor;
 	
-	public EuropeanaSpaceSource() {
-		super(Sources.Europeana);
-		vmap = FilterValuesMap.getEuropeanaMap();
+	public HistorypinSpaceSource() {
+		super(Sources.Historypin);
+		vmap = FilterValuesMap.getHistorypinMap();
 		
-		apiKey = "SECRET_KEY";
-		
-	    /*filtersSupportedBySource = new ArrayList<CommonFilters>(
-	    		Arrays.asList(CommonFilters.PROVIDER, CommonFilters.COUNTRY, CommonFilters.CREATOR, 
-	    				CommonFilters.DATA_PROVIDER, CommonFilters.PROVIDER, CommonFilters.RIGHTS,
-	    				CommonFilters.TYPE, CommonFilters.YEAR)
-	    		);
-	    sourceToFiltersMappings = new HashMap<String, CommonFilters>(){{
-	    		for (CommonFilters filter: filtersSupportedBySource) {
-	    			put(filter.name(), filter);
-	    		}
-	    	}};*/
-		
-		addDefaultQueryModifier(CommonFilters.MIME_TYPE.getId(), qwriter("MIME_TYPE"));
-		addDefaultQueryModifier(CommonFilters.IMAGE_SIZE.getId(), qwriter("IMAGE_SIZE"));
-		addDefaultQueryModifier(CommonFilters.IMAGE_COLOUR.getId(), qwriter("IMAGE_COLOUR"));
-		addDefaultQueryModifier(CommonFilters.COLOURPALETE.getId(), qwriter("COLOURPALETE"));
-		
-		
-		addDefaultQueryModifier(CommonFilters.PROVIDER.getId(), qwriter("PROVIDER"));
-		addDefaultQueryModifier(CommonFilters.DATA_PROVIDER.getId(), qwriter("DATA_PROVIDER"));
-		addDefaultQueryModifier(CommonFilters.COUNTRY.getId(), qwriter("COUNTRY"));
-
-		addDefaultWriter(CommonFilters.YEAR.getId(), qfwriterYEAR());
-
-		addDefaultQueryModifier(CommonFilters.CREATOR.getId(), qwriter("CREATOR"));
+//		addDefaultWriter(CommonFilters.MIME_TYPE.getId(), qfwriter("MIME_TYPE"));
+//		addDefaultWriter(CommonFilters.IMAGE_SIZE.getId(), qfwriter("IMAGE_SIZE"));
+//		addDefaultWriter(CommonFilters.IMAGE_COLOUR.getId(), qfwriter("IMAGE_COLOUR"));
+//		addDefaultWriter(CommonFilters.COLOURPALETE.getId(), qfwriter("COLOURPALETE"));
+//		
+//		
+//		addDefaultWriter(CommonFilters.PROVIDER.getId(), qfwriter("PROVIDER"));
+//		addDefaultWriter(CommonFilters.DATA_PROVIDER.getId(), qfwriter("DATA_PROVIDER"));
+//		addDefaultWriter(CommonFilters.COUNTRY.getId(), qfwriter("COUNTRY"));
+//
+//		addDefaultWriter(CommonFilters.YEAR.getId(), qfwriterYEAR());
+//
+//		addDefaultWriter(CommonFilters.CREATOR.getId(), qfwriter("CREATOR"));
 
 		// addDefaultWriter(CommonFilters.CONTRIBUTOR_ID,
 		// qfwriter("proxy_dc_contributor"));
 
-		addDefaultQueryModifier(CommonFilters.RIGHTS.getId(), qrightwriter());
+//		addDefaultQueryModifier(CommonFilters.RIGHTS.getId(), qrightwriter());
 
-		addDefaultQueryModifier(CommonFilters.TYPE.getId(), qwriter("TYPE"));
+//		addDefaultWriter(CommonFilters.TYPE.getId(), qfwriter("TYPE"));
 
-		
-		formatreader = new EuropeanaRecordFormatter();
+		formatreader = new HistorypinRecordFormatter();
 
 	}
 
@@ -125,34 +113,6 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 			}
 		};
 	}
-	
-	private Function<List<String>, QueryModifier> qwriter(String parameter) {
-		Function<String, String> function = (String s) -> {
-			return parameter+":" + FunctionsUtils.smartquote().apply(s) + "";
-		};
-		return new Function<List<String>, QueryModifier>() {
-			@Override
-			public AdditionalQueryModifier apply(List<String> t) {
-				return new AdditionalQueryModifier(" " + Utils.getORList(ListUtils.transform(t, function), false));
-			}
-		};
-		
-		
-	}
-	
-//	private Function<List<String>, QueryModifier> qYearwriter(String parameter) {
-//		Function<String, String> function = (String s) -> {
-//			return parameter+":" + dateRange(parameter);
-//		};
-//		return new Function<List<String>, QueryModifier>() {
-//			@Override
-//			public AdditionalQueryModifier apply(List<String> t) {
-//				return new AdditionalQueryModifier(" " + Utils.getORList(ListUtils.transform(t, function), false));
-//			}
-//		};
-//		
-//		
-//	}
 
 	private Function<List<String>, Pair<String>> qfwriter(String parameter) {
 		if (parameter.equals(CommonFilters.YEAR.name())) {
@@ -176,90 +136,59 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 		return new Function<List<String>, Pair<String>>() {
 			@Override
 			public Pair<String> apply(List<String> t) {
-				String val = dateRange(t);
+				String val = "\"" + t.get(0) + "\"";
+				if (t.size() > 1) {
+					val = "[" + val + " TO \"" + t.get(1) + "\"]";
+				}
 				return new Pair<String>("qf", "YEAR:" + val);
 			}
 		};
 	}
 
-	class EuroQB extends QueryBuilder {
-
-		public EuroQB() {
-			super();
-		}
-
-		public EuroQB(String baseUrl) {
-			super(baseUrl);
-		}
-
-		public String getHttp() {
-			String res = getBaseUrl();
-			Iterator<Pair<String>> it = parameters.iterator();
-			boolean skipqf = false;
-			boolean added = false;
-			if (query.second != null) {
-				res += ("?" + query.getHttp());
-				added = true;
-			} else {
-				skipqf = true;
-			}
-			for (; it.hasNext();) {
-
-				Pair<String> next = it.next();
-				String string = added ? "&" : "?";
-				if (next.first.equals("qf") && skipqf) {
-					skipqf = false;
-					query.second = next.second;
-					res += (string + query.getHttp());
-					added = true;
-				} else {
-					added = true;
-					res += string + next.getHttp();
-				}
-			}
-			if (Utils.hasInfo(tail)){
-				res+=tail;
-			}
-			return res;
-		}
-
-	}
-
 	public String getHttpQuery(CommonQuery q) {
-		QueryBuilder builder = new EuroQB("http://europeana.eu/api/v2/search.json");
-		builder.addSearchParam("wskey", apiKey);
+		QueryBuilder builder = new QueryBuilder("http://www.historypin.org/en/api/pin/listing.json");
+//		builder.addSearchParam("wskey", apiKey);
 
-		builder.addQuery("query", q.searchTerm);
+//		builder.addQuery("keyword", q.searchTerm);
 
-		if (usingCursor){
-			if (q.page.equals("1"))
-				builder.addSearchParam("cursor", "*");
-			else
-				builder.addSearchParam("cursor", nextCursor);
-		} else
-		builder.addSearchParam("start", "" + (((Integer.parseInt(q.page) - 1) * Integer.parseInt(q.pageSize)) + 1));
-
-		builder.addSearchParam("rows", "" + q.pageSize);
-		builder.addSearchParam("profile", "rich facets");
-		String facets = "DEFAULT";
-		if (q.facetsMode != null) {
-			switch (q.facetsMode) {
-			case FacetsModes.SOME:
-				facets = "proxy_dc_creator," + facets;
-				break;
-			case FacetsModes.ALL:
-				facets = "proxy_dc_creator,proxy_dc_contributor," + 
-			             "MIME_TYPE,IMAGE_SIZE,IMAGE_COLOUR,IMAGE_GREYSCALE,"+
-						facets;
-				break;
-			default:
-				break;
+		builder.addSearchParam("page", "" +q.page);
+		builder.addSearchParam("limit", "" + q.pageSize);
+		builder.add(new Pair<String>("keyword", q.searchTerm){
+			public String getHttp(boolean encode) {
+				String string = first + ":" + second.toString();
+				if (encode){
+					try {
+						String encoded = URLEncoder.encode(second.toString(), "UTF-8");
+						string = first + ":" + encoded;
+					} catch (UnsupportedEncodingException e) {
+						e.printStackTrace();
+					}
+				}
+				return string;
 			}
-		}
-		if (q.hasMedia)
-			builder.addSearchParam("media", "true");
-//		builder.addSearchParam("facet", facets);
-		builder.setTail(q.tail);
+
+		});
+		
+//		builder.addSearchParam("profile", "rich facets");
+//		String facets = "DEFAULT";
+//		if (q.facetsMode != null) {
+//			switch (q.facetsMode) {
+//			case FacetsModes.SOME:
+//				facets = "proxy_dc_creator," + facets;
+//				break;
+//			case FacetsModes.ALL:
+//				facets = "proxy_dc_creator,proxy_dc_contributor," + 
+//			             "MIME_TYPE,IMAGE_SIZE,IMAGE_COLOUR,IMAGE_GREYSCALE,"+
+//						facets;
+//				break;
+//			default:
+//				break;
+//			}
+//		}
+//		if (q.hasMedia)
+//			builder.addSearchParam("media", "true");
+////		builder.addSearchParam("facet", facets);
+//		builder.setTail(q.tail);
 		return addfilters(q, builder).getHttp();
 	}
 
@@ -377,13 +306,11 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 	public ArrayList<WithResource<?, ?>> getItems(JsonNode response) {
 		ArrayList<WithResource<?, ?>> items = new ArrayList<>();
 		try {
-			if (response.path("success").asBoolean()) {
-				for (JsonNode item : response.path("items")) {
+				for (JsonNode item : response.path("results")) {
 					items.add(formatreader.readObjectFrom(item));
 				}
-			}
 		} catch (Exception e) {
-			log.error("",e);
+			e.printStackTrace();
 		}
 
 		return items;
@@ -399,11 +326,11 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 		if (checkFilters(q)) {
 			try {
 				response = getHttpConnector().getURLContent(httpQuery);
-				res.totalCount = Utils.readIntAttr(response, "totalResults", true);
-				res.count = Utils.readIntAttr(response, "itemsCount", true);
+				res.totalCount = Utils.readIntAttr(response, "count", true);
+				res.count = Utils.readIntAttr(response, "limit", true);
 				res.items.setCulturalCHO(getItems(response));
 				// res.facets = response.path("facets");
-				res.filtersLogic = createFilters(response);
+				//res.filtersLogic = createFilters(response);
 				if (usingCursor) {
 					nextCursor = Utils.readAttr(response, "nextCursor", true);
 					if (!Utils.hasInfo(nextCursor))
@@ -413,65 +340,30 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
-				log.error( "", e );
+				e.printStackTrace();
 			}
 		}
 		return res;
 	}
 
-	public String autocompleteQuery(String term, int limit) {
-		return "http://www.europeana.eu/api/v2/suggestions.json?rows=" + limit + "&phrases=false&query=" + term;
-	}
+	
 
-	public AutocompleteResponse autocompleteResponse(String response) {
-		try {
-			JSONObject jsonResp = new JSONObject(response);
-			if ((jsonResp == null) || !jsonResp.getBoolean("success") || (jsonResp.getJSONArray("items") == null))
-				return new AutocompleteResponse();
-			else {
-				JSONArray items = jsonResp.getJSONArray("items");
-				AutocompleteResponse ar = new AutocompleteResponse();
-				ar.suggestions = new ArrayList<Suggestion>();
-				for (int i = 0; i < items.length(); i++) {
-					JSONObject item = items.getJSONObject(i);
-					Suggestion s = new Suggestion();
-					s.value = item.getString("term");
-					DataJSON data = new DataJSON();
-					data.category = "Europeana";
-					data.frequencey = item.getInt("frequency");
-					data.field = item.getString("field");
-					s.data = data;
-					ar.suggestions.add(s);
-				}
-				return ar;
-			}
-		} catch (JSONException e) {
-			log.error("", e);
-			return new AutocompleteResponse();
-		}
-	}
 
 	@Override
 	public ArrayList<RecordJSONMetadata> getRecordFromSource(String recordId, RecordResource fullRecord) {
-		String key = "SECRET_KEY";
+		String key = "ANnuDzRpW";
 		ArrayList<RecordJSONMetadata> jsonMetadata = new ArrayList<RecordJSONMetadata>();
 		JsonNode response;
 		try {
 			response = getHttpConnector()
-					.getURLContent("http://www.europeana.eu/api/v2/record/" + recordId + ".json?wskey=" + key);
+					.getURLContent("http://www.historypin.org/en/api/pin/get.json?id=" + recordId);
 			// todo read the other format;
-			JsonNode record = response.get("object");
+			JsonNode record = response;
 			if (response != null) {
-//				jsonMetadata.add(new RecordJSONMetadata(Format.JSON_EDM, record.toString()));
-				EuropeanaItemRecordFormatter f = new EuropeanaItemRecordFormatter();
+				jsonMetadata.add(new RecordJSONMetadata(Format.JSON_Historypin, record.toString()));
+				HistorypinItemRecordFormatter f = new HistorypinItemRecordFormatter();
 				String json = Json.toJson(f.overwritedObjectFrom((CulturalObject)fullRecord,record)).toString();
 				jsonMetadata.add(new RecordJSONMetadata(Format.JSON_WITH, json));
-			}
-			response = getHttpConnector()
-					.getURLContent("http://www.europeana.eu/api/v2/record/" + recordId + ".jsonld?wskey=" + key);
-			if (response != null) {
-				record = response;
-				jsonMetadata.add(new RecordJSONMetadata(Format.JSONLD_EDM, record.toString()));
 			}
 
 			return jsonMetadata;
@@ -486,14 +378,6 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 
 	public void setUsingCursor(boolean useCursor) {
 		this.usingCursor = useCursor;
-	}
-
-	private String dateRange(List<String> t) {
-		String val = "\"" + t.get(0) + "\"";
-		if (t.size() > 1) {
-			val = "[" + val + " TO \"" + t.get(1) + "\"]";
-		}
-		return val;
 	}
 	
 }

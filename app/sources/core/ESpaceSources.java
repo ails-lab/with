@@ -29,6 +29,7 @@ import sources.ElasticSource;
 import sources.EuropeanaFashionSpaceSource;
 import sources.EuropeanaSpaceSource;
 import sources.FlickrSpaceSource;
+import sources.HistorypinSpaceSource;
 import sources.NLASpaceSource;
 import sources.RijksmuseumSpaceSource;
 import sources.WithSpaceSource;
@@ -62,6 +63,7 @@ public class ESpaceSources {
 		esources.add(new BritishLibrarySpaceSource());
 		esources.add(new FlickrSpaceSource.InternetArchiveSpaceSource());
 		esources.add(new WithSpaceSource());
+		esources.add(new HistorypinSpaceSource());
 		log.info("Initialization of sources list");
 	}
 
