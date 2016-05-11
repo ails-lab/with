@@ -52,8 +52,9 @@
 			  <!-- /ko -->
 			</section>
 			<!-- message-->
-			<section class="message"><img src="img/ui/ic-inbox.png" class="hero">
 			 <!-- ko if: showsExhibitions -->
+			 <!-- ko if: exhibitionCount == 0 -->
+			 <section class="message"><img src="img/ui/ic-inbox.png" class="hero">
 			  <div class="message-body">
 				<div class="header">Welcome to My Exhibitions</div>
 				<div class="description">This is <b>My Exhibitions</b>. All exhibitions created by and shared with you will be presented here.</div>
@@ -62,8 +63,12 @@
 				   	<span class="text">Hide welcome message</span>
 				   </a>
 			  </div>
-			   <!-- /ko -->
+			 </section>
+			  <!-- /ko -->
+			  <!-- /ko -->
 			  <!-- ko else -->
+			  <!-- ko if: collectionCount() == 0 -->
+			  <section class="message"><img src="img/ui/ic-inbox.png" class="hero">
 			  <div class="message-body">
 				<div class="header">Welcome to My Collections</div>
 				<div class="description">This is <b>My Collections</b>. All collections created by and shared with you will be presented here.</div>
@@ -72,8 +77,9 @@
 				   	<span class="text">Hide welcome message</span>
 				   </a>
 			  </div>
+			  </section>
 			  <!-- /ko -->
-			</section>
+			  <!-- /ko -->
 			<!-- collection main-->
 			<section class="collection-list">
 			  <!-- collection main header-->
@@ -255,7 +261,8 @@
 					  <!-- ko else -->
 					  	<div class="thumbnails"><img src="images/user.png"></div>
 					  <!-- /ko -->
-					  <a href="#" data-toggle="tooltip" data-placement="top" data-bind="{attr: {title: username}, click: $parent.removeRights}" class="trash">
+
+					  <a style="cursor: pointer;" data-toggle="tooltip" data-placement="top" data-bind="{attr: {title: username}, click: $parent.removeRights}" class="trash">
 					  <i class="fa fa-trash"></i></a>
 					  <div class="toggle">
 						<input type="checkbox" data-bind="{attr: {id: username}, checked: accessChecked, click: $parent.changeRights}">
@@ -300,23 +307,40 @@
 					<!-- ko else -->
 					<div class="category">private</div>
 					<!--/ko-->
-					<!-- ko if: media()[0]-->
-					<div class="wrap"><img data-bind="attr: {src: media()[0].thumbnailUrl}" onError="this.src='img/content/thumb-empty.png'"/></div>
+					<!-- ko if: backgroundImg() != "" -->
+						<div class="wrap"><img data-bind="attr: {src: backgroundImg}" onError="this.src='img/content/thumb-empty.png'"/></div>
+						<!-- ko if: media()[0]-->
+						<div class="wrap small"><img data-bind="attr: {src: media()[0].thumbnailUrl}" onError="this.src='img/content/thumb-empty.png'"/></div>
+						<!-- /ko -->
+						<!-- ko else -->
+						<div class="wrap small"></div>
+						<!-- /ko -->
+						<!-- ko if: media()[1]-->
+						<div class="wrap small"><img data-bind="attr: {src: media()[1].thumbnailUrl}"/></div>
+						<!-- /ko -->
+						<!-- ko else -->
+						<div class="wrap small"></div>
+						<!-- /ko -->
 					<!-- /ko -->
 					<!-- ko else -->
-					<div class="wrap"></div>
-					<!-- /ko -->
-					<!-- ko if: media()[1]-->
-					<div class="wrap small"><img data-bind="attr: {src: media()[1].thumbnailUrl}"/></div>
-					<!-- /ko -->
-					<!-- ko else -->
-					<div class="wrap small"></div>
-					<!-- /ko -->
-					<!-- ko if: media()[2]-->
-					<div class="wrap small"><img data-bind="attr: {src: media()[2].thumbnailUrl}"/></div>
-					<!-- /ko -->
-					<!-- ko else -->
-					<div class="wrap small"></div>
+						<!-- ko if: media()[0]-->
+						<div class="wrap"><img data-bind="attr: {src: media()[0].thumbnailUrl}" onError="this.src='img/content/thumb-empty.png'"/></div>
+						<!-- /ko -->
+						<!-- ko else -->
+						<div class="wrap"></div>
+						<!-- /ko -->
+						<!-- ko if: media()[1]-->
+						<div class="wrap small"><img data-bind="attr: {src: media()[1].thumbnailUrl}"/></div>
+						<!-- /ko -->
+						<!-- ko else -->
+						<div class="wrap small"></div>
+						<!-- /ko -->
+						<!-- ko if: media()[2]-->
+						<div class="wrap small"><img data-bind="attr: {src: media()[2].thumbnailUrl}"/></div>
+						<!-- /ko -->
+						<!-- ko else -->
+						<div class="wrap small"></div>
+						<!-- /ko -->
 					<!-- /ko -->
 					</a>
 				  </div>

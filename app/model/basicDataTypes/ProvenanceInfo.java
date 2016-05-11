@@ -36,9 +36,10 @@ public class ProvenanceInfo {
 		EFashion("EFashion"),
 		YouTube("Youtube"),
 		NLA("NLA","National Library of Australia"),
-		DBPedia("DBPedia", "DBPedia"),
 		WITHin("WITHin"),
-		Rijksmuseum("Rijksmuseum","Rijksmuseum");
+		DBPedia("DBPedia", "DBPedia"),
+		Rijksmuseum("Rijksmuseum","Rijksmuseum"), Historypin("Historypin");
+
 
 		private final String text;
 		private final String ID;

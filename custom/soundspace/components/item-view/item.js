@@ -1,7 +1,8 @@
 define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, app) {
 
     self.disqusLoaded=ko.observable(false);
-	
+    helper_thumb = "";
+    
 
 	function Record(data) {
 		var self = this;
@@ -25,7 +26,7 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 		self.data=ko.observable('');
 		self.collectedIn =  [];
 		self.isLike=ko.observable(false);
-		
+		self.vtype = "IMAGE";
 		self.related =  ko.observableArray([]);
 		self.similar =  ko.observableArray([]);
 		self.facebook='';
@@ -70,9 +71,10 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 			if(self.source() && self.source()=="Europeana"){
 				$("span.pnd-resource").show();
 				$("div.pnd-resource").show();
-				
-				$("span.pnd-resource").attr('about',self.view_url());
-				$("div.pnd-resource").attr('about',self.view_url());
+				var pundit_url=self.view_url().replace('http://www.europeana.eu/portal/record/','http://data.europeana.eu/item/');
+				pundit_url=pundit_url.replace('.html','');
+				$("span.pnd-resource").attr('about',pundit_url);
+				$("div.pnd-resource").attr('about',pundit_url);
 				dispatchDocumentEvent('Pundit.loadAnnotations');
 				dispatchDocumentEvent('Pundit.forceCompileButton');
 				
@@ -109,9 +111,13 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 					self.vtype = "MEDIA";
 					$('#mediadiv').html('<audio id="mediaplayer" autoplay="true" controls width="576" height="324"><source src="' + self.fullres() + '" type="audio/mpeg">Your browser does not support HTML5</audio>');
 				}
-			}		 
+			}
+			console.log(helper_thumb);
+			helper_thumb = self.calcOnErrorThumbnail();
 		};
 
+		
+		
 		self.findsimilar=function(){
 		  if(self.related().length==0 && self.relatedsearch==false){
 			self.relatedsearch=true;  
@@ -192,7 +198,6 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 					self.related().push.apply(self.related(),items);
 					self.related.valueHasMutated();}
 					self.loading(false);
-					self.vtype = "IMAGE";
 				},
 				error   : function(request, status, error) {
 					self.loading(false);
@@ -268,7 +273,8 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 												collectedIn:result.collectedIn,
 												data: result,
 												fullrestype: media[0] != null && media[0].Original != null 
-												&& media[0].Original.type != "null" ? media[0].Original.type : ""
+												&& media[0].Original.type != "null" ? media[0].Original.type : "",
+												vtype : "IMAGE"	
 									  });
 							        if(record.thumb && record.thumb.length>0 && record.externalId!=self.externalId)
 								       items.push(record);
@@ -278,7 +284,6 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 						self.similar().push.apply(self.similar(),items);
 						self.similar.valueHasMutated();}
 						self.loading(false);
-						self.vtype = "IMAGE";
 					},
 					error   : function(request, status, error) {
 						self.loading(false);
@@ -303,6 +308,18 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 				   return "img/content/thumb-empty.png";
 			   }
 			});
+		
+		self.calcOnErrorThumbnail = ko.pureComputed(function() {
+
+
+			   if(self.thumb && self.thumb.indexOf('.pdf') == -1){
+					return self.thumb;
+				}
+			   else{
+				   return "img/content/thumb-empty.png";
+			   }
+			});
+		
 		self.sourceCredits = ko.pureComputed(function() {
 			 switch(self.source()) {
 			    case "DPLA":
@@ -506,7 +523,6 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 					self.open();
 					self.addDisqus();
 					$( '.itemview' ).fadeIn();
-					self.vtype = "IMAGE"; 
 				},
 				error: function (xhr, textStatus, errorThrown) {
 					self.open();

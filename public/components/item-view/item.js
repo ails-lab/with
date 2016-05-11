@@ -1,4 +1,4 @@
-define(['knockout', 'text!./_item.html', 'app','smoke', 'knockout-else'], function (ko, template, app, KnockoutElse) {
+define(['knockout', 'text!./_item.html', 'app','smoke'], function (ko, template, app) {
 
 	self.disqusLoaded=ko.observable(false);
 	
@@ -25,7 +25,7 @@ define(['knockout', 'text!./_item.html', 'app','smoke', 'knockout-else'], functi
 		self.data=ko.observable('');
 		self.collectedIn =  [];
 		self.isLike=ko.observable(false);
-		
+		self.vtype = "IMAGE"; 
 		self.related =  ko.observableArray([]);
 		self.similar =  ko.observableArray([]);
 		self.facebook='';
@@ -47,23 +47,20 @@ define(['knockout', 'text!./_item.html', 'app','smoke', 'knockout-else'], functi
 		    "&description="+desc,'','height=500,width=750');
 		    return false;
 		};
-		
+		 
 		
 		self.isLiked = ko.pureComputed(function () {
 			return app.isLiked(self.externalId);
 		});
 		self.isLoaded = ko.observable(false);
 		
-		self.vtype = "IMAGE";
-		
 		self.load = function(data) {
-			
 			if(data.title==undefined){
 				self.title="No title";
 			}else{self.title=data.title;}
 			self.view_url=data.view_url;
 			self.thumb=data.thumb;
-			if (data.fullres && data.fullres.length > 0 ) {
+			if ( data.fullres && data.fullres.length > 0 ) {
 				self.fullres(data.fullres);
 			} else {
 				self.fullres(self.thumb);
@@ -92,7 +89,6 @@ define(['knockout', 'text!./_item.html', 'app','smoke', 'knockout-else'], functi
 			var likeval=app.isLiked(self.externalId);
 			self.isLike(likeval);
 			self.loading(false);
-
 			if (data.fullrestype != null) {
 				if (data.fullrestype == "VIDEO") {
 					self.vtype = "MEDIA";
@@ -136,14 +132,11 @@ define(['knockout', 'text!./_item.html', 'app','smoke', 'knockout-else'], functi
 								 var usage=result.usage;
 										
 								 var rights=null;
-//								 var type = null;
 								 if(media){
 								 if(media[0].Original){
 									 rights=findResOrLit(media[0].Original.originalRights);
-//									 type = media[0].Original.type;
 								 }else if(media[0].Thumbnail){
 									 rights=findResOrLit(media[0].Thumbnail.originalRights);
-//									 type = media[0].Thmbnail.type;
 								 }}
 									
 								 var source=findProvenanceValues(provenance,"source");
@@ -177,7 +170,9 @@ define(['knockout', 'text!./_item.html', 'app','smoke', 'knockout-else'], functi
 											collected: usage.collected,
 											collectedIn:result.collectedIn,
 											data: result,
-											fullrestype: media[0] != null && media[0].Original != null && media[0].Original.type != "null" ? media[0].Original.type : ""
+											fullrestype: media[0] != null && media[0].Original != null 
+											&& media[0].Original.type != "null" ? media[0].Original.type : ""
+
 								  });
 						        if(record.thumb && record.thumb.length>0 && record.externalId!=self.externalId)
 							       items.push(record);
@@ -187,7 +182,6 @@ define(['knockout', 'text!./_item.html', 'app','smoke', 'knockout-else'], functi
 					self.related().push.apply(self.related(),items);
 					self.related.valueHasMutated();}
 					self.loading(false);
-					self.vtype = "IMAGE";
 				},
 				error   : function(request, status, error) {
 					self.loading(false);
@@ -200,7 +194,6 @@ define(['knockout', 'text!./_item.html', 'app','smoke', 'knockout-else'], functi
 				self.similarsearch=true;  
 				
 				self.loading(true);
-				
 	           $.ajax({
 					type    : "post",
 					url     : "/api/advancedsearch",
@@ -262,7 +255,10 @@ define(['knockout', 'text!./_item.html', 'app','smoke', 'knockout-else'], functi
 												collected: usage.collected,
 												collectedIn:result.collectedIn,
 												data: result,
-												fullrestype: media[0] != null && media[0].Original != null && media[0].Original.type != "null" ? media[0].Original.type : ""
+												fullrestype: media[0] != null && media[0].Original != null 
+												&& media[0].Original.type != "null" ? media[0].Original.type : "",
+												vtype : "IMAGE"
+
 									  });
 							        if(record.thumb && record.thumb.length>0 && record.externalId!=self.externalId)
 								       items.push(record);
@@ -272,7 +268,6 @@ define(['knockout', 'text!./_item.html', 'app','smoke', 'knockout-else'], functi
 						self.similar().push.apply(self.similar(),items);
 						self.similar.valueHasMutated();}
 						self.loading(false);
-						self.vtype = "IMAGE"; 
 					},
 					error   : function(request, status, error) {
 						self.loading(false);
@@ -378,12 +373,7 @@ define(['knockout', 'text!./_item.html', 'app','smoke', 'knockout-else'], functi
 		};
 
 		self.close = function () {
-
-			var vid = document.getElementById("mediaplayer"); 
-			if (vid != null) {
-				vid.pause();
-			}
-			
+			//self.record(new Record());
 			$('body').css('overflow','visible');
 			$( '.itemview' ).fadeOut();
 			var vid = document.getElementById("mediaplayer");
@@ -471,7 +461,7 @@ define(['knockout', 'text!./_item.html', 'app','smoke', 'knockout-else'], functi
 					var provenance=result.provenance;
 					var usage=result.usage;
 					 var rights=null;
-					if(media){
+					 if(media){
 					 if(media[0].Original){
 						 rights=findResOrLit(media[0].Original.originalRights);
 					 }else if(media[0].Thumbnail){
@@ -509,12 +499,13 @@ define(['knockout', 'text!./_item.html', 'app','smoke', 'knockout-else'], functi
 									collected: usage.collected,
 									collectedIn:result.collectedIn,
 									data: result,
-									fullrestype: media[0] != null && media[0].Original != null && media[0].Original.type != "null" ? media[0].Original.type : ""
+									fullrestype: media[0] != null && media[0].Original != null
+									&& media[0].Original.type != "null" ? media[0].Original.type : ""
+
 						  });
 					self.record(record);
 					self.open();
 					self.addDisqus();
-					self.vtype = "IMAGE"; 
 				},
 				error: function (xhr, textStatus, errorThrown) {
 					

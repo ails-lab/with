@@ -27,6 +27,7 @@ import java.util.function.BiFunction;
 
 import model.EmbeddedMediaObject;
 import model.EmbeddedMediaObject.MediaVersion;
+import model.EmbeddedMediaObject.WithMediaType;
 import model.MediaObject;
 import model.annotations.ContextData;
 import model.annotations.ContextData.ContextDataBody;
@@ -483,7 +484,9 @@ public class CollectionObjectDAO extends WithResourceDAO<CollectionObject> {
 			HashMap<MediaVersion, EmbeddedMediaObject> media = recordMedia
 					.get(0);
 			if (media.containsKey(MediaVersion.Original)
-					&& !media.containsKey(MediaVersion.Thumbnail)) {
+					&& !media.containsKey(MediaVersion.Thumbnail) 
+					&& media.get(MediaVersion.Original).getType()
+					.equals(WithMediaType.IMAGE)) {
 				String originalUrl = media.get(MediaVersion.Original).getUrl();
 				MediaObject original = MediaController
 						.downloadMedia(originalUrl, MediaVersion.Original);
@@ -516,7 +519,6 @@ public class CollectionObjectDAO extends WithResourceDAO<CollectionObject> {
 
 	public void updateContextData(ContextData contextData, int position)
 			throws Exception {
-
 		ObjectId collectionId = contextData.getTarget().getCollectionId();
 		ObjectId recordId = contextData.getTarget().getRecordId();
 		List<ContextData<ContextDataBody>> collectedResources = this

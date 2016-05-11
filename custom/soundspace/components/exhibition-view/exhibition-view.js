@@ -181,7 +181,7 @@ define(['knockout', 'text!./exhibition-view.html', 'app', 'magnific-popup', 'sli
 									if (backgroundImg.Original.withUrl.indexOf("/media") == 0) {
 										self.backgroundImgWithUrl(window.location.origin + backgroundImg.Original.withUrl);
 									} else {
-										self.backgroundImgWithUrl(self.backgroundImg.Original.withUrl);
+										self.backgroundImgWithUrl(backgroundImg.Original.withUrl);
 									}
 								}
 								self.loading(false);
