@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.List;
 
 import utils.SortedList;
 
@@ -102,5 +103,10 @@ public class CommonFilterLogic implements Cloneable {
 
 	public Collection<ValueCount> values() {
 		return counts.values();
+	}
+	
+	public CommonFilterLogic addTo(List<CommonFilterLogic> list){
+		list.add(this);
+		return this;
 	}
 }

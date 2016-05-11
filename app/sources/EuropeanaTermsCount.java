@@ -27,7 +27,7 @@ import java.util.function.Function;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
-import sources.EuropeanaSpaceSource.EuroQB;
+import sources.EuropeanaSpaceSource.EuropeanaQueryBuilder;
 import sources.core.HttpConnector;
 import sources.core.QueryBuilder;
 import sources.core.SourceResponse;

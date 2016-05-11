@@ -254,13 +254,14 @@ public class FilterValuesMap {
 	}
 
 	private void fillDDB() {
-		addMapping(CommonFilters.TYPE.getId(), WithMediaType.IMAGE, "image","IMAGE");
-		addMapping(CommonFilters.TYPE.getId(), WithMediaType.AUDIO, "Audio","SOUND");
-		addMapping(CommonFilters.TYPE.getId(), WithMediaType.TEXT, "text","TEXT");		
-		addMapping(CommonFilters.TYPE.getId(), WithMediaType.VIDEO, "VIDEO");
+		addMapping(CommonFilters.TYPE.getId(), WithMediaType.IMAGE, "mediatype_002");
+		addMapping(CommonFilters.TYPE.getId(), WithMediaType.AUDIO, "mediatype_001");
+		addMapping(CommonFilters.TYPE.getId(), WithMediaType.TEXT, "mediatype_003", "mediatype_004");		
+		addMapping(CommonFilters.TYPE.getId(), WithMediaType.VIDEO, "mediatype_005");
+		addMapping(CommonFilters.TYPE.getId(), WithMediaType.OTHER, "mediatype_006","mediatype_007","mediatype_008");
 		
 		addMapping(CommonFilters.RIGHTS.getId(), WithMediaRights.Creative, ".*creative.*");
-		addMapping(CommonFilters.RIGHTS.getId(), WithMediaRights.Commercial, ".*creative(?!.*nc).*");
+		addMapping(CommonFilters.RIGHTS.getId(), WithMediaRights.Creative_Not_Commercial, ".*creative(?!.*nc).*");
 		addMapping(CommonFilters.RIGHTS.getId(), WithMediaRights.Modify, ".*creative(?!.*nd).*");
 		addMapping(CommonFilters.RIGHTS.getId(), WithMediaRights.RR, ".*rr-.*",".*rv-fz.*");
 		addMapping(CommonFilters.RIGHTS.getId(), WithMediaRights.UNKNOWN, ".*unknown.*");

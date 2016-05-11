@@ -67,7 +67,7 @@ public class HistorypinSpaceSource extends ISpaceSource {
 	public HistorypinSpaceSource() {
 		super(Sources.Historypin);
 		vmap = FilterValuesMap.getHistorypinMap();
-		
+		addDefaultWriter(CommonFilters.TYPE.getId(), qfwriter("pin"));
 //		addDefaultWriter(CommonFilters.MIME_TYPE.getId(), qfwriter("MIME_TYPE"));
 //		addDefaultWriter(CommonFilters.IMAGE_SIZE.getId(), qfwriter("IMAGE_SIZE"));
 //		addDefaultWriter(CommonFilters.IMAGE_COLOUR.getId(), qfwriter("IMAGE_COLOUR"));
