@@ -594,7 +594,9 @@ public class CollectionObjectController extends WithResourceController {
 				result.put("totalExhibitions", info.y.y);
 			}
 			for (CollectionObject collection : userCollections) {
-				ObjectNode c = (ObjectNode) Json.toJson(collection);
+				CollectionObject profiledCollection = ProfilesController.getCollectionProfile(profile, collection);
+				ProfilesController.filterResourceByLocale(locale, profiledCollection);
+				ObjectNode c = (ObjectNode) Json.toJson(profiledCollection);
 				c.remove("collectedResources");
 				if (effectiveUserIds.isEmpty())
 					c.put("access", Access.READ.toString());
@@ -619,7 +621,7 @@ public class CollectionObjectController extends WithResourceController {
 				result.put("totalExhibitions", info.y.y);
 			}
 			List<ObjectNode> collections = collectionsWithMyAccessData(info.x,
-					effectiveUserIds);
+					effectiveUserIds, profile, locale);
 			for (ObjectNode c : collections) {
 				c.remove("collectedResources");
 				collArray.add(c);
@@ -679,7 +681,7 @@ public class CollectionObjectController extends WithResourceController {
 			}
 
 			List<ObjectNode> collections = collectionsWithMyAccessData(info.x,
-					effectiveUserIds);
+					effectiveUserIds, profile, locale);
 			for (ObjectNode c : collections) {
 				c.remove("collectedResources");
 				collArray.add(c);
@@ -750,24 +752,23 @@ public class CollectionObjectController extends WithResourceController {
 
 	private static List<ObjectNode> collectionsWithMyAccessData(
 			List<CollectionObject> userCollections,
-			List<String> effectiveUserIds) {
+			List<String> effectiveUserIds, String profile, Option<String> locale) {
 		List<ObjectNode> collections = new ArrayList<ObjectNode>(
 				userCollections.size());
-		for (CollectionObject collection : userCollections) {
-			// List<String> titles = collection.getDescriptiveData().getLabel()
-			// .get(Language.DEFAULT);
-			// if ((titles != null) && !titles.get(0).equals("_favorites")) {
+		for (CollectionObject collection : userCollections) {			
 			collections.add(collectionWithMyAccessData(collection,
-					effectiveUserIds));
-			// }
+					effectiveUserIds, profile, locale));			
 		}
 		return collections;
 	}
 
 	private static ObjectNode collectionWithMyAccessData(
-			CollectionObject userCollection, List<String> effectiveUserIds) {
-		ObjectNode c = (ObjectNode) Json.toJson(userCollection);
-		Access maxAccess = AccessManager.getMaxAccess(userCollection
+			CollectionObject userCollection, List<String> effectiveUserIds, 
+			String profile, Option<String> locale) {
+		CollectionObject profiledCollection = ProfilesController.getCollectionProfile(profile, userCollection);
+		ProfilesController.filterResourceByLocale(locale, profiledCollection);
+		ObjectNode c = (ObjectNode) Json.toJson(profiledCollection);
+		Access maxAccess = AccessManager.getMaxAccess(profiledCollection
 				.getAdministrative().getAccess(), effectiveUserIds);
 		if (maxAccess.equals(Access.NONE))
 			maxAccess = Access.READ;
@@ -797,7 +798,8 @@ public class CollectionObjectController extends WithResourceController {
 	// countPerType exhibitions, i.e. (max) 2*countPerType
 	// collectionsOrExhibitions
 	public static Result getFeatured(String userOrGroupName,
-			Option<Boolean> isExhibition, int offset, int countPerType) {
+			Option<Boolean> isExhibition, int offset, int countPerType, 
+			String profile, Option<String> locale) {
 		Page page = null;
 		UserGroup userGroup = DB.getUserGroupDAO().getByName(userOrGroupName);
 		if (userGroup != null) {
@@ -842,7 +844,7 @@ public class CollectionObjectController extends WithResourceController {
 			}
 			ArrayNode collArray = Json.newObject().arrayNode();
 			List<ObjectNode> collections = collectionsWithMyAccessData(
-					collectionsOrExhibitions, effectiveUserIds);
+					collectionsOrExhibitions, effectiveUserIds, profile, locale);
 			for (ObjectNode c : collections)
 				collArray.add(c);
 			result.put("totalCollections", collectionsSize);
@@ -890,7 +892,7 @@ public class CollectionObjectController extends WithResourceController {
 	 * List all Records from a Collection using a start item and a page size
 	 */
 	public static Result listRecordResources(String collectionId,
-			String contentFormat, int start, int count) {
+			String contentFormat, int start, int count, String profile, Option<String> locale) {
 		ObjectNode result = Json.newObject();
 		ObjectId colId = new ObjectId(collectionId);
 		Locks locks = null;
@@ -943,7 +945,9 @@ public class CollectionObjectController extends WithResourceController {
 						recordsList.add(Json.toJson(newContent));
 						continue;
 					}
-					recordsList.add(Json.toJson(r));
+					RecordResource profiledRecord = ProfilesController.getRecordProfile(profile, r);
+					ProfilesController.filterResourceByLocale(locale, profiledRecord);
+					recordsList.add(Json.toJson(profiledRecord));
 				}
 				result.put(
 						"entryCount",

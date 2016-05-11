@@ -26,6 +26,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import play.libs.Json;
+import play.libs.F.Option;
 import play.mvc.Controller;
 import model.EmbeddedMediaObject;
 import model.EmbeddedMediaObject.MediaVersion;
@@ -48,7 +49,10 @@ public class ProfilesController extends Controller {
 	
 	public enum Profile {FULL, BASIC, MEDIUM};
 	
-	public static CollectionObject getCollectionProfile(Profile profile, CollectionObject input) {
+	public static CollectionObject getCollectionProfile(String profileString, CollectionObject input) {
+		Profile profile = Profile.valueOf(profileString);
+		if (profile == null)
+			profile = Profile.BASIC;
 		if (profile.equals(Profile.FULL))
 			return input;
 		else if (profile.equals(Profile.BASIC) || profile.equals(Profile.MEDIUM)) {
@@ -82,7 +86,10 @@ public class ProfilesController extends Controller {
 		//output.setUsage(input.getUsage());
 	}
 	
-	public static RecordResource getRecordProfile(Profile profile, RecordResource input) {
+	public static RecordResource getRecordProfile(String profileString, RecordResource input) {
+		Profile profile = Profile.valueOf(profileString);
+		if (profile == null)
+			profile = Profile.BASIC;
 		if (profile.equals(Profile.FULL))
 			return input;
 		else {
@@ -121,36 +128,34 @@ public class ProfilesController extends Controller {
 		output.setProvenance(input.getProvenance());
 	}
 	
-	public static String getLocale(String lang) {
+	public static String getLocale(Option<String> lang) {
 		String locale = Language.DEFAULT.toString();
-		if (lang == null) {
+		if (!lang.isDefined()) {
 			String sessionLocale = session().get("locale");
 			if (sessionLocale != null)
 				locale = sessionLocale;
 		}
 		else {
-			if (lang.equals("ALL"))
-				locale = lang;
+			if (lang.get().equals("ALL"))
+				locale = lang.get();
 			else {
-				Language language = Language.valueOf(lang);
-				if (language!= null)
+				Language language = Language.valueOf(lang.get());
+				if (language != null)
 					locale = language.toString();
-				else {
-					
-				}
 			}
 		}
 		return locale;
 	}
 	
-	public void filterResourceByLocale(String locale, WithResource resource) {
+	public static void filterResourceByLocale(Option<String> locale, WithResource resource) {
+		String localeString = getLocale(locale);
 		Field[] fields = resource.getClass().getDeclaredFields();
 		for (Field field : fields) {
 	        Class<?> type = field.getType();
 	        try {
 		        if (type.equals(MultiLiteral.class) || type.equals(MultiLiteralOrResource.class) || type.equals(Literal.class) || type.equals(LiteralOrResource.class)) {
 		        	HashMap<String, Object> hm = (HashMap<String, Object>) field.get(resource);
-		        	HashMap<String, Object> filteredHm = filterHashMapByLocale(hm, locale);
+		        	HashMap<String, Object> filteredHm = filterHashMapByLocale(hm, localeString);
 		        	if (!filteredHm.isEmpty())
 		        	field.set(resource, filteredHm);
 		        } 
