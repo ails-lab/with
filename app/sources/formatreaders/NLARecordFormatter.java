@@ -81,7 +81,7 @@ public class NLARecordFormatter extends CulturalRecordFormatter {
 		List<String> rights = rec.getStringArrayValue("rights");
 		String stringValue = rec.getStringValue("type");
 		List<Object> translateToCommon = getValuesMap().translateToCommon(CommonFilters.TYPE.getId(), stringValue);
-		WithMediaType type = WithMediaType.getType(translateToCommon.get(0).toString());
+		WithMediaType type = (Utils.hasInfo(translateToCommon))?WithMediaType.getType(translateToCommon.get(0).toString()):WithMediaType.OTHER;
 		WithMediaRights withRights = (rights==null || rights.size()==0)?null:(WithMediaRights) getValuesMap().translateToCommon(CommonFilters.RIGHTS.getId(), rights.get(0)).get(0);
 		String uri3 = rec.getStringValue("identifier[type=url,linktype=thumbnail].value");
 		String uri2 = model.getIsShownBy()==null?null:model.getIsShownBy().getURI();

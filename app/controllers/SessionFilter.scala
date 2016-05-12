@@ -31,7 +31,6 @@ import db.DB
 import play.api.Logger
 import play.api.mvc.Headers
 import play.api.mvc.Headers
-import play.api.http.{ HeaderNames, HttpVerbs, MimeTypes }
 
 
 
@@ -61,7 +60,7 @@ class SessionFilter extends Filter {
     }
    
     if( ignoreRequest || rh.session.isEmpty  ) {
-      next( rh ).map {result => result.withHeaders(HeaderNames.ACCESS_CONTROL_ALLOW_ORIGIN -> "*")}  
+      next( rh )  
     } else {
       // expire session
     	  val timeout = rh.session.get( "lastAccessTime")
@@ -70,25 +69,25 @@ class SessionFilter extends Filter {
 
         timeout match {
            // no accessTime in the session
-           case None => next(rh).map {result => result.withHeaders(HeaderNames.ACCESS_CONTROL_ALLOW_ORIGIN -> "*")}
+           case None => next(rh)
            
            // timeout, remove user from incoming session
            case Some( true ) => {
         	   val sessionData = rh.session - ("user") + ("lastAccessTime" -> System.currentTimeMillis().toString())
         		 val newRh = FilterUtils.withSession( rh, sessionData.data )
-        		 next(newRh).map {result => result.withHeaders(HeaderNames.ACCESS_CONTROL_ALLOW_ORIGIN -> "*")}
+        		 next(newRh)
            }
            
            // no timeout, update the lastAccessTime in the cookie
            case Some( false ) => {
               next( rh ).map { result => 
                 FilterUtils.outsession(result) match {
-                  case Some( session ) => result.withHeaders(HeaderNames.ACCESS_CONTROL_ALLOW_ORIGIN -> "*").withSession( Session(session) + ("lastAccessTime" -> System.currentTimeMillis().toString()))
-                  case None => result.withHeaders(HeaderNames.ACCESS_CONTROL_ALLOW_ORIGIN -> "*").withSession( rh.session + ("lastAccessTime" -> System.currentTimeMillis().toString()))
+                  case Some( session ) => result.withSession( Session(session) + ("lastAccessTime" -> System.currentTimeMillis().toString()))
+                  case None => result.withSession( rh.session + ("lastAccessTime" -> System.currentTimeMillis().toString()))
                 }
               } 
            }
          }
-     }
+     }  
   }
 }
