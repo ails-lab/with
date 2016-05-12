@@ -78,6 +78,8 @@ public class ProfilesController extends Controller {
 	public static void addCommonCollectionFields(CollectionObject input, CollectionObject output) {
 		output.setAdministrative((CollectionAdmin) input.getAdministrative());
 		output.setDbId(input.getDbId());
+		System.out.println(output.getDescriptiveData());
+		System.out.println(input.getDescriptiveData().getLabel());
 		output.getDescriptiveData().setLabel(input.getDescriptiveData().getLabel());
 		output.getDescriptiveData().setDescription(input.getDescriptiveData().getDescription());
 		output.setProvenance(input.getProvenance());

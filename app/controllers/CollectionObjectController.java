@@ -219,7 +219,7 @@ public class CollectionObjectController extends WithResourceController {
 				return ok(Json.toJson(collectionWithMyAccessData(
 						collection,
 						AccessManager.effectiveUserIds(session().get(
-								"effectiveUserIds")))));
+								"effectiveUserIds")), "BASIC", Option.Some("DEFAULT"))));
 			}
 		});
 		if (resultInfo.has("error"))
@@ -230,7 +230,7 @@ public class CollectionObjectController extends WithResourceController {
 			return Promise.pure(ok(Json.toJson(collectionWithMyAccessData(
 					collection,
 					AccessManager.effectiveUserIds(session().get(
-							"effectiveUserIds"))))));
+							"effectiveUserIds")), "BASIC", Option.Some("DEFAULT")))));
 	}
 
 	private static int addResultToCollection(SourceResponse result,
@@ -363,7 +363,7 @@ public class CollectionObjectController extends WithResourceController {
 			return ok(Json.toJson(collectionWithMyAccessData(
 					collection,
 					AccessManager.effectiveUserIds(session().get(
-							"effectiveUserIds")))));
+							"effectiveUserIds")), "BASIC", Option.Some("DEFAULT"))));
 		} catch (Exception e) {
 			error.put("error", e.getMessage());
 			return internalServerError(error);
@@ -543,11 +543,12 @@ public class CollectionObjectController extends WithResourceController {
 		}
 	}
 	
+
 	public static Result list(Option<MyPlayList> directlyAccessedByUserOrGroup,
-			Option<String> creator, Option<Boolean> isPublic, Option<Boolean> isExhibition,
+			Option<String> creator, Option<Boolean> isExhibition,
 			 Boolean collectionHits, int offset, int count, String profile, Option<String> locale) {
-		return list(directlyAccessedByUserOrGroup, Option.<MyPlayList>None(), creator, isPublic,
-				isExhibition, collectionHits, offset, count, profile, locale);
+		return list(directlyAccessedByUserOrGroup, Option.<MyPlayList>None(), creator,
+				Option.Some(false), isExhibition, collectionHits, offset, count, profile, locale);
 	}
 	
 	public static Result listPublic(Option<MyPlayList> directlyAccessedByUserOrGroup,
