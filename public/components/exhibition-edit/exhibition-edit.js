@@ -646,22 +646,20 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 						ui.helper.css({
 							"z-index": 500
 						});
-						/*
-						//if (!_bIsMoveOperation) {
-							if (ui.helper.width() > 80) {
-								//var newAspectHeight = 80 / ui.helper.width() * ui.helper.height();
+						if (_bIsMoveOperation) {
+							if (ui.helper.width() > 100) {
+								var newAspectHeight = 100 / ui.helper.width() * ui.helper.height();
 								ui.helper.css({
-									"width": 80
+									"width": 100
 								});
 								ui.helper.css({
-									"height": 80//newAspectHeight
+									"height": newAspectHeight
 								});
 								ui.helper.css({
 									opacity: 0.8
 								});
 							}
-						//}
-						*/
+						}
 					},
 					stop: function (event, ui) {
 						$("#collscroll").css({
