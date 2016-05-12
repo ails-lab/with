@@ -49,7 +49,7 @@ class AllowAccessHeaderFilter extends Filter {
 
   private val HttpMethods = {
     import HttpVerbs._
-    immutable.HashSet(GET, POST, PUT, PATCH, DELETE, HEAD, OPTIONS)
+    immutable.HashSet(GET, POST, PUT, PATCH, DELETE, HEAD)
   }
 
   def apply(next: (RequestHeader) => Future[Result])(rh: RequestHeader) = {
