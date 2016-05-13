@@ -65,6 +65,7 @@ public class ProfilesController extends Controller {
 				Exhibition output = new Exhibition();
 				addCommonCollectionFields(input, output);
 				ExhibitionDescriptiveData edd = (ExhibitionDescriptiveData) input.getDescriptiveData();
+				edd.getBackgroundImg().remove(MediaVersion.Original);
 				output.getDescriptiveData().setBackgroundImg(edd.getBackgroundImg());
 				output.getDescriptiveData().setCredits(edd.getCredits());
 				output.getDescriptiveData().setIntro(edd.getIntro());
@@ -78,12 +79,11 @@ public class ProfilesController extends Controller {
 	public static void addCommonCollectionFields(CollectionObject input, CollectionObject output) {
 		output.setAdministrative((CollectionAdmin) input.getAdministrative());
 		output.setDbId(input.getDbId());
-		System.out.println(output.getDescriptiveData());
-		System.out.println(input.getDescriptiveData().getLabel());
 		output.getDescriptiveData().setLabel(input.getDescriptiveData().getLabel());
 		output.getDescriptiveData().setDescription(input.getDescriptiveData().getDescription());
 		output.setProvenance(input.getProvenance());
-		output.setMedia(input.getMedia());
+		if (input.getMedia().size() > 3)
+			output.setMedia(input.getMedia().subList(0, 2));
 		output.setResourceType(input.getResourceType());
 		//output.setUsage(input.getUsage());
 	}
