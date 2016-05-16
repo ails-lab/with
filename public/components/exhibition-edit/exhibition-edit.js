@@ -515,7 +515,6 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 			jsonData = {
 				"contextDataType": "ExhibitionData",
 				"target": {
-					"collectionId": colId,
 					"recordId": dbId,
 					"position": position
 				},
@@ -527,7 +526,7 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 			};
 			jsonData = JSON.stringify(jsonData);
 			return $.ajax({
-				"url": "/record/contextData	",
+				"url": "/record/contextData?collectionId="+colId,
 				"method": "put",
 				"contentType": "application/json",
 				"data": jsonData,
