@@ -32,7 +32,6 @@
 package filters
 
 import scala.concurrent.Future
-
 import play.api.Logger
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import play.api.mvc.Filter
@@ -53,7 +52,7 @@ class AllowAccessHeaderFilter extends Filter {
   }
 
   def apply(next: (RequestHeader) => Future[Result])(rh: RequestHeader) = {
-    next(rh).map { result => result.withHeaders(HeaderNames.ACCESS_CONTROL_ALLOW_ORIGIN -> "*").withHeaders(HeaderNames.ACCESS_CONTROL_ALLOW_METHODS -> HttpMethods.mkString(", ")).withHeaders(HeaderNames.ACCESS_CONTROL_ALLOW_HEADERS -> "content-type") }
+    next(rh).map { result => result.withHeaders(HeaderNames.ACCESS_CONTROL_ALLOW_ORIGIN -> "*", HeaderNames.ACCESS_CONTROL_ALLOW_METHODS -> HttpMethods.mkString(", "), HeaderNames.ACCESS_CONTROL_ALLOW_HEADERS -> "content-type", HeaderNames.ACCESS_CONTROL_ALLOW_CREDENTIALS -> "true") }
   }
 
 }
