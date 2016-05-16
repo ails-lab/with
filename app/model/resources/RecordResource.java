@@ -24,6 +24,7 @@ import org.bson.types.ObjectId;
 
 import model.DescriptiveData;
 import model.annotations.ContextData;
+import model.resources.CulturalObject.CulturalObjectData;
 
 
 public class RecordResource<T extends RecordResource.RecordDescriptiveData>
@@ -32,6 +33,7 @@ public class RecordResource<T extends RecordResource.RecordDescriptiveData>
 	public RecordResource() {
 		super();
 		this.administrative = new RecordAdmin();
+		this.descriptiveData = (T) new RecordDescriptiveData();
 	}
 
 	public RecordResource(ObjectId id) {

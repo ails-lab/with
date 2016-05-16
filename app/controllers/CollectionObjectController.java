@@ -928,7 +928,9 @@ public class CollectionObjectController extends WithResourceController {
 					if (contentFormat.equals("noContent")
 							&& r.getContent() != null) {
 						r.getContent().clear();
-						recordsList.add(Json.toJson(r));
+						RecordResource profiledRecord = ProfilesController.getRecordProfile(profile, r);
+						ProfilesController.filterResourceByLocale(locale, profiledRecord);
+						recordsList.add(Json.toJson(profiledRecord));
 						fillContextData(
 								DB.getCollectionObjectDAO()
 										.getById(
