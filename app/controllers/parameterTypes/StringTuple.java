@@ -24,11 +24,14 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import play.Logger;
+import play.Logger.ALogger;
 import play.libs.F.Option;
-import play.mvc.PathBindable;
 import play.mvc.QueryStringBindable;
 
 public class StringTuple implements QueryStringBindable<StringTuple>{
+	public static final ALogger log = Logger.of(StringTuple.class);
+
 	public String x = null; 
 	public String y = null; 
 
@@ -56,10 +59,10 @@ public class StringTuple implements QueryStringBindable<StringTuple>{
 		        	return Option.None();
 			} catch (JsonProcessingException e) {
 				// TODO Auto-generated catch block
-				e.printStackTrace();
+				log.error("",e);
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
-				e.printStackTrace();
+				log.error("",e);
 			}
 	    }
 	    return Option.None();

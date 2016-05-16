@@ -30,17 +30,21 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+import play.Logger;
+import play.Logger.ALogger;
 import play.libs.F.Promise;
 import play.mvc.BodyParser;
 import play.mvc.Controller;
 import play.mvc.Result;
 import sources.core.AutocompleteResponse;
+import sources.core.AutocompleteResponse.Suggestion;
 import sources.core.ESpaceSources;
 import sources.core.ISpaceSource;
 import sources.core.ParallelAPICall;
-import sources.core.AutocompleteResponse.Suggestion;
 
 public class AutocompleteController extends Controller {
+
+	public static final ALogger log = Logger.of(AutocompleteController.class);
 
 	public static Promise<Result> autocompleteExt(String term, Integer limit, List<String> sourceFromUI) {
 		List<ISpaceSource> sourcesForAutocomplete = new ArrayList<ISpaceSource>();
@@ -82,7 +86,7 @@ public class AutocompleteController extends Controller {
 			        AutocompleteResponse standardResponse = src.autocompleteResponse(response.toString());;
 			        return standardResponse;
 				} catch (IOException e) {
-					e.printStackTrace();
+					log.error( "Autocomplete problem.", e );
 					return new AutocompleteResponse();
 				}
 		};

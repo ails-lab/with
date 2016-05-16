@@ -16,15 +16,16 @@
 
 package sources.core;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Comparator;
 import java.util.HashMap;
 
+import play.Logger;
+import play.Logger.ALogger;
 import utils.SortedList;
 
 public class CommonFilterLogic implements Cloneable {
-
+	public static final ALogger log = Logger.of( CommonFilterLogic.class);
+	
 	private HashMap<String, ValueCount> counts = new HashMap<String, ValueCount>();
 
 	public CommonFilterResponse data = new CommonFilterResponse();
@@ -54,7 +55,6 @@ public class CommonFilterLogic implements Cloneable {
 	
 	public void addValue(String value, int count) {
 		if (value != null) {
-			// System.out.println(filterName + " Added " + value);
 			getOrSet(value).add(count);
 		}
 	}

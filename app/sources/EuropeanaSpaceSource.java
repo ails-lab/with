@@ -32,6 +32,7 @@ import model.resources.CulturalObject;
 import model.resources.RecordResource;
 import model.resources.WithResource;
 import play.Logger;
+import play.Logger.ALogger;
 import play.libs.Json;
 import sources.core.AdditionalQueryModifier;
 import sources.core.AutocompleteResponse;
@@ -41,7 +42,6 @@ import sources.core.CommonFilterLogic;
 import sources.core.CommonFilters;
 import sources.core.CommonQuery;
 import sources.core.FacetsModes;
-import sources.core.HttpConnector;
 import sources.core.ISpaceSource;
 import sources.core.QueryBuilder;
 import sources.core.QueryModifier;
@@ -56,6 +56,8 @@ import sources.utils.FunctionsUtils;
 import utils.ListUtils;
 
 public class EuropeanaSpaceSource extends ISpaceSource {
+	
+	public static final ALogger log = Logger.of( EuropeanaSpaceSource.class);
 	
 	private boolean usingCursor = false;
 	private String nextCursor;
@@ -381,7 +383,7 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 				}
 			}
 		} catch (Exception e) {
-			e.printStackTrace();
+			log.error("",e);
 		}
 
 		return items;
@@ -411,7 +413,7 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
-				e.printStackTrace();
+				log.error( "", e );
 			}
 		}
 		return res;
@@ -444,7 +446,7 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 				return ar;
 			}
 		} catch (JSONException e) {
-			e.printStackTrace();
+			log.error("", e);
 			return new AutocompleteResponse();
 		}
 	}
