@@ -16,16 +16,12 @@
 
 package model.annotations;
 
-import model.basicDataTypes.WithAccess;
-
 import org.bson.types.ObjectId;
 
-import utils.Deserializer;
 import utils.Serializer;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -42,20 +38,7 @@ public class ContextData<T1 extends ContextData.ContextDataBody> {
 
 	public static class ContextDataTarget {
 		@JsonSerialize(using = Serializer.ObjectIdSerializer.class)
-		ObjectId collectionId;
-		@JsonSerialize(using = Serializer.ObjectIdSerializer.class)
 		ObjectId recordId;
-		@JsonSerialize(using = Serializer.WithAccessSerializer.class)
-		@JsonDeserialize(using = Deserializer.WithAccessDeserializer.class)
-		WithAccess access;
-
-		public ObjectId getCollectionId() {
-			return collectionId;
-		}
-
-		public void setCollectionId(ObjectId collectionId) {
-			this.collectionId = collectionId;
-		}
 
 		public ObjectId getRecordId() {
 			return recordId;
@@ -63,14 +46,6 @@ public class ContextData<T1 extends ContextData.ContextDataBody> {
 
 		public void setRecordId(ObjectId recordId) {
 			this.recordId = recordId;
-		}
-
-		public WithAccess getAccess() {
-			return access;
-		}
-
-		public void setAccess(WithAccess access) {
-			this.access = access;
 		}
 	}
 
