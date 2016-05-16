@@ -17,6 +17,8 @@
 package controllers;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -28,6 +30,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import play.libs.Json;
 import play.libs.F.Option;
 import play.mvc.Controller;
+import model.DescriptiveData;
 import model.EmbeddedMediaObject;
 import model.EmbeddedMediaObject.MediaVersion;
 import model.basicDataTypes.Language;
@@ -164,53 +167,63 @@ public class ProfilesController extends Controller {
 	
 	public static void filterResourceByLocale(Option<String> locale, WithResource resource) {
 		String localeString = getLocale(locale);
-		Field[] fields = getLiteralFields(Arrays.asList(getOneLevelInclParentFields(resource.getClass())), 0);
-		for (Field field : fields) {
-	        //Class<?> type = field.getType();
+		//assume only descriptiveData has literal type of fields
+		DescriptiveData descriptiveData = resource.getDescriptiveData();
+		List<Field> directFields = new ArrayList<Field>();
+		getOneLevelInclParentFields(descriptiveData.getClass(), directFields);
+		List<Field> literalFields = new ArrayList<Field>();
+		getLiteralFields(directFields, literalFields);
+		for (Field field : literalFields) {
 	        try {
-		        //if (type.equals(MultiLiteral.class) || type.equals(MultiLiteralOrResource.class) || type.equals(Literal.class) || type.equals(LiteralOrResource.class)) {
-		        	HashMap<String, Object> hm = (HashMap<String, Object>) field.get(resource);
-		        	HashMap<String, Object> filteredHm = filterHashMapByLocale(hm, localeString);
-		        	if (!filteredHm.isEmpty())
-		        		field.set(resource, filteredHm);
-		        //} 
-	        } catch (IllegalArgumentException e) {
-			} catch (IllegalAccessException e) {
+	        	/*field.setAccessible(true);
+	        	Object value = field.get(descriptiveData);*/
+	        	String methodName = "get" + field.getName().substring(0, 1).toUpperCase() + field.getName().substring(1);
+	        	Method method = descriptiveData.getClass().getMethod(methodName);
+	        	Object value = method.invoke(descriptiveData);
+	        	System.out.println(field.getName() + " = " + value);
+	        	if (value != null) {
+		        	HashMap<String, Object> hm = (HashMap<String, Object>) value;
+		        	if (!hm.isEmpty()) {
+		        		System.out.println(localeString);
+			        	HashMap<String, Object> filteredHm = filterHashMapByLocale(hm, localeString.toLowerCase());
+			        	if (!filteredHm.isEmpty()) {
+				        	methodName = "s" + methodName.substring(1);
+				        	method = descriptiveData.getClass().getMethod(methodName, value.getClass());
+				        	method.invoke(descriptiveData, (value.getClass().cast(filteredHm)));
+			        		//field.set(descriptiveData, filteredHm);
+			        	}
+		        	}
+	        	}
+	        } catch (IllegalArgumentException | IllegalAccessException | NoSuchMethodException | SecurityException e) {
+	        	e.printStackTrace();
+			} catch (InvocationTargetException e) {
+				e.printStackTrace();
 			}	
 	    }
 	}
 	
-	private static Field[] getOneLevelInclParentFields(Class clazz) {
-		List<Field> fields = new ArrayList<Field>();
+	private static void getOneLevelInclParentFields(Class clazz, List<Field> fields) {
         fields.addAll(Arrays.asList(clazz.getDeclaredFields()));
-        if (clazz.getSuperclass() != null && clazz.getSimpleName() != "model.resources.WithResource") {
-            fields.addAll(Arrays.asList(getOneLevelInclParentFields(clazz.getSuperclass())));
+        if (clazz.getSuperclass() != null && !clazz.getSimpleName().equals("model.resources.WithResource")) {
+            getOneLevelInclParentFields(clazz.getSuperclass(), fields);
         }
-        return fields.toArray(new Field[] {});
-        
 	}
 	
-	private static Field[] getLiteralFields(List<Field> fields, int count) {
-		count ++;
-		if (count < 10) {
-        for (Field cf: fields) {
+	private static void getLiteralFields(List<Field> allFields, List<Field> literalFields) {
+        for (Field cf: allFields) {
         	Class<?> type = cf.getType();
             if (!type.isEnum()) {
-        	System.out.println(cf.getName() + ": " + type);
-	        if (type.equals(MultiLiteral.class) || type.equals(MultiLiteralOrResource.class) || type.equals(Literal.class) || type.equals(LiteralOrResource.class)) {
-	        	System.out.println("!!!!! " + cf.getName() + ": " + type);
-	        	fields.add(cf);
+		        if (type.equals(MultiLiteral.class) || type.equals(MultiLiteralOrResource.class) || type.equals(Literal.class) || type.equals(LiteralOrResource.class)) {
+		        	literalFields.add(cf);
+		        }
+		        else
+		        	getLiteralFields(Arrays.asList(type.getDeclaredFields()), literalFields);
 	        }
-	        else
-	        	getLiteralFields(Arrays.asList(type.getDeclaredFields()), count);
-            }
 		}
-		}
-        return fields.toArray(new Field[] {});
     }
 	
 	private static HashMap<String, Object> filterHashMapByLocale(HashMap<String, Object> hm, String locale) {
-    	HashMap<String, Object> filteredHm = new HashMap<String, Object>(1);
+    	HashMap<String, Object> filteredHm = new HashMap<String, Object>();
     	if (hm.containsKey(locale)) 
         	filteredHm.put(locale, hm.get(locale));
     	if (hm.containsKey("URI"))
