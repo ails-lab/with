@@ -565,6 +565,8 @@ public class CollectionObjectController extends WithResourceController {
 			User creatorUser = DB.getUserDAO().getByUsername(creator.get());
 			if (creatorUser != null)
 				creatorId = creatorUser.getDbId();
+			else 
+				return badRequest("User with username " + creator.get() + " does not exist.");
 		}
 		if (effectiveUserIds.isEmpty()
 				|| (isPublic.isDefined() && (isPublic.get() == true))) {
