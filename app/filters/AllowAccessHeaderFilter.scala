@@ -38,18 +38,22 @@ import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import play.api.mvc.Filter
 import play.api.mvc.RequestHeader
 import play.api.mvc.Result
-import play.mvc.Http.HeaderNames
-
-
+import scala.collection.immutable
+import play.api.http.{ HeaderNames, HttpVerbs, MimeTypes }
 
 /**
  * Add the CORS Header to be able to use API results from other webapps
  */
 class AllowAccessHeaderFilter extends Filter {
   val log = Logger(this.getClass())
-  
-  def apply(next: (RequestHeader) => Future[Result])(rh: RequestHeader) = {
-    next( rh ).map {result => result.withHeaders(HeaderNames.ACCESS_CONTROL_ALLOW_ORIGIN -> "*")}
+
+  private val HttpMethods = {
+    import HttpVerbs._
+    immutable.HashSet(GET, POST, PUT, PATCH, DELETE, HEAD)
   }
-  
+
+  def apply(next: (RequestHeader) => Future[Result])(rh: RequestHeader) = {
+    next(rh).map { result => result.withHeaders(HeaderNames.ACCESS_CONTROL_ALLOW_ORIGIN -> "*").withHeaders(HeaderNames.ACCESS_CONTROL_ALLOW_METHODS -> HttpMethods.mkString(", ")).withHeaders(HeaderNames.ACCESS_CONTROL_ALLOW_HEADERS -> "content-type") }
+  }
+
 }

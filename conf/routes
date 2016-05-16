@@ -4,6 +4,7 @@
 
 # Home page
 #GET     /                          controllers.Application.index()
+OPTIONS	 /*path									   controllers.PreFlight.checkPreFlight(path)
 GET      /                                         controllers.Default.redirect(to="assets/index.html")
 
 GET      /notifications/socket                     controllers.NotificationController.socket()
