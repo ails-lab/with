@@ -65,7 +65,8 @@ public class ProfilesController extends Controller {
 				Exhibition output = new Exhibition();
 				addCommonCollectionFields(input, output);
 				ExhibitionDescriptiveData edd = (ExhibitionDescriptiveData) input.getDescriptiveData();
-				edd.getBackgroundImg().remove(MediaVersion.Original);
+				if (edd.getBackgroundImg() != null && edd.getBackgroundImg().containsKey(MediaVersion.Original))
+					edd.getBackgroundImg().remove(MediaVersion.Original);
 				output.getDescriptiveData().setBackgroundImg(edd.getBackgroundImg());
 				output.getDescriptiveData().setCredits(edd.getCredits());
 				output.getDescriptiveData().setIntro(edd.getIntro());
@@ -95,28 +96,40 @@ public class ProfilesController extends Controller {
 		if (profile.equals(Profile.FULL))
 			return input;
 		else {
-			RecordResource output = new RecordResource();
-			if (profile.equals(Profile.BASIC)) { //for thumbnails view
-			//if (input.getResourceType().equals(WithResourceType.CulturalObject)) {
-				addBasicRecordFields(input, output);
-				EmbeddedMediaObject thumbnail = ((HashMap<MediaVersion, EmbeddedMediaObject>) input.getMedia().get(0)).get(MediaVersion.Thumbnail);
-				HashMap<MediaVersion, EmbeddedMediaObject> media = new HashMap<MediaVersion, EmbeddedMediaObject>(1);
-				media.put(MediaVersion.Thumbnail, thumbnail);
-				output.setMedia(new ArrayList<>(Arrays.asList(media)));
-				return output;
-			//}
+			WithResourceType recordType = input.getResourceType();
+			try {
+				Class<?> clazz = Class.forName("model.resources." + recordType.toString());
+				RecordResource output;
+				output = (RecordResource) clazz.newInstance();
+				if (profile.equals(Profile.BASIC)) { //for thumbnails view
+				//if (input.getResourceType().equals(WithResourceType.CulturalObject)) {
+					addBasicRecordFields(input, output);
+					HashMap<MediaVersion, EmbeddedMediaObject> media = new HashMap<MediaVersion, EmbeddedMediaObject>(1);
+					if (input.getMedia() != null && input.getMedia().size() > 0) {
+						EmbeddedMediaObject thumbnail = ((HashMap<MediaVersion, EmbeddedMediaObject>) input.getMedia().get(0)).get(MediaVersion.Thumbnail);
+						if (thumbnail != null) {
+							media.put(MediaVersion.Thumbnail, thumbnail);
+						}
+					}
+					output.setMedia(new ArrayList<>(Arrays.asList(media)));
+					return output;
+				//}
+				}
+				else if (profile.equals(Profile.MEDIUM)) {
+					addBasicRecordFields(input, output);
+					EmbeddedMediaObject thumbnail = ((HashMap<MediaVersion, EmbeddedMediaObject>) input.getMedia().get(0)).get(MediaVersion.Thumbnail);
+					EmbeddedMediaObject original = ((HashMap<MediaVersion, EmbeddedMediaObject>) input.getMedia().get(0)).get(MediaVersion.Original);
+					HashMap<MediaVersion, EmbeddedMediaObject> media = new HashMap<MediaVersion, EmbeddedMediaObject>(2);
+					media.put(MediaVersion.Thumbnail, thumbnail);
+					media.put(MediaVersion.Original, original);
+					output.setMedia(new ArrayList<>(Arrays.asList(media)));
+					return output;
+				}
+				else return input;
+			} catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
+				e.printStackTrace();
+				return null;
 			}
-			else if (profile.equals(Profile.MEDIUM)) {
-				addBasicRecordFields(input, output);
-				EmbeddedMediaObject thumbnail = ((HashMap<MediaVersion, EmbeddedMediaObject>) input.getMedia().get(0)).get(MediaVersion.Thumbnail);
-				EmbeddedMediaObject original = ((HashMap<MediaVersion, EmbeddedMediaObject>) input.getMedia().get(0)).get(MediaVersion.Original);
-				HashMap<MediaVersion, EmbeddedMediaObject> media = new HashMap<MediaVersion, EmbeddedMediaObject>(2);
-				media.put(MediaVersion.Thumbnail, thumbnail);
-				media.put(MediaVersion.Original, original);
-				output.setMedia(new ArrayList<>(Arrays.asList(media)));
-				return output;
-			}
-			else return input;
 		}
 	}
 	
@@ -151,29 +164,58 @@ public class ProfilesController extends Controller {
 	
 	public static void filterResourceByLocale(Option<String> locale, WithResource resource) {
 		String localeString = getLocale(locale);
-		Field[] fields = resource.getClass().getDeclaredFields();
+		Field[] fields = getLiteralFields(Arrays.asList(getOneLevelInclParentFields(resource.getClass())), 0);
 		for (Field field : fields) {
-	        Class<?> type = field.getType();
+	        //Class<?> type = field.getType();
 	        try {
-		        if (type.equals(MultiLiteral.class) || type.equals(MultiLiteralOrResource.class) || type.equals(Literal.class) || type.equals(LiteralOrResource.class)) {
+		        //if (type.equals(MultiLiteral.class) || type.equals(MultiLiteralOrResource.class) || type.equals(Literal.class) || type.equals(LiteralOrResource.class)) {
 		        	HashMap<String, Object> hm = (HashMap<String, Object>) field.get(resource);
 		        	HashMap<String, Object> filteredHm = filterHashMapByLocale(hm, localeString);
 		        	if (!filteredHm.isEmpty())
-		        	field.set(resource, filteredHm);
-		        } 
+		        		field.set(resource, filteredHm);
+		        //} 
 	        } catch (IllegalArgumentException e) {
 			} catch (IllegalAccessException e) {
 			}	
 	    }
 	}
 	
+	private static Field[] getOneLevelInclParentFields(Class clazz) {
+		List<Field> fields = new ArrayList<Field>();
+        fields.addAll(Arrays.asList(clazz.getDeclaredFields()));
+        if (clazz.getSuperclass() != null && clazz.getSimpleName() != "model.resources.WithResource") {
+            fields.addAll(Arrays.asList(getOneLevelInclParentFields(clazz.getSuperclass())));
+        }
+        return fields.toArray(new Field[] {});
+        
+	}
+	
+	private static Field[] getLiteralFields(List<Field> fields, int count) {
+		count ++;
+		if (count < 10) {
+        for (Field cf: fields) {
+        	Class<?> type = cf.getType();
+            if (!type.isEnum()) {
+        	System.out.println(cf.getName() + ": " + type);
+	        if (type.equals(MultiLiteral.class) || type.equals(MultiLiteralOrResource.class) || type.equals(Literal.class) || type.equals(LiteralOrResource.class)) {
+	        	System.out.println("!!!!! " + cf.getName() + ": " + type);
+	        	fields.add(cf);
+	        }
+	        else
+	        	getLiteralFields(Arrays.asList(type.getDeclaredFields()), count);
+            }
+		}
+		}
+        return fields.toArray(new Field[] {});
+    }
+	
 	private static HashMap<String, Object> filterHashMapByLocale(HashMap<String, Object> hm, String locale) {
     	HashMap<String, Object> filteredHm = new HashMap<String, Object>(1);
     	if (hm.containsKey(locale)) 
         	filteredHm.put(locale, hm.get(locale));
     	if (hm.containsKey("URI"))
-    		hm.put("URI", hm.get("URI"));
-    	return hm;
+    		filteredHm.put("URI", hm.get("URI"));
+    	return filteredHm;
 	}
 	
 	
