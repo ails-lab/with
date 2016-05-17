@@ -501,7 +501,6 @@ public class WithResourceController extends Controller {
 								}
 							} else {
 								target = new ContextDataTarget();
-								target.setCollectionId(colId);
 								// target.setPosition(position);
 							}
 							if (c.has("body")) {

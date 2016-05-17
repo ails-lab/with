@@ -285,11 +285,9 @@ public class UserManager extends Controller {
 	 * @return OK status and the cookie or JSON error
 	 */
 	public static Result login() {
-
 		JsonNode json = request().body().asJson();
 		ObjectNode result = Json.newObject();
 		ObjectNode error = Json.newObject();
-
 		User u = null;
 		if (json.has("facebookId")) {
 			String facebookId = json.get("facebookId").asText();
@@ -302,8 +300,14 @@ public class UserManager extends Controller {
 						Long.toString(System.currentTimeMillis()));
 				return ok(Json.toJson(u));
 			} else {
-				String accessToken = json.get("accessToken").asText();
-				return facebookLogin(facebookId, accessToken);
+				if (!json.has("accessToken")) {
+					result.put("error", "facebookId is not valid.");
+					return badRequest(result);
+				}
+				else {
+					String accessToken = json.get("accessToken").asText();
+					return facebookLogin(facebookId, accessToken);
+				}
 			}
 		}
 		if (json.has("googleId")) {

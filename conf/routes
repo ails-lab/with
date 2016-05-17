@@ -4,6 +4,7 @@
 
 # Home page
 #GET     /                          controllers.Application.index()
+OPTIONS	 /*path									   controllers.PreFlight.checkPreFlight(path)
 GET      /                                         controllers.Default.redirect(to="assets/index.html")
 
 GET      /notifications/socket                     controllers.NotificationController.socket()
@@ -30,7 +31,7 @@ GET 	/custom/:customName					    controllers.CustomAssets.redirect(customName)
 GET 	/custom/:customName/					controllers.CustomAssets.redirect(customName)
 GET 	/custom/:customName/*file				controllers.CustomAssets.getFile(customName:String, file:String)
 
-PUT		/record/contextData			            controllers.RecordResourceController.editContextData()
+PUT		/record/contextData			            controllers.RecordResourceController.editContextData(collectionId)
 GET		/record/:id							    controllers.RecordResourceController.getRecordResource(id, format: play.libs.F.Option[String], profile: String ?="MEDIUM", locale: play.libs.F.Option[java.lang.String])
 PUT		/record/:id								controllers.RecordResourceController.editRecordResource(id)
 

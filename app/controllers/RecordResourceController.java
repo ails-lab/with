@@ -157,7 +157,7 @@ public class RecordResourceController extends WithResourceController {
 		}
 	}
 
-	public static Result editContextData() throws Exception {
+	public static Result editContextData(String collectionId) throws Exception {
 		ObjectNode error = Json.newObject();
 		ObjectNode json = (ObjectNode) request().body().asJson();
 		if (json == null) {
@@ -178,22 +178,21 @@ public class RecordResourceController extends WithResourceController {
 									+ contextDataType);
 							ContextData newContextData = (ContextData) Json
 									.fromJson(json, clazz);
-							ObjectId collectionId = newContextData.getTarget()
-									.getCollectionId();
+							ObjectId collectionDbId = new ObjectId(collectionId);
 							// int position =
 							// newContextData.getTarget().getPosition();
 							if (collectionId != null
 									&& DB.getCollectionObjectDAO()
-											.existsEntity(collectionId)) {
+											.existsEntity(collectionDbId)) {
 								// filterContextData(record);
 								Result response = errorIfNoAccessToCollection(
-										Action.EDIT, collectionId);
+										Action.EDIT, collectionDbId);
 								if (!response.toString()
 										.equals(ok().toString()))
 									return response;
 								else {
 									DB.getCollectionObjectDAO()
-											.updateContextData(newContextData,
+											.updateContextData(collectionDbId, newContextData,
 													position);
 
 								}
