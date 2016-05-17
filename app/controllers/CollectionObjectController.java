@@ -422,7 +422,7 @@ public class CollectionObjectController extends WithResourceController {
 	 *            the resource id
 	 * @return the resource metadata
 	 */
-	public static Result getCollectionObject(String id) {
+	public static Result getCollectionObject(String id, String profile, Option<String> locale) {
 		ObjectNode result = Json.newObject();
 		try {
 			ObjectId collectionDbId = new ObjectId(id);
@@ -433,7 +433,9 @@ public class CollectionObjectController extends WithResourceController {
 			else {
 				CollectionObject collection = DB.getCollectionObjectDAO().get(
 						new ObjectId(id));
-				return ok(Json.toJson(collection));
+				CollectionObject profiledCollection = ProfilesController.getCollectionProfile(profile, collection);
+				ProfilesController.filterResourceByLocale(locale, profiledCollection);
+				return ok(Json.toJson(profiledCollection));
 			}
 		} catch (Exception e) {
 			result.put("error", e.getMessage());
@@ -862,7 +864,7 @@ public class CollectionObjectController extends WithResourceController {
 	/**
 	 * @return
 	 */
-	public static Result getFavoriteCollection() {
+	public static Result getFavoriteCollection(String profile, Option<String> locale) {
 		if (session().get("user") == null) {
 			return forbidden();
 		}
@@ -875,7 +877,7 @@ public class CollectionObjectController extends WithResourceController {
 		} else {
 			favoritesId = favorite.getDbId();
 		}
-		return getCollectionObject(favoritesId.toString());
+		return getCollectionObject(favoritesId.toString(), profile, locale);
 
 	}
 

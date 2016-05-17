@@ -31,7 +31,7 @@ GET 	/custom/:customName/					controllers.CustomAssets.redirect(customName)
 GET 	/custom/:customName/*file				controllers.CustomAssets.getFile(customName:String, file:String)
 
 PUT		/record/contextData			            controllers.RecordResourceController.editContextData()
-GET		/record/:id							    controllers.RecordResourceController.getRecordResource(id, format: play.libs.F.Option[String])
+GET		/record/:id							    controllers.RecordResourceController.getRecordResource(id, format: play.libs.F.Option[String], profile: String ?="MEDIUM", locale: play.libs.F.Option[java.lang.String])
 PUT		/record/:id								controllers.RecordResourceController.editRecordResource(id)
 
 # Collection Controller
@@ -49,8 +49,8 @@ GET 	 /collection/countMyAndShared			controllers.CollectionObjectController.coun
 GET 	 /collection/featured					controllers.CollectionObjectController.getFeatured(groupOrUserName: String, isExhibition: play.libs.F.Option[java.lang.Boolean], offset: Integer ?=0, countPerType: Integer ?=10, profile: String ?="BASIC", locale: play.libs.F.Option[java.lang.String])
 GET		 /collection/favorites					controllers.RecordResourceController.getFavorites()
 GET      /collection/:id/listUsers				controllers.CollectionObjectController.listUsersWithRights(id)
-GET      /collection/:id/list		   	        controllers.CollectionObjectController.listRecordResources(id, format: String ?="noContent", start: Integer ?=0, count: Integer ?=10,  profile: String ?="BASIC", locale: play.libs.F.Option[java.lang.String])
-GET		 /collection/favoriteCollection			controllers.CollectionObjectController.getFavoriteCollection()
+GET      /collection/:id/list		   	        controllers.CollectionObjectController.listRecordResources(id, format: String ?="noContent", start: Integer ?=0, count: Integer ?=10,  profile: String ?="MEDIUM", locale: play.libs.F.Option[java.lang.String])
+GET		 /collection/favoriteCollection			controllers.CollectionObjectController.getFavoriteCollection(profile: String ?="BASIC", locale: play.libs.F.Option[java.lang.String])
 PUT		 /collection/sort/:id					controllers.CollectionObjectController.sortCollectionObject(id)
 
 POST     /collection/liked			            controllers.WithResourceController.addToFavorites()
@@ -67,7 +67,7 @@ POST     /collection/importIDs 					controllers.CollectionObjectController.impor
 GET     /collection/importEuropeanaCollection	controllers.CollectionObjectController.createAndFillEuropeanaCollection(id: String, limit:Integer ?=-1)
 GET      /collection/exportToOWL 			    controllers.CollectionObjectController.exportCollectionObjectToOWL(cname)
 
-GET	     /collection/:id 	        			controllers.CollectionObjectController.getCollectionObject(id)
+GET	     /collection/:id 	        			controllers.CollectionObjectController.getCollectionObject(id, profile: String ?="MEDIUM", locale: play.libs.F.Option[java.lang.String])
 PUT		 /collection/:id 						controllers.CollectionObjectController.editCollectionObject(id)
 DELETE   /collection/:id	                    controllers.CollectionObjectController.deleteCollectionObject(id)
 

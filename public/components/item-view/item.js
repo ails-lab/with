@@ -452,6 +452,7 @@ define(['knockout', 'text!./_item.html', 'app','smoke'], function (ko, template,
 		self.loadItem = function () {
 			$.ajax({
 				"url": "/record/" + self.id(),
+				"data": "format=noContent",
 				"method": "get",
 				"contentType": "application/json",
 				"success": function (result) {

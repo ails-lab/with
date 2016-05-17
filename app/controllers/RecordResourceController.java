@@ -61,7 +61,7 @@ public class RecordResourceController extends WithResourceController {
 	 *            the resource serialization
 	 * @return the resource metadata
 	 */
-	public static Result getRecordResource(String id, Option<String> format) {
+	public static Result getRecordResource(String id, Option<String> format, String profile, Option<String> locale) {
 		ObjectNode result = Json.newObject();
 		try {
 			RecordResource record = DB.getRecordResourceDAO().get(
@@ -80,7 +80,9 @@ public class RecordResourceController extends WithResourceController {
 					} else {
 						if (format.equals("noContent")) {
 							record.getContent().clear();
-							return ok(Json.toJson(record));
+							RecordResource profiledRecord = ProfilesController.getRecordProfile(profile, record);
+							ProfilesController.filterResourceByLocale(locale, profiledRecord);
+							return ok(Json.toJson(profiledRecord));
 						} else if (record.getContent() != null
 								&& record.getContent().containsKey(format)) {
 							return ok(record.getContent().get(format)
@@ -222,7 +224,7 @@ public class RecordResourceController extends WithResourceController {
 	/**
 	 * @return
 	 */
-	public static Result getFavorites() {
+	public static Result getFavorites(String profile, Option<String> locale) {
 		ObjectNode result = Json.newObject();
 		if (session().get("user") == null) {
 			return forbidden();
