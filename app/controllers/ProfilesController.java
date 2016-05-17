@@ -175,22 +175,26 @@ public class ProfilesController extends Controller {
 		getLiteralFields(directFields, literalFields);
 		for (Field field : literalFields) {
 	        try {
-	        	/*field.setAccessible(true);
-	        	Object value = field.get(descriptiveData);*/
 	        	String methodName = "get" + field.getName().substring(0, 1).toUpperCase() + field.getName().substring(1);
 	        	Method method = descriptiveData.getClass().getMethod(methodName);
 	        	Object value = method.invoke(descriptiveData);
-	        	System.out.println(field.getName() + " = " + value);
 	        	if (value != null) {
 		        	HashMap<String, Object> hm = (HashMap<String, Object>) value;
 		        	if (!hm.isEmpty()) {
-		        		System.out.println(localeString);
+			        	Class<?> type = value.getClass();
 			        	HashMap<String, Object> filteredHm = filterHashMapByLocale(hm, localeString.toLowerCase());
 			        	if (!filteredHm.isEmpty()) {
 				        	methodName = "s" + methodName.substring(1);
-				        	method = descriptiveData.getClass().getMethod(methodName, value.getClass());
-				        	method.invoke(descriptiveData, (value.getClass().cast(filteredHm)));
-			        		//field.set(descriptiveData, filteredHm);
+				        	method = descriptiveData.getClass().getMethod(methodName, type);
+					        if (type.equals(MultiLiteral.class) || type.equals(MultiLiteralOrResource.class)) {
+					        	MultiLiteral fhm = new MultiLiteral();
+					        	for (String k: filteredHm.keySet())
+					        		fhm.put(k, (List<String>) filteredHm.get(k));
+					        	method.invoke(descriptiveData, fhm);
+					        }
+					        else if (type.equals(Literal.class) || type.equals(LiteralOrResource.class)) {
+					        	method.invoke(descriptiveData, (value.getClass().cast(filteredHm)));
+					        }
 			        	}
 		        	}
 	        	}
@@ -226,6 +230,7 @@ public class ProfilesController extends Controller {
     	HashMap<String, Object> filteredHm = new HashMap<String, Object>();
     	if (hm.containsKey(locale)) 
         	filteredHm.put(locale, hm.get(locale));
+    	//URI entries are always returned
     	if (hm.containsKey("URI"))
     		filteredHm.put("URI", hm.get("URI"));
     	return filteredHm;
