@@ -5,13 +5,10 @@
                     <!-- head-->
                     <h3>Media Viewer</h3>
                     <!-- actions-->
-                    <ul class="close">
-                    <li><a href="#" data-toggle="tooltip" data-placement="top" title="" class="closemedia" data-original-title="Close media viewer" data-bind="visible: window.location.href.indexOf('#item')==-1,click: close"><img src="img/ui/ic-close.png"></a></li>
-                    </ul>
-                    <ul class="actions"><li><a href="#" data-toggle="tooltip" data-placement="top" title="Add to favorites" class="fa fa-heart favorite" data-bind="visible:loggedUser && record().externalId!=null, css: { redheart: record().isLike()==true }, event: { click: function(data,event) { likeRecord(record(),event); } }"></a>
-                    </li><li><a href="#" data-toggle="tooltip" data-placement="top" title="Collect it" class="fa fa-download collectbutton" data-bind="visible:loggedUser, event: { click: function(data,event) { collect(record(),event); } }"></a>
-                    </li><li><a href="#" data-toggle="tooltip" data-placement="top" title="Visit item site" data-bind="attr: { href:record().view_url}" target="_blank" class="fa fa-external-link medialink"></a>
-                    </li></ul>
+                    <div class="actions"><a href="#" data-toggle="tooltip" data-placement="top" title="Add to favorites" class="fa fa-heart favorite" data-bind="visible:loggedUser && record().externalId!=null, css: { redheart: record().isLike()==true }, event: { click: function(data,event) { likeRecord(record(),event); } }"></a>
+                    <a href="#" data-toggle="tooltip" data-placement="top" title="Collect it" class="fa fa-download collectbutton" data-bind="visible:loggedUser, event: { click: function(data,event) { collect(record(),event); } }"></a>
+                    <a href="#" data-toggle="tooltip" data-placement="bottom" title="Visit item site" class="medialink" data-bind="attr: { href:record().view_url}" target="_blank"><i class="fa fa-external-link"></i></a>
+                    <a  data-toggle="tooltip" data-placement="bottom" title="Close media viewer" class="closemedia" data-bind="visible: window.location.href.indexOf('#item')==-1,click: close"><img src="img/ui/ic-close.png"></a></div>
                   </div>
                 </div>
                 <!-- media content-->
