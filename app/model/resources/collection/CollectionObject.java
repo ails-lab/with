@@ -21,10 +21,14 @@ import java.util.List;
 import java.util.Map;
 
 import model.DescriptiveData;
+import model.EmbeddedMediaObject.MediaVersion;
 import model.annotations.ContextData;
 import model.annotations.ContextData.ContextDataBody;
 import model.basicDataTypes.MultiLiteralOrResource;
 import model.resources.WithResource;
+import model.resources.WithResource.WithResourceType;
+import model.resources.collection.Exhibition.ExhibitionDescriptiveData;
+
 import org.mongodb.morphia.annotations.Embedded;
 import org.mongodb.morphia.annotations.Entity;
 import org.mongodb.morphia.annotations.Field;
@@ -40,6 +44,8 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
+
+import controllers.WithController.Profile;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
@@ -157,8 +163,47 @@ public class CollectionObject<T extends CollectionObject.CollectionDescriptiveDa
 		mapper.setSerializationInclusion(Include.NON_NULL);
 		List<Object> cd_map = mapper.convertValue(cd, List.class);
 		idx_map.put("collectedResources", cd_map);
-
 		return idx_map;
+	}
+	
+	public CollectionObject getCollectionProfile(String profileString) {
+		Profile profile = Profile.valueOf(profileString);
+		if (profile == null)
+			profile = Profile.BASIC;
+		if (profile.equals(Profile.FULL))
+			return this;
+		else if (profile.equals(Profile.BASIC) || profile.equals(Profile.MEDIUM)) {
+			if (this.getResourceType().equals(WithResourceType.SimpleCollection)) {
+				SimpleCollection output = new SimpleCollection();
+				addCommonCollectionFields(output);
+				return output;
+			}
+			else if (getResourceType().equals(WithResourceType.Exhibition)) {
+				Exhibition output = new Exhibition();
+				addCommonCollectionFields(output);
+				ExhibitionDescriptiveData edd = (ExhibitionDescriptiveData) getDescriptiveData();
+				if (edd.getBackgroundImg() != null && edd.getBackgroundImg().containsKey(MediaVersion.Original))
+					edd.getBackgroundImg().remove(MediaVersion.Original);
+				output.getDescriptiveData().setBackgroundImg(edd.getBackgroundImg());
+				output.getDescriptiveData().setCredits(edd.getCredits());
+				output.getDescriptiveData().setIntro(edd.getIntro());
+				return output;
+			}
+			else return this;
+		}
+		else return this;
+	}
+	
+	private void addCommonCollectionFields(CollectionObject output) {
+		output.setAdministrative((CollectionAdmin) getAdministrative());
+		output.setDbId(getDbId());
+		output.getDescriptiveData().setLabel(getDescriptiveData().getLabel());
+		output.getDescriptiveData().setDescription(getDescriptiveData().getDescription());
+		output.setProvenance(getProvenance());
+		if (getMedia().size() > 3)
+			output.setMedia(getMedia().subList(0, 3));
+		output.setResourceType(getResourceType());
+		//output.setUsage(input.getUsage());
 	}
 
 }

@@ -22,7 +22,6 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Set;
 
 import model.EmbeddedMediaObject.MediaVersion;
 import model.basicDataTypes.WithAccess;
@@ -42,8 +41,6 @@ import play.Logger;
 import play.Logger.ALogger;
 import play.libs.Json;
 import play.mvc.Result;
-import utils.AccessManager.Action;
-import utils.AccessManager;
 import utils.NotificationCenter;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -64,7 +61,7 @@ public class RightsController extends WithResourceController {
 				getUniqueByFieldAndValue("_id", colDbId, new ArrayList<String>(Arrays.asList("administrative.access")));
 			boolean oldIsPublic = collection.getAdministrative().getAccess().getIsPublic();
 			if (oldIsPublic != isPublic) {
-				List<ObjectId> effectiveIds = AccessManager.effectiveUserDbIds(session().get("effectiveUserIds"));
+				List<ObjectId> effectiveIds = effectiveUserDbIds(session().get("effectiveUserIds"));
 				DB.getCollectionObjectDAO().updateField(colDbId, "administrative.access.isPublic", isPublic);
 				if (!isPublic) //downgrade
 					if (membersDowngrade) {
@@ -132,7 +129,7 @@ public class RightsController extends WithResourceController {
 				int downgrade = isDowngrade(oldColAccess.getAcl(), userOrGroupId, newAccess);
 				//the logged in user has the right to downgrade his own access level (unshare)
 				boolean hasDowngradeRight = loggedIn.equals(userOrGroupId);
-				List<ObjectId> effectiveIds = AccessManager.effectiveUserDbIds(session().get("effectiveUserIds"));
+				List<ObjectId> effectiveIds = effectiveUserDbIds(session().get("effectiveUserIds"));
 				if (userGroup != null) {
 					hasDowngradeRight = userGroup.getAdminIds().contains(loggedIn);
 				}

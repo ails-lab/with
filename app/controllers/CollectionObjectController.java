@@ -25,17 +25,11 @@ import java.util.List;
 import java.util.Set;
 
 import javax.validation.ConstraintViolation;
-
-import org.bson.Document;
 import org.bson.types.ObjectId;
-import org.mongodb.morphia.query.Query;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.mongodb.MongoClient;
-import com.mongodb.client.FindIterable;
-import com.mongodb.client.MongoDatabase;
 
 import controllers.parameterTypes.MyPlayList;
 import controllers.parameterTypes.StringTuple;
@@ -55,7 +49,6 @@ import model.resources.WithResource;
 import model.resources.WithResource.WithResourceType;
 import model.resources.collection.CollectionObject;
 import model.resources.collection.CollectionObject.CollectionAdmin;
-import model.resources.collection.Exhibition;
 import model.resources.collection.SimpleCollection;
 import model.usersAndGroups.Organization;
 import model.usersAndGroups.Page;
@@ -78,8 +71,6 @@ import sources.OWLExporter.CulturalItemOWLExporter;
 import sources.core.CommonQuery;
 import sources.core.SourceResponse;
 import sources.core.Utils;
-import utils.AccessManager;
-import utils.AccessManager.Action;
 import utils.Locks;
 import utils.Tuple;
 
@@ -218,7 +209,7 @@ public class CollectionObjectController extends WithResourceController {
 				}
 				return ok(Json.toJson(collectionWithMyAccessData(
 						collection,
-						AccessManager.effectiveUserIds(session().get(
+						effectiveUserIds(session().get(
 								"effectiveUserIds")), "BASIC", Option.Some("DEFAULT"))));
 			}
 		});
@@ -229,7 +220,7 @@ public class CollectionObjectController extends WithResourceController {
 		else
 			return Promise.pure(ok(Json.toJson(collectionWithMyAccessData(
 					collection,
-					AccessManager.effectiveUserIds(session().get(
+					effectiveUserIds(session().get(
 							"effectiveUserIds")), "BASIC", Option.Some("DEFAULT")))));
 	}
 
@@ -362,7 +353,7 @@ public class CollectionObjectController extends WithResourceController {
 				return badRequest(error);
 			return ok(Json.toJson(collectionWithMyAccessData(
 					collection,
-					AccessManager.effectiveUserIds(session().get(
+					effectiveUserIds(session().get(
 							"effectiveUserIds")), "BASIC", Option.Some("DEFAULT"))));
 		} catch (Exception e) {
 			error.put("error", e.getMessage());
@@ -433,8 +424,8 @@ public class CollectionObjectController extends WithResourceController {
 			else {
 				CollectionObject collection = DB.getCollectionObjectDAO().get(
 						new ObjectId(id));
-				CollectionObject profiledCollection = ProfilesController.getCollectionProfile(profile, collection);
-				ProfilesController.filterResourceByLocale(locale, profiledCollection);
+				CollectionObject profiledCollection = collection.getCollectionProfile(profile);
+				filterResourceByLocale(locale, profiledCollection, session());
 				return ok(Json.toJson(profiledCollection));
 			}
 		} catch (Exception e) {
@@ -534,13 +525,13 @@ public class CollectionObjectController extends WithResourceController {
 
 	public static Result countMyAndShared() {
 		ObjectNode result = Json.newObject().objectNode();
-		List<String> effectiveUserIds = AccessManager
-				.effectiveUserIds(session().get("effectiveUserIds"));
+		List<String> effectiveUserIds = 
+				effectiveUserIds(session().get("effectiveUserIds"));
 		if (effectiveUserIds.isEmpty()) {
 			return badRequest("You should be signed in as a user.");
 		} else {
 			result = DB.getCollectionObjectDAO().countMyAndSharedCollections(
-					AccessManager.toObjectIds(effectiveUserIds));
+					toObjectIds(effectiveUserIds));
 			return ok(result);
 		}
 	}
@@ -568,8 +559,8 @@ public class CollectionObjectController extends WithResourceController {
 		ObjectNode result = Json.newObject().objectNode();
 		ArrayNode collArray = Json.newObject().arrayNode();
 		List<CollectionObject> userCollections;
-		List<String> effectiveUserIds = AccessManager
-				.effectiveUserIds(session().get("effectiveUserIds"));
+		List<String> effectiveUserIds = 
+				effectiveUserIds(session().get("effectiveUserIds"));
 		List<List<Tuple<ObjectId, Access>>> accessedByUserOrGroup = accessibleByUserOrGroup(
 				directlyAccessedByUserOrGroup, recursivelyAccessedByUserOrGroup);
 		Boolean isExhibitionBoolean = isExhibition.isDefined() ? isExhibition
@@ -599,8 +590,8 @@ public class CollectionObjectController extends WithResourceController {
 				result.put("totalExhibitions", info.y.y);
 			}
 			for (CollectionObject collection : userCollections) {
-				CollectionObject profiledCollection = ProfilesController.getCollectionProfile(profile, collection);
-				ProfilesController.filterResourceByLocale(locale, profiledCollection);
+				CollectionObject profiledCollection = collection.getCollectionProfile(profile);
+				filterResourceByLocale(locale, profiledCollection, session());
 				ObjectNode c = (ObjectNode) Json.toJson(profiledCollection);
 				c.remove("collectedResources");
 				if (effectiveUserIds.isEmpty())
@@ -612,9 +603,9 @@ public class CollectionObjectController extends WithResourceController {
 		} else { // logged in, check if super user, if not, restrict query to
 					// accessible by effectiveUserIds
 			Tuple<List<CollectionObject>, Tuple<Integer, Integer>> info;
-			if (!AccessManager.isSuperUser(effectiveUserIds.get(0)))
+			if (!isSuperUser(effectiveUserIds.get(0)))
 				info = DB.getCollectionObjectDAO().getByLoggedInUsersAndAcl(
-						AccessManager.toObjectIds(effectiveUserIds),
+						toObjectIds(effectiveUserIds),
 						accessedByUserOrGroup, creatorId, isExhibitionBoolean,
 						collectionHits, offset, count);
 			else
@@ -650,8 +641,8 @@ public class CollectionObjectController extends WithResourceController {
 			int count, String profile, Option<String> locale) {
 		ObjectNode result = Json.newObject().objectNode();
 		ArrayNode collArray = Json.newObject().arrayNode();
-		List<String> effectiveUserIds = AccessManager
-				.effectiveUserIds(session().get("effectiveUserIds"));
+		List<String> effectiveUserIds = 
+				effectiveUserIds(session().get("effectiveUserIds"));
 		Boolean isExhibitionBoolean = isExhibition.isDefined() ? isExhibition
 				.get() : null;
 		if (effectiveUserIds.isEmpty()) {
@@ -770,10 +761,10 @@ public class CollectionObjectController extends WithResourceController {
 	private static ObjectNode collectionWithMyAccessData(
 			CollectionObject userCollection, List<String> effectiveUserIds, 
 			String profile, Option<String> locale) {
-		CollectionObject profiledCollection = ProfilesController.getCollectionProfile(profile, userCollection);
-		ProfilesController.filterResourceByLocale(locale, profiledCollection);
+		CollectionObject profiledCollection = userCollection.getCollectionProfile(profile);
+		filterResourceByLocale(locale, profiledCollection, session());
 		ObjectNode c = (ObjectNode) Json.toJson(profiledCollection);
-		Access maxAccess = AccessManager.getMaxAccess(profiledCollection
+		Access maxAccess = getMaxAccess(profiledCollection
 				.getAdministrative().getAccess(), effectiveUserIds);
 		if (maxAccess.equals(Access.NONE))
 			maxAccess = Access.READ;
@@ -791,7 +782,7 @@ public class CollectionObjectController extends WithResourceController {
 				if (c.getAdministrative().getAccess().getIsPublic())
 					collectionsOrExhibitions.add(c);
 			} else {
-				Access maxAccess = AccessManager.getMaxAccess(c
+				Access maxAccess = getMaxAccess(c
 						.getAdministrative().getAccess(), effectiveUserIds);
 				if (!maxAccess.equals(Access.NONE))
 					collectionsOrExhibitions.add(c);
@@ -819,8 +810,8 @@ public class CollectionObjectController extends WithResourceController {
 			}
 		}
 		if (page != null) {
-			List<String> effectiveUserIds = AccessManager
-					.effectiveUserIds(session().get("effectiveUserIds"));
+			List<String> effectiveUserIds = 
+					effectiveUserIds(session().get("effectiveUserIds"));
 			ObjectNode result = Json.newObject().objectNode();
 			int start = offset * countPerType;
 			int collectionsSize = page.getFeaturedCollections().size();
@@ -932,8 +923,8 @@ public class CollectionObjectController extends WithResourceController {
 					if (contentFormat.equals("noContent")
 							&& r.getContent() != null) {
 						r.getContent().clear();
-						RecordResource profiledRecord = ProfilesController.getRecordProfile(profile, r);
-						ProfilesController.filterResourceByLocale(locale, profiledRecord);
+						RecordResource profiledRecord = r.getRecordProfile(profile);
+						filterResourceByLocale(locale, profiledRecord, session());
 						recordsList.add(Json.toJson(profiledRecord));
 						fillContextData(
 								DB.getCollectionObjectDAO()
@@ -952,8 +943,8 @@ public class CollectionObjectController extends WithResourceController {
 						recordsList.add(Json.toJson(newContent));
 						continue;
 					}
-					RecordResource profiledRecord = ProfilesController.getRecordProfile(profile, r);
-					ProfilesController.filterResourceByLocale(locale, profiledRecord);
+					RecordResource profiledRecord = r.getRecordProfile(profile);
+					filterResourceByLocale(locale, profiledRecord, session());
 					recordsList.add(Json.toJson(profiledRecord));
 				}
 				result.put(

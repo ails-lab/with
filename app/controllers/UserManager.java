@@ -18,7 +18,6 @@ package controllers;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Date;
 import java.util.Random;
@@ -28,13 +27,9 @@ import java.util.regex.Pattern;
 import javax.net.ssl.HttpsURLConnection;
 
 import model.ApiKey;
-import model.basicDataTypes.MultiLiteral;
-import model.resources.collection.CollectionObject;
 import model.usersAndGroups.User;
 import model.usersAndGroups.UserGroup;
 
-import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.mail.DefaultAuthenticator;
 import org.apache.commons.mail.Email;
 import org.apache.commons.mail.EmailException;
@@ -46,7 +41,6 @@ import play.Logger.ALogger;
 import play.libs.Akka;
 import play.libs.Crypto;
 import play.libs.Json;
-import play.mvc.Controller;
 import play.mvc.Result;
 import scala.concurrent.Await;
 import scala.concurrent.Future;
@@ -65,7 +59,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import db.DB;
 
-public class UserManager extends Controller {
+public class UserManager extends WithController {
 
 	public static final ALogger log = Logger.of(UserManager.class);
 	private static final long TOKENTIMEOUT = 10 * 1000l /* 10 sec */;

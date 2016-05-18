@@ -32,7 +32,6 @@ import java.util.stream.Collectors;
 
 import play.libs.F.Promise;
 import play.mvc.BodyParser;
-import play.mvc.Controller;
 import play.mvc.Result;
 import sources.core.AutocompleteResponse;
 import sources.core.ESpaceSources;
@@ -40,7 +39,7 @@ import sources.core.ISpaceSource;
 import sources.core.ParallelAPICall;
 import sources.core.AutocompleteResponse.Suggestion;
 
-public class AutocompleteController extends Controller {
+public class AutocompleteController extends WithController {
 
 	public static Promise<Result> autocompleteExt(String term, Integer limit, List<String> sourceFromUI) {
 		List<ISpaceSource> sourcesForAutocomplete = new ArrayList<ISpaceSource>();

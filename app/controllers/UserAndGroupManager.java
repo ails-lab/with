@@ -38,22 +38,16 @@ import db.DB;
 import model.EmbeddedMediaObject;
 import model.EmbeddedMediaObject.MediaVersion;
 import model.MediaObject;
-import model.basicDataTypes.WithAccess.Access;
 import notifications.GroupNotification;
 import notifications.Notification;
 import notifications.Notification.Activity;
 import play.Logger;
 import play.Logger.ALogger;
 import play.libs.Json;
-import play.mvc.Controller;
 import play.mvc.Result;
-import utils.AccessManager;
 import utils.NotificationCenter;
 
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-
-public class UserAndGroupManager extends Controller {
+public class UserAndGroupManager extends WithController {
 
 	public static final ALogger log = Logger.of(UserGroup.class);
 
@@ -92,8 +86,7 @@ public class UserAndGroupManager extends Controller {
 					prefix);
 			List<UserGroup> groups2 = DB.getUserGroupDAO().getByFriendlyNamePrefix(prefix);
 			groups.addAll(groups2);
-			List<String> effectiveUserIds = AccessManager
-					.effectiveUserIds(session().get("effectiveUserIds"));
+			List<String> effectiveUserIds = effectiveUserIds(session().get("effectiveUserIds"));
 			ObjectId userId = new ObjectId(effectiveUserIds.get(0));
 			for (UserGroup group : groups) {
 				if (!onlyParents
@@ -214,7 +207,7 @@ public class UserAndGroupManager extends Controller {
 	public static Result addUserOrGroupToGroup(String id, String groupId) {
 		ObjectNode result = Json.newObject();
 		try {
-			String adminId = AccessManager.effectiveUserId(session().get(
+			String adminId = effectiveUserId(session().get(
 					"effectiveUserIds"));
 			if ((adminId == null) || (adminId.equals(""))) {
 				result.put("error",
@@ -320,7 +313,7 @@ public class UserAndGroupManager extends Controller {
 	public static Result removeUserOrGroupFromGroup(String id, String groupId) {
 		ObjectNode result = Json.newObject();
 		try {
-			String adminId = AccessManager.effectiveUserId(session().get(
+			String adminId = effectiveUserId(session().get(
 					"effectiveUserIds"));
 			if ((adminId == null) || (adminId.equals(""))) {
 				result.put("error",
@@ -417,7 +410,7 @@ public class UserAndGroupManager extends Controller {
 	public static Result joinGroup(String groupId) {
 		ObjectNode result = Json.newObject();
 		try {
-			String userId = AccessManager.effectiveUserId(session().get(
+			String userId = effectiveUserId(session().get(
 					"effectiveUserIds"));
 			if (userId == null) {
 				result.put("error", "Must specify user for join request");
@@ -473,7 +466,7 @@ public class UserAndGroupManager extends Controller {
 	public static Result leaveGroup(String groupId) {
 		ObjectNode result = Json.newObject();
 		try {
-			String userId = AccessManager.effectiveUserId(session().get(
+			String userId = effectiveUserId(session().get(
 					"effectiveUserIds"));
 			if (userId == null) {
 				result.put("error", "Must specify user for join request");
@@ -543,7 +536,7 @@ public class UserAndGroupManager extends Controller {
 	public static Result addAdminToGroup(String id, String groupId){
 		ObjectNode result = Json.newObject();
 		try {
-			String adminId = AccessManager.effectiveUserId(session().get(
+			String adminId = effectiveUserId(session().get(
 					"effectiveUserIds"));
 			if ((adminId == null) || (adminId.equals(""))) {
 				result.put("error",
@@ -592,7 +585,7 @@ public class UserAndGroupManager extends Controller {
 	public static Result removeAdminFromGroup(String id, String groupId){
 		ObjectNode result = Json.newObject();
 		try {
-			String adminId = AccessManager.effectiveUserId(session().get(
+			String adminId = effectiveUserId(session().get(
 					"effectiveUserIds"));
 			if ((adminId == null) || (adminId.equals(""))) {
 				result.put("error",

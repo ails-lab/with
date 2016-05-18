@@ -34,7 +34,6 @@ import play.data.validation.Validation;
 import play.libs.F.Option;
 import play.libs.Json;
 import play.mvc.Result;
-import utils.AccessManager.Action;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -80,8 +79,8 @@ public class RecordResourceController extends WithResourceController {
 					} else {
 						if (format.equals("noContent")) {
 							record.getContent().clear();
-							RecordResource profiledRecord = ProfilesController.getRecordProfile(profile, record);
-							ProfilesController.filterResourceByLocale(locale, profiledRecord);
+							RecordResource profiledRecord = record.getRecordProfile(profile);
+							filterResourceByLocale(locale, profiledRecord, session());
 							return ok(Json.toJson(profiledRecord));
 						} else if (record.getContent() != null
 								&& record.getContent().containsKey(format)) {
@@ -223,7 +222,7 @@ public class RecordResourceController extends WithResourceController {
 	/**
 	 * @return
 	 */
-	public static Result getFavorites(String profile, Option<String> locale) {
+	public static Result getFavorites() {
 		ObjectNode result = Json.newObject();
 		if (session().get("user") == null) {
 			return forbidden();

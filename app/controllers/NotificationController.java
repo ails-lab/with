@@ -36,7 +36,6 @@ import play.libs.Json;
 import play.mvc.Controller;
 import play.mvc.Result;
 import play.mvc.WebSocket;
-import utils.AccessManager;
 import utils.NotificationCenter;
 import actors.NotificationActor;
 
@@ -46,7 +45,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import db.DB;
 
-public class NotificationController extends Controller {
+public class NotificationController extends WithController {
 	public static final ALogger log = Logger.of(NotificationController.class);
 
 	public static WebSocket<JsonNode> socket() {
@@ -189,7 +188,7 @@ public class NotificationController extends Controller {
 	public static Result getUserNotifications() {
 		try {
 			ObjectId userId = new ObjectId(
-					AccessManager.effectiveUserId(session().get(
+					effectiveUserId(session().get(
 							"effectiveUserIds")));
 			Set<ObjectId> userOrGroupIds = new HashSet<ObjectId>();
 			Set<ObjectId> groups = DB.getUserDAO().get(userId)
@@ -246,7 +245,7 @@ public class NotificationController extends Controller {
 	}
 
 	public static Result sendMessage(String receiverId) {
-		ObjectId sender = new ObjectId(AccessManager.effectiveUserId(session()
+		ObjectId sender = new ObjectId(effectiveUserId(session()
 				.get("effectiveUserIds")));
 		JsonNode json = request().body().asJson();
 		if (!json.has("message")) {

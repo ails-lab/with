@@ -49,14 +49,11 @@ import play.Logger;
 import play.Logger.ALogger;
 import play.libs.F.Option;
 import play.libs.Json;
-import play.mvc.Controller;
 import play.mvc.Result;
 import sources.core.ISpaceSource;
 import sources.core.ParallelAPICall;
 import sources.core.ParallelAPICall.Priority;
 import sources.core.RecordJSONMetadata;
-import utils.AccessManager;
-import utils.AccessManager.Action;
 import utils.Locks;
 
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -73,15 +70,14 @@ import db.WithResourceDAO;
  *
  */
 @SuppressWarnings({ "rawtypes", "unchecked" })
-public class WithResourceController extends Controller {
+public class WithResourceController extends WithController {
 
 	public static final ALogger log = Logger.of(WithResourceController.class);
 
 	public static Status errorIfNoAccessToWithResource(
 			WithResourceDAO resourceDAO, Action action, ObjectId id) {
 		ObjectNode result = Json.newObject();
-		List<String> effectiveUserIds = AccessManager
-				.effectiveUserIds(session().get("effectiveUserIds"));
+		List<String> effectiveUserIds = effectiveUserIds(session().get("effectiveUserIds"));
 		if (!resourceDAO.existsEntity(id)) {
 			log.error("Cannot retrieve resource from database");
 			result.put("error", "Cannot retrieve resource " + id
@@ -89,9 +85,9 @@ public class WithResourceController extends Controller {
 			return internalServerError(result);
 			// TODO superuser
 		} else if (!resourceDAO.hasAccess(
-				AccessManager.effectiveUserDbIds(session().get(
+				effectiveUserDbIds(session().get(
 						"effectiveUserIds")), action, id)
-				&& !AccessManager.isSuperUser(effectiveUserIds.get(0))) {
+				&& !isSuperUser(effectiveUserIds.get(0))) {
 			result.put("error", "User does not have " + action
 					+ " access for resource " + id);
 			return forbidden(result);
@@ -170,7 +166,7 @@ public class WithResourceController extends Controller {
 			ObjectId collectionDbId, Option<Integer> position, Boolean noDouble) {
 		ObjectNode result = Json.newObject();
 		String resourceType = null;
-		ObjectId userId = AccessManager.effectiveUserDbIds(
+		ObjectId userId = effectiveUserDbIds(
 				session().get("effectiveUserIds")).get(0);
 		if (json.has("resourceType"))
 			resourceType = json.get("resourceType").asText();
@@ -206,7 +202,7 @@ public class WithResourceController extends Controller {
 				externalId = record.getAdministrative().getExternalId();
 			ObjectId recordId = null;
 			boolean owns = DB.getRecordResourceDAO().hasAccess(
-					AccessManager.effectiveUserDbIds(session().get(
+					effectiveUserDbIds(session().get(
 							"effectiveUserIds")), Action.DELETE, recordId);
 			if ((externalId != null)// get dbId of existring resource
 					&& DB.getRecordResourceDAO().existsWithExternalId(
@@ -231,8 +227,7 @@ public class WithResourceController extends Controller {
 						}
 					}
 					if (DB.getRecordResourceDAO()
-							.hasAccess(
-									AccessManager.effectiveUserDbIds(session()
+							.hasAccess(effectiveUserDbIds(session()
 											.get("effectiveUserIds")),
 									Action.EDIT, recordId)
 							&& (json.get("descriptiveData") != null))
@@ -282,9 +277,8 @@ public class WithResourceController extends Controller {
 										boolean hasAccessToMedia = MediaController
 												.hasAccessToMedia(
 														mediaUrl,
-														AccessManager
-																.effectiveUserDbIds(session()
-																		.get("effectiveUserIds")),
+														effectiveUserDbIds(session()
+															.get("effectiveUserIds")),
 														Action.EDIT);
 										if (!hasAccessToMedia)
 											media = new EmbeddedMediaObject(

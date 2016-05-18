@@ -59,17 +59,13 @@ import sources.core.ParallelAPICall;
 import sources.core.SearchResponse;
 import sources.core.SourceResponse;
 import sources.core.Utils;
-import utils.AccessManager;
 import utils.ListUtils;
 
-public class SearchController extends Controller {
+public class SearchController extends WithController {
 
 	final static Form<CommonQuery> userForm = Form.form(CommonQuery.class);
 	public static final ALogger log = Logger.of(SearchController.class);
 
-	// here is how the ApiKey check can be build into the controllers
-	// @With( CallAllowedCheck.class)
-	@SuppressWarnings("unchecked")
 	public static Promise<Result> search() {
 		JsonNode json = request().body().asJson();
 		if (log.isDebugEnabled()) {
@@ -88,7 +84,7 @@ public class SearchController extends Controller {
 				final CommonQuery q = Utils.parseJson(json);
 				q.setTypes(Elastic.allTypes);
 				if (session().containsKey("effectiveUserIds")) {
-					List<String> userIds = AccessManager.effectiveUserIds(session().get("effectiveUserIds"));
+					List<String> userIds = effectiveUserIds(session().get("effectiveUserIds"));
 					q.setEffectiveUserIds(userIds);
 				}
 				Iterable<Promise<SourceResponse>> promises = callSources(q);
@@ -122,7 +118,7 @@ public class SearchController extends Controller {
 				final CommonQuery q = Utils.parseJson(json);
 				q.setTypes(Elastic.allTypes);
 				if (session().containsKey("effectiveUserIds")) {
-					List<String> userIds = AccessManager.effectiveUserIds(session().get("effectiveUserIds"));
+					List<String> userIds = effectiveUserIds(session().get("effectiveUserIds"));
 					q.setEffectiveUserIds(userIds);
 				}
 				Promise<SearchResponse> myResults = getMyResutlsPromise(q);
@@ -148,7 +144,7 @@ public class SearchController extends Controller {
 		try {
 			q.setTypes(Elastic.allTypes);
 			if (session().containsKey("effectiveUserIds")) {
-				List<String> userIds = AccessManager.effectiveUserIds(session().get("effectiveUserIds"));
+				List<String> userIds = effectiveUserIds(session().get("effectiveUserIds"));
 				q.setEffectiveUserIds(userIds);
 			}
 			Promise<SearchResponse> myResults = getMyResutlsPromise(q);
@@ -176,7 +172,7 @@ public class SearchController extends Controller {
 				q.searchTerm=null;
 				q.setTypes(Elastic.allTypes);
 				if (session().containsKey("effectiveUserIds")) {
-					List<String> userIds = AccessManager.effectiveUserIds(session().get("effectiveUserIds"));
+					List<String> userIds = effectiveUserIds(session().get("effectiveUserIds"));
 					q.setEffectiveUserIds(userIds);
 				}
 				Promise<SearchResponse> myResults = getMyResutlsPromise(q);
