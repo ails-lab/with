@@ -215,6 +215,7 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
 
 	function SearchModel(params) {
 		var self = this;
+		window.location.hash = '#search';
 		 
 		setTimeout(function(){ WITHApp.init(); WITHApp.tabAction();}, 300);
 		var $container = $("#gridlist").find("div.grid").isotope({
