@@ -20,7 +20,7 @@
 	                <ul class="organization-list-control">
 	                  <li><a href="exhibition-view.html" data-toggle="tooltip" data-placement="top" title="Preview Exhibition" class="fa fa-eye" data-bind="attr: {href: 'index.html#exhibitionview/'+dbId()}" ></a></li>
 	                  <li><a href="#" data-toggle="tooltip" data-placement="top" title="Add credits section" class="fa fa-copyright creditbutton"></a></li>
-	                  <li><a href="#" data-toggle="tooltip" data-placement="top" data-bind="click: bindFileUpload"  title="Upload background image" class="fa fa-image upload exhibition"></a></li>
+	                  <li><a href="#" data-toggle="tooltip" data-placement="top" data-bind="click: bindFileUpload" title="Upload background image" class="fa fa-image upload exhibition"></a></li>
 	                  <li><a href="#" data-toggle="tooltip" data-placement="top" title="Delete Exhibition" class="fa fa-trash"></a></li>
 	                </ul>
 	              </div>
@@ -189,9 +189,10 @@
                 <div class="title">Add credit</div>
               </div>
               <div class="action-body">
-                <textarea type="text" placeholder="About me">Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidunt ut laoreet dolore magna aliquam erat volutpat.</textarea>
+                <textarea type="text" placeholder="Credits" data-bind="value: credits"></textarea>
               </div>
-              <div class="button-group"><a href="#" class="btn-green-o cancel">Cancel</a><a href="#" class="btn-green">Save</a></div>
+              <div class="button-group"><a href="#" class="btn-green-o cancel" data-bind="click: closeSideBar">Cancel</a>
+              	<a href="#" class="btn-green" data-bind="click: editCredits">Save</a></div>
             </section>
             <!-- collection give access-->
             <section class="action addmediasection">

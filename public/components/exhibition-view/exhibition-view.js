@@ -98,6 +98,7 @@ define(['knockout', 'text!./_exhibition-view.html', 'app', 'magnific-popup', 'sl
 		self.loading = ko.observable(false);
 		self.showCarousel = ko.observable(false);
 		self.backgroundImgWithUrl = ko.observable('');
+		self.credits = ko.observable('');
 		self.initCarousel = function () {
 			WITHApp.initTooltip();
 			WITHApp.initCarousel();
@@ -156,12 +157,12 @@ define(['knockout', 'text!./_exhibition-view.html', 'app', 'magnific-popup', 'sl
 						}
 					}
 					var adminData = data.administrative;
-					var descData = data.descriptiveData;
 					self.exhName(findByLang(data.descriptiveData.label));
 					self.desc(findByLang(data.descriptiveData.description));
 					self.owner(data.withCreatorInfo.username);
 					self.ownerId(data.administrative.withCreator);
 					self.entryCount(data.administrative.entryCount);
+					self.credits(data.descriptiveData.credits);
 					var backgroundImg = data.descriptiveData.backgroundImg;
 					//self.access(adminData.access);
 					if (self.entryCount() && self.entryCount() > 0) {

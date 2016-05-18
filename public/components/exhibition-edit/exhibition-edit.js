@@ -251,6 +251,7 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 		self.loading = ko.observable(false);
 		self.title = ko.observable('');
 		self.description = ko.observable('');
+		self.credits = ko.observable('');
 		self.dbId = ko.observable();
 		self.loadingExhibitionItems = false;
 		self.loadingInitialItemsCount = 0;
@@ -321,6 +322,7 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 			ko.mapping.fromJS(data, mappingExhibition, self);
 			self.title(app.findByLang(data.descriptiveData.label));
 			self.description(app.findByLang(data.descriptiveData.description));
+			self.credits(data.descriptiveData.credits);
 			setUpSwitch(self);
 			if (self.descriptiveData.backgroundImg == null || self.descriptiveData.backgroundImg.Original == null || 
 					self.descriptiveData.backgroundImg.Original.withUrl == null || 
@@ -604,6 +606,25 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 				});
 			}
 			//updateExhibitionProperty(self, "descriptiveData.backgroundImg", self.backgroundImg());
+		}
+		self.editCredits = function() {
+			$('.action').removeClass('active');
+			$('.action.creditsection').addClass('active');
+			var jsonData = {
+				descriptiveData: {
+					credits: self.credits()
+				},
+				resourceType: "Exhibition"
+			};
+			$.ajax({
+				type: "PUT",
+				url: "/collection/" + self.dbId(),
+				data: JSON.stringify(jsonData),
+				contentType: "application/json",
+				success: function () {
+					self.closeSideBar();
+				}
+			});
 		}
 		
 		self.bindFileUpload = function() {
