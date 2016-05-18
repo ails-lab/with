@@ -316,6 +316,34 @@ WITHApp.ui = function( custom ){
 			});*/
 		}
 
+		
+		// credit
+		// open upload
+		if ( $( 'a.creditbutton' ).length !== 0 ) {
+
+			$( 'a.creditbutton' ).click( function( e ) {
+
+				e.preventDefault();
+				$( '.action' ).removeClass( 'active' );
+				$( '.action.creditsection' ).addClass( 'active' );				
+			});
+
+		}
+
+		// credit
+		// open upload
+		if ( $( 'a.addmediabutton' ).length !== 0 ) {
+			
+
+			$( 'a.addmediabutton' ).click( function( e ) {
+
+
+				e.preventDefault();
+				$( '.action' ).removeClass( 'active' );
+				$( '.action.addmediasection' ).addClass( 'active' );				
+			});
+
+		}
 		// open upload
 		if ( $( 'a.upload' ).length !== 0 ) {
 
@@ -327,6 +355,8 @@ WITHApp.ui = function( custom ){
 			});
 
 		}
+		
+		
 		
 		// open uploadimage
 		if ( $( 'a.uploadimage' ).length !== 0 ) {

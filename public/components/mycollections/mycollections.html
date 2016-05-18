@@ -8,48 +8,36 @@
 		<main>
 		  <!-- collection section-->
 		  <section class="collection">
-			<section class="header">
-			  <!-- ko if: showsExhibitions -->
-			  <a id="picker" href="#" data-toggle="dropdown" class="picker" >
-			  	<span id="pickerTitle" class="text">My Exhibitions</span><span class="arrow"></span>
-			  </a>
-			  <!-- /ko -->
-			  <!-- ko else -->
-			  <a id="picker" href="#" data-toggle="dropdown" class="picker" >
-			  	<span id="pickerTitle" class="text">My Collections</span><span class="arrow"></span>
-			  </a>
-			  <!-- /ko -->
-			  <!-- ko if: showsExhibitions -->
-			  	<ul aria-labelledby="picker" class="dropdown-menu">
-				<li data-bind="click: changeTab"><a style="cursor:pointer;" >My Exhibitions</a></li>
-				<li data-bind="click: changeTab"><a style="cursor:pointer;" >Exhibitions shared with me</a></li>
-			  </ul>
-			  <!-- /ko -->
-			  <!-- ko else -->
-			  <ul aria-labelledby="picker" class="dropdown-menu">
-				<li data-bind="click: changeTab"><a style="cursor:pointer;" >My Collections</a></li>
-				<li data-bind="click: changeTab"><a style="cursor:pointer;" >Collections shared with me</a></li>
-			  </ul>
-			  <!-- /ko -->
-			  <!-- ko if: showsExhibitions -->
+		  <section class="header">
+			
+			 <!-- ko if: showsExhibitions -->
 			    <a href="#" class="new" ><span class="plus"></span><span class="text" >New Exhibition</span></a>
+			    <ul class="typeselect">
+                   <li data-bind="click: changeTab"><a href="javascript: void(0);" title="Show only my exhibitions">My Exhibitions</a></li>
+				  <li data-bind="click: changeTab"><a href="javascript: void(0);" title="Show exhibitions shared with me">Exhibitions shared with me</a></li>
+                  
+                </ul>
 			  <!-- /ko -->
 			  <!-- ko else -->
 			  
 			    <a href="#" class="new" ><span class="plus"></span><span class="text" >New Collection</span></a>
-			    <!-- ko if: showImportFromEuropeana -->
-			    <div class="dropdown1">
-			    <a id="picker1" href="#" data-toggle="dropdown" 
-			      ><span class="plus"></span><span id="pickerTitle1" class="text" >Import Collection</span>
-			    <span class="arrow"></span>
-			    </a>
-			    <ul aria-labelledby="picker1" class="dropdown-menu">
-				<li data-bind="click: openAction.bind($data,'importEuropeana')"><a style="cursor:pointer;" >Europeana Collection</a></li>
-				<li data-bind="click: openAction.bind($data,'importEuropeanaSearch')"><a style="cursor:pointer;" >Europeana Search</a></li>
-			  </ul>
-			  </div>
-			  <!-- /ko -->
-			  <!-- /ko -->
+			     <!-- ko if: showImportFromEuropeana -->
+			    <div class="picker-wrap"><a id="picker" href="#" data-toggle="dropdown" class="picker"><span class="text" id="pickerTitle1">Import Collection</span><span class="arrow"></span></a>
+                  <ul aria-labelledby="picker" class="dropdown-menu">
+                    <li data-bind="click: openAction.bind($data,'importEuropeana')"><a href="#">Europeana collection</a></li>
+                    <li data-bind="click: openAction.bind($data,'importEuropeanaSearch')"><a href="#">Europeana search</a></li>
+                  </ul>
+                </div>
+                <!-- /ko -->
+                <!-- tabs-->
+                <ul class="typeselect">
+                   <li class="active" data-bind="click: changeTab"><a href="javascript: void(0);" title="Show only my collections">My Collections</a></li>
+				  <li data-bind="click: changeTab"><a href="javascript: void(0);" title="Show collections shared with me">Collections shared with me</a></li>
+                  
+                </ul>
+              <!-- /ko -->  
+			
+			 
 			</section>
 			<!-- message-->
 			 <!-- ko if: showsExhibitions -->
@@ -84,6 +72,7 @@
 			<section class="collection-list">
 			  <!-- collection main header-->
 			  <div class="list-head">
+			    <!-- item count--><span class="item-count"><!-- ko if: showsExhibitions -->7 exhibitions<!-- /ko --><!-- ko ifnot: showsExhibitions --> 7 collections <!-- /ko --></span>
 				<div class="sort"><span>Sort by</span><a id="sorting" href="#" data-toggle="dropdown"><span class="text">Date</span><span class="arrow"></span></a>
 				  <!-- dropdown-->
 				  <ul aria-labelledby="sorting" class="dropdown-menu">
@@ -95,11 +84,21 @@
 					<a href="#" data-toggle="tooltip" data-placement="top" title="List view" class="fa fa-bars"></a>
 					<a href="#" data-toggle="tooltip" data-placement="top" title="Grid view" class="fa fa-th active"></a>
 				</div>
+				 <!-- search-->
+                  <div class="filtertype"><img src="img/ui/ic-mag.png" class="mag">
+                    <input type="text" placeholder="Search" class="filtertext">
+                  </div>
 			  </div>
 			  <!-- listing-->
 			  <ul class="list-body grids">
-					<div data-bind="{visible: collectionSet() == 'my', template: { name: 'collectionsTemplate', foreach: myCollections()}}"></div>
-					<div data-bind="{visible: collectionSet() == 'shared', template: { name: 'collectionsTemplate', foreach: sharedCollections()}}"></div>
+			       <!--  ko if: collectionSet()=='my' -->
+			       <!-- ko template: { name: 'collectionsTemplate', foreach: myCollections()} -->
+			       <!-- /ko -->
+			       <!-- /ko -->
+			       <!--  ko ifnot: collectionSet()=='my' -->
+			       <!-- ko template: { name: 'collectionsTemplate', foreach: sharedCollections()} -->
+			       <!-- /ko -->
+			       <!-- /ko -->
 			  <a style="cursor:pointer;" class="loadmore"
 			  data-bind="{visible: moreCollectionData(),
 			  event: {click: moreCollections.bind($data, showsExhibitions)}}">load more
@@ -308,9 +307,9 @@
 					<div class="category">private</div>
 					<!--/ko-->
 					<!-- ko if: backgroundImg() != "" -->
-						<div class="wrap"><img data-bind="attr: {src: backgroundImg}" onError="this.src='img/content/thumb-empty.png'"/></div>
+						<div class="wrap"><img data-bind="attr: {src: backgroundImg}" onError="this.src='img/ui/ic-noimage.png'"/></div>
 						<!-- ko if: media()[0]-->
-						<div class="wrap small"><img data-bind="attr: {src: media()[0].thumbnailUrl}" onError="this.src='img/content/thumb-empty.png'"/></div>
+						<div class="wrap small"><img data-bind="attr: {src: media()[0].thumbnailUrl}" onError="this.src='img/ui/ic-noimage.png'"/></div>
 						<!-- /ko -->
 						<!-- ko else -->
 						<div class="wrap small"></div>
@@ -324,7 +323,7 @@
 					<!-- /ko -->
 					<!-- ko else -->
 						<!-- ko if: media()[0]-->
-						<div class="wrap"><img data-bind="attr: {src: media()[0].thumbnailUrl}" onError="this.src='img/content/thumb-empty.png'"/></div>
+						<div class="wrap"><img data-bind="attr: {src: media()[0].thumbnailUrl}" onError="this.src='img/ui/ic-noimage.png'"/></div>
 						<!-- /ko -->
 						<!-- ko else -->
 						<div class="wrap"></div>
@@ -357,21 +356,24 @@
 					  <div class="date" data-bind="text: administrative.created()"></div>
 					  <div class="user"data-bind="text: withCreatorInfo.creatorName"></div>
 					</div>
-					<div class="action-group">
+					<div class="action-group"><div class="wrap">
+                          <ul>
+                            
 						<!--  ko if: myAccess() ==  "OWN" -->
 						<!-- ko if: $parent.showsExhibitions -->
-						<a data-toggle="tooltip" data-bind="click: $parent.deleteMyCollection" data-placement="top" title="Delete exhibition" class="fa fa-trash-o"></a>
-						<a data-toggle="tooltip" data-placement="top" data-bind="click: $parent.openShareCollection" title="Share exhibition" class="fa fa-paper-plane-o"></a>
+						<li><a data-toggle="tooltip" data-bind="click: $parent.deleteMyCollection" data-placement="top" title="Delete exhibition" class="fa fa-trash-o"></a></li>
+						<li><a data-toggle="tooltip" data-placement="top" data-bind="click: $parent.openShareCollection" title="Share exhibition" class="fa fa-paper-plane-o"></a></li>
 						<!-- /ko -->
 						<!-- ko else -->
-						<a data-toggle="tooltip" data-bind="click: $parent.deleteMyCollection" data-placement="top" title="Delete collection" class="fa fa-trash-o"></a>
-						<a data-toggle="tooltip" data-placement="top" data-bind="click: $parent.openShareCollection" title="Share collection" class="fa fa-paper-plane-o"></a>
+						<li><a data-toggle="tooltip" data-bind="click: $parent.deleteMyCollection" data-placement="top" title="Delete collection" class="fa fa-trash-o"></a></li>
+						<li><a data-toggle="tooltip" data-placement="top" data-bind="click: $parent.openShareCollection" title="Share collection" class="fa fa-paper-plane-o"></a></li>
 						<!-- /ko -->
 						<!-- /ko -->
 						<!--  ko if: (myAccess() ==  "OWN" || myAccess() == "WRITE")-->
-						<a data-toggle="tooltip" data-bind="click: $parent.prepareForEditCollection" data-placement="top" title="Edit" class="fa fa-pencil editaction"></a>
+						<li><a data-toggle="tooltip" data-bind="click: $parent.prepareForEditCollection" data-placement="top" title="Edit" class="fa fa-pencil editaction"></a></li>
 						<!-- /ko -->
-						<span data-bind="visible: myAccess() == 'READ'">&nbsp;</span>
+						</ul>
+						<span data-bind="visible: myAccess() == 'READ'">&nbsp;</span></div>
 					</div>
 				  </div>
 				</li>

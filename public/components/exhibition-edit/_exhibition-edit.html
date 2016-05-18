@@ -48,7 +48,7 @@
 									</div>
 									<div class="left">
 										<div class="imgwrap">
-											<img data-bind="attr: { src: fullres.length>0 ? fullres : thumbnailUrl }" id="itemImage" onError="javascript:this.src='img/content/thumb-empty.png'"/>
+											<img data-bind="attr: { src: fullres.length>0 ? fullres : thumbnailUrl }" id="itemImage" onError="javascript:this.src='img/ui/ic-noimage.png'"/>
 										</div>
 										<div class="imginfo">
 											<span class="mediatitle" data-bind="text: title"></span><br/>
@@ -125,7 +125,7 @@
 									<a class="bottom-box"  data-toggle="tooltip" data-placement="top" 
 									data-bind="{drag: {item: $data, move: false}, attr: {title: title}}">
 										<div class="hue">
-											<img data-bind="attr: { src: thumbnailUrl }" class="itemImage" onerror="javascript:this.src='img/content/thumb-empty.png';"/>
+											<img data-bind="attr: { src: thumbnailUrl }" class="itemImage" onerror="javascript:this.src='img/ui/ic-noimage.png';"/>
 											<div class="color"></div>
 										</div>
 									</a>

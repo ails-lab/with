@@ -75,7 +75,12 @@
           <section class="home"><a href="#dashboard" title="Dashboard Home" data-toggle="tooltip" data-placement="bottom"><img src="img/ui/ic-home.png" alt="Dashboard Home"></a></section>
          
           <!-- explore-->
-          <section class="explore"><a href="#search" title="explore"><img src="img/ui/ic-search.png"><span class="text">EXPLORE</span></a></section>
+          <section class="explore">
+            <!-- input search-->
+             <input type="text" placeholder="Search" data-bind="value: term" class="searchinput">
+            <!-- icon--><img src="img/ui/ic-mag.png" class="icon" data-bind="attr: {src: ko.contextFor(withsearchid).$data.searching()==true ? 'img/ui/ic-loading.gif' : 'img/ui/ic-mag.png'}, click: function() { search(true,true); }">
+          
+          </section>
         </div>
      
 

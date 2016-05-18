@@ -1,6 +1,6 @@
 //- index.jade
-- var title = "WITH - My Collection"
-- var page  = "collection"
+- var title = "WITH - My Annotation"
+- var page  = "annotation"
 
 doctype html
 html
@@ -40,26 +40,21 @@ html
 								// new collection
 								a(href="#").new
 									span.plus
-									span.text New collection
+									span.text Annotate new collection
 
-								// import picker wrap
-								.picker-wrap
-									a#picker(href="#", data-toggle='dropdown').picker
-										span.text Import Collection
-										span.arrow
+								// picker wrap
+									.picker-wrap
+										a#picker(href="#", data-toggle='dropdown').picker
+											span.text My collection
+											span.arrow
 
-									ul.dropdown-menu(aria-labelledby='picker')
-										li 
-											a(href="#") Europeana collection
-										li 
-											a(href="#") Europeana search
+										ul.dropdown-menu(aria-labelledby='picker')
+											li 
+												a(href="#") My collection
+											li 
+												a(href="#") Collection shared with me
 
-								// tabs
-								ul.typeselect
-									li.active
-										a( href="#" title="Show only my collection") My collection
-									li
-										a( href="#" title="Show collection shared with me") Collection shared with me		
+								
 								
 
 								
@@ -70,12 +65,16 @@ html
 							section.message
 								img(src='img/ui/ic-inbox.png').hero
 								.message-body
-									.header Welcome to My Collection
+									.header Welcome to My Annotation
 									.description
-										| This is <b> My Collection </b>, and every collections that are shared with you will be collected here.
+										| This is <b> My Annotation </b>, all of your annotation will be collected in here.
 									a(href="#")
 										span.cross
 										span.text Hide welcome message
+
+
+							// achievements
+							section.achievement
 
 
 
@@ -85,8 +84,7 @@ html
 								// collection main header
 								.list-head
 
-									// item count
-									span.item-count 7 collections
+									
 
 									// sort
 									.sort
@@ -107,9 +105,8 @@ html
 										a(href="#" data-toggle="tooltip" data-placement="top" title="Grid view").fa.fa-th.active
 
 									// search
-									.filtertype
-										img.mag( src="img/ui/ic-mag.png" )
-										input( type="text" class="filtertext" placeholder="Search collection" )
+									// item count
+									span.item-count-info You have annotated 7 collections
 
 								// loader
 								.loader.hidden
@@ -121,10 +118,10 @@ html
 										.thumbnails
 											.category private
 											.wrap
-												img(src="img/ui/ic-noimage.png")
+												img(src="img/content/collection-hero-white.png")
 
 											.wrap.small
-												img(src="img/content/collection-hero.png")
+												img(src="img/content/collection-hero-white.png")
 											.wrap.small
 										.meta
 											a(href="dashboard-collection-detail.html").header Collection title orem ipsum dolor sit amet
@@ -134,15 +131,7 @@ html
 												.count 20 Items
 												.date December 15, 2015
 												.user By Annac
-											.action-group
-												.wrap
-													ul
-														li
-															a(href="#" data-toggle="tooltip" data-placement="top" title="Delete collection" ).fa.fa-trash-o
-														li
-															a(href="#" data-toggle="tooltip" data-placement="top" title="Share collection" ).fa.fa-paper-plane-o
-														li
-															a(href="#" data-toggle="tooltip" data-placement="top" title="Edit collection" ).fa.fa-pencil.editaction
+											
 
 									li
 										.thumbnails
@@ -161,15 +150,7 @@ html
 												.count 20 Items
 												.date December 15, 2015
 												.user By Annac
-											.action-group
-												.wrap
-													ul
-														li
-															a(href="#" data-toggle="tooltip" data-placement="top" title="Delete collection" ).fa.fa-trash-o
-														li
-															a(href="#" data-toggle="tooltip" data-placement="top" title="Share collection" ).fa.fa-paper-plane-o
-														li
-															a(href="#" data-toggle="tooltip" data-placement="top" title="Edit collection" ).fa.fa-pencil.editaction
+											
 
 									li
 										.thumbnails
@@ -188,15 +169,7 @@ html
 												.count 20 Items
 												.date December 15, 2015
 												.user By Annac
-											.action-group
-												.wrap
-													ul
-														li
-															a(href="#" data-toggle="tooltip" data-placement="top" title="Delete collection" ).fa.fa-trash-o
-														li
-															a(href="#" data-toggle="tooltip" data-placement="top" title="Share collection" ).fa.fa-paper-plane-o
-														li
-															a(href="#" data-toggle="tooltip" data-placement="top" title="Edit collection" ).fa.fa-pencil.editaction
+											
 
 									li
 										.thumbnails
@@ -215,15 +188,7 @@ html
 												.count 20 Items
 												.date December 15, 2015
 												.user By Annac
-											.action-group
-												.wrap
-													ul
-														li
-															a(href="#" data-toggle="tooltip" data-placement="top" title="Delete collection" ).fa.fa-trash-o
-														li
-															a(href="#" data-toggle="tooltip" data-placement="top" title="Share collection" ).fa.fa-paper-plane-o
-														li
-															a(href="#" data-toggle="tooltip" data-placement="top" title="Edit collection" ).fa.fa-pencil.editaction
+											
 
 									li
 										.thumbnails
@@ -242,15 +207,7 @@ html
 												.count 20 Items
 												.date December 15, 2015
 												.user By Annac
-											.action-group
-												.wrap
-													ul
-														li
-															a(href="#" data-toggle="tooltip" data-placement="top" title="Delete collection" ).fa.fa-trash-o
-														li
-															a(href="#" data-toggle="tooltip" data-placement="top" title="Share collection" ).fa.fa-paper-plane-o
-														li
-															a(href="#" data-toggle="tooltip" data-placement="top" title="Edit collection" ).fa.fa-pencil.editaction
+											
 
 									li
 										.thumbnails
@@ -269,15 +226,7 @@ html
 												.count 20 Items
 												.date December 15, 2015
 												.user By Annac
-											.action-group
-												.wrap
-													ul
-														li
-															a(href="#" data-toggle="tooltip" data-placement="top" title="Delete collection" ).fa.fa-trash-o
-														li
-															a(href="#" data-toggle="tooltip" data-placement="top" title="Share collection" ).fa.fa-paper-plane-o
-														li
-															a(href="#" data-toggle="tooltip" data-placement="top" title="Edit collection" ).fa.fa-pencil.editaction
+											
 									li
 										.thumbnails
 											.category public
@@ -295,15 +244,7 @@ html
 												.count 20 Items
 												.date December 15, 2015
 												.user By Annac
-											.action-group
-												.wrap
-													ul
-														li
-															a(href="#" data-toggle="tooltip" data-placement="top" title="Delete collection" ).fa.fa-trash-o
-														li
-															a(href="#" data-toggle="tooltip" data-placement="top" title="Share collection" ).fa.fa-paper-plane-o
-														li
-															a(href="#" data-toggle="tooltip" data-placement="top" title="Edit collection" ).fa.fa-pencil.editaction
+											
 
 								a(href="#").loadmore 
 									| load more
@@ -438,31 +379,6 @@ html
 								.button-group
 									a(href="#").btn-green.cancel Close
 								
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

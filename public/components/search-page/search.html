@@ -7,30 +7,19 @@
           <div class="search">
             <!-- searchbar-->
             <section class="searchbar">
-              <div class="container-fluid">
-                <!-- wrap-->
-                <div class="wrap">
-                  <!-- settings bar-->
-                  <div class="settings"><a href="#" title="Filter settings" data-toggle="tooltip" data-placement="left" data-bind="event : {click: function(data, event) {showfacets(event)}}" data-bind="disable:$parent.searching"><img src="img/ui/ic-setting.png" alt="settings"></a></div>
-                  <!-- input-->
-                  <div class="searchbox" id="withsearchid"><img src="img/ui/ic-mag.png" alt="Search" class="icon" data-bind="attr: {src: searching()==true ? 'img/ui/ic-loading.gif' : 'img/ui/ic-mag.png'}, click: function() { search(true,true); }">
-                    <input type="text" data-bind="value: term" placeholder="Search media" class="searchinput">
-                  </div>
-                  <div class="provider" style="visibility:hidden">
-                    <!-- collection picker--><a id="picker" href="#" data-toggle="dropdown" class="picker"><span class="text">All Content Provider </span><span class="arrow"></span></a>
-                    <ul aria-labelledby="picker" class="dropdown-menu">
-                      <li><a href="#">Content Providers</a></li>
-                      <li><a href="#">WITH Content</a></li>
-                    </ul>
-                  </div>
+              <div class="container-fluid" id="withsearchid">
+                
+                    <!-- close search--><a href="void(0);"  data-bind="click: close" title="Close Search" class="close" data-toggle="tooltip" data-placement="left"><img src="img/ui/ic-close.png"></a>
+            
                   <!-- view setting-->
                   <ul class="view">
                        <li class="active" data-bind="event: {click: toggleSourceview}, enable: searching()==false"><a href="#" title="Column View" data-view="column" data-toggle="tooltip" data-placement="left"><img src="img/ui/ic-list.png" alt="list"></a></li>
                        <li data-bind="event: {click: toggleSourceview}, enable: searching()==false"><a href="#" title="Grid View" data-view="grid" data-toggle="tooltip" data-placement="right"><img src="img/ui/ic-grid.png" alt="grid"></a></li>
                   </ul>
-                </div>
-                <!-- close search--><a href="void(0);"  data-bind="click: close" title="Close Search" class="close" data-toggle="tooltip" data-placement="left"><img src="img/ui/ic-close.png"></a>
-              </div>
+               
+                 <!-- settings bar-->
+                <div class="settings"><a href="#" data-view="column" data-toggle="tooltip" data-placement="bottom" title="Search filter" data-bind="event : {click: function(data, event) {showfacets(event)}}" data-bind="disable:$parent.searching"><img src="img/ui/ic-setting.png" alt="settings"></a></div>
+               </div>
             </section>
             <!-- search filter-->
             <section class="searchlabel">
@@ -89,7 +78,7 @@
 				                
 				                  <!-- item-->
 				                  <div class="item"><a href="#" data-bind="event: { click: $parents[1].columnRecordSelect}" data-view="inline" class="mediaviewer">
-				                      <div class="imgwrap"><img onError="this.src='img/content/thumb-empty.png'" data-bind="attr: { src:thumb }" class="thumb"></div><span class="text" data-bind="text: title"></span></a></div>
+				                      <div class="imgwrap"><img onError="this.src='img/ui/ic-noimage.png'" data-bind="attr: { src:thumb }" class="thumb"></div><span class="text" data-bind="text: title"></span></a></div>
 				                  <!-- item-->
 				                  
 				                 </div>

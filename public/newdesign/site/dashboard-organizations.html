@@ -41,7 +41,7 @@
           </section>
           <!-- notification-->
           <section class="notification">
-            <!-- button--><a id="notificationbutton" href="#" title="notification" data-toggle="dropdown"><img src="img/ui/ic-notification.png"><span class="counter">12</span></a>
+            <!-- button--><a id="notificationbutton" href="#" title="Notification" data-toggle="dropdown"><img src="img/ui/ic-notification.png"><span class="counter">12</span></a>
             <!-- dropdown menu-->
             <div aria-labelledby="notificationbutton" class="dropdown-menu">
               <!-- header-->
@@ -57,9 +57,13 @@
             </div>
           </section>
           <!-- home-->
-          <section class="home"><a href="dashboard.html" title="Home"><img src="img/ui/ic-home.png" alt="Home"></a></section>
+          <section class="home"><a href="dashboard.html" title="Dashboard Home"><img src="img/ui/ic-home.png" alt="Home"></a></section>
           <!-- explore-->
-          <section class="explore"><a href="dashboard-search.html" title="explore"><img src="img/ui/ic-search.png"><span class="text">EXPLORE</span></a></section>
+          <section class="explore">
+            <!-- input search-->
+            <input type="text" placeholder="Search">
+            <!-- icon--><img src="img/ui/ic-mag.png" class="icon">
+          </section>
         </div>
       </div>
     </header>
@@ -80,6 +84,12 @@
                 <li><a href="dashboard-collection.html"><span class="counter">7</span><span class="icon"><i class="fa fa-clone"></i></span><span class="text">My Collection</span></a></li>
                 <li><a href="dashboard-exhibition.html"><span class="counter">10</span><span class="icon"><i class="fa fa-television"></i></span><span class="text">My Exhibition</span></a></li>
                 <li><a href="dashboard-favorite.html"><span class="counter">5</span><span class="icon"><i class="fa fa-heart-o"></i></span><span class="text">My Favorite</span></a></li>
+                <!-- li( class=page === "annotation" ? "active" : "" )
+                a(href='dashboard-annotation.html')
+                 span.icon
+                  i.fa.fa-edit
+                 span.text My Annotation
+                -->
                 <li class="active"><a href="dashboard-organizations.html"><span class="icon"><i class="fa fa-bookmark-o"></i></span><span class="text">Organizations</span></a></li>
                 <li><a href="dashboard-projects.html"><span class="icon"><i class="fa fa-comment-o"></i></span><span class="text">Projects</span></a></li>
               </ul>
@@ -113,6 +123,15 @@
               </section>
               <!-- collection main-->
               <section class="project-list">
+                <!-- collection main header-->
+                <div class="list-head">
+                  <!-- item count--><span class="item-count">7 organizations</span>
+                  <div class="filtertype"><img src="img/ui/ic-mag.png" class="mag">
+                    <input type="text" placeholder="Search organization" class="filtertext">
+                  </div>
+                  <!-- control-->
+                  <div class="list-control"><a href="#" data-toggle="tooltip" data-placement="top" title="API Calls" class="fa fa-rss detail-control single"></a></div>
+                </div>
                 <!-- listing-->
                 <ul class="list-body list">
                   <li>
@@ -127,7 +146,15 @@
                         <div class="date">December 15, 2015</div>
                         <div class="user">By Annac</div>
                       </div>
-                      <div class="action-group"><a href="#" data-toggle="tooltip" data-placement="top" title="Delete organization" class="fa fa-trash-o"></a><a href="dashboard-organizations-space.html" data-toggle="tooltip" data-placement="top" title="Edit organization space" class="fa fa-pencil"></a><a href="#" data-toggle="tooltip" data-placement="top" title="Manage members" class="fa fa-user members"></a></div>
+                      <div class="action-group">
+                        <div class="wrap">
+                          <ul>
+                            <li><a href="#" data-toggle="tooltip" data-placement="top" title="Delete organization" class="fa fa-trash-o"></a></li>
+                            <li><a href="dashboard-organizations-space.html" data-toggle="tooltip" data-placement="top" title="Edit organization space" class="fa fa-pencil"></a></li>
+                            <li><a href="#" data-toggle="tooltip" data-placement="top" title="Manage members" class="fa fa-user members"></a></li>
+                          </ul>
+                        </div>
+                      </div>
                     </div>
                   </li>
                   <li>
@@ -142,7 +169,15 @@
                         <div class="date">December 15, 2015</div>
                         <div class="user">By Annac</div>
                       </div>
-                      <div class="action-group"><a href="#" data-toggle="tooltip" data-placement="top" title="Delete organization" class="fa fa-trash-o"></a><a href="dashboard-organizations-space.html" data-toggle="tooltip" data-placement="top" title="Edit organization space" class="fa fa-pencil"></a><a href="#" data-toggle="tooltip" data-placement="top" title="Manage members" class="fa fa-user members"></a></div>
+                      <div class="action-group">
+                        <div class="wrap">
+                          <ul>
+                            <li><a href="#" data-toggle="tooltip" data-placement="top" title="Delete organization" class="fa fa-trash-o"></a></li>
+                            <li><a href="dashboard-organizations-space.html" data-toggle="tooltip" data-placement="top" title="Edit organization space" class="fa fa-pencil"></a></li>
+                            <li><a href="#" data-toggle="tooltip" data-placement="top" title="Manage members" class="fa fa-user members"></a></li>
+                          </ul>
+                        </div>
+                      </div>
                     </div>
                   </li>
                 </ul><a href="#" class="loadmore">load more
@@ -190,66 +225,82 @@
                 <div class="action-body">
                   <div class="group">
                     <div class="title">Users access</div>
-                    <div class="auto">
-                      <input type="text" placeholder="Start typing username" value="Lewis">
-                      <div style="position: absolute; max-height: 300px; z-index: 9999; top: 44px; left: 0; width: 329px;" class="autocomplete-suggestions">
-                        <div data-index="0" class="autocomplete-suggestion autocomplete-suggestion-extra"><strong>Lewis </strong>Kaldeli<span class="label pull-right">user</span></div>
-                        <div data-index="1" class="autocomplete-suggestion autocomplete-suggestion-extra"><strong>Lewis </strong>Mike<span class="label pull-right">user</span></div>
-                        <div data-index="2" class="autocomplete-suggestion autocomplete-suggestion-extra"><strong>Lewis </strong>Robert<span class="label pull-right">user</span></div>
-                      </div>
-                    </div>
-                    <ul class="access-list">
+                    <input type="text" placeholder="Start typing username">
+                    <ul class="members-list">
                       <li>
-                        <div class="thumbnails"><img src="img/content/img-profile.jpg"></div><a href="#" data-toggle="tooltip" data-placement="top" title="List view" class="trash"><i class="fa fa-trash"></i></a>
                         <div class="toggle">
                           <input type="checkbox" id="u1">
-                          <label for="u1"></label><span class="private">view</span><span class="public">co-edit</span>
+                          <label for="u1"></label><span class="member">member</span><span class="admin">admin</span>
                         </div>
+                        <div class="thumbnails"><img src="img/content/img-profile.jpg"><a href="#" class="trash"><i class="fa fa-trash"></i></a></div>
+                        <div class="username">Username 1</div>
                       </li>
                       <li>
-                        <div class="thumbnails"><img src="img/content/img-profile.jpg"></div><a href="#" data-toggle="tooltip" data-placement="top" title="List view" class="trash"><i class="fa fa-trash"></i></a>
                         <div class="toggle">
                           <input type="checkbox" id="u2">
-                          <label for="u2"></label><span class="private">view</span><span class="public">co-edit</span>
+                          <label for="u2"></label><span class="member">member</span><span class="admin">admin</span>
                         </div>
+                        <div class="thumbnails"><img src="img/content/img-profile.jpg"><a href="#" class="trash"><i class="fa fa-trash"></i></a></div>
+                        <div class="username">Username 2 lorem</div>
                       </li>
                       <li>
-                        <div class="thumbnails"><img src="img/content/img-profile.jpg"></div><a href="#" data-toggle="tooltip" data-placement="top" title="List view" class="trash"><i class="fa fa-trash"></i></a>
                         <div class="toggle">
                           <input type="checkbox" id="u3">
-                          <label for="u3"></label><span class="private">view</span><span class="public">co-edit</span>
+                          <label for="u3"></label><span class="member">member</span><span class="admin">admin</span>
                         </div>
+                        <div class="thumbnails"><img src="img/content/img-profile.jpg"><a href="#" class="trash"><i class="fa fa-trash"></i></a></div>
+                        <div class="username">Username 3</div>
                       </li>
                       <li>
-                        <div class="thumbnails"><img src="img/content/img-profile.jpg"></div><a href="#" data-toggle="tooltip" data-placement="top" title="List view" class="trash"><i class="fa fa-trash"></i></a>
                         <div class="toggle">
                           <input type="checkbox" id="u4">
-                          <label for="u4"></label><span class="private">view</span><span class="public">co-edit</span>
+                          <label for="u4"></label><span class="member">member</span><span class="admin">admin</span>
                         </div>
+                        <div class="thumbnails"><img src="img/content/img-profile.jpg"><a href="#" class="trash"><i class="fa fa-trash"></i></a></div>
+                        <div class="username">Username 4</div>
+                      </li>
+                      <li>
+                        <div class="toggle">
+                          <input type="checkbox" id="u5">
+                          <label for="u5"></label><span class="member">member</span><span class="admin">admin</span>
+                        </div>
+                        <div class="thumbnails"><img src="img/content/img-profile.jpg"><a href="#" class="trash"><i class="fa fa-trash"></i></a></div>
+                        <div class="username">Username 3</div>
+                      </li>
+                      <li>
+                        <div class="toggle">
+                          <input type="checkbox" id="u6">
+                          <label for="u6"></label><span class="member">member</span><span class="admin">admin</span>
+                        </div>
+                        <div class="thumbnails"><img src="img/content/img-profile.jpg"><a href="#" class="trash"><i class="fa fa-trash"></i></a></div>
+                        <div class="username">Username 4</div>
                       </li>
                     </ul>
                   </div>
                   <div class="group">
                     <div class="title">Groups access</div>
                     <input type="text" placeholder="Start typing group name">
-                    <ul class="access-list">
-                      <li class="blue"><span class="text">DK</span><a href="#" data-toggle="tooltip" data-placement="top" title="List view" class="trash"><i class="fa fa-trash"></i></a>
+                    <ul class="members-list">
+                      <li class="blue"><span class="text">ES<a href="#" class="trash"><i class="fa fa-trash"></i></a></span>
                         <div class="toggle">
                           <input type="checkbox" id="g1">
-                          <label for="g1"></label><span class="private">view</span><span class="public">co-edit</span>
+                          <label for="g1"></label><span class="member">member</span><span class="admin">admin</span>
                         </div>
+                        <div class="username">Europeana Space</div>
                       </li>
-                      <li class="green"><span class="text">US</span><a href="#" data-toggle="tooltip" data-placement="top" title="List view" class="trash"><i class="fa fa-trash"></i></a>
+                      <li class="green"><span class="text">SA<a href="#" class="trash"><i class="fa fa-trash"></i></a></span>
                         <div class="toggle">
                           <input type="checkbox" id="g2">
-                          <label for="g2"></label><span class="private">view</span><span class="public">co-edit</span>
+                          <label for="g2"></label><span class="member">member</span><span class="admin">admin</span>
                         </div>
+                        <div class="username">SOCIAL ART</div>
                       </li>
-                      <li class="orange"><span class="text">MN</span><a href="#" data-toggle="tooltip" data-placement="top" title="List view" class="trash"><i class="fa fa-trash"></i></a>
+                      <li class="orange"><span class="text">UF<a href="#" class="trash"><i class="fa fa-trash"></i></a></span>
                         <div class="toggle">
                           <input type="checkbox" id="g3">
-                          <label for="g3"></label><span class="private">view</span><span class="public">co-edit</span>
+                          <label for="g3"></label><span class="member">member</span><span class="admin">admin</span>
                         </div>
+                        <div class="username">UNIVERSITY FELLOW</div>
                       </li>
                     </ul>
                   </div>
