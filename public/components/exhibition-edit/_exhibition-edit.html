@@ -7,24 +7,20 @@
 			<main>
 				<!-- collection section-->
 				<section class="exhibition">
-				   <!-- toggle-->
-	              <div class="toggle exhibitiontoggle">
-	                <input type="checkbox" id="toggle2">
-	                <label for="toggle2"></label><span class="private">private</span><span class="public">public</span>
-	              </div>
-	              <!-- head-->
-	              <div class="list-head">
-	                 <a href="void(0);"  onclick="window.history.go(-1); return false;" data-toggle="tooltip" data-placement="top" title="Back to previous page" class="back"><i class="fa fa-angle-left"></i></a>
-								
-	                <!-- control-->
-	                <ul class="organization-list-control">
-	                  <li><a href="exhibition-view.html" data-toggle="tooltip" data-placement="top" title="Preview Exhibition" class="fa fa-eye" data-bind="attr: {href: 'index.html#exhibitionview/'+dbId()}" ></a></li>
-	                  <li><a href="#" data-toggle="tooltip" data-placement="top" title="Add credits section" class="fa fa-copyright creditbutton"></a></li>
-	                  <li><a href="#" data-toggle="tooltip" data-placement="top" data-bind="click: bindFileUpload"  title="Upload background image" class="fa fa-image upload exhibition"></a></li>
-	                  <li><a href="#" data-toggle="tooltip" data-placement="top" title="Delete Exhibition" class="fa fa-trash"></a></li>
-	                </ul>
-	              </div>
-					
+					<!-- head-->
+					<div class="list-head">
+						<!-- back-->
+						<div class="title">Exhibition Editor</div>
+						<!-- control-->
+						<div class="list-control">
+							<a title="Preview Exhibition" data-placement="top" data-toggle="tooltip" data-bind="attr: {href: 'index.html#exhibitionview/'+dbId()}" class="fa fa-eye"></a>
+							<a id="coverImg" href="#" data-bind="click: bindFileUpload" data-toggle="tooltip" data-placement="top" title="Upload background image" class="fa fa-image exhibition"></a>
+							<div class="toggle">
+								<input type="checkbox" id="toggle2">
+								<label for="toggle2"></label><span class="private">private</span><span class="public">public</span>
+							</div>
+						</div>
+					</div>
 					<!-- editor box-->
 					<div class="editorbox">
 						<div class="wrap" >
@@ -47,8 +43,7 @@
 									<div class="boxaction">
 										<ul>
 										<li><a href="#" data-toggle="tooltip" data-placement="top" title="Edit item text" data-bind="click: $parent.prepareForItemEdit" class="editbox"> <i class="fa fa-pencil-square-o"></i></a></li>
-										 <li><a href="#" data-toggle="tooltip" data-placement="top" title="Add media" class="addmediabutton"><i class="fa fa-play-circle"></i></a></li>
-                          				<li><a href="#" data-toggle="tooltip" data-placement="top" title="Delete item" data-bind="click: $parent.xButtonClicked"> <i class="fa fa-trash-o"></i></a><li>
+										<li><a href="#" data-toggle="tooltip" data-placement="top" title="Delete item" data-bind="click: $parent.xButtonClicked"> <i class="fa fa-trash-o"></i></a><li>
 										</ul>
 									</div>
 									<div class="left">
@@ -94,7 +89,11 @@
 				                        </ul>
 				                     </div>
 				                     <!-- /ko -->
-				                     
+				                     <!-- ko else -->
+									 <div class="video"><a href="javascript:void(0)" data-toggle="tooltip" data-placement="top" title="Add video" class="addvideo videobox" data-bind="click: $parent.prepareForItemEdit">
+									 	<img src="img/ui/ic-add.png"></a>
+									 </div>
+									 <!-- /ko -->
 									<div id="loadingIcon">
 										<i class="fa fa-spinner fa-pulse"></i>
 									</div>
@@ -160,13 +159,13 @@
 					</div>
 					<div class="action-body">
 						<textarea type="text" placeholder="Add text" data-bind="value: itemText"></textarea>
-						<div class="sectionside">
-		                  <div class="head">Media location</div>
-		                  <div class="toggle">
-		                    <input type="checkbox" id="toggle3">
-		                    <label for="toggle3"></label><span class="private">left</span><span class="public">right</span>
-		                  </div>
-		                </div>
+						<!--  <div class="sectionside">
+							<div class="head">Media location</div>
+							<div class="toggle">
+								<input type="checkbox" id="toggle3">
+								<label for="toggle3"></label><span class="private">left</span><span class="public">right</span>
+							</div>
+						</div> -->
 					</div>
 					<div class="button-group"><a class="btn-green-o cancel" data-bind="click: closeSideBar">Cancel</a>
 					<a class="btn-green" data-bind="click: editItem.bind($data, 'editText')">Save</a></div>
@@ -182,38 +181,6 @@
 					<div class="button-group"><a class="btn-green-o cancel" data-bind="click: closeSideBar">Cancel</a>
 					<a class="btn-green" data-bind="click: editItem.bind($data, 'editVideo')">Save</a></div>
 				</section>
-				
-				 <!-- collection new-->
-            <section class="action creditsection">
-              <div class="action-header">
-                <div class="title">Add credit</div>
-              </div>
-              <div class="action-body">
-                <textarea type="text" placeholder="About me">Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidunt ut laoreet dolore magna aliquam erat volutpat.</textarea>
-              </div>
-              <div class="button-group"><a href="#" class="btn-green-o cancel">Cancel</a><a href="#" class="btn-green">Save</a></div>
-            </section>
-            <!-- collection give access-->
-            <section class="action addmediasection">
-              <div class="action-header">
-                <div class="title">Add media</div>
-              </div>
-              <div class="action-body">
-                <div class="group">
-                  <div class="title">Select media type</div>
-                  <select class="form-control">
-                    <option>Video</option>
-                    <option>Audio</option>
-                  </select>
-                </div>
-                <div class="group">
-                  <div class="title">Media URL</div>
-                  <input type="text" value="http://">
-                  <textarea type="text" placeholder="Media description"></textarea>
-                </div>
-              </div>
-              <div class="button-group"><a href="#" class="btn-green-o cancel">Cancel</a><a href="#" class="btn-green">Add media</a></div>
-            </section>
 			</main>
 		</div>
 	</div>
