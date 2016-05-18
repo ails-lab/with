@@ -66,7 +66,6 @@ public class HistorypinSpaceSource extends ISpaceSource {
 	
 	public HistorypinSpaceSource() {
 		super(Sources.Historypin);
-		vmap = FilterValuesMap.getHistorypinMap();
 		addDefaultWriter(CommonFilters.TYPE.getId(), qfwriter("pin"));
 		formatreader = new HistorypinRecordFormatter();
 

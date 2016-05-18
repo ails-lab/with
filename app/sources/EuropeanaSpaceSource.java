@@ -59,11 +59,19 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 	
 	private boolean usingCursor = false;
 	private String nextCursor;
+	private String profile;
 	
+	public String getProfile() {
+		return profile;
+	}
+
+	public void setProfile(String profile) {
+		this.profile = profile;
+	}
+
 	public EuropeanaSpaceSource() {
 		super(Sources.Europeana);
-		vmap = FilterValuesMap.getEuropeanaMap();
-		
+		profile = "rich facets";
 		apiKey = "SECRET_KEY";
 		
 		addDefaultQueryModifier(CommonFilters.MIME_TYPE.getId(), qwriter("MIME_TYPE"));
@@ -214,7 +222,7 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 		builder.addSearchParam("start", "" + (((Integer.parseInt(q.page) - 1) * Integer.parseInt(q.pageSize)) + 1));
 
 		builder.addSearchParam("rows", "" + q.pageSize);
-		builder.addSearchParam("profile", "rich facets");
+		builder.addSearchParam("profile", profile);
 		String facets = "DEFAULT";
 		if (q.facetsMode != null) {
 			switch (q.facetsMode) {
