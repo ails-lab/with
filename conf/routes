@@ -107,6 +107,7 @@ DELETE 	/media/:id								controllers.MediaController.deleteMedia(id)
 # User Manager Controller
 POST	/user/register						    controllers.UserManager.register()
 POST	/user/login							    controllers.UserManager.login()
+POST	/user/facebookLogin						controllers.UserManager.facebookLogin()
 GET		/user/logout						    controllers.UserManager.logout()
 GET		/user/emailAvailable	                controllers.UserManager.emailAvailable(email:java.lang.String)
 GET		/user/token				                controllers.UserManager.getToken()
