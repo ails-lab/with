@@ -41,7 +41,7 @@
           </section>
           <!-- notification-->
           <section class="notification">
-            <!-- button--><a id="notificationbutton" href="#" title="notification" data-toggle="dropdown"><img src="img/ui/ic-notification.png"><span class="counter">12</span></a>
+            <!-- button--><a id="notificationbutton" href="#" title="Notification" data-toggle="dropdown"><img src="img/ui/ic-notification.png"><span class="counter">12</span></a>
             <!-- dropdown menu-->
             <div aria-labelledby="notificationbutton" class="dropdown-menu">
               <!-- header-->
@@ -57,9 +57,13 @@
             </div>
           </section>
           <!-- home-->
-          <section class="home"><a href="dashboard.html" title="Home"><img src="img/ui/ic-home.png" alt="Home"></a></section>
+          <section class="home"><a href="dashboard.html" title="Dashboard Home"><img src="img/ui/ic-home.png" alt="Home"></a></section>
           <!-- explore-->
-          <section class="explore"><a href="dashboard-search.html" title="explore"><img src="img/ui/ic-search.png"><span class="text">EXPLORE</span></a></section>
+          <section class="explore">
+            <!-- input search-->
+            <input type="text" placeholder="Search">
+            <!-- icon--><img src="img/ui/ic-mag.png" class="icon">
+          </section>
         </div>
       </div>
     </header>
@@ -80,6 +84,12 @@
                 <li><a href="dashboard-collection.html"><span class="counter">7</span><span class="icon"><i class="fa fa-clone"></i></span><span class="text">My Collection</span></a></li>
                 <li class="active"><a href="dashboard-exhibition.html"><span class="counter">10</span><span class="icon"><i class="fa fa-television"></i></span><span class="text">My Exhibition</span></a></li>
                 <li><a href="dashboard-favorite.html"><span class="counter">5</span><span class="icon"><i class="fa fa-heart-o"></i></span><span class="text">My Favorite</span></a></li>
+                <!-- li( class=page === "annotation" ? "active" : "" )
+                a(href='dashboard-annotation.html')
+                 span.icon
+                  i.fa.fa-edit
+                 span.text My Annotation
+                -->
                 <li><a href="dashboard-organizations.html"><span class="icon"><i class="fa fa-bookmark-o"></i></span><span class="text">Organizations</span></a></li>
                 <li><a href="dashboard-projects.html"><span class="icon"><i class="fa fa-comment-o"></i></span><span class="text">Projects</span></a></li>
               </ul>
@@ -100,17 +110,21 @@
           <main>
             <!-- collection section-->
             <section class="exhibition">
+              <!-- toggle-->
+              <div class="toggle exhibitiontoggle">
+                <input type="checkbox" id="toggle2">
+                <label for="toggle2"></label><span class="private">private</span><span class="public">public</span>
+              </div>
               <!-- head-->
               <div class="list-head">
-                <!-- back-->
-                <div class="title">Exhibition Editor</div>
+                <!-- back--><a href="dashboard-collection.html" data-toggle="tooltip" data-placement="top" title="Back to collection list" class="back"><i class="fa fa-angle-left"></i></a>
                 <!-- control-->
-                <div class="list-control"><a title="" data-placement="top" data-toggle="tooltip" href="exhibition-view.html" data-original-title="Preview Exhibition" class="fa fa-eye"></a><a href="#" data-toggle="tooltip" data-placement="top" title="Upload background image" class="fa fa-image upload exhibition"></a>
-                  <div class="toggle">
-                    <input type="checkbox" id="toggle2">
-                    <label for="toggle2"></label><span class="private">private</span><span class="public">public</span>
-                  </div>
-                </div>
+                <ul class="organization-list-control">
+                  <li><a href="exhibition-view.html" data-toggle="tooltip" data-placement="top" title="View Organization page" class="fa fa-eye"></a></li>
+                  <li><a href="#" data-toggle="tooltip" data-placement="top" title="Add credits section" class="fa fa-copyright creditbutton"></a></li>
+                  <li><a href="#" data-toggle="tooltip" data-placement="top" title="Upload background image" class="fa fa-image upload exhibition"></a></li>
+                  <li><a href="#" data-toggle="tooltip" data-placement="top" title="Delete Organization" class="fa fa-trash"></a></li>
+                </ul>
               </div>
               <!-- editor box-->
               <div class="editorbox">
@@ -138,6 +152,7 @@
                       <div class="boxaction">
                         <ul>
                           <li><a href="#" data-toggle="tooltip" data-placement="top" title="Edit section" class="editbox"><i class="fa fa-pencil-square-o"></i></a></li>
+                          <li><a href="#" data-toggle="tooltip" data-placement="top" title="Add media" class="addmediabutton"><i class="fa fa-play-circle"></i></a></li>
                           <li><a href="#" data-toggle="tooltip" data-placement="top" title="Delete section"><i class="fa fa-trash-o"></i></a></li>
                         </ul>
                       </div>
@@ -151,7 +166,6 @@
                           <p>The path of a cosmonaut is not an easy, triumphant march to glory. You have to get to know the meaning not just of joy but also of grief, before being allowed in the spacecraft cabin.</p>
                         </div>
                       </div>
-                      <div class="video"><a href="#" data-toggle="tooltip" data-placement="top" title="Add video" class="addvideo"><img src="img/ui/ic-add.png"></a></div>
                     </div>
                     <!-- add-->
                     <div data-toggle="tooltip" data-placement="top" title="Drag your media here" class="add"><span><a href="#"><img src="img/ui/ic-add.png"></a></span></div>
@@ -160,6 +174,7 @@
                       <div class="boxaction">
                         <ul>
                           <li><a href="#" data-toggle="tooltip" data-placement="top" title="Edit section" class="editbox"><i class="fa fa-pencil-square-o"></i></a></li>
+                          <li><a href="#" data-toggle="tooltip" data-placement="top" title="Add media" class="addmediabutton"><i class="fa fa-play-circle"></i></a></li>
                           <li><a href="#" data-toggle="tooltip" data-placement="top" title="Delete section"><i class="fa fa-trash-o"></i></a></li>
                         </ul>
                       </div>
@@ -193,6 +208,7 @@
                       <div class="boxaction">
                         <ul>
                           <li><a href="#" data-toggle="tooltip" data-placement="top" title="Edit section" class="editbox"><i class="fa fa-pencil-square-o"></i></a></li>
+                          <li><a href="#" data-toggle="tooltip" data-placement="top" title="Add media" class="addmediabutton"><i class="fa fa-play-circle"></i></a></li>
                           <li><a href="#" data-toggle="tooltip" data-placement="top" title="Delete section"><i class="fa fa-trash-o"></i></a></li>
                         </ul>
                       </div>
@@ -314,6 +330,37 @@
                 </div>
               </div>
               <div class="button-group"><a href="#" class="btn-green-o cancel">Cancel</a><a href="#" class="btn-green">Save</a></div>
+            </section>
+            <!-- collection new-->
+            <section class="action creditsection">
+              <div class="action-header">
+                <div class="title">Add credit</div>
+              </div>
+              <div class="action-body">
+                <textarea type="text" placeholder="About me">Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidunt ut laoreet dolore magna aliquam erat volutpat.</textarea>
+              </div>
+              <div class="button-group"><a href="#" class="btn-green-o cancel">Cancel</a><a href="#" class="btn-green">Save</a></div>
+            </section>
+            <!-- collection give access-->
+            <section class="action addmediasection">
+              <div class="action-header">
+                <div class="title">Add media</div>
+              </div>
+              <div class="action-body">
+                <div class="group">
+                  <div class="title">Select media type</div>
+                  <select class="form-control">
+                    <option>Video</option>
+                    <option>Audio</option>
+                  </select>
+                </div>
+                <div class="group">
+                  <div class="title">Media URL</div>
+                  <input type="text" value="http://">
+                  <textarea type="text" placeholder="Media description"></textarea>
+                </div>
+              </div>
+              <div class="button-group"><a href="#" class="btn-green-o cancel">Cancel</a><a href="#" class="btn-green">Add media</a></div>
             </section>
           </main>
         </div>

@@ -234,7 +234,7 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 		        	withUrl=newRecord.media()[0].Thumbnail.url();
 		        }       
 			    if (withUrl == "") {
-						newRecord.thumbnailUrl = ko.observable("img/content/thumb-empty.png");
+						newRecord.thumbnailUrl = ko.observable("img/ui/ic-noimage.png");
 			    }
 			    else {
 				   if (withUrl.indexOf("/media") == 0) {

@@ -58,7 +58,7 @@ define(['knockout', 'text!./_exhibition-view.html', 'app', 'magnific-popup', 'sl
 				self.collectedIn = usage.collectedIn;
 			}
 
-			self.thumb = media[0] != null && media[0].Thumbnail != null && media[0].Thumbnail.url != "null" ? media[0].Thumbnail.url : "img/content/thumb-empty.png";
+			self.thumb = media[0] != null && media[0].Thumbnail != null && media[0].Thumbnail.url != "null" ? media[0].Thumbnail.url : "img/ui/ic-noimage.png";
 			//self.fullres = media[0] != null && media[0].Original != null && media[0].Original.url != "null" ? media[0].Original.url : null,
 			if(media[0] != null && media[0].Original != null && media[0].Original.url != "null"){
 				self.fullres(media[0].Original.url);
