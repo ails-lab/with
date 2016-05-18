@@ -21,6 +21,7 @@ import play._
 import play.api.Logger
 import play.api.mvc.Controller
 import play.api.mvc.Action
+import filters.FilterUtils
 
 object CustomAssets extends Controller {
    val log = Logger(this.getClass())
