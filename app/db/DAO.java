@@ -43,8 +43,10 @@ import org.mongodb.morphia.query.UpdateResults;
 import play.Logger;
 import play.libs.F.Callback;
 import sources.core.ParallelAPICall;
+import utils.MetricsUtils;
 import utils.Tuple;
 
+import com.codahale.metrics.Timer;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBCursor;
@@ -377,6 +379,18 @@ public class DAO<E> extends BasicDAO<E, ObjectId> {
 	}
 
 	/**
+	 * Get a resource by the dbId and exclude a bunch fields from the whole document
+	 *
+	 */
+	public E getByIdAndExclude(ObjectId id, List<String> excludedFields) {
+		Query<E> q = this.createQuery().field("_id").equal(id);
+		if (excludedFields != null)
+			q.retrievedFields(false,
+					excludedFields.toArray(new String[excludedFields.size()]));
+		return this.findOne(q);
+	}
+
+	/**
 	 * Remove an entiry by dbId
 	 *
 	 * @param id
@@ -409,8 +423,9 @@ public class DAO<E> extends BasicDAO<E, ObjectId> {
 
 	public boolean existsFieldWithValue(String field, Object value) {
 		Query<E> q = this.createQuery().disableValidation().field(field)
-				.equal(value).limit(1);
-		return (this.find(q).asList().size() == 0 ? false : true);
+				.equal(value).retrievedFields(true, "_id").limit(1);
+
+		return (this.find(q).asKeyList().size() == 0 ? false : true);
 	}
 
 	public boolean existsFieldsWithValues(
@@ -419,7 +434,7 @@ public class DAO<E> extends BasicDAO<E, ObjectId> {
 		for (Tuple<String, Object> tuple : fieldValues) {
 			q.field(tuple.x).equal(tuple.y);
 		}
-		return (this.find(q).asList().size() == 0 ? false : true);
+		return (this.findIds(q).size() == 0 ? false : true);
 	}
 
 	public boolean existsEntity(ObjectId id) {
