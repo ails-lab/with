@@ -470,7 +470,12 @@ public class GroupManager extends Controller {
 				if ((u = DB.getUserDAO().get(oid)) == null) {
 					log.error("No User with dbId: " + oid);
 				}
-				users.add(userOrGroupJson(u));
+				ObjectNode userJSON = userOrGroupJson(u);
+				if(group.getAdminIds().contains(oid))
+					userJSON.put("isAdmin","true");
+				else
+					userJSON.put("isAdmin","false");
+				users.add(userJSON);
 			}
 		}
 		if ((category.equals("groups") || category.equals("both"))) {
