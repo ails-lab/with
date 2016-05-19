@@ -21,7 +21,7 @@
 	                  <li><a href="exhibition-view.html" data-toggle="tooltip" data-placement="top" title="Preview Exhibition" class="fa fa-eye" data-bind="attr: {href: 'index.html#exhibitionview/'+dbId()}" ></a></li>
 	                  <li><a href="#" data-toggle="tooltip" data-placement="top" title="Add credits section" class="fa fa-copyright creditbutton"></a></li>
 	                  <li><a href="#" data-toggle="tooltip" data-placement="top" data-bind="click: bindFileUpload" title="Upload background image" class="fa fa-image upload exhibition"></a></li>
-	                  <li><a href="#" data-toggle="tooltip" data-placement="top" title="Delete Exhibition" class="fa fa-trash"></a></li>
+	                  <li><a href="#" data-toggle="tooltip" data-bind="click: deleteExhibition.bind($data, $root)" data-placement="top" title="Delete Exhibition" class="fa fa-trash"></a></li>
 	                </ul>
 	              </div>
 					

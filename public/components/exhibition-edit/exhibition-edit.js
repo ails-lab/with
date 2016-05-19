@@ -627,6 +627,41 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 			});
 		}
 		
+		self.deleteExhibition = function() {
+			//ko.contextFor(mycollections).$data.deleteMyCollection(exhibition);
+			//copy-pasted here from mycollections!!!
+			self.showDelCollPopup(self.title(), self.dbId());
+			self.closeSideBar();
+		}
+		
+		//copy-pasted from mycollections!!!
+		self.showDelCollPopup = function (collectionTitle, collectionId) {
+			var myself = this;
+			myself.id = collectionId;
+			$.smkConfirm({
+				text: "All records in " + collectionTitle + " will be deleted. Are you sure?",
+				accept: 'Delete',
+				cancel: 'Cancel'
+			}, function (ee) {
+				if (ee) {
+					deleteCollection(myself.id);
+				}
+			});
+		};
+		
+		deleteCollection = function (collectionId) {
+			$.ajax({
+				"url": "/collection/" + collectionId,
+				"method": "DELETE",
+				success: function (result) {
+					$.smkAlert({text: 'Collection removed', type: 'success'});
+					//redirect to myCollections
+					window.location.href = "#mycollections";
+				}
+			});
+		};
+
+		
 		self.bindFileUpload = function() {
 			$('.action').removeClass('active');
 			$('.action.upload').addClass('active');				
