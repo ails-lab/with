@@ -211,7 +211,7 @@ public abstract class WithController extends Controller {
 		    	}
 			}
 			catch (NoSuchMethodException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-				log.error("Error in accessing or invoking a method of WithResource via reflection.");
+				log.error("Error in accessing or invoking a method of WithResource via reflection.", e);
 			}
 	    }
 	}
