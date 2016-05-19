@@ -86,11 +86,10 @@ public class UserAndGroupManager extends WithController {
 					prefix);
 			List<UserGroup> groups2 = DB.getUserGroupDAO().getByFriendlyNamePrefix(prefix);
 			groups.addAll(groups2);
-			List<String> effectiveUserIds = effectiveUserIds();
-			ObjectId userId = new ObjectId(effectiveUserIds.get(0));
+			ObjectId userId = effectiveUserDbId();
 			for (UserGroup group : groups) {
 				if (!onlyParents
-						|| (onlyParents && group.getUsers().contains(userId))) {
+						|| (userId != null && onlyParents && group.getUsers().contains(userId))) {
 					ObjectNode node = Json.newObject().objectNode();
 					ObjectNode data = Json.newObject().objectNode();
 					data.put("category", "group");
@@ -207,8 +206,7 @@ public class UserAndGroupManager extends WithController {
 	public static Result addUserOrGroupToGroup(String id, String groupId) {
 		ObjectNode result = Json.newObject();
 		try {
-			String adminId = effectiveUserId(session().get(
-					"effectiveUserIds"));
+			String adminId = effectiveUserId();
 			if ((adminId == null) || (adminId.equals(""))) {
 				result.put("error",
 						"Only administrators of the group have the right to edit the group");
@@ -313,8 +311,7 @@ public class UserAndGroupManager extends WithController {
 	public static Result removeUserOrGroupFromGroup(String id, String groupId) {
 		ObjectNode result = Json.newObject();
 		try {
-			String adminId = effectiveUserId(session().get(
-					"effectiveUserIds"));
+			String adminId = effectiveUserId();
 			if ((adminId == null) || (adminId.equals(""))) {
 				result.put("error",
 						"Only creator or administrators of the group have the right to edit the group");
@@ -410,8 +407,7 @@ public class UserAndGroupManager extends WithController {
 	public static Result joinGroup(String groupId) {
 		ObjectNode result = Json.newObject();
 		try {
-			String userId = effectiveUserId(session().get(
-					"effectiveUserIds"));
+			String userId = effectiveUserId();
 			if (userId == null) {
 				result.put("error", "Must specify user for join request");
 				return forbidden(result);
@@ -466,8 +462,7 @@ public class UserAndGroupManager extends WithController {
 	public static Result leaveGroup(String groupId) {
 		ObjectNode result = Json.newObject();
 		try {
-			String userId = effectiveUserId(session().get(
-					"effectiveUserIds"));
+			String userId = effectiveUserId();
 			if (userId == null) {
 				result.put("error", "Must specify user for join request");
 				return forbidden(result);
@@ -536,8 +531,7 @@ public class UserAndGroupManager extends WithController {
 	public static Result addAdminToGroup(String id, String groupId){
 		ObjectNode result = Json.newObject();
 		try {
-			String adminId = effectiveUserId(session().get(
-					"effectiveUserIds"));
+			String adminId = effectiveUserId();
 			if ((adminId == null) || (adminId.equals(""))) {
 				result.put("error",
 						"Only creator or administrators of the group have the right to edit the group");
@@ -585,8 +579,7 @@ public class UserAndGroupManager extends WithController {
 	public static Result removeAdminFromGroup(String id, String groupId){
 		ObjectNode result = Json.newObject();
 		try {
-			String adminId = effectiveUserId(session().get(
-					"effectiveUserIds"));
+			String adminId = effectiveUserId();
 			if ((adminId == null) || (adminId.equals(""))) {
 				result.put("error",
 						"Only creator or administrators of the group have the right to edit the group");

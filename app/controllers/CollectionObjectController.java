@@ -89,7 +89,7 @@ public class CollectionObjectController extends WithResourceController {
 			// Parse the query.
 			try {
 				ObjectNode resultInfo = Json.newObject();
-				ObjectId creatorDbId = new ObjectId(session().get("user"));
+				ObjectId creatorDbId = new ObjectId(loggedInUser());
 				final CommonQuery q = Utils.parseJson(json.get("query"));
 				final String cname = json.get("collectionName").toString();
 				final int limit = (json.has("limit")) ? json.get("limit")
@@ -127,7 +127,7 @@ public class CollectionObjectController extends WithResourceController {
 
 	public static Result importIDs(String cname, String source, String ids) {
 		ObjectNode resultInfo = Json.newObject();
-		ObjectId creatorDbId = new ObjectId(session().get("user"));
+		ObjectId creatorDbId = new ObjectId(loggedInUser());
 		CollectionObject ccid = null;
 		if (!isCollectionCreated(creatorDbId, cname)) {
 			CollectionObject collection = new SimpleCollection();
@@ -168,7 +168,7 @@ public class CollectionObjectController extends WithResourceController {
 		collection.getDescriptiveData()
 				.setLabel(new MultiLiteral(id).fillDEF());
 		ObjectNode resultInfo = Json.newObject();
-		ObjectId creatorDbId = new ObjectId(session().get("user"));
+		ObjectId creatorDbId = new ObjectId(loggedInUser());
 		boolean success = internalAddCollection(collection,
 				WithResourceType.SimpleCollection, creatorDbId, resultInfo);
 		if (!success)
@@ -265,7 +265,7 @@ public class CollectionObjectController extends WithResourceController {
 	public static Result exportCollectionObjectToOWL(String cname) {
 		
 		ObjectNode resultInfo = Json.newObject();
-		ObjectId creatorDbId = new ObjectId(session().get("user"));
+		ObjectId creatorDbId = new ObjectId(loggedInUser());
 		CollectionObject ccid = null;
 		if (!isCollectionCreated(creatorDbId, cname)) {
 			return badRequest(resultInfo);
@@ -322,11 +322,11 @@ public class CollectionObjectController extends WithResourceController {
 				|| (WithResourceType.valueOf(colType) == null))
 			colType = WithResourceType.SimpleCollection.toString();
 		try {
-			if (session().get("user") == null) {
+			ObjectId creatorDbId = effectiveUserDbId();
+			if (creatorDbId == null) {
 				error.put("error", "No rights for WITH resource creation");
 				return forbidden(error);
 			}
-			ObjectId creatorDbId = new ObjectId(session().get("user"));
 			Class<?> clazz = Class.forName("model.resources.collection."
 					+ colType);
 			CollectionObject collection = (CollectionObject) Json.fromJson(json,
@@ -485,10 +485,9 @@ public class CollectionObjectController extends WithResourceController {
 						+ colType);
 			CollectionObject collectionChanges = (CollectionObject) Json.fromJson(json,
 					clazz);
-			ObjectId creatorDbId = new ObjectId(session().get("user"));
 			if ((collectionChanges.getDescriptiveData().getLabel() != null)
 					&& DB.getCollectionObjectDAO().existsOtherForOwnerAndLabel(
-							creatorDbId,
+							effectiveUserDbId(),
 							null,
 							collectionChanges.getDescriptiveData().getLabel()
 									.get(Language.DEFAULT), collectionDbId)) {
@@ -837,10 +836,10 @@ public class CollectionObjectController extends WithResourceController {
 	 * @return
 	 */
 	public static Result getFavoriteCollection(String profile, Option<String> locale) {
-		if (session().get("user") == null) {
+		ObjectId userId = new ObjectId(loggedInUser());
+		if (userId == null) {
 			return forbidden();
 		}
-		ObjectId userId = new ObjectId(session().get("user"));
 		CollectionObject favorite;
 		ObjectId favoritesId;
 		if ((favorite = DB.getCollectionObjectDAO().getByOwnerAndLabel(userId,

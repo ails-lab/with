@@ -108,7 +108,7 @@ public class NotificationController extends WithController {
 	public static Result respondToRequest(String notificationId, boolean accept) {
 		ObjectNode result = Json.newObject();
 		try {
-			String currentUserId = session().get("user");
+			String currentUserId = loggedInUser();
 			if (currentUserId == null) {
 				result.put("error", "User is not authorized for this action");
 				return forbidden(result);
@@ -187,9 +187,7 @@ public class NotificationController extends WithController {
 
 	public static Result getUserNotifications() {
 		try {
-			ObjectId userId = new ObjectId(
-					effectiveUserId(session().get(
-							"effectiveUserIds")));
+			ObjectId userId = new ObjectId(loggedInUser());
 			Set<ObjectId> userOrGroupIds = new HashSet<ObjectId>();
 			Set<ObjectId> groups = DB.getUserDAO().get(userId)
 					.getAdminInGroups();
@@ -245,8 +243,7 @@ public class NotificationController extends WithController {
 	}
 
 	public static Result sendMessage(String receiverId) {
-		ObjectId sender = new ObjectId(effectiveUserId(session()
-				.get("effectiveUserIds")));
+		ObjectId sender = new ObjectId(loggedInUser());
 		JsonNode json = request().body().asJson();
 		if (!json.has("message")) {
 			ObjectNode error = Json.newObject();

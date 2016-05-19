@@ -41,10 +41,12 @@ import play.Logger;
 import play.Logger.ALogger;
 import play.libs.Json;
 import play.mvc.Result;
+import play.mvc.Results.Status;
 import utils.NotificationCenter;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
+import controllers.WithController.Action;
 import db.DB;
 
 public class RightsController extends WithResourceController {
@@ -100,7 +102,9 @@ public class RightsController extends WithResourceController {
 			return badRequest(result);
 		}
 		else {
-			ObjectId loggedIn = new ObjectId(session().get("user"));
+			ObjectId loggedIn = effectiveUserDbId();
+			if (loggedIn == null)
+				return forbidden("No rights to edit collection rights.");
 			UserGroup userGroup = null;
 			User user = null;
 			// the receiver can be either a User or a UserGroup

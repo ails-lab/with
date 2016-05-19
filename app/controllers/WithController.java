@@ -60,6 +60,18 @@ public abstract class WithController extends Controller {
 		String userId = effectiveUserIds().get(0);
 		return (DB.getUserDAO().isSuperUser(new ObjectId(userId)));
 	}
+	
+	public static User effectiveUser() {
+		ObjectId userId = effectiveUserDbId();
+		if (userId != null)
+			return DB.getUserDAO().get(userId);
+		else
+			return null;
+	}
+
+	public static String loggedInUser() {
+		return session().get("user");
+	}
 
 	public static boolean hasAccessToRecordResource(
 			Action action, ObjectId resourceId) {
@@ -142,14 +154,16 @@ public abstract class WithController extends Controller {
 		return userIds;
 	}
 
-	public static String effectiveUserId(String effectiveUserIds) {
+	public static String effectiveUserId() {
+		String effectiveUserIds = session().get("effectiveUserIds");
 		if (effectiveUserIds == null)
 			effectiveUserIds = "";
 		String[] ids = effectiveUserIds.split(",");
 		return ids[0];
 	}
 
-	public static ObjectId effectiveUserDbId(String effectiveUserIds) {
+	public static ObjectId effectiveUserDbId() {
+		String effectiveUserIds = session().get("effectiveUserIds");
 		if (effectiveUserIds == null || effectiveUserIds.isEmpty())
 			return null;
 		String[] ids = effectiveUserIds.split(",");

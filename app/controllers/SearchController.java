@@ -83,10 +83,8 @@ public class SearchController extends WithController {
 			try {
 				final CommonQuery q = Utils.parseJson(json);
 				q.setTypes(Elastic.allTypes);
-				if (session().containsKey("effectiveUserIds")) {
-					List<String> userIds = effectiveUserIds();
-					q.setEffectiveUserIds(userIds);
-				}
+				List<String> userIds = effectiveUserIds();
+				q.setEffectiveUserIds(userIds);
 				Iterable<Promise<SourceResponse>> promises = callSources(q);
 				// compose all futures, blocks until all futures finish
 				return ParallelAPICall.<SourceResponse> combineResponses(r -> {
@@ -117,9 +115,7 @@ public class SearchController extends WithController {
 			try {
 				final CommonQuery q = Utils.parseJson(json);
 				q.setTypes(Elastic.allTypes);
-				if (session().containsKey("effectiveUserIds")) {
-					q.setEffectiveUserIds(effectiveUserIds());
-				}
+				q.setEffectiveUserIds(effectiveUserIds());
 				Promise<SearchResponse> myResults = getMyResutlsPromise(q);
 				play.libs.F.Function<SearchResponse, Result> function = 
 				new play.libs.F.Function<SearchResponse, Result>() {
@@ -167,9 +163,7 @@ public class SearchController extends WithController {
 				final CommonQuery q = Utils.parseJson(json);
 				q.searchTerm=null;
 				q.setTypes(Elastic.allTypes);
-				if (session().containsKey("effectiveUserIds")) {
-					q.setEffectiveUserIds(effectiveUserIds());
-				}
+				q.setEffectiveUserIds(effectiveUserIds());
 				Promise<SearchResponse> myResults = getMyResutlsPromise(q);
 				play.libs.F.Function<SearchResponse, Result> function = 
 				new play.libs.F.Function<SearchResponse, Result>() {

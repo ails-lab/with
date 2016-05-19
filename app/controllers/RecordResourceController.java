@@ -101,24 +101,6 @@ public class RecordResourceController extends WithResourceController {
 			return internalServerError(result);
 		}
 	}
-/*
-	public static void filterContextData(WithResource record) {
-		List<ContextData> contextAnns = record.getContextData();
-		List<ContextData> filteredContextAnns = new ArrayList<ContextData>();
-		List<CollectionObject> accessibleCols = DB.getCollectionObjectDAO()
-				.getAtLeastCollections(
-						AccessManager.effectiveUserDbIds(session().get(
-								"effectiveUserIds")), Access.READ, 0,
-						Integer.MAX_VALUE);
-		List<ObjectId> accessibleColIds = accessibleCols.stream()
-				.map(e -> e.getDbId()).collect(Collectors.toList());
-		for (ContextData contextAnn : contextAnns) {
-			if (accessibleColIds.contains(contextAnn.getTarget()
-					.getCollectionId()))
-				filteredContextAnns.add(contextAnn);
-		}
-		record.setContextData(filteredContextAnns);
-	}*/
 
 	/**
 	 * Edits the WITH resource according to the JSON body. For every field
@@ -224,10 +206,10 @@ public class RecordResourceController extends WithResourceController {
 	 */
 	public static Result getFavorites() {
 		ObjectNode result = Json.newObject();
-		if (session().get("user") == null) {
+		if (loggedInUser() == null) {
 			return forbidden();
 		}
-		ObjectId userId = new ObjectId(session().get("user"));
+		ObjectId userId = new ObjectId(loggedInUser());
 		CollectionObject favorite;
 		ObjectId favoritesId;
 		if ((favorite = DB.getCollectionObjectDAO().getByOwnerAndLabel(userId,
