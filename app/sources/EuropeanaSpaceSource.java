@@ -71,7 +71,9 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 
 	public EuropeanaSpaceSource() {
 		super(Sources.Europeana);
-		profile = "rich facets";
+//		TODO use facets profile
+//		profile = "rich facets";
+		profile = "rich";
 		apiKey = "SECRET_KEY";
 		
 		addDefaultQueryModifier(CommonFilters.MIME_TYPE.getId(), qwriter("MIME_TYPE"));
