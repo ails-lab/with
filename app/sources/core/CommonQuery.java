@@ -27,18 +27,20 @@ import org.bson.types.ObjectId;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
-import controllers.parameterTypes.MyPlayList;
 import db.DB;
 import model.basicDataTypes.WithAccess.Access;
 import model.usersAndGroups.User;
 import model.usersAndGroups.UserGroup;
+import play.Logger;
+import play.Logger.ALogger;
 import play.libs.F.Option;
-import play.mvc.Controller;
 import play.mvc.QueryStringBindable;
 import utils.Tuple;
 
 public class CommonQuery implements Cloneable , QueryStringBindable<CommonQuery>{
 
+	public static final ALogger log = Logger.of( CommonQuery.class );
+	
 	@JsonIgnoreProperties(ignoreUnknown=true)
 	public String page = "1";
 	public String facetsMode = FacetsModes.DEFAULT;
@@ -188,7 +190,7 @@ public class CommonQuery implements Cloneable , QueryStringBindable<CommonQuery>
 			Object clone = super.clone();
 			return (CommonQuery) clone;
 		} catch (Exception e) {
-			e.printStackTrace();
+			log.error("",e);
 		}
 		return null;
 	}

@@ -30,10 +30,14 @@ import model.basicDataTypes.LiteralOrResource;
 import model.basicDataTypes.MultiLiteral;
 import model.basicDataTypes.MultiLiteralOrResource;
 import model.basicDataTypes.WithDate;
+import play.Logger;
+import play.Logger.ALogger;
 import sources.core.Utils;
 
 public class JsonNodeUtils {
 
+	public static final ALogger log = Logger.of( JsonNodeUtils.class );
+	
 	public static String asString(JsonNode node) {
 		if (node != null && !node.isMissingNode()) {
 			if (node.isArray()) {
@@ -84,7 +88,7 @@ public class JsonNodeUtils {
 						res.addSmartLiteral(asString.get(i), suggestedLanguages);
 					}
 					if (!next.getKey().equals("@resource"))
-						System.out.println("Unknown Format!!! " + next.toString());
+						log.info("Unknown Format!!! " + next.toString());
 				}
 			}
 			return res.fillDEF();

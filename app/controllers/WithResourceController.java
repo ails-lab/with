@@ -504,7 +504,7 @@ public class WithResourceController extends WithController {
 									contextData
 											.setContextDataType(contextDataType);
 								} catch (ClassNotFoundException e) {
-									e.printStackTrace();
+									log.error("",e);
 								}
 							}
 						}

@@ -63,6 +63,9 @@ public class UserManager extends WithController {
 
 	public static final ALogger log = Logger.of(UserManager.class);
 	private static final long TOKENTIMEOUT = 10 * 1000l /* 10 sec */;
+	private static final String facebookAccessTokenUrl = "https://graph.facebook.com/v2.3/oauth/access_token";
+	private static final String graphApiUrl = "https://graph.facebook.com/v2.3/me";
+	private static final String facebookSecret = "818572771c2f350e80790b264399cc81";
 
 	/**
 	 * Propose new username when it is already in use.
@@ -212,8 +215,9 @@ public class UserManager extends WithController {
 		// If everything is ok store the user at the database
 		User user = Json.fromJson(json, User.class);
 		DB.getUserDAO().makePermanent(user);
-		ObjectId fav = CollectionObjectController.createFavorites(user.getDbId());
-		user.setFavorites(fav);		
+		ObjectId fav = CollectionObjectController.createFavorites(user
+				.getDbId());
+		user.setFavorites(fav);
 		session().put("user", user.getDbId().toHexString());
 		session().put("sourceIp", request().remoteAddress());
 		session().put("lastAccessTime",
@@ -273,6 +277,31 @@ public class UserManager extends WithController {
 		}
 	}
 
+	public static Result facebookLogin() {
+		try {
+			JsonNode json = request().body().asJson();
+			// Exchange authorization code for access token.
+			String params = "code=" + json.get("code").asText() + "&client_id="
+					+ json.get("clientId").asText() + "&redirect_uri="
+					+ json.get("redirectUri").asText() + "&client_secret="
+					// TODO: Put the facebookSecret in the configuration file
+					+ facebookSecret;
+			URL url = new URL(facebookAccessTokenUrl + "?" + params);
+			InputStream is = ((HttpsURLConnection) url.openConnection())
+					.getInputStream();
+			String accessToken = Json.parse(is).get("access_token").asText();
+			// Retrieve profile information about the current user.
+			url = new URL(graphApiUrl + "?access_token=" + accessToken);
+			is = ((HttpsURLConnection) url.openConnection()).getInputStream();
+			// TODO: Get email from answer when the method facebookLogin(String
+			// facebookId, String accessToken) becomes obsolete
+			String id = Json.parse(is).get("id").asText();
+			return facebookLogin(id, accessToken);
+		} catch (Exception e) {
+			return badRequest(Json.parse("{\"error\":\"Invalid credentials\"}"));
+		}
+	}
+
 	/**
 	 * Acquire a login cookie.
 	 *
@@ -297,8 +326,7 @@ public class UserManager extends WithController {
 				if (!json.has("accessToken")) {
 					result.put("error", "facebookId is not valid.");
 					return badRequest(result);
-				}
-				else {
+				} else {
 					String accessToken = json.get("accessToken").asText();
 					return facebookLogin(facebookId, accessToken);
 				}
@@ -615,7 +643,7 @@ public class UserManager extends WithController {
 			s = (String) Await.result(future, timeout.duration());
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			log.error("", e);
 		}
 
 		if (s == "") {

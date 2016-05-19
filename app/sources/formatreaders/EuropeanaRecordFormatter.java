@@ -16,25 +16,22 @@
 
 package sources.formatreaders;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import com.fasterxml.jackson.databind.JsonNode;
-
-import jdk.nashorn.internal.runtime.regexp.RegExp;
 import model.EmbeddedMediaObject;
 import model.EmbeddedMediaObject.MediaVersion;
 import model.EmbeddedMediaObject.WithMediaRights;
 import model.EmbeddedMediaObject.WithMediaType;
 import model.basicDataTypes.Language;
 import model.basicDataTypes.LiteralOrResource;
-import model.basicDataTypes.MultiLiteralOrResource;
 import model.basicDataTypes.ProvenanceInfo;
 import model.basicDataTypes.ProvenanceInfo.Sources;
 import model.resources.CulturalObject;
 import model.resources.CulturalObject.CulturalObjectData;
+import play.Logger;
+import play.Logger.ALogger;
 import sources.FilterValuesMap;
 import sources.core.CommonFilters;
 import sources.core.Utils;
@@ -43,6 +40,8 @@ import sources.utils.StringUtils;
 
 public class EuropeanaRecordFormatter extends CulturalRecordFormatter {
 
+	public static final ALogger log = Logger.of( EuropeanaRecordFormatter.class);
+	
 	public EuropeanaRecordFormatter() {
 		super(FilterValuesMap.getEuropeanaMap());
 		object = new CulturalObject();
@@ -96,15 +95,6 @@ public class EuropeanaRecordFormatter extends CulturalRecordFormatter {
 		String uri2 = model.getIsShownBy()==null?null:model.getIsShownBy().getURI();
 		if (Utils.hasInfo(uri3)){
 			EmbeddedMediaObject medThumb = new EmbeddedMediaObject();
-//			uri3 = Utils.decodeURL(uri3);
-//			Pattern p = Pattern.compile(".*uri=([^&]*)&.*");
-//			Matcher m = p.matcher(uri3);
-//			if (m.find()) {
-//				String ref = m.group(1);
-//				System.out.println("Parse "+uri3);
-//				uri3 = ref;
-//				System.out.println("To "+uri3);
-//			}
 			
 			
 			medThumb.setUrl(uri3);

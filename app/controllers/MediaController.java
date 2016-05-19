@@ -131,7 +131,7 @@ public class MediaController extends WithController {
 					.getByUrlAndVersion(url, version)) != null)
 				return media;
 			media = new MediaObject();
-			Logger.info("Downloading " + url);
+			log.info("Downloading " + url);
 			File img = HttpConnector.getWSHttpConnector().getURLContentAsFile(
 					url);
 			byte[] mediaBytes = IOUtils.toByteArray(new FileInputStream(img));
@@ -247,7 +247,7 @@ public class MediaController extends WithController {
 				return ok(result);
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
-				e.printStackTrace();
+				log.error("",e);
 				result.put("error", "error creating from url");
 				return badRequest(result);
 			}
@@ -468,7 +468,6 @@ public class MediaController extends WithController {
 		// singleRes.put("isShownBy", "/media/"
 		// + med.getDbId().toString());
 
-		// Logger.info(results.asText());
 		return results;
 	}
 
@@ -512,10 +511,10 @@ public class MediaController extends WithController {
 			cmd.run(op, image, outfile);
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			log.error("",e);
 		} catch (IM4JavaException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			log.error("",e);
 		}
 		File newFile = new File(outfile);
 		BufferedImage ithumb = ImageIO.read(newFile);
@@ -532,10 +531,10 @@ public class MediaController extends WithController {
 				cmd2.run(op, ithumb, outfile2);
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
-				e.printStackTrace();
+				log.error("",e);
 			} catch (IM4JavaException e) {
 				// TODO Auto-generated catch block
-				e.printStackTrace();
+				log.error("",e);
 			}
 			newFile = new File(outfile);
 			ithumb = ImageIO.read(newFile);
@@ -586,9 +585,8 @@ public class MediaController extends WithController {
 				// JsonPath.parse(jsonResponse).read("$['results'][0]['mediaId']");
 				resp = Json.parse(jsonResponse);
 
-				Logger.info(jsonResponse);
+				log.info(jsonResponse);
 
-				Logger.info("Called!");
 				aFile.releaseConnection();
 
 				response.close();
@@ -596,7 +594,7 @@ public class MediaController extends WithController {
 
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
-				e.printStackTrace();
+				log.error("",e);
 			}
 			return resp;
 		};
@@ -620,7 +618,7 @@ public class MediaController extends WithController {
 					mediaURL, "url");
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			log.error("",e);
 		}
 		editMediaAfterChecker(med, response);
 	}

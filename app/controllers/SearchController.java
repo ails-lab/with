@@ -90,11 +90,11 @@ public class SearchController extends WithController {
 				Iterable<Promise<SourceResponse>> promises = callSources(q);
 				// compose all futures, blocks until all futures finish
 				return ParallelAPICall.<SourceResponse> combineResponses(r -> {
-					Logger.info(r.source + " found " + r.count);
+					log.info(r.source + " found " + r.count);
 					return true;
 				} , promises);
 			} catch (Exception e) {
-				e.printStackTrace();
+				log.error("",e);
 				return Promise.pure((Result) badRequest(e.getMessage()));
 			}
 		}
@@ -130,7 +130,7 @@ public class SearchController extends WithController {
 				return myResults.map(function);
 
 			} catch (Exception e) {
-				e.printStackTrace();
+				log.error("",e);
 				return Promise.pure((Result)badRequest(e.getMessage()));
 			}
 		}
@@ -152,7 +152,7 @@ public class SearchController extends WithController {
 			return myResults.map(function);
 
 		} catch (Exception e) {
-			e.printStackTrace();
+			log.error("",e);
 			return Promise.pure((Result) badRequest(e.getMessage()));
 		}
 	}
@@ -180,7 +180,7 @@ public class SearchController extends WithController {
 				return myResults.map(function);
 
 			} catch (Exception e) {
-				e.printStackTrace();
+				log.error("",e);
 				return Promise.pure((Result)badRequest(e.getMessage()));
 			}
 		}
@@ -198,13 +198,13 @@ public class SearchController extends WithController {
 					);
 		} catch (JsonParseException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			log.error("",e);
 		} catch (JsonMappingException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			log.error("",e);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			log.error("",e);
 		}
 		for (Collection<CommonFilterResponse> fresponse : filters) {
 			if (fresponse!=null){
@@ -282,11 +282,11 @@ public class SearchController extends WithController {
 				SourceResponse res = src
 						.getResults(cq);
 					if (res.source==null){
-						System.out.println("Error "+src.getSourceName());
+						log.info("Error "+src.getSourceName());
 					}
 					return res;
 			} catch(Exception e){
-				e.printStackTrace();
+				log.error("",e);
 				return null;
 			}
 			};
