@@ -82,8 +82,8 @@ public class Elastic {
 
 
 
-	private final static String host = getConf().getString("elasticsearch.host");
-	private final static int    port = getConf().getInt("elasticsearch.port");
+	public final static String host = getConf().getString("elasticsearch.host");
+	public final static int    port = getConf().getInt("elasticsearch.port");
 
 	private static Config getConf() {
 		if (conf == null) {
