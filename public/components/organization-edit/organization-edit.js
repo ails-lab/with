@@ -327,6 +327,36 @@ define(['bridget','knockout', 'text!./organization-edit.html', 'isotope','images
 			});
 		};
 
+		self.makeAdmin = function (userData) {
+			$.ajax({
+				method : "PUT",
+				contentType : "text/plain",
+				url : "/group/admin/" + self.id() + "?id=" + userData.userId,
+				success : function (result) {
+					/*self.image = userData.image;
+					self.userMembers.push(ko.mapping.fromJS(userData));*/
+				},
+				error : function (result) {
+					$.smkAlert({ text: result.responseJSON.error, type: 'danger', time: 10 });
+				}
+			});
+		};
+
+		self.makeMember = function (userData) {
+			$.ajax({
+				method : "DELETE",
+				contentType : "text/plain",
+				url : "/group/admin/" + self.id() + "?id=" + userData.userId,
+				success : function (result) {
+					/*self.image = userData.image;
+					self.userMembers.push(ko.mapping.fromJS(userData));*/
+				},
+				error : function (result) {
+					$.smkAlert({ text: result.responseJSON.error, type: 'danger', time: 10 });
+				}
+			});
+		};
+
 		self.excecuteRemove = function (id, category) {
 			$.ajax({
 				method : "DELETE",
