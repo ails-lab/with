@@ -18,23 +18,22 @@ package controllers;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
 import java.util.Random;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.net.ssl.HttpsURLConnection;
 
 import model.ApiKey;
-import model.basicDataTypes.MultiLiteral;
 import model.resources.collection.CollectionObject;
 import model.usersAndGroups.User;
 import model.usersAndGroups.UserGroup;
 
-import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.mail.DefaultAuthenticator;
 import org.apache.commons.mail.Email;
 import org.apache.commons.mail.EmailException;
@@ -48,9 +47,13 @@ import play.libs.Crypto;
 import play.libs.Json;
 import play.mvc.Controller;
 import play.mvc.Result;
+
+import java.util.HashSet;
+
 import scala.concurrent.Await;
 import scala.concurrent.Future;
 import scala.concurrent.duration.Duration;
+import utils.AccessManager;
 import actors.ApiKeyManager.Create;
 import akka.actor.ActorSelection;
 import akka.pattern.Patterns;
@@ -65,6 +68,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import db.DB;
 
+@SuppressWarnings("rawtypes")
 public class UserManager extends Controller {
 
 	public static final ALogger log = Logger.of(UserManager.class);
@@ -218,13 +222,69 @@ public class UserManager extends Controller {
 		// If everything is ok store the user at the database
 		User user = Json.fromJson(json, User.class);
 		DB.getUserDAO().makePermanent(user);
-		ObjectId fav = CollectionObjectController.createFavorites(user.getDbId());
-		user.setFavorites(fav);		
+		ObjectId fav = CollectionObjectController.createFavorites(user
+				.getDbId());
+		user.setFavorites(fav);
 		session().put("user", user.getDbId().toHexString());
 		session().put("sourceIp", request().remoteAddress());
 		session().put("lastAccessTime",
 				Long.toString(System.currentTimeMillis()));
 		return ok(Json.toJson(user));
+	}
+
+	/**
+	 * Deletes a user from the database including all the collections and groups
+	 * she owns. In case she shares any collections she owns with other people,
+	 * or she is the creator of groups with others, the user is not deleted but
+	 * has to contact the developers about that.
+	 * 
+	 * @return success or JSON error
+	 */
+	public static Result deleteUser(String id) {
+		try {
+			ObjectId userId = new ObjectId(id);
+			ObjectId currentUserId = AccessManager.effectiveUserDbId(session()
+					.get("effectiveUserIds"));
+			Status errorMessage = badRequest(Json
+					.parse("{'error':'User cannot be deleted due to ownership of "
+							+ "shared collections or groups. Please contact the developers'}"));
+			if (currentUserId == null || !currentUserId.equals(userId))
+				return forbidden(Json
+						.parse("{'error' : 'No rights for user deletion'}"));
+			Set<ObjectId> groupsToDelete = new HashSet<ObjectId>();
+			Set<ObjectId> collectionsToDelete = new HashSet<ObjectId>();
+			User user = DB.getUserDAO().getById(userId,
+					Arrays.asList("adminInGroups"));
+			Set<ObjectId> groups = user.getAdminInGroups();
+			for (ObjectId groupId : groups) {
+				UserGroup group = DB.getUserGroupDAO().getById(groupId,
+						Arrays.asList("creator, users"));
+				if (group == null || !group.getCreator().equals(userId))
+					continue;
+				if (group.getUsers().size() > 1) {
+					return errorMessage;
+				}
+				groupsToDelete.add(groupId);
+			}
+			List<CollectionObject> collections = DB.getCollectionObjectDAO()
+					.getByCreator(userId, 0, 0);
+			for (CollectionObject collection : collections) {
+				if (collection.getAdministrative().getAccess().getAcl().size() > 1) {
+					return errorMessage;
+				}
+				collectionsToDelete.add(collection.getDbId());
+			}
+			for (ObjectId groupId : groupsToDelete)
+				DB.getUserGroupDAO().deleteById(groupId);
+			for (ObjectId collectionId : collectionsToDelete)
+				DB.getCollectionObjectDAO().deleteById(collectionId);
+			DB.getUserDAO().deleteById(userId);
+			return ok(Json
+					.parse("{'success' : 'User was successfully deleted from the database'}"));
+		} catch (Exception e) {
+			return internalServerError(Json.parse("{'error' : '"
+					+ e.getMessage() + "'}"));
+		}
 	}
 
 	private static Result googleLogin(String googleId, String accessToken) {
@@ -303,8 +363,7 @@ public class UserManager extends Controller {
 				if (!json.has("accessToken")) {
 					result.put("error", "facebookId is not valid.");
 					return badRequest(result);
-				}
-				else {
+				} else {
 					String accessToken = json.get("accessToken").asText();
 					return facebookLogin(facebookId, accessToken);
 				}
@@ -518,32 +577,6 @@ public class UserManager extends Controller {
 
 	}
 
-	/**
-	 * This is just a skeleton until design issues are solved
-	 *
-	 * @param id
-	 * @return
-	 */
-
-	public static Result deleteUser(String id) {
-
-		ObjectNode result = Json.newObject();
-		// ObjectNode error = (ObjectNode) Json.newObject();
-
-		try {
-			User user = DB.getUserDAO().getById(new ObjectId(id), null);
-			if (user != null) {
-				return ok(result);
-			} else {
-				return badRequest(Json
-						.parse("{\"error\":\"User does not exist\"}"));
-
-			}
-		} catch (IllegalArgumentException e) {
-			return badRequest(Json.parse("{\"error\":\"User does not exist\"}"));
-		}
-	}
-
 	public static Result apikey() {
 
 		// need to limit calls like this and reset password to 3 times per day
@@ -621,7 +654,7 @@ public class UserManager extends Controller {
 			s = (String) Await.result(future, timeout.duration());
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
-			log.error("",e);
+			log.error("", e);
 		}
 
 		if (s == "") {
