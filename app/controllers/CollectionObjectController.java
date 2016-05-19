@@ -16,6 +16,7 @@
 
 package controllers;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -26,17 +27,15 @@ import java.util.Set;
 
 import javax.validation.ConstraintViolation;
 
-import org.bson.Document;
 import org.bson.types.ObjectId;
-import org.mongodb.morphia.query.Query;
-
+import com.codahale.metrics.Counter;
+import com.codahale.metrics.Histogram;
+import com.codahale.metrics.Meter;
+import com.codahale.metrics.Timer;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.mongodb.MongoClient;
-import com.mongodb.client.FindIterable;
-import com.mongodb.client.MongoDatabase;
-
 import controllers.parameterTypes.MyPlayList;
 import controllers.parameterTypes.StringTuple;
 import db.DB;
@@ -55,7 +54,6 @@ import model.resources.WithResource;
 import model.resources.WithResource.WithResourceType;
 import model.resources.collection.CollectionObject;
 import model.resources.collection.CollectionObject.CollectionAdmin;
-import model.resources.collection.Exhibition;
 import model.resources.collection.SimpleCollection;
 import model.usersAndGroups.Organization;
 import model.usersAndGroups.Page;
@@ -81,6 +79,7 @@ import sources.core.Utils;
 import utils.AccessManager;
 import utils.AccessManager.Action;
 import utils.Locks;
+import utils.MetricsUtils;
 import utils.Tuple;
 
 
@@ -285,9 +284,9 @@ public class CollectionObjectController extends WithResourceController {
 			return internalServerError(result);
 		}
 	}
-	
+
 	public static Result exportCollectionObjectToOWL(String cname) {
-		
+
 		ObjectNode resultInfo = Json.newObject();
 		ObjectId creatorDbId = new ObjectId(session().get("user"));
 		CollectionObject ccid = null;
@@ -311,7 +310,7 @@ public class CollectionObjectController extends WithResourceController {
 			List<RecordResource> records = DB.getRecordResourceDAO()
 					.getByCollectionBetweenPositions(collectionDbId, 0,
 							Math.min(entryCount, 1000));
-			
+
 			for (RecordResource recordResource : records) {
 				if (recordResource instanceof CulturalObject) {
 					CulturalObject new_record = (CulturalObject) recordResource;
@@ -377,7 +376,7 @@ public class CollectionObjectController extends WithResourceController {
 
 	private static boolean internalAddCollection(CollectionObject collection,
 			WithResourceType colType, ObjectId creatorDbId, ObjectNode error) {
-		if (collection.getDescriptiveData().getLabel() == null || collection.getDescriptiveData().getLabel().isEmpty()) {
+		if ((collection.getDescriptiveData().getLabel() == null) || collection.getDescriptiveData().getLabel().isEmpty()) {
 			error.put("error", "Missing collection title");
 			return false;
 		}
@@ -431,8 +430,8 @@ public class CollectionObjectController extends WithResourceController {
 			if (!response.toString().equals(ok().toString()))
 				return response;
 			else {
-				CollectionObject collection = DB.getCollectionObjectDAO().get(
-						new ObjectId(id));
+				CollectionObject collection = DB.getCollectionObjectDAO()
+						.getByIdAndExclude(new ObjectId(id), new ArrayList<String>() {{add("collectedResources");}});
 				return ok(Json.toJson(collection));
 			}
 		} catch (Exception e) {
@@ -547,9 +546,27 @@ public class CollectionObjectController extends WithResourceController {
 			Option<MyPlayList> recursivelyAccessedByUserOrGroup,
 			Option<String> creator, Option<Boolean> isPublic,
 			Option<Boolean> isExhibition, Boolean collectionHits, int offset,
-			int count) {
+			int count) throws IOException {
 		ObjectNode result = Json.newObject().objectNode();
 		ArrayNode collArray = Json.newObject().arrayNode();
+
+		/*
+		 * Metrics helper code
+		 */
+		/*final Meter meterResponseSize = MetricsUtils.registry.meter(
+				MetricsUtils.registry.name(CollectionObjectController.class, "listCollection", "meter-response-size"));
+		final Counter hits = MetricsUtils.registry.counter(
+				MetricsUtils.registry.name(CollectionObjectController.class, "listCollection", "number-of-requests"));
+		final Histogram histogramResponseSize = MetricsUtils.registry.histogram(
+				MetricsUtils.registry.name(CollectionObjectController.class, "listCollection", "histogram-response-size"));
+		final Timer call_timer = MetricsUtils.registry.timer(
+				MetricsUtils.registry.name(CollectionObjectController.class, "listCollection", "time"));
+		final Timer.Context call_timeContext = call_timer.time();*/
+		/*
+		 *
+		 */
+
+
 		List<CollectionObject> userCollections;
 		List<String> effectiveUserIds = AccessManager
 				.effectiveUserIds(session().get("effectiveUserIds"));
@@ -566,6 +583,7 @@ public class CollectionObjectController extends WithResourceController {
 			if (creatorUser != null)
 				creatorId = creatorUser.getDbId();
 		}
+
 		if (effectiveUserIds.isEmpty()
 				|| (isPublic.isDefined() && (isPublic.get() == true))) {
 			// if not logged or ask for public collections, return all public
@@ -590,6 +608,10 @@ public class CollectionObjectController extends WithResourceController {
 			return ok(result);
 		} else { // logged in, check if super user, if not, restrict query to
 					// accessible by effectiveUserIds
+			//Metrics timer
+			/*final Timer dao_timer = MetricsUtils.registry.timer(
+					MetricsUtils.registry.name(CollectionObjectController.class, "listCollection", "collectionsDBRetrival-time"));
+			final Timer.Context dao_timeContext = dao_timer.time();*/
 			Tuple<List<CollectionObject>, Tuple<Integer, Integer>> info;
 			if (!AccessManager.isSuperUser(effectiveUserIds.get(0)))
 				info = DB.getCollectionObjectDAO().getByLoggedInUsersAndAcl(
@@ -611,7 +633,21 @@ public class CollectionObjectController extends WithResourceController {
 				collArray.add(c);
 			}
 			result.put("collectionsOrExhibitions", collArray);
-			return ok(result);
+
+			try {
+				return ok(result);
+			} finally {
+				/*
+				 * Metrics helper code
+				 */
+				 /*ObjectMapper objm = new ObjectMapper();
+				 byte[] yourBytes = objm.writeValueAsBytes(result);
+				 histogramResponseSize.update(yourBytes.length-histogramResponseSize.getCount());
+				 call_timeContext.stop();
+				 dao_timeContext.stop();
+				 hits.inc();
+				 meterResponseSize.mark(yourBytes.length);*/
+			}
 		}
 	}
 
@@ -902,7 +938,7 @@ public class CollectionObjectController extends WithResourceController {
 						continue;
 					}
 					if (contentFormat.equals("noContent")
-							&& r.getContent() != null) {
+							&& (r.getContent() != null)) {
 						r.getContent().clear();
 						recordsList.add(Json.toJson(r));
 						fillContextData(
@@ -913,7 +949,7 @@ public class CollectionObjectController extends WithResourceController {
 										.getCollectedResources(), recordsList);
 						continue;
 					}
-					if (r.getContent() != null
+					if ((r.getContent() != null)
 							&& r.getContent().containsKey(contentFormat)) {
 						HashMap<String, String> newContent = new HashMap<String, String>(
 								1);
