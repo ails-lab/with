@@ -25,6 +25,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.mail.Session;
+
 import model.DescriptiveData;
 import model.basicDataTypes.Language;
 import model.basicDataTypes.Literal;
@@ -33,11 +35,7 @@ import model.basicDataTypes.MultiLiteral;
 import model.basicDataTypes.MultiLiteralOrResource;
 import model.basicDataTypes.WithAccess;
 import model.basicDataTypes.WithAccess.Access;
-import model.resources.RecordResource;
 import model.resources.WithResource;
-import model.resources.RecordResource.RecordAdmin;
-import model.resources.collection.CollectionObject;
-import model.resources.collection.CollectionObject.CollectionAdmin;
 import model.usersAndGroups.User;
 
 import org.bson.types.ObjectId;
@@ -47,7 +45,6 @@ import play.Logger;
 import play.Logger.ALogger;
 import play.libs.F.Option;
 import play.mvc.Controller;
-import play.mvc.Http.Session;
 
 public abstract class WithController extends Controller {
 	
@@ -59,20 +56,21 @@ public abstract class WithController extends Controller {
 		READ, EDIT, DELETE
 	};
 
-	public static boolean isSuperUser(String userId) {
+	public static boolean isSuperUser() {
+		String userId = effectiveUserIds().get(0);
 		return (DB.getUserDAO().isSuperUser(new ObjectId(userId)));
 	}
 
-	public static boolean hasAccessToRecordResource(String userIds,
+	public static boolean hasAccessToRecordResource(
 			Action action, ObjectId resourceId) {
-		return DB.getRecordResourceDAO().hasAccess(effectiveUserDbIds(userIds),
+		return DB.getRecordResourceDAO().hasAccess(effectiveUserDbIds(),
 				action, resourceId);
 	}
 
-	public static boolean hasAccessToCollectionResource(String userIds,
+	public static boolean hasAccessToCollectionResource(
 			Action action, ObjectId resourceId) {
 		return DB.getCollectionObjectDAO().hasAccess(
-				effectiveUserDbIds(userIds), action, resourceId);
+				effectiveUserDbIds(), action, resourceId);
 	}
 
 	public static List<ObjectId> toObjectIds(List<String> userIds) {
@@ -120,7 +118,8 @@ public abstract class WithController extends Controller {
 	 * @param effectiveUserIds
 	 * @return
 	 */
-	public static List<String> effectiveUserIds(String effectiveUserIds) {
+	public static List<String> effectiveUserIds() {
+		String effectiveUserIds = session().get("effectiveUserIds");
 		if (effectiveUserIds == null)
 			effectiveUserIds = "";
 		List<String> userIds = new ArrayList<String>();
@@ -131,7 +130,8 @@ public abstract class WithController extends Controller {
 		return userIds;
 	}
 
-	public static List<ObjectId> effectiveUserDbIds(String effectiveUserIds) {
+	public static List<ObjectId> effectiveUserDbIds() {
+		String effectiveUserIds = session().get("effectiveUserIds");
 		if (effectiveUserIds == null)
 			effectiveUserIds = "";
 		List<ObjectId> userIds = new ArrayList<ObjectId>();
@@ -157,10 +157,10 @@ public abstract class WithController extends Controller {
 	}
 	
 	
-	public static String getLocale(Option<String> lang, Session session) {
+	public static String getLocale(Option<String> lang) {
 		String locale = Language.DEFAULT.toString();
 		if (!lang.isDefined()) {
-			String sessionLocale = session.get("locale");
+			String sessionLocale = session().get("locale");
 			if (sessionLocale != null)
 				locale = sessionLocale;
 		}
@@ -176,8 +176,8 @@ public abstract class WithController extends Controller {
 		return locale;
 	}
 	
-	public static void filterResourceByLocale(Option<String> locale, WithResource resource, Session session) {
-		String localeString = getLocale(locale, session);
+	public static void filterResourceByLocale(Option<String> locale, WithResource resource) {
+		String localeString = getLocale(locale);
 		//assume only descriptiveData has literal type of fields
 		DescriptiveData descriptiveData = resource.getDescriptiveData();
 		List<Field> directFields = new ArrayList<Field>();
@@ -185,35 +185,29 @@ public abstract class WithController extends Controller {
 		List<Field> literalFields = new ArrayList<Field>();
 		getLiteralFields(directFields, literalFields);
 		for (Field field : literalFields) {
-	        try {
-	        	String methodName = "get" + field.getName().substring(0, 1).toUpperCase() + field.getName().substring(1);
-	        	Method method = descriptiveData.getClass().getMethod(methodName);
-	        	Object value = method.invoke(descriptiveData);
-	        	if (value != null) {
-		        	HashMap<String, Object> hm = (HashMap<String, Object>) value;
-		        	if (!hm.isEmpty()) {
-			        	Class<?> type = value.getClass();
-			        	HashMap<String, Object> filteredHm = filterHashMapByLocale(hm, localeString.toLowerCase());
-			        	if (!filteredHm.isEmpty()) {
-				        	methodName = "s" + methodName.substring(1);
-				        	method = descriptiveData.getClass().getMethod(methodName, type);
-					        if (type.equals(MultiLiteral.class) || type.equals(MultiLiteralOrResource.class)) {
-					        	MultiLiteral fhm = new MultiLiteral();
-					        	for (String k: filteredHm.keySet())
-					        		fhm.put(k, (List<String>) filteredHm.get(k));
-					        	method.invoke(descriptiveData, fhm);
-					        }
-					        else if (type.equals(Literal.class) || type.equals(LiteralOrResource.class)) {
-					        	method.invoke(descriptiveData, (value.getClass().cast(filteredHm)));
-					        }
-			        	}
+	    	String methodName = "get" + field.getName().substring(0, 1).toUpperCase() + field.getName().substring(1);
+	    	Method method = descriptiveData.getClass().getMethod(methodName);
+	    	Object value = method.invoke(descriptiveData);
+	    	if (value != null) {
+	        	HashMap<String, Object> hm = (HashMap<String, Object>) value;
+	        	if (!hm.isEmpty()) {
+		        	Class<?> type = value.getClass();
+		        	HashMap<String, Object> filteredHm = filterHashMapByLocale(hm, localeString.toLowerCase());
+		        	if (!filteredHm.isEmpty()) {
+			        	methodName = "s" + methodName.substring(1);
+			        	method = descriptiveData.getClass().getMethod(methodName, type);
+				        if (type.equals(MultiLiteral.class) || type.equals(MultiLiteralOrResource.class)) {
+				        	MultiLiteral fhm = new MultiLiteral();
+				        	for (String k: filteredHm.keySet())
+				        		fhm.put(k, (List<String>) filteredHm.get(k));
+				        	method.invoke(descriptiveData, fhm);
+				        }
+				        else if (type.equals(Literal.class) || type.equals(LiteralOrResource.class)) {
+				        	method.invoke(descriptiveData, (value.getClass().cast(filteredHm)));
+				        }
 		        	}
 	        	}
-	        } catch (IllegalArgumentException | IllegalAccessException | NoSuchMethodException | SecurityException e) {
-	        	e.printStackTrace();
-			} catch (InvocationTargetException e) {
-				e.printStackTrace();
-			}	
+	    	}
 	    }
 	}
 	

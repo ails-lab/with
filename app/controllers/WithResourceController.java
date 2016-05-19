@@ -77,7 +77,6 @@ public class WithResourceController extends WithController {
 	public static Status errorIfNoAccessToWithResource(
 			WithResourceDAO resourceDAO, Action action, ObjectId id) {
 		ObjectNode result = Json.newObject();
-		List<String> effectiveUserIds = effectiveUserIds(session().get("effectiveUserIds"));
 		if (!resourceDAO.existsEntity(id)) {
 			log.error("Cannot retrieve resource from database");
 			result.put("error", "Cannot retrieve resource " + id
@@ -85,9 +84,8 @@ public class WithResourceController extends WithController {
 			return internalServerError(result);
 			// TODO superuser
 		} else if (!resourceDAO.hasAccess(
-				effectiveUserDbIds(session().get(
-						"effectiveUserIds")), action, id)
-				&& !isSuperUser(effectiveUserIds.get(0))) {
+				effectiveUserDbIds(), action, id)
+				&& !isSuperUser()) {
 			result.put("error", "User does not have " + action
 					+ " access for resource " + id);
 			return forbidden(result);
@@ -166,8 +164,7 @@ public class WithResourceController extends WithController {
 			ObjectId collectionDbId, Option<Integer> position, Boolean noDouble) {
 		ObjectNode result = Json.newObject();
 		String resourceType = null;
-		ObjectId userId = effectiveUserDbIds(
-				session().get("effectiveUserIds")).get(0);
+		ObjectId userId = effectiveUserDbIds().get(0);
 		if (json.has("resourceType"))
 			resourceType = json.get("resourceType").asText();
 		if ((resourceType == null)
@@ -202,8 +199,7 @@ public class WithResourceController extends WithController {
 				externalId = record.getAdministrative().getExternalId();
 			ObjectId recordId = null;
 			boolean owns = DB.getRecordResourceDAO().hasAccess(
-					effectiveUserDbIds(session().get(
-							"effectiveUserIds")), Action.DELETE, recordId);
+					effectiveUserDbIds(), Action.DELETE, recordId);
 			if ((externalId != null)// get dbId of existring resource
 					&& DB.getRecordResourceDAO().existsWithExternalId(
 							externalId)) {
@@ -227,8 +223,7 @@ public class WithResourceController extends WithController {
 						}
 					}
 					if (DB.getRecordResourceDAO()
-							.hasAccess(effectiveUserDbIds(session()
-											.get("effectiveUserIds")),
+							.hasAccess(effectiveUserDbIds(),
 									Action.EDIT, recordId)
 							&& (json.get("descriptiveData") != null))
 						DB.getRecordResourceDAO()
@@ -277,8 +272,7 @@ public class WithResourceController extends WithController {
 										boolean hasAccessToMedia = MediaController
 												.hasAccessToMedia(
 														mediaUrl,
-														effectiveUserDbIds(session()
-															.get("effectiveUserIds")),
+														effectiveUserDbIds(),
 														Action.EDIT);
 										if (!hasAccessToMedia)
 											media = new EmbeddedMediaObject(

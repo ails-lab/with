@@ -61,7 +61,7 @@ public class RightsController extends WithResourceController {
 				getUniqueByFieldAndValue("_id", colDbId, new ArrayList<String>(Arrays.asList("administrative.access")));
 			boolean oldIsPublic = collection.getAdministrative().getAccess().getIsPublic();
 			if (oldIsPublic != isPublic) {
-				List<ObjectId> effectiveIds = effectiveUserDbIds(session().get("effectiveUserIds"));
+				List<ObjectId> effectiveIds = effectiveUserDbIds();
 				DB.getCollectionObjectDAO().updateField(colDbId, "administrative.access.isPublic", isPublic);
 				if (!isPublic) //downgrade
 					if (membersDowngrade) {
@@ -129,7 +129,7 @@ public class RightsController extends WithResourceController {
 				int downgrade = isDowngrade(oldColAccess.getAcl(), userOrGroupId, newAccess);
 				//the logged in user has the right to downgrade his own access level (unshare)
 				boolean hasDowngradeRight = loggedIn.equals(userOrGroupId);
-				List<ObjectId> effectiveIds = effectiveUserDbIds(session().get("effectiveUserIds"));
+				List<ObjectId> effectiveIds = effectiveUserDbIds();
 				if (userGroup != null) {
 					hasDowngradeRight = userGroup.getAdminIds().contains(loggedIn);
 				}

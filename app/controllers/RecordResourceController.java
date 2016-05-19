@@ -80,7 +80,7 @@ public class RecordResourceController extends WithResourceController {
 						if (format.equals("noContent")) {
 							record.getContent().clear();
 							RecordResource profiledRecord = record.getRecordProfile(profile);
-							filterResourceByLocale(locale, profiledRecord, session());
+							filterResourceByLocale(locale, profiledRecord);
 							return ok(Json.toJson(profiledRecord));
 						} else if (record.getContent() != null
 								&& record.getContent().containsKey(format)) {

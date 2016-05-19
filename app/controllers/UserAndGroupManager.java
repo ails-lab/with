@@ -86,7 +86,7 @@ public class UserAndGroupManager extends WithController {
 					prefix);
 			List<UserGroup> groups2 = DB.getUserGroupDAO().getByFriendlyNamePrefix(prefix);
 			groups.addAll(groups2);
-			List<String> effectiveUserIds = effectiveUserIds(session().get("effectiveUserIds"));
+			List<String> effectiveUserIds = effectiveUserIds();
 			ObjectId userId = new ObjectId(effectiveUserIds.get(0));
 			for (UserGroup group : groups) {
 				if (!onlyParents

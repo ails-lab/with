@@ -209,8 +209,7 @@ public class CollectionObjectController extends WithResourceController {
 				}
 				return ok(Json.toJson(collectionWithMyAccessData(
 						collection,
-						effectiveUserIds(session().get(
-								"effectiveUserIds")), "BASIC", Option.Some("DEFAULT"))));
+						effectiveUserIds(), "BASIC", Option.Some("DEFAULT"))));
 			}
 		});
 		if (resultInfo.has("error"))
@@ -220,8 +219,7 @@ public class CollectionObjectController extends WithResourceController {
 		else
 			return Promise.pure(ok(Json.toJson(collectionWithMyAccessData(
 					collection,
-					effectiveUserIds(session().get(
-							"effectiveUserIds")), "BASIC", Option.Some("DEFAULT")))));
+					effectiveUserIds(), "BASIC", Option.Some("DEFAULT")))));
 	}
 
 	private static int addResultToCollection(SourceResponse result,
@@ -352,9 +350,7 @@ public class CollectionObjectController extends WithResourceController {
 			if (!success)
 				return badRequest(error);
 			return ok(Json.toJson(collectionWithMyAccessData(
-					collection,
-					effectiveUserIds(session().get(
-							"effectiveUserIds")), "BASIC", Option.Some("DEFAULT"))));
+					collection, effectiveUserIds(), "BASIC", Option.Some("DEFAULT"))));
 		} catch (Exception e) {
 			error.put("error", e.getMessage());
 			return internalServerError(error);
@@ -425,7 +421,7 @@ public class CollectionObjectController extends WithResourceController {
 				CollectionObject collection = DB.getCollectionObjectDAO().get(
 						new ObjectId(id));
 				CollectionObject profiledCollection = collection.getCollectionProfile(profile);
-				filterResourceByLocale(locale, profiledCollection, session());
+				filterResourceByLocale(locale, profiledCollection);
 				return ok(Json.toJson(profiledCollection));
 			}
 		} catch (Exception e) {
@@ -526,7 +522,7 @@ public class CollectionObjectController extends WithResourceController {
 	public static Result countMyAndShared() {
 		ObjectNode result = Json.newObject().objectNode();
 		List<String> effectiveUserIds = 
-				effectiveUserIds(session().get("effectiveUserIds"));
+				effectiveUserIds();
 		if (effectiveUserIds.isEmpty()) {
 			return badRequest("You should be signed in as a user.");
 		} else {
@@ -559,8 +555,7 @@ public class CollectionObjectController extends WithResourceController {
 		ObjectNode result = Json.newObject().objectNode();
 		ArrayNode collArray = Json.newObject().arrayNode();
 		List<CollectionObject> userCollections;
-		List<String> effectiveUserIds = 
-				effectiveUserIds(session().get("effectiveUserIds"));
+		List<String> effectiveUserIds = effectiveUserIds();
 		List<List<Tuple<ObjectId, Access>>> accessedByUserOrGroup = accessibleByUserOrGroup(
 				directlyAccessedByUserOrGroup, recursivelyAccessedByUserOrGroup);
 		Boolean isExhibitionBoolean = isExhibition.isDefined() ? isExhibition
@@ -591,7 +586,7 @@ public class CollectionObjectController extends WithResourceController {
 			}
 			for (CollectionObject collection : userCollections) {
 				CollectionObject profiledCollection = collection.getCollectionProfile(profile);
-				filterResourceByLocale(locale, profiledCollection, session());
+				filterResourceByLocale(locale, profiledCollection);
 				ObjectNode c = (ObjectNode) Json.toJson(profiledCollection);
 				c.remove("collectedResources");
 				if (effectiveUserIds.isEmpty())
@@ -603,7 +598,7 @@ public class CollectionObjectController extends WithResourceController {
 		} else { // logged in, check if super user, if not, restrict query to
 					// accessible by effectiveUserIds
 			Tuple<List<CollectionObject>, Tuple<Integer, Integer>> info;
-			if (!isSuperUser(effectiveUserIds.get(0)))
+			if (!isSuperUser())
 				info = DB.getCollectionObjectDAO().getByLoggedInUsersAndAcl(
 						toObjectIds(effectiveUserIds),
 						accessedByUserOrGroup, creatorId, isExhibitionBoolean,
@@ -641,8 +636,7 @@ public class CollectionObjectController extends WithResourceController {
 			int count, String profile, Option<String> locale) {
 		ObjectNode result = Json.newObject().objectNode();
 		ArrayNode collArray = Json.newObject().arrayNode();
-		List<String> effectiveUserIds = 
-				effectiveUserIds(session().get("effectiveUserIds"));
+		List<String> effectiveUserIds = effectiveUserIds();
 		Boolean isExhibitionBoolean = isExhibition.isDefined() ? isExhibition
 				.get() : null;
 		if (effectiveUserIds.isEmpty()) {
@@ -762,7 +756,7 @@ public class CollectionObjectController extends WithResourceController {
 			CollectionObject userCollection, List<String> effectiveUserIds, 
 			String profile, Option<String> locale) {
 		CollectionObject profiledCollection = userCollection.getCollectionProfile(profile);
-		filterResourceByLocale(locale, profiledCollection, session());
+		filterResourceByLocale(locale, profiledCollection);
 		ObjectNode c = (ObjectNode) Json.toJson(profiledCollection);
 		Access maxAccess = getMaxAccess(profiledCollection
 				.getAdministrative().getAccess(), effectiveUserIds);
@@ -810,8 +804,7 @@ public class CollectionObjectController extends WithResourceController {
 			}
 		}
 		if (page != null) {
-			List<String> effectiveUserIds = 
-					effectiveUserIds(session().get("effectiveUserIds"));
+			List<String> effectiveUserIds = effectiveUserIds();
 			ObjectNode result = Json.newObject().objectNode();
 			int start = offset * countPerType;
 			int collectionsSize = page.getFeaturedCollections().size();
@@ -924,7 +917,7 @@ public class CollectionObjectController extends WithResourceController {
 							&& r.getContent() != null) {
 						r.getContent().clear();
 						RecordResource profiledRecord = r.getRecordProfile(profile);
-						filterResourceByLocale(locale, profiledRecord, session());
+						filterResourceByLocale(locale, profiledRecord);
 						recordsList.add(Json.toJson(profiledRecord));
 						fillContextData(
 								DB.getCollectionObjectDAO()
@@ -944,7 +937,7 @@ public class CollectionObjectController extends WithResourceController {
 						continue;
 					}
 					RecordResource profiledRecord = r.getRecordProfile(profile);
-					filterResourceByLocale(locale, profiledRecord, session());
+					filterResourceByLocale(locale, profiledRecord);
 					recordsList.add(Json.toJson(profiledRecord));
 				}
 				result.put(

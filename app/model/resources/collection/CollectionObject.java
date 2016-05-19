@@ -26,7 +26,6 @@ import model.annotations.ContextData;
 import model.annotations.ContextData.ContextDataBody;
 import model.basicDataTypes.MultiLiteralOrResource;
 import model.resources.WithResource;
-import model.resources.WithResource.WithResourceType;
 import model.resources.collection.Exhibition.ExhibitionDescriptiveData;
 
 import org.mongodb.morphia.annotations.Embedded;

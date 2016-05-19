@@ -185,8 +185,7 @@ public class GroupManager extends WithController {
 			result.put("error", "Cannot retrieve group from database.");
 			return internalServerError(result);
 		}
-		ObjectId userId = new ObjectId(effectiveUserIds(
-				session().get("effectiveUserIds")).get(0));
+		ObjectId userId = new ObjectId(effectiveUserIds().get(0));
 		User user = DB.getUserDAO().get(userId);
 		Set<ObjectId> groupAdmins = group.getAdminIds();
 		if (!groupAdmins.contains(userId) && !user.isSuperUser()) {
