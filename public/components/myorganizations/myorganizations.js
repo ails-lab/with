@@ -62,6 +62,13 @@ define(['knockout', 'text!./myorganizations.html', 'app', 'moment', 'async!https
 		self.groups = ko.observableArray([], mapping);
 		self.name = ko.observable(params.type);			// Project or Organization (display field)
 		self.namePlural = ko.observable(params.title);	// Projects or Organizations (display field)
+		self.groupCount = ko.pureComputed(function () {
+			if (self.groups().length === 1) {
+				return self.groups().length + ' ' + self.name();
+			} else {
+				return self.groups().length + ' ' + self.namePlural();
+			}
+		});
 		self.baseURL = ko.pureComputed(function () {
 			return window.location.origin + '/assets/index.html#' + self.name().toLowerCase() + '/';
 		});
