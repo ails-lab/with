@@ -185,29 +185,34 @@ public abstract class WithController extends Controller {
 		List<Field> literalFields = new ArrayList<Field>();
 		getLiteralFields(directFields, literalFields);
 		for (Field field : literalFields) {
-	    	String methodName = "get" + field.getName().substring(0, 1).toUpperCase() + field.getName().substring(1);
-	    	Method method = descriptiveData.getClass().getMethod(methodName);
-	    	Object value = method.invoke(descriptiveData);
-	    	if (value != null) {
-	        	HashMap<String, Object> hm = (HashMap<String, Object>) value;
-	        	if (!hm.isEmpty()) {
-		        	Class<?> type = value.getClass();
-		        	HashMap<String, Object> filteredHm = filterHashMapByLocale(hm, localeString.toLowerCase());
-		        	if (!filteredHm.isEmpty()) {
-			        	methodName = "s" + methodName.substring(1);
-			        	method = descriptiveData.getClass().getMethod(methodName, type);
-				        if (type.equals(MultiLiteral.class) || type.equals(MultiLiteralOrResource.class)) {
-				        	MultiLiteral fhm = new MultiLiteral();
-				        	for (String k: filteredHm.keySet())
-				        		fhm.put(k, (List<String>) filteredHm.get(k));
-				        	method.invoke(descriptiveData, fhm);
-				        }
-				        else if (type.equals(Literal.class) || type.equals(LiteralOrResource.class)) {
-				        	method.invoke(descriptiveData, (value.getClass().cast(filteredHm)));
-				        }
+			try {
+		    	String methodName = "get" + field.getName().substring(0, 1).toUpperCase() + field.getName().substring(1);
+		    	Method method = descriptiveData.getClass().getMethod(methodName);
+		    	Object value = method.invoke(descriptiveData);
+		    	if (value != null) {
+		        	HashMap<String, Object> hm = (HashMap<String, Object>) value;
+		        	if (!hm.isEmpty()) {
+			        	Class<?> type = value.getClass();
+			        	HashMap<String, Object> filteredHm = filterHashMapByLocale(hm, localeString.toLowerCase());
+			        	if (!filteredHm.isEmpty()) {
+				        	methodName = "s" + methodName.substring(1);
+				        	method = descriptiveData.getClass().getMethod(methodName, type);
+					        if (type.equals(MultiLiteral.class) || type.equals(MultiLiteralOrResource.class)) {
+					        	MultiLiteral fhm = new MultiLiteral();
+					        	for (String k: filteredHm.keySet())
+					        		fhm.put(k, (List<String>) filteredHm.get(k));
+									method.invoke(descriptiveData, fhm);
+					        }
+					        else if (type.equals(Literal.class) || type.equals(LiteralOrResource.class)) {
+					        	method.invoke(descriptiveData, (value.getClass().cast(filteredHm)));
+					        }
+			        	}
 		        	}
-	        	}
-	    	}
+		    	}
+			}
+			catch (NoSuchMethodException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+				log.error("Error in accessing or invoking a method of WithResource via reflection.");
+			}
 	    }
 	}
 	

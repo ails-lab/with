@@ -104,7 +104,6 @@ public class CollectionObject<T extends CollectionObject.CollectionDescriptiveDa
 	}
 
 
-	@Embedded
 	public static class CollectionDescriptiveData extends DescriptiveData {
 		//TODO: change these to camelCase!
 		// start day or possible start days
