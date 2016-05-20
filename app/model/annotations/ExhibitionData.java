@@ -24,6 +24,8 @@ import model.annotations.ContextData.ContextDataBody;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ExhibitionData extends ContextData<ExhibitionData.ExhibitionAnnotationBody> {
+	
+	private static enum MediaType {VIDEO, AUDIO};
 
 	public ExhibitionData() {
 		super();
@@ -35,9 +37,9 @@ public class ExhibitionData extends ContextData<ExhibitionData.ExhibitionAnnotat
 	@JsonIgnoreProperties(ignoreUnknown = true)
 	public static class ExhibitionAnnotationBody extends ContextDataBody {
 		Literal text = new Literal();
-		String audioUrl="";
-		String videoUrl="";
-		String videoDescription="";
+		String mediaUrl="";
+		String mediaDescription="";
+		MediaType mediaType = null;
 
 		public Literal getText() {
 			return text;
@@ -45,24 +47,27 @@ public class ExhibitionData extends ContextData<ExhibitionData.ExhibitionAnnotat
 		public void setText(Literal text) {
 			this.text = text;
 		}
-		public String getAudioUrl() {
-			return audioUrl;
+		public String getMediaUrl() {
+			return mediaUrl;
 		}
-		public void setAudioUrl(String audioUrl) {
-			this.audioUrl = audioUrl;
-		}
-		public String getVideoUrl() {
-			return videoUrl;
-		}
-		public void setVideoUrl(String videoUrl) {
-			this.videoUrl = videoUrl;
+		public void setMediaUrl(String audioUrl) {
+			this.mediaUrl = audioUrl;
 		}
 
-		public String getVideoDescription() {
-			return videoDescription;
+		public String getMediaDescription() {
+			return mediaDescription;
 		}
-		public void setVideoDescription(String videoDescription) {
-			this.videoDescription = videoDescription;
+		
+		public void setMediaDescription(String mediaDescription) {
+			this.mediaDescription = mediaDescription;
+		}
+		
+		public void setMediaType(MediaType mediaType) {
+			this.mediaType = mediaType;
+		}
+		
+		public MediaType getMediaType() {
+			return mediaType;
 		}
 	}
 
