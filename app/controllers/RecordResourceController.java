@@ -34,7 +34,6 @@ import play.data.validation.Validation;
 import play.libs.F.Option;
 import play.libs.Json;
 import play.mvc.Result;
-import utils.AccessManager.Action;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -61,7 +60,7 @@ public class RecordResourceController extends WithResourceController {
 	 *            the resource serialization
 	 * @return the resource metadata
 	 */
-	public static Result getRecordResource(String id, Option<String> format) {
+	public static Result getRecordResource(String id, Option<String> format, String profile, Option<String> locale) {
 		ObjectNode result = Json.newObject();
 		try {
 			RecordResource record = DB.getRecordResourceDAO().get(
@@ -80,7 +79,9 @@ public class RecordResourceController extends WithResourceController {
 					} else {
 						if (format.equals("noContent")) {
 							record.getContent().clear();
-							return ok(Json.toJson(record));
+							RecordResource profiledRecord = record.getRecordProfile(profile);
+							filterResourceByLocale(locale, profiledRecord);
+							return ok(Json.toJson(profiledRecord));
 						} else if (record.getContent() != null
 								&& record.getContent().containsKey(format)) {
 							return ok(record.getContent().get(format)
@@ -100,24 +101,6 @@ public class RecordResourceController extends WithResourceController {
 			return internalServerError(result);
 		}
 	}
-/*
-	public static void filterContextData(WithResource record) {
-		List<ContextData> contextAnns = record.getContextData();
-		List<ContextData> filteredContextAnns = new ArrayList<ContextData>();
-		List<CollectionObject> accessibleCols = DB.getCollectionObjectDAO()
-				.getAtLeastCollections(
-						AccessManager.effectiveUserDbIds(session().get(
-								"effectiveUserIds")), Access.READ, 0,
-						Integer.MAX_VALUE);
-		List<ObjectId> accessibleColIds = accessibleCols.stream()
-				.map(e -> e.getDbId()).collect(Collectors.toList());
-		for (ContextData contextAnn : contextAnns) {
-			if (accessibleColIds.contains(contextAnn.getTarget()
-					.getCollectionId()))
-				filteredContextAnns.add(contextAnn);
-		}
-		record.setContextData(filteredContextAnns);
-	}*/
 
 	/**
 	 * Edits the WITH resource according to the JSON body. For every field
@@ -155,7 +138,7 @@ public class RecordResourceController extends WithResourceController {
 		}
 	}
 
-	public static Result editContextData() throws Exception {
+	public static Result editContextData(String collectionId) throws Exception {
 		ObjectNode error = Json.newObject();
 		ObjectNode json = (ObjectNode) request().body().asJson();
 		if (json == null) {
@@ -176,22 +159,21 @@ public class RecordResourceController extends WithResourceController {
 									+ contextDataType);
 							ContextData newContextData = (ContextData) Json
 									.fromJson(json, clazz);
-							ObjectId collectionId = newContextData.getTarget()
-									.getCollectionId();
+							ObjectId collectionDbId = new ObjectId(collectionId);
 							// int position =
 							// newContextData.getTarget().getPosition();
 							if (collectionId != null
 									&& DB.getCollectionObjectDAO()
-											.existsEntity(collectionId)) {
+											.existsEntity(collectionDbId)) {
 								// filterContextData(record);
 								Result response = errorIfNoAccessToCollection(
-										Action.EDIT, collectionId);
+										Action.EDIT, collectionDbId);
 								if (!response.toString()
 										.equals(ok().toString()))
 									return response;
 								else {
 									DB.getCollectionObjectDAO()
-											.updateContextData(newContextData,
+											.updateContextData(collectionDbId, newContextData,
 													position);
 
 								}
@@ -199,7 +181,7 @@ public class RecordResourceController extends WithResourceController {
 						}
 						return ok("Edited context data.");
 					} catch (ClassNotFoundException e) {
-						e.printStackTrace();
+						log.error("",e);
 						return internalServerError(error);
 					}
 				} else
@@ -224,10 +206,10 @@ public class RecordResourceController extends WithResourceController {
 	 */
 	public static Result getFavorites() {
 		ObjectNode result = Json.newObject();
-		if (session().get("user") == null) {
+		if (loggedInUser() == null) {
 			return forbidden();
 		}
-		ObjectId userId = new ObjectId(session().get("user"));
+		ObjectId userId = new ObjectId(loggedInUser());
 		CollectionObject favorite;
 		ObjectId favoritesId;
 		if ((favorite = DB.getCollectionObjectDAO().getByOwnerAndLabel(userId,

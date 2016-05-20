@@ -26,6 +26,7 @@ import model.basicDataTypes.ProvenanceInfo;
 import model.resources.CulturalObject;
 import model.resources.CulturalObject.CulturalObjectData;
 import play.Logger;
+import play.Logger.ALogger;
 import sources.FilterValuesMap;
 import sources.core.JsonContextRecordFormatReader;
 import sources.core.Utils;
@@ -33,7 +34,8 @@ import sources.utils.JsonContextRecord;
 import sources.utils.StringUtils;
 
 public abstract class CulturalRecordFormatter extends JsonContextRecordFormatReader<CulturalObject> {
-
+	public static final ALogger log = Logger.of( CulturalRecordFormatter.class );
+	
 	private FilterValuesMap valuesMap;
 
 	public CulturalRecordFormatter(FilterValuesMap valuesMap) {
@@ -65,8 +67,7 @@ public abstract class CulturalRecordFormatter extends JsonContextRecordFormatRea
 		try {
 			fillObjectFrom(text);
 		} catch (Exception e) {
-			e.printStackTrace();
-			Logger.error(e.getMessage());
+			log.error("???",e );
 		}
 		List<ProvenanceInfo> provenance = object.getProvenance();
 		int index = provenance.size() - 1;
@@ -89,8 +90,7 @@ public abstract class CulturalRecordFormatter extends JsonContextRecordFormatRea
 		try {
 			fillObjectFrom(text);
 		} catch (Exception e) {
-			e.printStackTrace();
-			Logger.error(e.getMessage());
+			log.error("???",e);
 		}
 		List<ProvenanceInfo> provenance = object.getProvenance();
 		int index = provenance.size() - 1;

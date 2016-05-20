@@ -437,7 +437,7 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 			var context = ko.contextFor(event.target);
 			var index = context.$index();
 			self.itemPosition(index);
-			if (typeof exhibitionItem.contextData.body.text !== 'undefined') {
+			if (typeof exhibitionItem.contextData.body.text !== 'undefined' && exhibitionItem.contextData.body.text.default !== undefined) {
 				self.itemText(exhibitionItem.contextData.body.text.default());
 			}
 			if (typeof exhibitionItem.contextData.body.videoUrl !== 'undefined') {
@@ -515,7 +515,6 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 			jsonData = {
 				"contextDataType": "ExhibitionData",
 				"target": {
-					"collectionId": colId,
 					"recordId": dbId,
 					"position": position
 				},
@@ -527,7 +526,7 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 			};
 			jsonData = JSON.stringify(jsonData);
 			return $.ajax({
-				"url": "/record/contextData	",
+				"url": "/record/contextData?collectionId="+colId,
 				"method": "put",
 				"contentType": "application/json",
 				"data": jsonData,
@@ -646,22 +645,20 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 						ui.helper.css({
 							"z-index": 500
 						});
-						/*
-						//if (!_bIsMoveOperation) {
-							if (ui.helper.width() > 80) {
-								//var newAspectHeight = 80 / ui.helper.width() * ui.helper.height();
+						if (_bIsMoveOperation) {
+							if (ui.helper.width() > 100) {
+								var newAspectHeight = 100 / ui.helper.width() * ui.helper.height();
 								ui.helper.css({
-									"width": 80
+									"width": 100
 								});
 								ui.helper.css({
-									"height": 80//newAspectHeight
+									"height": newAspectHeight
 								});
 								ui.helper.css({
 									opacity: 0.8
 								});
 							}
-						//}
-						*/
+						}
 					},
 					stop: function (event, ui) {
 						$("#collscroll").css({

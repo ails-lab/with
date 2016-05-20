@@ -45,7 +45,6 @@ import play.libs.Json;
 import play.mvc.Controller;
 import play.mvc.Result;
 import sources.core.HttpConnector;
-import utils.AccessManager;
 import utils.Tuple;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -56,7 +55,7 @@ import db.DAO.QueryOperator;
 import db.DB;
 
 @SuppressWarnings({ "unchecked", "rawtypes" })
-public class GroupManager extends Controller {
+public class GroupManager extends WithController {
 
 	public static final ALogger log = Logger.of(UserGroup.class);
 
@@ -90,15 +89,11 @@ public class GroupManager extends Controller {
 				error.put("error", "Invalid JSON");
 				return badRequest(error);
 			}
-			if (AccessManager
-					.effectiveUserId(session().get("effectiveUserIds"))
-					.isEmpty()) {
+			ObjectId creator = effectiveUserDbId();
+			if (creator == null) {
 				error.put("error", "No rights for group creation");
 				return forbidden(error);
 			}
-			ObjectId creator = new ObjectId(
-					AccessManager.effectiveUserId(session().get(
-							"effectiveUserIds")));
 			if (!json.has("username")) {
 				error.put("error", "Must specify name for the group");
 				return badRequest(error);
@@ -187,11 +182,9 @@ public class GroupManager extends Controller {
 			result.put("error", "Cannot retrieve group from database.");
 			return internalServerError(result);
 		}
-		ObjectId userId = new ObjectId(AccessManager.effectiveUserIds(
-				session().get("effectiveUserIds")).get(0));
-		User user = DB.getUserDAO().get(userId);
+		User user = effectiveUser();
 		Set<ObjectId> groupAdmins = group.getAdminIds();
-		if (!groupAdmins.contains(userId) && !user.isSuperUser()) {
+		if (!groupAdmins.contains(user.getDbId()) && !user.isSuperUser()) {
 			result.put("error",
 					"Only an admin of the group has the right to edit the group.");
 			return forbidden(result);
@@ -267,8 +260,7 @@ public class GroupManager extends Controller {
 	public static Result deleteGroup(String groupId) {
 
 		ObjectNode result = Json.newObject();
-		String userId = AccessManager.effectiveUserId(session().get(
-				"effectiveUserIds"));
+		String userId = effectiveUserId();
 		if ((userId == null) || (userId.equals(""))) {
 			result.put("error",
 					"Only creator of the group has the right to delete the group");
@@ -508,8 +500,7 @@ public class GroupManager extends Controller {
 		for (UserGroup group : groups) {
 			ObjectNode g = (ObjectNode) Json.toJson(group);
 
-			ObjectId userId = AccessManager.effectiveUserDbId(session().get(
-					"effectiveUserIds"));
+			ObjectId userId = effectiveUserDbId();
 			User user = DB.getUserDAO().get(userId);
 			g.put("firstName", user.getFirstName());
 			g.put("lastName", user.getLastName());
@@ -542,8 +533,7 @@ public class GroupManager extends Controller {
 		List<UserGroup> groups = new ArrayList<UserGroup>();
 		try {
 			GroupType type = GroupType.valueOf(groupType);
-			ObjectId userId = AccessManager.effectiveUserDbId(session().get(
-					"effectiveUserIds"));
+			ObjectId userId = effectiveUserDbId();
 			if (userId == null) {
 				groups = DB.getUserGroupDAO().findPublic(type, offset, count);
 				return ok(Json.toJson(groups));

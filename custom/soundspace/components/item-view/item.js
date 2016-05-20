@@ -71,9 +71,10 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 			if(self.source() && self.source()=="Europeana"){
 				$("span.pnd-resource").show();
 				$("div.pnd-resource").show();
-				
-				$("span.pnd-resource").attr('about',self.view_url());
-				$("div.pnd-resource").attr('about',self.view_url());
+				var pundit_url=self.view_url().replace('http://www.europeana.eu/portal/record/','http://data.europeana.eu/item/');
+				pundit_url=pundit_url.replace('.html','');
+				$("span.pnd-resource").attr('about',pundit_url);
+				$("div.pnd-resource").attr('about',pundit_url);
 				dispatchDocumentEvent('Pundit.loadAnnotations');
 				dispatchDocumentEvent('Pundit.forceCompileButton');
 				

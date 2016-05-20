@@ -67,29 +67,6 @@ public class EuropeanaCollectionSpaceSource extends EuropeanaSpaceSource {
 		return super.getResults(q);
 	}
 
-	// public SourceResponse getMyResults(CommonQuery q) {
-	// SourceResponse res = new SourceResponse();
-	// res.source = getSourceName();
-	// String httpQuery = getHttpQuery(q);
-	// res.query = httpQuery;
-	// JsonNode response;
-	// if (checkFilters(q)) {
-	// try {
-	// response = getHttpConnector().getURLContent(httpQuery);
-	// res.totalCount = Utils.readIntAttr(response, "totalResults", true);
-	// res.count = Utils.readIntAttr(response, "itemsCount", true);
-	// res.items.setCulturalCHO(getItems(response));
-	// nextCursor = Utils.readAttr(response, "nextCursor", true);
-	// // res.facets = response.path("facets");
-	// res.filtersLogic = createFilters(response);
-	//
-	// } catch (Exception e) {
-	// // TODO Auto-generated catch block
-	// e.printStackTrace();
-	// }
-	// }
-	// return res;
-	// }
 
 	public String getCollectionName() {
 		return collectionName;

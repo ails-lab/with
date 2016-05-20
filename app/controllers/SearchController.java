@@ -59,17 +59,13 @@ import sources.core.ParallelAPICall;
 import sources.core.SearchResponse;
 import sources.core.SourceResponse;
 import sources.core.Utils;
-import utils.AccessManager;
 import utils.ListUtils;
 
-public class SearchController extends Controller {
+public class SearchController extends WithController {
 
 	final static Form<CommonQuery> userForm = Form.form(CommonQuery.class);
 	public static final ALogger log = Logger.of(SearchController.class);
 
-	// here is how the ApiKey check can be build into the controllers
-	// @With( CallAllowedCheck.class)
-	@SuppressWarnings("unchecked")
 	public static Promise<Result> search() {
 		JsonNode json = request().body().asJson();
 		if (log.isDebugEnabled()) {
@@ -87,18 +83,16 @@ public class SearchController extends Controller {
 			try {
 				final CommonQuery q = Utils.parseJson(json);
 				q.setTypes(Elastic.allTypes);
-				if (session().containsKey("effectiveUserIds")) {
-					List<String> userIds = AccessManager.effectiveUserIds(session().get("effectiveUserIds"));
-					q.setEffectiveUserIds(userIds);
-				}
+				List<String> userIds = effectiveUserIds();
+				q.setEffectiveUserIds(userIds);
 				Iterable<Promise<SourceResponse>> promises = callSources(q);
 				// compose all futures, blocks until all futures finish
 				return ParallelAPICall.<SourceResponse> combineResponses(r -> {
-					Logger.info(r.source + " found " + r.count);
+					log.info(r.source + " found " + r.count);
 					return true;
 				} , promises);
 			} catch (Exception e) {
-				e.printStackTrace();
+				log.error("",e);
 				return Promise.pure((Result) badRequest(e.getMessage()));
 			}
 		}
@@ -121,10 +115,7 @@ public class SearchController extends Controller {
 			try {
 				final CommonQuery q = Utils.parseJson(json);
 				q.setTypes(Elastic.allTypes);
-				if (session().containsKey("effectiveUserIds")) {
-					List<String> userIds = AccessManager.effectiveUserIds(session().get("effectiveUserIds"));
-					q.setEffectiveUserIds(userIds);
-				}
+				q.setEffectiveUserIds(effectiveUserIds());
 				Promise<SearchResponse> myResults = getMyResutlsPromise(q);
 				play.libs.F.Function<SearchResponse, Result> function = 
 				new play.libs.F.Function<SearchResponse, Result>() {
@@ -135,7 +126,7 @@ public class SearchController extends Controller {
 				return myResults.map(function);
 
 			} catch (Exception e) {
-				e.printStackTrace();
+				log.error("",e);
 				return Promise.pure((Result)badRequest(e.getMessage()));
 			}
 		}
@@ -147,10 +138,7 @@ public class SearchController extends Controller {
 		// Parse the query.
 		try {
 			q.setTypes(Elastic.allTypes);
-			if (session().containsKey("effectiveUserIds")) {
-				List<String> userIds = AccessManager.effectiveUserIds(session().get("effectiveUserIds"));
-				q.setEffectiveUserIds(userIds);
-			}
+			q.setEffectiveUserIds(effectiveUserIds());
 			Promise<SearchResponse> myResults = getMyResutlsPromise(q);
 			play.libs.F.Function<SearchResponse, Result> function = new play.libs.F.Function<SearchResponse, Result>() {
 				public Result apply(SearchResponse r) {
@@ -160,7 +148,7 @@ public class SearchController extends Controller {
 			return myResults.map(function);
 
 		} catch (Exception e) {
-			e.printStackTrace();
+			log.error("",e);
 			return Promise.pure((Result) badRequest(e.getMessage()));
 		}
 	}
@@ -175,10 +163,7 @@ public class SearchController extends Controller {
 				final CommonQuery q = Utils.parseJson(json);
 				q.searchTerm=null;
 				q.setTypes(Elastic.allTypes);
-				if (session().containsKey("effectiveUserIds")) {
-					List<String> userIds = AccessManager.effectiveUserIds(session().get("effectiveUserIds"));
-					q.setEffectiveUserIds(userIds);
-				}
+				q.setEffectiveUserIds(effectiveUserIds());
 				Promise<SearchResponse> myResults = getMyResutlsPromise(q);
 				play.libs.F.Function<SearchResponse, Result> function = 
 				new play.libs.F.Function<SearchResponse, Result>() {
@@ -189,7 +174,7 @@ public class SearchController extends Controller {
 				return myResults.map(function);
 
 			} catch (Exception e) {
-				e.printStackTrace();
+				log.error("",e);
 				return Promise.pure((Result)badRequest(e.getMessage()));
 			}
 		}
@@ -207,13 +192,13 @@ public class SearchController extends Controller {
 					);
 		} catch (JsonParseException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			log.error("",e);
 		} catch (JsonMappingException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			log.error("",e);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			log.error("",e);
 		}
 		for (Collection<CommonFilterResponse> fresponse : filters) {
 			if (fresponse!=null){
@@ -291,11 +276,11 @@ public class SearchController extends Controller {
 				SourceResponse res = src
 						.getResults(cq);
 					if (res.source==null){
-						System.out.println("Error "+src.getSourceName());
+						log.info("Error "+src.getSourceName());
 					}
 					return res;
 			} catch(Exception e){
-				e.printStackTrace();
+				log.error("",e);
 				return null;
 			}
 			};

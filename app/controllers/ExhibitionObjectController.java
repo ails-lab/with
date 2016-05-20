@@ -18,28 +18,26 @@ package controllers;
 
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.Iterator;
-
 import model.EmbeddedMediaObject;
 import model.EmbeddedMediaObject.MediaVersion;
-import model.resources.RecordResource;
-
 import org.bson.types.ObjectId;
 
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import db.DB;
+import model.EmbeddedMediaObject;
+import model.EmbeddedMediaObject.MediaVersion;
+import play.Logger;
+import play.Logger.ALogger;
 import play.libs.Json;
 import play.mvc.Result;
 
 public class ExhibitionObjectController extends WithResourceController {
-	
+	public static final ALogger log = Logger.of(ExhibitionObjectController.class);
+
 	public static Result addBackgroundImg(String exhΙd) {
 		ObjectNode result = Json.newObject();
 		JsonNode json = request().body().asJson();
@@ -53,7 +51,7 @@ public class ExhibitionObjectController extends WithResourceController {
 						json.traverse(), typeRef);
 					DB.getCollectionObjectDAO().updateBackgroundImg(new ObjectId(exhΙd), media);				
 				} catch (IOException e) {
-					e.printStackTrace();
+					log.error("",e);
 					return errorMsg();
 				} 
 			}

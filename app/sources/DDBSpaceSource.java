@@ -25,6 +25,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import model.basicDataTypes.ProvenanceInfo.Sources;
 import model.resources.RecordResource;
 import model.resources.WithResource;
+import play.Logger;
+import play.Logger.ALogger;
 import play.libs.Json;
 import sources.core.CommonFilterLogic;
 import sources.core.CommonFilters;
@@ -42,7 +44,8 @@ import sources.formatreaders.DDBRecordFormatter;
 import sources.utils.FunctionsUtils;
 
 public class DDBSpaceSource extends ISpaceSource {
-
+	public static final ALogger log = Logger.of( DDBSpaceSource.class);
+	
 	public DDBSpaceSource() {
 		super(Sources.DDB);
 		apiKey = "SECRET_KEY";
@@ -109,7 +112,7 @@ public class DDBSpaceSource extends ISpaceSource {
 
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
-				e.printStackTrace();
+				log.error( "",e );
 			}
 		}
 
@@ -178,7 +181,7 @@ public class DDBSpaceSource extends ISpaceSource {
 
 			return jsonMetadata;
 		} catch (Exception e) {
-			e.printStackTrace();
+			log.error("",e);
 			return jsonMetadata;
 		}
 	}

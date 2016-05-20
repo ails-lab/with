@@ -25,21 +25,20 @@ import java.util.Collection;
 import java.util.Scanner;
 import java.util.function.Function;
 
-import com.fasterxml.jackson.databind.JsonNode;
-
-import sources.EuropeanaSpaceSource.EuropeanaQueryBuilder;
-import sources.core.HttpConnector;
+import play.Logger;
+import play.Logger.ALogger;
 import sources.core.QueryBuilder;
-import sources.core.SourceResponse;
 import sources.core.Utils;
 import sources.utils.JsonContextRecord;
 import utils.ListUtils;
 
 public class EuropeanaTermsCount {
 
+	public static final ALogger log = Logger.of( EuropeanaTermsCount.class);
+	
 	public static String getHTML(String urlToRead) throws Exception {
 	      StringBuilder result = new StringBuilder();
-	      System.err.println("calling " + urlToRead);
+	      log.info("calling " + urlToRead);
 	      URL url = new URL(urlToRead);
 	      HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 	      conn.setRequestMethod("GET");
@@ -49,7 +48,7 @@ public class EuropeanaTermsCount {
 	         result.append(line);
 	      }
 	      rd.close();
-	      System.err.println("result "+System.lineSeparator() + result.toString());
+	      log.info("result "+System.lineSeparator() + result.toString());
 	      return result.toString();
 	   }
 	
