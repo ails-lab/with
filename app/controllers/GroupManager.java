@@ -102,13 +102,15 @@ public class GroupManager extends Controller {
 			if (!json.has("username")) {
 				error.put("error", "Must specify name for the group");
 				return badRequest(error);
-			} else if(json.get("username").asText().length() < 3) {
-				error.put("error", "Username of " + groupType + " must contain at least 3 characters");
+			} else if (json.get("username").asText().length() < 3) {
+				error.put("error", "Username of " + groupType
+						+ " must contain at least 3 characters");
 				return badRequest(error);
 			}
-			if(json.has("friendlyName") &&
-				(json.get("friendlyName").asText().length() < 3)) {
-				error.put("error", "Short Name of  " + groupType + " must contain at least 3 characters");
+			if (json.has("friendlyName")
+					&& (json.get("friendlyName").asText().length() < 3)) {
+				error.put("error", "Short Name of  " + groupType
+						+ " must contain at least 3 characters");
 				return badRequest(error);
 			}
 
@@ -209,12 +211,10 @@ public class GroupManager extends Controller {
 		return ok(Json.toJson(DB.getUserGroupDAO().get(groupDbId)));
 	}
 
-
-
 	private static void updatePage(ObjectId groupId, JsonNode json) {
 		UserGroup group = DB.getUserGroupDAO().get(groupId);
-		if (!json.has("page") || (!(group instanceof Organization)
-				&& !(group instanceof Project)))
+		if (!json.has("page")
+				|| (!(group instanceof Organization) && !(group instanceof Project)))
 			return;
 		Page newPage = Json.fromJson(json.get("page"), Page.class);
 		if ((newPage.getAddress() == null) && (newPage.getCity() == null)
@@ -241,8 +241,9 @@ public class GroupManager extends Controller {
 		fullAddress = fullAddress.replace(" ", "+");
 		try {
 			JsonNode response = HttpConnector.getWSHttpConnector()
-					.getURLContent("https://maps.googleapis.com/maps/api/geocode/json?address="
-							+ fullAddress);
+					.getURLContent(
+							"https://maps.googleapis.com/maps/api/geocode/json?address="
+									+ fullAddress);
 			Point coordinates = GeoJson.point(
 					response.get("results").get(0).get("geometry")
 							.get("location").get("lat").asDouble(),
@@ -370,13 +371,14 @@ public class GroupManager extends Controller {
 				g.put("totalExhibitions", hits.y);
 			}
 			boolean add = true;
-			for(int i=0; i<result.size(); i++) {
-				if(group.getDbId().toString().equals(result.get(i).get("dbId").asText())) {
-					add=false;
+			for (int i = 0; i < result.size(); i++) {
+				if (group.getDbId().toString()
+						.equals(result.get(i).get("dbId").asText())) {
+					add = false;
 					break;
 				}
 			}
-			if(add)
+			if (add)
 				result.add(g);
 		}
 		return result;
@@ -471,10 +473,10 @@ public class GroupManager extends Controller {
 					log.error("No User with dbId: " + oid);
 				}
 				ObjectNode userJSON = userOrGroupJson(u);
-				if(group.getAdminIds().contains(oid))
-					userJSON.put("isAdmin","true");
+				if (group.getAdminIds().contains(oid))
+					userJSON.put("isAdmin", "true");
 				else
-					userJSON.put("isAdmin","false");
+					userJSON.put("isAdmin", "false");
 				users.add(userJSON);
 			}
 		}
@@ -542,8 +544,17 @@ public class GroupManager extends Controller {
 		return result;
 	}
 
+	public static ObjectNode groupsWithCount(List<UserGroup> groups,
+			int groupCount) {
+		ObjectNode result = Json.newObject();
+		result.put("groups", userGroupsToJSON(groups));
+		result.put("groupCount", groupCount);
+		return result;
+	}
+
 	public static Result listUserGroups(String groupType, int offset,
 			int count, boolean belongsOnly) {
+
 		List<UserGroup> groups = new ArrayList<UserGroup>();
 		try {
 			GroupType type = GroupType.valueOf(groupType);
@@ -557,10 +568,10 @@ public class GroupManager extends Controller {
 			Set<ObjectId> userGroupsIds = user.getUserGroupsIds();
 			groups = DB.getUserGroupDAO().findByIds(userGroupsIds, type,
 					offset, count);
-			if (groups.size() == count)
-				return ok(userGroupsToJSON(groups));
 			int userGroupCount = DB.getUserGroupDAO().getGroupCount(
 					userGroupsIds, type);
+			if (groups.size() == count)
+				return ok(groupsWithCount(groups, userGroupCount));
 			if (offset < userGroupCount)
 				offset = 0;
 			else
@@ -569,11 +580,9 @@ public class GroupManager extends Controller {
 			if (!belongsOnly)
 				groups.addAll(DB.getUserGroupDAO().findPublicWithRestrictions(
 						type, offset, count, userGroupsIds));
-			return ok(userGroupsToJSON(groups));
-			// return ok(Json.toJson(groups));
+			return ok(groupsWithCount(groups, userGroupCount));
 		} catch (Exception e) {
-			return ok(userGroupsToJSON(groups));
-			// return ok(Json.toJson(groups));
+			return ok(groupsWithCount(groups, groups.size()));
 		}
 	}
 }

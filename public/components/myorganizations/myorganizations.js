@@ -62,11 +62,12 @@ define(['knockout', 'text!./myorganizations.html', 'app', 'moment', 'async!https
 		self.groups = ko.observableArray([], mapping);
 		self.name = ko.observable(params.type);			// Project or Organization (display field)
 		self.namePlural = ko.observable(params.title);	// Projects or Organizations (display field)
+		self.entryCount = ko.observable();
 		self.groupCount = ko.pureComputed(function () {
-			if (self.groups().length === 1) {
-				return self.groups().length + ' ' + self.name();
+			if (self.entryCount() === 1) {
+				return self.entryCount() + ' ' + self.name();
 			} else {
-				return self.groups().length + ' ' + self.namePlural();
+				return self.entryCount() + ' ' + self.namePlural();
 			}
 		});
 		self.baseURL = ko.pureComputed(function () {
@@ -113,7 +114,8 @@ define(['knockout', 'text!./myorganizations.html', 'app', 'moment', 'async!https
 			url: '/group/list?groupType=' + params.type + '&offset=0&belongsOnly=true',
 			type: 'GET',
 			success: function (data) {
-				ko.mapping.fromJS(data, mapping, self.groups);
+				ko.mapping.fromJS(data.groups, mapping, self.groups);
+				self.entryCount(data.groupCount);
 				WITHApp.tabAction();
 
 				if (self.groups().length % 10 > 0) {
@@ -166,6 +168,7 @@ define(['knockout', 'text!./myorganizations.html', 'app', 'moment', 'async!https
 						success: function (data, textStatus, jqXHR) {
 							self.groups.remove(group);
 							console.log(data);
+							self.entryCount(self.entryCount() -1);
 						},
 						error: function (jqXHR, textStatus, errorThrown) {
 							console.log(errorThrown);
@@ -232,10 +235,10 @@ define(['knockout', 'text!./myorganizations.html', 'app', 'moment', 'async!https
 				type: 'GET',
 				success: function (data) {
 					var newItems = ko.mapping.fromJS(data, mapping);
-					self.groups.push.apply(self.groups, newItems());
+					self.groups.push.apply(self.groups, newItems.groups());
 
 					WITHApp.tabAction();
-					if (data.length === 0 || data.length % 10 > 0) {
+					if (data.groups.length === 0 || data.groups.length % 10 > 0) {
 						$('.loadmore').text('no more results');
 					}
 				}
