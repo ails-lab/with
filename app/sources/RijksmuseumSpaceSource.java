@@ -30,6 +30,8 @@ import model.basicDataTypes.ProvenanceInfo.Sources;
 import model.resources.CulturalObject;
 import model.resources.RecordResource;
 import play.libs.Json;
+import sources.core.CommonFilterLogic;
+import sources.core.CommonFilters;
 import sources.core.CommonQuery;
 import sources.core.HttpConnector;
 import sources.core.ISpaceSource;
@@ -74,16 +76,6 @@ public class RijksmuseumSpaceSource extends ISpaceSource {
 		String httpQuery = getHttpQuery(q);
 		res.query = httpQuery;
 		JsonNode response;
-		// CommonFilterLogic type = CommonFilterLogic.typeFilter();
-		// CommonFilterLogic provider = CommonFilterLogic.providerFilter();
-		// CommonFilterLogic dataprovider =
-		// CommonFilterLogic.dataproviderFilter();
-		// CommonFilterLogic creator = CommonFilterLogic.creatorFilter();
-		// CommonFilterLogic rights = CommonFilterLogic.rightsFilter();
-		// CommonFilterLogic country = CommonFilterLogic.countryFilter();
-		// CommonFilterLogic year = CommonFilterLogic.yearFilter();
-		// CommonFilterLogic contributor =
-		// CommonFilterLogic.contributorFilter();
 		if (checkFilters(q)) {
 			try {
 				response = getHttpConnector().getURLContent(httpQuery);
@@ -97,65 +89,42 @@ public class RijksmuseumSpaceSource extends ISpaceSource {
 
 				res.facets = response.path("facets");
 
-				// for (JsonNode facet : response.path("facets")) {
-				// for (JsonNode jsonNode : facet.path("fields")) {
-				// String label = jsonNode.path("label").asText();
-				// int count = jsonNode.path("count").asInt();
-				// switch (facet.path("name").asText()) {
-				// case "TYPE":
-				// countValue(type, label, count);
-				// break;
-				//
-				// case "DATA_PROVIDER":
-				// countValue(dataprovider, label, false, count);
-				// break;
-				//
-				// case "PROVIDER":
-				// countValue(provider, label, false, count);
-				// break;
-				//
-				// case "RIGHTS":
-				// countValue(rights, label, count);
-				// break;
-				//
-				// case "proxy_dc_creator":
-				// countValue(creator, label, false, count);
-				// break;
-				//// case "proxy_dc_contributor":
-				//// countValue(contributor, label, false, count);
-				//// break;
-				// case "COUNTRY":
-				// countValue(country, label, false, count);
-				// break;
-				//
-				// case "YEAR":
-				// countValue(year, label, false, count);
-				// break;
-				//
-				// default:
-				// break;
-				// }
-				// }
-				// }
-
-				res.filtersLogic = new ArrayList<>();
-				// res.filtersLogic.add(type);
-				// res.filtersLogic.add(provider);
-				// res.filtersLogic.add(dataprovider);
-				// res.filtersLogic.add(creator);
-				//// res.filtersLogic.add(contributor);
-				// res.filtersLogic.add(rights);
-				// res.filtersLogic.add(country);
-				// res.filtersLogic.add(year);
+				res.filtersLogic = createFilters(response);
 			} catch (Exception e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
-		// protected void countValue(CommonFilterResponse type, String t) {
-		// type.addValue(vmap.translateToCommon(type.filterID, t));
-		// }
 		return res;
+	}
+	
+	public List<CommonFilterLogic> createFilters(JsonNode response) {
+		List<CommonFilterLogic> filters = new ArrayList<CommonFilterLogic>();
+		CommonFilterLogic type = new CommonFilterLogic(CommonFilters.TYPE).addTo(filters);
+		CommonFilterLogic creator = new CommonFilterLogic(CommonFilters.CREATOR).addTo(filters);
+		CommonFilterLogic country = new CommonFilterLogic(CommonFilters.COUNTRY).addTo(filters);
+				
+		for (JsonNode facet : response.path("facets")) {
+			String filterType = facet.path("name").asText();
+			for (JsonNode jsonNode : facet.path("facets")) {
+				String label = jsonNode.path("key").asText();
+				int count = jsonNode.path("value").asInt();
+				switch (filterType) {
+				case "type":
+					countValue(type, label, count);
+					break;
+				case "maker":
+					countValue(creator, label, false, count);
+					break;
+				case "place":
+					countValue(country, label, false, count);
+					break;
+				default:
+					break;
+				}
+
+			}
+		}
+		return filters;
 	}
 	
 	@Override
