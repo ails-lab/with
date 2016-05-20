@@ -34,6 +34,7 @@ public class Exhibition extends CollectionObject<Exhibition.ExhibitionDescriptiv
 
 	public Exhibition() {
 		super();
+		this.descriptiveData = new ExhibitionDescriptiveData();
 		this.resourceType = WithResourceType.Exhibition;
 	}
 

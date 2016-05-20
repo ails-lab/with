@@ -41,7 +41,6 @@ import play.Logger.ALogger;
 import play.libs.Akka;
 import play.libs.Crypto;
 import play.libs.Json;
-import play.mvc.Controller;
 import play.mvc.Result;
 import scala.concurrent.Await;
 import scala.concurrent.Future;
@@ -60,7 +59,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import db.DB;
 
-public class UserManager extends Controller {
+public class UserManager extends WithController {
 
 	public static final ALogger log = Logger.of(UserManager.class);
 	private static final long TOKENTIMEOUT = 10 * 1000l /* 10 sec */;
