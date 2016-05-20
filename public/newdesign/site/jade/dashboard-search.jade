@@ -29,44 +29,43 @@ html
 							.container-fluid
 
 								// wrap
-									.wrap
+								.wrap
 
-								
-									
+									// settings bar
+									.settings
+										a( href="#" title="#" )
+											img( src="img/ui/ic-setting.png" alt="settings" )
+										
 
-								// input
+									// input
 									.searchbox
 										img.icon( src="img/ui/ic-mag.png" alt="Search" )
-										input.searchinput( type="text" placeholder="Type your keyword" )
+										input.searchinput( type="text" placeholder="Search media" )
 
-								// tabs
-									ul.typeselect
+									.provider
+										// collection picker
+										a#picker(href="#", data-toggle='dropdown').picker
+											span.text All Content Provider 
+											span.arrow
+
+										ul.dropdown-menu(aria-labelledby='picker')
+											li 
+												a(href="#") All Content Provider
+											li 
+												a(href="#") WITH Content
+
+									// view setting
+									ul.view
 										li.active
-											a( href="#" title="Search all providers item") All content provider items
+											a( href="#" title="Column View" data-view="column" )
+												img( src="img/ui/ic-list.png" alt="list" )
 										li
-											a( href="#" title="Search on WITH items only") WITH items
-
-								
-
+											a( href="#" title="Grid View" data-view="grid" )
+												img( src="img/ui/ic-grid.png" alt="grid" )
 
 								// close search
 								a.close( href="#" title="Close Search" ) 
 									img( src='img/ui/ic-close.png' )
-
-
-								// view setting
-								ul.view
-									li.active
-										a.listview( href="#" data-view="column"  data-toggle="tooltip" data-placement="bottom" title="Column view")
-											span.icon
-									li
-										a.gridview( href="#"  data-view="grid"  data-toggle="tooltip" data-placement="bottom" title="List view")
-											span.icon
-
-								// settings bar
-								.settings
-									a( href="#" data-view="column"  data-toggle="tooltip" data-placement="bottom" title="Search filter")
-										img( src="img/ui/ic-setting.png" alt="settings" )
 
 						// search filter
 						section.searchlabel
@@ -120,26 +119,21 @@ html
 														// thumbnail
 														.thumb
 															img(src='img/content/thumb-media-1.png', alt='Lorem ipsum')
-													// info
-													.info
-														// anchor
-														a(href='#', title='Lorem ipsum').mediaviewer
+														// info
+														.info
 															h1.title
 																| The earth was small light blue and so touchingly alone ur home that must be defended like a relic
-															span.source National Library of Latvia
-														span.provider
-															a(href="#").links digitainz.org
 														
-													// metadata
-													.action-group
-														.wrap
-															ul
-																li
-																	a(href="#" data-toggle="tooltip" data-placement="top" title="Add to favorite" ).fa.fa-heart
-																li
-																	a(href="#" data-toggle="tooltip" data-placement="top" title="Collect it" ).fa.fa-download.collectbutton
-																li
-																	.inputcheck 
+														// metadata
+														.action-group
+															.wrap
+																a(href="#").links digitainz.org
+																ul
+																	li
+																		a(href="#" data-toggle="tooltip" data-placement="top" title="Add to favorite" ).fa.fa-heart
+																	li
+																		a(href="#" data-toggle="tooltip" data-placement="top" title="Collect it" ).fa.fa-download.collectbutton
+																	li
 																		input.selectitem( type="checkbox" )
 
 														
@@ -151,24 +145,20 @@ html
 														// thumbnail
 														.thumb
 															img(src='img/content/thumb-media-2.png', alt='Lorem ipsum')
-													// info
-													.info
-														a(href='#', title='Lorem ipsum').mediaviewer
+														// info
+														.info
 															h1.title The earth was small light blue and so touchingly alone.
-															span.source National Library of Latvia
-														span.provider
-															a(href="#").links digitainz.org
 														
-													// metadata
-													.action-group
-														.wrap
-															ul
-																li
-																	a(href="#" data-toggle="tooltip" data-placement="top" title="Add to favorite" ).fa.fa-heart
-																li
-																	a(href="#" data-toggle="tooltip" data-placement="top" title="Collect it" ).fa.fa-download.collectbutton
-																li
-																	.inputcheck 
+														// metadata
+														.action-group
+															.wrap
+																a(href="#").links digitainz.org
+																ul
+																	li
+																		a(href="#" data-toggle="tooltip" data-placement="top" title="Add to favorite" ).fa.fa-heart
+																	li
+																		a(href="#" data-toggle="tooltip" data-placement="top" title="Collect it" ).fa.fa-download.collectbutton
+																	li
 																		input.selectitem( type="checkbox" )
 														
 											// item
@@ -179,24 +169,20 @@ html
 														// thumbnail
 														.thumb
 															img(src='img/content/thumb-media-3.png', alt='Lorem ipsum')
-													// info
-													.info
-														a(href='#', title='Lorem ipsum').mediaviewer
+														// info
+														.info
 															h1.title The earth was small light blue and so touchingly alone ur
-															span.source National Library of Latvia
-														span.provider
-															a(href="#").links digitainz.org
-													
-													// metadata
-													.action-group
-														.wrap
-															ul
-																li
-																	a(href="#" data-toggle="tooltip" data-placement="top" title="Add to favorite" ).fa.fa-heart
-																li
-																	a(href="#" data-toggle="tooltip" data-placement="top" title="Collect it" ).fa.fa-download.collectbutton
-																li
-																	.inputcheck 
+														
+														// metadata
+														.action-group
+															.wrap
+																a(href="#").links digitainz.org
+																ul
+																	li
+																		a(href="#" data-toggle="tooltip" data-placement="top" title="Add to favorite" ).fa.fa-heart
+																	li
+																		a(href="#" data-toggle="tooltip" data-placement="top" title="Collect it" ).fa.fa-download.collectbutton
+																	li
 																		input.selectitem( type="checkbox" )
 														
 														
@@ -208,24 +194,20 @@ html
 														// thumbnail
 														.thumb
 															img(src='img/content/thumb-media-4.png', alt='Lorem ipsum')
-													// info
-													.info
-														a(href='#', title='Lorem ipsum').mediaviewer
+														// info
+														.info
 															h1.title The earth was small light blue 
-															span.source National Library of Latvia
-														span.provider
-															a(href="#").links digitainz.org
-													
-													// metadata
-													.action-group
-														.wrap
-															ul
-																li
-																	a(href="#" data-toggle="tooltip" data-placement="top" title="Add to favorite" ).fa.fa-heart
-																li
-																	a(href="#" data-toggle="tooltip" data-placement="top" title="Collect it" ).fa.fa-download.collectbutton
-																li
-																	.inputcheck 
+														
+														// metadata
+														.action-group
+															.wrap
+																a(href="#").links digitainz.org
+																ul
+																	li
+																		a(href="#" data-toggle="tooltip" data-placement="top" title="Add to favorite" ).fa.fa-heart
+																	li
+																		a(href="#" data-toggle="tooltip" data-placement="top" title="Collect it" ).fa.fa-download.collectbutton
+																	li
 																		input.selectitem( type="checkbox" )
 
 														
@@ -238,24 +220,20 @@ html
 														// thumbnail
 														.thumb
 															img(src='img/content/thumb-media-1.png', alt='Lorem ipsum')
-													// info
-													.info
-														a(href='#', title='Lorem ipsum').mediaviewer
+														// info
+														.info
 															h1.title The earth was small light blue and so touchingly alone.
-															span.source National Library of Latvia
-														span.provider
-															a(href="#").links digitainz.org
-													
-													// metadata
-													.action-group
-														.wrap
-															ul
-																li
-																	a(href="#" data-toggle="tooltip" data-placement="top" title="Add to favorite" ).fa.fa-heart
-																li
-																	a(href="#" data-toggle="tooltip" data-placement="top" title="Collect it" ).fa.fa-download.collectbutton
-																li
-																	.inputcheck 
+														
+														// metadata
+														.action-group
+															.wrap
+																a(href="#").links digitainz.org
+																ul
+																	li
+																		a(href="#" data-toggle="tooltip" data-placement="top" title="Add to favorite" ).fa.fa-heart
+																	li
+																		a(href="#" data-toggle="tooltip" data-placement="top" title="Collect it" ).fa.fa-download.collectbutton
+																	li
 																		input.selectitem( type="checkbox" )
 													
 													
@@ -267,24 +245,20 @@ html
 														// thumbnail
 														.thumb
 															img(src='img/content/thumb-media-2.png', alt='Lorem ipsum')
-													// info
-													.info
-														a(href='#', title='Lorem ipsum').mediaviewer
+														// info
+														.info
 															h1.title The earth was small light blue and so touchingly alone.
-															span.source National Library of Latvia
-														span.provider
-															a(href="#").links digitainz.org
-													
-													// metadata
-													.action-group
-														.wrap
-															ul
-																li
-																	a(href="#" data-toggle="tooltip" data-placement="top" title="Add to favorite" ).fa.fa-heart
-																li
-																	a(href="#" data-toggle="tooltip" data-placement="top" title="Collect it" ).fa.fa-download.collectbutton
-																li
-																	.inputcheck 
+														
+														// metadata
+														.action-group
+															.wrap
+																a(href="#").links digitainz.org
+																ul
+																	li
+																		a(href="#" data-toggle="tooltip" data-placement="top" title="Add to favorite" ).fa.fa-heart
+																	li
+																		a(href="#" data-toggle="tooltip" data-placement="top" title="Collect it" ).fa.fa-download.collectbutton
+																	li
 																		input.selectitem( type="checkbox" )
 														
 														
@@ -296,25 +270,21 @@ html
 														// thumbnail
 														.thumb
 															img(src='img/content/thumb-media-3.png', alt='Lorem ipsum')
-													// info
-													.info
-														a(href='#', title='Lorem ipsum').mediaviewer
+														// info
+														.info
 															h1.title
 																| The earth was small light blue and so touchingly alone ur home that must be defended like a relic
-															span.source National Library of Latvia
-														span.provider
-															a(href="#").links digitainz.org
-													
-													// metadata
-													.action-group
-														.wrap
-															ul
-																li
-																	a(href="#" data-toggle="tooltip" data-placement="top" title="Add to favorite" ).fa.fa-heart
-																li
-																	a(href="#" data-toggle="tooltip" data-placement="top" title="Collect it" ).fa.fa-download.collectbutton
-																li
-																	.inputcheck 
+														
+														// metadata
+														.action-group
+															.wrap
+																a(href="#").links digitainz.org
+																ul
+																	li
+																		a(href="#" data-toggle="tooltip" data-placement="top" title="Add to favorite" ).fa.fa-heart
+																	li
+																		a(href="#" data-toggle="tooltip" data-placement="top" title="Collect it" ).fa.fa-download.collectbutton
+																	li
 																		input.selectitem( type="checkbox" )
 														
 														
@@ -327,25 +297,21 @@ html
 														// thumbnail
 														.thumb
 															img(src='img/content/thumb-media-4.png', alt='Lorem ipsum')
-													// info
-													.info
-														a(href='#', title='Lorem ipsum').mediaviewer
+														// info
+														.info
 															h1.title
 																| The earth was small light blue and so touchingly alone ur home that must be defended like a relic
-															span.source National Library of Latvia
-														span.provider
-															a(href="#").links digitainz.org
-													
-													// metadata
-													.action-group
-														.wrap
-															ul
-																li
-																	a(href="#" data-toggle="tooltip" data-placement="top" title="Add to favorite" ).fa.fa-heart
-																li
-																	a(href="#" data-toggle="tooltip" data-placement="top" title="Collect it" ).fa.fa-download.collectbutton
-																li
-																	.inputcheck 
+														
+														// metadata
+														.action-group
+															.wrap
+																a(href="#").links digitainz.org
+																ul
+																	li
+																		a(href="#" data-toggle="tooltip" data-placement="top" title="Add to favorite" ).fa.fa-heart
+																	li
+																		a(href="#" data-toggle="tooltip" data-placement="top" title="Collect it" ).fa.fa-download.collectbutton
+																	li
 																		input.selectitem( type="checkbox" )
 		
 							// search result
@@ -678,22 +644,14 @@ html
 									// head
 									h3 Media Viewer
 
-									// close
-									ul.close
-										li
-											a( href="#" data-toggle="tooltip" data-placement="top" title="Close media viewer" ).closemedia
-												img( src="img/ui/ic-close.png" )
-
 									// actions
-									ul.actions
-										li
-											a(href="#" data-toggle="tooltip" data-placement="top" title="Add to favorite" ).fa.fa-heart-o.favorite
-										li
-											a(href="#" data-toggle="tooltip" data-placement="top" title="Collect it" ).fa.fa-download.collectbutton
-										li
-											a( href="#" data-toggle="tooltip" data-placement="top" title="Visit item site" ).fa.fa-external-link.medialink
-									
-
+									.actions
+										a(href="#" data-toggle="tooltip" data-placement="top" title="Add to favorite" ).fa.fa-heart.favorite
+										a(href="#" data-toggle="tooltip" data-placement="top" title="Collect it" ).fa.fa-download.collectbutton
+										a.medialink( href="#" data-toggle="tooltip" data-placement="bottom" title="Visit item site" )
+											i.fa.fa-external-link
+										a.closemedia( href="#" data-toggle="tooltip" data-placement="bottom" title="Close media viewer" )
+											img( src="img/ui/ic-close.png" )
 										
 
 							// media content

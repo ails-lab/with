@@ -30,7 +30,7 @@ header
 			section.notification
 
 				// button
-				a#notificationbutton(href='#' title="Notification" data-toggle='dropdown')
+				a#notificationbutton(href='#' title="notification" data-toggle='dropdown')
 					img( src="img/ui/ic-notification.png" )
 					span.counter 12
 
@@ -59,15 +59,11 @@ header
 
 			// home
 			section.home
-				a( href="dashboard.html" title="Dashboard Home" )
+				a( href="dashboard.html" title="Home" )
 					img( src="img/ui/ic-home.png" alt="Home" )
 
 			// explore
 			section.explore
-
-				// input search
-				input( type="text" placeholder="Search" )
-
-				// icon
-				img.icon( src="img/ui/ic-mag.png" )
-				
+				a(href='dashboard-search.html' title="explore")
+					img( src="img/ui/ic-search.png" )
+					span.text EXPLORE

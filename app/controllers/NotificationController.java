@@ -36,7 +36,6 @@ import play.libs.Json;
 import play.mvc.Controller;
 import play.mvc.Result;
 import play.mvc.WebSocket;
-import utils.AccessManager;
 import utils.NotificationCenter;
 import actors.NotificationActor;
 
@@ -46,7 +45,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import db.DB;
 
-public class NotificationController extends Controller {
+public class NotificationController extends WithController {
 	public static final ALogger log = Logger.of(NotificationController.class);
 
 	public static WebSocket<JsonNode> socket() {
@@ -109,7 +108,7 @@ public class NotificationController extends Controller {
 	public static Result respondToRequest(String notificationId, boolean accept) {
 		ObjectNode result = Json.newObject();
 		try {
-			String currentUserId = session().get("user");
+			String currentUserId = loggedInUser();
 			if (currentUserId == null) {
 				result.put("error", "User is not authorized for this action");
 				return forbidden(result);
@@ -188,9 +187,7 @@ public class NotificationController extends Controller {
 
 	public static Result getUserNotifications() {
 		try {
-			ObjectId userId = new ObjectId(
-					AccessManager.effectiveUserId(session().get(
-							"effectiveUserIds")));
+			ObjectId userId = new ObjectId(loggedInUser());
 			Set<ObjectId> userOrGroupIds = new HashSet<ObjectId>();
 			Set<ObjectId> groups = DB.getUserDAO().get(userId)
 					.getAdminInGroups();
@@ -246,8 +243,7 @@ public class NotificationController extends Controller {
 	}
 
 	public static Result sendMessage(String receiverId) {
-		ObjectId sender = new ObjectId(AccessManager.effectiveUserId(session()
-				.get("effectiveUserIds")));
+		ObjectId sender = new ObjectId(loggedInUser());
 		JsonNode json = request().body().asJson();
 		if (!json.has("message")) {
 			ObjectNode error = Json.newObject();

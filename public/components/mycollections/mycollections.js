@@ -138,7 +138,7 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 				    var url     = value.Thumbnail.url();
 					if (withUrl == "" || withUrl == null) {
 						if(innerModel.administrative.entryCount() > 0)
-							innerModel.media()[index].thumbnailUrl = ko.observable("img/ui/ic-noimage.png");
+							innerModel.media()[index].thumbnailUrl = ko.observable("img/content/thumb-empty.png");
 					} 						
 					else {
 						if (withUrl.indexOf("/media") == 0) {

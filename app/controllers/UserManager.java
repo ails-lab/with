@@ -30,7 +30,9 @@ import java.util.regex.Pattern;
 import javax.net.ssl.HttpsURLConnection;
 
 import model.ApiKey;
+
 import model.resources.collection.CollectionObject;
+
 import model.usersAndGroups.User;
 import model.usersAndGroups.UserGroup;
 
@@ -45,7 +47,6 @@ import play.Logger.ALogger;
 import play.libs.Akka;
 import play.libs.Crypto;
 import play.libs.Json;
-import play.mvc.Controller;
 import play.mvc.Result;
 
 import java.util.HashSet;
@@ -68,11 +69,13 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import db.DB;
 
-@SuppressWarnings("rawtypes")
-public class UserManager extends Controller {
+public class UserManager extends WithController {
 
 	public static final ALogger log = Logger.of(UserManager.class);
 	private static final long TOKENTIMEOUT = 10 * 1000l /* 10 sec */;
+	private static final String facebookAccessTokenUrl = "https://graph.facebook.com/v2.3/oauth/access_token";
+	private static final String graphApiUrl = "https://graph.facebook.com/v2.3/me";
+	private static final String facebookSecret = "818572771c2f350e80790b264399cc81";
 
 	/**
 	 * Propose new username when it is already in use.
@@ -243,8 +246,7 @@ public class UserManager extends Controller {
 	public static Result deleteUser(String id) {
 		try {
 			ObjectId userId = new ObjectId(id);
-			ObjectId currentUserId = AccessManager.effectiveUserDbId(session()
-					.get("effectiveUserIds"));
+			ObjectId currentUserId = WithController.effectiveUserDbId();
 			Status errorMessage = badRequest(Json
 					.parse("{'error':'User cannot be deleted due to ownership of "
 							+ "shared collections or groups. Please contact the developers'}"));
@@ -336,6 +338,31 @@ public class UserManager extends Controller {
 		} catch (Exception e) {
 			return badRequest(Json
 					.parse("{\"error\":\"Couldn't validate user\"}"));
+		}
+	}
+
+	public static Result facebookLogin() {
+		try {
+			JsonNode json = request().body().asJson();
+			// Exchange authorization code for access token.
+			String params = "code=" + json.get("code").asText() + "&client_id="
+					+ json.get("clientId").asText() + "&redirect_uri="
+					+ json.get("redirectUri").asText() + "&client_secret="
+					// TODO: Put the facebookSecret in the configuration file
+					+ facebookSecret;
+			URL url = new URL(facebookAccessTokenUrl + "?" + params);
+			InputStream is = ((HttpsURLConnection) url.openConnection())
+					.getInputStream();
+			String accessToken = Json.parse(is).get("access_token").asText();
+			// Retrieve profile information about the current user.
+			url = new URL(graphApiUrl + "?access_token=" + accessToken);
+			is = ((HttpsURLConnection) url.openConnection()).getInputStream();
+			// TODO: Get email from answer when the method facebookLogin(String
+			// facebookId, String accessToken) becomes obsolete
+			String id = Json.parse(is).get("id").asText();
+			return facebookLogin(id, accessToken);
+		} catch (Exception e) {
+			return badRequest(Json.parse("{\"error\":\"Invalid credentials\"}"));
 		}
 	}
 
