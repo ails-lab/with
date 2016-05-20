@@ -27,9 +27,14 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import model.basicDataTypes.ProvenanceInfo.Sources;
+import play.Logger;
+import play.Logger.ALogger;
 import sources.FilterValuesMap;
 
 public class MapsConfig {
+
+	public static final ALogger log = Logger.of( MapsConfig.class);
+	
 	private static HashMap<String, HashMap<String, HashMap<String, List<String>> >  > map;
 	private static void loadMap(){
 		String json = "";
@@ -37,15 +42,9 @@ public class MapsConfig {
 		//JSON from file to Object
 		try {
 			map = mapper.readValue(new File("conf/filtermaps.conf"), HashMap.class);
-		} catch (JsonParseException e) {
+		} catch (Exception e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (JsonMappingException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			log.error("error parsing filters maps config file: " + e.toString());
 		}
 	}
 	public static FilterValuesMap buildFilterValuesMap(Sources source){
