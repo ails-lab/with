@@ -250,7 +250,7 @@ public class UserManager extends WithController {
 			Status errorMessage = badRequest(Json
 					.parse("{'error':'User cannot be deleted due to ownership of "
 							+ "shared collections or groups. Please contact the developers'}"));
-			if (currentUserId == null || !currentUserId.equals(userId))
+			if (currentUserId == null || !currentUserId.equals(userId) && !WithController.isSuperUser() )
 				return forbidden(Json
 						.parse("{'error' : 'No rights for user deletion'}"));
 			Set<ObjectId> groupsToDelete = new HashSet<ObjectId>();
