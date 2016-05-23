@@ -43,7 +43,7 @@ public class EuropeanaRecordFormatter extends CulturalRecordFormatter {
 	public static final ALogger log = Logger.of( EuropeanaRecordFormatter.class);
 	
 	public EuropeanaRecordFormatter() {
-		super(FilterValuesMap.getEuropeanaMap());
+		super(FilterValuesMap.getMap(Sources.Europeana));
 		object = new CulturalObject();
 	}
 

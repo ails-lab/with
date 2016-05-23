@@ -51,7 +51,6 @@ public class NLASpaceSource extends ISpaceSource {
 	public NLASpaceSource() {
 		super(Sources.NLA);
 		apiKey = "SECRET_KEY";
-		vmap = FilterValuesMap.getNLAMap();
 		addDefaultQueryModifier(CommonFilters.TYPE.getId(), qfwriter("format"));
 		addDefaultQueryModifier(CommonFilters.YEAR.getId(), qfwriterYEAR());
 
@@ -111,6 +110,8 @@ public class NLASpaceSource extends ISpaceSource {
 
 	@Override
 	public SourceResponse getResults(CommonQuery q) {
+		if (!Utils.hasInfo(q.searchTerm) || q.searchTerm.equals("*"))
+			q.searchTerm = " ";
 		SourceResponse res = new SourceResponse();
 		res.source = getSourceName().toString();
 		String httpQuery = getHttpQuery(q);
@@ -176,8 +177,8 @@ public class NLASpaceSource extends ISpaceSource {
 				}
 
 				res.filtersLogic = new ArrayList<>();
-				// res.filtersLogic.add(type);
-				// res.filtersLogic.add(year);
+				 res.filtersLogic.add(type);
+				 res.filtersLogic.add(year);
 
 				// System.out.println(type);
 			} catch (Exception e) {
