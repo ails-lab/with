@@ -42,6 +42,8 @@ import controllers.parameterTypes.StringTuple;
 import db.DB;
 import model.annotations.ContextData;
 import model.annotations.ContextData.ContextDataBody;
+import model.annotations.ExhibitionData;
+import model.annotations.ExhibitionData.MediaType;
 import model.basicDataTypes.Language;
 import model.basicDataTypes.MultiLiteral;
 import model.basicDataTypes.ProvenanceInfo;
@@ -1014,4 +1016,64 @@ public class CollectionObjectController extends WithResourceController {
 		}
 		return 0;
 	}
+	
+	@SuppressWarnings("unchecked")
+	public static Result updateExhibitions(String host, Integer port, String dbName) {
+		MongoClient mongoClient = null;
+		ObjectNode result = Json.newObject();
+		try {
+			/*Query<CollectionObject> q = DB.getCollectionObjectDAO().createQuery().field("administrative.resourceType").equal("Exhibition");
+			Iterator<CollectionObject> colIterator = DB.getCollectionObjectDAO().find(q).iterator();
+			while (colIterator.hasNext()) {
+				CollectionObject col = colIterator.next();
+				for (ContextData contextData: (List<ContextData>) col.getCollectedResources()) {
+					
+				}
+			}*/
+		mongoClient = new MongoClient(host, port);
+		MongoDatabase db = mongoClient.getDatabase(dbName);
+		// get all records and store the information in a HashMap
+		FindIterable<Document> collections = db.getCollection("CollectionObject").find();
+		for (Document collection : collections) {
+			//System.out.println(((ArrayList) ((Document) ((Document) collection.get("descriptiveData")).get("label")).get("default")).get(0));
+			ObjectId id = collection.getObjectId("_id");
+			if (collection.getString("resourceType").equals("Exhibition")) {
+				if (((ArrayList) ((Document) ((Document) collection.get("descriptiveData")).get("label")).get("default")).get(0).equals("Circus_Exhibition")) {
+					CollectionObject col = DB.getCollectionObjectDAO().getById(id);
+			    	ArrayList<Document> contextDataList = (ArrayList<Document>) ((Document) collection).get("collectedResources");
+			    	int i = 0;
+			    	ArrayList<ContextData> newContextData = new ArrayList<ContextData>();
+				    for (Document cdDoc: contextDataList) {					    	
+				    	ExhibitionData exhData = new ExhibitionData();
+				    	exhData.getTarget().setRecordId(((ExhibitionData) col.getCollectedResources().get(i)).getTarget().getRecordId());
+				    	if (cdDoc.get("body") != null) {
+					    	String videoUrl = ((Document) cdDoc.get("body")).getString("videoUrl");
+					    	System.out.println(((Document) cdDoc.get("body")).getString("audioUrl"));
+					    	String videoDescription = ((Document) cdDoc.get("body")).getString("videoDescription");
+					    	if (videoUrl != null) {
+						    	exhData.getBody().setMediaUrl(videoUrl);
+						    	exhData.getBody().setMediaType(MediaType.VIDEO);
+					    	}
+					    	if (videoDescription != null)
+					    		exhData.getBody().setMediaDescription(videoDescription);
+							DB.getCollectionObjectDAO().deleteField(id, "collectedResources."+i+".body.audioUrl");
+							DB.getCollectionObjectDAO().deleteField(id, "collectedResources."+i+".body.videoUrl");
+							DB.getCollectionObjectDAO().deleteField(id, "collectedResources."+i+".body.videoDescription");
+							i++;
+				    	}
+				    	newContextData.add(exhData);
+				    }
+					col.setCollectedResources(newContextData);
+				    DB.getCollectionObjectDAO().makePermanent(col);
+				}
+			}
+		}
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			mongoClient.close();
+			return ok(result);
+		}
+	}
+
 }

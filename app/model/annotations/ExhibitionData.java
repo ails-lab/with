@@ -25,7 +25,7 @@ import model.annotations.ContextData.ContextDataBody;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ExhibitionData extends ContextData<ExhibitionData.ExhibitionAnnotationBody> {
 	
-	private static enum MediaType {VIDEO, AUDIO};
+	public static enum MediaType {VIDEO, AUDIO};
 
 	public ExhibitionData() {
 		super();
