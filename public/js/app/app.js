@@ -789,16 +789,17 @@ define("app", ['knockout', 'facebook', 'imagesloaded', 'moment', './js/app/plugi
 	};
 
 	autoCompleteUserName = function (elem, valueAccessor, allBindingsAccessor, viewModel, context, callback) {
-		var category = allBindingsAccessor.get('category') || 0;
+		var forUsers = allBindingsAccessor.get('forUsers') || false;
+		var paramsJSON = { "onlyParents": false, "forUsers" : forUsers};
+		if (allBindingsAccessor.has('forGroupType')) {
+			paramsJSON.forGroupType = allBindingsAccessor.get('forGroupType');
+		}
 		$(elem).devbridgeAutocomplete({
 			minChars: 3,
 			lookupLimit: 10,
 			serviceUrl: "/user/listNames",
 			paramName: "prefix",
-			params: {
-				onlyParents: false,
-				specifyCategory: category
-			},
+			params: paramsJSON,
 			ajaxSettings: {
 				dataType: "json"
 			},

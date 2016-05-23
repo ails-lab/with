@@ -44,6 +44,7 @@ import notifications.Notification;
 import notifications.Notification.Activity;
 import play.Logger;
 import play.Logger.ALogger;
+import play.libs.F.Option;
 import play.libs.Json;
 import play.mvc.Controller;
 import play.mvc.Result;
@@ -71,11 +72,11 @@ public class UserAndGroupManager extends Controller {
 	 *         (or all of them)
 	 */
 	public static Result listNames(String prefix, Boolean onlyParents,
-			Integer specifyCategory) {
+			Boolean forUsers, Option<String> forGroupType) {
 
 		ArrayNode suggestions = Json.newObject().arrayNode();
 
-		if ((specifyCategory == 0) || (specifyCategory == 1)) {
+		if (forUsers) {
 			List<User> users = DB.getUserDAO().getByUsernamePrefix(prefix);
 			for (User user : users) {
 				ObjectNode node = Json.newObject();
@@ -87,10 +88,11 @@ public class UserAndGroupManager extends Controller {
 				suggestions.add(node);
 			}
 		}
-		if ((specifyCategory == 0) || (specifyCategory == 2)) {
+		if (forGroupType.isDefined()) {
 			List<UserGroup> groups = DB.getUserGroupDAO().getByGroupNamePrefix(
 					prefix);
-			List<UserGroup> groups2 = DB.getUserGroupDAO().getByFriendlyNamePrefix(prefix);
+			List<UserGroup> groups2 = DB.getUserGroupDAO()
+					.getByFriendlyNamePrefix(prefix);
 			groups.addAll(groups2);
 			List<String> effectiveUserIds = AccessManager
 					.effectiveUserIds(session().get("effectiveUserIds"));
@@ -134,12 +136,12 @@ public class UserAndGroupManager extends Controller {
 				userJSON.put("lastName", ((User) u).getLastName());
 			}
 			if (collectionId != null) {
-				CollectionObject collection = DB.getCollectionObjectDAO().getById(
-						new ObjectId(collectionId));
+				CollectionObject collection = DB.getCollectionObjectDAO()
+						.getById(new ObjectId(collectionId));
 				if (collection != null) {
 					// TODO: have to do recursion here!
-					Access accessRights = collection.getAdministrative().getAccess().getAcl(
-							u.getDbId());
+					Access accessRights = collection.getAdministrative()
+							.getAccess().getAcl(u.getDbId());
 					if (accessRights != null)
 						userJSON.put("accessRights", accessRights.toString());
 					else
@@ -210,7 +212,7 @@ public class UserAndGroupManager extends Controller {
 	 *            the group id
 	 * @return success message
 	 */
-	//TODO: Implement with updates, not make permanent!
+	// TODO: Implement with updates, not make permanent!
 	public static Result addUserOrGroupToGroup(String id, String groupId) {
 		ObjectNode result = Json.newObject();
 		try {
@@ -221,8 +223,9 @@ public class UserAndGroupManager extends Controller {
 						"Only administrators of the group have the right to edit the group");
 				return forbidden(result);
 			}
-			if(id.equals(groupId)) {
-				result.put("error", "Sorry! You cannot add an organization as a member of itself");
+			if (id.equals(groupId)) {
+				result.put("error",
+						"Sorry! You cannot add an organization as a member of itself");
 				return badRequest(result);
 			}
 			User admin = DB.getUserDAO().get(new ObjectId(adminId));
@@ -249,7 +252,7 @@ public class UserAndGroupManager extends Controller {
 					return badRequest(result);
 				}
 
-				//add user to the group - database side
+				// add user to the group - database side
 				group.getUsers().add(user.getDbId());
 				user.addUserGroups(ancestorGroups);
 				DB.getUserDAO().makePermanent(user);
@@ -289,14 +292,15 @@ public class UserAndGroupManager extends Controller {
 			// Add group as a child of the group
 			if (DB.getUserGroupDAO().get(userOrGroupId) != null) {
 				UserGroup childGroup = DB.getUserGroupDAO().get(userOrGroupId);
-				if( !group.getParentGroups().contains(userOrGroupId) )
+				if (!group.getParentGroups().contains(userOrGroupId))
 					childGroup.getParentGroups().add(new ObjectId(groupId));
 				else {
-					result.put("error", "Sorry! The group/organization you are trying to add"
-										+ "is already parent of your current group/organization");
+					result.put(
+							"error",
+							"Sorry! The group/organization you are trying to add"
+									+ "is already parent of your current group/organization");
 					return badRequest(result);
 				}
-
 
 				for (ObjectId userId : childGroup.getUsers()) {
 					User user = DB.getUserDAO().get(userId);
@@ -367,15 +371,17 @@ public class UserAndGroupManager extends Controller {
 				if (!(DB.getUserDAO().makePermanent(user) == null)
 						&& !(DB.getUserGroupDAO().makePermanent(group) == null)) {
 
-					//remove pending invites on this group
+					// remove pending invites on this group
 					List<Notification> group_invites = DB.getNotificationDAO()
 							.getPendingGroupNotifications(user.getDbId(),
 									group.getDbId(), Activity.GROUP_INVITE);
-					for(Notification not: group_invites) {
-						if(DB.getNotificationDAO().makeTransient(not) != 1) {
-							log.error("Cannot remove notification with id: " + not.getDbId());
-							result.put("error_"+not.getDbId(),
-									"Cannot remove notification with id: " + not.getDbId());
+					for (Notification not : group_invites) {
+						if (DB.getNotificationDAO().makeTransient(not) != 1) {
+							log.error("Cannot remove notification with id: "
+									+ not.getDbId());
+							result.put("error_" + not.getDbId(),
+									"Cannot remove notification with id: "
+											+ not.getDbId());
 						}
 					}
 
@@ -396,8 +402,7 @@ public class UserAndGroupManager extends Controller {
 					// Send notification through socket to group
 					// administrators
 					NotificationCenter.sendNotification(notification);
-					result.put("message",
-							"User succesfully removed from group");
+					result.put("message", "User succesfully removed from group");
 					return ok(result);
 				} else {
 					result.put("error", "Could not remove user from group");
@@ -527,7 +532,8 @@ public class UserAndGroupManager extends Controller {
 	}
 
 	public static String getImageBase64(UserOrGroup user) {
-		if ((user.getAvatar()!=null) && (user.getAvatar().get(MediaVersion.Thumbnail) != null)) {
+		if ((user.getAvatar() != null)
+				&& (user.getAvatar().get(MediaVersion.Thumbnail) != null)) {
 			String photoUrl = user.getAvatar().get(MediaVersion.Thumbnail);
 			MediaObject photo = DB.getMediaObjectDAO().getByUrl(photoUrl);
 			if (photo != null)
@@ -540,7 +546,7 @@ public class UserAndGroupManager extends Controller {
 		return null;
 	}
 
-	public static Result addAdminToGroup(String id, String groupId){
+	public static Result addAdminToGroup(String id, String groupId) {
 		ObjectNode result = Json.newObject();
 		try {
 			String adminId = AccessManager.effectiveUserId(session().get(
@@ -568,10 +574,9 @@ public class UserAndGroupManager extends Controller {
 				User user = DB.getUserDAO().get(userOrGroupId);
 
 				group.addAdministrator(userOrGroupId);
-				if (!(DB.getUserGroupDAO().makePermanent(group) == null)){
+				if (!(DB.getUserGroupDAO().makePermanent(group) == null)) {
 
-					result.put("message",
-							"User  is  a group administrator");
+					result.put("message", "User  is  a group administrator");
 					return ok(result);
 				} else {
 					result.put("error", "There was an error");
@@ -589,7 +594,7 @@ public class UserAndGroupManager extends Controller {
 
 	}
 
-	public static Result removeAdminFromGroup(String id, String groupId){
+	public static Result removeAdminFromGroup(String id, String groupId) {
 		ObjectNode result = Json.newObject();
 		try {
 			String adminId = AccessManager.effectiveUserId(session().get(
@@ -615,12 +620,11 @@ public class UserAndGroupManager extends Controller {
 			ObjectId userOrGroupId = new ObjectId(id);
 			if (DB.getUserDAO().get(userOrGroupId) != null) {
 				User user = DB.getUserDAO().get(userOrGroupId);
-				if (group.getAdminIds().contains(userOrGroupId)){
+				if (group.getAdminIds().contains(userOrGroupId)) {
 					group.removeAdministrator(userOrGroupId);
 				}
-				if (!(DB.getUserGroupDAO().makePermanent(group) == null)){
-					result.put("message",
-							"User is not a group administrator");
+				if (!(DB.getUserGroupDAO().makePermanent(group) == null)) {
+					result.put("message", "User is not a group administrator");
 					return ok(result);
 				} else {
 					result.put("error", "There was an error");
@@ -635,7 +639,6 @@ public class UserAndGroupManager extends Controller {
 			result.put("error", e.getMessage());
 			return internalServerError(result);
 		}
-
 
 	}
 
