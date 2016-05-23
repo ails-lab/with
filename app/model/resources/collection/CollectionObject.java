@@ -200,6 +200,8 @@ public class CollectionObject<T extends CollectionObject.CollectionDescriptiveDa
 		output.setProvenance(getProvenance());
 		if (getMedia().size() > 3)
 			output.setMedia(getMedia().subList(0, 3));
+		else
+			output.setMedia(getMedia());
 		output.setResourceType(getResourceType());
 		//output.setUsage(input.getUsage());
 	}
