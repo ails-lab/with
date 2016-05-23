@@ -267,11 +267,27 @@ public class GroupManager extends Controller {
 		ObjectNode result = Json.newObject();
 		JsonNode json = request().body().asJson();
 
+		String userId = AccessManager.effectiveUserId(session().get(
+				"effectiveUserIds"));
+		if ((userId == null) || (userId.equals(""))) {
+			result.put("error",
+					"Sorry! Only logged in users have access to this API call");
+			return forbidden(result);
+		}
+
 		if(groupId == null) {
 			result.put("error",
 					"Invalid groupId specified!");
 			return badRequest(result);
 		}
+
+		UserGroup group = DB.getUserGroupDAO().get(new ObjectId(groupId));
+		if (!group.getAdminIds().contains(new ObjectId(userId))) {
+			result.put("error",
+					"Only admin of the group has the right to delete the group");
+			return forbidden(result);
+		}
+
 
 		if( !json.has("fCollections") &&	!json.has("fExhibitions")) {
 			result.put("success",
@@ -318,10 +334,25 @@ public class GroupManager extends Controller {
 		ObjectNode result = Json.newObject();
 		JsonNode json = request().body().asJson();
 
+		String userId = AccessManager.effectiveUserId(session().get(
+				"effectiveUserIds"));
+		if ((userId == null) || (userId.equals(""))) {
+			result.put("error",
+					"Sorry! Only logged in users have access to this API call");
+			return forbidden(result);
+		}
+
 		if(groupId == null) {
 			result.put("error",
 					"Invalid groupId specified!");
 			return badRequest(result);
+		}
+
+		UserGroup group = DB.getUserGroupDAO().get(new ObjectId(groupId));
+		if (!group.getAdminIds().contains(new ObjectId(userId))) {
+			result.put("error",
+					"Only admin of the group has the right to delete the group");
+			return forbidden(result);
 		}
 
 		if( !json.has("fCollections") && !json.has("fExhibitions")) {
