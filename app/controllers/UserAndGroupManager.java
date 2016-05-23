@@ -73,52 +73,59 @@ public class UserAndGroupManager extends Controller {
 	 */
 	public static Result listNames(String prefix, Boolean onlyParents,
 			Boolean forUsers, Option<String> forGroupType) {
+		try {
+			ArrayNode suggestions = Json.newObject().arrayNode();
 
-		ArrayNode suggestions = Json.newObject().arrayNode();
-
-		if (forUsers) {
-			List<User> users = DB.getUserDAO().getByUsernamePrefix(prefix);
-			for (User user : users) {
-				ObjectNode node = Json.newObject();
-				ObjectNode data = Json.newObject().objectNode();
-				data.put("category", "user");
-				// costly?
-				node.put("value", user.getUsername());
-				node.put("data", data);
-				suggestions.add(node);
-			}
-		}
-		if (forGroupType.isDefined()) {
-			List<UserGroup> groups = DB.getUserGroupDAO().getByGroupNamePrefix(
-					prefix);
-			List<UserGroup> groups2 = DB.getUserGroupDAO()
-					.getByFriendlyNamePrefix(prefix);
-			groups.addAll(groups2);
-			List<String> effectiveUserIds = AccessManager
-					.effectiveUserIds(session().get("effectiveUserIds"));
-			ObjectId userId = new ObjectId(effectiveUserIds.get(0));
-			for (UserGroup group : groups) {
-				if (!onlyParents
-						|| (onlyParents && group.getUsers().contains(userId))) {
-					ObjectNode node = Json.newObject().objectNode();
+			if (forUsers) {
+				List<User> users = DB.getUserDAO().getByUsernamePrefix(prefix);
+				for (User user : users) {
+					ObjectNode node = Json.newObject();
 					ObjectNode data = Json.newObject().objectNode();
-					data.put("category", "group");
-					node.put("value", group.getUsername());
-					// check if direct ancestor of user
-					/*
-					 * if (group.getUsers().contains(userId)) {
-					 * data.put("isParent", true); } else data.put("isParent",
-					 * false);
-					 */
-					node.put("value", group.getUsername());
+					data.put("category", "user");
+					// costly?
+					node.put("value", user.getUsername());
 					node.put("data", data);
 					suggestions.add(node);
 				}
 			}
+			if (forGroupType.isDefined()) {
+				Class<?> clazz = Class.forName("model.usersAndGroups."
+						+ forGroupType.get());
+				List<UserGroup> groups = DB.getUserGroupDAO()
+						.getByGroupNamePrefix(prefix);
+				List<UserGroup> groups2 = DB.getUserGroupDAO()
+						.getByFriendlyNamePrefix(prefix);
+				groups.addAll(groups2);
+				List<String> effectiveUserIds = AccessManager
+						.effectiveUserIds(session().get("effectiveUserIds"));
+				ObjectId userId = new ObjectId(effectiveUserIds.get(0));
+				for (UserGroup group : groups) {
+					if (!onlyParents
+							|| (onlyParents && group.getUsers()
+									.contains(userId))) {
+						if (clazz.isInstance(group)) {
+							ObjectNode node = Json.newObject().objectNode();
+							ObjectNode data = Json.newObject().objectNode();
+							data.put("category", "group");
+							node.put("value", group.getUsername());
+							// check if direct ancestor of user
+							/*
+							 * if (group.getUsers().contains(userId)) {
+							 * data.put("isParent", true); } else
+							 * data.put("isParent", false);
+							 */
+							node.put("value", group.getUsername());
+							node.put("data", data);
+							suggestions.add(node);
+						}
+					}
+				}
 
+			}
+			return ok(suggestions);
+		} catch (Exception e) {
+			return internalServerError(e.getMessage());
 		}
-
-		return ok(suggestions);
 	}
 
 	/**
