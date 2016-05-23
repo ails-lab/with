@@ -20,6 +20,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 
+import model.basicDataTypes.ProvenanceInfo.Sources;
 import play.Logger;
 import play.Logger.ALogger;
 import utils.SortedList;
@@ -98,6 +99,7 @@ public class CommonFilterLogic implements Cloneable {
 		CommonFilterLogic res = new CommonFilterLogic(this.data.filterID);
 		res.data.filterName = data.filterName;
 		res.counts = (HashMap<String, ValueCount>) counts.clone();
+		res.data.sources.addAll(data.sources);
 		return res;
 	}
 
@@ -108,5 +110,14 @@ public class CommonFilterLogic implements Cloneable {
 	public CommonFilterLogic addTo(List<CommonFilterLogic> list){
 		list.add(this);
 		return this;
+	}
+
+	public void addSourceFrom(CommonFilterLogic b) {
+		addSourceFrom(b.data);
+	}
+	public void addSourceFrom(CommonFilterResponse b) {
+		for (Sources s : b.sources) {
+			data.addSource(s);	
+		}
 	}
 }

@@ -69,7 +69,10 @@ public class ApacheHttpConnector extends HttpConnector {
 		HttpResponse response = getContentResponse(method);
 		BufferedReader rd = new BufferedReader(new InputStreamReader(response.getEntity().getContent(), "UTF-8"));
 		ObjectMapper mapper = new ObjectMapper();
-		return mapper.readValue(rd, JsonNode.class);
+		JsonNode readValue = mapper.readValue(rd, JsonNode.class);
+		log.debug("Response: " + readValue);
+		
+		return readValue;
 	}
 
 	public <T> T getContent(String url) throws Exception {

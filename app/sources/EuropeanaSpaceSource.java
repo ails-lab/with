@@ -73,15 +73,14 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 
 	public EuropeanaSpaceSource() {
 		super(Sources.Europeana);
-//		TODO use facets profile
-//		profile = "rich facets";
+//		profile = "rich+facets";
 		profile = "rich";
 		apiKey = "SECRET_KEY";
 		
-		addDefaultQueryModifier(CommonFilters.MIME_TYPE.getId(), qwriter("MIME_TYPE"));
-		addDefaultQueryModifier(CommonFilters.IMAGE_SIZE.getId(), qwriter("IMAGE_SIZE"));
-		addDefaultQueryModifier(CommonFilters.IMAGE_COLOUR.getId(), qwriter("IMAGE_COLOUR"));
-		addDefaultQueryModifier(CommonFilters.COLOURPALETE.getId(), qwriter("COLOURPALETE"));
+		addDefaultWriter(CommonFilters.MIME_TYPE.getId(), qfwriter("MIME_TYPE"));
+		addDefaultWriter(CommonFilters.IMAGE_SIZE.getId(), qfwriter("IMAGE_SIZE"));
+		addDefaultWriter(CommonFilters.IMAGE_COLOUR.getId(), qfwriter("IMAGE_COLOUR"));
+		addDefaultWriter(CommonFilters.COLOURPALETE.getId(), qfwriter("COLOURPALETE"));
 		
 		
 		addDefaultQueryModifier(CommonFilters.PROVIDER.getId(), qwriter("PROVIDER"));

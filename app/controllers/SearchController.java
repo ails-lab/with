@@ -228,8 +228,8 @@ public class SearchController extends WithController {
 				ArrayList<CommonFilterLogic> merge = new ArrayList<CommonFilterLogic>();
 				for (SourceResponse sourceResponse : finalResponses) {
 					if (sourceResponse!=null){
+						sourceResponse.setFilters(ListUtils.transform(sourceResponse.filtersLogic, f));
 						FiltersHelper.merge(merge, sourceResponse.filtersLogic);
-						sourceResponse.filters = ListUtils.transform(sourceResponse.filtersLogic, f);
 					}
 				}
 				r1.filters = ListUtils.transform(merge, f);
