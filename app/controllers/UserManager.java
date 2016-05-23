@@ -19,14 +19,20 @@ package controllers;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
 import java.util.Random;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.net.ssl.HttpsURLConnection;
 
 import model.ApiKey;
+
+import model.resources.collection.CollectionObject;
+
 import model.usersAndGroups.User;
 import model.usersAndGroups.UserGroup;
 
@@ -42,9 +48,13 @@ import play.libs.Akka;
 import play.libs.Crypto;
 import play.libs.Json;
 import play.mvc.Result;
+
+import java.util.HashSet;
+
 import scala.concurrent.Await;
 import scala.concurrent.Future;
 import scala.concurrent.duration.Duration;
+import utils.AccessManager;
 import actors.ApiKeyManager.Create;
 import akka.actor.ActorSelection;
 import akka.pattern.Patterns;
@@ -223,6 +233,60 @@ public class UserManager extends WithController {
 		session().put("lastAccessTime",
 				Long.toString(System.currentTimeMillis()));
 		return ok(Json.toJson(user));
+	}
+
+	/**
+	 * Deletes a user from the database including all the collections and groups
+	 * she owns. In case she shares any collections she owns with other people,
+	 * or she is the creator of groups with others, the user is not deleted but
+	 * has to contact the developers about that.
+	 * 
+	 * @return success or JSON error
+	 */
+	public static Result deleteUser(String id) {
+		try {
+			ObjectId userId = new ObjectId(id);
+			ObjectId currentUserId = WithController.effectiveUserDbId();
+			Status errorMessage = badRequest(Json
+					.parse("{'error':'User cannot be deleted due to ownership of "
+							+ "shared collections or groups. Please contact the developers'}"));
+			if (currentUserId == null || !currentUserId.equals(userId) && !WithController.isSuperUser() )
+				return forbidden(Json
+						.parse("{'error' : 'No rights for user deletion'}"));
+			Set<ObjectId> groupsToDelete = new HashSet<ObjectId>();
+			Set<ObjectId> collectionsToDelete = new HashSet<ObjectId>();
+			User user = DB.getUserDAO().getById(userId,
+					Arrays.asList("adminInGroups"));
+			Set<ObjectId> groups = user.getAdminInGroups();
+			for (ObjectId groupId : groups) {
+				UserGroup group = DB.getUserGroupDAO().getById(groupId,
+						Arrays.asList("creator, users"));
+				if (group == null || !group.getCreator().equals(userId))
+					continue;
+				if (group.getUsers().size() > 1) {
+					return errorMessage;
+				}
+				groupsToDelete.add(groupId);
+			}
+			List<CollectionObject> collections = DB.getCollectionObjectDAO()
+					.getByCreator(userId, 0, 0);
+			for (CollectionObject collection : collections) {
+				if (collection.getAdministrative().getAccess().getAcl().size() > 1) {
+					return errorMessage;
+				}
+				collectionsToDelete.add(collection.getDbId());
+			}
+			for (ObjectId groupId : groupsToDelete)
+				DB.getUserGroupDAO().deleteById(groupId);
+			for (ObjectId collectionId : collectionsToDelete)
+				DB.getCollectionObjectDAO().deleteById(collectionId);
+			DB.getUserDAO().deleteById(userId);
+			return ok(Json
+					.parse("{'success' : 'User was successfully deleted from the database'}"));
+		} catch (Exception e) {
+			return internalServerError(Json.parse("{'error' : '"
+					+ e.getMessage() + "'}"));
+		}
 	}
 
 	private static Result googleLogin(String googleId, String accessToken) {
@@ -538,32 +602,6 @@ public class UserManager extends WithController {
 		 * badRequest(Json.parse("{\"error\":\"User does not exist\"}")); }
 		 */
 
-	}
-
-	/**
-	 * This is just a skeleton until design issues are solved
-	 *
-	 * @param id
-	 * @return
-	 */
-
-	public static Result deleteUser(String id) {
-
-		ObjectNode result = Json.newObject();
-		// ObjectNode error = (ObjectNode) Json.newObject();
-
-		try {
-			User user = DB.getUserDAO().getById(new ObjectId(id), null);
-			if (user != null) {
-				return ok(result);
-			} else {
-				return badRequest(Json
-						.parse("{\"error\":\"User does not exist\"}"));
-
-			}
-		} catch (IllegalArgumentException e) {
-			return badRequest(Json.parse("{\"error\":\"User does not exist\"}"));
-		}
 	}
 
 	public static Result apikey() {
