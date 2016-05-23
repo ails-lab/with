@@ -573,11 +573,14 @@ public class CollectionObjectController extends WithResourceController {
 				result.put("totalExhibitions", info.y.y);
 			}
 			for (CollectionObject collection : userCollections) {
-				CollectionObject profiledCollection = collection.getCollectionProfile(profile);
-				filterResourceByLocale(locale, profiledCollection);
-				ObjectNode c = (ObjectNode) Json.toJson(profiledCollection);
+				ObjectNode c;
 				if (WithController.isSuperUser()) {
-					c = collectionWithMyAccessData(profiledCollection, effectiveUserIds, profile, locale);
+					c = collectionWithMyAccessData(collection, effectiveUserIds, profile, locale);
+				}
+				else {
+					CollectionObject profiledCollection = collection.getCollectionProfile(profile);
+					filterResourceByLocale(locale, profiledCollection);
+					c = (ObjectNode) Json.toJson(profiledCollection);
 				}
 				c.remove("collectedResources");
 				if (effectiveUserIds.isEmpty())
