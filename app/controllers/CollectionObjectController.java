@@ -560,7 +560,7 @@ public class CollectionObjectController extends WithResourceController {
 				return badRequest("User with username " + creator.get() + " does not exist.");
 		}
 		if (effectiveUserIds.isEmpty()
-				|| (isPublic.isDefined() && isPublic.get() == true && !WithController.isSuperUser())) {
+				|| (isPublic.isDefined() && isPublic.get() == true)) {
 			// if not logged or ask for public collections, return all public
 			// collections
 			Tuple<List<CollectionObject>, Tuple<Integer, Integer>> info = DB
@@ -576,6 +576,9 @@ public class CollectionObjectController extends WithResourceController {
 				CollectionObject profiledCollection = collection.getCollectionProfile(profile);
 				filterResourceByLocale(locale, profiledCollection);
 				ObjectNode c = (ObjectNode) Json.toJson(profiledCollection);
+				if (WithController.isSuperUser()) {
+					c = collectionWithMyAccessData(profiledCollection, effectiveUserIds, profile, locale);
+				}
 				c.remove("collectedResources");
 				if (effectiveUserIds.isEmpty())
 					c.put("access", Access.READ.toString());
