@@ -57,6 +57,8 @@ public abstract class WithController extends Controller {
 	};
 
 	public static boolean isSuperUser() {
+		if (effectiveUserIds().isEmpty())
+			return false;
 		String userId = effectiveUserIds().get(0);
 		return (DB.getUserDAO().isSuperUser(new ObjectId(userId)));
 	}
