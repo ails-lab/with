@@ -22,7 +22,7 @@
   
 				  <!-- ko foreach: $parent.filters -->
 				  <!-- ko if: suggestedValues.length>0 -->
-				  <li><a data-bind="attr:{href:'#'+filterID},text:filterName, attr:{'title':sources}, event:{click: $parent.listBind}"  data-toggle="tab" 
+				  <li><a data-bind="attr:{href:'#'+filterID, 'title':sources},text:filterName, event:{click: $parent.listBind}"  data-toggle="tab" 
 				   ></a></li>
 				  <!-- /ko -->
 				  <!-- /ko -->
