@@ -164,23 +164,21 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 		        var newRecord =  ko.mapping.fromJS(record, {});
 				if ($.isEmptyObject(newRecord.contextData.body)) {
 					body = ko.mapping.fromJS({
-							"audioUrl": "",
 							"text": {"default": ""},
-							"meidaType": "",
+							"mediaType": null,
 							"mediaUrl": "",
 							"mediaDescription": ""
 						}, {});
 					newRecord.contextData.body =body;
 				}
-				
 				newRecord.containsContextField = function(field) {
 					return ko.pureComputed(function () {
-						if (newRecord.contextData.body[field] == undefined) {
+						if (newRecord.contextData.body == undefined || newRecord.contextData.body[field] == undefined) {
 							return false;
 						} else {
+							console.log(field + " " + newRecord.contextData.body[field]());
 							return (newRecord.contextData.body[field]() !== null && newRecord.contextData.body[field]() !== '');
 						}
-						return result;
 					});
 				};
 				
@@ -194,7 +192,7 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 					}
 				 });
 				 newRecord.embeddedVideoUrl = ko.pureComputed(function () {
-					if (newRecord.containsContextField("mediaUrl") && newRecord.containsContextField("mediaType") 
+					if (newRecord.containsContextField("mediaUrl")() && newRecord.containsContextField("mediaType")()
 						&& newRecord.contextData.body.mediaType() == "VIDEO") {
 						var urlMatch = newRecord.contextData.body.mediaUrl().match(/youtube\.com.*(\?v=|\/embed\/)(.{11})/);
 						if (urlMatch !== null) {
@@ -277,8 +275,10 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 		self.itemPosition = ko.observable(0);
 		self.itemId = ko.observable("");
 		self.itemMediaDescription = ko.observable(undefined);
-		self.validationModel = ko.validatedObservable({
-			itemVideoUrl: self.itemVideoUrl,
+		self.validationModelVideo = ko.validatedObservable({
+			itemVideoUrl: self.itemVideoUrl
+		});
+		self.validationModelAudio = ko.validatedObservable({
 			itemAudioUrl: self.itemAudioUrl
 		});
 		self.backgroundImg = ko.observable("");
@@ -477,8 +477,8 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 		};
 		
 		self.editItem = function (editMode) {
-			if (self.itemMediaType() == "" || (self.itemMediaType() == "VIDEO" && ((self.itemVideoUrl() == "" || self.validationModel.isValid()))) ||
-					(self.itemMediaType() == "AUDIO" && ((self.itemAudiooUrl() == "" || self.validationModel.isValid())))) {
+			if (self.itemMediaType() == "" || (self.itemMediaType() == "VIDEO" && ((self.itemVideoUrl() == "" || self.validationModelVideo.isValid()))) ||
+					(self.itemMediaType() == "AUDIO" && ((self.itemAudioUrl() == "" || self.validationModelAudio.isValid())))) {
 				var mediaUrl;
 				if (self.itemMediaType() == "VIDEO") {
 					var itemEmbeddedVideoUrl = "";
@@ -493,15 +493,15 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 					mediaUrl = self.itemAudioUrl();
 				var promise = self.updateRecord(self.itemId(), self.itemText(), self.itemMediaType(), mediaUrl, self.itemMediaDescription(), self.dbId(), self.itemPosition());
 				$.when(promise).done(function (data) {
-					// console.log(JSON.stringify(self.collectionItemsArray()[self.itemPosition()].contextData.body()));
 					if (typeof self.collectionItemsArray()[self.itemPosition()].contextData.body.text === 'undefined'
-						&& typeof self.collectionItemsArray()[self.itemPosition()].contextData.body.videoUrl === 'undefined') {
+						&& typeof self.collectionItemsArray()[self.itemPosition()].contextData.body.mediaUrl === 'undefined') {
 						self.collectionItemsArray()[self.itemPosition()].contextData.body = {
 							text: {
 								default: ko.observable("")
 							},
-							videoUrl : ko.observable(""),
-							videoDescription : ko.observable("")
+							mediaUrl : ko.observable(""),
+							mediaDescription : ko.observable(""),
+							meduaType: ko.observable(null)
 						};
 					}
 					if (editMode == "editText") {
@@ -521,23 +521,25 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 				});
 			} else {
 				self.validationModel.errors.showAllMessages();
-			}	
+			}
 		};
 		
 		self.deleteMedia = function(exhibitionItem, event) {
 			var context = ko.contextFor(event.target);
 			var index = context.$index();
-			var promise = self.updateRecord(exhibitionItem.dbId(), self.itemText(), "", "", "", self.dbId(), index);
+			var promise = self.updateRecord(exhibitionItem.dbId(), self.itemText(), null, "", "", self.dbId(), index);
 			$.when(promise).done(function (data) {
-				self.collectionItemsArray()[index].contextData.body.videoUrl("");
-				self.collectionItemsArray()[index].contextData.body.videoDescription("");
+				self.collectionItemsArray()[index].contextData.body.mediaUrl("");
+				self.collectionItemsArray()[index].contextData.body.mediaDescription("");
+				self.collectionItemsArray()[index].contextData.body.mediaType(null);
 			});
 		}
 		
 		self.closeSideBar = function () {
 			self.itemPosition(-1);
 			self.itemText("");
-			self.itemMediaUrl("");
+			self.itemVideoUrl("");
+			self.itemAudioUrl("");
 			self.itemMediaDescription("");
 			self.itemId("");
 			self.itemMediaType("");
@@ -547,7 +549,7 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 			$('.action').removeClass('active');
 		};
 		
-		self.updateRecord = function(dbId, text, videoUrl, videoDescription, audioUrl, audioDescription, colId, position) {
+		self.updateRecord = function(dbId, text, mediaType, mediaUrl, mediaDescription, colId, position) {
 			var jsonData = {};
 			jsonData = {
 				"contextDataType": "ExhibitionData",
@@ -557,10 +559,9 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 				},
 				"body" : {
 					"text": {"default": text},
-					"videoUrl": videoUrl,
-					"videoDescription": videoDescription,
-					"audioUrl": audioUrl,
-					"audioDescription": audioDescription
+					"mediaUrl": mediaUrl,
+					"mediaDescription": mediaDescription,
+					"mediaType": mediaType
 				}
 			};
 			jsonData = JSON.stringify(jsonData);
@@ -701,10 +702,10 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 		
 		self.selectMediaType = function(selectedMediaType) {
 			// self.selectedMediaType(selectedMediaType);
-			if (selectedMediaType == "Video") {
+			if (selectedMediaType == "VIDEO") {
 				
 			}
-			else if (selectedMediaType == "Audio") {
+			else if (selectedMediaType == "AUDIO") {
 				
 			}
 		}

@@ -50,11 +50,22 @@
                           <h2  data-bind="text: title"></h2>
                           <p data-bind="text: annotation">
                           </p>
-                          <!--  ko if: $data.hasOwnProperty('videoUrl') -->
+                          <!--  ko if: $data.hasOwnProperty('mediaUrl') -->
                             <div class="videoWrap">
-                                <div class="embed-responsive embed-responsive-16by9">
-                                    <iframe width="100%" height="100%" data-bind="attr: { src: videoUrl }" frameborder="0" allowfullscreen></iframe>
-                                </div>
+                            	<!-- ko if: mediaType == "VIDEO" -->
+                                	<div class="embed-responsive embed-responsive-16by9">
+                                    	<iframe width="100%" height="100%" data-bind="attr: { src: mediaUrl }" frameborder="0" allowfullscreen></iframe>
+                                	</div>
+                                <!-- /ko -->
+                                <!-- ko if: mediaType == "AUDIO" -->
+	                                <p></p>
+		                          	<audio id="mediaplayer" controls style="width: 180px;" width="576" height="324">
+		                          		<source data-bind="attr:{src: mediaUrl}" type="audio/mpeg">Your browser does not support HTML5
+		                          	</audio>
+								<!-- /ko -->
+                                 	<!--  ko if: $data.hasOwnProperty('mediaDescription') -->
+		                       		<!-- <div class="imginfo"><span class="mediatitle" data-bind="text: mediaDescription"></span></div>-->
+		                        <!-- /ko -->
                             </div>
                             <!-- /ko -->
                           <div class="expand"><a title="#"><i class="glyphicon glyphicon-chevron-up"></i></a></div>

@@ -43,15 +43,17 @@
 								  <div data-toggle="tooltip" data-placement="top" title="Drag an item here" class="add" data-bind="drop: {index: $index}">
 								  	<span><a href="javascript:void(null);"><img src="img/ui/ic-add.png"></a></span>
 								  </div>
-								  <div class="box fill" data-bind="{css: {videoadded: containsContextField('videoUrl')}, drag: {item: $data, move: true}}">
+								  <div class="box fill" data-bind="{css: {videoadded: containsContextField('mediaUrl')}}">
 									<div class="boxaction">
 										<ul>
 										<li><a href="#" data-toggle="tooltip" data-placement="top" title="Edit item text" data-bind="click: $parent.prepareForItemEdit" class="editbox"> <i class="fa fa-pencil-square-o"></i></a></li>
+										 <!--  ko if: !containsContextField("mediaUrl")() -->
 										 <li><a href="#" data-toggle="tooltip" data-placement="top" title="Add media" data-bind="click: $parent.prepareForItemEdit" class="addmediabutton"><i class="fa fa-play-circle"></i></a></li>
+                          				 <!-- /ko -->
                           				<li><a href="#" data-toggle="tooltip" data-placement="top" title="Delete item" data-bind="click: $parent.xButtonClicked"> <i class="fa fa-trash-o"></i></a><li>
 										</ul>
 									</div>
-									<div class="left">
+									<div class="left" data-bind="drag: {item: $data, move: true}">
 										<div class="imgwrap">
 											<img data-bind="attr: { src: fullres.length>0 ? fullres : thumbnailUrl }" id="itemImage" onError="javascript:this.src='img/ui/ic-noimage.png'"/>
 										</div>
@@ -72,10 +74,10 @@
 					                        </div>
 										<!--  /ko -->
 									<!-- /ko -->
-								    <!--  ko if: containsContextField("mediaUrl") && containsContextField("mediaType")-->
+								    <!--  ko if: containsContextField("mediaUrl")() && containsContextField("mediaType")()-->
 									<div class="video">
 				                        <div class="imgwrap">
-				                          <!-- ko if: contextData.body.mediaType == "VIDEO" -->
+				                          <!-- ko if: contextData.body.mediaType() == "VIDEO" -->
 				                          <!-- ko if: embeddedVideoUrl -->
 				                          <div class="embed-responsive embed-responsive-4by3">
 				                            <iframe data-bind="attr: {src: embeddedVideoUrl}" frameborder="0" allowfullscreen class="embed-responsive-item"></iframe>
@@ -86,16 +88,19 @@
 				                          <span style="color:red" data-bind="text: contextData.body.mediaUrl"></span>
 				                          <!-- /ko -->
 				                          <!-- /ko -->
-				                          <!-- ko if: contextData.body.mediaType == "AUDIO" -->
-				                          <!-- show audio -->
+				                          <!-- ko if: contextData.body.mediaType() == "AUDIO" -->
+				                            <p></p>
+				                          	<audio id="mediaplayer" controls style="width: 180px;" width="576" height="324">
+				                          		<source data-bind="attr:{src: contextData.body.mediaUrl}" type="audio/mpeg">Your browser does not support HTML5
+				                          	</audio>
 										  <!-- /ko -->
 				                        </div>
-				                        <!--  ko if: containsContextField("mediaDescription") -->
-				                        <div class="imginfo"><span class="mediatitle" data-bind="text: contextData.body.mediaDescription"></span></div>
+				                        <!--  ko if: containsContextField("mediaDescription")() -->
+				                       		<!--<div class="imginfo"><span class="mediatitle" data-bind="text: contextData.body.mediaDescription"></span></div>-->
 				                        <!-- /ko -->
 				                        <ul class="action">
-				                          <li><a href="#" data-toggle="tooltip" data-placement="top" title="Edit video" data-bind="click: $parent.prepareForItemEdit"><i class="fa fa-pencil videobox"></i></a></li>
-				                          <li><a href="#" data-toggle="tooltip" data-placement="top" title="Delete video" data-bind="click: $parent.deleteVideo"><i class="fa fa-trash-o"></i></a></li>
+				                          <li><a href="#" data-toggle="tooltip" data-placement="top" title="Edit media" data-bind="click: $parent.prepareForItemEdit"><i class="fa fa-pencil videobox"></i></a></li>
+				                          <li><a href="#" data-toggle="tooltip" data-placement="top" title="Delete media" data-bind="click: $parent.deleteMedia"><i class="fa fa-trash-o"></i></a></li>
 				                        </ul>
 				                     </div>
 				                     <!-- /ko -->
@@ -181,16 +186,26 @@
 						<div class="title">Edit media</div>
 					</div>
 					<div class="action-body">
-						 <!-- ko if: itemMediaType == "Video" --> 
-						<textarea type="text" placeholder="Edit youtube url" data-bind="value: itemVideoUrl"></textarea>
-						<!-- /ko -->
-						<!-- ko if: itemMediaType == "Audio" --> 
-						<textarea type="text" placeholder="Edit audio url" data-bind="value: itemAudioUrl"></textarea>
-						<!-- /ko -->
-						<textarea type="text" placeholder="Edit media description" data-bind="value: itemMediaDescription"></textarea>
-					</div>
+	                <div class="group">
+	                  <div class="title">Select media type</div>
+	                  <select class="form-control" data-bind="value: itemMediaType">
+	                    <option>VIDEO</option>
+	                    <option>AUDIO</option>
+	                  </select>
+	                </div>
+	                <div class="group">
+	                  <div class="title">Media URL</div>
+	                  <!-- ko if: itemMediaType() == "VIDEO" --> 
+	                  	<input type="text" data-bind="value: itemVideoUrl" value="http://">
+	                  <!-- /ko -->
+	                  <!-- ko if: itemMediaType() == "AUDIO" --> 
+	                  	<input type="text" data-bind="value: itemAudioUrl" value="http://">
+	                  <!-- /ko -->
+	                  <!--<textarea type="text" data-bind="value: itemMediaDescription" placeholder="Media description"></textarea>-->
+	                </div>
+	              </div>
 					<div class="button-group"><a class="btn-green-o cancel" data-bind="click: closeSideBar">Cancel</a>
-					<a class="btn-green" data-bind="click: editItem.bind($data, 'editVideo')">Save</a></div>
+					<a class="btn-green" data-bind="click: editItem.bind($data, 'editMedia')">Save</a></div>
 				</section>
 				 <!-- collection new-->
             <section class="action creditsection">
@@ -212,19 +227,19 @@
                 <div class="group">
                   <div class="title">Select media type</div>
                   <select class="form-control" data-bind="value: itemMediaType">
-                    <option>Video</option>
-                    <option>Audio</option>
+                    <option>VIDEO</option>
+                    <option>AUDIO</option>
                   </select>
                 </div>
                 <div class="group">
                   <div class="title">Media URL</div>
-                  <!-- ko if: itemMediaType == "Video" --> 
-                  <input type="text" data-bind="value: itemVideoUrl" value="http://">
+                  <!-- ko if: itemMediaType() == "VIDEO" --> 
+                  	<input type="text" data-bind="value: itemVideoUrl" value="http://">
                   <!-- /ko -->
-                  <!-- ko if: itemMediaType == "Audio" --> 
-                  <input type="text" data-bind="value: itemAudioUrl" value="http://">
+                  <!-- ko if: itemMediaType() == "AUDIO" --> 
+                  	<input type="text" data-bind="value: itemAudioUrl" value="http://">
                   <!-- /ko -->
-                  <textarea type="text" data-bind="value: itemMediaDescription" placeholder="Media description"></textarea>
+                  <!--<textarea type="text" data-bind="value: itemMediaDescription" placeholder="Media description"></textarea>-->
                 </div>
               </div>
               <div class="button-group"><a href="#" class="btn-green-o cancel">Cancel</a>
