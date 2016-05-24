@@ -67,7 +67,8 @@ public class MetricsUtils {
 		incomingRequestsMeter.inc();
 	}
 
-	static public final Graphite graphite = new Graphite(new InetSocketAddress("collab.image.ntua.gr", 80));
+	//static public final Graphite graphite = new Graphite(new InetSocketAddress("collab.image.ntua.gr", 80));
+	static public final Graphite graphite = new Graphite(new InetSocketAddress("collab.image.ntua.gr", 2003));
 	static public final GraphiteReporter gr_reporter = GraphiteReporter.forRegistry(registry)
 	                                                  .prefixedWith("withculture.image.gr")
 	                                                  .convertRatesTo(TimeUnit.SECONDS)
