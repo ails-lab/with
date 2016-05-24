@@ -109,6 +109,7 @@ DELETE  /media/orphan							controllers.MediaController.deleteOrphanMadia()
 DELETE 	/media/:id								controllers.MediaController.deleteMedia(id)
 
 # User Manager Controller
+GET      /user/me                                controllers.UserManager.getMyUser()
 POST	/user/register						    controllers.UserManager.register()
 POST	/user/login							    controllers.UserManager.login()
 POST	/user/facebookLogin						controllers.UserManager.facebookLogin()
@@ -126,7 +127,6 @@ DELETE   /user/:id                                 controllers.UserManager.delet
 GET      /user/resetPassword/:emailOrUserName      controllers.UserManager.resetPassword(emailOrUserName: String)
 POST     /user/changePassword                      controllers.UserManager.changePassword()
 GET      /user/apikey/create                       controllers.UserManager.apikey()
-GET      /user/me                                controllers.UserManager.getMyUser()
 
 # trigger reindex (for development / admin )
 
