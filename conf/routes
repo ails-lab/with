@@ -126,6 +126,8 @@ DELETE   /user/:id                                 controllers.UserManager.delet
 GET      /user/resetPassword/:emailOrUserName      controllers.UserManager.resetPassword(emailOrUserName: String)
 POST     /user/changePassword                      controllers.UserManager.changePassword()
 GET      /user/apikey/create                       controllers.UserManager.apikey()
+GET      /user/me                                 controllers.UserManager.getUser()
+
 
 # trigger reindex (for development / admin )
 
