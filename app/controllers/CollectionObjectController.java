@@ -28,6 +28,8 @@ import javax.validation.ConstraintViolation;
 
 import org.bson.Document;
 import org.bson.types.ObjectId;
+import org.elasticsearch.action.search.SearchResponse;
+import org.elasticsearch.search.SearchHit;
 import org.mongodb.morphia.query.Query;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -40,6 +42,9 @@ import com.mongodb.client.MongoDatabase;
 import controllers.parameterTypes.MyPlayList;
 import controllers.parameterTypes.StringTuple;
 import db.DB;
+import elastic.Elastic;
+import elastic.ElasticSearcher;
+import elastic.ElasticSearcher.SearchOptions;
 import model.annotations.ContextData;
 import model.annotations.ContextData.ContextDataBody;
 import model.basicDataTypes.Language;
@@ -272,9 +277,9 @@ public class CollectionObjectController extends WithResourceController {
 			return internalServerError(result);
 		}
 	}
-	
+
 	public static Result exportCollectionObjectToOWL(String cname) {
-		
+
 		ObjectNode resultInfo = Json.newObject();
 		ObjectId creatorDbId = new ObjectId(session().get("user"));
 		CollectionObject ccid = null;
@@ -297,7 +302,7 @@ public class CollectionObjectController extends WithResourceController {
 			List<RecordResource> records = DB.getRecordResourceDAO()
 					.getByCollectionBetweenPositions(collectionDbId, 0,
 							Math.min(entryCount, 1000));
-			
+
 			for (RecordResource recordResource : records) {
 				if (recordResource instanceof CulturalObject) {
 					CulturalObject new_record = (CulturalObject) recordResource;
@@ -363,7 +368,7 @@ public class CollectionObjectController extends WithResourceController {
 
 	private static boolean internalAddCollection(CollectionObject collection,
 			WithResourceType colType, ObjectId creatorDbId, ObjectNode error) {
-		if (collection.getDescriptiveData().getLabel() == null || collection.getDescriptiveData().getLabel().isEmpty()) {
+		if ((collection.getDescriptiveData().getLabel() == null) || collection.getDescriptiveData().getLabel().isEmpty()) {
 			error.put("error", "Missing collection title");
 			return false;
 		}
@@ -551,7 +556,7 @@ public class CollectionObjectController extends WithResourceController {
 			User creatorUser = DB.getUserDAO().getByUsername(creator.get());
 			if (creatorUser != null)
 				creatorId = creatorUser.getDbId();
-			else 
+			else
 				return badRequest("User with username " + creator.get() + " does not exist.");
 		}
 		if (effectiveUserIds.isEmpty()
@@ -890,7 +895,7 @@ public class CollectionObjectController extends WithResourceController {
 						continue;
 					}
 					if (contentFormat.equals("noContent")
-							&& r.getContent() != null) {
+							&& (r.getContent() != null)) {
 						r.getContent().clear();
 						recordsList.add(Json.toJson(r));
 						fillContextData(
@@ -901,7 +906,7 @@ public class CollectionObjectController extends WithResourceController {
 										.getCollectedResources(), recordsList);
 						continue;
 					}
-					if (r.getContent() != null
+					if ((r.getContent() != null)
 							&& r.getContent().containsKey(contentFormat)) {
 						HashMap<String, String> newContent = new HashMap<String, String>(
 								1);
@@ -974,6 +979,89 @@ public class CollectionObjectController extends WithResourceController {
 		}
 		return ok(result);
 	}
+
+	/*
+	 * Search for collections/exhibitions in myCollections page.
+	 */
+	public static Result searchMyCollections(String term, Boolean direct,
+			Option<MyPlayList> directlyAccessedByUserOrGroup,
+			Option<MyPlayList> recursivelyAccessedByUserOrGroup) {
+		ObjectNode result = Json.newObject();
+
+		List<String> effectiveUserIds = AccessManager
+				.effectiveUserIds(session().get("effectiveUserIds"));
+		if (effectiveUserIds.isEmpty()) {
+			return forbidden(Json
+					.parse("\"error\", \"Must specify user for the collection\""));
+		}
+		ObjectId userId = new ObjectId(effectiveUserIds.get(0));
+		List<List<Tuple<ObjectId, Access>>> accessedByUserOrGroup = new ArrayList<List<Tuple<ObjectId, Access>>>();
+		accessedByUserOrGroup = accessibleByUserOrGroup(
+				directlyAccessedByUserOrGroup,
+				recursivelyAccessedByUserOrGroup);
+		List<Tuple<ObjectId, Access>> accessedByLoggedInUser = new ArrayList<Tuple<ObjectId, Access>>();
+		if (direct) {
+			accessedByLoggedInUser.add(new Tuple<ObjectId, Access>(userId,
+					Access.READ));
+			accessedByUserOrGroup.add(accessedByLoggedInUser);
+		} else {// indirectly: include collections for which user has access
+				// via userGoup sharing
+			for (String effectiveId : effectiveUserIds) {
+				accessedByLoggedInUser.add(new Tuple<ObjectId, Access>(
+						new ObjectId(effectiveId), Access.READ));
+			}
+			accessedByUserOrGroup.add(accessedByLoggedInUser);
+		}
+
+		ElasticSearcher searcher = new ElasticSearcher();
+		searcher.addType(WithResourceType.SimpleCollection.toString().toLowerCase());
+
+		SearchOptions options =  new SearchOptions();
+		options.accessList = accessedByUserOrGroup;
+
+		SearchResponse resp = searcher.searchMycollections(term, options);
+		ArrayNode filteredCols = Json.newObject().arrayNode();
+		for(SearchHit h: resp.getHits().getHits())
+			filteredCols.add(Json.toJson(DB.getCollectionObjectDAO().getById(new ObjectId(h.getId()))));
+
+		result.put("filteredCols", filteredCols);
+		return ok(filteredCols);
+
+	}
+
+	/*
+	 * Search for records within a collection.
+	 */
+	public static Result searchWithinCollection(String collectionId, String term) {
+		ObjectNode result = Json.newObject();
+
+		List<String> effectiveUserIds = AccessManager
+				.effectiveUserIds(session().get("effectiveUserIds"));
+		if (effectiveUserIds.isEmpty()) {
+			return forbidden(Json
+					.parse("\"error\", \"Must specify user for the collection\""));
+		}
+
+		ElasticSearcher searcher = new ElasticSearcher();
+		List<String> recordTypes = Elastic.allTypes;
+		recordTypes.remove(WithResourceType.CollectionObject.toString().toLowerCase());
+		recordTypes.remove(WithResourceType.SimpleCollection.toString().toLowerCase());
+		recordTypes.remove(WithResourceType.Exhibition.toString().toLowerCase());
+		searcher.setTypes(recordTypes);
+
+		SearchOptions options = new SearchOptions();
+		options.addFilter("collectedId", collectionId);
+
+		SearchResponse resp = searcher.searchForRecords(term, options);
+		ArrayNode filteredRecs = Json.newObject().arrayNode();
+		for(SearchHit h: resp.getHits().getHits())
+			filteredRecs.add(Json.toJson(DB.getWithResourceDAO().getById(new ObjectId(h.getId()))));
+
+		result.put("filteredRecs", filteredRecs);
+		return ok(filteredRecs);
+
+	}
+
 
 	private static ObjectNode userOrGroupJson(UserOrGroup user,
 			Access accessRights) {

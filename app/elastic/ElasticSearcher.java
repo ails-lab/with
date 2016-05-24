@@ -49,6 +49,8 @@ import org.elasticsearch.index.query.FilteredQueryBuilder;
 import org.elasticsearch.index.query.MatchAllQueryBuilder;
 import org.elasticsearch.index.query.MatchQueryBuilder;
 import org.elasticsearch.index.query.MoreLikeThisQueryBuilder;
+import org.elasticsearch.index.query.MultiMatchQueryBuilder;
+import org.elasticsearch.index.query.MultiMatchQueryBuilder.Type;
 import org.elasticsearch.index.query.NestedFilterBuilder;
 import org.elasticsearch.index.query.NotFilterBuilder;
 import org.elasticsearch.index.query.OrFilterBuilder;
@@ -254,6 +256,31 @@ public class ElasticSearcher {
 		return this.execute(match_all, options);
 	}
 
+
+	/*
+	 * Search for user collections
+	 * Specify the type to search only for collecitonobject type
+	 */
+	public SearchResponse searchMycollections(String term, SearchOptions options) {
+		MultiMatchQueryBuilder multi_match_q = QueryBuilders.multiMatchQuery(term, "", "", "");
+		multi_match_q.type(Type.PHRASE);
+		multi_match_q.operator(org.elasticsearch.index.query.MatchQueryBuilder.Operator.AND);
+		multi_match_q.fuzziness("AUTO");
+		return this.execute(multi_match_q);
+	}
+
+
+	/*
+	 * Search for records within a user collection
+	 * Specify the type to search only for *resources types
+	 */
+	public SearchResponse searchForRecords(String term, SearchOptions options) {
+		MultiMatchQueryBuilder multi_match_q = QueryBuilders.multiMatchQuery(term, "", "", "");
+		multi_match_q.type(Type.PHRASE);
+		multi_match_q.operator(org.elasticsearch.index.query.MatchQueryBuilder.Operator.AND);
+		multi_match_q.fuzziness("AUTO");
+		return this.execute(multi_match_q);
+	}
 
 	/*
 	 * Search for related records
