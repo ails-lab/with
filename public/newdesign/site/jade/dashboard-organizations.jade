@@ -55,22 +55,6 @@ html
 							// collection main
 							section.project-list
 
-								// collection main header
-								.list-head
-
-									// item count
-									span.item-count 7 organizations
-
-									.filtertype
-										img.mag( src="img/ui/ic-mag.png" )
-										input( type="text" class="filtertext" placeholder="Search organization" )
-											
-									
-									// control
-									.list-control
-
-										a(href="#" data-toggle="tooltip" data-placement="top" title="API Calls").fa.fa-rss.detail-control.single
-
 								// listing
 								ul.list-body.list
 
@@ -89,15 +73,9 @@ html
 												.date December 15, 2015
 												.user By Annac
 											.action-group
-												.wrap
-													ul
-														li
-															a(href="#" data-toggle="tooltip" data-placement="top" title="Delete organization" ).fa.fa-trash-o
-														li
-															a(href="dashboard-organizations-space.html" data-toggle="tooltip" data-placement="top" title="Edit organization space" ).fa.fa-pencil
-														li
-															a(href="#" data-toggle="tooltip" data-placement="top" title="Manage members" ).fa.fa-user.members
-
+												a(href="#" data-toggle="tooltip" data-placement="top" title="Delete organization" ).fa.fa-trash-o
+												a(href="dashboard-organizations-space.html" data-toggle="tooltip" data-placement="top" title="Edit organization space" ).fa.fa-pencil
+												a(href="#" data-toggle="tooltip" data-placement="top" title="Manage members").fa.fa-user.members
 
 									li
 										.thumbnails
@@ -114,14 +92,9 @@ html
 												.date December 15, 2015
 												.user By Annac
 											.action-group
-												.wrap
-													ul
-														li
-															a(href="#" data-toggle="tooltip" data-placement="top" title="Delete organization" ).fa.fa-trash-o
-														li
-															a(href="dashboard-organizations-space.html" data-toggle="tooltip" data-placement="top" title="Edit organization space" ).fa.fa-pencil
-														li
-															a(href="#" data-toggle="tooltip" data-placement="top" title="Manage members" ).fa.fa-user.members
+												a(href="#" data-toggle="tooltip" data-placement="top" title="Delete organization" ).fa.fa-trash-o
+												a(href="dashboard-organizations-space.html" data-toggle="tooltip" data-placement="top" title="Edit organization space" ).fa.fa-pencil
+												a(href="#" data-toggle="tooltip" data-placement="top" title="Manage members").fa.fa-user.members
 
 								a(href="#").loadmore 
 									| load more
@@ -172,116 +145,95 @@ html
 								.action-body
 									.group
 										.title Users access
-										input(type="text" placeholder="Start typing username")
-										ul.members-list
+										.auto
+											input(type="text" placeholder="Start typing username" value="Lewis" )
+											.autocomplete-suggestions(style='position: absolute; max-height: 300px; z-index: 9999; top: 44px; left: 0; width: 329px;')
+												.autocomplete-suggestion.autocomplete-suggestion-extra(data-index='0')
+													strong Lewis 
+													| Kaldeli
+													span.label.pull-right user
+												.autocomplete-suggestion.autocomplete-suggestion-extra(data-index='1')
+													strong Lewis 
+													| Mike
+													span.label.pull-right user
+												.autocomplete-suggestion.autocomplete-suggestion-extra(data-index='2')
+													strong Lewis 
+													| Robert
+													span.label.pull-right user
+										ul.access-list
 											li
-
+												.thumbnails
+													img(src="img/content/img-profile.jpg")
+												a(href="#" data-toggle="tooltip" data-placement="top" title="List view").trash
+													i.fa.fa-trash
 												.toggle
 													input(type='checkbox')#u1
 													label(for='u1')
-													span.member member
-													span.admin admin
+													span.private view
+													span.public co-edit
+											li
 												.thumbnails
 													img(src="img/content/img-profile.jpg")
-													a(href="#" ).trash
-														i.fa.fa-trash
-												.username Username 1
-												
-											li
+												a(href="#" data-toggle="tooltip" data-placement="top" title="List view").trash
+													i.fa.fa-trash
 												.toggle
 													input(type='checkbox')#u2
 													label(for='u2')
-													span.member member
-													span.admin admin
+													span.private view
+													span.public co-edit
+											li
 												.thumbnails
 													img(src="img/content/img-profile.jpg")
-													a(href="#").trash
-														i.fa.fa-trash
-												.username Username 2 lorem
-												
-											li
+												a(href="#" data-toggle="tooltip" data-placement="top" title="List view").trash
+													i.fa.fa-trash
 												.toggle
 													input(type='checkbox')#u3
 													label(for='u3')
-													span.member member
-													span.admin admin
+													span.private view
+													span.public co-edit
+											li
 												.thumbnails
 													img(src="img/content/img-profile.jpg")
-													a(href="#" ).trash
-														i.fa.fa-trash
-												.username Username 3
-												
-											li
+												a(href="#" data-toggle="tooltip" data-placement="top" title="List view").trash
+													i.fa.fa-trash
 												.toggle
 													input(type='checkbox')#u4
 													label(for='u4')
-													span.member member
-													span.admin admin
-												.thumbnails
-													img(src="img/content/img-profile.jpg")
-													a(href="#").trash
-														i.fa.fa-trash
-												.username Username 4
-
-											li
-												.toggle
-													input(type='checkbox')#u5
-													label(for='u5')
-													span.member member
-													span.admin admin
-												.thumbnails
-													img(src="img/content/img-profile.jpg")
-													a(href="#" ).trash
-														i.fa.fa-trash
-												.username Username 3
-												
-											li
-												.toggle
-													input(type='checkbox')#u6
-													label(for='u6')
-													span.member member
-													span.admin admin
-												.thumbnails
-													img(src="img/content/img-profile.jpg")
-													a(href="#").trash
-														i.fa.fa-trash
-												.username Username 4
-												
+													span.private view
+													span.public co-edit
 
 									.group
 										.title Groups access
 										input(type="text" placeholder="Start typing group name")
-										ul.members-list
+										ul.access-list
 											li.blue
-												span.text ES
-													a(href="#" ).trash
-														i.fa.fa-trash
+												span.text DK
+												a(href="#" data-toggle="tooltip" data-placement="top" title="List view").trash
+													i.fa.fa-trash
 												.toggle
 													input(type='checkbox')#g1
 													label(for='g1')
-													span.member member
-													span.admin admin
-												.username Europeana Space
+													span.private view
+													span.public co-edit
 											li.green
-												span.text SA
-													a(href="#" ).trash
-														i.fa.fa-trash
+												span.text US
+												a(href="#" data-toggle="tooltip" data-placement="top" title="List view").trash
+													i.fa.fa-trash
 												.toggle
 													input(type='checkbox')#g2
 													label(for='g2')
-													span.member member
-													span.admin admin
-												.username SOCIAL ART
+													span.private view
+													span.public co-edit
 											li.orange
-												span.text UF
-													a(href="#" ).trash
-														i.fa.fa-trash
+												span.text MN
+												a(href="#" data-toggle="tooltip" data-placement="top" title="List view").trash
+													i.fa.fa-trash
 												.toggle
 													input(type='checkbox')#g3
 													label(for='g3')
-													span.member member
-													span.admin admin
-												.username UNIVERSITY FELLOW
+													span.private view
+													span.public co-edit
+
 
 
 								.button-group

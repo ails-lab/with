@@ -34,49 +34,32 @@ html
 						section.collection
 
 							section.header
-
-								// info
-								.actioninfo
-
-									// upload
-									a(href="#").upload
-										span.plus
-										span.text Upload Image
 								
-								// collection detail
-								.collectiondetail
-									span.title My Collection Title
-									p.description
-										| Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip.
+								span.title My Collection Title
+								span.item-count 3 Items
 
-
-
+								p.description
+									| Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip.
 
 							// collection main
-							section.collection-list.collection-detail
+							section.collection-list
 
 								// collection main header
 								.list-head
-
-									// item count
-									span.item-count 3 items
-
 									// back
-									a.back( href="dashboard-collection.html" data-toggle="tooltip" data-placement="top" title="Back to collection list") 
-										i.fa.fa-angle-left
-
-									.filtertype
-										img.mag( src="img/ui/ic-mag.png" )
-										input( type="text" class="filtertext" placeholder="Search collection item" )
+									a(href="dashboard-collection.html").back Return to collection list
 
 									// control
 									.list-control
 
-										
+										// upload
+										a(href="#").upload
+											span.plus
+											span.text Upload Image
 
 										a(href="#" data-toggle="tooltip" data-placement="top" title="Edit Collection").fa.fa-pencil.editaction
 										a(href="#" data-toggle="tooltip" data-placement="top" title="API Calls").fa.fa-rss.detail-control
-										a(href="#" data-toggle="tooltip" data-placement="top" title="Delete Collection").fa.fa-trash.deleteaction
+										a(href="#" data-toggle="tooltip" data-placement="top" title="Delete Collection").fa.fa-trash
 
 							// isotope section
 							section.isotope
@@ -92,19 +75,13 @@ html
 											.wrap
 												a(href="#" title="Lorem ipsum")
 													.thumb
-														img(src="img/content/content-1-white.png" alt="Lorem ipsum")
+														img(src="img/content/content-1.png" alt="Lorem ipsum")
 														
-												.info
-													a(href="#" title="Lorem ipsum")
+													.info
 														h2.title Lorem ipsum dolor sit amet conceptus
-														span.source
-															| National Library of Latvia
-
-													span.provider
-														a(href="#").links digitainz.org
 												.action-group
 													.wrap
-														
+														a(href="#").links digitainz.org
 														ul
 															li
 																a(href="#" data-toggle="tooltip" data-placement="top" title="Delete media" ).fa.fa-trash-o
@@ -121,15 +98,11 @@ html
 													.thumb
 														img(src="img/content/content-1.png" alt="Lorem ipsum")
 														
-												.info
-													a(href="#" title="Lorem ipsum")
+													.info
 														h2.title Lorem ipsum dolor sit amet conceptus
-														span.source
-															| National Library of Latvia
-													span.provider
-														a(href="#").links digitainz.org
 												.action-group
 													.wrap
+														a(href="#").links digitainz.org
 														ul
 															li
 																a(href="#" data-toggle="tooltip" data-placement="top" title="Delete media" ).fa.fa-trash-o
@@ -145,15 +118,11 @@ html
 													.thumb
 														img(src="img/content/content-3.png" alt="Lorem ipsum")
 														
-												.info
-													a(href="#" title="Lorem ipsum")
+													.info
 														h2.title Lorem ipsum dolor sit amet conceptus
-														span.source
-															| National Library of Latvia
-													span.provider
-														a(href="#").links digitainz.org
 												.action-group
 													.wrap
+														a(href="#").links digitainz.org
 														ul
 															li
 																a(href="#" data-toggle="tooltip" data-placement="top" title="Delete media" ).fa.fa-trash-o
@@ -168,15 +137,11 @@ html
 													.thumb
 														img(src="img/content/content-2.png" alt="Lorem ipsum")
 														
-												.info
-													a(href="#" title="Lorem ipsum")
+													.info
 														h2.title Lorem ipsum dolor sit amet conceptus
-														span.source
-															| National Library of Latvia
-													span.provider
-														a(href="#").links digitainz.org
 												.action-group
 													.wrap
+														a(href="#").links digitainz.org
 														ul
 															li
 																a(href="#" data-toggle="tooltip" data-placement="top" title="Delete media" ).fa.fa-trash-o

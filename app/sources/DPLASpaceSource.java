@@ -59,7 +59,6 @@ public class DPLASpaceSource extends ISpaceSource {
 	public DPLASpaceSource() {
 		super(Sources.DPLA);
 		apiKey = "SECRET_KEY";
-		vmap = FilterValuesMap.getDPLAMap();
 
 		addDefaultWriter(CommonFilters.TYPE.getId(), fwriter("sourceResource.type"));
 		addDefaultWriter(CommonFilters.COUNTRY.getId(), fwriter("sourceResource.spatial.country"));

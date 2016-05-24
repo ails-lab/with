@@ -27,10 +27,10 @@ define(['bridget','knockout', 'text!./organization-edit.html', 'isotope','images
 					if (data) {
 						return data;
 					} else {
-						return "img/ui/ic-noimage.png";
+						return "img/content/thumb-empty.png";
 					}
 				}
-				return "img/ui/ic-noimage.png";
+				return "img/content/thumb-empty.png";
 			});
 			self.type = ko.computed(function () {
 				if (self.resourceType) {
@@ -100,10 +100,10 @@ define(['bridget','knockout', 'text!./organization-edit.html', 'isotope','images
 			        	 if(data){
 			 				return data;}
 			 			  else{
-			 				   return "img/ui/ic-noimage.png";
+			 				   return "img/content/thumb-empty.png";
 			 			   }
 			        	}
-			        	return "img/ui/ic-noimage.png";
+			        	return "img/content/thumb-empty.png";
 			        });
 
 			        self.type=ko.computed(function() {
@@ -665,7 +665,7 @@ define(['bridget','knockout', 'text!./organization-edit.html', 'isotope','images
 				dataType: "json",
 				url: "/collection/list",
 				processData: false,
-				data: "offset=0&count=500&directlyAccessedByUserOrGroup=" + JSON.stringify([{group: self.username(), rights: "WRITE"}])
+				data: "offset=0&count=50&directlyAccessedByUserOrGroup=" + JSON.stringify([{group: self.username(), rights: "WRITE"}])
 			}).success(function (data, textStatus, jqXHR) {
 				var items=self.revealItems(data['collectionsOrExhibitions']);
 
@@ -695,11 +695,7 @@ define(['bridget','knockout', 'text!./organization-edit.html', 'isotope','images
 			   tile+='<a href="'+collection.data.url()+'">'
                 +'<div class="thumb"><img src="'+collection.data.thumbnail()+'"><div class="counter">'+collection.data.entryCount+' ITEMS</div></div>'
                 +' <div class="info"><div class="type">'+collection.data.type()+'</div><h2 class="title">'+collection.data.title+'</h2></div>'
-                +'</a>'
-                +'<div class="action-group"><div class="wrap"><ul><li><a href="#" data-toggle="tooltip" data-placement="top" title="Unshare media" class="fa fa-ban"></a></li>'
-                +'<li><a href="#" data-toggle="tooltip" data-placement="top" title="Set as featured" class="fa fa-star featuredbutton"></a></li>'
-                +'</ul></div></div>'
-                +'</div></div>';
+                +'</a></div></div>';
 			return tile;
 
 		}

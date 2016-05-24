@@ -66,11 +66,13 @@ public class FiltersHelper {
 
 	public static CommonFilterLogic merge(CommonFilterLogic a, CommonFilterLogic b) {
 		a.addValueCounts(b.values());
+		a.addSourceFrom(b);
 		return a;
 	}
 
 	public static CommonFilterLogic merge(CommonFilterLogic a, CommonFilterResponse b) {
 		a.addValueCounts(b.suggestedValues);
+		a.addSourceFrom(b);
 		return a;
 	}
 }

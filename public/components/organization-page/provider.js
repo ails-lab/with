@@ -26,11 +26,11 @@ define(['bridget','knockout', 'text!./provider.html','isotope','imagesloaded','a
 						if (data) {
 							return data;
 						} else {
-							return "img/ui/ic-noimage.png";
+							return "img/content/thumb-empty.png";
 						}
 					}
 
-					return "img/ui/ic-noimage.png";
+					return "img/content/thumb-empty.png";
 				});
 
 				self.type = ko.computed(function () {

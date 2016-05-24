@@ -23,11 +23,10 @@ import elastic.ElasticReindexer;
 import play.Logger;
 import play.Logger.ALogger;
 import play.libs.F.Promise;
-import play.mvc.Controller;
 import play.mvc.Result;
 import sources.core.ParallelAPICall;
 
-public class ReindexController extends Controller {
+public class ReindexController extends WithController {
 
 	public static final ALogger log = Logger.of(ReindexController.class);
 

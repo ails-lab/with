@@ -41,7 +41,7 @@
           </section>
           <!-- notification-->
           <section class="notification">
-            <!-- button--><a id="notificationbutton" href="#" title="Notification" data-toggle="dropdown"><img src="img/ui/ic-notification.png"><span class="counter">12</span></a>
+            <!-- button--><a id="notificationbutton" href="#" title="notification" data-toggle="dropdown"><img src="img/ui/ic-notification.png"><span class="counter">12</span></a>
             <!-- dropdown menu-->
             <div aria-labelledby="notificationbutton" class="dropdown-menu">
               <!-- header-->
@@ -57,13 +57,9 @@
             </div>
           </section>
           <!-- home-->
-          <section class="home"><a href="dashboard.html" title="Dashboard Home"><img src="img/ui/ic-home.png" alt="Home"></a></section>
+          <section class="home"><a href="dashboard.html" title="Home"><img src="img/ui/ic-home.png" alt="Home"></a></section>
           <!-- explore-->
-          <section class="explore">
-            <!-- input search-->
-            <input type="text" placeholder="Search">
-            <!-- icon--><img src="img/ui/ic-mag.png" class="icon">
-          </section>
+          <section class="explore"><a href="dashboard-search.html" title="explore"><img src="img/ui/ic-search.png"><span class="text">EXPLORE</span></a></section>
         </div>
       </div>
     </header>
@@ -84,12 +80,6 @@
                 <li><a href="dashboard-collection.html"><span class="counter">7</span><span class="icon"><i class="fa fa-clone"></i></span><span class="text">My Collection</span></a></li>
                 <li><a href="dashboard-exhibition.html"><span class="counter">10</span><span class="icon"><i class="fa fa-television"></i></span><span class="text">My Exhibition</span></a></li>
                 <li><a href="dashboard-favorite.html"><span class="counter">5</span><span class="icon"><i class="fa fa-heart-o"></i></span><span class="text">My Favorite</span></a></li>
-                <!-- li( class=page === "annotation" ? "active" : "" )
-                a(href='dashboard-annotation.html')
-                 span.icon
-                  i.fa.fa-edit
-                 span.text My Annotation
-                -->
                 <li class="active"><a href="dashboard-organizations.html"><span class="icon"><i class="fa fa-bookmark-o"></i></span><span class="text">Organizations</span></a></li>
                 <li><a href="dashboard-projects.html"><span class="icon"><i class="fa fa-comment-o"></i></span><span class="text">Projects</span></a></li>
               </ul>
@@ -110,17 +100,13 @@
           <main>
             <!-- project-->
             <section class="project">
-              <!-- upload--><a href="#" class="uploadimage"><span class="plus"></span><span class="text">Change cover image</span></a>
               <!-- head-->
               <div class="list-head">
-                <!-- back--><a href="dashboard-collection.html" data-toggle="tooltip" data-placement="top" title="Back to organizations list" class="back"><i class="fa fa-angle-left"></i></a>
+                <!-- back--><a href="dashboard-collection.html" class="back">Return to project list</a>
                 <!-- control-->
-                <ul class="organization-list-control">
-                  <li><a href="organizations-space-view.html" data-toggle="tooltip" data-placement="top" title="View Organization page" class="fa fa-eye"></a></li>
-                  <li><a href="#" data-toggle="tooltip" data-placement="top" title="Edit Organization" class="fa fa-pencil editaction new"></a></li>
-                  <li><a href="#" data-toggle="tooltip" data-placement="top" title="Manage Members" class="fa fa-user members-access"></a></li>
-                  <li><a href="#" data-toggle="tooltip" data-placement="top" title="Delete Organization" class="fa fa-trash"></a></li>
-                </ul>
+                <div class="list-control">
+                  <!-- upload--><a href="#" class="upload"><span class="plus"></span><span class="text">Change cover image</span></a><a href="organizations-space-view.html" data-toggle="tooltip" data-placement="top" title="View Organization page" class="fa fa-eye"></a><a href="#" data-toggle="tooltip" data-placement="top" title="Edit Organization" class="fa fa-pencil editaction new"></a><a href="#" data-toggle="tooltip" data-placement="top" title="Manage Members" class="fa fa-user members-access"></a><a href="#" data-toggle="tooltip" data-placement="top" title="Delete Organization" class="fa fa-trash"></a>
+                </div>
               </div>
               <!-- hero section-->
               <section class="hero">
@@ -156,18 +142,7 @@
                           <div class="info"><span class="type">Exhibitions</span>
                             <h1 class="title">Lorem ipsum dolor sit amet conceptus</h1>
                             <p class="text">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
-                          </div></a>
-                        <div class="action-group">
-                          <div class="wrap">
-                            <ul>
-                              <li><a href="#" data-toggle="tooltip" data-placement="top" title="Unshare media" class="fa fa-ban"></a></li>
-                              <li><a href="#" data-toggle="tooltip" data-placement="top" title="Add to favorite" class="fa fa-heart"></a></li>
-                              <li><a href="#" data-toggle="tooltip" data-placement="top" title="Collect it" class="fa fa-download collectbutton"></a></li>
-                              <li><a href="#" data-toggle="tooltip" data-placement="top" title="Set as featured" class="fa fa-star featuredbutton"></a></li>
-                            </ul>
-                          </div>
-                        </div>
-                      </div>
+                          </div></a></div>
                     </div>
                     <div class="item exhibition">
                       <div class="wrap"><a href="#" title="Lorem ipsum">
@@ -175,18 +150,7 @@
                           <div class="info"><span class="type">Exhibitions</span>
                             <h1 class="title">Lorem ipsum dolor sit amet conceptus</h1>
                             <p class="text">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
-                          </div></a>
-                        <div class="action-group">
-                          <div class="wrap">
-                            <ul>
-                              <li><a href="#" data-toggle="tooltip" data-placement="top" title="Unshare media" class="fa fa-ban"></a></li>
-                              <li><a href="#" data-toggle="tooltip" data-placement="top" title="Add to favorite" class="fa fa-heart"></a></li>
-                              <li><a href="#" data-toggle="tooltip" data-placement="top" title="Collect it" class="fa fa-download collectbutton"></a></li>
-                              <li><a href="#" data-toggle="tooltip" data-placement="top" title="Set as featured" class="fa fa-star featuredbutton"></a></li>
-                            </ul>
-                          </div>
-                        </div>
-                      </div>
+                          </div></a></div>
                     </div>
                     <div class="item collection">
                       <div class="wrap"><a href="#" title="Lorem ipsum">
@@ -197,18 +161,7 @@
                             <div class="type">Collection</div>
                             <h1 class="title">Lorem ipsum dolor sit amet conceptus</h1>
                             <p class="text">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
-                          </div></a>
-                        <div class="action-group">
-                          <div class="wrap">
-                            <ul>
-                              <li><a href="#" data-toggle="tooltip" data-placement="top" title="Unshare media" class="fa fa-ban"></a></li>
-                              <li><a href="#" data-toggle="tooltip" data-placement="top" title="Add to favorite" class="fa fa-heart"></a></li>
-                              <li><a href="#" data-toggle="tooltip" data-placement="top" title="Collect it" class="fa fa-download collectbutton"></a></li>
-                              <li><a href="#" data-toggle="tooltip" data-placement="top" title="Set as featured" class="fa fa-star featuredbutton"></a></li>
-                            </ul>
-                          </div>
-                        </div>
-                      </div>
+                          </div></a></div>
                     </div>
                     <div class="item collection">
                       <div class="wrap"><a href="#" title="Lorem ipsum">
@@ -219,18 +172,7 @@
                             <div class="type">Collection</div>
                             <h1 class="title">Lorem ipsum dolor sit amet conceptus</h1>
                             <p class="text">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
-                          </div></a>
-                        <div class="action-group">
-                          <div class="wrap">
-                            <ul>
-                              <li><a href="#" data-toggle="tooltip" data-placement="top" title="Unshare media" class="fa fa-ban"></a></li>
-                              <li><a href="#" data-toggle="tooltip" data-placement="top" title="Add to favorite" class="fa fa-heart"></a></li>
-                              <li><a href="#" data-toggle="tooltip" data-placement="top" title="Collect it" class="fa fa-download collectbutton"></a></li>
-                              <li><a href="#" data-toggle="tooltip" data-placement="top" title="Set as featured" class="fa fa-star featuredbutton"></a></li>
-                            </ul>
-                          </div>
-                        </div>
-                      </div>
+                          </div></a></div>
                     </div>
                   </div>
                 </section>

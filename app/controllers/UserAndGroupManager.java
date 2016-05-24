@@ -38,22 +38,16 @@ import db.DB;
 import model.EmbeddedMediaObject;
 import model.EmbeddedMediaObject.MediaVersion;
 import model.MediaObject;
-import model.basicDataTypes.WithAccess.Access;
 import notifications.GroupNotification;
 import notifications.Notification;
 import notifications.Notification.Activity;
 import play.Logger;
 import play.Logger.ALogger;
 import play.libs.Json;
-import play.mvc.Controller;
 import play.mvc.Result;
-import utils.AccessManager;
 import utils.NotificationCenter;
 
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-
-public class UserAndGroupManager extends Controller {
+public class UserAndGroupManager extends WithController {
 
 	public static final ALogger log = Logger.of(UserGroup.class);
 
@@ -92,12 +86,10 @@ public class UserAndGroupManager extends Controller {
 					prefix);
 			List<UserGroup> groups2 = DB.getUserGroupDAO().getByFriendlyNamePrefix(prefix);
 			groups.addAll(groups2);
-			List<String> effectiveUserIds = AccessManager
-					.effectiveUserIds(session().get("effectiveUserIds"));
-			ObjectId userId = new ObjectId(effectiveUserIds.get(0));
+			ObjectId userId = effectiveUserDbId();
 			for (UserGroup group : groups) {
 				if (!onlyParents
-						|| (onlyParents && group.getUsers().contains(userId))) {
+						|| (userId != null && onlyParents && group.getUsers().contains(userId))) {
 					ObjectNode node = Json.newObject().objectNode();
 					ObjectNode data = Json.newObject().objectNode();
 					data.put("category", "group");
@@ -214,8 +206,7 @@ public class UserAndGroupManager extends Controller {
 	public static Result addUserOrGroupToGroup(String id, String groupId) {
 		ObjectNode result = Json.newObject();
 		try {
-			String adminId = AccessManager.effectiveUserId(session().get(
-					"effectiveUserIds"));
+			String adminId = effectiveUserId();
 			if ((adminId == null) || (adminId.equals(""))) {
 				result.put("error",
 						"Only administrators of the group have the right to edit the group");
@@ -320,8 +311,7 @@ public class UserAndGroupManager extends Controller {
 	public static Result removeUserOrGroupFromGroup(String id, String groupId) {
 		ObjectNode result = Json.newObject();
 		try {
-			String adminId = AccessManager.effectiveUserId(session().get(
-					"effectiveUserIds"));
+			String adminId = effectiveUserId();
 			if ((adminId == null) || (adminId.equals(""))) {
 				result.put("error",
 						"Only creator or administrators of the group have the right to edit the group");
@@ -417,8 +407,7 @@ public class UserAndGroupManager extends Controller {
 	public static Result joinGroup(String groupId) {
 		ObjectNode result = Json.newObject();
 		try {
-			String userId = AccessManager.effectiveUserId(session().get(
-					"effectiveUserIds"));
+			String userId = effectiveUserId();
 			if (userId == null) {
 				result.put("error", "Must specify user for join request");
 				return forbidden(result);
@@ -473,8 +462,7 @@ public class UserAndGroupManager extends Controller {
 	public static Result leaveGroup(String groupId) {
 		ObjectNode result = Json.newObject();
 		try {
-			String userId = AccessManager.effectiveUserId(session().get(
-					"effectiveUserIds"));
+			String userId = effectiveUserId();
 			if (userId == null) {
 				result.put("error", "Must specify user for join request");
 				return forbidden(result);
@@ -543,8 +531,7 @@ public class UserAndGroupManager extends Controller {
 	public static Result addAdminToGroup(String id, String groupId){
 		ObjectNode result = Json.newObject();
 		try {
-			String adminId = AccessManager.effectiveUserId(session().get(
-					"effectiveUserIds"));
+			String adminId = effectiveUserId();
 			if ((adminId == null) || (adminId.equals(""))) {
 				result.put("error",
 						"Only creator or administrators of the group have the right to edit the group");
@@ -592,8 +579,7 @@ public class UserAndGroupManager extends Controller {
 	public static Result removeAdminFromGroup(String id, String groupId){
 		ObjectNode result = Json.newObject();
 		try {
-			String adminId = AccessManager.effectiveUserId(session().get(
-					"effectiveUserIds"));
+			String adminId = effectiveUserId();
 			if ((adminId == null) || (adminId.equals(""))) {
 				result.put("error",
 						"Only creator or administrators of the group have the right to edit the group");

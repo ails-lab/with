@@ -10,14 +10,11 @@
                     <!-- head-->
                     <h3>Media Viewer</h3>
                     <!-- actions-->
-                    <ul class="close">
-                    <li><a href="#" data-toggle="tooltip" data-placement="top" title="" class="closemedia" data-original-title="Close media viewer" data-bind="visible: window.location.href.indexOf('#item')==-1,click: close"><img src="img/ui/ic-close.png"></a></li>
-                    </ul>
-                    <ul class="actions"><li><a href="#" data-toggle="tooltip" data-placement="top" title="Add to favorites" class="fa fa-heart favorite" data-bind="visible:loggedUser && record().externalId!=null, css: { redheart: record().isLike()==true }, event: { click: function(data,event) { likeRecord(record(),event); } }"></a>
-                    </li><li><a href="#" data-toggle="tooltip" data-placement="top" title="Collect it" class="fa fa-download collectbutton" data-bind="visible:loggedUser, event: { click: function(data,event) { collect(record(),event); } }"></a>
-                    </li><li><a href="#" data-toggle="tooltip" data-placement="top" title="Visit item site" data-bind="attr: { href:record().view_url}" target="_blank" class="fa fa-external-link medialink"></a>
-                    </li></ul>
-                   </div>
+                    <div class="actions"><a href="#" data-toggle="tooltip" data-placement="top" title="Add to favorites" class="fa fa-heart favorite" data-bind="visible:loggedUser && record().externalId!=null, css: { redheart: record().isLike()==true }, event: { click: function(data,event) { likeRecord(record(),event); } }"></a>
+                    <a href="#" data-toggle="tooltip" data-placement="top" title="Collect it" class="fa fa-download collectbutton" data-bind="visible:loggedUser, event: { click: function(data,event) { collect(record(),event); } }"></a>
+                    <a href="#" data-toggle="tooltip" data-placement="bottom" title="Visit item site" class="medialink" data-bind="attr: { href:record().view_url}" target="_blank"><i class="fa fa-external-link"></i></a>
+                    <a  data-toggle="tooltip" data-placement="bottom" title="Close media viewer" class="closemedia" data-bind="visible: window.location.href.indexOf('#item')==-1,click: close"><img src="img/ui/ic-close.png"></a></div>
+                  </div>
                 </div>
                 <!-- media content-->
                 <div class="mediacontent">
@@ -25,11 +22,8 @@
                     <!-- wrap-->
                     <div class="wrap">
                       <!-- item-->
-                     <div class="media" id="mediadiv">
-                      <!-- ko if: record().vtype == "IMAGE" --> 
-                      <img data-bind="attr: {src: record().fullres()},event: {error: function(){changeSource($data)}}"/>
-                      <!-- /ko --> 
-                      </div>  <!-- metadata-->
+                      <div class="media"><img data-bind="attr: {src: record().fullres()},event: {error: function(){changeSource($data)}}"/></div>
+                      <!-- metadata-->
                       <div class="metadata">
                       <div class="infowrap">
                         <!-- top-->
@@ -79,7 +73,7 @@
                                   </div>
                                   <div class="field" data-bind="text:record().rights"></div>
                                 </div>
-                                 <div class="list" data-bind="if: record().mediatype && record().mediatype!=''">
+                                 <div class="list" data-bind="if: record().mediatype && record().mediatype.length!=''">
                                   <div class="title">
                                     <div class="titlewrap">Media Type</div>
                                   </div>
