@@ -17,31 +17,26 @@
 package controllers;
 
 import java.sql.Timestamp;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Function;
 
+import model.EmbeddedMediaObject.MediaVersion;
+import model.MediaObject;
 import model.basicDataTypes.WithAccess.Access;
 import model.resources.collection.CollectionObject;
 import model.usersAndGroups.User;
 import model.usersAndGroups.UserGroup;
 import model.usersAndGroups.UserOrGroup;
+import notifications.GroupNotification;
+import notifications.Notification;
+import notifications.Notification.Activity;
 
 import org.apache.commons.codec.binary.Base64;
 import org.bson.types.ObjectId;
 
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-
-import db.DB;
-import model.EmbeddedMediaObject;
-import model.EmbeddedMediaObject.MediaVersion;
-import model.MediaObject;
-import model.basicDataTypes.WithAccess.Access;
-import notifications.GroupNotification;
-import notifications.Notification;
-import notifications.Notification.Activity;
 import play.Logger;
 import play.Logger.ALogger;
 import play.libs.F.Option;
@@ -53,6 +48,8 @@ import utils.NotificationCenter;
 
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+
+import db.DB;
 
 public class UserAndGroupManager extends Controller {
 
@@ -92,17 +89,16 @@ public class UserAndGroupManager extends Controller {
 				Class<?> clazz = Class.forName("model.usersAndGroups."
 						+ forGroupType.get());
 				List<UserGroup> groups = DB.getUserGroupDAO()
-						.getByGroupNamePrefix(prefix);
-				List<UserGroup> groups2 = DB.getUserGroupDAO()
-						.getByFriendlyNamePrefix(prefix);
-				groups.addAll(groups2);
+						.getByGroupOrFriendlyNamePrefix(prefix);
 				List<String> effectiveUserIds = AccessManager
 						.effectiveUserIds(session().get("effectiveUserIds"));
-				ObjectId userId = new ObjectId(effectiveUserIds.get(0));
+				User user = DB.getUserDAO().getById(
+						new ObjectId(effectiveUserIds.get(0)),
+						Arrays.asList("userGroupsIds"));
 				for (UserGroup group : groups) {
 					if (!onlyParents
-							|| (onlyParents && group.getUsers()
-									.contains(userId))) {
+							|| (onlyParents && user.getUserGroupsIds()
+									.contains(group.getDbId()))) {
 						if (clazz.isInstance(group)) {
 							ObjectNode node = Json.newObject().objectNode();
 							ObjectNode data = Json.newObject().objectNode();

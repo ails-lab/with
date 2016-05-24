@@ -789,8 +789,9 @@ define("app", ['knockout', 'facebook', 'imagesloaded', 'moment', './js/app/plugi
 	};
 
 	autoCompleteUserName = function (elem, valueAccessor, allBindingsAccessor, viewModel, context, callback) {
+		var onlyParents = allBindingsAccessor.get('onlyParents') || false;
 		var forUsers = allBindingsAccessor.get('forUsers') || false;
-		var paramsJSON = { "onlyParents": false, "forUsers" : forUsers};
+		var paramsJSON = { "onlyParents": onlyParents, "forUsers" : forUsers};
 		if (allBindingsAccessor.has('forGroupType')) {
 			paramsJSON.forGroupType = allBindingsAccessor.get('forGroupType');
 		}

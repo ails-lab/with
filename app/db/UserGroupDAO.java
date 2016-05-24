@@ -138,7 +138,7 @@ public class UserGroupDAO extends DAO<UserGroup> {
 		return find(q).asList();
 	}
 
-	//Is this fast or should we use ElasticSearch
+	// Is this fast or should we use ElasticSearch
 	public List<UserGroup> getByGroupNamePrefix(String prefix) {
 		Query<UserGroup> q = this.createQuery().field("username")
 				.startsWithIgnoreCase(prefix);
@@ -146,11 +146,19 @@ public class UserGroupDAO extends DAO<UserGroup> {
 
 	}
 
-	//Is this fast or should we use ElasticSearch
+	// Is this fast or should we use ElasticSearch
 	public List<UserGroup> getByFriendlyNamePrefix(String prefix) {
 		Query<UserGroup> q = this.createQuery().field("friendlyName")
 				.startsWithIgnoreCase(prefix);
 		return find(q).asList();
+	}
+
+	public List<UserGroup> getByGroupOrFriendlyNamePrefix(String prefix) {
+		Query<UserGroup> q = this.createQuery();
+		q.or(q.criteria("username").startsWithIgnoreCase(prefix),
+				q.criteria("friendlyName").startsWithIgnoreCase(prefix));
+		return find(q).asList();
+
 	}
 
 	public void setCreated() {

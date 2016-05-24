@@ -127,6 +127,16 @@ define(['knockout', 'text!./myorganizations.html', 'app', 'moment', 'async!https
 		self.hideMessage = function () {
 			$("section.message").toggle();
 		};
+		
+		self.findByGroupName = function (name) {
+			$.ajax({
+				url: '/group/findByGroupName?name='+name,
+				type: 'GET',
+				success: function (data) {
+					window.location = '/#organization/'+data.groupId;
+				}
+			});
+		}
 
 		self.getCoordinatesAndSubmit = function (submitFunc) {
 			if (self.page.address && self.page.city && self.page.country) {
@@ -282,6 +292,14 @@ define(['knockout', 'text!./myorganizations.html', 'app', 'moment', 'async!https
 				});
 			}
 		};
+		
+		ko.bindingHandlers.autocompleteGroupname = {
+				init: function (elem, valueAccessor, allBindingsAccessor, viewModel, context) {
+					app.autoCompleteUserName(elem, valueAccessor, allBindingsAccessor, viewModel, context, function (suggestion) {
+						viewModel.findByGroupName(suggestion);
+					});
+				}
+			};
 
 		arrayFirstIndexOf = function (array, predicate) {
 			for (var i = 0, j = array.length; i < j; i++) {
