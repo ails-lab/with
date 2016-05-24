@@ -209,7 +209,7 @@ public class UserManager extends WithController {
 		}
 	}
 	
-	public static Result getUser() {
+	public static Result getMyUser() {
 		try {
 			User user = effectiveUser();		
 			if (user != null) {
