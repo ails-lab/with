@@ -560,15 +560,11 @@ public class CollectionObjectController extends WithResourceController {
 		/*
 		 * Metrics helper code
 		 */
-		/*final Meter meterResponseSize = MetricsUtils.registry.meter(
-				MetricsUtils.registry.name(CollectionObjectController.class, "listCollection", "meter-response-size"));
-		final Counter hits = MetricsUtils.registry.counter(
-				MetricsUtils.registry.name(CollectionObjectController.class, "listCollection", "number-of-requests"));
 		final Histogram histogramResponseSize = MetricsUtils.registry.histogram(
 				MetricsUtils.registry.name(CollectionObjectController.class, "listCollection", "histogram-response-size"));
 		final Timer call_timer = MetricsUtils.registry.timer(
 				MetricsUtils.registry.name(CollectionObjectController.class, "listCollection", "time"));
-		final Timer.Context call_timeContext = call_timer.time();*/
+		final Timer.Context call_timeContext = call_timer.time();
 		/*
 		 *
 		 */
@@ -625,9 +621,15 @@ public class CollectionObjectController extends WithResourceController {
 		} else { // logged in, check if super user, if not, restrict query to
 					// accessible by effectiveUserIds
 			//Metrics timer
-			/*final Timer dao_timer = MetricsUtils.registry.timer(
+			/*
+			 *
+			 */
+			final Timer dao_timer = MetricsUtils.registry.timer(
 					MetricsUtils.registry.name(CollectionObjectController.class, "listCollection", "collectionsDBRetrival-time"));
-			final Timer.Context dao_timeContext = dao_timer.time();*/
+			final Timer.Context dao_timeContext = dao_timer.time();
+			/*
+			 *
+			 */
 			Tuple<List<CollectionObject>, Tuple<Integer, Integer>> info;
 			if (!isSuperUser())
 				info = DB.getCollectionObjectDAO().getByLoggedInUsersAndAcl(
@@ -656,13 +658,11 @@ public class CollectionObjectController extends WithResourceController {
 				/*
 				 * Metrics helper code
 				 */
-				 /*ObjectMapper objm = new ObjectMapper();
+				 ObjectMapper objm = new ObjectMapper();
 				 byte[] yourBytes = objm.writeValueAsBytes(result);
 				 histogramResponseSize.update(yourBytes.length-histogramResponseSize.getCount());
 				 call_timeContext.stop();
 				 dao_timeContext.stop();
-				 hits.inc();
-				 meterResponseSize.mark(yourBytes.length);*/
 			}
 		}
 	}
