@@ -39,6 +39,9 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import controllers.parameterTypes.MyPlayList;
 import controllers.parameterTypes.StringTuple;
 import db.DB;
+import elastic.Elastic;
+import elastic.ElasticSearcher;
+import elastic.ElasticSearcher.SearchOptions;
 import model.annotations.ContextData;
 import model.annotations.ContextData.ContextDataBody;
 import model.annotations.ExhibitionData;
@@ -1045,6 +1048,89 @@ public class CollectionObjectController extends WithResourceController {
 		}
 		return ok(result);
 	}
+
+	/*
+	 * Search for collections/exhibitions in myCollections page.
+	 */
+	public static Result searchMyCollections(String term, Boolean direct,
+			Option<MyPlayList> directlyAccessedByUserOrGroup,
+			Option<MyPlayList> recursivelyAccessedByUserOrGroup) {
+		ObjectNode result = Json.newObject();
+
+		List<String> effectiveUserIds = AccessManager
+				.effectiveUserIds(session().get("effectiveUserIds"));
+		if (effectiveUserIds.isEmpty()) {
+			return forbidden(Json
+					.parse("\"error\", \"Must specify user for the collection\""));
+		}
+		ObjectId userId = new ObjectId(effectiveUserIds.get(0));
+		List<List<Tuple<ObjectId, Access>>> accessedByUserOrGroup = new ArrayList<List<Tuple<ObjectId, Access>>>();
+		accessedByUserOrGroup = accessibleByUserOrGroup(
+				directlyAccessedByUserOrGroup,
+				recursivelyAccessedByUserOrGroup);
+		List<Tuple<ObjectId, Access>> accessedByLoggedInUser = new ArrayList<Tuple<ObjectId, Access>>();
+		if (direct) {
+			accessedByLoggedInUser.add(new Tuple<ObjectId, Access>(userId,
+					Access.READ));
+			accessedByUserOrGroup.add(accessedByLoggedInUser);
+		} else {// indirectly: include collections for which user has access
+				// via userGoup sharing
+			for (String effectiveId : effectiveUserIds) {
+				accessedByLoggedInUser.add(new Tuple<ObjectId, Access>(
+						new ObjectId(effectiveId), Access.READ));
+			}
+			accessedByUserOrGroup.add(accessedByLoggedInUser);
+		}
+
+		ElasticSearcher searcher = new ElasticSearcher();
+		searcher.addType(WithResourceType.SimpleCollection.toString().toLowerCase());
+
+		SearchOptions options =  new SearchOptions();
+		options.accessList = accessedByUserOrGroup;
+
+		SearchResponse resp = searcher.searchMycollections(term, options);
+		ArrayNode filteredCols = Json.newObject().arrayNode();
+		for(SearchHit h: resp.getHits().getHits())
+			filteredCols.add(Json.toJson(DB.getCollectionObjectDAO().getById(new ObjectId(h.getId()))));
+
+		result.put("filteredCols", filteredCols);
+		return ok(filteredCols);
+
+	}
+
+	/*
+	 * Search for records within a collection.
+	 */
+	public static Result searchWithinCollection(String collectionId, String term) {
+		ObjectNode result = Json.newObject();
+
+		List<String> effectiveUserIds = AccessManager
+				.effectiveUserIds(session().get("effectiveUserIds"));
+		if (effectiveUserIds.isEmpty()) {
+			return forbidden(Json
+					.parse("\"error\", \"Must specify user for the collection\""));
+		}
+
+		ElasticSearcher searcher = new ElasticSearcher();
+		List<String> recordTypes = Elastic.allTypes;
+		recordTypes.remove(WithResourceType.CollectionObject.toString().toLowerCase());
+		recordTypes.remove(WithResourceType.SimpleCollection.toString().toLowerCase());
+		recordTypes.remove(WithResourceType.Exhibition.toString().toLowerCase());
+		searcher.setTypes(recordTypes);
+
+		SearchOptions options = new SearchOptions();
+		options.addFilter("collectedId", collectionId);
+
+		SearchResponse resp = searcher.searchForRecords(term, options);
+		ArrayNode filteredRecs = Json.newObject().arrayNode();
+		for(SearchHit h: resp.getHits().getHits())
+			filteredRecs.add(Json.toJson(DB.getWithResourceDAO().getById(new ObjectId(h.getId()))));
+
+		result.put("filteredRecs", filteredRecs);
+		return ok(filteredRecs);
+
+	}
+
 
 	private static ObjectNode userOrGroupJson(UserOrGroup user,
 			Access accessRights) {
