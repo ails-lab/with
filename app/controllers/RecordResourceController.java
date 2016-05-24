@@ -75,20 +75,21 @@ public class RecordResourceController extends WithResourceController {
 				// which the user has no read access rights
 				//filterContextData(record);
 				if (format.isDefined()) {
-					if (format.equals("contentOnly")) {
+					String formats = format.get();
+					if (formats.equals("contentOnly")) {
 						return ok(Json.toJson(record.getContent()));
 					} else {
-						if (format.equals("noContent")) {
+						if (formats.equals("noContent")) {
 							record.getContent().clear();
 							return ok(Json.toJson(record));
 						} else if (record.getContent() != null
-								&& record.getContent().containsKey(format)) {
-							return ok(record.getContent().get(format)
+								&& record.getContent().containsKey(formats)) {
+							return ok(record.getContent().get(formats)
 									.toString());
 						} else {
 							result.put("error",
-									"Resource does not contain representation for format"
-											+ format);
+									"Resource does not contain representation for format "
+											+ formats);
 							return play.mvc.Results.notFound(result);
 						}
 					}
