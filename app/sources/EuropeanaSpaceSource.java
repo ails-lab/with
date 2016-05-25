@@ -28,7 +28,7 @@ import org.json.JSONObject;
 import com.fasterxml.jackson.databind.JsonNode;
 
 import model.basicDataTypes.ProvenanceInfo.Sources;
-import model.resources.CulturalObject;
+import model.quality.RecordQuality;
 import model.resources.RecordResource;
 import model.resources.WithResource;
 import play.Logger;
@@ -41,7 +41,6 @@ import sources.core.CommonFilterLogic;
 import sources.core.CommonFilters;
 import sources.core.CommonQuery;
 import sources.core.FacetsModes;
-import sources.core.HttpConnector;
 import sources.core.ISpaceSource;
 import sources.core.QueryBuilder;
 import sources.core.QueryModifier;
@@ -53,6 +52,7 @@ import sources.core.Utils.Pair;
 import sources.formatreaders.EuropeanaItemRecordFormatter;
 import sources.formatreaders.EuropeanaRecordFormatter;
 import sources.utils.FunctionsUtils;
+import sources.utils.JsonContextRecord;
 import utils.ListUtils;
 
 public class EuropeanaSpaceSource extends ISpaceSource {
@@ -437,8 +437,10 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 			if (response != null) {
 //				jsonMetadata.add(new RecordJSONMetadata(Format.JSON_EDM, record.toString()));
 				EuropeanaItemRecordFormatter f = new EuropeanaItemRecordFormatter();
-				String json = Json.toJson(f.overwritedObjectFrom((CulturalObject)fullRecord,record)).toString();
+				String json = Json.toJson(f.readObjectFrom(record)).toString();
 				jsonMetadata.add(new RecordJSONMetadata(Format.JSON_WITH, json));
+				RecordQuality q = new RecordQuality();
+				q.compute(new JsonContextRecord(json));
 			}
 			response = getHttpConnector()
 					.getURLContent("http://www.europeana.eu/api/v2/record/" + recordId + ".jsonld?wskey=" + key);
