@@ -109,6 +109,7 @@ DELETE  /media/orphan							controllers.MediaController.deleteOrphanMadia()
 DELETE 	/media/:id								controllers.MediaController.deleteMedia(id)
 
 # User Manager Controller
+GET      /user/me                                controllers.UserManager.getMyUser()
 POST	/user/register						    controllers.UserManager.register()
 POST	/user/login							    controllers.UserManager.login()
 POST	/user/facebookLogin						controllers.UserManager.facebookLogin()
