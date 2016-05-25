@@ -620,9 +620,8 @@ public class CollectionObjectController extends WithResourceController {
 			return ok(result);
 		} else { // logged in, check if super user, if not, restrict query to
 					// accessible by effectiveUserIds
-			//Metrics timer
 			/*
-			 *
+			 * Metrics timer for collections DB retrieval
 			 */
 			final Timer dao_timer = MetricsUtils.registry.timer(
 					MetricsUtils.registry.name(CollectionObjectController.class, "listCollection", "collectionsDBRetrival-time"));
