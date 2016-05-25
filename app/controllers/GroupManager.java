@@ -260,8 +260,7 @@ public class GroupManager extends WithController {
 		ObjectNode result = Json.newObject();
 		JsonNode json = request().body().asJson();
 
-		String userId = AccessManager.effectiveUserId(session().get(
-				"effectiveUserIds"));
+		String userId = effectiveUserId();
 		if ((userId == null) || (userId.equals(""))) {
 			result.put("error",
 					"Sorry! Only logged in users have access to this API call");
@@ -275,9 +274,10 @@ public class GroupManager extends WithController {
 		}
 
 		UserGroup group = DB.getUserGroupDAO().get(new ObjectId(groupId));
-		if (!group.getAdminIds().contains(new ObjectId(userId))) {
+		if (!group.getAdminIds().contains(new ObjectId(userId)) &&
+				!isSuperUser()) {
 			result.put("error",
-					"Only admin of the group has the right to delete the group");
+					"Only group admin or super user have the access to add featured collections/exhibitions");
 			return forbidden(result);
 		}
 
@@ -327,8 +327,7 @@ public class GroupManager extends WithController {
 		ObjectNode result = Json.newObject();
 		JsonNode json = request().body().asJson();
 
-		String userId = AccessManager.effectiveUserId(session().get(
-				"effectiveUserIds"));
+		String userId = effectiveUserId();
 		if ((userId == null) || (userId.equals(""))) {
 			result.put("error",
 					"Sorry! Only logged in users have access to this API call");
@@ -342,9 +341,10 @@ public class GroupManager extends WithController {
 		}
 
 		UserGroup group = DB.getUserGroupDAO().get(new ObjectId(groupId));
-		if (!group.getAdminIds().contains(new ObjectId(userId))) {
+		if (!group.getAdminIds().contains(new ObjectId(userId)) &&
+				!isSuperUser()) {
 			result.put("error",
-					"Only admin of the group has the right to delete the group");
+					"Only admin of the group or the super user have the right to delete featured collections/exhibitions");
 			return forbidden(result);
 		}
 

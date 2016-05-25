@@ -262,9 +262,9 @@ public class CollectionObjectController extends WithResourceController {
 			return internalServerError(result);
 		}
 	}
-	
+
 	public static Result exportCollectionObjectToOWL(String cname) {
-		
+
 		ObjectNode resultInfo = Json.newObject();
 		ObjectId creatorDbId = new ObjectId(loggedInUser());
 		CollectionObject ccid = null;
@@ -287,7 +287,7 @@ public class CollectionObjectController extends WithResourceController {
 			List<RecordResource> records = DB.getRecordResourceDAO()
 					.getByCollectionBetweenPositions(collectionDbId, 0,
 							Math.min(entryCount, 1000));
-			
+
 			for (RecordResource recordResource : records) {
 				if (recordResource instanceof CulturalObject) {
 					CulturalObject new_record = (CulturalObject) recordResource;
@@ -351,7 +351,7 @@ public class CollectionObjectController extends WithResourceController {
 
 	private static boolean internalAddCollection(CollectionObject collection,
 			WithResourceType colType, ObjectId creatorDbId, ObjectNode error) {
-		if (collection.getDescriptiveData().getLabel() == null || collection.getDescriptiveData().getLabel().isEmpty()) {
+		if ((collection.getDescriptiveData().getLabel() == null) || collection.getDescriptiveData().getLabel().isEmpty()) {
 			error.put("error", "Missing collection title");
 			return false;
 		}
@@ -507,7 +507,7 @@ public class CollectionObjectController extends WithResourceController {
 
 	public static Result countMyAndShared() {
 		ObjectNode result = Json.newObject().objectNode();
-		List<String> effectiveUserIds = 
+		List<String> effectiveUserIds =
 				effectiveUserIds();
 		if (effectiveUserIds.isEmpty()) {
 			return badRequest("You should be signed in as a user.");
@@ -517,7 +517,7 @@ public class CollectionObjectController extends WithResourceController {
 			return ok(result);
 		}
 	}
-	
+
 
 	public static Result list(Option<MyPlayList> directlyAccessedByUserOrGroup,
 			Option<String> creator, Option<Boolean> isExhibition,
@@ -528,14 +528,14 @@ public class CollectionObjectController extends WithResourceController {
 		return list(directlyAccessedByUserOrGroup, Option.<MyPlayList>None(), creator,
 				Option.Some(false), isExhibition, collectionHits, offset, count, profile, locale);
 	}
-	
+
 	public static Result listPublic(Option<MyPlayList> directlyAccessedByUserOrGroup,
 			Option<String> creator, Option<Boolean> isExhibition,
 			 Boolean collectionHits, int offset, int count, String profile, Option<String> locale) {
 		return list(directlyAccessedByUserOrGroup, Option.<MyPlayList>None(), creator, Option.Some(true),
 				isExhibition, collectionHits, offset, count, profile, locale);
 	}
-	
+
 	public static Result list(Option<MyPlayList> directlyAccessedByUserOrGroup,
 			Option<MyPlayList> recursivelyAccessedByUserOrGroup,
 			Option<String> creator, Option<Boolean> isPublic,
@@ -557,11 +557,11 @@ public class CollectionObjectController extends WithResourceController {
 			User creatorUser = DB.getUserDAO().getByUsername(creator.get());
 			if (creatorUser != null)
 				creatorId = creatorUser.getDbId();
-			else 
+			else
 				return badRequest("User with username " + creator.get() + " does not exist.");
 		}
 		if (effectiveUserIds.isEmpty()
-				|| (isPublic.isDefined() && isPublic.get() == true)) {
+				|| (isPublic.isDefined() && (isPublic.get() == true))) {
 			// if not logged or ask for public collections, return all public
 			// collections
 			Tuple<List<CollectionObject>, Tuple<Integer, Integer>> info = DB
@@ -616,9 +616,9 @@ public class CollectionObjectController extends WithResourceController {
 			return ok(result);
 		}
 	}
-	
+
 	public static Result listShared(Boolean direct, Option<MyPlayList> directlyAccessedByUserOrGroup,
-			Option<Boolean> isExhibition, Boolean collectionHits, int offset, int count, 
+			Option<Boolean> isExhibition, Boolean collectionHits, int offset, int count,
 			String profile, Option<String> locale) {
 		return listShared(direct, directlyAccessedByUserOrGroup, Option.<MyPlayList>None(),
 				isExhibition, collectionHits, offset, count, profile, locale);
@@ -740,15 +740,15 @@ public class CollectionObjectController extends WithResourceController {
 			List<String> effectiveUserIds, String profile, Option<String> locale) {
 		List<ObjectNode> collections = new ArrayList<ObjectNode>(
 				userCollections.size());
-		for (CollectionObject collection : userCollections) {			
+		for (CollectionObject collection : userCollections) {
 			collections.add(collectionWithMyAccessData(collection,
-					effectiveUserIds, profile, locale));			
+					effectiveUserIds, profile, locale));
 		}
 		return collections;
 	}
 
 	private static ObjectNode collectionWithMyAccessData(
-			CollectionObject userCollection, List<String> effectiveUserIds, 
+			CollectionObject userCollection, List<String> effectiveUserIds,
 			String profile, Option<String> locale) {
 		CollectionObject profiledCollection = userCollection.getCollectionProfile(profile);
 		filterResourceByLocale(locale, profiledCollection);
@@ -783,7 +783,7 @@ public class CollectionObjectController extends WithResourceController {
 	// countPerType exhibitions, i.e. (max) 2*countPerType
 	// collectionsOrExhibitions
 	public static Result getFeatured(String userOrGroupName,
-			Option<Boolean> isExhibition, int offset, int countPerType, 
+			Option<Boolean> isExhibition, int offset, int countPerType,
 			String profile, Option<String> locale) {
 		Page page = null;
 		UserGroup userGroup = DB.getUserGroupDAO().getByName(userOrGroupName);
@@ -841,12 +841,7 @@ public class CollectionObjectController extends WithResourceController {
 					+ " does not exist or has no specified page.");
 
 	}
-	
-	public static Result deleteFeatured(String groupId) {
-		ObjectNode result = Json.newObject();
-		return ok(result);
-	}
-	
+
 	/*
 	 * This method gets as input a list of Collection and Exhibition
 	 * id's and updates the featuredCollections & featuredExhibitions
@@ -971,7 +966,7 @@ public class CollectionObjectController extends WithResourceController {
 						continue;
 					}
 					if (contentFormat.equals("noContent")
-							&& r.getContent() != null) {
+							&& (r.getContent() != null)) {
 						r.getContent().clear();
 						RecordResource profiledRecord = r.getRecordProfile(profile);
 						filterResourceByLocale(locale, profiledRecord);
@@ -984,7 +979,7 @@ public class CollectionObjectController extends WithResourceController {
 										.getCollectedResources(), recordsList);
 						continue;
 					}
-					if (r.getContent() != null
+					if ((r.getContent() != null)
 							&& r.getContent().containsKey(contentFormat)) {
 						HashMap<String, String> newContent = new HashMap<String, String>(
 								1);
