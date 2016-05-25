@@ -25,14 +25,16 @@ import java.util.Map;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
 
+import play.Logger;
+import play.Logger.ALogger;
 import play.libs.F.Option;
 import play.mvc.QueryStringBindable;
 
 public class MyPlayList implements QueryStringBindable<MyPlayList>{
 	
 	public List<StringTuple> list = new ArrayList<StringTuple>();
+	public static final ALogger log = Logger.of(MyPlayList.class);
 
 	// play framework requires the Bindable to provide a "no Argument" public constructor.
 	public MyPlayList() {
@@ -62,9 +64,9 @@ public class MyPlayList implements QueryStringBindable<MyPlayList>{
 				else
 					return Option.None();
 			} catch (JsonProcessingException e) {
-				e.printStackTrace();
+				log.error( "Json problem.",e);
 			} catch (IOException e) {
-				e.printStackTrace();
+				log.error("IOProblem", e);
 			}
 	    }
 	    return Option.None();

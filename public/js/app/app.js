@@ -598,9 +598,9 @@ define("app", ['knockout', 'facebook', 'imagesloaded', 'moment', './js/app/plugi
 			type: "GET",
 			contentType: "application/json",
 			dataType: "json",
-			url: "/collection/list",
+			url: "/collection/listPublic",
 			processData: false,
-			data: "isPublic=true&offset=0&count=20" //&isExhibition=false"
+			data: "offset=0&count=20" //&isExhibition=false"
 		}).done(
 			//"filterByUser=" +  self.currentUser.username() + "&filterByUserId=" + self.currentUser._id() +
 			//"&filterByEmail=" + self.currentUser.email() + "&access=read&offset=0&count=20"}).done(
@@ -624,7 +624,7 @@ define("app", ['knockout', 'facebook', 'imagesloaded', 'moment', './js/app/plugi
 			dataType: "json",
 			url: "/collection/list",
 			processData: false,
-			data: "offset=0&count=500&directlyAccessedByUserOrGroup=" + JSON.stringify([{
+			data: "offset=0&count=50&directlyAccessedByUserOrGroup=" + JSON.stringify([{
 				user: self.currentUser.username(),
 				rights: "WRITE"
 			}]),

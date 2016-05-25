@@ -37,7 +37,7 @@ import sources.utils.StringUtils;
 public class EuropeanaItemRecordFormatter extends CulturalRecordFormatter {
 
 	public EuropeanaItemRecordFormatter() {
-		super(FilterValuesMap.getEuropeanaMap());
+		super(FilterValuesMap.getMap(Sources.Europeana));
 		object = new CulturalObject();
 	}
 

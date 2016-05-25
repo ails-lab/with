@@ -44,18 +44,18 @@ import sources.utils.StringUtils;
 
 public abstract class FlickrRecordFormatter extends CulturalRecordFormatter {
 
-	protected String source = Sources.BritishLibrary.toString();
+	protected Sources source = Sources.BritishLibrary;
 	protected String user = "britishlibrary";
 
-	public FlickrRecordFormatter(String source, String user) {
-		super(FilterValuesMap.getFlickrMap());
+	public FlickrRecordFormatter(Sources source, String user) {
+		super(FilterValuesMap.getMap(source));
 		this.source = source;
 		this.user = user;
 	}
 
-	public FlickrRecordFormatter() {
-		super(FilterValuesMap.getFlickrMap());
-	}
+//	public FlickrRecordFormatter() {
+//		super(FilterValuesMap.getFlickrMap());
+//	}
 
 	@Override
 	public CulturalObject fillObjectFrom(JsonContextRecord rec) {
@@ -76,7 +76,7 @@ public abstract class FlickrRecordFormatter extends CulturalRecordFormatter {
 	//		object.addToProvenance(
 	//				new ProvenanceInfo(rec.getStringValue("provider.name"), null, rec.getStringValue("provider.@id")));
 			String id = rec.getStringValue("id");
-			object.addToProvenance(new ProvenanceInfo(source,
+			object.addToProvenance(new ProvenanceInfo(source.toString(),
 					"https://www.flickr.com/photos/"+user+"/" + id + "/", id));
 					
 			String rights = BritishLibrarySpaceSource.getLicence(rec.getStringValue("license"));
@@ -156,7 +156,7 @@ public abstract class FlickrRecordFormatter extends CulturalRecordFormatter {
 	public static class BritishLibraryRecordFormatter extends FlickrRecordFormatter {
 
 		public BritishLibraryRecordFormatter() {
-			super();
+			super(Sources.BritishLibrary,"britishlibrary");
 			object = new CulturalObject();
 		}
 
@@ -165,7 +165,7 @@ public abstract class FlickrRecordFormatter extends CulturalRecordFormatter {
 	public static class InternetArchiveRecordFormatter extends FlickrRecordFormatter {
 
 		public InternetArchiveRecordFormatter() {
-			super("Internet Archive Book Images","internetarchivebookimages");
+			super(Sources.InternetArchive,"internetarchivebookimages");
 			object = new CulturalObject();
 		}
 		

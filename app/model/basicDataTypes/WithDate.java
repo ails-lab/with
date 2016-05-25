@@ -22,6 +22,7 @@ import java.util.Calendar;
 import java.util.Date;
 
 import play.Logger;
+import play.Logger.ALogger;
 
 /**
  * Capture accurate and inaccurate dates in a visualisable way. Enable search
@@ -29,6 +30,8 @@ import play.Logger;
  * class.
  */
 public class WithDate {
+	public static final ALogger log = Logger.of( WithDate.class );
+	
 	Date isoDate;
 	// facet
 	// year should be filled in whenever possible
@@ -133,19 +136,19 @@ public class WithDate {
 			try {
 				setIsoDate((new SimpleDateFormat("dd-mm-yyyy")).parse(free));
 			} catch (ParseException e) {
-				Logger.warn("unrecognized date: " + free);
+				log.warn("Parse Exception: " + free);
 			}
 		} else if (free.matches("\\d\\d\\d\\d-\\d\\d-\\d\\d")) {
 			try {
 				setIsoDate((new SimpleDateFormat("yyyy-mm-dd")).parse(free));
 			} catch (ParseException e) {
-				Logger.warn("unrecognized date: " + free);
+				log.warn("Parse Exception: " + free);
 			}
 		} else if (sources.core.Utils.isValidURL(free)) {
 			this.uri = free;
 			// this.uriType = ResourceType.uri;
 		} else {
-			Logger.warn("unrecognized date: " + free);
+			log.warn("unrecognized date: " + free);
 		}
 	}
 

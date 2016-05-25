@@ -37,7 +37,7 @@ import sources.utils.StringUtils;
 public class DDBItemRecordFormatter extends CulturalRecordFormatter {
 
 	public DDBItemRecordFormatter() {
-		super(FilterValuesMap.getDDBMap());
+		super(FilterValuesMap.getMap(Sources.DDB));
 		object = new CulturalObject();
 	}
 

@@ -16,15 +16,18 @@
 
 package sources.core;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Comparator;
 import java.util.HashMap;
+import java.util.List;
 
+import model.basicDataTypes.ProvenanceInfo.Sources;
+import play.Logger;
+import play.Logger.ALogger;
 import utils.SortedList;
 
 public class CommonFilterLogic implements Cloneable {
-
+	public static final ALogger log = Logger.of( CommonFilterLogic.class);
+	
 	private HashMap<String, ValueCount> counts = new HashMap<String, ValueCount>();
 
 	public CommonFilterResponse data = new CommonFilterResponse();
@@ -54,7 +57,6 @@ public class CommonFilterLogic implements Cloneable {
 	
 	public void addValue(String value, int count) {
 		if (value != null) {
-			// System.out.println(filterName + " Added " + value);
 			getOrSet(value).add(count);
 		}
 	}
@@ -97,10 +99,25 @@ public class CommonFilterLogic implements Cloneable {
 		CommonFilterLogic res = new CommonFilterLogic(this.data.filterID);
 		res.data.filterName = data.filterName;
 		res.counts = (HashMap<String, ValueCount>) counts.clone();
+		res.data.sources.addAll(data.sources);
 		return res;
 	}
 
 	public Collection<ValueCount> values() {
 		return counts.values();
+	}
+	
+	public CommonFilterLogic addTo(List<CommonFilterLogic> list){
+		list.add(this);
+		return this;
+	}
+
+	public void addSourceFrom(CommonFilterLogic b) {
+		addSourceFrom(b.data);
+	}
+	public void addSourceFrom(CommonFilterResponse b) {
+		for (Sources s : b.sources) {
+			data.addSource(s);	
+		}
 	}
 }

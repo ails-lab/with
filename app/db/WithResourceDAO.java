@@ -37,20 +37,15 @@ import model.usersAndGroups.User;
 
 import org.bson.types.ObjectId;
 import org.elasticsearch.common.lang3.ArrayUtils;
-import org.mongodb.morphia.Key;
 import org.mongodb.morphia.query.Criteria;
 import org.mongodb.morphia.query.CriteriaContainer;
 import org.mongodb.morphia.query.Query;
 import org.mongodb.morphia.query.UpdateOperations;
 
-import utils.AccessManager.Action;
-import utils.MetricsUtils;
+import controllers.WithController.Action;
 import utils.Tuple;
 
-import com.codahale.metrics.Timer;
 import com.mongodb.BasicDBObject;
-
-import controllers.CollectionObjectController;
 
 /*
  * The class consists of methods that can be both query

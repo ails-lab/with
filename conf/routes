@@ -4,6 +4,7 @@
 
 # Home page
 #GET     /                          controllers.Application.index()
+OPTIONS	 /*path									   controllers.PreFlight.checkPreFlight(path)
 GET      /                                         controllers.Default.redirect(to="assets/index.html")
 
 GET      /notifications/socket                     controllers.NotificationController.socket()
@@ -24,25 +25,33 @@ POST     /api/search            	controllers.SearchController.search()
 GET		/api/autocompleteExt		controllers.AutocompleteController.autocompleteExt(term:java.lang.String,limit:Integer,source:java.util.List[java.lang.String])
 
 # Map static resources from the /public folder to the /assets URL path
-GET 	/assets/headers.js						controllers.FilterUtils.withAjaxScript
+GET 	/assets/headers.js						filters.FilterUtils.withAjaxScript
 GET     /assets/*file               			controllers.Assets.at(path="/public", file)
 GET 	/custom/:customName					    controllers.CustomAssets.redirect(customName)
 GET 	/custom/:customName/					controllers.CustomAssets.redirect(customName)
 GET 	/custom/:customName/*file				controllers.CustomAssets.getFile(customName:String, file:String)
 
-PUT		/record/contextData			            controllers.RecordResourceController.editContextData()
-GET		/record/:id							    controllers.RecordResourceController.getRecordResource(id, format: play.libs.F.Option[String])
+PUT		/record/contextData			            controllers.RecordResourceController.editContextData(collectionId)
+GET		/record/:id							    controllers.RecordResourceController.getRecordResource(id, format: play.libs.F.Option[String], profile: String ?="MEDIUM", locale: play.libs.F.Option[java.lang.String])
 PUT		/record/:id								controllers.RecordResourceController.editRecordResource(id)
 
 # Collection Controller
-GET 	 /collection/list 						controllers.CollectionObjectController.list(directlyAccessedByUserOrGroup: play.libs.F.Option[controllers.parameterTypes.MyPlayList], recursivelyAccessedByUserOrGroup: play.libs.F.Option[controllers.parameterTypes.MyPlayList], creator: play.libs.F.Option[String], isPublic: play.libs.F.Option[java.lang.Boolean], isExhibition: play.libs.F.Option[java.lang.Boolean], collectionHits:Boolean ?= false, offset: Integer ?=0, count: Integer ?=10)
-GET 	 /collection/listShared					controllers.CollectionObjectController.listShared(direct: Boolean ?= true, directlyAccessedByUserOrGroup: play.libs.F.Option[controllers.parameterTypes.MyPlayList], recursivelyAccessedByUserOrGroup: play.libs.F.Option[controllers.parameterTypes.MyPlayList], isExhibition: play.libs.F.Option[java.lang.Boolean], collectionHits:Boolean ?= false, offset: Integer ?=0, count: Integer ?=10)
+#GET 	 /collection/list 						controllers.CollectionObjectController.list(directlyAccessedByUserOrGroup: play.libs.F.Option[controllers.parameterTypes.MyPlayList], recursivelyAccessedByUserOrGroup: play.libs.F.Option[controllers.parameterTypes.MyPlayList], creator: play.libs.F.Option[String], isPublic: play.libs.F.Option[java.lang.Boolean], isExhibition: play.libs.F.Option[java.lang.Boolean], collectionHits:Boolean ?= false, offset: Integer ?=0, count: Integer ?=10)
+GET      /collection/list						controllers.CollectionObjectController.list(directlyAccessedByUserOrGroup: play.libs.F.Option[controllers.parameterTypes.MyPlayList], creator: play.libs.F.Option[String],  isExhibition: play.libs.F.Option[java.lang.Boolean], collectionHits:Boolean ?= false, offset: Integer ?=0, count: Integer ?=10, profile: String ?="BASIC", locale: play.libs.F.Option[java.lang.String])
+#GET	  /collection/listExhibitions			controllers.CollectionObjectController.listExhibitions(directlyAccessedByUserOrGroup: play.libs.F.Option[controllers.parameterTypes.MyPlayList], creator: play.libs.F.Option[String], collectionHits:Boolean ?= false, offset: Integer ?=0, count: Integer ?=10, profile: String ?="BASIC", locale: play.libs.F.Option[java.lang.String])
+GET 	 /collection/listPublic 				controllers.CollectionObjectController.listPublic(directlyAccessedByUserOrGroup: play.libs.F.Option[controllers.parameterTypes.MyPlayList], creator: play.libs.F.Option[String], isExhibition: play.libs.F.Option[java.lang.Boolean], collectionHits:Boolean ?= false, offset: Integer ?=0, count: Integer ?=10, profile: String ?="BASIC", locale: play.libs.F.Option[java.lang.String])
+#GET      /collection/listPublicCollections		controllers.CollectionObjectController.listPublicCollections(directlyAccessedByUserOrGroup: play.libs.F.Option[controllers.parameterTypes.MyPlayList], creator: play.libs.F.Option[String],collectionHits:Boolean ?= false, offset: Integer ?=0, count: Integer ?=10, profile: String ?="BASIC", locale: play.libs.F.Option[java.lang.String])
+#GET      /collection/listPublicExhibitions		controllers.CollectionObjectController.listPublicCollections(directlyAccessedByUserOrGroup: play.libs.F.Option[controllers.parameterTypes.MyPlayList], creator: play.libs.F.Option[String],collectionHits:Boolean ?= false, offset: Integer ?=0, count: Integer ?=10, profile: String ?="BASIC", locale: play.libs.F.Option[java.lang.String])
+#GET 	 /collection/listShared					controllers.CollectionObjectController.listShared(direct: Boolean ?= true, directlyAccessedByUserOrGroup: play.libs.F.Option[controllers.parameterTypes.MyPlayList], recursivelyAccessedByUserOrGroup: play.libs.F.Option[controllers.parameterTypes.MyPlayList], isExhibition: play.libs.F.Option[java.lang.Boolean], collectionHits:Boolean ?= false, offset: Integer ?=0, count: Integer ?=10)
+GET 	 /collection/listShared					controllers.CollectionObjectController.listShared(direct: Boolean ?= true, directlyAccessedByUserOrGroup: play.libs.F.Option[controllers.parameterTypes.MyPlayList], isExhibition: play.libs.F.Option[java.lang.Boolean], collectionHits:Boolean ?= false, offset: Integer ?=0, count: Integer ?=10, profile: String ?="BASIC", locale: play.libs.F.Option[java.lang.String])
+#GET      /collection/listSharedCollections		controllers.CollectionObjectController.listShared(direct: Boolean ?= true, directlyAccessedByUserOrGroup: play.libs.F.Option[controllers.parameterTypes.MyPlayList], collectionHits:Boolean ?= false, offset: Integer ?=0, count: Integer ?=10, profile: String ?="BASIC", locale: play.libs.F.Option[java.lang.String])
+#GET      /collection/listSharedExhibitions		controllers.CollectionObjectController.listShared(direct: Boolean ?= true, directlyAccessedByUserOrGroup: play.libs.F.Option[controllers.parameterTypes.MyPlayList], collectionHits:Boolean ?= false, offset: Integer ?=0, count: Integer ?=10, profile: String ?="BASIC", locale: play.libs.F.Option[java.lang.String])
 GET 	 /collection/countMyAndShared			controllers.CollectionObjectController.countMyAndShared()
-GET 	 /collection/featured					controllers.CollectionObjectController.getFeatured(groupOrUserName: String, isExhibition: play.libs.F.Option[java.lang.Boolean], offset: Integer ?=0, countPerType: Integer ?=10)
+GET 	 /collection/featured					controllers.CollectionObjectController.getFeatured(groupOrUserName: String, isExhibition: play.libs.F.Option[java.lang.Boolean], offset: Integer ?=0, countPerType: Integer ?=10, profile: String ?="BASIC", locale: play.libs.F.Option[java.lang.String])
 GET		 /collection/favorites					controllers.RecordResourceController.getFavorites()
 GET      /collection/:id/listUsers				controllers.CollectionObjectController.listUsersWithRights(id)
-GET      /collection/:id/list		   	        controllers.CollectionObjectController.listRecordResources(id, format: String ?="noContent", start: Integer ?=0, count: Integer ?=10)
-GET		 /collection/favoriteCollection			controllers.CollectionObjectController.getFavoriteCollection()
+GET      /collection/:id/list		   	        controllers.CollectionObjectController.listRecordResources(id, format: String ?="noContent", start: Integer ?=0, count: Integer ?=10,  profile: String ?="MEDIUM", locale: play.libs.F.Option[java.lang.String])
+GET		 /collection/favoriteCollection			controllers.CollectionObjectController.getFavoriteCollection(profile: String ?="BASIC", locale: play.libs.F.Option[java.lang.String])
 PUT		 /collection/sort/:id					controllers.CollectionObjectController.sortCollectionObject(id)
 
 POST     /collection/liked			            controllers.WithResourceController.addToFavorites()
@@ -59,16 +68,12 @@ POST     /collection/importIDs 					controllers.CollectionObjectController.impor
 GET     /collection/importEuropeanaCollection	controllers.CollectionObjectController.createAndFillEuropeanaCollection(id: String, limit:Integer ?=-1)
 GET      /collection/exportToOWL 			    controllers.CollectionObjectController.exportCollectionObjectToOWL(cname)
 
-GET	     /collection/:id 	        			controllers.CollectionObjectController.getCollectionObject(id)
+GET	     /collection/:id 	        			controllers.CollectionObjectController.getCollectionObject(id, profile: String ?="MEDIUM", locale: play.libs.F.Option[java.lang.String])
 PUT		 /collection/:id 						controllers.CollectionObjectController.editCollectionObject(id)
 DELETE   /collection/:id	                    controllers.CollectionObjectController.deleteCollectionObject(id)
 
 # Exhibition Controller
 POST	 /exhibition/:id/addBackgroundImg		controllers.ExhibitionObjectController.addBackgroundImg(id)
- 
-#POST     /exhibition/create                    controllers.CollectionObjectController.createCollectionObject(collectionType: String ?= "Exhibition")
-
-#GET	  /record/similar/:externalId			controllers.RecordController.getSimilar(externalId)
 
 #Group Manager
 POST	/group/create							controllers.GroupManager.createGroup(adminId: String ?=null, adminUsername: String ?=null, groupType: String ?="UserGroup")
@@ -104,8 +109,10 @@ DELETE  /media/orphan							controllers.MediaController.deleteOrphanMadia()
 DELETE 	/media/:id								controllers.MediaController.deleteMedia(id)
 
 # User Manager Controller
+GET      /user/me                                controllers.UserManager.getMyUser()
 POST	/user/register						    controllers.UserManager.register()
 POST	/user/login							    controllers.UserManager.login()
+POST	/user/facebookLogin						controllers.UserManager.facebookLogin()
 GET		/user/logout						    controllers.UserManager.logout()
 GET		/user/emailAvailable	                controllers.UserManager.emailAvailable(email:java.lang.String)
 GET		/user/token				                controllers.UserManager.getToken()

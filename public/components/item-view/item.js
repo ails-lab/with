@@ -3,7 +3,7 @@ define(['knockout', 'text!./_item.html', 'app','smoke'], function (ko, template,
 	self.disqusLoaded=ko.observable(false);
 	
 	
-	function Record(data,showMeta) {
+	function Record(data,showMeta, isRelated) {
 		var self = this;
 	    self.recordId = "-1";
 		self.title = "";
@@ -54,7 +54,8 @@ define(['knockout', 'text!./_item.html', 'app','smoke'], function (ko, template,
 		});
 		self.isLoaded = ko.observable(false);
 		
-		self.load = function(data) {
+		self.load = function(data, isRelated) {
+			$('#mediaplayer').remove();
 			if(data.title==undefined){
 				self.title="No title";
 			}else{self.title=data.title;}
@@ -89,13 +90,30 @@ define(['knockout', 'text!./_item.html', 'app','smoke'], function (ko, template,
 			var likeval=app.isLiked(self.externalId);
 			self.isLike(likeval);
 			self.loading(false);
-			if (data.fullrestype != null) {
-				if (data.fullrestype == "VIDEO") {
+			//if (data.fullrestype != null) {
+			if (data.mediatype != null) {
+				//if (data.fullrestype == "VIDEO") {
+				if (data.mediatype == "VIDEO") {
+					
 					self.vtype = "MEDIA";
-					$('#mediadiv').html('<video id="mediaplayer" autoplay="true" controls width="576" height="324"><source src="' + self.fullres() + '" type="video/mp4">Your browser does not support HTML5</video>');        
+				/*	$('#mediadiv').html('<video id="mediaplayer" autoplay="true" controls width="576" height="324"><source src="' + self.fullres() + '" type="video/mp4">Your browser does not support HTML5</video>');        
 				} else if (data.fullrestype == "AUDIO") {
 					self.vtype = "MEDIA";
 					$('#mediadiv').html('<audio id="mediaplayer" autoplay="true" controls width="576" height="324"><source src="' + self.fullres() + '" type="audio/mpeg">Your browser does not support HTML5</audio>');
+				}*/
+					if(isRelated){
+						
+					} else {
+						$('#mediadiv').html('<video id="mediaplayer" autoplay="true" controls width="576" height="324"><source src="' + self.fullres() + '" type="video/mp4">Your browser does not support HTML5</video>');
+					}
+				//} else if (data.fullrestype == "AUDIO") {
+				} else if (data.mediatype == "AUDIO") {
+					self.vtype = "MEDIA";
+					if(isRelated) {
+						
+					} else {
+						$('#mediadiv').html('<audio id="mediaplayer" autoplay="true" controls width="576" height="324"><source src="' + self.fullres() + '" type="audio/mpeg">Your browser does not support HTML5</audio>');
+					}
 				}
 			} 			
 		};
@@ -173,7 +191,7 @@ define(['knockout', 'text!./_item.html', 'app','smoke'], function (ko, template,
 											fullrestype: media[0] != null && media[0].Original != null 
 											&& media[0].Original.type != "null" ? media[0].Original.type : ""
 
-								  });
+								  }, undefined, true);
 						        if(record.thumb && record.thumb.length>0 && record.externalId!=self.externalId)
 							       items.push(record);
 							}
@@ -259,7 +277,8 @@ define(['knockout', 'text!./_item.html', 'app','smoke'], function (ko, template,
 												&& media[0].Original.type != "null" ? media[0].Original.type : "",
 												vtype : "IMAGE"
 
-									  });
+									  }, undefined, true);
+							  
 							        if(record.thumb && record.thumb.length>0 && record.externalId!=self.externalId)
 								       items.push(record);
 								}
@@ -328,7 +347,10 @@ define(['knockout', 'text!./_item.html', 'app','smoke'], function (ko, template,
 
 		
 		
-		if(data != undefined) self.load(data);
+		if(data != undefined) { 
+			if(isRelated) self.load(data, true); 
+			else self.load(data);
+		} ;
 	}
 	
 	
@@ -349,8 +371,7 @@ define(['knockout', 'text!./_item.html', 'app','smoke'], function (ko, template,
 		self.id = ko.observable(params.id);
 		itemShow = function (e,showMeta) {
 			data = ko.toJS(e);
-			
-			self.record(new Record(data,showMeta));
+			self.record(new Record(data, showMeta));
 			self.open();
 			if(self.record().recordId!="-1"){
 				self.addDisqus();
@@ -379,6 +400,7 @@ define(['knockout', 'text!./_item.html', 'app','smoke'], function (ko, template,
 			var vid = document.getElementById("mediaplayer");
 			 if (vid != null) {
 			    vid.pause();
+			    $(vid).remove();
 			}
 		};
 
@@ -452,6 +474,7 @@ define(['knockout', 'text!./_item.html', 'app','smoke'], function (ko, template,
 		self.loadItem = function () {
 			$.ajax({
 				"url": "/record/" + self.id(),
+				"data": "format=noContent",
 				"method": "get",
 				"contentType": "application/json",
 				"success": function (result) {

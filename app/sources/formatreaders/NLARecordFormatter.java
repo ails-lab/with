@@ -41,7 +41,7 @@ import sources.utils.StringUtils;
 public class NLARecordFormatter extends CulturalRecordFormatter {
 
 	public NLARecordFormatter() {
-		super(FilterValuesMap.getNLAMap());
+		super(FilterValuesMap.getMap(Sources.NLA));
 		object = new CulturalObject();
 	}
 

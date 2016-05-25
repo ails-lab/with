@@ -35,6 +35,7 @@ public class CulturalObject extends RecordResource<CulturalObject.CulturalObject
 		super();
 		this.administrative = new RecordAdmin();
 		this.resourceType = WithResourceType.valueOf(this.getClass().getSimpleName());
+		this.descriptiveData = new CulturalObjectData();
 	}
 
 	public static class CulturalObjectData extends RecordDescriptiveData {

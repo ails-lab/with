@@ -34,6 +34,7 @@ import com.ning.http.multipart.MultipartRequestEntity;
 import com.ning.http.multipart.Part;
 
 import play.Logger;
+import play.Logger.ALogger;
 import play.libs.F.Function;
 import play.libs.F.Promise;
 import play.libs.ws.WS;
@@ -41,7 +42,7 @@ import play.libs.ws.WSResponse;
 
 
 public class HttpConnector {
-	
+	public static final ALogger log = Logger.of( HttpConnector.class );
 	private static HttpConnector wsHttpConnector;
 
 
@@ -57,7 +58,7 @@ public class HttpConnector {
 	
 	public <T> T getContent(String url) throws Exception {
 		try {
-			Logger.debug("calling: " + url);
+			log.debug("calling: " + url);
 			long time = System.currentTimeMillis();
 			String url1 = Utils.replaceQuotes(url);
 			
@@ -66,14 +67,14 @@ public class HttpConnector {
 //					System.out.println(response.getBody());
 					T json = (T) response.asJson();
 					long ftime = (System.currentTimeMillis() - time)/1000;
-					Logger.debug("waited "+ftime+" sec for: " + url);
+					log.debug("waited "+ftime+" sec for: " + url);
 					return json;
 				}
 			});
 			return (T) jsonPromise.get(TIMEOUT_CONNECTION);
 		} catch (Exception e) {
-			Logger.error("calling: " + url);
-			Logger.error("msg: " + e.getMessage());
+			log.error("calling: " + url);
+			log.error("msg: " + e.getMessage());
 
 			throw e;
 		}
@@ -81,7 +82,7 @@ public class HttpConnector {
 	
 	public  File getContentAsFile(String url) throws Exception {
 		try {
-			Logger.debug("calling: " + url);
+			log.debug("calling: " + url);
 			long time = System.currentTimeMillis();
 			String url1 = Utils.replaceQuotes(url);
 			
@@ -92,14 +93,14 @@ public class HttpConnector {
 					FileUtils.writeByteArrayToFile(tmp, response.asByteArray());
 					//T file = (T) response.asByteArray();
 					long ftime = (System.currentTimeMillis() - time)/1000;
-					Logger.debug("waited "+ftime+" sec for: " + url);
+					log.debug("waited "+ftime+" sec for: " + url);
 					return tmp;
 				}
 			});
 			return filePromise.get(TIMEOUT_CONNECTION);
 		} catch (Exception e) {
-			Logger.error("calling: " + url);
-			Logger.error("msg: " + e.getMessage());
+			log.error("calling: " + url);
+			log.error("msg: " + e.getMessage());
 
 			throw e;
 		}
@@ -108,7 +109,7 @@ public class HttpConnector {
 	
 	public  <T> T postFileContent(String url, File file, String paramName, String paramValue) throws Exception {
 		try {
-			Logger.debug("calling: " + url);
+			log.debug("calling: " + url);
 			long time = System.currentTimeMillis();
 			String url1 = Utils.replaceQuotes(url);
 			
@@ -117,14 +118,14 @@ public class HttpConnector {
 //					System.out.println(response.getBody());
 					T json = (T) response.asJson();
 					long ftime = (System.currentTimeMillis() - time)/1000;
-					Logger.debug("waited "+ftime+" sec for: " + url);
+					log.debug("waited "+ftime+" sec for: " + url);
 					return json;
 				}
 			});
 			return (T) jsonPromise.get(TIMEOUT_CONNECTION);
 		} catch (Exception e) {
-			Logger.error("calling: " + url);
-			Logger.error("msg: " + e.getMessage());
+			log.error("calling: " + url);
+			log.error("msg: " + e.getMessage());
 
 			throw e;
 		}
@@ -204,7 +205,7 @@ public class HttpConnector {
 			//    .setContentType(reqE.getContentType());
 			
 			
-			Logger.debug("calling: " + url);
+			log.debug("calling: " + url);
 			long time = System.currentTimeMillis();
 			String url1 = Utils.replaceQuotes(url);
 			
@@ -214,16 +215,16 @@ public class HttpConnector {
 //					System.out.println(response.getBody());
 					T json = (T) response.asJson();
 					long ftime = (System.currentTimeMillis() - time)/1000;
-					Logger.debug("waited "+ftime+" sec for: " + url);
+					log.debug("waited "+ftime+" sec for: " + url);
 					return json;
 				}
 			});
-			Logger.info("request: " + WS.url(url1).setQueryParameter(paramName, paramValue)
+			log.info("request: " + WS.url(url1).setQueryParameter(paramName, paramValue)
 					.post(reqIS));
 			return (T) jsonPromise.get(TIMEOUT_CONNECTION);
 		} catch (Exception e) {
-			Logger.error("calling: " + url);
-			Logger.error("msg: " + e.getMessage());
+			log.error("calling: " + url);
+			log.error("msg: " + e.getMessage());
 
 			throw e;
 		}
@@ -232,7 +233,7 @@ public class HttpConnector {
 	
 	public  <T> T postJsonContent(String url, JsonNode node) throws Exception {
 		try {
-			Logger.debug("calling: " + url);
+			log.debug("calling: " + url);
 			long time = System.currentTimeMillis();
 			String url1 = Utils.replaceQuotes(url);
 			
@@ -241,14 +242,14 @@ public class HttpConnector {
 //					System.out.println(response.getBody());
 					T json = (T) response.asJson();
 					long ftime = (System.currentTimeMillis() - time)/1000;
-					Logger.debug("waited "+ftime+" sec for: " + url);
+					log.debug("waited "+ftime+" sec for: " + url);
 					return json;
 				}
 			});
 			return (T) jsonPromise.get(TIMEOUT_CONNECTION);
 		} catch (Exception e) {
-			Logger.error("calling: " + url);
-			Logger.error("msg: " + e.getMessage());
+			log.error("calling: " + url);
+			log.error("msg: " + e.getMessage());
 
 			throw e;
 		}
@@ -256,7 +257,7 @@ public class HttpConnector {
 
 public  <T> T postContent(String url, String parameter, String paramName) throws Exception {
 		try {
-			Logger.debug("calling: " + url);
+			log.debug("calling: " + url);
 			long time = System.currentTimeMillis();
 			String url1 = Utils.replaceQuotes(url);
 			
@@ -267,14 +268,14 @@ public  <T> T postContent(String url, String parameter, String paramName) throws
 				public T apply(WSResponse response) {
 					T json = (T) response.asJson();
 					long ftime = (System.currentTimeMillis() - time)/1000;
-					Logger.debug("waited "+ftime+" sec for: " + url);
+					log.debug("waited "+ftime+" sec for: " + url);
 					return json;
 				}
 			});
 			return (T) jsonPromise.get(TIMEOUT_CONNECTION);
 		} catch (Exception e) {
-			Logger.error("calling: " + url);
-			Logger.error("msg: " + e.getMessage());
+			log.error("calling: " + url);
+			log.error("msg: " + e.getMessage());
 
 			throw e;
 		}

@@ -27,6 +27,9 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import model.basicDataTypes.WithAccess.Access;
+import play.Logger;
+import play.Logger.ALogger;
+
 import org.bson.types.ObjectId;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
@@ -62,10 +65,13 @@ import org.elasticsearch.search.suggest.SuggestBuilders;
 import org.elasticsearch.search.suggest.term.TermSuggestionBuilder;
 
 import com.fasterxml.jackson.databind.JsonNode;
+
+import controllers.SearchController;
 import utils.Tuple;
 
 public class ElasticSearcher {
 	public static final int DEFAULT_RESPONSE_COUNT = 10;
+	public static final ALogger log = Logger.of(ElasticSearcher.class);
 
 	private final String name;
 	private List<String> types = new ArrayList<String>();
@@ -317,7 +323,6 @@ public class ElasticSearcher {
 		this.populateBoolFromSet(bool, 1.2f, subjects);
 		this.populateBoolFromSet(bool, 1.0f, dataProviders);
 
-//		System.out.println(bool.toString());
 		return this.execute(bool);
 	}
 
@@ -334,7 +339,6 @@ public class ElasticSearcher {
 	/* Private utility methods */
 
 	private void populateBoolFromSet(BoolQueryBuilder bool, float boost, Set<String> set) {
-//		System.out.println(set);
 		if(set.size() > 0) {
 			String searchFor = "";
 			for(String item: set) {
