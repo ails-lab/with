@@ -22,6 +22,7 @@ define(["knockout", "crossroads", "hasher"], function(ko, crossroads, hasher) {
 			{ url: 'email',     params: { page: 'email-page',    title: 'Register' } },
 			{ url: 'collect/{id}',     params: { page: 'item-view',    title: 'Collect' } },
 			{ url: 'item/{id}',     params: { page: 'item-view',    title: 'Media Item' } },
+			{ url: '!item/{id}',     params: { page: 'item-view',    title: 'Media Item' } },
 			{ url: 'provider/{id}',     params: { page: 'provider',    title: 'Content Provider' } },
 			{ url: 'provider/{id}/count/{count}',     params: { page: 'provider',    title: 'Content Provider' } },
 			{ url: 'providers',     params: { page: 'providers',    title: 'Content Providers' } },

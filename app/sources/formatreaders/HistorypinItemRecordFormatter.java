@@ -44,7 +44,7 @@ import sources.utils.StringUtils;
 public class HistorypinItemRecordFormatter extends CulturalRecordFormatter {
 
 	public HistorypinItemRecordFormatter() {
-		super(FilterValuesMap.getHistorypinMap());
+		super(FilterValuesMap.getMap(Sources.Historypin));
 		object = new CulturalObject();
 	}
 

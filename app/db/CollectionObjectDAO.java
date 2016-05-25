@@ -293,6 +293,7 @@ public class CollectionObjectDAO extends WithResourceDAO<CollectionObject> {
 			ObjectId creator, Boolean isExhibition, boolean totalHits,
 			int offset, int count) {
 		Query<CollectionObject> q = this.createQuery().disableValidation()
+				.retrievedFields(false, "collectedResources")
 				.field("descriptiveData.label.default.0")
 				.notEqual("_favorites");
 		q.order("-administrative.lastModified").offset(offset).limit(count);
@@ -484,7 +485,7 @@ public class CollectionObjectDAO extends WithResourceDAO<CollectionObject> {
 			HashMap<MediaVersion, EmbeddedMediaObject> media = recordMedia
 					.get(0);
 			if (media.containsKey(MediaVersion.Original)
-					&& !media.containsKey(MediaVersion.Thumbnail) 
+					&& !media.containsKey(MediaVersion.Thumbnail)
 					&& media.get(MediaVersion.Original).getType()
 					.equals(WithMediaType.IMAGE)) {
 				String originalUrl = media.get(MediaVersion.Original).getUrl();
@@ -517,9 +518,8 @@ public class CollectionObjectDAO extends WithResourceDAO<CollectionObject> {
 
 	}
 
-	public void updateContextData(ContextData contextData, int position)
+	public void updateContextData(ObjectId collectionId, ContextData contextData, int position)
 			throws Exception {
-		ObjectId collectionId = contextData.getTarget().getCollectionId();
 		ObjectId recordId = contextData.getTarget().getRecordId();
 		List<ContextData<ContextDataBody>> collectedResources = this
 				.getById(collectionId, Arrays.asList("collectedResources"))

@@ -3,9 +3,9 @@
       <section class="featured">
         <div class="container">
           <!-- title-->
-          <div class="sectionhead">FEATURED EXHIBITION</div>
+          <div class="sectionhead"  data-bind="visible:featuredExhibition() !=null">FEATURED EXHIBITION</div>
           <!-- featured exhibition-->
-          <div id="featuredExhibit" class="exhibition" data-bind="with: featuredExhibition">
+          <div id="featuredExhibit" class="exhibition" data-bind="with: featuredExhibition, visible:featuredExhibition() !=null">
             <div class="hue">
               <!-- info-->
               <div class="info">

@@ -108,11 +108,11 @@ public class ApiKeyManager extends UntypedActor  {
 	 */
 	private void readKeysFromDb() {
 		apiKeys.clear();
-		Logger.info("reading " + DB.getApiKeyDAO().count() + " many keys");
+		log.info("Reading " + DB.getApiKeyDAO().count() + " API-keys");
 		for( ApiKey k: DB.getApiKeyDAO().find()) {
 			if( !StringUtils.isEmpty(k.getKeyString())) {
 				apiKeys.put( k.getKeyString(), k);
-				Logger.info(k.getKeyString());
+				log.info(k.getKeyString());
 			} 
 		}
 	}
@@ -136,13 +136,13 @@ public class ApiKeyManager extends UntypedActor  {
 	
 	private void onApiAccess( Access access ) {
 
+		allAccessLog.info( access.toString() );
 		// conf disabled api keys
 		if( DB.getConf().getBoolean("apikey.disabled") ) {
 			sender().tell( ApiKey.Response.ALLOWED, self());
 			return;
 		}
 		
-		Logger.debug( access.toString() );
 		ApiKey key = null;
 		
 			key = apiKeys.get( access.apikey);

@@ -20,10 +20,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import utils.ListUtils;
+import play.Logger;
+import play.Logger.ALogger;
 
 public class CommonFilter implements Cloneable {
-
+	public static final ALogger log = Logger.of( CommonFilter.class);
+	
 	public String filterID;
 	public List<String> values;
 	
@@ -54,7 +56,7 @@ public class CommonFilter implements Cloneable {
 					res.add(c);
 				} catch (CloneNotSupportedException e) {
 					// TODO Auto-generated catch block
-					e.printStackTrace();
+					log.error("",e);
 				}
 			}
 		}

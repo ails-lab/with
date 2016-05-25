@@ -36,12 +36,16 @@ import model.basicDataTypes.LiteralOrResource;
 import model.basicDataTypes.MultiLiteral;
 import model.basicDataTypes.MultiLiteralOrResource;
 import model.basicDataTypes.WithDate;
+import play.Logger;
+import play.Logger.ALogger;
 import play.libs.Json;
 import scala.collection.mutable.HashMap;
 import sources.core.Utils;
 
 public class JsonContextRecord {
 
+	public static final ALogger log = Logger.of( JsonContextRecord.class );
+	
 	private JsonNode rootInformation;
 	private List<String> context;
 	private Language[] languages;
@@ -59,10 +63,10 @@ public class JsonContextRecord {
 			this.rootInformation = mapper.readTree(jsonString);
 		} catch (JsonProcessingException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			log.error("",e);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			log.error("",e);
 		}
 	}
 
