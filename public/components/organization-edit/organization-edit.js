@@ -272,6 +272,7 @@ define(['bridget','knockout', 'text!./organization-edit.html', 'isotope','images
 						var users = result.users;
 						console.log(users);
 						ko.mapping.fromJS(users, self.usersMapping, self.userMembers);
+						console.log(self.userMembers()[0].isAdmin());
 					}
 					if (result.groups !== undefined) {
 						var userGroups = result.groups;
@@ -329,6 +330,7 @@ define(['bridget','knockout', 'text!./organization-edit.html', 'isotope','images
 		};
 
 		self.makeAdmin = function (userId) {
+			console.log("makeAdmin");
 			$.ajax({
 				method : "PUT",
 				contentType : "text/plain",
@@ -343,14 +345,13 @@ define(['bridget','knockout', 'text!./organization-edit.html', 'isotope','images
 			});
 		};
 
-		self.makeMember = function (userData) {
+		self.makeMember = function (userId) {
+			console.log("makembember");
 			$.ajax({
 				method : "DELETE",
 				contentType : "text/plain",
 				url : "/group/admin/" + self.id() + "?id=" + userId,
 				success : function (result) {
-					/*self.image = userData.image;
-					self.userMembers.push(ko.mapping.fromJS(userData));*/
 				},
 				error : function (result) {
 					$.smkAlert({ text: result.responseJSON.error, type: 'danger', time: 10 });
@@ -358,12 +359,12 @@ define(['bridget','knockout', 'text!./organization-edit.html', 'isotope','images
 			});
 		};
 
-		self.isAdminToggle = function(isadmin,userid){
-			console.log("hallo");
-			if (isadmin == true) 
-				self.makeMember(userid);
+		self.isAdminToggle = function(isAdmin, userId){
+			if (!isAdmin) 
+				self.makeMember(userId);
 			else 
-				self.makeAdmin(userid);
+				self.makeAdmin(userId);
+			return true;
 		}
 
 		self.excecuteRemove = function (id, category) {
