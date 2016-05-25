@@ -29,7 +29,7 @@
                     <input type="text" placeholder="Search" class="filtertext" data-bind="autocompleteGroupname:myUsername, onlyParents:true, forUsers:false, forGroupType:name" >
                   </div>
                   <!-- control-->
-                  <div class="list-control"><a href="#" data-toggle="tooltip" data-placement="top" title="API Calls" class="fa fa-rss detail-control single"></a></div>
+                  <div class="list-control"><a data-toggle="tooltip" data-placement="top" title="API Calls" class="fa fa-rss detail-control single"></a></div>
                 </div>
 					<!-- listing-->
 					<ul class="list-body list" data-bind="foreach: groups">
@@ -421,6 +421,21 @@
 					</div>
 					<div class="button-group"><a href="#" class="btn-green cancel">Close</a></div>
 				</section>
+				<!-- group api-->
+						<section class="action api">
+							<div class="action-header">
+								<div class="title">API Calls</div>
+							</div>
+							<div class="action-body">
+								<div class="input-style"><span class="get">GET</span>
+									<input type="text" data-bind="value: getAPIUrlGroup(true)">
+								</div>
+								<div class="input-style"><span class="get">GET</span>
+									<input type="text" data-bind="value: getAPIUrlGroup(false)">
+								</div>
+							</div>
+							<div class="button-group"><a class="btn-green cancel">close</a></div>
+						</section>
 			</section>
 		</main>
 	</div>
