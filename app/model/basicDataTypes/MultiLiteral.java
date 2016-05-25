@@ -19,6 +19,7 @@ package model.basicDataTypes;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -114,7 +115,12 @@ public class MultiLiteral extends HashMap<String, List<String>> implements
 		return this;
 	}
 	
-	public Set<String> getLanguages() {
-		return this.keySet();
+	public Set<Language> getLanguages() {
+		Set<Language> res = new HashSet<>();
+		for (String s : keySet()) {
+			res.add(Language.getLanguage(s));
+		}
+		
+		return res;
 	}
 }

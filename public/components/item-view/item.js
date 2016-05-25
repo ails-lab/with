@@ -47,6 +47,12 @@ define(['knockout', 'text!./_item.html', 'app','smoke'], function (ko, template,
 		    "&description="+desc,'','height=500,width=750');
 		    return false;
 		};
+		
+		
+		self.annotations = ko.observableArray([]);
+//		self.annotationsMap = ko.observableArray([]);
+		self.annotationsKeys = ko.observableArray([]);		
+		self.referenceMap = ko.observableArray([]);
 		 
 		
 		self.isLiked = ko.pureComputed(function () {
@@ -100,6 +106,205 @@ define(['knockout', 'text!./_item.html', 'app','smoke'], function (ko, template,
 			} 			
 		};
 
+		var Annotations = function(data) {
+			var selfx = this;
+			
+			selfx.field = ko.observable();
+			selfx.values = ko.observableArray([]);
+			
+			ko.mapping.fromJS(data, {}, selfx);
+		}
+
+		var AnnotationLocation = function(data) {
+			var selfx = this;
+			
+			selfx.property = ko.observable();
+			selfx.sp = ko.observable();
+			selfx.ep = ko.observable();
+			
+			ko.mapping.fromJS(data, {}, selfx);
+		}
+		
+		self.annotationIndex = [];
+		self.annotatedTexts = ko.observableArray([]);
+		
+		self.annotate = function(){
+			if(self.annotations().length==0) {
+//				self.relatedsearch=true;  
+//				self.creator.length>0? self.forrelated(self.creator.toUpperCase()) : self.forrelated(self.provider.toUpperCase());
+//		        self.relatedlabel=self.creator.length>0? "CREATOR" : "PROVIDER";
+//		        if(self.forrelated().length>0){
+//		            	self.loading(true);
+		           $.ajax({
+						type    : "get",
+						url     : "/annotate/" + self.recordId,
+						contentType: "application/json",
+						dataType: "json",
+						success : function(result) {
+							self.parseAnnotations(result);
+						},
+						error   : function(request, status, error) {
+							self.loading(false);
+							
+						}
+		           });
+			}
+		}
+		
+		self.parseAnnotations = function(data){
+			var anns = data.annotations;
+			
+			var annotations = new Object();
+			
+			for (x in anns) {
+				var location = anns[x].target.selector.value;
+				var property = location.substring(2,location.indexOf("&t="));
+				
+				if (annotations[property] == undefined) {
+					annotations[property] = [];
+				}
+				
+				for (z in anns[x].body) {
+					if (z == "@id") {
+						annotations[property].push(anns[x].body[z]);
+					}
+				}
+			}
+			
+			
+			for (entry in annotations) {
+				self.annotations.push(new Annotations({ field:entry, values: annotations[entry] }));
+			}
+			
+			var properties = [];
+			var annotationsMap = [];
+			var positionsArray = [];
+			
+			var count = 0;
+			
+			for (x in anns) {
+				var uri = "";
+
+				for (z in anns[x].body) {
+					if (z == "@id") {
+						uri = anns[x].body[z];
+					}
+				}
+				
+				var found = false; 
+				for (var i = 0; i < self.annotationsKeys().length; i++) {
+					if (self.annotationsKeys()[i] == uri) {
+						found = true;
+						break;
+					}
+				}
+				
+				if (!found) {
+					self.annotationsKeys.push(uri);
+					self.annotationIndex[uri] = count++;
+				}
+
+				var location = anns[x].target.selector.value;
+				var property = location.substring(2,location.indexOf("&t="));
+				var position = location.substring(location.indexOf("&t=") + 3);
+				var sp = parseInt(position.substring(0, position.indexOf(",")));
+				var ep = parseInt(position.substring(position.indexOf(",") + 1));
+				
+				found = false;
+				for (var i = 0; i < properties.length; i++) {
+					if (properties[i] == property) {
+						found = true;
+						break;
+					}
+				}
+				
+				if (!found) {
+					properties.push(property);
+				}
+				
+//				self.annotationsMap[uri].push(new AnnotationLocation({uri: uri, property: property, sp: sp, ep: ep}));
+				annotationsMap.push(new AnnotationLocation({uri: uri, property: property, sp: sp, ep: ep}));
+				
+				if (positionsArray[property] == undefined) {
+					positionsArray[property] = [];
+				}
+				
+				positionsArray[property].push({uri:uri, pos:sp, type:0, index:self.annotationIndex[uri]});
+				positionsArray[property].push({uri:uri, pos:ep, type:1, index:self.annotationIndex[uri]});
+				
+//				alert(uri + " " + positionsArray[property].length);
+			}
+			
+			for (v in positionsArray) {
+				positionsArray[v].sort(function(a, b) {
+					if (a.pos < b.pos) {
+						return -1;
+					} else if (a.pos > b.pos) {
+						return 1;
+					} else {
+						if (a.type > b.type) {
+							return -1;
+						} else if (a.type < b.type) {
+							return 1;
+						} else {
+							return 0;
+						}
+					}
+				});
+			}
+			
+			for (v in properties) {
+				if (properties[v] == "description") {
+					var ppos = -1;
+					var text = self.description;
+					var rtext = "";
+					
+					for (lc in positionsArray[properties[v]]) {
+						var element = positionsArray[properties[v]][lc];
+
+//						alert(v + " " + element.pos + " " + element.type);
+						
+						if (ppos == -1) {
+							rtext += text.substring(0, element.pos)
+						} else {
+							rtext += text.substring(ppos, element.pos)
+						}
+						
+						if (element.type == 0) {
+							rtext += "<span id='annotation" + self.annotationIndex[element.uri] +"'>";
+						} else {
+							rtext += "</span>";
+						}
+						
+						ppos = element.pos;
+					}
+					
+					rtext += text.substring(ppos);
+					
+//					self.annotatedTexts()[properties[v]] = rtext;
+					$("#anndescription").html(rtext);
+				}
+			}
+			
+			
+		};
+		
+		self.annDescription = function(data) {
+			return self.annotatedTexts()["description"];
+		}
+
+		var selectedAnnotations = [];
+		
+		self.annShow = function(uri) {
+			for (v in selectedAnnotations) {
+				$("#annotation" + selectedAnnotations[v]).css("color","black");
+			}
+			selectedAnnotations.push(self.annotationIndex[uri]);
+//			alert("annotation" + self.annotationIndex[uri] + " " + $("annotation" + self.annotationIndex[uri]));
+			$("#annotation" + self.annotationIndex[uri]).css("color","red");
+		};
+
+		
 	   self.findsimilar=function(){
 		  if(self.related().length==0 && self.relatedsearch==false){
 			self.relatedsearch=true;  

@@ -16,13 +16,19 @@
 
 package controllers;
 
+import java.lang.reflect.Method;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.validation.ConstraintViolation;
 
+import model.DescriptiveData;
 import model.annotations.ContextData;
 import model.annotations.ContextData.ContextDataType;
+import model.basicDataTypes.Language;
+import model.basicDataTypes.MultiLiteral;
 import model.resources.RecordResource;
 import model.resources.collection.CollectionObject;
 
@@ -35,6 +41,8 @@ import play.libs.F.Option;
 import play.libs.Json;
 import play.mvc.Result;
 import utils.AccessManager.Action;
+import annotators.Annotation;
+import annotators.Annotator;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -263,6 +271,76 @@ public class RecordResourceController extends WithResourceController {
 			return result;
 		} else {
 			return null;
+		}
+	}
+	
+	public static Result annotateRecordResource(String id) {
+		ObjectNode result = Json.newObject();
+		try {
+			RecordResource record = DB.getRecordResourceDAO().get(new ObjectId(id));
+			Result response = errorIfNoAccessToRecord(Action.READ,
+					new ObjectId(id));
+			if (!response.toString().equals(ok().toString()))
+				return response;
+			else {
+				String[] fields = new String[] {"description", "label"};
+				
+				Annotator annotator = Annotator.getAnnotatorByName("DBPediaSpotlightAnnotator");
+				
+				DescriptiveData dd = record.getDescriptiveData();
+				
+				ObjectNode annotations = Json.newObject();
+				ArrayNode array = Json.newObject().arrayNode();
+
+				for (String p : fields) {
+					Method method = dd.getClass().getMethod("get" + p.substring(0,1).toUpperCase() + p.substring(1));
+				
+					Object res = method.invoke(dd);
+					if (res instanceof MultiLiteral) {
+						MultiLiteral value = (MultiLiteral)res;
+	
+						for (Language lang : value.getLanguages()) {
+							Map<String, Object> props = new HashMap();
+							props.put(Annotator.LANGUAGE, lang);
+							
+							for (String text : value.get(lang)) {
+	
+								for (Annotation ann : annotator.annotate(text, props)) {
+	
+									ObjectNode annotation = Json.newObject();
+									annotation.put("generator", annotator.getName());
+	
+									ObjectNode body = Json.newObject();
+									body.put("@id", ann.getURI());
+									
+									annotation.put("body", body);
+	
+									ObjectNode target = Json.newObject();
+									
+									target.put("source", "record/" + id);
+									
+									ObjectNode targetSelector = Json.newObject();
+									targetSelector.put("@type", "FragmentSelector");
+									targetSelector.put("value", "r=" + p + "&t=" +ann.getStartPosition() + "," + ann.getEndPosition());
+									
+									target.put("selector", targetSelector);
+	
+									annotation.put("target", target);
+	
+									array.add(annotation);
+
+								}
+							}
+						}
+					}
+				}
+				
+				annotations.put("annotations", array);
+				return ok(annotations);
+			}				
+		} catch (Exception e) {
+			result.put("error", e.getMessage());
+			return internalServerError(result);
 		}
 	}
 }

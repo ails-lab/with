@@ -136,4 +136,4 @@ GET	/collection/:id/similarlist		   			controllers.CollectionObjectController.si
 POST	/collection/:id/keywords 	        			controllers.thesaurus.CollectionIndexController.getCollectionKeywords(id)
 
 GET /source/dbpedia/lookup	controllers.DBPediaController.dbpediaLookup(type: java.lang.String, query: java.lang.String, start: Integer ?=0, count: Integer ?=10)
-
+GET		/annotate/:id								controllers.RecordResourceController.annotateRecordResource(id)
