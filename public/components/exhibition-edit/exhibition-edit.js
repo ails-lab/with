@@ -465,7 +465,7 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 					self.itemAudioUrl(exhibitionItem.contextData.body.mediaUrl());
 				}
 			}
-			if (typeof exhibitionItem.contextData.body.text !== 'undefined') {
+			if (typeof exhibitionItem.contextData.body.text !== 'undefined' &&  typeof exhibitionItem.contextData.body.text.default !== 'undefined') {
 				self.itemText(exhibitionItem.contextData.body.text.default());
 			}
 			if (typeof exhibitionItem.contextData.body.mediaDescription !== 'undefined') {
