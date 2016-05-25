@@ -79,7 +79,7 @@
 					</div>
 					<div class="action-body">
 						<div class="group">
-							<div class="title">Users access</div>
+							<div class="title">Users access A</div>
 							<input id="userName" type="text" placeholder="Start typing username" data-bind="autocompleteUsername: myUsername, category:1">
 
 
@@ -92,8 +92,10 @@
 										<i class="fa fa-trash"></i>
 									</a></div>
 									<div class="toggle">
-			                          <input type="checkbox" id="g1">
-			                          <label for="g1"></label><span class="member">member</span><span class="admin">admin</span>
+			                          <input type="checkbox" id="g1"  data-bind="{checked: isAdmin() , click: $parent.isAdminToggle()}">
+			                          <label for="g1"></label>
+			                          <span class="member">member</span>
+			                          <span class="admin">admin</span>
 			                        </div>
 			                        <div class="username" data-bind="text: username"></div>
 									
@@ -108,8 +110,10 @@
 										<i class="fa fa-trash"></i>
 									</a></div>
 									<div class="toggle">
-			                          <input type="checkbox" id="g1">
-			                          <label for="g1"></label><span class="member">member</span><span class="admin">admin</span>
+			                            <input type="checkbox" id="g2"  data-bind="{checked: isAdmin() , click: $parent.isAdminToggle(isAdmin(),userId())}">
+			                          <label for="g2"></label>
+			                          <span class="member">member</span>
+			                          <span class="admin">admin</span>
 			                        </div>
 			                        <div class="username" data-bind="text: username"></div>
 								
