@@ -377,7 +377,13 @@ define(['knockout', 'text!./myorganizations.html', 'app', 'moment', 'async!https
 				}
 			});
 		};
-
+		
+		self.getAPIUrlGroup = function (belongsOnly) {
+			var url = window.location.href.split("assets")[0];
+			var groupCall = url + "group/list?groupType="+self.name()+"&belongsOnly="+belongsOnly;
+			return groupCall;
+		};
+		
 		self.excecuteRemove = function (id, category) {
 			$.ajax({
 				method : "DELETE",
@@ -406,6 +412,7 @@ define(['knockout', 'text!./myorganizations.html', 'app', 'moment', 'async!https
 			});
 		};
 
+		
 		/* ****************************************************************
 		 *
 		 * ****************************************************************/
