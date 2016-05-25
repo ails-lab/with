@@ -30,9 +30,9 @@ import akka.actor.Props;
 import filters.AllowAccessHeaderFilter;
 import com.mongodb.WriteConcern;
 
-import controllers.AccessFilter;
-import controllers.EffektiveUserFilter;
-import controllers.SessionFilter;
+import filters.AccessFilter;
+import filters.EffektiveUserFilter;
+import filters.SessionFilter;
 import db.DB;
 import elastic.Elastic;
 
@@ -61,6 +61,7 @@ public class Global extends GlobalSettings {
 	}
 
 	//@Override
+	@SuppressWarnings("unchecked")
 	public <T extends EssentialFilter> Class<T>[] filters() {
 	    return new Class[] {AccessFilter.class, SessionFilter.class, 
 	    		EffektiveUserFilter.class, AllowAccessHeaderFilter.class };

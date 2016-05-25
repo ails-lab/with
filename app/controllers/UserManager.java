@@ -208,6 +208,19 @@ public class UserManager extends WithController {
 			return internalServerError();
 		}
 	}
+	
+	public static Result getMyUser() {
+		try {
+			User user = effectiveUser();		
+			if (user != null) {
+				return ok(Json.toJson(user));
+			}
+			return badRequest();
+		} catch (Exception e) {
+			return internalServerError();
+		}
+	}
+	
 
 	/**
 	 * Creates a user and stores him at the database

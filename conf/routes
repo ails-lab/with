@@ -25,7 +25,7 @@ POST     /api/search            	controllers.SearchController.search()
 GET		/api/autocompleteExt		controllers.AutocompleteController.autocompleteExt(term:java.lang.String,limit:Integer,source:java.util.List[java.lang.String])
 
 # Map static resources from the /public folder to the /assets URL path
-GET 	/assets/headers.js						controllers.FilterUtils.withAjaxScript
+GET 	/assets/headers.js						filters.FilterUtils.withAjaxScript
 GET     /assets/*file               			controllers.Assets.at(path="/public", file)
 GET 	/custom/:customName					    controllers.CustomAssets.redirect(customName)
 GET 	/custom/:customName/					controllers.CustomAssets.redirect(customName)
@@ -109,6 +109,7 @@ DELETE  /media/orphan							controllers.MediaController.deleteOrphanMadia()
 DELETE 	/media/:id								controllers.MediaController.deleteMedia(id)
 
 # User Manager Controller
+GET      /user/me                                controllers.UserManager.getMyUser()
 POST	/user/register						    controllers.UserManager.register()
 POST	/user/login							    controllers.UserManager.login()
 POST	/user/facebookLogin						controllers.UserManager.facebookLogin()
