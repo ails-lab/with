@@ -346,7 +346,7 @@
 					<div class="action-body">
 						<div class="group">
 							<div class="title">Users access</div>
-							<input id="userName" type="text" placeholder="Start typing username" data-bind="autocompleteUsername: myUsername, category:1">
+							<input id="userName" type="text" placeholder="Start typing username" data-bind="autocompleteUsername: myUsername, forUsers:true">
 
 
 							<ul class="members-list" data-bind="foreach: userMembers">
@@ -383,7 +383,7 @@
 						</div>
 						<div class="group">
 							<div class="title">Groups access</div>
-							<input id="groupName" type="text" placeholder="Start typing group name" data-bind="autocompleteUsername: myUsername, category:2">
+							<input id="groupName" type="text" placeholder="Start typing group name" data-bind="autocompleteUsername: myUsername, onlyParents:false, forUsers:false, forGroupType:'UserGroup'">
 							<ul class="members-list" data-bind="foreach: groupMembers">
 							       
 							<!-- <li data-bind="attr: { class: $parent.colors[$index]%4  }"> -->
