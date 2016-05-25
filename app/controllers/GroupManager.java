@@ -465,8 +465,8 @@ public class GroupManager extends Controller {
 			return badRequest(result);
 		}
 		if ((category.equals("users") || category.equals("both"))
-				&& (group.getUsers().size() > group.getAdminIds().size())) {
-			group.getUsers().removeAll(group.getAdminIds());
+				&& (group.getUsers().size() >= group.getAdminIds().size())) {
+		//	group.getUsers().removeAll(group.getAdminIds());
 			User u;
 			for (ObjectId oid : group.getUsers()) {
 				if ((u = DB.getUserDAO().get(oid)) == null) {
