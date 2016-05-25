@@ -45,6 +45,7 @@ import model.annotations.ContextData.ContextDataBody;
 import model.annotations.ExhibitionData;
 import model.annotations.ExhibitionData.MediaType;
 import model.basicDataTypes.Language;
+import model.basicDataTypes.Literal;
 import model.basicDataTypes.MultiLiteral;
 import model.basicDataTypes.ProvenanceInfo;
 import model.basicDataTypes.WithAccess;
@@ -1022,51 +1023,79 @@ public class CollectionObjectController extends WithResourceController {
 		MongoClient mongoClient = null;
 		ObjectNode result = Json.newObject();
 		try {
-			/*Query<CollectionObject> q = DB.getCollectionObjectDAO().createQuery().field("administrative.resourceType").equal("Exhibition");
-			Iterator<CollectionObject> colIterator = DB.getCollectionObjectDAO().find(q).iterator();
-			while (colIterator.hasNext()) {
-				CollectionObject col = colIterator.next();
-				for (ContextData contextData: (List<ContextData>) col.getCollectedResources()) {
-					
-				}
-			}*/
 		mongoClient = new MongoClient(host, port);
 		MongoDatabase db = mongoClient.getDatabase(dbName);
-		// get all records and store the information in a HashMap
 		FindIterable<Document> collections = db.getCollection("CollectionObject").find();
 		for (Document collection : collections) {
-			//System.out.println(((ArrayList) ((Document) ((Document) collection.get("descriptiveData")).get("label")).get("default")).get(0));
 			ObjectId id = collection.getObjectId("_id");
 			if (collection.getString("resourceType").equals("Exhibition")) {
-				if (((ArrayList) ((Document) ((Document) collection.get("descriptiveData")).get("label")).get("default")).get(0).equals("Circus_Exhibition")) {
+				//if (((ArrayList) ((Document) ((Document) collection.get("descriptiveData")).get("label")).get("default")).get(0).equals("test anna")) {
 					CollectionObject col = DB.getCollectionObjectDAO().getById(id);
 			    	ArrayList<Document> contextDataList = (ArrayList<Document>) ((Document) collection).get("collectedResources");
 			    	int i = 0;
 			    	ArrayList<ContextData> newContextData = new ArrayList<ContextData>();
-				    for (Document cdDoc: contextDataList) {					    	
-				    	ExhibitionData exhData = new ExhibitionData();
-				    	exhData.getTarget().setRecordId(((ExhibitionData) col.getCollectedResources().get(i)).getTarget().getRecordId());
-				    	if (cdDoc.get("body") != null) {
-					    	String videoUrl = ((Document) cdDoc.get("body")).getString("videoUrl");
-					    	System.out.println(((Document) cdDoc.get("body")).getString("audioUrl"));
-					    	String videoDescription = ((Document) cdDoc.get("body")).getString("videoDescription");
-					    	if (videoUrl != null) {
-						    	exhData.getBody().setMediaUrl(videoUrl);
-						    	exhData.getBody().setMediaType(MediaType.VIDEO);
+			    	System.out.println("======= " + col.getDescriptiveData().getLabel().get(Language.DEFAULT)+ " =======");
+			    	if (contextDataList != null) {
+					    for (Document cdDoc: contextDataList) {		
+					    	ContextData oldContext = (ContextData) col.getCollectedResources().get(i);
+					    	if (cdDoc.get("body") != null) {
+					    		System.out.println(i + ": body");
+						    	ExhibitionData exhData = new ExhibitionData();
+						    	ObjectId recordId = oldContext.getTarget().getRecordId();
+						    	exhData.getTarget().setRecordId(recordId);
+						    	String videoUrl = ((Document) cdDoc.get("body")).getString("videoUrl");
+						    	String videoDescription = ((Document) cdDoc.get("body")).getString("videoDescription");
+						    	if (oldContext != null) {
+						    		Literal text = ((ExhibitionData) oldContext).getBody().getText();
+						    		System.out.println("Text: " + text);
+							    	exhData.getBody().setText(text);
+						    	}
+						    	if (videoUrl != null) {
+							    	exhData.getBody().setMediaUrl(videoUrl);
+							    	exhData.getBody().setMediaType(MediaType.VIDEO);
+						    	}
+						    	if (videoDescription != null)
+						    		exhData.getBody().setMediaDescription(videoDescription);
+						    	String mediaUrl = ((Document) cdDoc.get("body")).getString("mediaUrl");
+						    	String mediaDescription = ((Document) cdDoc.get("body")).getString("mediaDescription");
+						    	String mediaType = ((Document) cdDoc.get("body")).getString("mediaType");
+						    	if (mediaUrl != null) {
+							    	exhData.getBody().setMediaUrl(mediaUrl);
+							    	boolean contains = false;
+							    	if (mediaType != null) {
+								    	for (MediaType mt: MediaType.values()) {
+								    		if (mt.name().equals(mediaType)) {
+								    			contains = true;
+								    			break;
+								    		}
+								    	}
+								    	if (contains)
+								    		exhData.getBody().setMediaType(MediaType.valueOf(mediaType));
+								    	else 
+								    		exhData.getBody().setMediaType(null);
+								    	}
+							    	else
+							    		exhData.getBody().setMediaType(null);
+						    	}
+						    	if (mediaDescription != null)
+						    		exhData.getBody().setMediaDescription(mediaDescription);
+								//DB.getCollectionObjectDAO().deleteField(id, "collectedResources."+i+".body.audioUrl");
+								//DB.getCollectionObjectDAO().deleteField(id, "collectedResources."+i+".body.videoUrl");
+								//DB.getCollectionObjectDAO().deleteField(id, "collectedResources."+i+".body.videoDescription");
+						    	newContextData.add(exhData);
 					    	}
-					    	if (videoDescription != null)
-					    		exhData.getBody().setMediaDescription(videoDescription);
-							DB.getCollectionObjectDAO().deleteField(id, "collectedResources."+i+".body.audioUrl");
-							DB.getCollectionObjectDAO().deleteField(id, "collectedResources."+i+".body.videoUrl");
-							DB.getCollectionObjectDAO().deleteField(id, "collectedResources."+i+".body.videoDescription");
+					    	else {
+					    		System.out.println(i+ ": no body");
+					    		oldContext.setBody(null);
+					    		newContextData.add(oldContext);
+					    	}
 							i++;
-				    	}
-				    	newContextData.add(exhData);
-				    }
-					col.setCollectedResources(newContextData);
-				    DB.getCollectionObjectDAO().makePermanent(col);
+					    }
+						col.setCollectedResources(newContextData);
+					    DB.getCollectionObjectDAO().makePermanent(col);
+			    	}
 				}
-			}
+			//}
 		}
 		} catch (Exception e) {
 			e.printStackTrace();
