@@ -35,6 +35,7 @@ import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.graphite.Graphite;
 import com.codahale.metrics.graphite.GraphiteReporter;
 
+import db.DB;
 import elastic.Elastic;
 
 public class MetricsUtils {
@@ -46,7 +47,7 @@ public class MetricsUtils {
             .formatFor(Locale.US)
             .convertRatesTo(TimeUnit.SECONDS)
             .convertDurationsTo(TimeUnit.MILLISECONDS)
-            .build(new File("/home/yiorgos/"));
+            .build(new File(DB.getConf().getString("metrics.csv.directory")));
 
 
 	public static ElasticsearchReporter getESReporter() {
@@ -68,9 +69,11 @@ public class MetricsUtils {
 	}
 
 	//static public final Graphite graphite = new Graphite(new InetSocketAddress("collab.image.ntua.gr", 80));
-	static public final Graphite graphite = new Graphite(new InetSocketAddress("collab.image.ntua.gr", 2003));
+	static public final Graphite graphite = new Graphite(new InetSocketAddress(
+				DB.getConf().getString("metrics.graphite.host"),
+				DB.getConf().getInt("metrics.graphite.port")));
 	static public final GraphiteReporter gr_reporter = GraphiteReporter.forRegistry(registry)
-	                                                  .prefixedWith("withculture.image.gr")
+	                                                  .prefixedWith(DB.getConf().getString("metrics.graphite.prefix"))
 	                                                  .convertRatesTo(TimeUnit.SECONDS)
 	                                                  .convertDurationsTo(TimeUnit.MILLISECONDS)
 	                                                  .filter(MetricFilter.ALL)
