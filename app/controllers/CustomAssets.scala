@@ -18,9 +18,10 @@ package controllers
 
 import java.io.File
 import play._
+import play.api.mvc.Controller
 import play.api.Logger
 import play.api.mvc.Action
-import play.api.mvc.Controller
+import _root_.filters.FilterUtils.withAjaxScript
 
 object CustomAssets extends Controller {
    val log = Logger(this.getClass())
@@ -30,7 +31,7 @@ object CustomAssets extends Controller {
       val filePath = new File( customDir, path )
       log.info(customName + " " + path+ " " + filePath.getAbsolutePath())
       
-      if( path == "headers.js" )  FilterUtils.withAjaxScript
+      if( path == "headers.js" )  withAjaxScript
       else {
     	  if( filePath.canRead())
     		  Action { Ok.sendFile( filePath, true ) }
