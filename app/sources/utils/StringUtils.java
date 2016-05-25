@@ -47,10 +47,13 @@ import model.basicDataTypes.LiteralOrResource;
 import model.basicDataTypes.MultiLiteralOrResource;
 import model.basicDataTypes.WithDate;
 import play.Logger;
+import play.Logger.ALogger;
 import sources.core.Utils;
 
 public class StringUtils {
-
+	
+	public static final ALogger log = Logger.of( StringUtils.class );
+	
 	private static final String[] DATE_FORMATS = new String[] { "yyyy-MM-dd", "dd-MM-yyyy", "MM/dd/yyyy", "yyyy/MM/dd",
 			"dd MMM yyyy", "dd MMMM yyyy", "yyyyMMddHHmm", "yyyyMMdd HHmm", "dd-MM-yyyy HH:mm", "yyyy-MM-dd HH:mm",
 			"MM/dd/yyyy HH:mm", "yyyy/MM/dd HH:mm", "dd MMM yyyy HH:mm", "dd MMMM yyyy HH:mm", "yyyyMMddHHmmss",
@@ -141,8 +144,7 @@ public class StringUtils {
 			        .withProfiles(languageProfiles).minimalConfidence(0.8)
 			        .build();
 			} catch (IOException e) {
-				Logger.warn("problems loading language detector");
-				e.printStackTrace();
+				log.warn("problems loading language detector", e );
 			}
 		}
 		return languageDetector;
@@ -163,7 +165,6 @@ public class StringUtils {
 			if (language.getProbability()>=confidenceTH)
 			res.add(Language.getLanguage(language.getLanguage()));
 		}
-//        Logger.info("Languages Probs " + probabilities);
         return res;
 	}
 	

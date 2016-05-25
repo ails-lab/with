@@ -48,21 +48,21 @@ define(['bridget','knockout', 'text!./organization-edit.html', 'isotope','images
 					if (self.resourceType.indexOf("SimpleCollection") != -1) {
 						return "item collection";
 					} else if (self.resourceType.indexOf("Exhibition") != -1) {
-						return "item space";
+						return "item exhibition";
 					}
 				} else {
-					return "item exhibition";
+					return "item space";
 				}
 			});
 			self.url = ko.computed(function () {
 				if (self.resourceType) {
-					if (selfself.resourceType.indexOf("SimpleCollection") > -1) {
+					if (self.resourceType.indexOf("SimpleCollection") != -1) {
 						return 'index.html#collectionview/' + self.dbId;
-					} else if (self.resourceType.indexOf("Exhibition") > -1) {
+					} else if (self.resourceType.indexOf("Exhibition") != -1) {
 						return 'index.html#exhibitionview/' + self.dbId;
 					}
 				} else {
-					return "";
+					return "index.html#collectionview/"+ self.dbId;
 				}
 			});
 			self.owner = ko.computed(function () {
@@ -108,7 +108,7 @@ define(['bridget','knockout', 'text!./organization-edit.html', 'isotope','images
 
 			        self.type=ko.computed(function() {
 			        	if(self.resourceType){
-			        		if (self.resourceType.indexOf("Collection")!=-1)
+			        		if (self.resourceType.indexOf("SimpleCollection")!=-1)
 			        		  return "COLLECTION";
 			        		else if (self.resourceType.indexOf("Exhibition")!=-1)
 			        			return "EXHIBITION";
@@ -117,7 +117,7 @@ define(['bridget','knockout', 'text!./organization-edit.html', 'isotope','images
 
 			        self.css=ko.computed(function() {
 			        	if(self.resourceType){
-			        		if (self.resourceType.indexOf("Collection")!=-1)
+			        		if (self.resourceType.indexOf("SimpleCollection")!=-1)
 			        		  return "item collection";
 			        		else if (self.resourceType.indexOf("Exhibition")!=-1)
 			        			return "item exhibition";
@@ -127,15 +127,15 @@ define(['bridget','knockout', 'text!./organization-edit.html', 'isotope','images
 
 			        self.url=ko.computed(function() {
 			        	if(self.resourceType){
-			        		if (self.resourceType.indexOf("Collection")==-1)
-				    		  return 'index.html#cοllectionview/'+ self.dbId;
-			        		else if (self.resourceType.indexOf("Space")>-1){
+			        		if (self.resourceType.indexOf("SimpleCollection")!=-1)
+				    		  return 'index.html#collectionview/'+ self.dbId;
+			        		else if (self.resourceType.indexOf("Space")!=-1){
 			        			return self.administrative.isShownAt;
 			        		}
-				    		else{
+			        		else if (self.resourceType.indexOf("Exhibition")!=-1){
 				    			return 'index.html#exhibitionview/'+ self.dbId;
 				    		}
-			        	}else return "";
+			        	}else return "index.html#collectionview/"+ self.dbId;
 			        });
 			        self.owner=ko.computed(function(){
 			        	if(self.withCreatorInfo){
@@ -665,7 +665,7 @@ define(['bridget','knockout', 'text!./organization-edit.html', 'isotope','images
 				dataType: "json",
 				url: "/collection/list",
 				processData: false,
-				data: "offset=0&count=500&directlyAccessedByUserOrGroup=" + JSON.stringify([{group: self.username(), rights: "WRITE"}])
+				data: "offset=0&count=50&directlyAccessedByUserOrGroup=" + JSON.stringify([{group: self.username(), rights: "WRITE"}])
 			}).success(function (data, textStatus, jqXHR) {
 				var items=self.revealItems(data['collectionsOrExhibitions']);
 
@@ -680,12 +680,19 @@ define(['bridget','knockout', 'text!./organization-edit.html', 'isotope','images
 		};
 
 
+		loadUrl = function (data,event) {
+			event.preventDefault();
+			window.location.href = data;
+
+			return false;
+		};
+		
 		function getItem(collection) {
 
 
 
 			  var tile= '<div class="'+collection.data.css()+'"> <div class="wrap">';
-			   tile+='<a href="#" onclick="loadUrl(\''+collection.data.url()+'\',event)">'
+			   tile+='<a href="'+collection.data.url()+'">'
                 +'<div class="thumb"><img src="'+collection.data.thumbnail()+'"><div class="counter">'+collection.data.entryCount+' ITEMS</div></div>'
                 +' <div class="info"><div class="type">'+collection.data.type()+'</div><h2 class="title">'+collection.data.title+'</h2></div>'
                 +'</a></div></div>';

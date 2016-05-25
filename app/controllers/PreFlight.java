@@ -16,20 +16,12 @@
 
 package controllers;
 
-import play.libs.F.Promise;
-import play.mvc.Action;
-import play.mvc.Http.Context;
 import play.mvc.Result;
 
-public class UserLoggedIn extends Action.Simple {
+public class PreFlight extends WithController {
 
-	@Override
-	public Promise<Result> call(Context ctx) throws Throwable {
-		if(ctx.session().containsKey("user")) {
-			return delegate.call(ctx);
-		}
-		
-		return Promise.pure((Result)badRequest());
+	public static Result checkPreFlight(String path) {
+		return ok();
 	}
 
 }

@@ -25,9 +25,10 @@ import java.util.function.Function;
 import com.fasterxml.jackson.databind.JsonNode;
 
 import model.basicDataTypes.ProvenanceInfo.Sources;
+import play.Logger;
+import play.Logger.ALogger;
 import sources.core.CommonFilters;
 import sources.core.CommonQuery;
-import sources.core.HttpConnector;
 import sources.core.ISpaceSource;
 import sources.core.QueryBuilder;
 import sources.core.SourceResponse;
@@ -38,6 +39,8 @@ import utils.ListUtils;
 
 public abstract class FlickrSpaceSource extends ISpaceSource {
 
+	public static final ALogger log = Logger.of( FlickrSpaceSource.class);
+	
 	private static HashMap<String, String> licences;
 	private static HashMap<String, String> licencesId;
 	protected String userID;
@@ -63,8 +66,7 @@ public abstract class FlickrSpaceSource extends ISpaceSource {
 					licencesId.put(name, id);
 				}
 			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				log.error("",e);
 			}
 		}
 	}
@@ -77,7 +79,7 @@ public abstract class FlickrSpaceSource extends ISpaceSource {
 		super(source);
 		apiKey = "SECRET_KEY";
 		setLicences();
-		this.vmap = FilterValuesMap.getFlickrMap();
+//		this.vmap = FilterValuesMap.getFlickrMap();
 		this.userID = userID;
 		addDefaultWriter(CommonFilters.TYPE.getId(), fwriter("media"));
 		addDefaultWriter(CommonFilters.RIGHTS.getId(), frwriter());
@@ -185,8 +187,7 @@ public abstract class FlickrSpaceSource extends ISpaceSource {
 				// countValue(type, "photo", 1);
 				// res.filtersLogic.add(type);
 			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				log.error("", e );
 			}
 		}
 		return res;

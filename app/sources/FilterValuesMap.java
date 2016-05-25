@@ -24,26 +24,24 @@ import java.util.function.Function;
 
 import model.EmbeddedMediaObject.WithMediaRights;
 import model.EmbeddedMediaObject.WithMediaType;
+import model.basicDataTypes.ProvenanceInfo.Sources;
 import sources.core.CommonFilters;
+import sources.core.ESpaceSources;
+import sources.core.MapsConfig;
 import sources.core.QueryModifier;
 import utils.ListUtils;
 
 public class FilterValuesMap {
 
-	private static FilterValuesMap europeanaMap;
-	private static FilterValuesMap dplaMap;
-	private static FilterValuesMap nlaMap;
-	private static FilterValuesMap ddbMap;
-	private static FilterValuesMap dnzMap;
-	private static FilterValuesMap rijksMap;
-	private static FilterValuesMap flickrMap;
 	
+	private static HashMap<Sources, FilterValuesMap> map;
 	private HashMap<String, List<Object>> specificvalues;
 	// private HashMap<String, List<Pair<String>>> queryTexts;
 	private HashMap<String, List<Object>> commonvalues;
 	private HashMap<String, Function<List<String>, QueryModifier>> writters;
 
 	public FilterValuesMap() {
+		map = new HashMap<>();
 		specificvalues = new HashMap<>();
 		commonvalues = new HashMap<>();
 		// queryTexts = new HashMap<String, List<Pair<String>>>();
@@ -85,13 +83,21 @@ public class FilterValuesMap {
 		}
 		// getOrset(queryTexts, getKey(filterID, commonValue)).add(queryText);
 	}
+	
+	public void addMap(String filterID, Object commonValue, List<String> specificValue) {
+		getOrset(specificvalues, getKey(filterID, commonValue)).addAll(specificValue);
+		for (String string : specificValue) {
+			getOrset(commonvalues, getKey(filterID, string)).add(commonValue);
+		}
+		// getOrset(queryTexts, getKey(filterID, commonValue)).add(queryText);
+	}
 
 	public List<Object> translateToCommon(String filterID, String specificValue) {
 		if (specificValue != null) {
 			String matchexpr = getKey(filterID, specificValue);
 			List<Object> v = new ArrayList<>();			
 			for (String kk : commonvalues.keySet()) {
-				if (matchexpr.matches(kk)) {
+				if (matchexpr.matches(kk) || matchexpr.equals(kk)) {
 					// String k = getKey(filterID, specificValue);
 					List<Object> orset = getOrset(commonvalues, kk, false);
 					v.addAll(orset);
@@ -147,64 +153,22 @@ public class FilterValuesMap {
 	}
 	
 	
-	private void fillEuropeana(){
-		addMapping(CommonFilters.TYPE.getId(), WithMediaType.IMAGE, "IMAGE");
-		addMapping(CommonFilters.TYPE.getId(), WithMediaType.VIDEO, "VIDEO");
-		addMapping(CommonFilters.TYPE.getId(), WithMediaType.AUDIO, "SOUND");
-		addMapping(CommonFilters.TYPE.getId(), WithMediaType.TEXT, "TEXT");
-		addMapping(CommonFilters.TYPE.getId(), WithMediaType.THREED, "3D","_3D");
-
-		addMapping(CommonFilters.RIGHTS.getId(), WithMediaRights.Creative, ".*creative.*");
-		addMapping(CommonFilters.RIGHTS.getId(), WithMediaRights.Commercial, ".*creative(?!.*nc).*");
-		addMapping(CommonFilters.RIGHTS.getId(), WithMediaRights.Modify, ".*creative(?!.*nd).*");
-		addMapping(CommonFilters.RIGHTS.getId(), WithMediaRights.RR, ".*rr-.*");
-		addMapping(CommonFilters.RIGHTS.getId(), WithMediaRights.UNKNOWN, ".*unknown.*");
-	}
+	
 	
 	
 	private void addMapping(String id, Object obj, String... string) {
 		addMap(id, obj, string);
 	}
-
-	public static FilterValuesMap getEuropeanaMap(){
-		if (europeanaMap==null){
-			europeanaMap = new FilterValuesMap();
-			europeanaMap.fillEuropeana();
+	
+	public static FilterValuesMap getMap(Sources source){
+		FilterValuesMap ms = map.get(source);
+		if (ms==null){
+			ms = MapsConfig.buildFilterValuesMap(source);
+			map.put(source, ms);
 		}
-		return europeanaMap;
+		return ms;
 	}
 	
-	public static FilterValuesMap getDPLAMap(){
-		if (dplaMap==null){
-			dplaMap = new FilterValuesMap();
-			dplaMap.fillDPLA();
-		}
-		return dplaMap;
-	}
-	
-	public static FilterValuesMap getNLAMap(){
-		if (nlaMap==null){
-			nlaMap = new FilterValuesMap();
-			nlaMap.fillNLA();
-		}
-		return nlaMap;
-	}
-	
-	public static FilterValuesMap getDDBMap(){
-		if (ddbMap==null){
-			ddbMap = new FilterValuesMap();
-			ddbMap.fillDDB();
-		}
-		return ddbMap;
-	}
-	
-	public static FilterValuesMap getFlickrMap(){
-		if (flickrMap==null){
-			flickrMap = new FilterValuesMap();
-			flickrMap.fillFlickr();
-		}
-		return flickrMap;
-	}
 
 
 	private void fillFlickr() {
@@ -230,13 +194,14 @@ public class FilterValuesMap {
 	}
 
 	private void fillDDB() {
-		addMapping(CommonFilters.TYPE.getId(), WithMediaType.IMAGE, "image","IMAGE");
-		addMapping(CommonFilters.TYPE.getId(), WithMediaType.AUDIO, "Audio","SOUND");
-		addMapping(CommonFilters.TYPE.getId(), WithMediaType.TEXT, "text","TEXT");		
-		addMapping(CommonFilters.TYPE.getId(), WithMediaType.VIDEO, "VIDEO");
+		addMapping(CommonFilters.TYPE.getId(), WithMediaType.IMAGE, "mediatype_002");
+		addMapping(CommonFilters.TYPE.getId(), WithMediaType.AUDIO, "mediatype_001");
+		addMapping(CommonFilters.TYPE.getId(), WithMediaType.TEXT, "mediatype_003", "mediatype_004");		
+		addMapping(CommonFilters.TYPE.getId(), WithMediaType.VIDEO, "mediatype_005");
+		addMapping(CommonFilters.TYPE.getId(), WithMediaType.OTHER, "mediatype_006","mediatype_007","mediatype_008");
 		
 		addMapping(CommonFilters.RIGHTS.getId(), WithMediaRights.Creative, ".*creative.*");
-		addMapping(CommonFilters.RIGHTS.getId(), WithMediaRights.Commercial, ".*creative(?!.*nc).*");
+		addMapping(CommonFilters.RIGHTS.getId(), WithMediaRights.Creative_Not_Commercial, ".*creative(?!.*nc).*");
 		addMapping(CommonFilters.RIGHTS.getId(), WithMediaRights.Modify, ".*creative(?!.*nd).*");
 		addMapping(CommonFilters.RIGHTS.getId(), WithMediaRights.RR, ".*rr-.*",".*rv-fz.*");
 		addMapping(CommonFilters.RIGHTS.getId(), WithMediaRights.UNKNOWN, ".*unknown.*");
@@ -310,21 +275,7 @@ public class FilterValuesMap {
 		addMapping(CommonFilters.RIGHTS.getId(), WithMediaRights.RR, "All rights reserved");
 	}
 
-	public static FilterValuesMap getDNZMap() {
-		if (dnzMap==null){
-			dnzMap = new FilterValuesMap();
-			dnzMap.fillDNZ();
-		}
-		return dnzMap;
-	}
 	
-	public static FilterValuesMap getRijksMap() {
-		if (rijksMap==null){
-			rijksMap = new FilterValuesMap();
-			rijksMap.fillRijks();
-		}
-		return rijksMap;
-	}
 
 	private void fillRijks() {
 		addMapping(CommonFilters.TYPE.getId(), WithMediaType.IMAGE, 

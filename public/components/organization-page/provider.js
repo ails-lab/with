@@ -35,7 +35,7 @@ define(['bridget','knockout', 'text!./provider.html','isotope','imagesloaded','a
 
 				self.type = ko.computed(function () {
 					if (self.resourceType) {
-						if (self.resourceType.indexOf("Collection") != -1) {
+						if (self.resourceType.indexOf("SimpleCollection") != -1) {
 							return "COLLECTION";
 						} else if (self.resourceType.indexOf("Org") != -1) {
 							return "ORGANIZATION";
@@ -49,7 +49,7 @@ define(['bridget','knockout', 'text!./provider.html','isotope','imagesloaded','a
 
 				self.css = ko.computed(function () {
 					if (self.resourceType) {
-						if (self.resourceType.indexOf("Collection") != -1) {
+						if (self.resourceType.indexOf("SimpleCollection") != -1) {
 							return "item collection";
 						} else if (self.resourceType.indexOf("Org") != -1) {
 							return "item organization";
@@ -63,12 +63,12 @@ define(['bridget','knockout', 'text!./provider.html','isotope','imagesloaded','a
 
 				self.url = ko.computed(function () {
 					if (self.resourceType) {
-						if (self.resourceType.indexOf("Collection") != -1) {
-							return 'index.html#exhibitionview/' + self.dbId;
-						} else if (self.resourceType.indexOf("Org") > -1) {
+						if (self.resourceType.indexOf("SimpleCollection") != -1) {
+							return 'index.html#collectionview/' + self.dbId;
+						} else if (self.resourceType.indexOf("Org") != -1) {
 							return self.administrative.isShownAt;
 						} else {
-							return 'index.html#collectionview/' + self.dbId;
+							return 'index.html#exhibitionview/' + self.dbId;
 						}
 					} else {
 						return "";

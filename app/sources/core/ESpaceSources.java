@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import play.Logger;
+import play.Logger.ALogger;
 import sources.BritishLibrarySpaceSource;
 import sources.DDBSpaceSource;
 import sources.DPLASpaceSource;
@@ -28,6 +29,7 @@ import sources.ElasticSource;
 import sources.EuropeanaFashionSpaceSource;
 import sources.EuropeanaSpaceSource;
 import sources.FlickrSpaceSource;
+import sources.HistorypinSpaceSource;
 import sources.NLASpaceSource;
 import sources.RijksmuseumSpaceSource;
 import sources.WithSpaceSource;
@@ -45,6 +47,7 @@ import espace.core.sources.YouTubeSpaceSource;*/
 public class ESpaceSources {
 
 	public static List<ISpaceSource> esources;
+	public static final ALogger log = Logger.of( ESpaceSources.class );
 
 	static void init() {
 		esources = new ArrayList<ISpaceSource>();
@@ -60,7 +63,8 @@ public class ESpaceSources {
 		esources.add(new BritishLibrarySpaceSource());
 		esources.add(new FlickrSpaceSource.InternetArchiveSpaceSource());
 		esources.add(new WithSpaceSource());
-		Logger.info("Initialization of sources list");
+		esources.add(new HistorypinSpaceSource());
+		log.info("Initialization of sources list");
 	}
 
 	public static List<ISpaceSource> getESources() {

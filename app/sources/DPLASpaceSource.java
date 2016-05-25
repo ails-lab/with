@@ -25,11 +25,12 @@ import com.fasterxml.jackson.databind.JsonNode;
 
 import model.basicDataTypes.ProvenanceInfo.Sources;
 import model.resources.RecordResource;
+import play.Logger;
+import play.Logger.ALogger;
 import play.libs.Json;
 import sources.core.CommonFilterLogic;
 import sources.core.CommonFilters;
 import sources.core.CommonQuery;
-import sources.core.HttpConnector;
 import sources.core.ISpaceSource;
 import sources.core.QueryBuilder;
 import sources.core.RecordJSONMetadata;
@@ -39,10 +40,10 @@ import sources.core.Utils;
 import sources.core.Utils.Pair;
 import sources.formatreaders.DPLARecordFormatter;
 import sources.utils.FunctionsUtils;
-import utils.ListUtils;
 
 public class DPLASpaceSource extends ISpaceSource {
-
+	public static final ALogger log = Logger.of( DPLASpaceSource.class);
+	
 	public String getHttpQuery(CommonQuery q) {
 		// q=zeus&api_key=SECRET_KEY&sourceResource.creator=Zeus
 		QueryBuilder builder = new QueryBuilder("http://api.dp.la/v2/items");
@@ -58,7 +59,6 @@ public class DPLASpaceSource extends ISpaceSource {
 	public DPLASpaceSource() {
 		super(Sources.DPLA);
 		apiKey = "SECRET_KEY";
-		vmap = FilterValuesMap.getDPLAMap();
 
 		addDefaultWriter(CommonFilters.TYPE.getId(), fwriter("sourceResource.type"));
 		addDefaultWriter(CommonFilters.COUNTRY.getId(), fwriter("sourceResource.spatial.country"));
@@ -160,8 +160,7 @@ public class DPLASpaceSource extends ISpaceSource {
 				res.filtersLogic.add(contributor);
 
 			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				log.error( "", e );
 			}
 		}
 		return res;
@@ -190,7 +189,7 @@ public class DPLASpaceSource extends ISpaceSource {
 			}
 			return jsonMetadata;
 		} catch (Exception e) {
-			e.printStackTrace();
+			log.error("",e );
 			return jsonMetadata;
 		}
 	}

@@ -26,24 +26,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import model.annotations.ContextData;
-import model.annotations.ContextData.ContextDataBody;
-import model.annotations.ContextData.ContextDataTarget;
-import model.annotations.ContextData.ContextDataType;
-import model.basicDataTypes.Language;
-import model.basicDataTypes.Literal;
-import model.basicDataTypes.LiteralOrResource;
-import model.basicDataTypes.MultiLiteral;
-import model.basicDataTypes.MultiLiteralOrResource;
-import model.basicDataTypes.WithAccess;
-import model.basicDataTypes.WithAccess.Access;
-import model.usersAndGroups.User;
-
 import org.bson.types.ObjectId;
 import org.mongodb.morphia.geo.GeoJson;
 import org.mongodb.morphia.geo.Point;
-
-import play.libs.Json;
 
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -55,12 +40,25 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.BooleanNode;
 import com.fasterxml.jackson.databind.node.TextNode;
 import com.google.common.net.MediaType;
-import com.hp.hpl.jena.tdb.store.IntegerNode;
 
 import db.DB;
+import model.annotations.ContextData;
+import model.annotations.ContextData.ContextDataType;
+import model.basicDataTypes.Language;
+import model.basicDataTypes.Literal;
+import model.basicDataTypes.LiteralOrResource;
+import model.basicDataTypes.MultiLiteral;
+import model.basicDataTypes.MultiLiteralOrResource;
+import model.basicDataTypes.WithAccess;
+import model.basicDataTypes.WithAccess.Access;
+import model.usersAndGroups.User;
+import play.Logger;
+import play.Logger.ALogger;
+import play.libs.Json;
 
 public class Deserializer {
-
+	public static final ALogger log = Logger.of( Deserializer.class);
+	
 	public static class WithAccessDeserializer extends
 			JsonDeserializer<WithAccess> {
 
@@ -315,7 +313,7 @@ public class Deserializer {
 			try {
 				return sdf.parse(date.getValueAsString());
 			} catch (ParseException e) {
-				e.printStackTrace();
+				log.error("",e);
 				return null;
 			}
 		}
