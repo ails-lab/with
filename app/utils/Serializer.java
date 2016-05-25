@@ -33,10 +33,12 @@ import org.w3c.dom.Document;
 import org.w3c.dom.ls.DOMImplementationLS;
 import org.w3c.dom.ls.LSSerializer;
 
+import controllers.WithController;
 import model.basicDataTypes.MultiLiteral;
 import model.basicDataTypes.WithAccess;
 import model.basicDataTypes.WithAccess.Access;
 import model.basicDataTypes.WithAccess.AccessEntry;
+import model.usersAndGroups.User;
 import play.Logger;
 import play.Logger.ALogger;
 import play.libs.Json;
@@ -49,6 +51,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.net.MediaType;
+
+import db.DB;
 
 public class Serializer {
 	public static final ALogger log = Logger.of(Serializer.class);
@@ -168,6 +172,29 @@ public class Serializer {
 				rights.put(e.getKey().toString(), e.getValue().toString());
 			}
 			jsonGen.writeObject(Json.toJson(rights));
+		}
+
+	}
+
+	public static class LightUserSerializer extends JsonSerializer<Object> {
+
+		@Override
+		public void serialize(Object user, JsonGenerator jsonGen,
+				SerializerProvider arg2) throws IOException,
+				JsonProcessingException {
+			User u = (User)user;
+			ObjectNode json = DB.getCollectionObjectDAO().countMyAndSharedCollections(
+					WithController.toObjectIds(WithController.effectiveUserIds()));
+			json.put("firstName", u.getFirstName());
+			json.put("lastName", u.getLastName());
+			if(u.getAvatar()!=null)
+				json.put("avatar", Json.toJson(u.getAvatar()));
+			if(u.getNotifications()!=null) {
+				long pendingNots = u.getNotifications().stream().filter(n -> n.isPendingResponse()).count();
+				json.put("pendingNotifications", pendingNots);
+			}
+
+			jsonGen.writeObject(json);
 		}
 
 	}
