@@ -725,7 +725,7 @@ public class MediaController extends Controller {
 			return true;
 	}
 
-	public static Result deleteOrphanMadia() {
+	public static Result deleteOrphanMedia() {
 		DB.getMediaObjectDAO().deleteOrphanMediaObjects();
 		return ok();
 	}

@@ -103,7 +103,7 @@ POST	/media/create							controllers.MediaController.createMedia(file: Boolean ?
 GET		/media/byUrl							controllers.MediaController.getMediaByUrl(url, version: String ?= "Original")
 GET 	/media/:id								controllers.MediaController.getMetadataOrFile(id, file: Boolean ?=true)
 POST 	/media/:id 								controllers.MediaController.editMetadataOrFile(id, file: Boolean ?=false)
-DELETE  /media/orphan							controllers.MediaController.deleteOrphanMadia()
+DELETE  /media/orphan							controllers.MediaController.deleteOrphanMedia()
 DELETE 	/media/:id								controllers.MediaController.deleteMedia(id)
 
 # User Manager Controller
