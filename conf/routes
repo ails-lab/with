@@ -94,6 +94,8 @@ PUT      /group/leave/:groupId                  controllers.UserAndGroupManager.
 GET		/group/membersInfo/:groupId 			controllers.GroupManager.getGroupUsersInfo(groupId, category: String ?="both")
 PUT      /group/admin/:groupId       			controllers.UserAndGroupManager.addAdminToGroup(id: String ?=null, groupId)
 DELETE   /group/admin/:groupId     			    controllers.UserAndGroupManager.removeAdminFromGroup(id: String ?=null, groupId)
+POST	/group/:groupId/addFeatured				controllers.GroupManager.addFeatured(groupId)
+POST 	/group/:groupId/removeFeatured	   	    controllers.GroupManager.removeFeatured(groupId)
 
 
 # Rights Controller
