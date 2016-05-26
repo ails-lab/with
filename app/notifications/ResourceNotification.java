@@ -35,19 +35,20 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import db.DB;
 
 public class ResourceNotification extends Notification {
-	
+
 	// The resource related with the action
 	@JsonSerialize(using = Serializer.ObjectIdSerializer.class)
 	private ObjectId resource;
 
 	public static class ShareInfo {
 		//the userOrGroup the resource is shared with
+		@JsonSerialize(using = Serializer.ObjectIdSerializer.class)
 		private ObjectId userOrGroup;
 		private Access previousAccess;
 		private Access newAccess;
 		//effectiveIds of the owner of the resource - the one who does the sharing
 		private List<ObjectId> ownerEffectiveIds;
-		
+
 		public Access getNewAccess() {
 			return newAccess;
 		}
@@ -72,17 +73,17 @@ public class ResourceNotification extends Notification {
 		public void setUserOrGroup(ObjectId userOrGroup) {
 			this.userOrGroup = userOrGroup;
 		}
-		
+
 		public Boolean sharedWithGroup() {
 			if (userOrGroup != null) {
-				if (DB.getUserDAO().existsEntity(userOrGroup)) 
+				if (DB.getUserDAO().existsEntity(userOrGroup))
 					return false;
 				else if (DB.getUserGroupDAO().existsEntity(userOrGroup))
 					return true;
 			}
 			return null;
 		}
-		
+
 		public String getUserOrGroupName() {
 			String username;
 			if (userOrGroup == null)
@@ -99,9 +100,9 @@ public class ResourceNotification extends Notification {
 			return username;
 		}
 	}
-	
+
 	private ShareInfo shareInfo;
-	
+
 	public ObjectId getResource() {
 		return resource;
 	}
@@ -114,9 +115,9 @@ public class ResourceNotification extends Notification {
 		if (this.resource == null) {
 			return null;
 		}
-		WithResource withResource = DB.getCollectionObjectDAO().getById(resource);
+		WithResource withResource = DB.getCollectionObjectDAO().getById(resource, new ArrayList<String>() {{ add("descriptiveData.label"); }});
 		if (withResource == null)
-			withResource = DB.getRecordResourceDAO().getById(resource);
+			withResource = DB.getRecordResourceDAO().getById(resource, new ArrayList<String>() {{ add("descriptiveData.label"); }});
 		if (withResource != null)
 			return withResource.getDescriptiveData().getLabel().get(Language.DEFAULT).get(0);
 		else
@@ -130,7 +131,7 @@ public class ResourceNotification extends Notification {
 	public void setShareInfo(ShareInfo shareInfo) {
 		this.shareInfo = shareInfo;
 	}
-	
-	
+
+
 
 }
