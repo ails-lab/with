@@ -79,11 +79,10 @@ public class HistorypinSpaceSource extends ISpaceSource {
 
 
 	public String getHttpQuery(CommonQuery q) {
-		QueryBuilder builder = new QueryBuilder("http://www.historypin.org/en/api/pin/listing.json");
-
+		QueryBuilder builder = new QueryBuilder("http://www.historypin.org/en/api/explore/pin/get_gallery.json");
 		builder.addSearchParam("page", "" +q.page);
 		builder.addSearchParam("limit", "" + q.pageSize);
-		builder.add(new Pair<String>("keyword", q.searchTerm){
+		builder.add(new Pair<String>("search=pin:pin,keyword", q.searchTerm){
 			public String getHttp(boolean encode) {
 				String string = first + ":" + second.toString();
 				if (encode){

@@ -374,6 +374,16 @@ public class WithResource<T extends DescriptiveData, U extends WithResource.With
 	@Embedded
 	//@JsonDeserialize(using = Deserializer.ContextDataDeserializer.class)
 	private ContextData contextData;
+	
+	private double qualityMeasure;
+
+	public double getQualityMeasure() {
+		return qualityMeasure;
+	}
+
+	public void setQualityMeasure(double qualityMeasure) {
+		this.qualityMeasure = qualityMeasure;
+	}
 
 	private List<Annotation> annotations;
 
