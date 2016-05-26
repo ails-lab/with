@@ -167,7 +167,8 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 							"text": {"default": ""},
 							"mediaType": null,
 							"mediaUrl": "",
-							"mediaDescription": ""
+							"mediaDescription": "",
+							"textPosition": "RIGHT"
 						}, {});
 					newRecord.contextData.body =body;
 				}
@@ -176,7 +177,6 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 						if (newRecord.contextData.body == undefined || newRecord.contextData.body[field] == undefined) {
 							return false;
 						} else {
-							console.log(field + " " + newRecord.contextData.body[field]());
 							return (newRecord.contextData.body[field]() !== null && newRecord.contextData.body[field]() !== '');
 						}
 					});
@@ -258,6 +258,7 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 																// exhibitions
 																// items
 		self.itemText = ko.observable("");
+		self.itemTextPosition = ko.observable(true);
 		self.itemVideoUrl = ko.observable("").extend({
 			required: true,
 			pattern: {
@@ -402,6 +403,22 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 
 		self.itemsLoaded = 0;
         
+		self.textPositionToBoolean = function (textPosition) {
+			if (textPosition == "RIGHT")
+				return true;
+			else if (textPosition == "LEFT")
+				return false;
+			else 
+				return undefined;
+		};
+		
+		self.textPositionToString = function (textPosition) {
+			if (textPosition)
+				return "RIGHT";
+			else 
+				return "LEFT";
+		};
+		
 		self.showNewItem = function (elem, index, record) {
 			$(elem).hide().fadeIn(500);
 			if ($(elem).hasClass('box fill')) { // it gets called for all
@@ -467,6 +484,7 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 			}
 			if (typeof exhibitionItem.contextData.body.text !== 'undefined' &&  typeof exhibitionItem.contextData.body.text.default !== 'undefined') {
 				self.itemText(exhibitionItem.contextData.body.text.default());
+				self.itemTextPosition(self.textPositionToBoolean(exhibitionItem.contextData.body.textPosition()));
 			}
 			if (typeof exhibitionItem.contextData.body.mediaDescription !== 'undefined') {
 				self.itemMediaDescription(exhibitionItem.contextData.body.mediaDescription());
@@ -491,7 +509,7 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 				}
 				else if (self.itemMediaType() == "AUDIO")
 					mediaUrl = self.itemAudioUrl();
-				var promise = self.updateRecord(self.itemId(), self.itemText(), self.itemMediaType(), mediaUrl, self.itemMediaDescription(), self.dbId(), self.itemPosition());
+				var promise = self.updateRecord(self.itemId(), self.itemText(), self.textPositionToString(self.itemTextPosition()), self.itemMediaType(), mediaUrl, self.itemMediaDescription(), self.dbId(), self.itemPosition());
 				$.when(promise).done(function (data) {
 					if (typeof self.collectionItemsArray()[self.itemPosition()].contextData.body.text === 'undefined'
 						&& typeof self.collectionItemsArray()[self.itemPosition()].contextData.body.mediaUrl === 'undefined') {
@@ -504,8 +522,9 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 							meduaType: ko.observable(null)
 						};
 					}
-					if (editMode == "editText") {
+					if (editMode == "editText" && self.collectionItemsArray()[self.itemPosition()].containsText()) {
 						self.collectionItemsArray()[self.itemPosition()].contextData.body.text.default(self.itemText());
+						self.collectionItemsArray()[self.itemPosition()].contextData.body.textPosition(self.textPositionToString(self.itemTextPosition()));
 					} else if (editMode == "editMedia") {
 						self.collectionItemsArray()[self.itemPosition()].contextData.body.mediaType(self.itemMediaType());
 						self.collectionItemsArray()[self.itemPosition()].contextData.body.mediaDescription(self.itemMediaDescription());
@@ -527,7 +546,7 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 		self.deleteMedia = function(exhibitionItem, event) {
 			var context = ko.contextFor(event.target);
 			var index = context.$index();
-			var promise = self.updateRecord(exhibitionItem.dbId(), self.itemText(), null, "", "", self.dbId(), index);
+			var promise = self.updateRecord(exhibitionItem.dbId(), self.itemText(), self.textPositionToString(self.itemTextPosition()), null, "", "", self.dbId(), index);
 			$.when(promise).done(function (data) {
 				self.collectionItemsArray()[index].contextData.body.mediaUrl("");
 				self.collectionItemsArray()[index].contextData.body.mediaDescription("");
@@ -538,6 +557,7 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 		self.closeSideBar = function () {
 			self.itemPosition(-1);
 			self.itemText("");
+			self.itemTextPosition(true);
 			self.itemVideoUrl("");
 			self.itemAudioUrl("");
 			self.itemMediaDescription("");
@@ -549,7 +569,7 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 			$('.action').removeClass('active');
 		};
 		
-		self.updateRecord = function(dbId, text, mediaType, mediaUrl, mediaDescription, colId, position) {
+		self.updateRecord = function(dbId, text, textPosition, mediaType, mediaUrl, mediaDescription, colId, position) {
 			var jsonData = {};
 			jsonData = {
 				"contextDataType": "ExhibitionData",
@@ -559,6 +579,7 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 				},
 				"body" : {
 					"text": {"default": text},
+					"textPosition": textPosition,
 					"mediaUrl": mediaUrl,
 					"mediaDescription": mediaDescription,
 					"mediaType": mediaType

@@ -823,7 +823,6 @@ public class CollectionObjectController extends WithResourceController {
 		} else
 			return badRequest("User or group with name " + userOrGroupName
 					+ " does not exist or has no specified page.");
-
 	}
 
 	/**
