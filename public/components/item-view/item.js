@@ -104,7 +104,7 @@ define(['knockout', 'text!./_item.html', 'app','smoke'], function (ko, template,
 					if(isRelated){
 						
 					} else {
-						$('#mediadiv').html('<video id="mediaplayer" autoplay="true" controls width="576" height="324"><source src="' + self.fullres() + '" type="video/mp4">Your browser does not support HTML5</video>');
+						$('#mediadiv').append('<video id="mediaplayer" autoplay="true" controls width="576" height="324"><source src="' + self.fullres() + '" type="video/mp4">Your browser does not support HTML5</video>');
 					}
 				//} else if (data.fullrestype == "AUDIO") {
 				} else if (data.mediatype == "AUDIO") {
@@ -112,7 +112,7 @@ define(['knockout', 'text!./_item.html', 'app','smoke'], function (ko, template,
 					if(isRelated) {
 						
 					} else {
-						$('#mediadiv').html('<audio id="mediaplayer" autoplay="true" controls width="576" height="324"><source src="' + self.fullres() + '" type="audio/mpeg">Your browser does not support HTML5</audio>');
+						$('#mediadiv').append('<audio id="mediaplayer" autoplay="true" controls width="576" height="324"><source src="' + self.fullres() + '" type="audio/mpeg">Your browser does not support HTML5</audio>');
 					}
 				}
 			} 			
