@@ -184,7 +184,7 @@ public class Serializer {
 				JsonProcessingException {
 			User u = (User)user;
 			ObjectNode json = DB.getCollectionObjectDAO().countMyAndSharedCollections(
-					WithController.toObjectIds(WithController.effectiveUserIds()));
+					new ArrayList<ObjectId>() {{ add(u.getDbId()); addAll(u.getUserGroupsIds()); }});
 			json.put("firstName", u.getFirstName());
 			json.put("lastName", u.getLastName());
 			if(u.getAvatar()!=null)
