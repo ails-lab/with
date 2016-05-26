@@ -201,9 +201,11 @@ public class UserManager extends WithController {
 
 	public static Result getUser(String id) {
 		try {
-			User user = DB.getUserDAO().get(new ObjectId(id));
+			//User user = DB.getUserDAO().getById(new ObjectId(id), new ArrayList<String>() {{ add("firstName"); add("lastName"); }});
+			User user = DB.getUserDAO().getById(new ObjectId(id));
 			if (user != null) {
-				return ok(lightUserSerialization(user));
+				//return ok(lightUserSerialization(user));
+				return ok(Json.toJson(user));
 			}
 			return badRequest();
 		} catch (Exception e) {
@@ -322,7 +324,8 @@ public class UserManager extends WithController {
 			}
 			u.setGoogleId(googleId);
 			DB.getUserDAO().makePermanent(u);
-			return ok(lightUserSerialization(u));
+			//return ok(lightUserSerialization(u));
+			return ok(Json.toJson(u));
 		} catch (Exception e) {
 			return badRequest(Json
 					.parse("{\"error\":\"Couldn't validate user\"}"));
@@ -348,7 +351,8 @@ public class UserManager extends WithController {
 			}
 			u.setFacebookId(facebookId);
 			DB.getUserDAO().makePermanent(u);
-			return ok(lightUserSerialization(u));
+			//return ok(lightUserSerialization(u));
+			return ok(Json.toJson(u));
 		} catch (Exception e) {
 			return badRequest(Json
 					.parse("{\"error\":\"Couldn't validate user\"}"));
@@ -457,7 +461,8 @@ public class UserManager extends WithController {
 			session().put("sourceIp", request().remoteAddress());
 			session().put("lastAccessTime",
 					Long.toString(System.currentTimeMillis()));
-			return ok(lightUserSerialization(u));
+			//return ok(lightUserSerialization(u));
+			return ok(Json.toJson(u));
 		} else {
 			error.put("password", "Invalid Password");
 			result.put("error", error);
