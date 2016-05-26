@@ -42,7 +42,7 @@ import org.mongodb.morphia.query.CriteriaContainer;
 import org.mongodb.morphia.query.Query;
 import org.mongodb.morphia.query.UpdateOperations;
 
-import utils.AccessManager.Action;
+import controllers.WithController.Action;
 import utils.Tuple;
 
 import com.mongodb.BasicDBObject;

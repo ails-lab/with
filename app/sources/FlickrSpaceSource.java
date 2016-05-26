@@ -79,7 +79,7 @@ public abstract class FlickrSpaceSource extends ISpaceSource {
 		super(source);
 		apiKey = "SECRET_KEY";
 		setLicences();
-		this.vmap = FilterValuesMap.getFlickrMap();
+//		this.vmap = FilterValuesMap.getFlickrMap();
 		this.userID = userID;
 		addDefaultWriter(CommonFilters.TYPE.getId(), fwriter("media"));
 		addDefaultWriter(CommonFilters.RIGHTS.getId(), frwriter());

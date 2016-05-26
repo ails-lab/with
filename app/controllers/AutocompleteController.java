@@ -34,7 +34,6 @@ import play.Logger;
 import play.Logger.ALogger;
 import play.libs.F.Promise;
 import play.mvc.BodyParser;
-import play.mvc.Controller;
 import play.mvc.Result;
 import sources.core.AutocompleteResponse;
 import sources.core.AutocompleteResponse.Suggestion;
@@ -42,7 +41,7 @@ import sources.core.ESpaceSources;
 import sources.core.ISpaceSource;
 import sources.core.ParallelAPICall;
 
-public class AutocompleteController extends Controller {
+public class AutocompleteController extends WithController {
 
 	public static final ALogger log = Logger.of(AutocompleteController.class);
 

@@ -42,7 +42,8 @@ import sources.utils.StringUtils;
 public class RijksmuseumItemRecordFormatter extends CulturalRecordFormatter {
 
 	public RijksmuseumItemRecordFormatter() {
-		super(FilterValuesMap.getRijksMap());
+		super(FilterValuesMap.getMap(Sources.Rijksmuseum));
+		
 		object = new CulturalObject();
 	}
 

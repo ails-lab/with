@@ -17,6 +17,8 @@
 package sources;
 
 import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Function;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
@@ -26,16 +28,20 @@ import model.resources.WithResource;
 import play.Logger;
 import play.Logger.ALogger;
 import play.libs.Json;
+import sources.core.CommonFilterLogic;
+import sources.core.CommonFilters;
 import sources.core.CommonQuery;
 import sources.core.HttpConnector;
 import sources.core.ISpaceSource;
 import sources.core.QueryBuilder;
 import sources.core.RecordJSONMetadata;
 import sources.core.RecordJSONMetadata.Format;
+import sources.core.Utils.Pair;
 import sources.core.SourceResponse;
 import sources.core.Utils;
 import sources.formatreaders.DDBItemRecordFormatter;
 import sources.formatreaders.DDBRecordFormatter;
+import sources.utils.FunctionsUtils;
 
 public class DDBSpaceSource extends ISpaceSource {
 	public static final ALogger log = Logger.of( DDBSpaceSource.class);
@@ -43,8 +49,22 @@ public class DDBSpaceSource extends ISpaceSource {
 	public DDBSpaceSource() {
 		super(Sources.DDB);
 		apiKey = "SECRET_KEY";
-		vmap = FilterValuesMap.getDDBMap();
 		formatreader = new DDBRecordFormatter();
+		
+		addDefaultWriter(CommonFilters.TYPE.getId(), fwriter("type_fct"));
+		addDefaultWriter(CommonFilters.PROVIDER.getId(), fwriter("provider_fct"));
+		addDefaultWriter(CommonFilters.RIGHTS.getId(), fwriter("license_group"));
+		addDefaultWriter(CommonFilters.COUNTRY.getId(), fwriter("place_fct"));
+		
+	}
+	
+	public List<CommonQuery> splitFilters(CommonQuery q) {
+		return q.splitFilters(this);
+	}
+
+	
+	private Function<List<String>, Pair<String>> fwriter(String parameter) {
+		return FunctionsUtils.toORList(parameter, false);
 	}
 
 	@Override
@@ -61,7 +81,6 @@ public class DDBSpaceSource extends ISpaceSource {
 		builder.addSearchParam("facet", "time_fct");
 		builder.addSearchParam("facet", "license_group");
 //		builder.addSearchParam("isThumbnailFiltered", "true");
-
 		FashionSearch fq = new FashionSearch();
 		fq.setTerm(q.searchTerm);
 		fq.setCount(Integer.parseInt(q.pageSize));
@@ -86,20 +105,10 @@ public class DDBSpaceSource extends ISpaceSource {
 				res.totalCount = Utils.readIntAttr(response, "numberOfResults", true);
 				res.count = docs.size();
 				// res.startIndex = Utils.readIntAttr(response, "offset", true);
-				ArrayList<WithResource<?, ?>> a = new ArrayList<>();
-
 				for (JsonNode item : docs) {
 					res.addItem(formatreader.readObjectFrom(item));
 				}
-
-				// CommonFilterLogic dataProvider =
-				// CommonFilterLogic.dataproviderFilter();
-
-				// JsonNode o = response.path("facets");
-				// readList(o.path("dataProviders"), dataProvider);
-
-				res.filtersLogic = new ArrayList<>();
-				// res.filtersLogic.add(dataProvider);
+				res.filtersLogic = createFilters(response);
 
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
@@ -110,6 +119,44 @@ public class DDBSpaceSource extends ISpaceSource {
 		return res;
 	}
 	
+	
+	public List<CommonFilterLogic> createFilters(JsonNode response) {
+		List<CommonFilterLogic> filters = new ArrayList<CommonFilterLogic>();
+		CommonFilterLogic type = new CommonFilterLogic(CommonFilters.TYPE).addTo(filters);
+		CommonFilterLogic provider = new CommonFilterLogic(CommonFilters.PROVIDER).addTo(filters);
+		CommonFilterLogic rights = new CommonFilterLogic(CommonFilters.RIGHTS).addTo(filters);
+		CommonFilterLogic country = new CommonFilterLogic(CommonFilters.COUNTRY).addTo(filters);
+		CommonFilterLogic year = new CommonFilterLogic(CommonFilters.YEAR).addTo(filters);
+				
+		for (JsonNode facet : response.path("facets")) {
+			String filterType = facet.path("field").asText();
+			for (JsonNode jsonNode : facet.path("facetValues")) {
+				String label = jsonNode.path("value").asText();
+				int count = jsonNode.path("count").asInt();
+				switch (filterType) {
+				case "type_fct":
+					countValue(type, label, count);
+					break;
+				case "provider_fct":
+					countValue(provider, label, false, count);
+					break;
+				case "license_group":
+					countValue(rights, label, count);
+					break;
+				case "place_fct":
+					countValue(country, label, false, count);
+					break;
+				case "time_fct":
+					countValue(year, label, false, count);
+					break;
+				default:
+					break;
+				}
+
+			}
+		}
+		return filters;
+	}
 	
 	@Override
 	public ArrayList<RecordJSONMetadata> getRecordFromSource(String recordId, RecordResource fullRecord) {

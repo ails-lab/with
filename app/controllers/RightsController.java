@@ -22,7 +22,6 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Set;
 
 import model.EmbeddedMediaObject.MediaVersion;
 import model.basicDataTypes.WithAccess;
@@ -42,12 +41,12 @@ import play.Logger;
 import play.Logger.ALogger;
 import play.libs.Json;
 import play.mvc.Result;
-import utils.AccessManager.Action;
-import utils.AccessManager;
+import play.mvc.Results.Status;
 import utils.NotificationCenter;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
+import controllers.WithController.Action;
 import db.DB;
 
 public class RightsController extends WithResourceController {
@@ -64,7 +63,7 @@ public class RightsController extends WithResourceController {
 				getUniqueByFieldAndValue("_id", colDbId, new ArrayList<String>(Arrays.asList("administrative.access")));
 			boolean oldIsPublic = collection.getAdministrative().getAccess().getIsPublic();
 			if (oldIsPublic != isPublic) {
-				List<ObjectId> effectiveIds = AccessManager.effectiveUserDbIds(session().get("effectiveUserIds"));
+				List<ObjectId> effectiveIds = effectiveUserDbIds();
 				DB.getCollectionObjectDAO().updateField(colDbId, "administrative.access.isPublic", isPublic);
 				if (!isPublic) //downgrade
 					if (membersDowngrade) {
@@ -103,7 +102,9 @@ public class RightsController extends WithResourceController {
 			return badRequest(result);
 		}
 		else {
-			ObjectId loggedIn = new ObjectId(session().get("user"));
+			ObjectId loggedIn = effectiveUserDbId();
+			if (loggedIn == null)
+				return forbidden("No rights to edit collection rights.");
 			UserGroup userGroup = null;
 			User user = null;
 			// the receiver can be either a User or a UserGroup
@@ -132,7 +133,7 @@ public class RightsController extends WithResourceController {
 				int downgrade = isDowngrade(oldColAccess.getAcl(), userOrGroupId, newAccess);
 				//the logged in user has the right to downgrade his own access level (unshare)
 				boolean hasDowngradeRight = loggedIn.equals(userOrGroupId);
-				List<ObjectId> effectiveIds = AccessManager.effectiveUserDbIds(session().get("effectiveUserIds"));
+				List<ObjectId> effectiveIds = effectiveUserDbIds();
 				if (userGroup != null) {
 					hasDowngradeRight = userGroup.getAdminIds().contains(loggedIn);
 				}
