@@ -120,7 +120,6 @@ GET 	/user/loginWithToken	                controllers.UserManager.loginWithToken
 # both users and groups
 GET      /user/findByUserOrGroupNameOrEmail        controllers.UserAndGroupManager.findByUserOrGroupNameOrEmail(userOrGroupNameOrEmail: String, collectionId ?= null)
 GET      /user/listNames                           controllers.UserAndGroupManager.listNames(prefix:java.lang.String ?= "", onlyParents: Boolean ?= false, specifyCategory: Integer ?= 0)
-GET      /user/:id/notifications                   controllers.UserManager.getUserNotifications(id)
 GET      /user/:id/photo                           controllers.UserAndGroupManager.getUserOrGroupThumbnail(id)
 GET      /user/:id                                 controllers.UserManager.getUser(id)
 PUT      /user/:id                                 controllers.UserManager.editUser(id)
