@@ -221,23 +221,6 @@ public class UserManager extends WithController {
 		}
 	}
 
-	public static Result getUserNotifications(String id) {
-		try {
-			if(!effectiveUserDbIds().contains(new ObjectId(id))) {
-				return badRequest(Json
-						.parse("{'error':'Cannot get notifications of another user'}"));
-			}
-			List<Notification> notifications = DB.getNotificationDAO().getAllByReceiver(new ObjectId(id), 0);;
-			if (notifications != null) {
-				return ok(Json.toJson(notifications));
-			}
-			return badRequest();
-		} catch (Exception e) {
-			return internalServerError();
-		}
-	}
-
-
 	/**
 	 * Creates a user and stores him at the database
 	 *
