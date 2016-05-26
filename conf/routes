@@ -54,6 +54,8 @@ GET      /collection/:id/list		   	        controllers.CollectionObjectControlle
 GET		 /collection/favoriteCollection			controllers.CollectionObjectController.getFavoriteCollection(profile: String ?="BASIC", locale: play.libs.F.Option[java.lang.String])
 PUT		 /collection/sort/:id					controllers.CollectionObjectController.sortCollectionObject(id)
 
+GET 	 /collection/featured					controllers.CollectionObjectController.getFeatured(groupOrUserName: String, isExhibition: play.libs.F.Option[java.lang.Boolean], offset: Integer ?=0, countPerType: Integer ?=10)
+
 POST     /collection/liked			            controllers.WithResourceController.addToFavorites()
 POST     /collection/:id/addRecord              controllers.WithResourceController.addRecordToCollection(id, position: play.libs.F.Option[Integer], noDouble: Boolean ?= false)
 POST 	/collection/:id/addRecords				controllers.WithResourceController.addRecordsToCollection(id, noDouble: Boolean ?= false)
@@ -94,6 +96,8 @@ PUT      /group/leave/:groupId                  controllers.UserAndGroupManager.
 GET		/group/membersInfo/:groupId 			controllers.GroupManager.getGroupUsersInfo(groupId, category: String ?="both")
 PUT      /group/admin/:groupId       			controllers.UserAndGroupManager.addAdminToGroup(id: String ?=null, groupId)
 DELETE   /group/admin/:groupId     			    controllers.UserAndGroupManager.removeAdminFromGroup(id: String ?=null, groupId)
+POST	/group/:groupId/addFeatured				controllers.GroupManager.addFeatured(groupId)
+POST 	/group/:groupId/removeFeatured	   	    controllers.GroupManager.removeFeatured(groupId)
 
 
 # Rights Controller
