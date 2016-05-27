@@ -120,12 +120,6 @@ define(['knockout', 'text!./_exhibition-view.html', 'app', 'magnific-popup', 'sl
 					record.mediaType = result.contextData.body.mediaType;
 					record.mediaDescription = result.contextData.body.mediaDescription;
 					record.textPosition = result.contextData.body.textPosition;
-//					for (var j in result.contextData) {
-//						if (result.contextData[j].target.collectionId == self.id() && result.contextData[j].target.position == i) {
-//							record.annotation = result.contextData[j].body.text.default;
-//							record.videoUrl = result.contextData[j].body.videoUrl;
-//						}
-//					}
 				}
 				var styleId = self.exhItems().length % 5 || 0;
 				var styleIdMapping = {

@@ -35,7 +35,7 @@
                   </div>
                   <!-- item-->
                   <!-- ko foreach: exhItems -->
-                  	<div class="item" data-bind="css: {style1: textPosition == 'RIGHT', style2: textPosition == 'LEFT'}">
+                  	<div class="item" data-bind="css: {style1: $data.textPosition == 'RIGHT', style2: $data.textPosition == 'LEFT'}">
                     <div class="container">
                       	 <div class="textbox">
                           <div class="wrap">
@@ -51,7 +51,7 @@
                         </ul>
                       </div>
                       <!--  ko if: $data.hasOwnProperty('mediaUrl') -->
-                    <div class="imageWrap">
+                    <div class="videowrap">
                     	<!-- ko if: mediaType == "VIDEO" -->
                         	<div class="embed-responsive embed-responsive-16by9">
                             	<iframe width="100%" height="100%" data-bind="attr: { src: mediaUrl }" frameborder="0" allowfullscreen></iframe>
