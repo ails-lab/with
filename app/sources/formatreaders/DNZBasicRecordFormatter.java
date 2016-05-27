@@ -42,7 +42,7 @@ import sources.utils.StringUtils;
 public class DNZBasicRecordFormatter extends CulturalRecordFormatter {
 
 	public DNZBasicRecordFormatter() {
-		super(FilterValuesMap.getDNZMap());
+		super(FilterValuesMap.getMap(Sources.DigitalNZ));
 		object = new CulturalObject();
 	}
 
@@ -102,7 +102,7 @@ public class DNZBasicRecordFormatter extends CulturalRecordFormatter {
 				}
 			}
 		}
-		WithMediaRights withRights = (rights==null || rights.size()==0)?null:(WithMediaRights) getValuesMap().translateToCommon(CommonFilters.RIGHTS.getId(), rights.get(0)).get(0);
+		WithMediaRights withRights = (rights==null || rights.size()==0)?null:(WithMediaRights.getRights(getValuesMap().translateToCommon(CommonFilters.RIGHTS.getId(), rights.get(0)).get(0).toString())) ;
 		
 		
 		

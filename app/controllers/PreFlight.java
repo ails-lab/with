@@ -16,10 +16,9 @@
 
 package controllers;
 
-import play.mvc.Controller;
 import play.mvc.Result;
 
-public class PreFlight extends Controller {
+public class PreFlight extends WithController {
 
 	public static Result checkPreFlight(String path) {
 		return ok();

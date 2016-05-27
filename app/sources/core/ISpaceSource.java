@@ -41,6 +41,7 @@ public abstract class ISpaceSource {
 	
 	public ISpaceSource(Sources source) {
 		this.sourceLABEL = source;
+		vmap = FilterValuesMap.getMap(source);
 	}
 	
 	public HttpConnector getHttpConnector() {

@@ -41,7 +41,7 @@
 			</section>
 			<!-- message-->
 			 <!-- ko if: showsExhibitions -->
-			 <!-- ko if: exhibitionCount == 0 -->
+			 <!-- ko if: exhibitionCount() >= 0 -->
 			 <section class="message"><img src="img/ui/ic-inbox.png" class="hero">
 			  <div class="message-body">
 				<div class="header">Welcome to My Exhibitions</div>
@@ -55,7 +55,7 @@
 			  <!-- /ko -->
 			  <!-- /ko -->
 			  <!-- ko else -->
-			  <!-- ko if: collectionCount() == 0 -->
+			  <!-- ko if: collectionCount() >= 0 -->
 			  <section class="message"><img src="img/ui/ic-inbox.png" class="hero">
 			  <div class="message-body">
 				<div class="header">Welcome to My Collections</div>
@@ -348,7 +348,7 @@
 				  	<a title="View exhibition" data-bind="{text: title(), attr: {href: 'index.html#exhibitionview/'+dbId()}}" class="header truncate"></a>
 				  	<!-- /ko -->
 					<!-- ko else -->
-					<a class="header" data-bind="{text: title(), attr: {href: 'index.html#collectionview/'+dbId()}}" class="header truncate"></a>
+					<a data-bind="{text: title(), attr: {href: 'index.html#collectionview/'+dbId()}}" class="header truncate"></a>
 					<!-- /ko -->
 					<div class="description" data-bind="text: description()"></div>
 					<div class="other-info">

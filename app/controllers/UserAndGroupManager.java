@@ -36,22 +36,19 @@ import notifications.Notification.Activity;
 
 import org.apache.commons.codec.binary.Base64;
 import org.bson.types.ObjectId;
-
-import play.Logger;
-import play.Logger.ALogger;
-import play.libs.F.Option;
-import play.libs.Json;
-import play.mvc.Controller;
-import play.mvc.Result;
-import utils.AccessManager;
-import utils.NotificationCenter;
-
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import db.DB;
+import model.EmbeddedMediaObject;
+import play.Logger;
+import play.Logger.ALogger;
+import play.libs.F.Option;
+import play.libs.Json;
+import play.mvc.Result;
+import utils.NotificationCenter;
 
-public class UserAndGroupManager extends Controller {
+public class UserAndGroupManager extends WithController {
 
 	public static final ALogger log = Logger.of(UserGroup.class);
 
@@ -90,8 +87,7 @@ public class UserAndGroupManager extends Controller {
 						+ forGroupType.get());
 				List<UserGroup> groups = DB.getUserGroupDAO()
 						.getByGroupOrFriendlyNamePrefix(prefix);
-				List<String> effectiveUserIds = AccessManager
-						.effectiveUserIds(session().get("effectiveUserIds"));
+				List<String> effectiveUserIds = effectiveUserIds();
 				User user = DB.getUserDAO().getById(
 						new ObjectId(effectiveUserIds.get(0)),
 						Arrays.asList("userGroupsIds"));
@@ -219,8 +215,7 @@ public class UserAndGroupManager extends Controller {
 	public static Result addUserOrGroupToGroup(String id, String groupId) {
 		ObjectNode result = Json.newObject();
 		try {
-			String adminId = AccessManager.effectiveUserId(session().get(
-					"effectiveUserIds"));
+			String adminId = effectiveUserId();
 			if ((adminId == null) || (adminId.equals(""))) {
 				result.put("error",
 						"Only administrators of the group have the right to edit the group");
@@ -327,8 +322,7 @@ public class UserAndGroupManager extends Controller {
 	public static Result removeUserOrGroupFromGroup(String id, String groupId) {
 		ObjectNode result = Json.newObject();
 		try {
-			String adminId = AccessManager.effectiveUserId(session().get(
-					"effectiveUserIds"));
+			String adminId = effectiveUserId();
 			if ((adminId == null) || (adminId.equals(""))) {
 				result.put("error",
 						"Only creator or administrators of the group have the right to edit the group");
@@ -425,8 +419,7 @@ public class UserAndGroupManager extends Controller {
 	public static Result joinGroup(String groupId) {
 		ObjectNode result = Json.newObject();
 		try {
-			String userId = AccessManager.effectiveUserId(session().get(
-					"effectiveUserIds"));
+			String userId = effectiveUserId();
 			if (userId == null) {
 				result.put("error", "Must specify user for join request");
 				return forbidden(result);
@@ -481,8 +474,7 @@ public class UserAndGroupManager extends Controller {
 	public static Result leaveGroup(String groupId) {
 		ObjectNode result = Json.newObject();
 		try {
-			String userId = AccessManager.effectiveUserId(session().get(
-					"effectiveUserIds"));
+			String userId = effectiveUserId();
 			if (userId == null) {
 				result.put("error", "Must specify user for join request");
 				return forbidden(result);
@@ -552,8 +544,7 @@ public class UserAndGroupManager extends Controller {
 	public static Result addAdminToGroup(String id, String groupId) {
 		ObjectNode result = Json.newObject();
 		try {
-			String adminId = AccessManager.effectiveUserId(session().get(
-					"effectiveUserIds"));
+			String adminId = effectiveUserId();
 			if ((adminId == null) || (adminId.equals(""))) {
 				result.put("error",
 						"Only creator or administrators of the group have the right to edit the group");
@@ -600,8 +591,7 @@ public class UserAndGroupManager extends Controller {
 	public static Result removeAdminFromGroup(String id, String groupId) {
 		ObjectNode result = Json.newObject();
 		try {
-			String adminId = AccessManager.effectiveUserId(session().get(
-					"effectiveUserIds"));
+			String adminId = effectiveUserId();
 			if ((adminId == null) || (adminId.equals(""))) {
 				result.put("error",
 						"Only creator or administrators of the group have the right to edit the group");

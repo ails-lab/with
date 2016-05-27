@@ -18,7 +18,8 @@ package controllers;
 
 import java.io.IOException;
 import java.util.HashMap;
-
+import model.EmbeddedMediaObject;
+import model.EmbeddedMediaObject.MediaVersion;
 import org.bson.types.ObjectId;
 
 import com.fasterxml.jackson.core.type.TypeReference;

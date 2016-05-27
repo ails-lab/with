@@ -69,8 +69,7 @@ import play.mvc.Http.MultipartFormData.FilePart;
 import play.mvc.Result;
 import sources.core.HttpConnector;
 import sources.core.ParallelAPICall;
-import utils.AccessManager;
-import utils.AccessManager.Action;
+
 import actors.MediaCheckerActor.MediaCheckMessage;
 import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
@@ -82,7 +81,7 @@ import com.google.common.net.MediaType;
 
 import db.DB;
 
-public class MediaController extends Controller {
+public class MediaController extends WithController {
 	public static final ALogger log = Logger.of(MediaController.class);
 
 	// Cache media based on url and media version
@@ -725,7 +724,7 @@ public class MediaController extends Controller {
 			return true;
 	}
 
-	public static Result deleteOrphanMadia() {
+	public static Result deleteOrphanMedia() {
 		DB.getMediaObjectDAO().deleteOrphanMediaObjects();
 		return ok();
 	}
