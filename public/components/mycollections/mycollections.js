@@ -34,7 +34,7 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 			dataType    : "json",
 			url         : "/collection/listShared",
 			processData : false,
-			data        : "isExhibition=" + isExhibition + "&offset=" + offset + "&count=" + count
+			data        : "isExhibition=" + isExhibition + "&offset=" + offset + "&count=" + count + "&collectionHits=true"
 		}).done(function (data) {
 			return data;
 		}).fail(function (request, status, error) {
@@ -204,8 +204,31 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 		//self.editedUsersToShare = ko.mapping.fromJS([], {});
 
 		self.myUsername = ko.observable(app.currentUser.username());
-		self.collectionCount = ko.observable(app.currentUser.collectionCount());
-		self.exhibitionCount = ko.observable(app.currentUser.exhibitionCount());
+		self.collectionCount = ko.observable();
+		self.exhibitionCount = ko.observable();
+		self.collectionSharedCount = ko.observable();
+		self.exhibitionSharedCount = ko.observable();
+		self.collectionOrExhibitionCount =  ko.pureComputed(function () {
+			var count, type;
+			if (self.showsExhibitions) {
+				if (self.collectionSet()==='my')
+					count = self.exhibitionCount();
+				else
+					count = self.exhibitionSharedCount();
+				type =  ' exhibition'; 
+			} else {
+				if (self.collectionSet()==='my')
+					count = self.collectionCount();
+				else
+					count = self.collectionSharedCount();
+				type = ' collection';
+			}
+			if (count!== 1) {
+				return count + type +'s';
+			} else {
+				return count + type;
+			}
+		});
 		self.moreCollectionData = ko.observable(true);
 		self.moreSharedCollectionData = ko.observable(true);
 		self.sharedCollections = ko.mapping.fromJS([], mapping);
@@ -236,6 +259,8 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 				$.when(promise, promiseShared).done(function (data,data2) {
 					ko.mapping.fromJS(data[0].collectionsOrExhibitions, mapping, self.myCollections);
 					ko.mapping.fromJS(data2[0].collectionsOrExhibitions, mapping, self.sharedCollections);
+					self.exhibitionCount(data[0].totalExhibitions);
+					self.exhibitionSharedCount(data2[0].totalExhibitions);
 					self.loading(false);
 					WITHApp.tabAction();
 					WITHApp.initTooltip();
@@ -247,6 +272,8 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 				$.when(promise, promiseShared).done(function (data,data2) {
 					ko.mapping.fromJS(data[0].collectionsOrExhibitions, mapping, self.myCollections);
 					ko.mapping.fromJS(data2[0].collectionsOrExhibitions, mapping, self.sharedCollections);
+					self.collectionCount(data[0].totalCollections);
+					self.collectionSharedCount(data2[0].totalCollections);
 					self.loading(false);
 					WITHApp.tabAction();
 					WITHApp.initTooltip();
@@ -365,11 +392,11 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 					currentUser.editables.remove(theitem);*/
 					if (self.showsExhibitions) {
 						app.currentUser.exhibitionCount(app.currentUser.exhibitionCount() - 1);
-						self.exhibitionCount(self.exhibitionCount() + 1);
+						self.exhibitionCount(self.exhibitionCount() - 1);
 					}
 					else {
 						app.currentUser.collectionCount(app.currentUser.collectionCount() - 1);
-						self.collectionCount(self.collectionCount() + 1);
+						self.collectionCount(self.collectionCount() - 1);
 					}
 				}
 			});

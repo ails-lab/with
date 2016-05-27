@@ -652,7 +652,7 @@ define("app", ['knockout', 'facebook', 'imagesloaded', 'moment', './js/app/plugi
 			dataType: "json",
 			url: "/collection/list",
 			processData: false,
-			data: "creator=" + self.currentUser.username() + "&offset="+offset+"&count="+count+"&isExhibition=" + isExhibition + "&totalHits=true"
+			data: "creator=" + self.currentUser.username() + "&offset="+offset+"&count="+count+"&isExhibition=" + isExhibition + "&collectionHits=true"
 		}).done(
 			function (data) {
 				return data;
@@ -669,7 +669,7 @@ define("app", ['knockout', 'facebook', 'imagesloaded', 'moment', './js/app/plugi
 			dataType: "json",
 			url: "/collection/list",
 			processData: false,
-			data: "creator=" + self.currentUser.username() + "&offset=0&count=1000&isExhibition=false&totalHits=true"
+			data: "creator=" + self.currentUser.username() + "&offset=0&count=1000&isExhibition=false&collectionHits=true"
 		}).done(
 			function (data) {
 				// console.log("User collections " + JSON.stringify(data));
