@@ -902,13 +902,13 @@ public class CollectionObjectController extends WithResourceController {
 					if (!response.toString().equals(ok().toString())) {
 						continue;
 					}
-					if (contentFormat.equals("contentOnly")) {
+					else if (contentFormat.equals("contentOnly")) {
 						if (r.getContent() != null) {
 							recordsList.add(Json.toJson(r.getContent()));
 						}
 						continue;
 					}
-					if (contentFormat.equals("noContent")
+					else if (contentFormat.equals("noContent")
 							&& (r.getContent() != null)) {
 						r.getContent().clear();
 						RecordResource profiledRecord = r.getRecordProfile(profile);
@@ -922,7 +922,7 @@ public class CollectionObjectController extends WithResourceController {
 										.getCollectedResources(), recordsList);
 						continue;
 					}
-					if ((r.getContent() != null)
+					else if ((r.getContent() != null)
 							&& r.getContent().containsKey(contentFormat)) {
 						HashMap<String, String> newContent = new HashMap<String, String>(
 								1);
@@ -931,9 +931,11 @@ public class CollectionObjectController extends WithResourceController {
 						recordsList.add(Json.toJson(newContent));
 						continue;
 					}
-					RecordResource profiledRecord = r.getRecordProfile(profile);
-					filterResourceByLocale(locale, profiledRecord);
-					recordsList.add(Json.toJson(profiledRecord));
+					else  {
+						RecordResource profiledRecord = r.getRecordProfile(profile);
+						filterResourceByLocale(locale, profiledRecord);
+						recordsList.add(Json.toJson(profiledRecord));
+					}
 				}
 				result.put(
 						"entryCount",
