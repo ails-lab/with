@@ -181,7 +181,6 @@ public class ThesaurusController extends Controller {
 			} else {
 
 				record.getAdministrative().setCreated(new Date());
-//				record.getAdministrative().setExternalId(uri);
 				
 				DB.getThesaurusDAO().makePermanent(record);
 				recordId = record.getDbId();
