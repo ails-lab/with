@@ -86,13 +86,13 @@
 				</div>
 				 <!-- search-->
                   <div class="filtertype"><img src="img/ui/ic-mag.png" class="mag">
-                    <input type="text" placeholder="Search" class="filtertext">
+                    <input type="text" placeholder="Search" class="filtertext" data-bind="value:query, valueUpdate:'keyup'" autocomplete="off"">
                   </div>
 			  </div>
 			  <!-- listing-->
 			  <ul class="list-body grids">
 			       <!--  ko if: collectionSet()=='my' -->
-			       <!-- ko template: { name: 'collectionsTemplate', foreach: myCollections()} -->
+			       <!-- ko template: { name: 'collectionsTemplate', foreach:searchMyCollections()} -->
 			       <!-- /ko -->
 			       <!-- /ko -->
 			       <!--  ko ifnot: collectionSet()=='my' -->

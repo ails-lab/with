@@ -13,7 +13,7 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 				viewModel.addToSharedWithUsers("READ", suggestion);
 			});
 		}
-	};
+	}
 
 	ko.bindingHandlers.redirectToLogin = {
 		init: function (elem, valueAccessor, allBindingsAccessor, viewModel, context) {
@@ -194,6 +194,16 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 		};
 
 		self.myCollections = ko.mapping.fromJS([], mapping);
+		self.query = ko.observable("");
+		self.searchMyCollections = ko.computed(function() {
+		    if (self.query() === "") {
+		    	return self.myCollections;
+		    } else {
+		    	return self.myCollections.filter(function(i) {
+		    	   return (i.title()).toLowerCase().indexOf(self.query().toLowerCase()) == 0;
+		    	 });
+		    }
+		});
 		self.titleToEdit = ko.observable("").extend({ required: true, minLength: 2});
 		self.descriptionToEdit = ko.observable("");
 		self.isPublicToEdit = ko.observable(false);
@@ -229,6 +239,7 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 				return count + type;
 			}
 		});
+		
 		self.moreCollectionData = ko.observable(true);
 		self.moreSharedCollectionData = ko.observable(true);
 		self.sharedCollections = ko.mapping.fromJS([], mapping);
@@ -477,6 +488,13 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 			});
 		};
 
+		self.searchCollectionName = function (elem, valueAccessor, allBindingsAccessor, viewModel, context, callback) {
+			
+//			self.myCollections.filter(function() {
+//		        return this == 'two';
+//		    }).css('color','red')		
+		};
+				
 		self.changeRights = function (userData) {
 			if (userData.accessChecked()) {
 				self.shareCollection(userData, "WRITE");
