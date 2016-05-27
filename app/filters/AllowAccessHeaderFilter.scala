@@ -52,7 +52,13 @@ class AllowAccessHeaderFilter extends Filter {
   }
 
   def apply(next: (RequestHeader) => Future[Result])(rh: RequestHeader) = {
-    next(rh).map { result => result.withHeaders(HeaderNames.ACCESS_CONTROL_ALLOW_ORIGIN -> "http://localhost:9000", HeaderNames.ACCESS_CONTROL_ALLOW_ORIGIN -> "http://localhost:1337", HeaderNames.ACCESS_CONTROL_ALLOW_METHODS -> HttpMethods.mkString(", "), HeaderNames.ACCESS_CONTROL_ALLOW_HEADERS -> "content-type", HeaderNames.ACCESS_CONTROL_ALLOW_CREDENTIALS -> "true") }
+    next(rh).map { result => result
+      .withHeaders(HeaderNames.ACCESS_CONTROL_ALLOW_ORIGIN -> "http://localhost:9000", 
+          //it seems that more than one ALLOW_ORIGIN values cannot be supported (?)
+          //HeaderNames.ACCESS_CONTROL_ALLOW_ORIGIN -> "http://localhost:1337", 
+          HeaderNames.ACCESS_CONTROL_ALLOW_METHODS -> HttpMethods.mkString(", "), 
+          HeaderNames.ACCESS_CONTROL_ALLOW_HEADERS -> "content-type, X-auth1,X-auth2,authorization",
+          HeaderNames.ACCESS_CONTROL_ALLOW_CREDENTIALS -> "true") }
   }
 
 }

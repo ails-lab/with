@@ -439,7 +439,7 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 			var context = ko.contextFor(event.target);
 			var index = context.$index();
 			self.itemPosition(index);
-			if (typeof exhibitionItem.contextData.body.text !== 'undefined') {
+			if (typeof exhibitionItem.contextData.body.text !== 'undefined' && exhibitionItem.contextData.body.text.default !== undefined) {
 				self.itemText(exhibitionItem.contextData.body.text.default());
 			}
 			if (typeof exhibitionItem.contextData.body.videoUrl !== 'undefined') {

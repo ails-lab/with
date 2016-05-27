@@ -45,7 +45,6 @@ import play.libs.Json;
 import play.mvc.Controller;
 import play.mvc.Result;
 import sources.core.HttpConnector;
-import utils.AccessManager;
 import utils.Tuple;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -56,7 +55,7 @@ import db.DAO.QueryOperator;
 import db.DB;
 
 @SuppressWarnings({ "unchecked", "rawtypes" })
-public class GroupManager extends Controller {
+public class GroupManager extends WithController {
 
 	public static final ALogger log = Logger.of(UserGroup.class);
 
@@ -90,15 +89,11 @@ public class GroupManager extends Controller {
 				error.put("error", "Invalid JSON");
 				return badRequest(error);
 			}
-			if (AccessManager
-					.effectiveUserId(session().get("effectiveUserIds"))
-					.isEmpty()) {
+			ObjectId creator = effectiveUserDbId();
+			if (creator == null) {
 				error.put("error", "No rights for group creation");
 				return forbidden(error);
 			}
-			ObjectId creator = new ObjectId(
-					AccessManager.effectiveUserId(session().get(
-							"effectiveUserIds")));
 			if (!json.has("username")) {
 				error.put("error", "Must specify name for the group");
 				return badRequest(error);
@@ -189,11 +184,9 @@ public class GroupManager extends Controller {
 			result.put("error", "Cannot retrieve group from database.");
 			return internalServerError(result);
 		}
-		ObjectId userId = new ObjectId(AccessManager.effectiveUserIds(
-				session().get("effectiveUserIds")).get(0));
-		User user = DB.getUserDAO().get(userId);
+		User user = effectiveUser();
 		Set<ObjectId> groupAdmins = group.getAdminIds();
-		if (!groupAdmins.contains(userId) && !user.isSuperUser()) {
+		if (!groupAdmins.contains(user.getDbId()) && !user.isSuperUser()) {
 			result.put("error",
 					"Only an admin of the group has the right to edit the group.");
 			return forbidden(result);
@@ -257,6 +250,146 @@ public class GroupManager extends Controller {
 		}
 	}
 
+
+	/*
+	 * This method get's as input a list of Collection and Exhibition
+	 * id's and updates the featuredCollections & featuredExhibitions
+	 * lists at a Page.
+	 */
+	public static Result addFeatured(String groupId) {
+
+		ObjectNode result = Json.newObject();
+		JsonNode json = request().body().asJson();
+
+		String userId = effectiveUserId();
+		if ((userId == null) || (userId.equals(""))) {
+			result.put("error",
+					"Sorry! Only logged in users have access to this API call");
+			return forbidden(result);
+		}
+
+		if(groupId == null) {
+			result.put("error",
+					"Invalid groupId specified!");
+			return badRequest(result);
+		}
+
+		UserGroup group = DB.getUserGroupDAO().get(new ObjectId(groupId));
+		if (!group.getAdminIds().contains(new ObjectId(userId)) &&
+				!isSuperUser()) {
+			result.put("error",
+					"Only group admin or super user have the access to add featured collections/exhibitions");
+			return forbidden(result);
+		}
+
+
+		if( !json.has("fCollections") &&	!json.has("fExhibitions")) {
+			result.put("success",
+					"Nothing to update!");
+			return ok(result);
+		}
+
+
+		ArrayNode fCollections = null;
+		ArrayNode fExhibitions = null;
+		try{
+			if(json.has("fCollections"))
+				fCollections = (ArrayNode)json.withArray("fCollections");
+			if(json.has("fExhibitions"))
+					fExhibitions  = (ArrayNode)json.withArray("fExhibitions");
+		} catch(UnsupportedOperationException opex) {
+			log.debug("Unsupported cast", opex);
+			result.put("error", "Bad value on json fields 'fCollection' or 'fExhibitions'");
+			return internalServerError(result);
+		}
+
+		if((fCollections.size() == 0) &&
+			(fExhibitions.size() == 0)) {
+			result.put("success",
+					"Nothing to update!");
+			return ok(result);
+		}
+
+		List<ObjectId> fCols = new ArrayList<ObjectId>();
+		fCollections.forEach(  id -> fCols.add(new ObjectId(id.asText())) );
+		List<ObjectId> fExhs = new ArrayList<ObjectId>();
+		fExhibitions.forEach(  id -> fExhs.add(new ObjectId(id.asText())) );
+
+		if(DB.getUserGroupDAO().updateFeatured(new ObjectId(groupId), fCols, fExhs, "+") == 1) {
+			result.put("success", "Featured Data succesfully updated!");
+			return ok(result);
+		} else {
+			result.put("error", "Featured Data were not updated due to system error");
+			return internalServerError(result);
+		}
+	}
+
+	public static Result removeFeatured(String groupId) {
+		ObjectNode result = Json.newObject();
+		JsonNode json = request().body().asJson();
+
+		String userId = effectiveUserId();
+		if ((userId == null) || (userId.equals(""))) {
+			result.put("error",
+					"Sorry! Only logged in users have access to this API call");
+			return forbidden(result);
+		}
+
+		if(groupId == null) {
+			result.put("error",
+					"Invalid groupId specified!");
+			return badRequest(result);
+		}
+
+		UserGroup group = DB.getUserGroupDAO().get(new ObjectId(groupId));
+		if (!group.getAdminIds().contains(new ObjectId(userId)) &&
+				!isSuperUser()) {
+			result.put("error",
+					"Only admin of the group or the super user have the right to delete featured collections/exhibitions");
+			return forbidden(result);
+		}
+
+		if( !json.has("fCollections") && !json.has("fExhibitions")) {
+			result.put("success",
+					"Nothing to update!");
+			return ok(result);
+		}
+
+
+		ArrayNode fCollections = null;
+		ArrayNode fExhibitions = null;
+		try{
+			if(json.has("fCollections"))
+				fCollections = (ArrayNode)json.withArray("fCollections");
+			if(json.has("fExhibitions"))
+					fExhibitions  = (ArrayNode)json.withArray("fExhibitions");
+		} catch(UnsupportedOperationException opex) {
+			log.debug("Unsupported cast", opex);
+			result.put("error", "Bad value on json fields 'fCollection' or 'fExhibitions'");
+			return internalServerError(result);
+		}
+
+		if((fCollections.size() == 0) &&
+			(fExhibitions.size() == 0)) {
+			result.put("success",
+					"Nothing to update!");
+			return ok(result);
+		}
+
+		List<ObjectId> fCols = new ArrayList<ObjectId>();
+		fCollections.forEach(  id -> fCols.add(new ObjectId(id.asText())) );
+		List<ObjectId> fExhs = new ArrayList<ObjectId>();
+		fExhibitions.forEach(  id -> fExhs.add(new ObjectId(id.asText())) );
+
+		if(DB.getUserGroupDAO().updateFeatured(new ObjectId(groupId), fCols, fExhs, "-") == 1) {
+			result.put("success", "Featured Data succesfully updated!");
+			return ok(result);
+		} else {
+			result.put("error", "Featured Data were not updated due to system error");
+			return internalServerError(result);
+		}
+	}
+
 	/**
 	 * Deletes a group from the database. The users who participate are not
 	 * deleted as well.
@@ -268,8 +401,7 @@ public class GroupManager extends Controller {
 	public static Result deleteGroup(String groupId) {
 
 		ObjectNode result = Json.newObject();
-		String userId = AccessManager.effectiveUserId(session().get(
-				"effectiveUserIds"));
+		String userId = effectiveUserId();
 		if ((userId == null) || (userId.equals(""))) {
 			result.put("error",
 					"Only creator of the group has the right to delete the group");
@@ -515,8 +647,7 @@ public class GroupManager extends Controller {
 		for (UserGroup group : groups) {
 			ObjectNode g = (ObjectNode) Json.toJson(group);
 
-			ObjectId userId = AccessManager.effectiveUserDbId(session().get(
-					"effectiveUserIds"));
+			ObjectId userId = effectiveUserDbId();
 			User user = DB.getUserDAO().get(userId);
 			g.put("firstName", user.getFirstName());
 			g.put("lastName", user.getLastName());
@@ -558,8 +689,7 @@ public class GroupManager extends Controller {
 		List<UserGroup> groups = new ArrayList<UserGroup>();
 		try {
 			GroupType type = GroupType.valueOf(groupType);
-			ObjectId userId = AccessManager.effectiveUserDbId(session().get(
-					"effectiveUserIds"));
+			ObjectId userId = effectiveUserDbId();
 			if (userId == null) {
 				groups = DB.getUserGroupDAO().findPublic(type, offset, count);
 				return ok(Json.toJson(groups));

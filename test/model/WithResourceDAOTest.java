@@ -39,7 +39,7 @@ import org.junit.Test;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import play.libs.Json;
-import utils.AccessManager.Action;
+import controllers.WithController.Action;
 import db.DB;
 
 public class WithResourceDAOTest {

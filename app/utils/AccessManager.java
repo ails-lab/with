@@ -35,7 +35,7 @@ import play.Logger.ALogger;
 public class AccessManager {
 	public static final ALogger log = Logger.of(AccessManager.class);
 
-	public static enum Action {
+	/*public static enum Action {
 		READ, EDIT, DELETE
 	};
 
@@ -84,7 +84,7 @@ public class AccessManager {
 			}
 		}
 		return maxAccess;
-	}
+	}*/
 
 	/*
 	 * public static boolean increasedAccess(Access before, Access after) { if
@@ -100,7 +100,7 @@ public class AccessManager {
 	 * @param effectiveUserIds
 	 * @return
 	 */
-	public static List<String> effectiveUserIds(String effectiveUserIds) {
+	/*public static List<String> effectiveUserIds(String effectiveUserIds) {
 		if (effectiveUserIds == null)
 			effectiveUserIds = "";
 		List<String> userIds = new ArrayList<String>();
@@ -134,5 +134,5 @@ public class AccessManager {
 			return null;
 		String[] ids = effectiveUserIds.split(",");
 		return new ObjectId(ids[0]);
-	}
+	}*/
 }

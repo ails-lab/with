@@ -44,7 +44,7 @@ import sources.utils.StringUtils;
 public class HistorypinRecordFormatter extends CulturalRecordFormatter {
 
 	public HistorypinRecordFormatter() {
-		super(FilterValuesMap.getHistorypinMap());
+		super(FilterValuesMap.getMap(Sources.Historypin));
 		object = new CulturalObject();
 	}
 
@@ -79,7 +79,9 @@ public class HistorypinRecordFormatter extends CulturalRecordFormatter {
 //		model.setIsShownAt(rec.getLiteralOrResourceValue("media_url"));
 //		model.setDates(rec.getWithDateArrayValue("year"));
 		model.setDccreator(rec.getMultiLiteralOrResourceValue("user.name"));
-		model.getDccreator().addLiteral("http://www.historypin.org/en"+rec.getStringValue("user.url"));
+		String url = rec.getStringValue("user.url");
+		if (Utils.hasInfo(url))
+		model.getDccreator().addLiteral("http://www.historypin.org/en"+url);
 		model.setDccontributor(rec.getMultiLiteralOrResourceValue("dcContributor"));
 		model.setKeywords(rec.getMultiLiteralOrResourceValue("dcSubjectLangAware"));
 //		object.addToProvenance(new ProvenanceInfo(rec.getStringValue("dataProvider"), model.getIsShownAt()==null?null:model.getIsShownAt().getURI(),null));
