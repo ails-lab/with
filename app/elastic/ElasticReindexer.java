@@ -207,7 +207,7 @@ public class ElasticReindexer {
 			Query<ThesaurusObject> q = DB.getDs().createQuery(ThesaurusObject.class).offset(i*1000).limit(1000);
 			List<ThesaurusObject> thesaurusCursor = DB.getThesaurusDAO().find(q).asList();
 			for(ThesaurusObject th: thesaurusCursor) {
-				bulk.add(new IndexRequest(Elastic.index, ElasticUtils.defineInstanceOf(th), th.getDbid().toString())
+				bulk.add(new IndexRequest(Elastic.index, ElasticUtils.defineInstanceOf(th), th.getDbId().toString())
 						.source(th.transform()));
 			}
 			bulk.flush();
@@ -216,7 +216,7 @@ public class ElasticReindexer {
 		Query<ThesaurusObject> q = DB.getDs().createQuery(ThesaurusObject.class).offset((int)(countAllTH/1000)*1000).limit(1000);
 		List<ThesaurusObject> thesaurusCursor = DB.getThesaurusDAO().find(q).asList();
 		for(ThesaurusObject th: thesaurusCursor) {
-			bulk.add(new IndexRequest(Elastic.index, ElasticUtils.defineInstanceOf(th), th.getDbid().toString())
+			bulk.add(new IndexRequest(Elastic.index, ElasticUtils.defineInstanceOf(th), th.getDbId().toString())
 					.source(th.transform()));
 		}
 

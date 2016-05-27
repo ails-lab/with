@@ -16,6 +16,14 @@
 
 package db;
 
+import java.util.Date;
+
+import org.bson.types.ObjectId;
+import org.mongodb.morphia.query.Query;
+import org.mongodb.morphia.query.UpdateOperations;
+
+import com.fasterxml.jackson.databind.JsonNode;
+
 import model.resources.ThesaurusObject;
 
 public class ThesaurusObjectDAO extends DAO<ThesaurusObject> {
@@ -26,6 +34,15 @@ public class ThesaurusObjectDAO extends DAO<ThesaurusObject> {
 	
 	public ThesaurusObject getByUri(String uri) {
 		return this.findOne("semantic.uri", uri);
+	}
+
+	public void editRecord(String root, ObjectId dbId, JsonNode json) {
+		Query<ThesaurusObject> q = this.createQuery().field("_id").equal(dbId);
+		UpdateOperations<ThesaurusObject> updateOps = this.createUpdateOperations();
+		
+		updateFields(root, json, updateOps);
+		updateOps.set("administrative.lastModified", new Date());
+		this.update(q, updateOps);
 	}
 
 }

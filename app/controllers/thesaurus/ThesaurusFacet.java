@@ -56,7 +56,7 @@ public class ThesaurusFacet {
 			long start = System.currentTimeMillis();
 	
 			for (ThesaurusObject to : dao.getAll()) {
-				idMap.put(to.getSemantic().getUri(), to.getDbid());
+				idMap.put(to.getSemantic().getUri(), to.getDbId());
 				map.put(to.getSemantic().getUri(), to.getSemantic()); 
 			}
 	
@@ -76,7 +76,7 @@ public class ThesaurusFacet {
 			if (to != null) {
 				res = to.getSemantic();
 				map.put(res.getUri(), res);
-				idMap.put(res.getUri(), to.getDbid());
+				idMap.put(res.getUri(), to.getDbId());
 			}
 		}
 		

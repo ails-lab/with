@@ -129,11 +129,17 @@ GET	/api/mkconst									controllers.ReindexController.makeConsistent()
 GET	/api/idxres										controllers.ReindexController.reindexAllResources()
 GET	/api/idxthes									controllers.ReindexController.reindexAllThesaurus()
 
+#Thesaurus management
+POST	/thesauri/addTerm	        			    controllers.ThesaurusController.addThesaurusTerm()
+
+#Thesaurus gui
 POST	/collection/:id/facets 	        			controllers.thesaurus.CollectionIndexController.getCollectionFacets(id)
 POST	/collection/:id/selectionlist		   			controllers.CollectionObjectController.facetedListRecordResources(id, format: String ?="noContent", start: Integer ?=0, count: Integer ?=10)
-GET	/collection/:id/similarlist		   			controllers.CollectionObjectController.similarListRecordResources(id, itemid: java.lang.String, format: String ?="noContent", start: Integer ?=0, count: Integer ?=10)
+GET 	/collection/:id/similarlist		   			controllers.CollectionObjectController.similarListRecordResources(id, itemid: java.lang.String, format: String ?="noContent", start: Integer ?=0, count: Integer ?=10)
 
 POST	/collection/:id/keywords 	        			controllers.thesaurus.CollectionIndexController.getCollectionKeywords(id)
 
 GET /source/dbpedia/lookup	controllers.DBPediaController.dbpediaLookup(type: java.lang.String, query: java.lang.String, start: Integer ?=0, count: Integer ?=10)
+
+#Annotations
 GET		/annotate/:id								controllers.RecordResourceController.annotateRecordResource(id)

@@ -75,10 +75,10 @@ public class CollectionIndexController extends WithResourceController	{
 	};
 
 	public static String[] indexAutocompleteFields = new String[] {
-		"keywords_all",
-		"dctype_all",
-		"dcformat_all",
-		"dctermsmedium_all"
+		"keywords_all.all",
+		"dctype_all.all",
+		"dcformat_all.all",
+		"dctermsmedium_all.all"
 	};
 	
 	public static Result getCollectionFacets(String id) {
