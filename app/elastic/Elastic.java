@@ -76,6 +76,7 @@ public class Elastic {
 	public static String mappingResource    = getConf().getString("elasticsearch.index.mapping.resource");
 
 	public static final String typeResource       = WithResourceType.RecordResource.toString().toLowerCase();
+	public static final String thesaurusResource       = WithResourceType.ThesaurusObject.toString().toLowerCase();
 	public static final List<String> allTypes 	  = Arrays.asList(WithResourceType.values()).stream()
 														.map(wr -> wr.toString().toLowerCase())
 														.collect(Collectors.toList());

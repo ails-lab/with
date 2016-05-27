@@ -1075,25 +1075,13 @@ public class CollectionObjectController extends WithResourceController {
 				
 				long totalHits = sh.getTotalHits();
 				
-//				System.out.println("RESULTS " + sh.getHits().length);
-
-				List<String> retrievedFields = new ArrayList<String>(
-						Arrays.asList("descriptiveData.label",
-								"descriptiveData.description", "media", "collectedIn"));
-				
 				List<String> ids = new ArrayList<>();
 				for (Iterator<SearchHit> iter = sh.iterator(); iter.hasNext();) {
 					SearchHit hit = iter.next();
 					ids.add(hit.getId());
-//					log.info("ID " + hit.getId());
 				}
 				
 				List<RecordResource> records = DB.getRecordResourceDAO().getByCollectionIds(colId, ids);
-				
-//				System.out.println("RESULTS DB " + records.size());
-//				for (RecordResource rr : records) {
-//					log.info("DB " + rr.getDbId());
-//				}
 
 				if (records == null) {
 					result.put("message",
@@ -1166,7 +1154,6 @@ public class CollectionObjectController extends WithResourceController {
 			} else {
 				RecordResource rr = DB.getRecordResourceDAO().getById(new ObjectId(itemid));
 				
-//				System.out.println("QUERYING FOR VIEW");
 				ElasticSearcher es = new ElasticSearcher();
 				
 				QueryBuilder query = CollectionIndexController.getSimilarItemsIndexCollectionQuery(colId, rr.getDescriptiveData());
@@ -1177,12 +1164,6 @@ public class CollectionObjectController extends WithResourceController {
 				SearchHits sh = res.getHits();
 				
 				long totalHits = sh.getTotalHits();
-				
-//				System.out.println("RESULTS " + sh.getHits().length);
-
-				List<String> retrievedFields = new ArrayList<String>(
-						Arrays.asList("descriptiveData.label",
-								"descriptiveData.description", "media", "collectedIn"));
 				
 				List<String> ids = new ArrayList<>();
 				for (Iterator<SearchHit> iter = sh.iterator(); iter.hasNext();) {
@@ -1199,7 +1180,6 @@ public class CollectionObjectController extends WithResourceController {
 				}
 				ArrayNode recordsList = Json.newObject().arrayNode();
 				
-				int position = start;
 				for (RecordResource r : records) {
 					// filter out records to which the user has no read access
 					response = errorIfNoAccessToRecord(Action.READ, r.getDbId());

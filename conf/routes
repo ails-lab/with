@@ -131,6 +131,7 @@ GET	/api/idxthes									controllers.ReindexController.reindexAllThesaurus()
 
 #Thesaurus management
 POST	/thesauri/addTerm	        			    controllers.ThesaurusController.addThesaurusTerm()
+DELETE  /thesauri/deleteThesaurus/:name	        controllers.ThesaurusController.deleteThesaurus(name)
 
 #Thesaurus gui
 POST	/collection/:id/facets 	        			controllers.thesaurus.CollectionIndexController.getCollectionFacets(id)

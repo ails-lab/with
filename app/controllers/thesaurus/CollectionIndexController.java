@@ -213,7 +213,7 @@ public class CollectionIndexController extends WithResourceController	{
 
 	public static QueryBuilder getIndexCollectionQuery(ObjectId colId, JsonNode json) {
 		BoolQueryBuilder query = QueryBuilders.boolQuery();
-		query.must(QueryBuilders.termQuery("collectedIn.collectionId", colId));
+		query.must(QueryBuilders.termQuery("collectedId", colId));
 
 		if (json != null) {
 			for (Iterator<JsonNode> iter = json.get("terms").elements(); iter.hasNext();) {
@@ -249,7 +249,7 @@ public class CollectionIndexController extends WithResourceController	{
 
 	public static QueryBuilder getSimilarItemsIndexCollectionQuery(ObjectId colId, DescriptiveData dd) {
 		BoolQueryBuilder query = QueryBuilders.boolQuery();
-		query.must(QueryBuilders.termQuery("collectedIn.collectionId", colId));
+		query.must(QueryBuilders.termQuery("collectedId", colId));
 
 		ThesaurusObjectDAO thesaurusDAO = DB.getThesaurusDAO();
 		

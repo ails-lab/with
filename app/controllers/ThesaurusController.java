@@ -43,6 +43,7 @@ import model.resources.CulturalObject.CulturalObjectData;
 import model.resources.RecordResource;
 import model.resources.ThesaurusObject;
 import model.resources.WithResource.WithResourceType;
+import model.resources.collection.CollectionObject;
 
 import org.bson.types.ObjectId;
 
@@ -158,20 +159,7 @@ public class ThesaurusController extends Controller {
 		
 		ObjectNode result = Json.newObject();
 
-		
-		String resourceType = null;
-//		ObjectId userId = AccessManager.effectiveUserDbIds(session().get("effectiveUserIds")).get(0);
-		
-//		if (json.has("resourceType"))
-//			resourceType = json.get("resourceType").asText();
-		
-//		if ((resourceType == null) || (WithResourceType.valueOf(resourceType) == null))
-//			resourceType = WithResourceType.CulturalObject.toString();
-		
 		try {
-//			if (json.has("contextData"))
-//				((ObjectNode) json).remove("contextData");
-			
 			Class<?> clazz = Class.forName("model.resources.ThesaurusObject");
 			
 			ThesaurusObject record = (ThesaurusObject) Json.fromJson(json, clazz);
@@ -188,29 +176,15 @@ public class ThesaurusController extends Controller {
 						.getUniqueByFieldAndValue("administrative.externalId",
 								uri,
 								new ArrayList<String>(Arrays.asList("_id")));
-//				recordId = resource.getDbId();
 				DB.getThesaurusDAO().editRecord("semantic", resource.getDbId(), json.get("semantic"));
 
-			} else { // create new record in db
+			} else {
 
 				record.getAdministrative().setCreated(new Date());
-				record.getAdministrative().setExternalId(uri);
+//				record.getAdministrative().setExternalId(uri);
 				
-				// Fill the EmbeddedMediaObject from the MediaObject
-				// that has been created
-//				record.getAdministrative().setWithCreator(userId);
-//				String mediaUrl;
 				DB.getThesaurusDAO().makePermanent(record);
 				recordId = record.getDbId();
-				// setting of provevance's resourceId and externalId
-				// (based on recordDbId) is taken care by postLoad in
-				// WithResource
-//					DB.getRecordResourceDAO().updateWithURI(recordId,"/record/" + recordId);
-//				DB.getRecordResourceDAO().updateProvenance(
-//						recordId,
-//						last,
-//						new ProvenanceInfo("UploadedByUser", "record/"
-//								+ recordId, recordId.toString()));
 				DB.getThesaurusDAO().updateField(recordId, "administrative.externalId", uri);
 			}
 			
@@ -259,4 +233,30 @@ public class ThesaurusController extends Controller {
 //				locks.release();
 		}
 	}
+	
+	public static Result deleteThesaurus(String thesaurus) {
+		ObjectNode result = Json.newObject();
+//		Locks locks = null;
+		try {
+//			locks = Locks.create().write("Collection #" + id).acquire();
+//			ObjectId collectionDbId = new ObjectId(id);
+//			Result response = errorIfNoAccessToCollection(Action.DELETE,
+//					collectionDbId);
+//			if (!response.toString().equals(ok().toString()))
+//				return response;
+//			else {
+				DB.getThesaurusDAO().removeAllTermsFromThesaurus(thesaurus);
+
+				result.put("message", "Thesaurus was deleted successfully");
+				return ok(result);
+//			}
+		} catch (Exception e) {
+			result.put("error", e.getMessage());
+			return internalServerError(result);
+		} finally {
+//			if (locks != null)
+//				locks.release();
+		}
+	}
+
 }
