@@ -28,15 +28,21 @@ object CustomAssets extends Controller {
 
    def getFile( customName:String, path:String ) = {
       val customDir = new File(  new File( Play.application().path(), "custom" ), customName )
+      val baseDir = new File(  new File( Play.application().path(), "custom" ), "base" )
       val filePath = new File( customDir, path )
+      val basePath = new File( baseDir, path )
+      
       log.info(customName + " " + path+ " " + filePath.getAbsolutePath())
       
       if( path == "headers.js" )  withAjaxScript
       else {
     	  if( filePath.canRead())
     		  Action { Ok.sendFile( filePath, true ) }
-        else
-    		  Assets.at( "/public", path )
+        else if( basePath.canRead() ) {
+          Action { Ok.sendFile( basePath, true ) }
+        } else {
+    		    Assets.at( "/public", path )
+        }
       }
   }
    
