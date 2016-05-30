@@ -204,6 +204,16 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 		    	 });
 		    }
 		});
+		self.sharedCollections = ko.mapping.fromJS([], mapping);
+		self.searchSharedCollections = ko.computed(function() {
+		    if (self.query() === "") {
+		    	return self.sharedCollections;
+		    } else {
+		    	return self.sharedCollections.filter(function(i) {
+		    	   return (i.title()).toLowerCase().indexOf(self.query().toLowerCase()) == 0;
+		    	 });
+		    }
+		});
 		self.titleToEdit = ko.observable("").extend({ required: true, minLength: 2});
 		self.descriptionToEdit = ko.observable("");
 		self.isPublicToEdit = ko.observable(false);
@@ -242,7 +252,6 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 		
 		self.moreCollectionData = ko.observable(true);
 		self.moreSharedCollectionData = ko.observable(true);
-		self.sharedCollections = ko.mapping.fromJS([], mapping);
 		self.validationModel = ko.validatedObservable({
 			title: self.titleToEdit
 		});
