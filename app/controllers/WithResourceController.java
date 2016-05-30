@@ -39,6 +39,7 @@ import model.basicDataTypes.Language;
 import model.basicDataTypes.MultiLiteral;
 import model.basicDataTypes.ProvenanceInfo;
 import model.basicDataTypes.ProvenanceInfo.Sources;
+import model.quality.RecordQuality;
 import model.resources.CulturalObject.CulturalObjectData;
 import model.resources.RecordResource;
 import model.resources.WithResource.WithResourceType;
@@ -54,6 +55,7 @@ import sources.core.ISpaceSource;
 import sources.core.ParallelAPICall;
 import sources.core.ParallelAPICall.Priority;
 import sources.core.RecordJSONMetadata;
+import sources.utils.JsonContextRecord;
 import utils.Locks;
 
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -632,7 +634,22 @@ public class WithResourceController extends WithController {
 						sourceId, fullRecord);
 				for (RecordJSONMetadata data : recordsData) {
 					if (data.getFormat().equals("JSON-WITH")) {
+						
+						// Quality computation
+						
+						RecordQuality q = new RecordQuality();
+						double dq= q.compute(new JsonContextRecord(data.getJsonContent()));
+						// and update it
+						
+//						DB.getWithResourceDAO().updateContent(recordId, "JSON-WITH", data.getJsonContent());
+						DB.getWithResourceDAO().updateField(recordId, "qualityMeasure", dq);
+						
+						
+						RecordResource o = Json.fromJson(new JsonContextRecord(data.getJsonContent()).getRootInformation(),
+								RecordResource.class);
+						log.info("quality="+o.getQualityMeasure());
 						log.info(data.getJsonContent());
+						
 						ObjectMapper mapper = new ObjectMapper();
 						JsonNode json = mapper.readTree(data.getJsonContent())
 								.get("descriptiveData");
@@ -640,6 +657,8 @@ public class WithResourceController extends WithController {
 								CulturalObjectData.class);
 						DB.getWithResourceDAO().updateDescriptiveData(recordId,
 								descriptiveData);
+						
+						
 						String mediaString = mapper
 								.readTree(data.getJsonContent()).get("media")
 								.toString();

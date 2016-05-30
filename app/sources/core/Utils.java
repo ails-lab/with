@@ -91,6 +91,14 @@ public class Utils {
 		}
 		
 	};
+	
+	public final static Comparator<WithResource<?,?>> compareQuality = new Comparator<WithResource<?,?>>() {
+		public int compare(WithResource<?,?> o1, WithResource<?,?> o2) {
+			double d = o2.getQualityMeasure() - o1.getQualityMeasure();
+			return (int)Math.signum(d);
+		}
+		
+	};
 
 	public static String toLower(String text) {
 		if (text != null) {
