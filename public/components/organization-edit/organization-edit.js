@@ -272,7 +272,6 @@ define(['bridget','knockout', 'text!./organization-edit.html', 'isotope','images
 						var users = result.users;
 						console.log(users);
 						ko.mapping.fromJS(users, self.usersMapping, self.userMembers);
-						console.log(self.userMembers()[0].isAdmin());
 					}
 					if (result.groups !== undefined) {
 						var userGroups = result.groups;
@@ -346,7 +345,7 @@ define(['bridget','knockout', 'text!./organization-edit.html', 'isotope','images
 		};
 
 		self.makeMember = function (userId) {
-			console.log("makembember");
+			console.log("makeMember");
 			$.ajax({
 				method : "DELETE",
 				contentType : "text/plain",
@@ -359,8 +358,8 @@ define(['bridget','knockout', 'text!./organization-edit.html', 'isotope','images
 			});
 		};
 
-		self.isAdminToggle = function(isAdmin, userId){
-			if (!isAdmin) 
+		self.isAdminToggle = function(admin, userId){
+			if (!admin) 
 				self.makeMember(userId);
 			else 
 				self.makeAdmin(userId);

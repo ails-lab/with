@@ -474,9 +474,9 @@ public class GroupManager extends Controller {
 				}
 				ObjectNode userJSON = userOrGroupJson(u);
 				if (group.getAdminIds().contains(oid))
-					userJSON.put("isAdmin", "true");
+					userJSON.put("admin", "true");
 				else
-					userJSON.put("isAdmin", "false");
+					userJSON.put("admin", "false");
 				users.add(userJSON);
 			}
 		}

@@ -92,8 +92,8 @@
 										<i class="fa fa-trash"></i>
 									</a></div>
 									<div class="toggle">
-			                          <input type="checkbox" id="g1"  data-bind="{checked: isAdmin , click: $parent.isAdminToggle.bind($data, isAdmin(),userId())}">
-			                          <label for="g1"></label>
+			                          <input type="checkbox" data-bind="{checked: admin , click: $parent.isAdminToggle.bind($data, admin(), userId()), attr: {id: userId}} ">
+			                          <label data-bind="{attr: {for: userId}}" ></label>
 			                          <span class="member">member</span>
 			                          <span class="admin">admin</span>
 			                        </div>
@@ -110,8 +110,8 @@
 										<i class="fa fa-trash"></i>
 									</a></div>
 									<div class="toggle">
-			                            <input type="checkbox" id="g2"  data-bind="{checked: isAdmin , click: $parent.isAdminToggle.bind($data, isAdmin(),userId())}">
-			                          <label for="g2"></label>
+			                            <input type="checkbox"   data-bind="{checked: admin , click: $parent.isAdminToggle.bind($data, admin(),userId()),attr: {id: userId}}">
+			                          <label data-bind="{attr: {for: userId}}"></label>
 			                          <span class="member">member</span>
 			                          <span class="admin">admin</span>
 			                        </div>
