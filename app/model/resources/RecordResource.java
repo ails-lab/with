@@ -28,6 +28,7 @@ import controllers.WithController.Profile;
 import model.DescriptiveData;
 import model.EmbeddedMediaObject;
 import model.EmbeddedMediaObject.MediaVersion;
+import model.basicDataTypes.Language;
 
 
 public class RecordResource<T extends RecordResource.RecordDescriptiveData>
@@ -81,7 +82,7 @@ public class RecordResource<T extends RecordResource.RecordDescriptiveData>
 		return idx_map;
 	}
 	
-	public RecordResource getRecordProfile(String profileString) {
+	public RecordResource<T> getRecordProfile(String profileString) {
 		Profile profile = Profile.valueOf(profileString);
 		if (profile == null)
 			profile = Profile.BASIC;
@@ -91,8 +92,8 @@ public class RecordResource<T extends RecordResource.RecordDescriptiveData>
 			WithResourceType recordType = getResourceType();
 			try {
 				Class<?> clazz = Class.forName("model.resources." + recordType.toString());
-				RecordResource output;
-				output = (RecordResource) clazz.newInstance();
+				RecordResource<T> output;
+				output = (RecordResource<T>) clazz.newInstance();
 				if (profile.equals(Profile.BASIC)) { //for thumbnails view
 				//if (input.getResourceType().equals(WithResourceType.CulturalObject)) {
 					addBasicRecordFields(output);
@@ -108,7 +109,7 @@ public class RecordResource<T extends RecordResource.RecordDescriptiveData>
 				//}
 				}
 				else if (profile.equals(Profile.MEDIUM)) {
-					addBasicRecordFields(output);
+					addMediumRecordFields(output);
 					EmbeddedMediaObject thumbnail = ((HashMap<MediaVersion, EmbeddedMediaObject>) getMedia().get(0)).get(MediaVersion.Thumbnail);
 					EmbeddedMediaObject original = ((HashMap<MediaVersion, EmbeddedMediaObject>) getMedia().get(0)).get(MediaVersion.Original);
 					HashMap<MediaVersion, EmbeddedMediaObject> media = new HashMap<MediaVersion, EmbeddedMediaObject>(2);
@@ -130,8 +131,17 @@ public class RecordResource<T extends RecordResource.RecordDescriptiveData>
 		output.setAdministrative((RecordAdmin) getAdministrative());
 		output.getDescriptiveData().setLabel(getDescriptiveData().getLabel());
 		output.getDescriptiveData().setDescription(getDescriptiveData().getDescription());
-		//add more fields more from descriptive
+		//add more fields from descriptive?
 		output.setDbId(getDbId());
 		output.setProvenance(getProvenance());
+	}
+	
+	//adds all descriptiveData
+	private void addMediumRecordFields(RecordResource output) {
+		output.setResourceType(getResourceType());
+		output.setAdministrative((RecordAdmin) getAdministrative());
+		output.setDbId(getDbId());
+		output.setProvenance(getProvenance());
+		output.setDescriptiveData(getDescriptiveData());
 	}
 }
