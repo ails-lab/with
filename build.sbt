@@ -12,6 +12,7 @@ version := "1.0-SNAPSHOT"
 
 lazy val root = (project in file(".")).enablePlugins(PlayJava)
 
+
 scalaVersion := "2.11.1"
 
 libraryDependencies ++= Seq(
@@ -44,3 +45,5 @@ libraryDependencies ++= Seq(
  "org.im4java" % "im4java" % "1.4.0",
  "net.coobird" % "thumbnailator" % "0.4.8"
 )
+
+sources in doc in Compile := List() 
