@@ -1,0 +1,57 @@
+body {
+	font-family: "Open Sans", Helvetica, Arial, sans-serif;
+}
+
+.espace {
+	margin-top: 40px;
+}
+
+.espace h1 {
+	font-size: 24px;
+	margin-bottom: 0;
+	line-height: 1.2em;
+	word-spacing: 0;
+	font-weight: 800;
+}
+
+.espace h1 a {
+	color: #515151;
+	text-decoration: none;
+}
+
+.espace h1 a:hover {
+	color: #21759b;
+}
+
+.espace h2 {
+	font-size: 16px;
+	line-height: 1.4em;
+	margin: 10px 0;
+	color: #757575;
+	font-height: normal;
+}
+
+.espace .site-logo {
+	max-width: 100%;
+}
+
+.eucaption {
+	color: #757575;
+	font-size: 12px;
+	line-height: 1.4em;
+	margin-top: 10px;
+}
+
+.navbar a:hover {
+	color: #21759b;
+}
+
+.navbar {
+	border-bottom: 1px solid #515151;
+	border-top: 1px solid #515151;
+	background-color: white;
+}
+
+.navbar .withlogo a {
+	color: black;
+}

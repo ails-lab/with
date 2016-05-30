@@ -1,0 +1,45 @@
+
+      <!-- menu bar-->
+      <nav class="menubar">
+        <div class="container">
+          <ul>
+            <li class="active"><a href="#" title="#">Content Providers</a></li>
+          </ul>
+        </div>
+      </nav>
+      <!-- wrap spacer-->
+      <div class="spacer">
+        <!-- listing-->
+        <section class="listing">
+          <div class="container">
+            <!-- grid-->
+            <div class="grid" data-bind="providerIsotope: providers">
+              <!-- item-->
+              <!-- ko if: $index() === 0 -->
+              <div class="sizer"></div>
+              <!-- /ko -->
+              <!-- item-->
+              <div class="item provider">
+                <div class="wrap">
+                  <!-- anchor--><a data-bind="attr :{ href: url}" title="View provider">
+                    <!-- thumbnail-->
+                    <div class="thumb"><img data-bind="style : { visibility :  background.length>0 ? '' : 'hidden' }, attr: {src:background}"></div>
+                    <!-- info-->
+                    <div class="info"><span class="logo"><img data-bind="style : { visibility :  logo.length>0 ? '' : 'hidden' },attr: {src:logo}" alt="logo"></span>
+                      <h1 class="name"><!-- ko text:name --><!-- /ko --></h1><span class="location" data-bind="text: country"></span>
+                    </div>
+                    <!-- stats-->
+                    <ul class="stats">
+                      <li class="collection"><span class="num"><!-- ko text: totalCollections --><!-- /ko --></span><span class="type">Collection</span></li>
+                      <li class="exhibition"><span class="num"><!-- ko text: totalExhibitions --><!-- /ko --></span><span class="type">Exhibition</span></li>
+                    </ul>
+                    <!-- pointer-->
+                    <div class="pointer"><span class="arrow"><img src="img/ic-right-arrow.png" alt="Arrow"></span></div></a>
+                </div>
+              </div>
+             
+            </div>
+          </div>
+        </section>
+      </div>
+   
