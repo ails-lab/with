@@ -35,6 +35,7 @@ public class EuropeanaCollectionSpaceSource extends EuropeanaSpaceSource {
 
 	public EuropeanaCollectionSpaceSource(String collectionName) {
 		super();
+		setProfile("rich");
 		setUsingCursor(true);
 		addDefaultWriter("europeana_collectionName", qfwriter("europeana_collectionName"));
 		this.collectionName = collectionName;

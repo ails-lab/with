@@ -19,6 +19,7 @@ package general.controllerTest;
 import static org.fest.assertions.Assertions.assertThat;
 import static play.mvc.Http.Status.OK;
 import static play.test.Helpers.GET;
+import static play.test.Helpers.POST;
 import static play.test.Helpers.contentAsString;
 import static play.test.Helpers.fakeApplication;
 import static play.test.Helpers.fakeRequest;
@@ -43,6 +44,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
 import db.DB;
@@ -194,4 +196,89 @@ public class GroupManagerTest {
 		});
 	}
 
+	@Test
+	public void testAddFeatured() {
+		running(fakeApplication(), new Runnable() {
+			@Override
+			public void run() {
+
+				ObjectId groupId  = new ObjectId("560be4c3e4b0d93b055f929b");
+
+				// unsupported cast
+				ObjectNode json_inp =  Json.newObject();
+				json_inp.put("fCollections", "");
+				json_inp.put("fExhibitions", "");
+				Result result = route(fakeRequest(POST,
+						"/group/560be4c3e4b0d93b055f929b/addFeatured").withJsonBody(json_inp));
+				JsonParser parser = new JsonParser();
+				JsonObject res = parser.parse(contentAsString(result))
+						.getAsJsonObject();
+				assertThat(res.get("error")).isEqualTo("Bad value on json fields 'fCollection' or 'fExhibitions'");
+
+
+				// unsupported cast
+				json_inp =  Json.newObject();
+				json_inp.putArray("fCollections");
+				json_inp.putArray("fExhibitions");
+				result = route(fakeRequest(POST,
+						"/group/" + groupId + "/" + "addFeatured").withJsonBody(json_inp));
+				parser = new JsonParser();
+				res = parser.parse(contentAsString(result))
+						.getAsJsonObject();
+				assertThat(res.get("error")).isEqualTo("Nothing to update!");
+
+
+				// add featured
+				json_inp =  Json.newObject();
+				json_inp.putArray("fCollections").add("5731d59f78635e449045b3be").add("5731d59f78635e449045b3ae");
+				json_inp.putArray("fExhibitions").add("5731d59f78635e449045b3be");
+				result = route(fakeRequest(POST,
+						"/group/" + groupId + "/" + "addFeatured").withJsonBody(json_inp));
+				parser = new JsonParser();
+				res = parser.parse(contentAsString(result))
+						.getAsJsonObject();
+				assertThat(res.get("success")).isEqualTo("Featured Data succesfully updated!");
+			}
+		});
+	}
+
+	@Test
+	public void testRemoveFeatured() {
+			ObjectId groupId  = new ObjectId("560be4c3e4b0d93b055f929b");
+
+			// unsupported cast
+			ObjectNode json_inp =  Json.newObject();
+			json_inp.put("fCollections", "");
+			json_inp.put("fExhibitions", "");
+			Result result = route(fakeRequest(POST,
+					"/group/560be4c3e4b0d93b055f929b/addFeatured").withJsonBody(json_inp));
+			JsonParser parser = new JsonParser();
+			JsonObject res = parser.parse(contentAsString(result))
+					.getAsJsonObject();
+			assertThat(res.get("error")).isEqualTo("Bad value on json fields 'fCollection' or 'fExhibitions'");
+
+
+			// unsupported cast
+			json_inp =  Json.newObject();
+			json_inp.putArray("fCollections");
+			json_inp.putArray("fExhibitions");
+			result = route(fakeRequest(POST,
+					"/group/" + groupId + "/" + "addFeatured").withJsonBody(json_inp));
+			parser = new JsonParser();
+			res = parser.parse(contentAsString(result))
+					.getAsJsonObject();
+			assertThat(res.get("error")).isEqualTo("Nothing to update!");
+
+
+			// add featured
+			json_inp =  Json.newObject();
+			json_inp.putArray("fCollections").add("5731d59f78635e449045b3be").add("5731d59f78635e449045b3ae");
+			json_inp.putArray("fExhibitions").add("5731d59f78635e449045b3be");
+			result = route(fakeRequest(POST,
+					"/group/" + groupId + "/" + "addFeatured").withJsonBody(json_inp));
+			parser = new JsonParser();
+			res = parser.parse(contentAsString(result))
+					.getAsJsonObject();
+			assertThat(res.get("success")).isEqualTo("Featured Data succesfully updated!");
+	}
 }

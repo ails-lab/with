@@ -34,7 +34,7 @@ public class CollectTest {
 		String id = args[k++];
 		ESpaceSources.getESources();
 		for (ISpaceSource src : ESpaceSources.getESources()) {
-			if (src.sourceLABEL.equals(source)) {
+			if (src.getSourceName().toString().equals(source)) {
 				List<RecordJSONMetadata> l = src.getRecordFromSource(id, null);
 				for (RecordJSONMetadata recordJSONMetadata : l) {
 					if (recordJSONMetadata.hasFormat(Format.JSON_WITH)) {

@@ -704,7 +704,7 @@ define(['bridget','knockout', 'text!./organization-edit.html', 'isotope','images
 				dataType: "json",
 				url: "/collection/list",
 				processData: false,
-				data: "offset=0&count=500&directlyAccessedByUserOrGroup=" + JSON.stringify([{group: self.username(), rights: "WRITE"}])
+				data: "offset=0&count=50&directlyAccessedByUserOrGroup=" + JSON.stringify([{group: self.username(), rights: "WRITE"}])
 			}).success(function (data, textStatus, jqXHR) {
 				var items=self.revealItems(data['collectionsOrExhibitions']);
 

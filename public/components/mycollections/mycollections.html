@@ -41,7 +41,7 @@
 			</section>
 			<!-- message-->
 			 <!-- ko if: showsExhibitions -->
-			 <!-- ko if: exhibitionCount == 0 -->
+			 <!-- ko if: exhibitionCount() >= 0 -->
 			 <section class="message"><img src="img/ui/ic-inbox.png" class="hero">
 			  <div class="message-body">
 				<div class="header">Welcome to My Exhibitions</div>
@@ -55,7 +55,7 @@
 			  <!-- /ko -->
 			  <!-- /ko -->
 			  <!-- ko else -->
-			  <!-- ko if: collectionCount() == 0 -->
+			  <!-- ko if: collectionCount() >= 0 -->
 			  <section class="message"><img src="img/ui/ic-inbox.png" class="hero">
 			  <div class="message-body">
 				<div class="header">Welcome to My Collections</div>
@@ -72,7 +72,7 @@
 			<section class="collection-list">
 			  <!-- collection main header-->
 			  <div class="list-head">
-			    <!-- item count--><span class="item-count"><!-- ko if: showsExhibitions -->7 exhibitions<!-- /ko --><!-- ko ifnot: showsExhibitions --> 7 collections <!-- /ko --></span>
+			    <!-- item count--><span class="item-count"><!-- ko text: collectionOrExhibitionCount() --><!-- /ko --></span>
 				<div class="sort"><span>Sort by</span><a id="sorting" href="#" data-toggle="dropdown"><span class="text">Date</span><span class="arrow"></span></a>
 				  <!-- dropdown-->
 				  <ul aria-labelledby="sorting" class="dropdown-menu">
@@ -86,17 +86,17 @@
 				</div>
 				 <!-- search-->
                   <div class="filtertype"><img src="img/ui/ic-mag.png" class="mag">
-                    <input type="text" placeholder="Search" class="filtertext">
+                    <input type="text" placeholder="Search" class="filtertext" data-bind="value:query, valueUpdate:'keyup'" autocomplete="off"">
                   </div>
 			  </div>
 			  <!-- listing-->
 			  <ul class="list-body grids">
 			       <!--  ko if: collectionSet()=='my' -->
-			       <!-- ko template: { name: 'collectionsTemplate', foreach: myCollections()} -->
+			       <!-- ko template: { name: 'collectionsTemplate', foreach:searchMyCollections()} -->
 			       <!-- /ko -->
 			       <!-- /ko -->
 			       <!--  ko ifnot: collectionSet()=='my' -->
-			       <!-- ko template: { name: 'collectionsTemplate', foreach: sharedCollections()} -->
+			       <!-- ko template: { name: 'collectionsTemplate', foreach: searchSharedCollections()} -->
 			       <!-- /ko -->
 			       <!-- /ko -->
 			  <a style="cursor:pointer;" class="loadmore"
@@ -348,7 +348,7 @@
 				  	<a title="View exhibition" data-bind="{text: title(), attr: {href: 'index.html#exhibitionview/'+dbId()}}" class="header truncate"></a>
 				  	<!-- /ko -->
 					<!-- ko else -->
-					<a class="header" data-bind="{text: title(), attr: {href: 'index.html#collectionview/'+dbId()}}" class="header truncate"></a>
+					<a data-bind="{text: title(), attr: {href: 'index.html#collectionview/'+dbId()}}" class="header truncate"></a>
 					<!-- /ko -->
 					<div class="description" data-bind="text: description()"></div>
 					<div class="other-info">

@@ -26,6 +26,7 @@ import model.annotations.ContextData.ContextDataBody;
 public class ExhibitionData extends ContextData<ExhibitionData.ExhibitionAnnotationBody> {
 	
 	public static enum MediaType {VIDEO, AUDIO};
+	public static enum TextPosition {LEFT, RIGHT};
 
 	public ExhibitionData() {
 		super();
@@ -39,6 +40,8 @@ public class ExhibitionData extends ContextData<ExhibitionData.ExhibitionAnnotat
 		Literal text = new Literal();
 		String mediaUrl="";
 		String mediaDescription="";
+		TextPosition textPosition = TextPosition.RIGHT;
+		
 		MediaType mediaType = null;
 
 		public Literal getText() {
@@ -47,6 +50,15 @@ public class ExhibitionData extends ContextData<ExhibitionData.ExhibitionAnnotat
 		public void setText(Literal text) {
 			this.text = text;
 		}
+		
+		public void setTextPosition(TextPosition textPosition) {
+			this.textPosition = textPosition;
+		}
+		
+		public TextPosition getTextPosition() {
+			return textPosition;
+		}
+		
 		public String getMediaUrl() {
 			return mediaUrl;
 		}

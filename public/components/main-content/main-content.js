@@ -370,9 +370,9 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 				type: "GET",
 				contentType: "application/json",
 				dataType: "json",
-				url: "/collection/list",
+				url: "/collection/listPublic",
 				processData: false,
-				data: "offset=0&count="+self.fetchitemnum+"&collectionHits=true&isPublic=true&isExhibition=false",
+				data: "offset=0&count="+self.fetchitemnum+"&collectionHits=true&isExhibition=false",
 			}).success (function(){
 			});
 		};
@@ -384,9 +384,9 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 				type: "GET",
 				contentType: "application/json",
 				dataType: "json",
-				url: "/collection/list",
+				url: "/collection/listPublic",
 				processData: false,
-				data: "offset=0&count="+self.fetchitemnum+"&collectionHits=true&isPublic=true&isExhibition=true",
+				data: "offset=0&count="+self.fetchitemnum+"&collectionHits=true&isExhibition=true",
 			}).success (function(){
 			});
 		};
@@ -458,9 +458,9 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 				type: "GET",
 				contentType: "application/json",
 				dataType: "json",
-				url: "/collection/list",
+				url: "/collection/listPublic",
 				processData: false,
-				data: "isPublic=true&count="+self.fetchitemnum+"&offset=" + self.collections().length+"&isExhibition=false",
+				data: "count="+self.fetchitemnum+"&offset=" + self.collections().length+"&isExhibition=false",
 			}).success (function(){
 			});
 			
@@ -471,9 +471,9 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 				type: "GET",
 				contentType: "application/json",
 				dataType: "json",
-				url: "/collection/list",
+				url: "/collection/listPublic",
 				processData: false,
-				data: "isPublic=true&count="+self.fetchitemnum+"&offset=" + self.exhibitions().length+"&isExhibition=true",
+				data: "count="+self.fetchitemnum+"&offset=" + self.exhibitions().length+"&isExhibition=true",
 			}).success (function(){
 			});
 			

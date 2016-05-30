@@ -14,7 +14,7 @@
  */
 
 
-package controllers
+package filters
 
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import play.api.mvc._

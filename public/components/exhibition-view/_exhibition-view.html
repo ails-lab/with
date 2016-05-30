@@ -35,43 +35,40 @@
                   </div>
                   <!-- item-->
                   <!-- ko foreach: exhItems -->
-                  <div data-bind="css: css">
+                  	<div class="item" data-bind="css: {style1: textPosition == 'RIGHT', style2: textPosition == 'LEFT'}">
                     <div class="container">
-                      <!-- image-->
+                      	 <div class="textbox">
+                          <div class="wrap">
+                          <h2  data-bind="text: title"></h2>
+                          <p data-bind="text: annotation">
+                          </p>
+                         </div>
+                        </div>
                       <div class="imagewrap"><img data-bind="attr: { src: fullres }" alt="">
                         <ul class="action">
                           <li class="zoom"><a data-bind="attr: { href: fullres, 'title': title }" class="imagezoom"><i class="glyphicon glyphicon-resize-full"></i></a></li>
                           <li class="view"><a data-bind="attr: { href: view_url }" title="#"><i class="glyphicon glyphicon-link"></i></a></li>
                         </ul>
                       </div>
-                      <!-- title-->
-                      <div class="textbox">
-                        <div class="wrap">
-                          <h2  data-bind="text: title"></h2>
-                          <p data-bind="text: annotation">
-                          </p>
-                          <!--  ko if: $data.hasOwnProperty('mediaUrl') -->
-                            <div class="videoWrap">
-                            	<!-- ko if: mediaType == "VIDEO" -->
-                                	<div class="embed-responsive embed-responsive-16by9">
-                                    	<iframe width="100%" height="100%" data-bind="attr: { src: mediaUrl }" frameborder="0" allowfullscreen></iframe>
-                                	</div>
-                                <!-- /ko -->
-                                <!-- ko if: mediaType == "AUDIO" -->
-	                                <p></p>
-		                          	<audio id="mediaplayer" controls style="width: 180px;" width="576" height="324">
-		                          		<source data-bind="attr:{src: mediaUrl}" type="audio/mpeg">Your browser does not support HTML5
-		                          	</audio>
-								<!-- /ko -->
-                                 	<!--  ko if: $data.hasOwnProperty('mediaDescription') -->
-		                       		<!-- <div class="imginfo"><span class="mediatitle" data-bind="text: mediaDescription"></span></div>-->
-		                        <!-- /ko -->
-                            </div>
-                            <!-- /ko -->
-                          <div class="expand"><a title="#"><i class="glyphicon glyphicon-chevron-up"></i></a></div>
-                        </div>
-                      </div>
+                      <!--  ko if: $data.hasOwnProperty('mediaUrl') -->
+                    <div class="imageWrap">
+                    	<!-- ko if: mediaType == "VIDEO" -->
+                        	<div class="embed-responsive embed-responsive-16by9">
+                            	<iframe width="100%" height="100%" data-bind="attr: { src: mediaUrl }" frameborder="0" allowfullscreen></iframe>
+                        	</div>
+                        <!-- /ko -->
+                        <!-- ko if: mediaType == "AUDIO" -->
+                            <p></p>
+                          	<audio id="mediaplayer" controls style="width: 180px;" width="576" height="324">
+                          		<source data-bind="attr:{src: mediaUrl}" type="audio/mpeg">Your browser does not support HTML5
+                          	</audio>
+						<!-- /ko -->
+                         	<!--  ko if: $data.hasOwnProperty('mediaDescription') -->
+                       		<!-- <div class="imginfo"><span class="mediatitle" data-bind="text: mediaDescription"></span></div>-->
+                        <!-- /ko -->
                     </div>
+                    <!-- /ko -->
+                     </div>
                   </div>
                   <!--/ko-->
                   <!-- item-->
@@ -94,8 +91,7 @@
                             </div>-->
                             <!-- right-->
                             <!--<div class="right">           
-                            </div>-->
-                            
+                            </div>-->           
                     	</div>
                     </div>
                 	</div>
