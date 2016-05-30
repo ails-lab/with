@@ -384,13 +384,13 @@ define(['knockout', 'text!./myorganizations.html', 'app', 'moment', 'async!https
 			return groupCall;
 		};
 
-		
+
 		self.makeAdmin = function (userId) {
 			console.log("makeAdmin");
 			$.ajax({
 				method : "PUT",
 				contentType : "text/plain",
-				url : "/group/admin/" + self.id() + "?id=" + userId,
+				url : "/group/admin/" + self.groupId() + "?id=" + userId,
 				success : function (result) {
 					/*self.image = userData.image;
 					self.userMembers.push(ko.mapping.fromJS(userData));*/
@@ -406,7 +406,7 @@ define(['knockout', 'text!./myorganizations.html', 'app', 'moment', 'async!https
 			$.ajax({
 				method : "DELETE",
 				contentType : "text/plain",
-				url : "/group/admin/" + self.id() + "?id=" + userId,
+				url : "/group/admin/" + self.groupId() + "?id=" + userId,
 				success : function (result) {
 				},
 				error : function (result) {
