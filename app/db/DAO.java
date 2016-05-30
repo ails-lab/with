@@ -26,6 +26,8 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 
 import play.libs.F.Promise;
+import play.libs.Json;
+import model.quality.RecordQuality;
 import model.resources.WithResource.WithResourceType;
 
 import org.bson.types.ObjectId;
@@ -441,6 +443,18 @@ public class DAO<E> extends BasicDAO<E, ObjectId> {
 		return existsFieldWithValue("_id", id);
 	}
 
+
+	
+	
+	public void computeAndUpdateQuality(ObjectId id) {
+		RecordQuality q = new RecordQuality();
+		E obj = getById(id, Arrays.asList("descriptiveData","provenance", "media"));
+		double dq= q.compute(new JsonContextRecord(Json.toJson(obj)));
+		log.info("Quality "+dq);
+		updateField(id, "qualityMeasure", dq);
+	}
+	
+	
 	public void updateField(ObjectId id, String field, Object value) {
 		Query<E> q = this.createQuery().field("_id").equal(id);
 		UpdateOperations<E> updateOps = this.createUpdateOperations()

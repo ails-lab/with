@@ -636,19 +636,7 @@ public class WithResourceController extends WithController {
 				for (RecordJSONMetadata data : recordsData) {
 					if (data.getFormat().equals("JSON-WITH")) {
 						
-						// Quality computation
-						
-						RecordQuality q = new RecordQuality();
-						double dq= q.compute(new JsonContextRecord(data.getJsonContent()));
-						// and update it
-						
-//						DB.getWithResourceDAO().updateContent(recordId, "JSON-WITH", data.getJsonContent());
-						DB.getWithResourceDAO().updateField(recordId, "qualityMeasure", dq);
-						
-						
-						RecordResource o = Json.fromJson(new JsonContextRecord(data.getJsonContent()).getRootInformation(),
-								RecordResource.class);
-						log.info("quality="+o.getQualityMeasure());
+						DB.getWithResourceDAO().computeAndUpdateQuality(recordId);
 						log.info(data.getJsonContent());
 						
 						ObjectMapper mapper = new ObjectMapper();
