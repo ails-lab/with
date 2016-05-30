@@ -871,6 +871,8 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 			} else {
 				$.smkAlert({ text: 'Not a valid operation!', type: 'danger', time: 10 });
 			}
+			$('.tab').removeClass('active');
+			$(clickedElement).addClass('active');
 			self.moreCollectionData(true);
 		};
 
