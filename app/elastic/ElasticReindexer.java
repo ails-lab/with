@@ -17,6 +17,7 @@
 package elastic;
 
 
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -66,37 +67,42 @@ public class ElasticReindexer {
 		/* Index all RecordResources */
 		for(int i = 0; i < (countAllRR/1000); i++) {
 			Query<RecordResource> q = DB.getDs().createQuery(RecordResource.class).offset(i*1000).limit(1000);
-			List<RecordResource> resourceCursor = DB.getRecordResourceDAO().find(q).asList();
-			for(RecordResource rr: resourceCursor) {
+			Iterator<RecordResource> resourceCursor = DB.getRecordResourceDAO().find(q).iterator();
+			while(resourceCursor.hasNext()) {
+				RecordResource rr = resourceCursor.next();
 				bulk.add(new IndexRequest(Elastic.index, ElasticUtils.defineInstanceOf(rr), rr.getDbId().toString())
-						.source(rr.transform()));
+				.source(rr.transform()));
 			}
 			bulk.flush();
 		}
 
 		Query<RecordResource> q = DB.getDs().createQuery(RecordResource.class).offset((int)(countAllRR/1000)*1000).limit(1000);
-		List<RecordResource> resourceCursor = DB.getRecordResourceDAO().find(q).asList();
-		for(RecordResource rr: resourceCursor) {
+		Iterator<RecordResource> resourceCursor = DB.getRecordResourceDAO().find(q).iterator();
+		while(resourceCursor.hasNext()) {
+			RecordResource rr = resourceCursor.next();
 			bulk.add(new IndexRequest(Elastic.index, ElasticUtils.defineInstanceOf(rr), rr.getDbId().toString())
-					.source(rr.transform()));
+			.source(rr.transform()));
 		}
+		bulk.flush();
 
 		/* Index all CollectionObjects */
 		for(int i = 0; i < (countAllCO/1000); i++) {
 			Query<CollectionObject> q1 = DB.getDs().createQuery(CollectionObject.class).offset(i*1000).limit(1000);
-			List<CollectionObject> collectionCursor = DB.getCollectionObjectDAO().find(q1).asList();
-			for(CollectionObject co: collectionCursor) {
+			Iterator<CollectionObject> collectionCursor = DB.getCollectionObjectDAO().find(q1).iterator();
+			while(collectionCursor.hasNext()){
+				CollectionObject co = collectionCursor.next();
 				bulk.add(new IndexRequest(Elastic.index, ElasticUtils.defineInstanceOf(co), co.getDbId().toString())
-						.source(co.transform()));
+				.source(co.transform()));
 			}
 			bulk.flush();
 		}
 
 		Query<CollectionObject> q1 = DB.getDs().createQuery(CollectionObject.class).offset((int)(countAllRR/1000)*1000).limit(1000);
-		List<CollectionObject> collectionCursor = DB.getCollectionObjectDAO().find(q1).asList();
-		for(CollectionObject co: collectionCursor) {
+		Iterator<CollectionObject> collectionCursor = DB.getCollectionObjectDAO().find(q1).iterator();
+		while(collectionCursor.hasNext()){
+			CollectionObject co = collectionCursor.next();
 			bulk.add(new IndexRequest(Elastic.index, ElasticUtils.defineInstanceOf(co), co.getDbId().toString())
-					.source(co.transform()));
+			.source(co.transform()));
 		}
 
 		bulk.close();
@@ -195,6 +201,41 @@ public class ElasticReindexer {
 	}
 
 	/*
+	 * Re-index all collection objects
+	 */
+	public static boolean reindexAllDbCollections() {
+
+		BulkProcessor bulk = Elastic.getBulkProcessor();
+		long countAllTH = DB.getCollectionObjectDAO().find().countAll();
+
+		/* Index all CollectionObjects */
+		for(int i = 0; i < (countAllTH/1000); i++) {
+			Query<CollectionObject> q = DB.getDs().createQuery(CollectionObject.class).offset(i*1000).limit(1000);
+			Iterator<CollectionObject> collectionCursor = DB.getCollectionObjectDAO().find(q).iterator();
+			while(collectionCursor.hasNext()) {
+				CollectionObject co = collectionCursor.next();
+				bulk.add(new IndexRequest(Elastic.index, ElasticUtils.defineInstanceOf(co), co.getDbId().toString())
+				.source(co.transform()));
+			}
+			bulk.flush();
+		}
+
+		Query<CollectionObject> q = DB.getDs().createQuery(CollectionObject.class).retrievedFields(false, "collectedResources").offset((int)(countAllTH/1000)*1000).limit(1000);
+		@SuppressWarnings("unused")
+		int count = (int) q.countAll();
+		Iterator<CollectionObject> collectionCursor = DB.getCollectionObjectDAO().find(q).iterator();
+		while(collectionCursor.hasNext()) {
+			CollectionObject co = collectionCursor.next();
+			bulk.add(new IndexRequest(Elastic.index, ElasticUtils.defineInstanceOf(co), co.getDbId().toString())
+			.source(co.transform()));
+		}
+
+		bulk.close();
+		return true;
+
+	}
+
+	/*
 	 *
 	 */
 	public static boolean reindexAllDbThesaurus() {
@@ -205,19 +246,21 @@ public class ElasticReindexer {
 		/* Index all RecordResources */
 		for(int i = 0; i < (countAllTH/1000); i++) {
 			Query<ThesaurusObject> q = DB.getDs().createQuery(ThesaurusObject.class).offset(i*1000).limit(1000);
-			List<ThesaurusObject> thesaurusCursor = DB.getThesaurusDAO().find(q).asList();
-			for(ThesaurusObject th: thesaurusCursor) {
+			Iterator<ThesaurusObject> thesaurusCursor = DB.getThesaurusDAO().find(q).iterator();
+			while(thesaurusCursor.hasNext()) {
+				ThesaurusObject th = thesaurusCursor.next();
 				bulk.add(new IndexRequest(Elastic.index, ElasticUtils.defineInstanceOf(th), th.getDbid().toString())
-						.source(th.transform()));
+				.source(th.transform()));
 			}
 			bulk.flush();
 		}
 
 		Query<ThesaurusObject> q = DB.getDs().createQuery(ThesaurusObject.class).offset((int)(countAllTH/1000)*1000).limit(1000);
-		List<ThesaurusObject> thesaurusCursor = DB.getThesaurusDAO().find(q).asList();
-		for(ThesaurusObject th: thesaurusCursor) {
+		Iterator<ThesaurusObject> thesaurusCursor = DB.getThesaurusDAO().find(q).iterator();
+		while(thesaurusCursor.hasNext()) {
+			ThesaurusObject th = thesaurusCursor.next();
 			bulk.add(new IndexRequest(Elastic.index, ElasticUtils.defineInstanceOf(th), th.getDbid().toString())
-					.source(th.transform()));
+			.source(th.transform()));
 		}
 
 		bulk.close();

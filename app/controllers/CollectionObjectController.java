@@ -1013,13 +1013,11 @@ public class CollectionObjectController extends WithResourceController {
 			Option<MyPlayList> recursivelyAccessedByUserOrGroup) {
 		ObjectNode result = Json.newObject();
 
-		List<String> effectiveUserIds = AccessManager
-				.effectiveUserIds(session().get("effectiveUserIds"));
-		if (effectiveUserIds.isEmpty()) {
+		if (effectiveUserIds().isEmpty()) {
 			return forbidden(Json
 					.parse("\"error\", \"Must specify user for the collection\""));
 		}
-		ObjectId userId = new ObjectId(effectiveUserIds.get(0));
+		ObjectId userId = new ObjectId(effectiveUserId());
 		List<List<Tuple<ObjectId, Access>>> accessedByUserOrGroup = new ArrayList<List<Tuple<ObjectId, Access>>>();
 		accessedByUserOrGroup = accessibleByUserOrGroup(
 				directlyAccessedByUserOrGroup,
@@ -1031,7 +1029,7 @@ public class CollectionObjectController extends WithResourceController {
 			accessedByUserOrGroup.add(accessedByLoggedInUser);
 		} else {// indirectly: include collections for which user has access
 				// via userGoup sharing
-			for (String effectiveId : effectiveUserIds) {
+			for (String effectiveId : effectiveUserIds()) {
 				accessedByLoggedInUser.add(new Tuple<ObjectId, Access>(
 						new ObjectId(effectiveId), Access.READ));
 			}
@@ -1060,9 +1058,7 @@ public class CollectionObjectController extends WithResourceController {
 	public static Result searchWithinCollection(String collectionId, String term) {
 		ObjectNode result = Json.newObject();
 
-		List<String> effectiveUserIds = AccessManager
-				.effectiveUserIds(session().get("effectiveUserIds"));
-		if (effectiveUserIds.isEmpty()) {
+		if (effectiveUserIds().isEmpty()) {
 			return forbidden(Json
 					.parse("\"error\", \"Must specify user for the collection\""));
 		}
