@@ -52,6 +52,7 @@ import utils.Serializer;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -375,7 +376,7 @@ public class WithResource<T extends DescriptiveData, U extends WithResource.With
 	//@JsonDeserialize(using = Deserializer.ContextDataDeserializer.class)
 	private ContextData contextData;
 	
-	@Embedded
+	@JsonInclude(Include.ALWAYS)
 	private double qualityMeasure;
 
 	public double getQualityMeasure() {
