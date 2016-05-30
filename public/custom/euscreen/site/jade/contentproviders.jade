@@ -1,0 +1,38 @@
+//- index.jade
+
+//- variables
+- var title = "EUscreen Space - Content Providers"
+- var page  = "contentproviders"
+
+doctype html
+html
+
+	//- head
+	include ./includes/head.jade
+
+	//- body
+	body( data-page="#{page}" )
+		
+		// header
+		include ./includes/header.jade
+
+		// main
+		div( role="main" )
+
+			// menu bar
+			nav.menubar
+				.container
+						
+					ul
+						li.active
+							a( href="#" title="#" )
+								| Content Providers
+
+			// wrap spacer
+			.spacer
+				
+				// listing
+				include ./includes/listing.providers.jade
+
+		// script
+		include ./includes/script.jade

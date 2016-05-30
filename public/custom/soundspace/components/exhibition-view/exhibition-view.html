@@ -1,0 +1,63 @@
+
+<!-- menu bar-->
+<nav class="titlebar exhibition">
+    <div class="container">
+        <!-- title--><span class="title" data-bind="text:exhName"></span>
+        <!-- action-->
+        <ul class="action">
+            <li class="hidden"><a href="#" title="#"><img src="img/ic-expand.png"></a></li>
+            <li><a href="javascript:void(0)" title="#"  onclick="window.history.go(-1); return false;"><img src="img/ic-close.png"></a></li>
+        </ul>
+    </div>
+</nav>
+<!--  ko if: showCarousel-->
+<!-- exhibition carousel-->
+<section class="exhibitionplayer">
+    <!-- carousel-->
+    <!--  ko if: exhItems().length > 0 -->
+    <div data-bind="backgroundImage" class="wrap">
+        <div class="carouselexhibition hue">
+            <!-- item-->
+            <div class="item main">
+                <div class="container">
+                    <!-- title-->
+                    <h1 class="title" data-bind="text: exhName"></h1>
+                    <div class="description">
+                        <p data-bind="text: desc"></p>
+                    </div><a title="START EXHIBITION" class="btn btn-blue">START EXHIBITION</a>
+                </div>
+            </div>
+            <!-- items-->
+            <!-- ko foreach: exhItems -->
+            <div data-bind="css: css">
+                <div class="container">
+                    <!-- image-->
+                    <div class="imagewrap"><img data-bind="attr: {src: fullres}" alt="">
+                        <ul class="action">
+                            <li class="zoom"><a data-bind="attr: {href: fullres, 'title': title}" class="imagezoom"><i class="glyphicon glyphicon-resize-full"></i></a></li>
+                            <li class="view"><a data-bind="attr: {href: view_url}" title="#"><i class="glyphicon glyphicon-link"></i></a></li>
+                        </ul>
+                    </div>
+                    <!-- title-->
+                    <div class="textbox">
+                        <div class="wrap">
+                            <h2 data-bind="text: title"></h2>
+                            <p data-bind="text: annotation"></p>
+                            <!--  ko if: $data.hasOwnProperty('videoUrl') -->
+                            <div class="videoWrap">
+                                <div class="embed-responsive embed-responsive-16by9">
+                                    <iframe width="100%" height="100%" data-bind="attr: {src: videoUrl}" frameborder="0" allowfullscreen></iframe>
+                                </div>
+                            </div>
+                            <!-- /ko -->
+                            <div class="expand"><a title="#"><i class="glyphicon glyphicon-chevron-up"></i></a></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- /ko -->
+        </div>
+    </div>
+    <!-- /ko -->
+</section>
+<!-- /ko -->

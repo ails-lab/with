@@ -1,0 +1,80 @@
+//- index.jade
+
+//- variables
+- var title = "EUscreen Space - Search"
+- var page  = "search"
+- var searchtype  = "grid"
+
+doctype html
+html
+
+	//- head
+	include ./includes/head.jade
+
+	//- body
+	body( data-page="#{page}" )
+		
+		// header
+		include ./includes/header.jade
+
+		// main
+		div( role="main" )
+
+			// searchbar
+			section.searchbar
+				.container
+
+					// wrap
+					.wrap
+
+						// settings bar
+						.settings
+							a( href="#" title="#" )
+								img( src="img/ic-setting.png" alt="settings" )
+							
+							//- search settings
+							include ./includes/search.setting.jade
+
+						// input
+						.searchbox
+							img.icon( src="img/ic-search-blue.png" alt="Search" )
+							input.searchinput( type="text" placeholder="Search media" )
+
+						// view setting
+						ul.view
+							li( class=searchtype === "list" ? "active" : "" )
+								a( href="search.html" title="#" )
+									img( src="img/ic-list.png" alt="list" )
+							li( class=searchtype === "grid" ? "active" : "" )
+								a( href="searchgrid.html" title="#" )
+									img( src="img/ic-grid.png" alt="grid" )
+
+					// close search
+					a.close( href="#" title="Close Search" )
+						img( src="img/ic-close-white.png" alt="" )
+
+			// search filter
+			section.searchlabel
+				.container
+
+					// label
+					span.label
+						span.text Lorem
+						a( href="#" )
+							i.glyphicon.glyphicon-remove
+
+					// label
+					span.label
+						span.text Ipsum Dolor
+						a( href="#" )
+							i.glyphicon.glyphicon-remove
+
+			// wrap spacer
+			.spacer.search.gridlist
+
+				// listing
+				include ./includes/listing.search.jade
+
+			
+		// script
+		include ./includes/script.jade

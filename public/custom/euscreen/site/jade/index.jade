@@ -1,0 +1,77 @@
+//- index.jade
+
+//- variables
+- var title = "EUscreen Space"
+- var page  = "home"
+
+doctype html
+html
+
+	//- head
+	include ./includes/head.jade
+
+	//- body
+	body( data-page="#{page}" )
+		
+		// header
+		include ./includes/header.home.jade
+
+		// main
+		div( role="main" )
+
+			// featured
+			section.featured
+				.container
+
+					// title
+					.sectionhead
+						| FEATURED EXHIBITION
+
+					// featured exhibition
+					.exhibition
+						.hue
+
+							// info
+							.info
+								div.type
+									| EXHIBITION
+								h1.title
+									| The path of a cosmonaut is not an easy path
+								div.description
+									
+									// description
+									div.text
+										| Triumphant march to glory. You have to get to know the meaning not just 
+										| of joy but also of grief, before being allowed in the spacecraft cabin.
+										| Discover exhibits and collections from museums and archives all around the world. Explore cultural treasures in extraordinary detail from hidden gems to masterpieces. 
+									
+									// view button
+									div.view
+										a( href="exhibition.html" title="VIEW EXHIBITION" class="btn btn-view blue" )
+											img( src="img/ic-right-arrow.png" alt="view") 
+
+							// thumbnails
+							.thumbnails
+
+								// left
+								.left
+									.imagewrapper
+										img( src="img/content/thumb-owl.png" alt="owl")
+									.title
+										| THE WORLD TOP AMAZING ANIMALS
+
+								// right
+								.right
+									.imagewrapper
+										img( src="img/content/thumb-elephant.png" alt="owl")
+									.title
+										| LOREM IPSUM DOLOR SIT AMET
+
+			// filter
+			include ./includes/filter.jade
+
+			// listing
+			include ./includes/listing.jade
+
+		// script
+		include ./includes/script.jade

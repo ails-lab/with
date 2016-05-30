@@ -1,0 +1,26 @@
+//- filter.jade
+section.filter
+	.container
+
+		//- wrap
+		.wrap
+
+			// menu
+			ul.nav
+				li.active( data-filter="*" )
+					a( href="#" title="ALL" ) 
+						| All
+				li( data-filter=".exhibition" )
+					a( href="#" title="EXHIBITION" ) 
+						| Exhibition
+				li( data-filter=".collection" )
+					a( href="#" title="COLLECTION" ) 
+						| Collection
+
+			// menu
+			ul.counter
+				li.collection
+					| 31 Collection
+				li.exhibition
+					| 10 Exhibition
+			

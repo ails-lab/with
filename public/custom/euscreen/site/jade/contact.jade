@@ -1,0 +1,57 @@
+//- index.jade
+
+//- variables
+- var title = "EUscreen Space - Feedback & Contact"
+- var page  = "contact"
+
+doctype html
+html
+
+	//- head
+	include ./includes/head.jade
+
+	//- body
+	body( data-page="#{page}" )
+		
+		// header
+		include ./includes/header.jade
+
+		// main
+		div( role="main" )
+
+			// menu bar
+			include ./includes/menubar.jade
+
+			// hero bar
+			section.hero
+				.hue
+
+					// container
+					.container
+
+						// banner
+						.banner
+							h1
+								| Feedback &amp; Contact
+							p
+								| Discover exhibits and collections from museums and archives all around the world.
+								| Explore cultural treasures in extraordinary detail from hidden gems to masterpieces. 
+
+			
+			// section
+			section.inner.terms
+				.container
+
+					// wrap
+					.wrap
+						h1
+							| Feedback &amp; Contact
+						p
+							| We cordially invite you to leave comments or feedback. Your input is valuable as it will allow us to respond to your requests and improve the EUscreen experience. Many thanks in advance for your assistance. 
+						a.btn.btn-alt.btn-contact( href="#" )
+							| CONTACT US FOR FURTHER INQUIRIES
+
+						
+
+		// script
+		include ./includes/script.jade

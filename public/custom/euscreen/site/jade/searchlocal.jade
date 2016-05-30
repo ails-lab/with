@@ -1,0 +1,65 @@
+//- index.jade
+
+//- variables
+- var title = "EUscreen Space - Search"
+- var page  = "search"
+
+doctype html
+html
+
+	//- head
+	include ./includes/head.jade
+
+	//- body
+	body( data-page="#{page}" )
+		
+		// header
+		include ./includes/header.jade
+
+		// main
+		div( role="main" )
+
+			// searchbar
+			section.searchbar.local
+				.container
+
+					// wrap
+					.wrap
+
+						// settings bar
+						.settings
+							a( href="#" title="#" )
+								img( src="img/ic-setting.png" alt="settings" )
+
+						// input
+						.searchbox
+							img.icon( src="img/ic-search-blue.png" alt="Search" )
+							input.searchinput( type="text" placeholder="Search exhibition and collection" )
+
+						// view setting
+						ul.view
+							li.active
+								a( href="#" title="#" )
+									img( src="img/ic-list.png" alt="list" )
+							li
+								a( href="#" title="#" )
+									img( src="img/ic-grid.png" alt="list" )
+					
+					// close search
+					a.close( href="#" title="Close Search" )
+						img( src="img/ic-close-white.png" alt="" )
+
+			// spacer
+			.spacer.searchlocal 
+
+				// filter
+				include ./includes/filter.jade
+
+				// listing
+				include ./includes/listing.jade
+
+
+
+
+		// script
+		include ./includes/script.jade

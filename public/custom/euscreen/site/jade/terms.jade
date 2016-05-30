@@ -1,0 +1,75 @@
+//- index.jade
+
+//- variables
+- var title = "EUscreen Space - Terms of Use"
+- var page  = "terms"
+
+doctype html
+html
+
+	//- head
+	include ./includes/head.jade
+
+	//- body
+	body( data-page="#{page}" )
+		
+		// header
+		include ./includes/header.jade
+
+		// main
+		div( role="main" )
+
+			// menu bar
+			include ./includes/menubar.jade
+
+			// hero bar
+			section.hero
+				.hue
+
+					// container
+					.container
+
+						// banner
+						.banner
+							h1
+								| Terms of Use
+							p
+								| Discover exhibits and collections from museums and archives all around the world.
+								| Explore cultural treasures in extraordinary detail from hidden gems to masterpieces. 
+
+			
+			// section
+			section.inner.terms
+				.container
+
+					// wrap
+					.wrap
+						h1
+							| Terms of Use
+
+						p
+							| These Terms of Use apply to all use of the Website (as defined below). Please read these Terms of Use carefully so 	
+							| that you know what your rights and obligations are when you use the Website. These Terms of Use constitute a valid 
+							| and binding agreement between EUscreen and you, for the use of the Website.
+
+						hr 
+
+						h2 1. Definitions
+						p
+							| Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore 
+							| et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut 
+							| aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse
+							| cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+
+						h2 2. Contribution
+						p
+							| Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore 
+							| et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut 
+							| aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse
+							| cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+
+						h3 3. Intellectual Property rights
+						p
+							| The Website as well as all Content published on and/or transmitted by means of the Website, are protected by Intellectual Property Rights. The Intellectual Property Rights with regard to the Website and the Content, including but not limited to the texts, images, design, photographs, software, audiovisual material and other materials are exclusively vested in EUscreen or its licensors. This article does not apply to the Contributions. 
+		// script
+		include ./includes/script.jade
