@@ -204,11 +204,10 @@ define(['bridget', 'knockout', 'text!./_collection-view.html', 'isotope', 'image
 		self.isFavorites = ko.observable(false);
 		self.fetchitemnum = 20;
 		self.isPublic = ko.observable(true);
-		
+		self.query = ko.observable('');
 		self.validationModel = ko.validatedObservable({
 			title: self.titleToEdit
 		});
-
 		self.displayTitle = ko.pureComputed(function () {
 			return self.isFavorites() ? 'Favorites' : self.title();
 		});
@@ -243,7 +242,17 @@ define(['bridget', 'knockout', 'text!./_collection-view.html', 'isotope', 'image
 				percentPosition: true
 			}
 		});
-
+		ko.bindingHandlers.filterItems = {
+				update: function (elem, valueAccessor, allBindingsAccessor, viewModel, context) {
+					console.log("update!!!!!!!"+ko.utils.unwrapObservable(valueAccessor()));
+					var q = ko.utils.unwrapObservable(valueAccessor());
+					self.$container.isotope({ filter : function() {
+					    var title = $(this).find('.title').text();
+					     return title.toLowerCase().indexOf(q.toLowerCase()) == 0;
+					  }
+					});
+				}
+			};
 		self.revealItems = function (data) {
 			if ((data.length === 0 || data.length < self.fetchitemnum)) {
 				loading(false);$(".loadmore").text("no more results");
@@ -708,7 +717,7 @@ define(['bridget', 'knockout', 'text!./_collection-view.html', 'isotope', 'image
 			return this;
 		};
 	}
-
+	
 	return {
 		viewModel: CViewModel,
 		template: template
