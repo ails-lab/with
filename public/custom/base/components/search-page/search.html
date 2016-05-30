@@ -1,0 +1,96 @@
+<item-view params="route: route"></item-view>
+
+ <!-- searchbar-->
+    <section class="searchbar">
+        <div class="container">
+          <!-- wrap-->
+          <div class="wrap">
+            	<facets id="search-facets" params="name:'search-filters',params: {}"></facets>	
+				
+            <!-- input-->
+            <div class="searchbox" id="withsearchid"><img alt="Search" class="icon"  data-bind="attr: {src: searching()==true ? 'img/ic-loading.gif' : 'img/ic-search-blue.png'}, click: function() { search(true,true); }">
+              <input type="text"  data-bind="value: term" placeholder="Search..." class="searchinput">
+            </div>
+            <!-- view setting-->
+           
+            
+            <ul class="view">
+              <li class="active" data-bind="event: {click: toggleSourceview}, enable: searching()==false"><a href="#" title="Column View" data-view="column"><img src="img/ic-list.png" alt="list"></a></li>
+              <li data-bind="event: {click: toggleSourceview}, enable: searching()==false"><a href="#" title="Grid View" data-view="grid"><img src="img/ic-grid.png" alt="grid"></a></li>
+            </ul>
+          </div>
+          <!-- close search--><a href="#" title="Close Search" class="close"><img src="img/ic-close-white.png" alt=""></a>
+        </div>
+      </section>
+      <!-- search filter-->
+      <section class="searchlabel">
+        <div class="container" data-bind="visible: filterselect()==true || results().length>0">
+            <input id="facet_tags" type="text" data-role="tagsinput">
+        </div>
+      </section>
+      <!-- search filter-->
+      <section class="searchfilter">
+        <select class="form-control providerselection" data-bind="options: sources,value: selectedSource, event:{ change: columnChanged}">
+          
+        </select>
+      </section>
+      <!-- search result-->
+      
+     <div id="gridlist" class="spacer search gridlist searchlist" data-bind="visible: sourceview()==false">
+      <!-- ko if: noResults -->
+			<div>
+			  <p><br/><br/>Your search did not return results. Please try again.</p>
+			</div>
+			<!-- /ko -->
+        <section class="listing">
+          <div class="container">
+            <!-- grid-->
+            <div class="grid">
+              <div class="sizer"></div>
+            </div>
+          </div>
+        </section>
+        <div id="more" data-bind="scroll: mixresults(), scrollOptions: { loadFunc: searchNext, offset: 0 }" style="display:none"> <i class="fa fa-spinner fa-pulse"></i></div>
+        <div class="scroll-top-wrapper"  data-bind="event:{click: goToTop}">
+				<span class="scroll-top-inner">
+					<i class="fa fa-2x fa-arrow-circle-up"></i>
+				</span>
+			</div>
+      </div>
+      
+      <!-- ko if: sourceview()==true -->
+      <section class="searchresults" id="columnlist" class="searchresults searchlist">
+        <div class="container-fluid">
+          <!-- row-->
+          <div class="row">
+          <!-- ko if: noResults -->
+			<div>
+			  <p><br/><br/>Your search did not return results. Please try again.</p>
+			</div>
+			<!-- /ko -->
+			<!-- ko if: results().length > 0 -->
+            <!-- ko foreach: results -->
+            <div data-bind="attr: {'id': source+'_result'}, css: $parent.selectedSource()==source? 'column selected' : 'column'">
+              <!-- wrap-->
+              <div class="wrap">
+                <div class="header"><a data-bind="attr: { href:consoleurl}" target="_blank" title="API console">
+                    <div class="source" data-bind="text: source"></div><img src="img/ic-external.png" alt="external" class="externallink">
+                    <div class="loading" data-bind="visible: loading()==true"><img src="img/ic-loading.gif" alt="external"></div>
+                    </a></div>
+                <div class="result" data-bind="foreach: items, event: { scroll: $parents[0].scrolled }">
+                
+                  <!-- item-->
+                  <div class="item"><a href="#" data-bind="event: { click: $parents[1].columnRecordSelect}" data-view="inline">
+                      <div class="imgwrap"><img onError="this.src='img/content/thumb-empty.png'" data-bind="attr: { src:thumb }" class="thumb"></div><span class="text" data-bind="text: title"></span></a></div>
+                  <!-- item-->
+                  
+                 </div>
+              </div>
+            </div>
+            
+            <!-- /ko -->
+            <!-- /ko -->
+          </div>
+        </div>
+      </section>
+<!-- /ko -->
