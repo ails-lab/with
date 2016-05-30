@@ -1,0 +1,209 @@
+//- index.jade
+
+//- variables
+- var title = "EUscreen Space - Media title"
+- var page  = "media"
+
+doctype html
+html
+
+	//- head
+	include ./includes/head.jade
+
+	//- body
+	body( data-page="#{page}" )
+		
+		// header
+		include ./includes/header.jade
+
+		// main
+		div( role="main" )
+
+			// menu bar
+			nav.menubar.media
+				.container
+					
+					// title
+					ul
+						li.active
+							a( href="#" title="#" )
+								| Media Item
+
+					// action
+					ul.action
+						li
+							a( href="#" title="#" )
+								img( src="img/ic-close-green.png" )
+
+			// section media details
+			section.mediadetails.spacer
+				.container
+					.wrap
+
+						// media itself
+						.mediathumb
+							img( src="img/content/img-media.jpg" alt="image" )
+
+
+						// media information
+						.mediainfo
+							.infowrap
+
+								// title
+								h1 Avenue de l'Observatoire , 1932-34
+								.owner
+									a( href="#" title="#" ) National Gallery Athens
+
+
+								// metadata
+								ul.nav.nav-tabs( role="tablist" )
+									li.active
+										a( href="#information" title="" data-toggle="tab" ) Info
+									li
+										a( href="#related" title="" data-toggle="tab" ) Related
+									li
+										a( href="#comment" title="" data-toggle="tab" ) Comments
+									li
+										a( href="#share" title="" data-toggle="tab" ) Share
+
+								// panes
+								.tab-content
+									.tab-pane.active( id="information" )
+										
+										// description
+										ul.meta
+											li
+												.title DESCRIPTION
+												.field
+													| George Brassaï (pseudonym of Gyula Halász) (9 September 1899 — 8 July 1984) was a Hungarian photographer, 
+													| sculptor, and filmmaker who rose to international fame in France in the 20th century. He was one of the numerous 
+													| Hungarian artists who flourished in Paris beginning between the World Wars. In the early 21st century, the discovery 
+													| of more than 200 letters and hundreds of drawings and other items from the period 1940–1984 has provided scholars with 
+													| material for understanding his later life and career.
+											li
+												.title PROVIDER
+												.field
+													| National Gallery - Alexandros Soutzos Museum, Athens.
+											li
+												.title RIGHTS
+												.field
+													| Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+											li
+												.title RECORD SOURCE
+												.field
+													a( href="#" title="#" ) 
+														| EUROPEANA
+
+									.tab-pane( id="related" )
+
+										// related media
+										.title 
+											span OTHER MEDIA ITEM BY NATIONAL GALLERY ATHENS
+											a.follow( href="#" title="#") FOLLOW
+										ul.related
+											li
+												a( href="#" data-toggle="tooltip" data-placement="top" title="Lorem ipsum dolor" )
+													img( src="img/content/thumb-media-1.png" alt="media" )
+											li
+												a( href="#" data-toggle="tooltip" data-placement="top" title="Lorem ipsum dolor" )
+													img( src="img/content/thumb-media-2.png" alt="media" )
+											li
+												a( href="#" data-toggle="tooltip" data-placement="top" title="Lorem ipsum dolor" )
+													img( src="img/content/thumb-media-3.png" alt="media" )
+											li
+												a( href="#" data-toggle="tooltip" data-placement="top" title="Lorem ipsum dolor" )
+													img( src="img/content/thumb-media-4.png" alt="media" )
+
+										// related media
+										.title SIMILAR MEDIA ITEM
+										ul.related
+											li
+												a( href="#" data-toggle="tooltip" data-placement="top" title="Lorem ipsum dolor" )
+													img( src="img/content/thumb-media-4.png" alt="media" )
+											li
+												a( href="#" data-toggle="tooltip" data-placement="top" title="Lorem ipsum dolor" )
+													img( src="img/content/thumb-media-3.png" alt="media" )
+											li
+												a( href="#" data-toggle="tooltip" data-placement="top" title="Lorem ipsum dolor" )
+													img( src="img/content/thumb-media-2.png" alt="media" )
+											li
+												a( href="#" data-toggle="tooltip" data-placement="top" title="Lorem ipsum dolor" )
+													img( src="img/content/thumb-media-1.png" alt="media" )
+
+										
+									.tab-pane( id="comment" )
+										
+										// comment 
+										.comments
+											.form
+												textarea( class="form-control" placeholder="Fill in your comment" )
+												button.btn.btn-green SUBMIT
+
+											// commentlist
+											ul.commentlist
+												li
+													a( href="#" title="#" )
+														img.profilepicture( src="img/content/img-profilepicture.png" alt="" )
+													.entry
+														a.name( href="account.html" title="#" ) Mike Jones
+														.text
+															| Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.	
+														.meta
+															| 1 day ago
+												li
+													a( href="account.html" title="#" )
+														img.profilepicture( src="img/content/img-profilepicture.png" alt="" )
+													.entry
+														a.name( href="account.html" title="#" )  Mike Jones
+														.text
+															| Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.	
+														.meta
+															| 1 day ago
+												li
+													a( href="account.html" title="#" )
+														img.profilepicture( src="img/content/img-profilepicture.png" alt="" )
+													.entry
+														a.name( href="account.html" title="#" ) Mike Jones
+														.text
+															| Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.	
+														.meta
+															| 1 day ago
+												li
+													a( href="account.html" title="#" )
+														img.profilepicture( src="img/content/img-profilepicture.png" alt="" )
+													.entry
+														a.name( href="account.html" title="#" )  Mike Jones
+														.text
+															| Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.	
+														.meta
+															| 1 day ago
+
+									.tab-pane( id="share" )
+		
+										// share
+										.sharetext Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+										ul.social
+											li
+												a( href="#" title="#" )
+													img( src="img/ic-facebook.png" alt="facebook" )
+											li
+												a( href="#" title="#" )
+													img( src="img/ic-twitter.png" alt="facebook" )
+											li
+												a( href="#" title="#" )
+													img( src="img/ic-pinterest.png" alt="facebook" )
+											li
+												a( href="#" title="#" )
+													img( src="img/ic-mail.png" alt="facebook" )
+							// visit original
+							.shortcut
+
+								// ul
+								ul
+									li
+										a( href="#" title="Contact Us" class="btn btn-alt" )
+											| VISIT ITEM SITE
+
+			
+		// script
+		include ./includes/script.jade

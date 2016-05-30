@@ -1,0 +1,83 @@
+      <nav class="menubar">
+        <div class="container">
+          <ul>
+            <li class="active"><a href="#" title="#">Content Provider</a></li>
+          </ul>
+        </div>
+      </nav>
+      <!-- profile bar-->
+      <section class="profilebar">
+        <!-- wrap-->
+        <div class="wrap">
+          <div class="hue">
+            <div class="container">
+              <!-- profile box-->
+              <div class="profilebox">
+                <!-- logo-->
+                <div class="logo" data-bind="visible: logo"><img data-bind="attr : {src: logo}" alt="provider"></div>
+                <!-- title-->
+                <div class="title">
+                  <h1><!-- ko text: name() --><!-- /ko --></h1>
+                </div>
+                <!-- location-->
+                <div class="location" data-bind="text: address"></div>
+              </div>
+              <!-- profile info-->
+              <div class="profileinfo">
+                <!-- nav-->
+                <ul class="nav nav-tabs">
+                  <li role="presentation" class="active"><a href="#profile-desc" aria-controls="home" role="tab" data-toggle="tab">INFO</a></li>
+                  <li data-bind="visible: url"><a data-bind="attr: {href: url}" target="_blank">VISIT SITE</a></li>
+                </ul>
+                <!-- content-->
+                <div class="tab-content">
+                  <!-- content-->
+                  <div id="profile-desc" role="tabpanel" class="tab-pane active">
+                    <div class="description" data-bind="text: description">
+                    </div>
+                  </div>
+                 
+                </div>
+              </div>
+              <!-- profile map-->
+              <div class="profilemap" data-bind="visible: coords">
+                <iframe data-bind="attr : {src: coords}" frameborder="0" style="border:0" allowfullscreen class="maps"></iframe>
+              </div>
+                 
+          
+            </div>
+          </div>
+        </div>
+      </section>
+     
+     <!-- filter-->
+      <section class="filter">
+        <div class="container">
+          <div class="wrap">
+            <!-- menu-->
+            <ul class="nav">
+              <li class="active" data-filter="*" data-bind="click: filter"><a href="#" title="ALL">All</a></li>
+              <li data-filter=".exhibition" data-bind="click: filter"><a href="#" title="EXHIBITION">Exhibition</a></li>
+              <li data-filter=".collection" data-bind="click: filter"><a href="#" title="COLLECTION">Collection</a></li>
+            </ul>
+            <!-- menu-->
+            <ul class="counter">
+               <li class="collection"><!-- ko text:totalCollections --> <!-- /ko --> Collection </li>
+              <li class="exhibition"><!-- ko text:totalExhibitions --> <!-- /ko --> Exhibition </li>
+            </ul>
+          </div>
+        </div>
+      </section>
+      <!-- listing-->
+      <section class="listing">
+        <div class="container">
+          <!-- grid-->
+          <div class="grid">
+              <div class="sizer"></div>
+             
+          </div>
+          
+          <div id="more" data-bind="visible: loading, scroll: collections(), scrollOptions: { loadFunc: loadNext, offset: 0 }"> <i class="fa fa-spinner fa-pulse"></i></div>
+          </div>
+        
+      </section>

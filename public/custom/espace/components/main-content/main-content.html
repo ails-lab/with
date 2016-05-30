@@ -1,0 +1,82 @@
+
+      <!-- featured-->
+      <section class="featured">
+        <div class="container">
+          <!-- title-->
+          <div class="sectionhead">FEATURED EXHIBITION</div>
+          <!-- featured exhibition-->
+          <div id="featuredExhibit" class="exhibition" data-bind="with: featuredExhibition">
+            <div class="hue">
+              <!-- info-->
+              <div class="info">
+                <div class="type">EXHIBITION</div>
+                <h1 class="title"><!-- ko text:data.title --><!-- /ko --> </h1>
+                <div class="description">
+                  <!-- description-->
+                  <div class="text" data-bind="text: data.description">
+               
+                  </div>
+                  <!-- view button-->
+                  <div class="view"><a data-bind="attr: {href: data.url()}" title="VIEW EXHIBITION" class="btn btn-view blue"><img src="img/ic-right-arrow.png" alt="view"></a></div>
+                </div>
+              </div>
+              <!-- thumbnails-->
+              <div class="thumbnails">
+                <!-- left-->
+                
+                <div class="left">
+                <div class="imagewrapper"><img  data-bind="attr: { src: data.media[0].Thumbnail.url}"></div>
+                  <div class="title"></div>
+                </div>
+                <!-- right-->
+                <div class="right">
+                <div class="imagewrapper"><img  data-bind="attr: { src: data.media[1].Thumbnail.url}""></div>
+                  <div class="title"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+      <!-- filter-->
+      <section class="filter">
+        <div class="container">
+          <div class="wrap">
+            <!-- menu-->
+            <ul class="nav">
+              <li class="active" data-filter="*" data-bind="click: filter"><a href="javascript:void(0)" title="ALL">All</a></li>
+              <li data-filter=".exhibition" data-bind="click: filter"><a href="javascript:void(0)" title="EXHIBITION">Exhibition</a></li>
+              <li data-filter=".collection" data-bind="click: filter"><a href="javascript:void(0)" title="COLLECTION">Collection</a></li>
+            </ul>
+            <!-- menu-->
+            <ul class="counter">
+              <li class="collection"><!-- ko text:totalCollections --> <!-- /ko --> Collection </li>
+              <li class="exhibition"><!-- ko text:totalExhibitions --> <!-- /ko --> Exhibition </li>
+            </ul>
+          </div>
+        </div>
+      </section>
+      <!-- listing-->
+      <section class="listing">
+        <div class="container">
+          <!-- grid-->
+          <div class="grid" id="homemasonry">
+              <div class="sizer"></div>
+          </div>
+          
+          <div id="more" data-bind="visible: loading, scroll: homecollections(), scrollOptions: { loadFunc: loadNext, offset: 0 }"> <i class="fa fa-spinner fa-pulse"></i></div>
+          </div>
+        
+      </section>
+ 	  
+ 
+
+
+
+
+			
+					
+		 						
+		 					
+		 
+					  

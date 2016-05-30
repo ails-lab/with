@@ -1,0 +1,178 @@
+//- index.jade
+
+//- variables
+- var title = "EUscreen Space - About"
+- var page  = "about"
+
+doctype html
+html
+
+	//- head
+	include ./includes/head.jade
+
+	//- body
+	body( data-page="#{page}" )
+		
+		// header
+		include ./includes/header.jade
+
+		// main
+		div( role="main" )
+
+			// menu bar
+			include ./includes/menubar.jade
+
+			// hero bar
+			section.hero
+				.hue
+
+					// container
+					.container
+
+						// banner
+						.banner
+							h1
+								| About EUspace
+							p
+								| Discover exhibits and collections from museums and archives all around the world.
+								| Explore cultural treasures in extraordinary detail from hidden gems to masterpieces. 
+
+			// text box
+			section.inner.about
+				.container
+
+					// wrap
+					.wrap 
+
+						// title
+						.sectionhead
+							| LOREM IPSUM SLOGAN
+
+						// description
+						.descriptiontext
+
+							// left
+							.left
+								p
+									| As we got further and further away, it diminished in size. Finally it shrank to the size of a 
+									| marble, the most beautiful you can imagine. That beautiful, warm, living object looked so fragile, 
+									| so delicate, that if you touched it with a finger it would crumble and fall apart. Seeing this has 
+									| to change a man.
+								p
+									| Science has not yet mastered prophecy. We predict too much for the next year and yet far too little 
+									| for the next 10. We choose to go to the moon in this decade and do the other things, not because 
+									| they are easy, but because they are hard, because that goal will serve to organize and measure the 
+									| best of our energies and skills, because that challenge is one that we are willing to accept, one 
+									| we are unwilling to postpone, and one which we intend to win.
+
+							// right
+							.right
+								p
+									| As we got further and further away, it diminished in size. Finally it shrank to the size of a 
+									| marble, the most beautiful you can imagine. That beautiful, warm, living object looked so fragile, 
+									| so delicate, that if you touched it with a finger it would crumble and fall apart. Seeing this has 
+									| to change a man.
+								p
+									| Science has not yet mastered prophecy. We predict too much for the next year and yet far too little 
+									| for the next 10. We choose to go to the moon in this decade and do the other things, not because 
+									| they are easy, but because they are hard, because that goal will serve to organize and measure the 
+									| best of our energies and skills, because that challenge is one that we are willing to accept, one 
+									| we are unwilling to postpone, and one which we intend to win.
+
+			// about highlights
+			section.abouthighlight
+				.container
+
+					// wrap	
+					.wrap
+
+						// photo
+						.gallery
+
+							// flow
+							.flow
+
+								// images
+								img( src="img/content/img-gallery-1.png" alt="gallery" )
+
+						// info
+						.info
+
+							// slogan
+							.slogan
+								blockquote
+									| The path of a cosmonaut is not an easy, triumphant march to glory. You have to get to know the meaning not just of joy but also of grief, before
+
+							// content provider
+							.contentprovider
+
+								// heading
+								h2
+									| Content Providers
+
+								// carousel
+								.carousel
+									.item
+										ul
+											li
+												| Audiovisual Technologies Informatics
+											li
+												| British Universities Film and Video Council
+											li
+												| Nederlands Instituut voor Beeld en Geluid
+											li
+												| Deutsche Welle
+											li
+												| Istituto Luce Cinecittà
+											li
+												| Eötvös Loránd University
+											li
+												| Rádio e Televisão de Portugal
+									.item
+										ul
+											li
+												| Audiovisual Technologies Informatics
+											li
+												| British Universities Film and Video Council
+											li
+												| Nederlands Instituut voor Beeld en Geluid
+											li
+												| Deutsche Welle
+											li
+												| Istituto Luce Cinecittà
+											li
+												| Eötvös Loránd University
+											li
+												| Rádio e Televisão de Portugal
+									.item
+										ul
+											li
+												| Audiovisual Technologies Informatics
+											li
+												| British Universities Film and Video Council
+											li
+												| Nederlands Instituut voor Beeld en Geluid
+											li
+												| Deutsche Welle
+											li
+												| Istituto Luce Cinecittà
+											li
+												| Eötvös Loránd University
+											li
+												| Rádio e Televisão de Portugal
+
+			// about shortcut
+			section.shortcut
+				.container
+
+					// ul
+					ul
+						li
+							a( href="contact.html" title="Contact Us" class="btn btn-alt" )
+								| CONTACT US
+						li
+							a( href="contentproviders.html" title="Explore EUspace" class="btn btn-alt" )
+								| EXPLORE
+
+		// script
+		include ./includes/script.jade

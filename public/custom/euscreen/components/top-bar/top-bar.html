@@ -1,0 +1,45 @@
+ <!-- mainnav-->
+      <nav class="main">
+        <div class="container">
+          <!-- logo-->
+          <h1 class="logo"><a href="javascript:void(0)" data-bind="event :{ click: function(data,event){goToPage('#home',event);}}"  title="Home">ESPACE</a></h1>
+          <!-- mobile menu-->
+          <button type="button" role="button" aria-label="Show Navigation" class="mobilemenu"><span class="lines"></span></button>
+          <!-- search-->
+          <ul class="search">
+            <li><a href="#search" title="Search"><img src="img/ic-search.png" alt="search"></a></li>
+          </ul>
+          <!-- nav-->
+          <ul class="menu">
+            <li><a href="javascript:void(0)" data-bind="event :{ click: function(data,event){goToPage('#home',event);}}" title="Home">Home</a></li>
+            <li><a href="#providers" title="Content Provider">Content Providers</a></li>
+            <li><a href="#about" title="About">About</a></li>
+        <li><a href="#" data-bind="visible: isLogged()==true,event :{ click: function(data,event){gotoWith(event);}}" title="WITH Login" target="_blank"><img  alt="with logo" src="img/with_logo.png" style="width: 20px;vertical-align: top;">&nbsp;<!-- ko text:currentUser.username() --><!-- /ko --></a><a href="#" data-bind="visible: isLogged()==false,event :{ click: function(data,event){openLogin(event);}}"  title="WITH Login" target="_blank">WITH Login</a></li>
+                <li class="subnav">
+              <ul>
+                <li><a href="#terms" title="Terms of Usage">Terms of Use</a></li>
+                <li><a href="#privacy" title="Privacy Policy">Privacy Policy</a></li>
+                <li><a href="#contact" title="Contact">Feedback &amp; Contact</a></li>
+              </ul>
+            </li>
+            <li class="info">ESpace is a place to discover exhibits and collections from museums and archives all around the world. </li>
+          </ul>
+        </div>
+      </nav>
+       <!-- hero, only to be rendered in index page-->
+      <section class="hero">
+        <!-- the wrap-->
+        <div class="wrap">
+          <div class="hue">
+            <div class="container">
+              <!-- banner-->
+              <div class="banner">
+                <h1>BUILD YOUR OWN SPACE</h1>
+                <p>
+                  Spaces of possibility for the creative re-use of digital cultural content.
+                </p><a href="#search" title="EXPLORE ESPACE" class="btn btn-blue">EXPLORE</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
