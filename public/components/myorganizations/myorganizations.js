@@ -383,6 +383,45 @@ define(['knockout', 'text!./myorganizations.html', 'app', 'moment', 'async!https
 			var groupCall = url + "group/list?groupType="+self.name()+"&belongsOnly="+belongsOnly;
 			return groupCall;
 		};
+
+		
+		self.makeAdmin = function (userId) {
+			console.log("makeAdmin");
+			$.ajax({
+				method : "PUT",
+				contentType : "text/plain",
+				url : "/group/admin/" + self.id() + "?id=" + userId,
+				success : function (result) {
+					/*self.image = userData.image;
+					self.userMembers.push(ko.mapping.fromJS(userData));*/
+				},
+				error : function (result) {
+					$.smkAlert({ text: result.responseJSON.error, type: 'danger', time: 10 });
+				}
+			});
+		};
+
+		self.makeMember = function (userId) {
+			console.log("makeMember");
+			$.ajax({
+				method : "DELETE",
+				contentType : "text/plain",
+				url : "/group/admin/" + self.id() + "?id=" + userId,
+				success : function (result) {
+				},
+				error : function (result) {
+					$.smkAlert({ text: result.responseJSON.error, type: 'danger', time: 10 });
+				}
+			});
+		};
+
+		self.isAdminToggle = function(admin, userId){
+			if (!admin) 
+				self.makeMember(userId);
+			else 
+				self.makeAdmin(userId);
+			return true;
+		}
 		
 		self.excecuteRemove = function (id, category) {
 			$.ajax({

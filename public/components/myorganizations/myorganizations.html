@@ -346,35 +346,45 @@
 					<div class="action-body">
 						<div class="group">
 							<div class="title">Users access</div>
-							<input id="userName" type="text" placeholder="Start typing username" data-bind="autocompleteUsername: myUsername, forUsers:true">
+							<input id="userName" type="text" placeholder="Start typing username" data-bind="autocompleteUsername: myUsername, category:1">
+
+
 							<ul class="members-list" data-bind="foreach: userMembers">
 								<li>
-								     
 									<!-- ko if: $data.image -->
-									<div class="toggle">
-                         					 <input type="checkbox" id="u1">
-                         					 <label for="u1"></label><span class="member">member</span><span class="admin">admin</span>
-                     				   </div>
 									<div class="thumbnails"><img data-bind="attr: {src: image, id: 'image_' + userId()}">
 									<a href="#" data-toggle="tooltip" data-placement="top" data-bind="click: $parent.excecuteRemove.bind($data, userId(), 'user'),
 									attr: { title: username }"  class="trash">
 										<i class="fa fa-trash"></i>
 									</a></div>
-									<div class="username">Username 1</div>
-								     <!-- /ko -->
-									<!-- ko ifnot: $data.image -->
 									<div class="toggle">
-                         					 <input type="checkbox" id="u1">
-                         					 <label for="u1"></label><span class="member">member</span><span class="admin">admin</span>
-                     				   </div>
+			                          <input type="checkbox" data-bind="{checked: admin , click: $parent.isAdminToggle.bind($data, admin(), userId()), attr: {id: userId}} ">
+			                          <label data-bind="{attr: {for: userId}}" ></label>
+			                          <span class="member">member</span>
+			                          <span class="admin">admin</span>
+			                        </div>
+			                        <div class="username" data-bind="text: username"></div>
+									
+
+
+									<!-- /ko -->
+									<!-- ko ifnot: $data.image -->
 									<div class="thumbnails"><img src="images/user.png">
 									<a href="#" data-toggle="tooltip" data-placement="top" data-bind="click: $parent.excecuteRemove.bind($data, userId(), 'user'),
 									attr: { title: username }"
 									 class="trash">
 										<i class="fa fa-trash"></i>
 									</a></div>
-									<div class="username">Username 1</div>
-									
+									<div class="toggle">
+			                            <input type="checkbox"   data-bind="{checked: admin , click: $parent.isAdminToggle.bind($data, admin(),userId()),attr: {id: userId}}">
+			                          <label data-bind="{attr: {for: userId}}"></label>
+			                          <span class="member">member</span>
+			                          <span class="admin">admin</span>
+			                        </div>
+			                        <div class="username" data-bind="text: username"></div>
+								
+
+
 									<!-- /ko -->
 								</li>
 							</ul>
