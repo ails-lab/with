@@ -39,7 +39,8 @@ public class RecordQuality {
 		topq.add(proportional(rec.getValue("dates").size()));
 		topq.add(computeLiteral(rec.getMultiLiteralValue("country")));
 		topq.add(computeLiteral(rec.getMultiLiteralValue("dcLanguage")));
-	
+		rec.exitContext();
+	    rec.setValue("qualityMeasure", ""+topq.computeWeight());
 		return topq.computeWeight();
 	}
 	
