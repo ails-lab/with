@@ -1,6 +1,6 @@
 define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','app', 'knockout-validation'], function (bootstrap, ko, template, KnockoutElse, app) {
 
-	count = 6;
+	count = 12;
 	accessLevels = {
 		READ : 0,
 		WRITE : 1,
