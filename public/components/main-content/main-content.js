@@ -247,10 +247,10 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 			};
 	  
 		self.revealSpaceItems = function (data) {
-			if(data.length==0 || data.length<self.fetchitemnum){self.morespaces(false);self.nospaces(true);}
+			if(data.groups.length==0 || data.groups.length<self.fetchitemnum){self.morespaces(false);self.nospaces(true);}
 			var items = [];
-				for (var i in data) {
-					var page=data[i].page;
+				for (var i in data.groups) {
+					var page=data.groups[i].page;
 					var thumb=null;
 					var url="";
 					
@@ -259,7 +259,7 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 						url=page.url;
 					}
 					
-					var spacetocollection={resourceType: 'Space', administrative:{isShownAt:url}, descriptiveData:{label:{default:[data[i].friendlyName]}},media:[{Thumbnail:{url: thumb}}]};
+					var spacetocollection={resourceType: 'Space', administrative:{isShownAt:url}, descriptiveData:{label:{default:[data.groups[i].friendlyName]}},media:[{Thumbnail:{url: thumb}}]};
 					var c=new Collection(
 								spacetocollection				
 					);
