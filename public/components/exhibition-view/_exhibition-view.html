@@ -35,8 +35,9 @@
                   </div>
                   <!-- item-->
                   <!-- ko foreach: exhItems -->
-                  	<div class="item" data-bind="css: {style1: $data.textPosition == 'RIGHT', style2: $data.textPosition == 'LEFT'}">
+                  	<div class="item style1">
                     <div class="container">
+                    	 <!-- ko if: $data.textPosition == 'LEFT' -->
                       	 <div class="textbox">
                           <div class="wrap">
                           <h2  data-bind="text: title"></h2>
@@ -44,31 +45,70 @@
                           </p>
                          </div>
                         </div>
-                      <div class="imagewrap"><img data-bind="attr: { src: fullres }" alt="">
+                        <!-- /ko -->
+                      <!--  ko if: $data.hasOwnProperty('mediaUrl') && mediaUrl != null && mediaUrl != "" --> 
+                      <div data-bind="css: {imagewrapvideo: $data.mediaType == 'VIDEO', imagewrapaudio: $data.mediaType == 'AUDIO'}">
+                      	<img data-bind="{attr: { src: fullres}}" alt="">
                         <ul class="action">
                           <li class="zoom"><a data-bind="attr: { href: fullres, 'title': title }" class="imagezoom"><i class="glyphicon glyphicon-resize-full"></i></a></li>
                           <li class="view"><a data-bind="attr: { href: view_url }" title="#"><i class="glyphicon glyphicon-link"></i></a></li>
                         </ul>
                       </div>
-                      <!--  ko if: $data.hasOwnProperty('mediaUrl') -->
-                    <div class="videowrap">
+                      <!-- ko if: $data.textPosition == 'RIGHT' -->
+                      	 <div class="textbox">
+                          <div class="wrap">
+                          <h2  data-bind="text: title"></h2>
+                          <p data-bind="text: annotation">
+                          </p>
+                         </div>
+                        </div>
+                        <!-- /ko -->
                     	<!-- ko if: mediaType == "VIDEO" -->
+                    	<div class="videowrap">
                         	<div class="embed-responsive embed-responsive-16by9">
                             	<iframe width="100%" height="100%" data-bind="attr: { src: mediaUrl }" frameborder="0" allowfullscreen></iframe>
                         	</div>
+                        </div>
                         <!-- /ko -->
                         <!-- ko if: mediaType == "AUDIO" -->
+                        <div class="audiowrap">
                             <p></p>
                           	<audio id="mediaplayer" controls style="width: 180px;" width="576" height="324">
                           		<source data-bind="attr:{src: mediaUrl}" type="audio/mpeg">Your browser does not support HTML5
                           	</audio>
+                        </div>
 						<!-- /ko -->
                          	<!--  ko if: $data.hasOwnProperty('mediaDescription') -->
                        		<!-- <div class="imginfo"><span class="mediatitle" data-bind="text: mediaDescription"></span></div>-->
-                        <!-- /ko -->
-                    </div>
+                        	<!-- /ko -->
                     <!-- /ko -->
-                     </div>
+                    <!-- ko else -->
+                       <!-- ko if: $data.textPosition == 'LEFT' -->
+                      	 <div class="textbox">
+                          <div class="wrap">
+                          <h2  data-bind="text: title"></h2>
+                          <p data-bind="text: annotation">
+                          </p>
+                         </div>
+                        </div>
+                        <!-- /ko -->
+                       <div class="imagewrap"><img data-bind="attr: { src: fullres}" alt="" width="75%">
+                        <ul class="action">
+                          <li class="zoom"><a data-bind="attr: { href: fullres, 'title': title }" class="imagezoom"><i class="glyphicon glyphicon-resize-full"></i></a></li>
+                          <li class="view"><a data-bind="attr: { href: view_url }" title="#"><i class="glyphicon glyphicon-link"></i></a></li>
+                        </ul>
+                      </div>
+                      <!-- ko if: $data.textPosition == 'RIGHT' -->
+                      	 <div class="textbox">
+                          <div class="wrap">
+                          <h2  data-bind="text: title"></h2>
+                          <p data-bind="text: annotation">
+                          </p>
+                         </div>
+                        </div>
+                        <!-- /ko -->
+                    <!-- /ko -->
+                  </div>
                   </div>
                   <!--/ko-->
                   <!-- item-->

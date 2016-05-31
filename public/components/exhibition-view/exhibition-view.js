@@ -1,4 +1,5 @@
-define(['knockout', 'text!./_exhibition-view.html', 'app', 'magnific-popup', 'slick'], function (ko, template, app, magnificPopup, slick) {
+define(['knockout', 'text!./_exhibition-view.html', 'app', 'magnific-popup', 'slick', 'knockout-else'], 
+		function (ko, template, app, magnificPopup, slick, KnockoutElse) {
 
 	ko.bindingHandlers.backgroundImage = {
 		update: function (element, valueAccessor, allBindingsAccessor, viewModel, context) {
@@ -83,9 +84,9 @@ define(['knockout', 'text!./_exhibition-view.html', 'app', 'magnific-popup', 'sl
 	function EViewModel(params) {
 		document.body.setAttribute("data-page", "exhibition");
 		// $("div[role='main']").toggleClass("homepage", false);
-
 		var self = this;
 		self.route = params.route;
+		KnockoutElse.init([spec = {}]);
 		var counter = 1;
 		self.exhName = ko.observable('');
 		//self.access = ko.observable([]);
