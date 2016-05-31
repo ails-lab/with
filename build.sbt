@@ -42,5 +42,9 @@ libraryDependencies ++= Seq(
  "com.jayway.jsonpath" % "json-path" % "2.0.0",
  "junit" % "junit" % "4.11",
  "org.im4java" % "im4java" % "1.4.0",
- "net.coobird" % "thumbnailator" % "0.4.8"
+ "net.coobird" % "thumbnailator" % "0.4.8",
+ "org.apache.opennlp" % "opennlp-tools" % "1.6.0",
+ "edu.stanford.nlp" % "stanford-corenlp" % "3.6.0",
+ "edu.stanford.nlp" % "stanford-corenlp" % "3.6.0" classifier "models",
+ "de.julielab" % "aliasi-lingpipe" % "4.1.0"
 )

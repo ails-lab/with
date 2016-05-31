@@ -43,6 +43,8 @@ import play.mvc.Result;
 import utils.AccessManager.Action;
 import annotators.Annotation;
 import annotators.Annotator;
+import annotators.DBPediaSpotlightAnnotator;
+import annotators.DictionaryAnnotator;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -283,9 +285,8 @@ public class RecordResourceController extends WithResourceController {
 			if (!response.toString().equals(ok().toString()))
 				return response;
 			else {
-				String[] fields = new String[] {"description", "label"};
-				
-				Annotator annotator = Annotator.getAnnotatorByName("DBPediaSpotlightAnnotator");
+//				String[] fields = new String[] {"description", "label"};
+				String[] fields = new String[] {"description"};
 				
 				DescriptiveData dd = record.getDescriptiveData();
 				
@@ -300,35 +301,47 @@ public class RecordResourceController extends WithResourceController {
 						MultiLiteral value = (MultiLiteral)res;
 	
 						for (Language lang : value.getLanguages()) {
+							if (lang == Language.UNKNOWN || lang == Language.DEFAULT) {
+								continue;
+							}
+							
 							Map<String, Object> props = new HashMap();
-							props.put(Annotator.LANGUAGE, lang);
+//							props.put(Annotator.LANGUAGE, lang);
 							
 							for (String text : value.get(lang)) {
+								for (Annotator annotator : Annotator.getAnnotators(lang)) {
+									for (Annotation ann : annotator.annotate(text, props)) {
+										
+										ObjectNode annotation = Json.newObject();
+										annotation.put("generator", annotator.getName());
+		
+										ObjectNode body = Json.newObject();
+										body.put("@id", ann.getURI());
+										if (ann.getLabel() != null) {
+											body.put("label", ann.getLabel());
+										}
+										
+										if (ann.getVocabulary() != null) {
+											body.put("vocabulary", ann.getVocabulary());
+										}
+										
+										annotation.put("body", body);
+		
+										ObjectNode target = Json.newObject();
+										
+										target.put("source", "record/" + id);
+										
+										ObjectNode targetSelector = Json.newObject();
+										targetSelector.put("@type", "FragmentSelector");
+										targetSelector.put("value", "r=" + p + "&t=" +ann.getStartPosition() + "," + ann.getEndPosition());
+										
+										target.put("selector", targetSelector);
+		
+										annotation.put("target", target);
+		
+										array.add(annotation);
 	
-								for (Annotation ann : annotator.annotate(text, props)) {
-	
-									ObjectNode annotation = Json.newObject();
-									annotation.put("generator", annotator.getName());
-	
-									ObjectNode body = Json.newObject();
-									body.put("@id", ann.getURI());
-									
-									annotation.put("body", body);
-	
-									ObjectNode target = Json.newObject();
-									
-									target.put("source", "record/" + id);
-									
-									ObjectNode targetSelector = Json.newObject();
-									targetSelector.put("@type", "FragmentSelector");
-									targetSelector.put("value", "r=" + p + "&t=" +ann.getStartPosition() + "," + ann.getEndPosition());
-									
-									target.put("selector", targetSelector);
-	
-									annotation.put("target", target);
-	
-									array.add(annotation);
-
+									}
 								}
 							}
 						}
@@ -336,6 +349,7 @@ public class RecordResourceController extends WithResourceController {
 				}
 				
 				annotations.put("annotations", array);
+				
 				return ok(annotations);
 			}				
 		} catch (Exception e) {

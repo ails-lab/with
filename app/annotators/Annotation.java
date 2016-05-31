@@ -28,13 +28,18 @@ public class Annotation {
 	private String URI;
 	private double confidence;
 	
-	public Annotation(Class<? extends Annotator> annotator, String body, int sp, int ep, String URI, double confidence) {
+	private String label;
+	private String vocabulary;
+	
+	public Annotation(Class<? extends Annotator> annotator, int sp, int ep, double confidence, String URI, String label, String vocabulary) {
 		this.setAnnotator(annotator);
-		this.setBody(body);
+//		this.setBody(body);
 		this.setStartPosition(sp);
 		this.setEndPosition(ep);
 		this.setURI(URI);
 		this.setConfidence(confidence);
+		this.setLabel(label);
+		this.setVocabulary(vocabulary);
 				
 	}
 
@@ -46,13 +51,13 @@ public class Annotation {
 		this.annotator = annotator;
 	}
 
-	public String getBody() {
-		return body;
-	}
-
-	public void setBody(String body) {
-		this.body = body;
-	}
+//	public String getBody() {
+//		return body;
+//	}
+//
+//	public void setBody(String body) {
+//		this.body = body;
+//	}
 
 	public int getStartPosition() {
 		return startPosition;
@@ -84,5 +89,21 @@ public class Annotation {
 
 	public void setConfidence(double confidence) {
 		this.confidence = confidence;
+	}
+
+	public String getVocabulary() {
+		return vocabulary;
+	}
+
+	public void setVocabulary(String vocabulary) {
+		this.vocabulary = vocabulary;
+	}
+
+	public String getLabel() {
+		return label;
+	}
+
+	public void setLabel(String label) {
+		this.label = label;
 	}
 }

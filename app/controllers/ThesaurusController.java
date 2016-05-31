@@ -46,6 +46,11 @@ import model.resources.WithResource.WithResourceType;
 import model.resources.collection.CollectionObject;
 
 import org.bson.types.ObjectId;
+import org.elasticsearch.action.search.SearchResponse;
+import org.elasticsearch.index.query.BoolQueryBuilder;
+import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.search.SearchHit;
+import org.elasticsearch.search.SearchHits;
 
 import play.Logger;
 import play.Logger.ALogger;
@@ -61,6 +66,7 @@ import utils.AccessManager;
 import utils.AccessManager.Action;
 import utils.Locks;
 
+import com.aliasi.dict.MapDictionary;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -69,6 +75,9 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import db.DB;
 import db.WithResourceDAO;
+import elastic.Elastic;
+import elastic.ElasticSearcher;
+import elastic.ElasticSearcher.SearchOptions;
 
 /**
  * @author mariaral
@@ -119,7 +128,7 @@ public class ThesaurusController extends Controller {
 		JsonNode json = request().body().asJson();
 		ObjectNode result = Json.newObject();
 
-		Locks locks = null;
+//		Locks locks = null;
 		try {
 //			locks = Locks.create().write("Collection #" + colId).acquire();
 //			Status response = errorIfNoAccessToCollection(Action.EDIT,
@@ -136,9 +145,9 @@ public class ThesaurusController extends Controller {
 		} catch (Exception e) {
 			result.put("error", e.getMessage());
 			return internalServerError(result);
-		} finally {
-			if (locks != null)
-				locks.release();
+//		} finally {
+//			if (locks != null)
+//				locks.release();
 		}
 	}
 

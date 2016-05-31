@@ -144,7 +144,7 @@
                                   <div class="title">
                                     <div class="titlewrap">Description</div>
                                   </div>
-                                  <div class="field newlines" id="anndescription">
+                                  <div class="field newlines" id="anndescription" data-bind="html:record().description">
                                   </div>
                                 </div>
                                 <div class="list"  data-bind="if: record().dataProvider">
@@ -190,7 +190,7 @@
                                     <div class="titlewrap">Resources</div>
                                   </div>
                                   <!-- ko foreach: record().annotationsKeys -->
-                                  <div class="field newlines" data-bind="text:$data, event: {click: function(){$parent.record().annShow($data);}}"></div>
+                                  <div class="field newlines ann-resource" data-bind="attr: {id: id}, text:$parent.record().getAnnotationLabel($data), event: {click: function(){$parent.record().annShow(uri);}}"></div>
                                  <!-- /ko --> 
                                   </div>
                                  

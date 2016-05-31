@@ -115,26 +115,11 @@ define(['knockout', 'text!./_item.html', 'app','smoke'], function (ko, template,
 			ko.mapping.fromJS(data, {}, selfx);
 		}
 
-		var AnnotationLocation = function(data) {
-			var selfx = this;
-			
-			selfx.property = ko.observable();
-			selfx.sp = ko.observable();
-			selfx.ep = ko.observable();
-			
-			ko.mapping.fromJS(data, {}, selfx);
-		}
-		
 		self.annotationIndex = [];
 		self.annotatedTexts = ko.observableArray([]);
 		
 		self.annotate = function(){
 			if(self.annotations().length==0) {
-//				self.relatedsearch=true;  
-//				self.creator.length>0? self.forrelated(self.creator.toUpperCase()) : self.forrelated(self.provider.toUpperCase());
-//		        self.relatedlabel=self.creator.length>0? "CREATOR" : "PROVIDER";
-//		        if(self.forrelated().length>0){
-//		            	self.loading(true);
 		           $.ajax({
 						type    : "get",
 						url     : "/annotate/" + self.recordId,
@@ -151,7 +136,17 @@ define(['knockout', 'text!./_item.html', 'app','smoke'], function (ko, template,
 			}
 		}
 		
+		self.getAnnotationLabel = function (data) {
+			if (data.label == undefined || data.vocabulary == undefined) {
+				return data.uri;
+			} else {
+				return data.vocabulary + " : " + data.label;
+			}
+		}
+
+		
 		self.parseAnnotations = function(data){
+			
 			var anns = data.annotations;
 			
 			var annotations = new Object();
@@ -177,7 +172,6 @@ define(['knockout', 'text!./_item.html', 'app','smoke'], function (ko, template,
 			}
 			
 			var properties = [];
-			var annotationsMap = [];
 			var positionsArray = [];
 			
 			var count = 0;
@@ -191,16 +185,20 @@ define(['knockout', 'text!./_item.html', 'app','smoke'], function (ko, template,
 					}
 				}
 				
+				var label = anns[x].body.label;
+				var vocabulary = anns[x].body.vocabulary;
+				
 				var found = false; 
 				for (var i = 0; i < self.annotationsKeys().length; i++) {
-					if (self.annotationsKeys()[i] == uri) {
+					if (self.annotationsKeys()[i].uri == uri) {
 						found = true;
 						break;
 					}
 				}
 				
 				if (!found) {
-					self.annotationsKeys.push(uri);
+					self.annotationsKeys.push({uri: uri, label: label, vocabulary: vocabulary, id: "ann-key-" + count});
+
 					self.annotationIndex[uri] = count++;
 				}
 
@@ -222,17 +220,12 @@ define(['knockout', 'text!./_item.html', 'app','smoke'], function (ko, template,
 					properties.push(property);
 				}
 				
-//				self.annotationsMap[uri].push(new AnnotationLocation({uri: uri, property: property, sp: sp, ep: ep}));
-				annotationsMap.push(new AnnotationLocation({uri: uri, property: property, sp: sp, ep: ep}));
-				
 				if (positionsArray[property] == undefined) {
 					positionsArray[property] = [];
 				}
 				
 				positionsArray[property].push({uri:uri, pos:sp, type:0, index:self.annotationIndex[uri]});
 				positionsArray[property].push({uri:uri, pos:ep, type:1, index:self.annotationIndex[uri]});
-				
-//				alert(uri + " " + positionsArray[property].length);
 			}
 			
 			for (v in positionsArray) {
@@ -259,29 +252,67 @@ define(['knockout', 'text!./_item.html', 'app','smoke'], function (ko, template,
 					var text = self.description;
 					var rtext = "";
 					
-					for (lc in positionsArray[properties[v]]) {
-						var element = positionsArray[properties[v]][lc];
-
-//						alert(v + " " + element.pos + " " + element.type);
+					var current = [];
+					
+					var array = positionsArray[properties[v]];
+					
+					var i;
+					
+					for (i = 0; i < array.length;) {
+						var s = i;
+						var e = i;
+						while (e < array.length - 1) {
+							if (array[e + 1].pos == array[s].pos) {
+								e++;
+							} else {
+								break;
+							}
+						}
+						
+						var removed = false;
+						var t;
+						for (t = s; t <= e; t++) {
+							if (array[t].type == 0) {
+								current.push(array[t].uri);
+							} else if (array[t].type == 1) {
+								for (var j = 0; j < current.length; j++) {
+									if (current[j] == array[t].uri) {
+										removed = true;
+										current.splice(j, 1);
+									}
+								}
+							}
+						}
 						
 						if (ppos == -1) {
-							rtext += text.substring(0, element.pos)
+							rtext += text.substring(0, array[s].pos)
 						} else {
-							rtext += text.substring(ppos, element.pos)
+							rtext += text.substring(ppos, array[s].pos)
 						}
 						
-						if (element.type == 0) {
-							rtext += "<span id='annotation" + self.annotationIndex[element.uri] +"'>";
-						} else {
+						ppos = array[s].pos;
+
+						if (removed) {
 							rtext += "</span>";
 						}
+
+						if (current.length > 0) {
+							rtext += "<span class='";
+							for (var j = 0; j < current.length; j++) {
+								if (j > 0) {
+									rtext += " ";
+								}
+								rtext += "ann-value-" + self.annotationIndex[current[j]];
+							}
+							
+							rtext += "'>"
+						}
 						
-						ppos = element.pos;
+						i = e + 1;
 					}
 					
 					rtext += text.substring(ppos);
 					
-//					self.annotatedTexts()[properties[v]] = rtext;
 					$("#anndescription").html(rtext);
 				}
 			}
@@ -296,12 +327,16 @@ define(['knockout', 'text!./_item.html', 'app','smoke'], function (ko, template,
 		var selectedAnnotations = [];
 		
 		self.annShow = function(uri) {
+			$(".ann-resource").css("color","black");
+			
+			$("#ann-key-" + self.annotationIndex[uri]).css("color","red");
+			
 			for (v in selectedAnnotations) {
-				$("#annotation" + selectedAnnotations[v]).css("color","black");
+				$(".ann-value-" + selectedAnnotations[v]).css("color","black");
 			}
 			selectedAnnotations.push(self.annotationIndex[uri]);
-//			alert("annotation" + self.annotationIndex[uri] + " " + $("annotation" + self.annotationIndex[uri]));
-			$("#annotation" + self.annotationIndex[uri]).css("color","red");
+			
+			$(".ann-value-" + self.annotationIndex[uri]).css("color","red");
 		};
 
 		

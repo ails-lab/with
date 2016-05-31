@@ -16,9 +16,11 @@
 
 package annotators;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import model.basicDataTypes.Language;
 import model.resources.RecordResource;
 
 public abstract class Annotator {
@@ -27,17 +29,27 @@ public abstract class Annotator {
 	
 	public abstract String getName();
 	
-	public static Annotator getAnnotatorByName(String name) {
-		if (name.equals(DBPediaSpotlightAnnotator.NAME)) {
-			return new DBPediaSpotlightAnnotator();
-		}
-		
-		return null;
-	}
+	public abstract String getService();
 	
 	public abstract List<Annotation> annotate(String text, Map<String, Object> properties) throws Exception;
 	
-	public void annotate(RecordResource rr) {
+	public void annotate(RecordResource rr) {	}
+	
+	public static List<Annotator> getAnnotators(Language lang) {
+		List<Annotator> res = new ArrayList<>();
 		
+		Annotator ann;
+		ann = DBPediaSpotlightAnnotator.getAnnotator(lang);
+		if (ann != null) {
+			res.add(ann);
+		}
+		
+		ann = DictionaryAnnotator.getAnnotator(lang, true);
+		if (ann != null) {
+			res.add(ann);
+		}
+
+		
+		return res;
 	}
 }
