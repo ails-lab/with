@@ -1,4 +1,4 @@
-define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','app', 'knockout-validation'], function (bootstrap, ko, template, KnockoutElse, app) {
+define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','app', 'moment', 'knockout-validation'], function (bootstrap, ko, template, KnockoutElse, app, moment) {
 
 	count = 12;
 	accessLevels = {
@@ -160,6 +160,9 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 						return 'by ' + firstName + ' ' + lastName;
 					else
 						return 'by ' + innerModel.withCreatorInfo.username();
+				});
+				innerModel.date = ko.pureComputed(function () {
+					return moment(innerModel.administrative.created()).format("MMMM Do YYYY");
 				});
 				innerModel.backgroundImg = ko.pureComputed(function () {
 					if (!(innerModel.descriptiveData.backgroundImg == null || innerModel.descriptiveData.backgroundImg.Thumbnail == null || 
@@ -364,7 +367,7 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 				    	}
 				        if (collectionType == 'Exhibition') {
 							app.currentUser.exhibitionCount(app.currentUser.exhibitionCount() + 1);
-							self.exhibitionCount(self.exhibitionCount() + 1);
+							administrative.created	= self.exhibitionCount(self.exhibitionCount() + 1);
 							window.location = '#exhibition-edit/'+data.dbId;
 				        }
 						self.closeSideBar();

@@ -300,7 +300,8 @@
 			   	<li data-bind="css: { private: !administrative.access.isPublic()}">
 				  <div class="thumbnails">
 				  	<a href="#" data-bind="attr: {href: $parent.showsExhibitions? (administrative.entryCount() > 0? 'index.html#exhibitionview/'+dbId(): 'index.html#exhibition-edit/'+dbId()): 'index.html#collectionview/'+dbId()}" title="view"> 
-				  	<!-- ko if: administrative.access.isPublic()-->
+				  	<div class="counter" data-bind="text: itemCount()"> Items</div>
+					<!-- ko if: administrative.access.isPublic()-->
 					<div class="category">public</div>
 					<!--/ko-->
 					<!-- ko else -->
@@ -352,9 +353,8 @@
 					<!-- /ko -->
 					<div class="description" data-bind="text: description()"></div>
 					<div class="other-info">
-					  <div class="count" data-bind="text: itemCount()"></div>
-					  <div class="date" data-bind="text: administrative.created()"></div>
-					  <div class="user"data-bind="text: withCreatorInfo.creatorName"></div>
+					  <div class="date" data-bind="text: date()"></div>
+					  <div class="user"data-bind="text: creatorName()"></div>
 					</div>
 					<div class="action-group"><div class="wrap">
                           <ul>
