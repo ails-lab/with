@@ -262,11 +262,11 @@ public class ElasticSearcher {
 	 * Specify the type to search only for collecitonobject type
 	 */
 	public SearchResponse searchMycollections(String term, SearchOptions options) {
-		MultiMatchQueryBuilder multi_match_q = QueryBuilders.multiMatchQuery(term, "", "", "");
+		MultiMatchQueryBuilder multi_match_q = QueryBuilders.multiMatchQuery(term, Elastic.searchFieldsWin);
 		multi_match_q.type(Type.PHRASE);
-		multi_match_q.operator(org.elasticsearch.index.query.MatchQueryBuilder.Operator.AND);
+		multi_match_q.operator(org.elasticsearch.index.query.MatchQueryBuilder.Operator.OR);
 		multi_match_q.fuzziness("AUTO");
-		return this.execute(multi_match_q);
+		return this.execute(multi_match_q, options);
 	}
 
 
@@ -275,11 +275,11 @@ public class ElasticSearcher {
 	 * Specify the type to search only for *resources types
 	 */
 	public SearchResponse searchForRecords(String term, SearchOptions options) {
-		MultiMatchQueryBuilder multi_match_q = QueryBuilders.multiMatchQuery(term, "", "", "");
+		MultiMatchQueryBuilder multi_match_q = QueryBuilders.multiMatchQuery(term, Elastic.searchFieldsWin);
 		multi_match_q.type(Type.PHRASE);
-		multi_match_q.operator(org.elasticsearch.index.query.MatchQueryBuilder.Operator.AND);
+		multi_match_q.operator(org.elasticsearch.index.query.MatchQueryBuilder.Operator.OR);
 		multi_match_q.fuzziness("AUTO");
-		return this.execute(multi_match_q);
+		return this.execute(multi_match_q, options);
 	}
 
 	/*
