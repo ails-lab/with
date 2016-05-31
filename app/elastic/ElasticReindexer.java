@@ -105,7 +105,7 @@ public class ElasticReindexer {
 			.source(co.transform()));
 		}
 
-		bulk.close();
+		bulk.flush();
 		return true;
 
 	}
@@ -153,7 +153,7 @@ public class ElasticReindexer {
 					.source(co.transform()));
 			}
 		}
-		bulk.close();
+		bulk.flush();
 		return true;
 	}
 
@@ -190,7 +190,7 @@ public class ElasticReindexer {
 
 			if(scrollResp.getHits().getHits().length == 0) {
 				log.info("Closing the bulk processor");
-				bulk.close();
+				bulk.flush();
 		        break;
 			}
 
@@ -230,7 +230,7 @@ public class ElasticReindexer {
 			.source(co.transform()));
 		}
 
-		bulk.close();
+		bulk.flush();
 		return true;
 
 	}
@@ -263,7 +263,7 @@ public class ElasticReindexer {
 			.source(th.transform()));
 		}
 
-		bulk.close();
+		bulk.flush();
 		return true;
 
 	}
