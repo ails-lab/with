@@ -23,14 +23,12 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import javax.validation.ConstraintViolation;
+
 import org.bson.types.ObjectId;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.search.SearchHit;
-import org.mongodb.morphia.query.Query;
-
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -561,10 +559,8 @@ public class CollectionObjectController extends WithResourceController {
 			result.put("collectionsOrExhibitions", Json.newObject().arrayNode());
 			return ok(result);
 		} else if (creator.isDefined() && !creator.get().equals("undefined")) {
-			User creatorUser = DB.getUserDAO().getByUsername(creator.get());
-			if (creatorUser != null)
-				creatorId = creatorUser.getDbId();
-			else
+			creatorId = (ObjectId) DB.getUserDAO().getIdByUsername(creator.get()).getId();
+			if (creatorId == null)
 				return badRequest("User with username " + creator.get() + " does not exist.");
 		}
 		if (effectiveUserIds.isEmpty()
@@ -1010,39 +1006,38 @@ public class CollectionObjectController extends WithResourceController {
 	/*
 	 * Search for collections/exhibitions in myCollections page.
 	 */
-	public static Result searchMyCollections(String term, Boolean direct,
-			Option<MyPlayList> directlyAccessedByUserOrGroup,
-			Option<MyPlayList> recursivelyAccessedByUserOrGroup) {
+	public static Result searchMyCollections(String term, Option<String> creator, boolean isExhibition, boolean isShared) {
 		ObjectNode result = Json.newObject();
 
 		if (effectiveUserIds().isEmpty()) {
 			return forbidden(Json
 					.parse("\"error\", \"Must specify user for the collection\""));
 		}
-		ObjectId userId = new ObjectId(effectiveUserId());
 		List<List<Tuple<ObjectId, Access>>> accessedByUserOrGroup = new ArrayList<List<Tuple<ObjectId, Access>>>();
-		accessedByUserOrGroup = accessibleByUserOrGroup(
-				directlyAccessedByUserOrGroup,
-				recursivelyAccessedByUserOrGroup);
 		List<Tuple<ObjectId, Access>> accessedByLoggedInUser = new ArrayList<Tuple<ObjectId, Access>>();
-		if (direct) {
-			accessedByLoggedInUser.add(new Tuple<ObjectId, Access>(userId,
-					Access.READ));
-			accessedByUserOrGroup.add(accessedByLoggedInUser);
-		} else {// indirectly: include collections for which user has access
-				// via userGoup sharing
-			for (String effectiveId : effectiveUserIds()) {
+		for (String effectiveId : effectiveUserIds()) {
 				accessedByLoggedInUser.add(new Tuple<ObjectId, Access>(
 						new ObjectId(effectiveId), Access.READ));
-			}
-			accessedByUserOrGroup.add(accessedByLoggedInUser);
 		}
+		accessedByUserOrGroup.add(accessedByLoggedInUser);
+
 
 		ElasticSearcher searcher = new ElasticSearcher();
-		searcher.addType(WithResourceType.SimpleCollection.toString().toLowerCase());
+		searcher.addType(WithResourceType.CollectionObject.toString().toLowerCase());
+		if(!isExhibition)
+			searcher.addType(WithResourceType.SimpleCollection.toString().toLowerCase());
+		else
+			searcher.addType(WithResourceType.Exhibition.toString().toLowerCase());
 
 		SearchOptions options =  new SearchOptions();
 		options.accessList = accessedByUserOrGroup;
+		if(creator != null)
+			if(!isShared)
+				options.addFilter("creatorUsername", creator.get());
+			else {
+				//options.setFilterType("not");
+				//options.addFilter("creatorUsername", creator);
+			}
 
 		SearchResponse resp = searcher.searchMycollections(term, options);
 		ArrayNode filteredCols = Json.newObject().arrayNode();
@@ -1053,6 +1048,7 @@ public class CollectionObjectController extends WithResourceController {
 		return ok(filteredCols);
 
 	}
+
 
 	/*
 	 * Search for records within a collection.
