@@ -397,7 +397,7 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 
 	public List<RecordResource> getByMedia(String mediaUrl) {
 		Query<RecordResource> q = this.createQuery().disableValidation()
-				.field("media.0.Original.url").equal(mediaUrl);
+				.field("media.Original.url").equal(mediaUrl);
 		return this.find(q.retrievedFields(true, "_id")).asList();
 	}
 
