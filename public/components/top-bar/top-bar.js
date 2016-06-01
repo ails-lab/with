@@ -42,7 +42,17 @@ define(['knockout', 'text!./top-bar.html', 'app', 'autocomplete', 'knockout-swit
             	self.search();
             }
       });
+		
+		self.enterSearch = function(data, event){
+			if(event.keyCode == 13){
+				showSearch(true);
+				ko.contextFor(withsearchid).$data.term(self.term());
+				ko.contextFor(withsearchid).$data.search(true,true);
+			}
+			
+		}
 
+		
 		// self.username      = app.currentUser.username;
 		self.username = ko.pureComputed(function () {
 			return app.currentUser.firstName() + ' ' + app.currentUser.lastName();

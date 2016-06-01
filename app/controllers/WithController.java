@@ -213,12 +213,18 @@ public abstract class WithController extends Controller {
 			        	if (!filteredHm.isEmpty()) {
 				        	methodName = "s" + methodName.substring(1);
 				        	method = descriptiveData.getClass().getMethod(methodName, type);
-					        if (type.equals(MultiLiteral.class) || type.equals(MultiLiteralOrResource.class)) {
+					        if (type.equals(MultiLiteral.class)) {
 					        	MultiLiteral fhm = new MultiLiteral();
 					        	for (String k: filteredHm.keySet())
 					        		fhm.put(k, (List<String>) filteredHm.get(k));
 									method.invoke(descriptiveData, fhm);
 					        }
+					        else if (type.equals(MultiLiteralOrResource.class)) {
+					        	MultiLiteralOrResource fhm = new MultiLiteralOrResource();
+					        	for (String k: filteredHm.keySet())
+					        		fhm.put(k, (List<String>) filteredHm.get(k));
+									method.invoke(descriptiveData, fhm);
+					        }	
 					        else if (type.equals(Literal.class) || type.equals(LiteralOrResource.class)) {
 					        	method.invoke(descriptiveData, (value.getClass().cast(filteredHm)));
 					        }

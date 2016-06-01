@@ -215,7 +215,7 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 				}	
 		        var fullres="";
 			    
-		        if(newRecord.media()!=null &&  newRecord.media()[0] !=null && newRecord.media()[0].Original!=null  && newRecord.media()[0].Original.url()!="null") {
+		        if(newRecord.media()!=null &&  newRecord.media()[0] !=null && newRecord.media()[0].Original!=null  && newRecord.media()[0].Original.url != undefined) {
 		        	 fullres=newRecord.media()[0].Original.url();
 		        }
 		        if (fullres.indexOf("empty")!=-1) {fullres="";}
@@ -522,7 +522,7 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 							meduaType: ko.observable(null)
 						};
 					}
-					if (editMode == "editText" && self.collectionItemsArray()[self.itemPosition()].containsText()) {
+					if (editMode == "editText") {
 						self.collectionItemsArray()[self.itemPosition()].contextData.body.text.default(self.itemText());
 						self.collectionItemsArray()[self.itemPosition()].contextData.body.textPosition(self.textPositionToString(self.itemTextPosition()));
 					} else if (editMode == "editMedia") {

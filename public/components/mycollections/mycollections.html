@@ -13,8 +13,8 @@
 			 <!-- ko if: showsExhibitions -->
 			    <a href="#" class="new" ><span class="plus"></span><span class="text" >New Exhibition</span></a>
 			    <ul class="typeselect">
-                   <li data-bind="click: changeTab"><a href="javascript: void(0);" title="Show only my exhibitions">My Exhibitions</a></li>
-				  <li data-bind="click: changeTab"><a href="javascript: void(0);" title="Show exhibitions shared with me">Exhibitions shared with me</a></li>
+                   <li class="tab active" data-bind="click: changeTab"><a href="javascript: void(0);" title="Show only my exhibitions">My Exhibitions</a></li>
+				  <li class="tab" data-bind="click: changeTab"><a href="javascript: void(0);" title="Show exhibitions shared with me">Exhibitions shared with me</a></li>
                   
                 </ul>
 			  <!-- /ko -->
@@ -31,8 +31,8 @@
                 <!-- /ko -->
                 <!-- tabs-->
                 <ul class="typeselect">
-                   <li class="active" data-bind="click: changeTab"><a href="javascript: void(0);" title="Show only my collections">My Collections</a></li>
-				  <li data-bind="click: changeTab"><a href="javascript: void(0);" title="Show collections shared with me">Collections shared with me</a></li>
+                   <li class="tab active" data-bind="click: changeTab"><a href="javascript: void(0);" title="Show only my collections">My Collections</a></li>
+				  <li class="tab" data-bind="click: changeTab"><a href="javascript: void(0);" title="Show collections shared with me">Collections shared with me</a></li>
                   
                 </ul>
               <!-- /ko -->  
@@ -300,7 +300,8 @@
 			   	<li data-bind="css: { private: !administrative.access.isPublic()}">
 				  <div class="thumbnails">
 				  	<a href="#" data-bind="attr: {href: $parent.showsExhibitions? (administrative.entryCount() > 0? 'index.html#exhibitionview/'+dbId(): 'index.html#exhibition-edit/'+dbId()): 'index.html#collectionview/'+dbId()}" title="view"> 
-				  	<!-- ko if: administrative.access.isPublic()-->
+				  	<div class="counter" data-bind="text: itemCount()"> Items</div>
+					<!-- ko if: administrative.access.isPublic()-->
 					<div class="category">public</div>
 					<!--/ko-->
 					<!-- ko else -->
@@ -350,11 +351,15 @@
 					<!-- ko else -->
 					<a data-bind="{text: title(), attr: {href: 'index.html#collectionview/'+dbId()}}" class="header truncate"></a>
 					<!-- /ko -->
-					<div class="description" data-bind="text: description()"></div>
+					<!-- ko if: (description() == "") -->
+					<br>
+					<!-- /ko -->
+					<!-- ko else -->
+					<div class="truncate" data-bind="text: description()"></div>
+					<!-- /ko -->
 					<div class="other-info">
-					  <div class="count" data-bind="text: itemCount()"></div>
-					  <div class="date" data-bind="text: administrative.created()"></div>
-					  <div class="user"data-bind="text: withCreatorInfo.creatorName"></div>
+					  <div class="date" data-bind="text: date()"></div>
+					  <div class="user"data-bind="text: creatorName()"></div>
 					</div>
 					<div class="action-group"><div class="wrap">
                           <ul>

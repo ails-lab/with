@@ -1,6 +1,6 @@
-define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','app', 'knockout-validation'], function (bootstrap, ko, template, KnockoutElse, app) {
+define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','app', 'moment', 'knockout-validation'], function (bootstrap, ko, template, KnockoutElse, app, moment) {
 
-	count = 6;
+	count = 12;
 	accessLevels = {
 		READ : 0,
 		WRITE : 1,
@@ -160,6 +160,9 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 						return 'by ' + firstName + ' ' + lastName;
 					else
 						return 'by ' + innerModel.withCreatorInfo.username();
+				});
+				innerModel.date = ko.pureComputed(function () {
+					return moment(innerModel.administrative.created()).format("MMMM Do YYYY");
 				});
 				innerModel.backgroundImg = ko.pureComputed(function () {
 					if (!(innerModel.descriptiveData.backgroundImg == null || innerModel.descriptiveData.backgroundImg.Thumbnail == null || 
@@ -364,7 +367,7 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 				    	}
 				        if (collectionType == 'Exhibition') {
 							app.currentUser.exhibitionCount(app.currentUser.exhibitionCount() + 1);
-							self.exhibitionCount(self.exhibitionCount() + 1);
+							administrative.created	= self.exhibitionCount(self.exhibitionCount() + 1);
 							window.location = '#exhibition-edit/'+data.dbId;
 				        }
 						self.closeSideBar();
@@ -871,6 +874,8 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 			} else {
 				$.smkAlert({ text: 'Not a valid operation!', type: 'danger', time: 10 });
 			}
+			$('.tab').removeClass('active');
+			$(clickedElement).addClass('active');
 			self.moreCollectionData(true);
 		};
 
