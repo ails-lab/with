@@ -37,7 +37,8 @@
                   <!-- ko foreach: exhItems -->
                   	<div class="item style1">
                     <div class="container">
-                    	 <!-- ko if: $data.textPosition == 'LEFT' -->
+                      <!--  ko if: $data.hasOwnProperty('mediaUrl') && mediaUrl != null && mediaUrl != "" --> 
+                      <!-- ko if: $data.textPosition == 'LEFT' -->
                       	 <div class="textbox">
                           <div class="wrap">
                           <h2  data-bind="text: title"></h2>
@@ -46,7 +47,6 @@
                          </div>
                         </div>
                         <!-- /ko -->
-                      <!--  ko if: $data.hasOwnProperty('mediaUrl') && mediaUrl != null && mediaUrl != "" --> 
                       <div data-bind="css: {imagewrapvideo: $data.mediaType == 'VIDEO', imagewrapaudio: $data.mediaType == 'AUDIO'}">
                       	<img data-bind="{attr: { src: fullres}}" alt="">
                         <ul class="action">
