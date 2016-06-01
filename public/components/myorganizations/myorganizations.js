@@ -312,7 +312,6 @@ define(['knockout', 'text!./myorganizations.html', 'app', 'moment', 'async!https
 
 		self.getMembersInfo = function (category, group) {
 			self.groupId(group.dbId());
-			console.log("members info");
 			$.ajax({
 				method : "GET",
 				contentType : "application/json",
