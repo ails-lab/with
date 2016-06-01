@@ -244,7 +244,6 @@ define(['bridget', 'knockout', 'text!./_collection-view.html', 'isotope', 'image
 		});
 		ko.bindingHandlers.filterItems = {
 				update: function (elem, valueAccessor, allBindingsAccessor, viewModel, context) {
-					console.log("update!!!!!!!"+ko.utils.unwrapObservable(valueAccessor()));
 					var q = ko.utils.unwrapObservable(valueAccessor());
 					self.$container.isotope({ filter : function() {
 					    var title = $(this).find('.title').text();
