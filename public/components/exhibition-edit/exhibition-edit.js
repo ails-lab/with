@@ -275,12 +275,15 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 		});
 		self.itemPosition = ko.observable(0);
 		self.itemId = ko.observable("");
-		self.itemMediaDescription = ko.observable(undefined);
+		self.itemMediaDescription = ko.observable("").extend({maxLength: 50});
 		self.validationModelVideo = ko.validatedObservable({
 			itemVideoUrl: self.itemVideoUrl
 		});
 		self.validationModelAudio = ko.validatedObservable({
 			itemAudioUrl: self.itemAudioUrl
+		});
+		self.validationModelMediaDescription = ko.validatedObservable({
+			itemMediaDescription: self.itemMediaDescription
 		});
 		self.backgroundImg = ko.observable("");
 		self.displayCoverImage = ko.pureComputed(function () {
@@ -495,8 +498,10 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 		};
 		
 		self.editItem = function (editMode) {
+			console.log(self.validationModelMediaDescription.isValid() + " " + self.itemMediaDescription());
 			if (self.itemMediaType() == "" || (self.itemMediaType() == "VIDEO" && ((self.itemVideoUrl() == "" || self.validationModelVideo.isValid()))) ||
-					(self.itemMediaType() == "AUDIO" && ((self.itemAudioUrl() == "" || self.validationModelAudio.isValid())))) {
+					(self.itemMediaType() == "AUDIO" && ((self.itemAudioUrl() == "" || self.validationModelAudio.isValid()))) 
+					&& self.validationModelMediaDescription.isValid()) {
 				var mediaUrl;
 				if (self.itemMediaType() == "VIDEO") {
 					var itemEmbeddedVideoUrl = "";
@@ -539,7 +544,9 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 					self.closeSideBar();
 				});
 			} else {
-				self.validationModel.errors.showAllMessages();
+				self.validationModelMediaDescription.errors.showAllMessages();
+				self.validationModelVideo.errors.showAllMessages();
+				self.validationModelAudio.errors.showAllMessages();
 			}
 		};
 		

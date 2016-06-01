@@ -55,7 +55,7 @@
                         </ul>
                       </div>
                       <!-- ko if: $data.textPosition == 'RIGHT' -->
-                      	 <div class="textbox">
+                      	 <div class="textbox" style="padding-right: 20px">
                           <div class="wrap">
                           <h2  data-bind="text: title"></h2>
                           <p data-bind="text: annotation">
@@ -68,19 +68,22 @@
                         	<div class="embed-responsive embed-responsive-16by9">
                             	<iframe width="100%" height="100%" data-bind="attr: { src: mediaUrl }" frameborder="0" allowfullscreen></iframe>
                         	</div>
+                        	<!--  ko if: $data.hasOwnProperty('mediaDescription') -->
+                   		   <center><span class="mediadescription" data-bind="text: mediaDescription"></span></center>
+                    		<!-- /ko -->
                         </div>
                         <!-- /ko -->
                         <!-- ko if: mediaType == "AUDIO" -->
                         <div class="audiowrap">
-                            <p></p>
+                            <div class="thumb"><img style="width: 180px;" src="img/ui/sounds_exhibition1.jpg"></div>
                           	<audio id="mediaplayer" controls style="width: 180px;" width="576" height="324">
                           		<source data-bind="attr:{src: mediaUrl}" type="audio/mpeg">Your browser does not support HTML5
                           	</audio>
+                          	<!--  ko if: $data.hasOwnProperty('mediaDescription') -->
+                   		    <span class="mediadescription" style="width: 180px;" data-bind="text: mediaDescription"></span>
+                    	    <!-- /ko -->
                         </div>
-						<!-- /ko -->
-                         	<!--  ko if: $data.hasOwnProperty('mediaDescription') -->
-                       		<!-- <div class="imginfo"><span class="mediatitle" data-bind="text: mediaDescription"></span></div>-->
-                        	<!-- /ko -->
+						<!-- /ko -->            	
                     <!-- /ko -->
                     <!-- ko else -->
                        <!-- ko if: $data.textPosition == 'LEFT' -->
