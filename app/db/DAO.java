@@ -500,13 +500,15 @@ public class DAO<E> extends BasicDAO<E, ObjectId> {
 				if (fieldValue.isArray()) {
 					String[] values = new String[fieldValue.size()];
 					for (int i = 0; i < fieldValue.size(); i++) {
-						if (fieldValue.get(i).isObject())
-							updateFields(newFieldName, fieldValue, updateOps);
+						if (fieldValue.get(i).isObject()) {
+							updateFields(newFieldName+"."+i, fieldValue.get(i), updateOps);
+						}
 						else
 							values[i] = fieldValue.get(i).asText();
 					}
-					if ((values.length > 0) && (values[0] != null) )
+					if ((values.length > 0) && (values[0] != null)) {
 						updateOps.disableValidation().set(newFieldName, values);
+					}
 				} else {
 					updateOps.disableValidation().set(newFieldName,
 							fieldValue.asText());

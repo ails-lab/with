@@ -1,0 +1,120 @@
+<!-- settings bar-->
+
+  <!-- search filter-->
+     
+       
+            <div class="settings" data-bind="css: {active: visiblePanel()==true}"><a href="#" title="#" data-bind="click: showfacets,disable:$parent.searching"><img src="img/ic-setting.png" alt="settings"></a>
+              <!-- settings-->
+              <div class="searchsetting" id="searchfacets" data-bind="if: visiblePanel,visible:visiblePanel">
+               
+			   
+			    <!-- filter Text-->
+              <div class="facetsearchbox">
+			    <div class="box">
+			    <input class="facetinput" id="f_search" placeholder="Search" type="text" value=""/>
+			   </div>
+			   </div>
+                
+                <!-- tabs-->
+ 
+                <!-- tabs-->
+                <ul role="tablist" class="nav nav-tabs">
+                 <li class="active"><a href="#datasources" data-toggle="tab" data-bind="event:{click: sourceBind}">Sources</a></li>
+  
+				  <!-- ko foreach: $parent.filters -->
+				  <!-- ko if: suggestedValues.length>0 -->
+				  <li><a data-bind="attr:{href:'#'+filterID},text:filterName,event:{click: $parent.listBind}"  data-toggle="tab"></a></li>
+				  <!-- /ko -->
+				  <!-- /ko -->
+                  
+                </ul>
+                <!-- panes-->
+                <div class="tab-content">
+                
+                
+                <div class="tab-pane active" id="datasources">
+				     <ul class="sources list">
+				     
+				     <li><label>
+				      <input type="checkbox" value="Europeana" data-bind="checked: $parent.sources, click: listClick"/>
+				      <span>Europeana</span>
+				     </label>
+				     </li>
+				       
+				       <li><label>
+				      <input type="checkbox" value="DPLA" data-bind="checked: $parent.sources, click:listClick"/>
+				       <span>DPLA</span>
+				      </label>
+				     </li>
+				     <li><label>
+				      <input type="checkbox" value="NLA" data-bind="checked: $parent.sources, click:listClick"/>
+				      <span>NLA</span>
+				      </label>
+				     </li>
+				     <li><label>
+				      <input type="checkbox" value="DigitalNZ" data-bind="checked: $parent.sources, click:listClick"/>
+				      <span>DigitalNZ</span>
+				      </label>
+				     </li>
+				     
+				     <li><label>
+				      <input type="checkbox" value="YouTube" data-bind="checked: $parent.sources, click: listClick"/></span>
+				     <span>YouTube</span>
+				     </label>
+				     </li>
+				    
+				    <li><label>
+				      <input type="checkbox" value="WITHin" data-bind="checked: $parent.sources, click: listClick"/></span>
+				      <span>WITHin</span>
+				     </label>
+				     </li>
+				      <li><label>
+				      <input type="checkbox" value="Rijksmuseum" data-bind="checked: $parent.sources, click: listClick"/></span>
+				      <span>Rijksmuseum</span>
+				     </label>
+				     </li>
+				    </ul>
+				  </div>
+				  
+				   <!-- ko foreach: $parent.filters -->
+				   <div class="tab-pane" data-bind="attr:{id:filterID}">
+				    <!-- ko if:(filterID!="dates" &&  suggestedValues.length>0) -->
+				    <ul class="type list">
+				   
+				    
+				   
+				    <!-- ko foreach: suggestedValues -->
+				   
+				    <li data-bind="click:function(){$parents[1].listSelect($parents[0].filterID,value);}">
+				      <a href="#" data-bind="text: value"></a>
+				      
+				     </li>
+				     <!-- /ko -->
+				      </ul>
+				     <!-- /ko -->
+				     
+				     <!-- ko if:(filterID=="dates" &&  suggestedValues.length>0) -->
+				     
+				        <ul class="type list chart">
+				         <!-- ko foreach:$parent.yaxis -->
+						    <li data-bind="attr:{'title': $data},click:function(){$parents[1].listSelect($parents[0].filterID,$data);}">
+						    <span class="label" data-bind="text:$parents[1].yaxislabels()[$index()]"></span>
+						    
+						    <span class="bar" data-bind="attr: { 'data-number': $parents[1].barheights()[$index()]}"></span></li>
+						  <!-- /ko -->  
+						</ul>
+				     <!-- /ko -->
+				    
+				   
+				    
+				    
+				   
+				  </div>
+				   <!-- /ko -->
+                
+                
+                
+                 
+                </div>
+              </div>
+            </div>

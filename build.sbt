@@ -12,6 +12,7 @@ version := "1.0-SNAPSHOT"
 
 lazy val root = (project in file(".")).enablePlugins(PlayJava)
 
+
 scalaVersion := "2.11.1"
 
 libraryDependencies ++= Seq(
@@ -47,3 +48,5 @@ libraryDependencies ++= Seq(
 "org.elasticsearch" % "metrics-elasticsearch-reporter" % "2.0",
  "net.coobird" % "thumbnailator" % "0.4.8"
 )
+
+sources in doc in Compile := List() 
