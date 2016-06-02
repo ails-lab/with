@@ -57,17 +57,25 @@ html
 
 								// header
 								.list-head
-									.sort
+
+									// tabs
+									ul.typeselect
+										li.active
+											a( href="#" title="Show only my notification") My notification
+										li
+											a( href="#" title="Show all notification") All notification
+									
+									//.sort
 										a#sorting(href="#", data-toggle='dropdown')
-											span.text My Notification
+											span.text My notification
 											span.arrow
 
 										// dropdown
 										ul.dropdown-menu(aria-labelledby='sorting')
 											li 
-												a(href="#") Title
+												a(href="#") My notification
 											li 
-												a(href="#") Date
+												a(href="#") All notification
 
 								ul.notif-list
 									li

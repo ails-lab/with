@@ -62,6 +62,14 @@ define(['knockout', 'text!./myorganizations.html', 'app', 'moment', 'async!https
 		self.groups = ko.observableArray([], mapping);
 		self.name = ko.observable(params.type);			// Project or Organization (display field)
 		self.namePlural = ko.observable(params.title);	// Projects or Organizations (display field)
+		self.entryCount = ko.observable();
+		self.groupCount = ko.pureComputed(function () {
+			if (self.entryCount() === 1) {
+				return self.entryCount() + ' ' + self.name();
+			} else {
+				return self.entryCount() + ' ' + self.namePlural();
+			}
+		});
 		self.baseURL = ko.pureComputed(function () {
 			return window.location.origin + '/assets/index.html#' + self.name().toLowerCase() + '/';
 		});
@@ -106,7 +114,8 @@ define(['knockout', 'text!./myorganizations.html', 'app', 'moment', 'async!https
 			url: '/group/list?groupType=' + params.type + '&offset=0&belongsOnly=true',
 			type: 'GET',
 			success: function (data) {
-				ko.mapping.fromJS(data, mapping, self.groups);
+				ko.mapping.fromJS(data.groups, mapping, self.groups);
+				self.entryCount(data.groupCount);
 				WITHApp.tabAction();
 
 				if (self.groups().length % 10 > 0) {
@@ -118,6 +127,16 @@ define(['knockout', 'text!./myorganizations.html', 'app', 'moment', 'async!https
 		self.hideMessage = function () {
 			$("section.message").toggle();
 		};
+		
+		self.findByGroupName = function (name) {
+			$.ajax({
+				url: '/group/findByGroupName?name='+name,
+				type: 'GET',
+				success: function (data) {
+					window.location = '/#organization/'+data.groupId;
+				}
+			});
+		}
 
 		self.getCoordinatesAndSubmit = function (submitFunc) {
 			if (self.page.address && self.page.city && self.page.country) {
@@ -159,6 +178,7 @@ define(['knockout', 'text!./myorganizations.html', 'app', 'moment', 'async!https
 						success: function (data, textStatus, jqXHR) {
 							self.groups.remove(group);
 							console.log(data);
+							self.entryCount(self.entryCount() -1);
 						},
 						error: function (jqXHR, textStatus, errorThrown) {
 							console.log(errorThrown);
@@ -225,10 +245,10 @@ define(['knockout', 'text!./myorganizations.html', 'app', 'moment', 'async!https
 				type: 'GET',
 				success: function (data) {
 					var newItems = ko.mapping.fromJS(data, mapping);
-					self.groups.push.apply(self.groups, newItems());
+					self.groups.push.apply(self.groups, newItems.groups());
 
 					WITHApp.tabAction();
-					if (data.length === 0 || data.length % 10 > 0) {
+					if (data.groups.length === 0 || data.groups.length % 10 > 0) {
 						$('.loadmore').text('no more results');
 					}
 				}
@@ -272,6 +292,14 @@ define(['knockout', 'text!./myorganizations.html', 'app', 'moment', 'async!https
 				});
 			}
 		};
+		
+		ko.bindingHandlers.autocompleteGroupname = {
+				init: function (elem, valueAccessor, allBindingsAccessor, viewModel, context) {
+					app.autoCompleteUserName(elem, valueAccessor, allBindingsAccessor, viewModel, context, function (suggestion) {
+						viewModel.findByGroupName(suggestion);
+					});
+				}
+			};
 
 		arrayFirstIndexOf = function (array, predicate) {
 			for (var i = 0, j = array.length; i < j; i++) {
@@ -284,7 +312,6 @@ define(['knockout', 'text!./myorganizations.html', 'app', 'moment', 'async!https
 
 		self.getMembersInfo = function (category, group) {
 			self.groupId(group.dbId());
-			console.log("members info");
 			$.ajax({
 				method : "GET",
 				contentType : "application/json",
@@ -349,7 +376,52 @@ define(['knockout', 'text!./myorganizations.html', 'app', 'moment', 'async!https
 				}
 			});
 		};
+		
+		self.getAPIUrlGroup = function (belongsOnly) {
+			var url = window.location.href.split("assets")[0];
+			var groupCall = url + "group/list?groupType="+self.name()+"&belongsOnly="+belongsOnly;
+			return groupCall;
+		};
 
+
+		self.makeAdmin = function (userId) {
+			console.log("makeAdmin");
+			$.ajax({
+				method : "PUT",
+				contentType : "text/plain",
+				url : "/group/admin/" + self.groupId() + "?id=" + userId,
+				success : function (result) {
+					/*self.image = userData.image;
+					self.userMembers.push(ko.mapping.fromJS(userData));*/
+				},
+				error : function (result) {
+					$.smkAlert({ text: result.responseJSON.error, type: 'danger', time: 10 });
+				}
+			});
+		};
+
+		self.makeMember = function (userId) {
+			console.log("makeMember");
+			$.ajax({
+				method : "DELETE",
+				contentType : "text/plain",
+				url : "/group/admin/" + self.groupId() + "?id=" + userId,
+				success : function (result) {
+				},
+				error : function (result) {
+					$.smkAlert({ text: result.responseJSON.error, type: 'danger', time: 10 });
+				}
+			});
+		};
+
+		self.isAdminToggle = function(admin, userId){
+			if (!admin) 
+				self.makeMember(userId);
+			else 
+				self.makeAdmin(userId);
+			return true;
+		}
+		
 		self.excecuteRemove = function (id, category) {
 			$.ajax({
 				method : "DELETE",
@@ -378,6 +450,7 @@ define(['knockout', 'text!./myorganizations.html', 'app', 'moment', 'async!https
 			});
 		};
 
+		
 		/* ****************************************************************
 		 *
 		 * ****************************************************************/

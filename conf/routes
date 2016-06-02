@@ -31,6 +31,8 @@ GET 	/custom/:customName					    controllers.CustomAssets.redirect(customName)
 GET 	/custom/:customName/					controllers.CustomAssets.redirect(customName)
 GET 	/custom/:customName/*file				controllers.CustomAssets.getFile(customName:String, file:String)
 
+GET 	/collection/updateExhibitions			controllers.CollectionObjectController.updateExhibitions(host: String, port: Integer, dbName: String)
+
 PUT		/record/contextData			            controllers.RecordResourceController.editContextData(collectionId)
 GET		/record/:id							    controllers.RecordResourceController.getRecordResource(id, format: play.libs.F.Option[String], profile: String ?="MEDIUM", locale: play.libs.F.Option[java.lang.String])
 PUT		/record/:id								controllers.RecordResourceController.editRecordResource(id)
@@ -79,7 +81,7 @@ POST	 /exhibition/:id/addBackgroundImg		controllers.ExhibitionObjectController.a
 POST	/group/create							controllers.GroupManager.createGroup(adminId: String ?=null, adminUsername: String ?=null, groupType: String ?="UserGroup")
 POST	/organization/create					controllers.GroupManager.createGroup(adminId: String ?=null, adminUsername: String ?=null, groupType: String ?="Organization")
 POST	/project/create							controllers.GroupManager.createGroup(adminId: String ?=null, adminUsername: String ?=null, groupType: String ?="Project")
-GET      /group/findByGroupName                 controllers.GroupManager.findByGroupName(name, collectionId)
+GET      /group/findByGroupName                 controllers.GroupManager.findByGroupName(name, collectionId: String ?= null)
 GET		/group/descendantGroups/:groupId		controllers.GroupManager.getDescendantGroups(groupId, groupType: String  ?="All", direct: Boolean ?=true, collectionHits:Boolean ?= false)
 GET		/group/descendantOrganizations/:groupId	controllers.GroupManager.getDescendantGroups(groupId, groupType: String  ?="Organization", direct: Boolean ?=true, collectionHits:Boolean ?= false)
 GET		/group/descendantProjects/:groupId		controllers.GroupManager.getDescendantGroups(groupId, groupType: String  ?="Project", direct: Boolean ?=true, collectionHits:Boolean ?= false)
@@ -107,7 +109,7 @@ POST	/media/create							controllers.MediaController.createMedia(file: Boolean ?
 GET		/media/byUrl							controllers.MediaController.getMediaByUrl(url, version: String ?= "Original")
 GET 	/media/:id								controllers.MediaController.getMetadataOrFile(id, file: Boolean ?=true)
 POST 	/media/:id 								controllers.MediaController.editMetadataOrFile(id, file: Boolean ?=false)
-DELETE  /media/orphan							controllers.MediaController.deleteOrphanMadia()
+DELETE  /media/orphan							controllers.MediaController.deleteOrphanMedia()
 DELETE 	/media/:id								controllers.MediaController.deleteMedia(id)
 
 # User Manager Controller
@@ -121,7 +123,7 @@ GET		/user/token				                controllers.UserManager.getToken()
 GET 	/user/loginWithToken	                controllers.UserManager.loginWithToken( token: java.lang.String )
 # both users and groups
 GET      /user/findByUserOrGroupNameOrEmail        controllers.UserAndGroupManager.findByUserOrGroupNameOrEmail(userOrGroupNameOrEmail: String, collectionId ?= null)
-GET      /user/listNames                           controllers.UserAndGroupManager.listNames(prefix:java.lang.String ?= "", onlyParents: Boolean ?= false, specifyCategory: Integer ?= 0)
+GET      /user/listNames                           controllers.UserAndGroupManager.listNames(prefix:java.lang.String ?= "", onlyParents: Boolean ?= false, forUsers: Boolean ?= true, forGroupType: play.libs.F.Option[String])
 GET      /user/:id/photo                           controllers.UserAndGroupManager.getUserOrGroupThumbnail(id)
 GET      /user/:id                                 controllers.UserManager.getUser(id)
 PUT      /user/:id                                 controllers.UserManager.editUser(id)

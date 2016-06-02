@@ -41,7 +41,7 @@
           </section>
           <!-- notification-->
           <section class="notification">
-            <!-- button--><a id="notificationbutton" href="#" title="notification" data-toggle="dropdown"><img src="img/ui/ic-notification.png"><span class="counter">12</span></a>
+            <!-- button--><a id="notificationbutton" href="#" title="Notification" data-toggle="dropdown"><img src="img/ui/ic-notification.png"><span class="counter">12</span></a>
             <!-- dropdown menu-->
             <div aria-labelledby="notificationbutton" class="dropdown-menu">
               <!-- header-->
@@ -57,9 +57,13 @@
             </div>
           </section>
           <!-- home-->
-          <section class="home"><a href="dashboard.html" title="Home"><img src="img/ui/ic-home.png" alt="Home"></a></section>
+          <section class="home"><a href="dashboard.html" title="Dashboard Home"><img src="img/ui/ic-home.png" alt="Home"></a></section>
           <!-- explore-->
-          <section class="explore"><a href="dashboard-search.html" title="explore"><img src="img/ui/ic-search.png"><span class="text">EXPLORE</span></a></section>
+          <section class="explore">
+            <!-- input search-->
+            <input type="text" placeholder="Search">
+            <!-- icon--><img src="img/ui/ic-mag.png" class="icon">
+          </section>
         </div>
       </div>
     </header>
@@ -80,6 +84,12 @@
                 <li><a href="dashboard-collection.html"><span class="counter">7</span><span class="icon"><i class="fa fa-clone"></i></span><span class="text">My Collection</span></a></li>
                 <li class="active"><a href="dashboard-exhibition.html"><span class="counter">10</span><span class="icon"><i class="fa fa-television"></i></span><span class="text">My Exhibition</span></a></li>
                 <li><a href="dashboard-favorite.html"><span class="counter">5</span><span class="icon"><i class="fa fa-heart-o"></i></span><span class="text">My Favorite</span></a></li>
+                <!-- li( class=page === "annotation" ? "active" : "" )
+                a(href='dashboard-annotation.html')
+                 span.icon
+                  i.fa.fa-edit
+                 span.text My Annotation
+                -->
                 <li><a href="dashboard-organizations.html"><span class="icon"><i class="fa fa-bookmark-o"></i></span><span class="text">Organizations</span></a></li>
                 <li><a href="dashboard-projects.html"><span class="icon"><i class="fa fa-comment-o"></i></span><span class="text">Projects</span></a></li>
               </ul>
@@ -101,12 +111,25 @@
             <!-- collection section-->
             <section class="exhibition">
               <section class="header">
-                <!-- collection picker--><a id="picker" href="#" data-toggle="dropdown" class="picker"><span class="text">My Exhibition</span><span class="arrow"></span></a>
-                <ul aria-labelledby="picker" class="dropdown-menu">
-                  <li><a href="#">My Exhibition</a></li>
-                  <li><a href="#">Exhibition shared with me</a></li>
+                <!-- new collection--><a href="#" class="new"><span class="plus"></span><span class="text">New exhibition</span></a>
+                <!-- picker wrap
+                .picker-wrap
+                 a#picker(href="#", data-toggle='dropdown').picker
+                  span.text My exhibition
+                  span.arrow
+                  
+                 ul.dropdown-menu(aria-labelledby='picker')
+                  li 
+                   a(href="#") My exhibition
+                  li 
+                   a(href="#") Exhibition shared with me
+                   
+                -->
+                <!-- tabs-->
+                <ul class="typeselect">
+                  <li class="active"><a href="#" title="Show only my exhibition">My exhibition</a></li>
+                  <li><a href="#" title="Show exhibition shared with me">Exhibition shared with me</a></li>
                 </ul>
-                <!-- new collection--><a href="#" class="new"><span class="plus"></span><span class="text">New Exhibition</span></a>
               </section>
               <!-- message-->
               <section class="message"><img src="img/ui/ic-stack.png" class="hero">
@@ -119,6 +142,11 @@
               <section class="exhibition-list">
                 <!-- collection main header-->
                 <div class="list-head">
+                  <!-- item count--><span class="item-count">7 exhibitions</span>
+                  <!-- search-->
+                  <div class="filtertype"><img src="img/ui/ic-mag.png" class="mag">
+                    <input type="text" placeholder="Search exhibition" class="filtertext">
+                  </div>
                   <div class="sort"><span>Sort by</span><a id="sorting" href="#" data-toggle="dropdown"><span class="text">Title</span><span class="arrow"></span></a>
                     <!-- dropdown-->
                     <ul aria-labelledby="sorting" class="dropdown-menu">
@@ -144,7 +172,15 @@
                         <div class="date">December 15, 2015</div>
                         <div class="user">By Annac</div>
                       </div>
-                      <div class="action-group"><a href="#" data-toggle="tooltip" data-placement="top" title="Delete exhibition" class="fa fa-trash-o"></a><a href="#" data-toggle="tooltip" data-placement="top" title="Share exhibition" class="fa fa-paper-plane-o"></a><a href="dashboard-exhibition-editor.html" data-toggle="tooltip" data-placement="top" title="Edit exhibition" class="fa fa-pencil"></a></div>
+                      <div class="action-group">
+                        <div class="wrap">
+                          <ul>
+                            <li><a href="#" data-toggle="tooltip" data-placement="top" title="Delete exhibition" class="fa fa-trash-o"></a></li>
+                            <li><a href="#" data-toggle="tooltip" data-placement="top" title="Share exhibition" class="fa fa-paper-plane-o"></a></li>
+                            <li><a href="dashboard-exhibition-editor.html" data-toggle="tooltip" data-placement="top" title="Edit exhibition" class="fa fa-pencil"></a></li>
+                          </ul>
+                        </div>
+                      </div>
                     </div>
                   </li>
                   <li>
@@ -161,7 +197,15 @@
                         <div class="date">December 15, 2015</div>
                         <div class="user">By Annac</div>
                       </div>
-                      <div class="action-group"><a href="#" data-toggle="tooltip" data-placement="top" title="Delete exhibition" class="fa fa-trash-o"></a><a href="#" data-toggle="tooltip" data-placement="top" title="Share exhibition" class="fa fa-paper-plane-o"></a><a href="dashboard-exhibition-editor.html" data-toggle="tooltip" data-placement="top" title="Edit exhibition" class="fa fa-pencil"></a></div>
+                      <div class="action-group">
+                        <div class="wrap">
+                          <ul>
+                            <li><a href="#" data-toggle="tooltip" data-placement="top" title="Delete exhibition" class="fa fa-trash-o"></a></li>
+                            <li><a href="#" data-toggle="tooltip" data-placement="top" title="Share exhibition" class="fa fa-paper-plane-o"></a></li>
+                            <li><a href="dashboard-exhibition-editor.html" data-toggle="tooltip" data-placement="top" title="Edit exhibition" class="fa fa-pencil"></a></li>
+                          </ul>
+                        </div>
+                      </div>
                     </div>
                   </li>
                   <li>
@@ -178,7 +222,15 @@
                         <div class="date">December 15, 2015</div>
                         <div class="user">By Annac</div>
                       </div>
-                      <div class="action-group"><a href="#" data-toggle="tooltip" data-placement="top" title="Delete exhibition" class="fa fa-trash-o"></a><a href="#" data-toggle="tooltip" data-placement="top" title="Share exhibition" class="fa fa-paper-plane-o"></a><a href="dashboard-exhibition-editor.html" data-toggle="tooltip" data-placement="top" title="Edit exhibition" class="fa fa-pencil"></a></div>
+                      <div class="action-group">
+                        <div class="wrap">
+                          <ul>
+                            <li><a href="#" data-toggle="tooltip" data-placement="top" title="Delete exhibition" class="fa fa-trash-o"></a></li>
+                            <li><a href="#" data-toggle="tooltip" data-placement="top" title="Share exhibition" class="fa fa-paper-plane-o"></a></li>
+                            <li><a href="dashboard-exhibition-editor.html" data-toggle="tooltip" data-placement="top" title="Edit exhibition" class="fa fa-pencil"></a></li>
+                          </ul>
+                        </div>
+                      </div>
                     </div>
                   </li>
                   <li>
@@ -195,7 +247,15 @@
                         <div class="date">December 15, 2015</div>
                         <div class="user">By Annac</div>
                       </div>
-                      <div class="action-group"><a href="#" data-toggle="tooltip" data-placement="top" title="Delete exhibition" class="fa fa-trash-o"></a><a href="#" data-toggle="tooltip" data-placement="top" title="Share exhibition" class="fa fa-paper-plane-o"></a><a href="dashboard-exhibition-editor.html" data-toggle="tooltip" data-placement="top" title="Edit exhibition" class="fa fa-pencil"></a></div>
+                      <div class="action-group">
+                        <div class="wrap">
+                          <ul>
+                            <li><a href="#" data-toggle="tooltip" data-placement="top" title="Delete exhibition" class="fa fa-trash-o"></a></li>
+                            <li><a href="#" data-toggle="tooltip" data-placement="top" title="Share exhibition" class="fa fa-paper-plane-o"></a></li>
+                            <li><a href="dashboard-exhibition-editor.html" data-toggle="tooltip" data-placement="top" title="Edit exhibition" class="fa fa-pencil"></a></li>
+                          </ul>
+                        </div>
+                      </div>
                     </div>
                   </li>
                   <li>
@@ -212,7 +272,15 @@
                         <div class="date">December 15, 2015</div>
                         <div class="user">By Annac</div>
                       </div>
-                      <div class="action-group"><a href="#" data-toggle="tooltip" data-placement="top" title="Delete exhibition" class="fa fa-trash-o"></a><a href="#" data-toggle="tooltip" data-placement="top" title="Share exhibition" class="fa fa-paper-plane-o"></a><a href="dashboard-exhibition-editor.html" data-toggle="tooltip" data-placement="top" title="Edit exhibition" class="fa fa-pencil"></a></div>
+                      <div class="action-group">
+                        <div class="wrap">
+                          <ul>
+                            <li><a href="#" data-toggle="tooltip" data-placement="top" title="Delete exhibition" class="fa fa-trash-o"></a></li>
+                            <li><a href="#" data-toggle="tooltip" data-placement="top" title="Share exhibition" class="fa fa-paper-plane-o"></a></li>
+                            <li><a href="dashboard-exhibition-editor.html" data-toggle="tooltip" data-placement="top" title="Edit exhibition" class="fa fa-pencil"></a></li>
+                          </ul>
+                        </div>
+                      </div>
                     </div>
                   </li>
                   <li>
@@ -229,7 +297,15 @@
                         <div class="date">December 15, 2015</div>
                         <div class="user">By Annac</div>
                       </div>
-                      <div class="action-group"><a href="#" data-toggle="tooltip" data-placement="top" title="Delete exhibition" class="fa fa-trash-o"></a><a href="#" data-toggle="tooltip" data-placement="top" title="Share exhibition" class="fa fa-paper-plane-o"></a><a href="dashboard-exhibition-editor.html" data-toggle="tooltip" data-placement="top" title="Edit exhibition" class="fa fa-pencil"></a></div>
+                      <div class="action-group">
+                        <div class="wrap">
+                          <ul>
+                            <li><a href="#" data-toggle="tooltip" data-placement="top" title="Delete exhibition" class="fa fa-trash-o"></a></li>
+                            <li><a href="#" data-toggle="tooltip" data-placement="top" title="Share exhibition" class="fa fa-paper-plane-o"></a></li>
+                            <li><a href="dashboard-exhibition-editor.html" data-toggle="tooltip" data-placement="top" title="Edit exhibition" class="fa fa-pencil"></a></li>
+                          </ul>
+                        </div>
+                      </div>
                     </div>
                   </li>
                   <li>
@@ -246,7 +322,15 @@
                         <div class="date">December 15, 2015</div>
                         <div class="user">By Annac</div>
                       </div>
-                      <div class="action-group"><a href="#" data-toggle="tooltip" data-placement="top" title="Delete exhibition" class="fa fa-trash-o"></a><a href="#" data-toggle="tooltip" data-placement="top" title="Share exhibition" class="fa fa-paper-plane-o"></a><a href="dashboard-exhibition-editor.html" data-toggle="tooltip" data-placement="top" title="Edit exhibition" class="fa fa-pencil"></a></div>
+                      <div class="action-group">
+                        <div class="wrap">
+                          <ul>
+                            <li><a href="#" data-toggle="tooltip" data-placement="top" title="Delete exhibition" class="fa fa-trash-o"></a></li>
+                            <li><a href="#" data-toggle="tooltip" data-placement="top" title="Share exhibition" class="fa fa-paper-plane-o"></a></li>
+                            <li><a href="dashboard-exhibition-editor.html" data-toggle="tooltip" data-placement="top" title="Edit exhibition" class="fa fa-pencil"></a></li>
+                          </ul>
+                        </div>
+                      </div>
                     </div>
                   </li>
                 </ul><a href="#" class="loadmore">load more

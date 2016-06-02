@@ -54,7 +54,6 @@ import java.util.HashSet;
 import scala.concurrent.Await;
 import scala.concurrent.Future;
 import scala.concurrent.duration.Duration;
-import utils.AccessManager;
 import actors.ApiKeyManager.Create;
 import akka.actor.ActorSelection;
 import akka.pattern.Patterns;

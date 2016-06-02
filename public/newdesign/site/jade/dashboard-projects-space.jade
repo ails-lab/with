@@ -33,23 +33,28 @@ html
 						// project
 						section.project
 
+							// upload
+							a(href="#").uploadimage
+								span.plus
+								span.text Change cover image
+
 							// head
 							.list-head
+
 								// back
-								a(href="dashboard-collection.html").back Return to project list
+								a.back( href="dashboard-collection.html" data-toggle="tooltip" data-placement="top" title="Back to organizations list") 
+									i.fa.fa-angle-left
 
 								// control
-								.list-control
-
-									// upload
-									a(href="#").upload
-										span.plus
-										span.text Change cover image
-
-									a(href="projects-space-view.html" data-toggle="tooltip" data-placement="top" title="Edit Project").fa.fa-eye
-									a(href="#" data-toggle="tooltip" data-placement="top" title="Edit Project").fa.fa-pencil.editaction.new
-									a(href="#" data-toggle="tooltip" data-placement="top" title="Manage Members").fa.fa-user.members-access
-									a(href="#" data-toggle="tooltip" data-placement="top" title="Delete Project").fa.fa-trash
+								ul.organization-list-control
+									li
+										a(href="projects-space-view.html" data-toggle="tooltip" data-placement="top" title="View Project page").fa.fa-eye
+									li
+										a(href="#" data-toggle="tooltip" data-placement="top" title="Edit Project").fa.fa-pencil.editaction.new
+									li
+										a(href="#" data-toggle="tooltip" data-placement="top" title="Manage Members").fa.fa-user.members-access
+									li
+										a(href="#" data-toggle="tooltip" data-placement="top" title="Delete Project").fa.fa-trash
 							
 							// hero section
 							section.hero
@@ -96,6 +101,17 @@ html
 														h1.title Lorem ipsum dolor sit amet conceptus
 														p.text
 															| Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+												.action-group
+													.wrap
+														ul
+															li
+																a(href="#" data-toggle="tooltip" data-placement="top" title="Unshare media" ).fa.fa-ban
+															li
+																a(href="#" data-toggle="tooltip" data-placement="top" title="Add to favorite" ).fa.fa-heart
+															li
+																a(href="#" data-toggle="tooltip" data-placement="top" title="Collect it" ).fa.fa-download.collectbutton
+															li
+																a(href="#" data-toggle="tooltip" data-placement="top" title="Set as featured" ).fa.fa-star.featuredbutton
 
 										.item.exhibition
 											.wrap
@@ -107,6 +123,17 @@ html
 														h1.title Lorem ipsum dolor sit amet conceptus
 														p.text
 															| Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+												.action-group
+													.wrap
+														ul
+															li
+																a(href="#" data-toggle="tooltip" data-placement="top" title="Unshare media" ).fa.fa-ban
+															li
+																a(href="#" data-toggle="tooltip" data-placement="top" title="Add to favorite" ).fa.fa-heart
+															li
+																a(href="#" data-toggle="tooltip" data-placement="top" title="Collect it" ).fa.fa-download.collectbutton
+															li
+																a(href="#" data-toggle="tooltip" data-placement="top" title="Set as featured" ).fa.fa-star.featuredbutton
 
 
 										.item.collection
@@ -120,6 +147,17 @@ html
 														h1.title Lorem ipsum dolor sit amet conceptus
 														p.text
 															| Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+												.action-group
+													.wrap
+														ul
+															li
+																a(href="#" data-toggle="tooltip" data-placement="top" title="Unshare media" ).fa.fa-ban
+															li
+																a(href="#" data-toggle="tooltip" data-placement="top" title="Add to favorite" ).fa.fa-heart
+															li
+																a(href="#" data-toggle="tooltip" data-placement="top" title="Collect it" ).fa.fa-download.collectbutton
+															li
+																a(href="#" data-toggle="tooltip" data-placement="top" title="Set as featured" ).fa.fa-star.featuredbutton
 
 										.item.collection
 											.wrap
@@ -132,6 +170,17 @@ html
 														h1.title Lorem ipsum dolor sit amet conceptus
 														p.text
 															| Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+												.action-group
+													.wrap
+														ul
+															li
+																a(href="#" data-toggle="tooltip" data-placement="top" title="Unshare media" ).fa.fa-ban
+															li
+																a(href="#" data-toggle="tooltip" data-placement="top" title="Add to favorite" ).fa.fa-heart
+															li
+																a(href="#" data-toggle="tooltip" data-placement="top" title="Collect it" ).fa.fa-download.collectbutton
+															li
+																a(href="#" data-toggle="tooltip" data-placement="top" title="Set as featured" ).fa.fa-star.featuredbutton
 
 							// collection give access
 							section.action.members
@@ -151,8 +200,8 @@ html
 												.toggle
 													input(type='checkbox')#u1
 													label(for='u1')
-													span.private view
-													span.public co-edit
+													span.private member
+													span.public admin
 											li
 												.thumbnails
 													img(src="img/content/img-profile.jpg")
@@ -161,8 +210,8 @@ html
 												.toggle
 													input(type='checkbox')#u2
 													label(for='u2')
-													span.private view
-													span.public co-edit
+													span.private member
+													span.public admin
 											li
 												.thumbnails
 													img(src="img/content/img-profile.jpg")
@@ -171,8 +220,8 @@ html
 												.toggle
 													input(type='checkbox')#u3
 													label(for='u3')
-													span.private view
-													span.public co-edit
+													span.private member
+													span.public admin
 											li
 												.thumbnails
 													img(src="img/content/img-profile.jpg")
@@ -181,8 +230,8 @@ html
 												.toggle
 													input(type='checkbox')#u4
 													label(for='u4')
-													span.private view
-													span.public co-edit
+													span.private member
+													span.public admin
 
 									.group
 										.title Groups access
@@ -195,8 +244,8 @@ html
 												.toggle
 													input(type='checkbox')#g1
 													label(for='g1')
-													span.private view
-													span.public co-edit
+													span.private member
+													span.public admin
 											li.green
 												span.text US
 												a(href="#" data-toggle="tooltip" data-placement="top" title="List view").trash
@@ -204,8 +253,8 @@ html
 												.toggle
 													input(type='checkbox')#g2
 													label(for='g2')
-													span.private view
-													span.public co-edit
+													span.private member
+													span.public admin
 											li.orange
 												span.text MN
 												a(href="#" data-toggle="tooltip" data-placement="top" title="List view").trash
@@ -213,8 +262,8 @@ html
 												.toggle
 													input(type='checkbox')#g3
 													label(for='g3')
-													span.private view
-													span.public co-edit
+													span.private member
+													span.public admin
 
 
 

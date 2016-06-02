@@ -33,23 +33,30 @@ html
 						// project
 						section.project
 
+							// upload
+							a(href="#").uploadimage
+								span.plus
+								span.text Change cover image
+
 							// head
 							.list-head
+								
 								// back
-								a(href="dashboard-collection.html").back Return to project list
+								a.back( href="dashboard-collection.html" data-toggle="tooltip" data-placement="top" title="Back to organizations list") 
+									i.fa.fa-angle-left
+
+								
 
 								// control
-								.list-control
-
-									// upload
-									a(href="#").upload
-										span.plus
-										span.text Change cover image
-
-									a(href="organizations-space-view.html" data-toggle="tooltip" data-placement="top" title="View Organization page").fa.fa-eye
-									a(href="#" data-toggle="tooltip" data-placement="top" title="Edit Organization").fa.fa-pencil.editaction.new
-									a(href="#" data-toggle="tooltip" data-placement="top" title="Manage Members").fa.fa-user.members-access
-									a(href="#" data-toggle="tooltip" data-placement="top" title="Delete Organization").fa.fa-trash
+								ul.organization-list-control
+									li
+										a(href="organizations-space-view.html" data-toggle="tooltip" data-placement="top" title="View Organization page").fa.fa-eye
+									li
+										a(href="#" data-toggle="tooltip" data-placement="top" title="Edit Organization").fa.fa-pencil.editaction.new
+									li
+										a(href="#" data-toggle="tooltip" data-placement="top" title="Manage Members").fa.fa-user.members-access
+									li
+										a(href="#" data-toggle="tooltip" data-placement="top" title="Delete Organization").fa.fa-trash
 							
 							// hero section
 							section.hero
@@ -96,6 +103,17 @@ html
 														h1.title Lorem ipsum dolor sit amet conceptus
 														p.text
 															| Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+												.action-group
+													.wrap
+														ul
+															li
+																a(href="#" data-toggle="tooltip" data-placement="top" title="Unshare media" ).fa.fa-ban
+															li
+																a(href="#" data-toggle="tooltip" data-placement="top" title="Add to favorite" ).fa.fa-heart
+															li
+																a(href="#" data-toggle="tooltip" data-placement="top" title="Collect it" ).fa.fa-download.collectbutton
+															li
+																a(href="#" data-toggle="tooltip" data-placement="top" title="Set as featured" ).fa.fa-star.featuredbutton
 
 										.item.exhibition
 											.wrap
@@ -107,6 +125,17 @@ html
 														h1.title Lorem ipsum dolor sit amet conceptus
 														p.text
 															| Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+												.action-group
+													.wrap
+														ul
+															li
+																a(href="#" data-toggle="tooltip" data-placement="top" title="Unshare media" ).fa.fa-ban
+															li
+																a(href="#" data-toggle="tooltip" data-placement="top" title="Add to favorite" ).fa.fa-heart
+															li
+																a(href="#" data-toggle="tooltip" data-placement="top" title="Collect it" ).fa.fa-download.collectbutton
+															li
+																a(href="#" data-toggle="tooltip" data-placement="top" title="Set as featured" ).fa.fa-star.featuredbutton
 
 
 										.item.collection
@@ -120,6 +149,17 @@ html
 														h1.title Lorem ipsum dolor sit amet conceptus
 														p.text
 															| Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+												.action-group
+													.wrap
+														ul
+															li
+																a(href="#" data-toggle="tooltip" data-placement="top" title="Unshare media" ).fa.fa-ban
+															li
+																a(href="#" data-toggle="tooltip" data-placement="top" title="Add to favorite" ).fa.fa-heart
+															li
+																a(href="#" data-toggle="tooltip" data-placement="top" title="Collect it" ).fa.fa-download.collectbutton
+															li
+																a(href="#" data-toggle="tooltip" data-placement="top" title="Set as featured" ).fa.fa-star.featuredbutton
 
 										.item.collection
 											.wrap
@@ -132,6 +172,17 @@ html
 														h1.title Lorem ipsum dolor sit amet conceptus
 														p.text
 															| Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+												.action-group
+													.wrap
+														ul
+															li
+																a(href="#" data-toggle="tooltip" data-placement="top" title="Unshare media" ).fa.fa-ban
+															li
+																a(href="#" data-toggle="tooltip" data-placement="top" title="Add to favorite" ).fa.fa-heart
+															li
+																a(href="#" data-toggle="tooltip" data-placement="top" title="Collect it" ).fa.fa-download.collectbutton
+															li
+																a(href="#" data-toggle="tooltip" data-placement="top" title="Set as featured" ).fa.fa-star.featuredbutton
 
 							// collection give access
 							section.action.members

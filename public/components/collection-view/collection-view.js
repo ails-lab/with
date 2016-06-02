@@ -63,7 +63,7 @@ define(['bridget', 'knockout', 'text!./_collection-view.html', 'isotope', 'image
 			if (self.thumb) {
 				return self.thumb;
 			} else {
-				return "img/content/thumb-empty.png";
+				return "img/ui/ic-noimage.png";
 			}
 		});
 
@@ -204,11 +204,10 @@ define(['bridget', 'knockout', 'text!./_collection-view.html', 'isotope', 'image
 		self.isFavorites = ko.observable(false);
 		self.fetchitemnum = 20;
 		self.isPublic = ko.observable(true);
-		
+		self.query = ko.observable('');
 		self.validationModel = ko.validatedObservable({
 			title: self.titleToEdit
 		});
-
 		self.displayTitle = ko.pureComputed(function () {
 			return self.isFavorites() ? 'Favorites' : self.title();
 		});
@@ -243,7 +242,16 @@ define(['bridget', 'knockout', 'text!./_collection-view.html', 'isotope', 'image
 				percentPosition: true
 			}
 		});
-
+		ko.bindingHandlers.filterItems = {
+				update: function (elem, valueAccessor, allBindingsAccessor, viewModel, context) {
+					var q = ko.utils.unwrapObservable(valueAccessor());
+					self.$container.isotope({ filter : function() {
+					    var title = $(this).find('.title').text();
+					     return title.toLowerCase().indexOf(q.toLowerCase()) == 0;
+					  }
+					});
+				}
+			};
 		self.revealItems = function (data) {
 			if ((data.length === 0 || data.length < self.fetchitemnum)) {
 				loading(false);$(".loadmore").text("no more results");
@@ -535,11 +543,20 @@ define(['bridget', 'knockout', 'text!./_collection-view.html', 'isotope', 'image
 		
 
 		function getItem(record) {
-			var tile = '<div class="item ' + record.dbId + '"><div class="wrap"><a href="#"  onclick="recordSelect(\'' + record.dbId + '\',event)"><div class="thumb"><img style="width:100%" src="' + record.thumbnail() + '" onError="this.src=\'img/content/thumb-empty.png\'"/></div>';
-			tile += '<div class="info"><h2 class="title">' + record.displayTitle() + '</h2></div></a>';
-			tile += '<div class="action-group"><div class="wrap"><a href="' + record.view_url + '" target="_new" class="links">' + record.sourceCredits() + '</a>';
+			var tile = '<div class="item ' + record.dbId + '"><div class="wrap"><a href="#"  onclick="recordSelect(\'' + record.dbId + '\',event)"><div class="thumb"><img style="width:100%" src="' + record.thumbnail() + '" onError="this.src=\'img/ui/ic-noimage.png\'"/></a></div>';
+			tile += '<div class="info"><h2 class="title">' + record.title + '</h2>';
+			
+			var distitle = "";
+			if (record.creator && record.creator.length > 0) {
+				distitle = "by " + record.creator;
+			}
+			else if (record.dataProvider && record.dataProvider.length > 0 && record.dataProvider != record.creator) {
+				distitle = record.dataProvider;
+			}
+			tile+='<span class="source">'+distitle+'</source><a href="' + record.view_url + '" target="_new" class="links">' + record.sourceCredits() + '</a></div>';
+			tile += '<div class="action-group"><div class="wrap">';
 			if (isLogged()) {
-				tile+="<ul>"
+				tile+="<ul>";
 				if ((self.access() == "WRITE" || self.access() == "OWN")) {
 					tile += '<li><a  data-toggle="tooltip" data-placement="top" title="Remove media" class="fa fa-trash-o"  onclick="removeRecord(\'' + record.dbId + '\',event)"></a></li>';
 				}
@@ -554,6 +571,9 @@ define(['bridget', 'knockout', 'text!./_collection-view.html', 'isotope', 'image
 			}
 
 			tile += "</div></div></div></div>";
+			
+			
+			
 			
 			return tile;
 		}
@@ -696,7 +716,7 @@ define(['bridget', 'knockout', 'text!./_collection-view.html', 'isotope', 'image
 			return this;
 		};
 	}
-
+	
 	return {
 		viewModel: CViewModel,
 		template: template

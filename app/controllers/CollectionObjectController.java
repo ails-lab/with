@@ -23,21 +23,29 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import javax.validation.ConstraintViolation;
+
+import org.bson.Document;
 import org.bson.types.ObjectId;
+import org.mongodb.morphia.query.Query;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.mongodb.MongoClient;
+import com.mongodb.client.FindIterable;
+import com.mongodb.client.MongoDatabase;
 
 import controllers.parameterTypes.MyPlayList;
 import controllers.parameterTypes.StringTuple;
 import db.DB;
 import model.annotations.ContextData;
 import model.annotations.ContextData.ContextDataBody;
+import model.annotations.ExhibitionData;
+import model.annotations.ExhibitionData.MediaType;
 import model.basicDataTypes.Language;
+import model.basicDataTypes.Literal;
 import model.basicDataTypes.MultiLiteral;
 import model.basicDataTypes.ProvenanceInfo;
 import model.basicDataTypes.WithAccess;
@@ -50,6 +58,7 @@ import model.resources.WithResource;
 import model.resources.WithResource.WithResourceType;
 import model.resources.collection.CollectionObject;
 import model.resources.collection.CollectionObject.CollectionAdmin;
+import model.resources.collection.Exhibition;
 import model.resources.collection.SimpleCollection;
 import model.usersAndGroups.Organization;
 import model.usersAndGroups.Page;
@@ -75,6 +84,8 @@ import sources.core.Utils;
 import utils.ListUtils;
 import utils.Locks;
 import utils.Tuple;
+
+
 
 
 @SuppressWarnings("rawtypes")
@@ -851,7 +862,6 @@ public class CollectionObjectController extends WithResourceController {
 		} else
 			return badRequest("User or group with name " + userOrGroupName
 					+ " does not exist or has no specified page.");
-
 	}
 
 	/**
@@ -1054,4 +1064,92 @@ public class CollectionObjectController extends WithResourceController {
 		}
 		return 0;
 	}
+	
+	@SuppressWarnings("unchecked")
+	public static Result updateExhibitions(String host, Integer port, String dbName) {
+		MongoClient mongoClient = null;
+		ObjectNode result = Json.newObject();
+		try {
+		mongoClient = new MongoClient(host, port);
+		MongoDatabase db = mongoClient.getDatabase(dbName);
+		FindIterable<Document> collections = db.getCollection("CollectionObject").find();
+		for (Document collection : collections) {
+			ObjectId id = collection.getObjectId("_id");
+			if (collection.getString("resourceType").equals("Exhibition")) {
+				//if (((ArrayList) ((Document) ((Document) collection.get("descriptiveData")).get("label")).get("default")).get(0).equals("test anna")) {
+					CollectionObject col = DB.getCollectionObjectDAO().getById(id);
+			    	ArrayList<Document> contextDataList = (ArrayList<Document>) ((Document) collection).get("collectedResources");
+			    	int i = 0;
+			    	ArrayList<ContextData> newContextData = new ArrayList<ContextData>();
+			    	System.out.println("======= " + col.getDescriptiveData().getLabel().get(Language.DEFAULT)+ " =======");
+			    	if (contextDataList != null) {
+					    for (Document cdDoc: contextDataList) {		
+					    	ContextData oldContext = (ContextData) col.getCollectedResources().get(i);
+					    	if (cdDoc.get("body") != null) {
+					    		System.out.println(i + ": body");
+						    	ExhibitionData exhData = new ExhibitionData();
+						    	ObjectId recordId = oldContext.getTarget().getRecordId();
+						    	exhData.getTarget().setRecordId(recordId);
+						    	String videoUrl = ((Document) cdDoc.get("body")).getString("videoUrl");
+						    	String videoDescription = ((Document) cdDoc.get("body")).getString("videoDescription");
+						    	if (oldContext != null) {
+						    		Literal text = ((ExhibitionData) oldContext).getBody().getText();
+						    		System.out.println("Text: " + text);
+							    	exhData.getBody().setText(text);
+						    	}
+						    	if (videoUrl != null) {
+							    	exhData.getBody().setMediaUrl(videoUrl);
+							    	exhData.getBody().setMediaType(MediaType.VIDEO);
+						    	}
+						    	if (videoDescription != null)
+						    		exhData.getBody().setMediaDescription(videoDescription);
+						    	String mediaUrl = ((Document) cdDoc.get("body")).getString("mediaUrl");
+						    	String mediaDescription = ((Document) cdDoc.get("body")).getString("mediaDescription");
+						    	String mediaType = ((Document) cdDoc.get("body")).getString("mediaType");
+						    	if (mediaUrl != null) {
+							    	exhData.getBody().setMediaUrl(mediaUrl);
+							    	boolean contains = false;
+							    	if (mediaType != null) {
+								    	for (MediaType mt: MediaType.values()) {
+								    		if (mt.name().equals(mediaType)) {
+								    			contains = true;
+								    			break;
+								    		}
+								    	}
+								    	if (contains)
+								    		exhData.getBody().setMediaType(MediaType.valueOf(mediaType));
+								    	else 
+								    		exhData.getBody().setMediaType(null);
+								    	}
+							    	else
+							    		exhData.getBody().setMediaType(null);
+						    	}
+						    	if (mediaDescription != null)
+						    		exhData.getBody().setMediaDescription(mediaDescription);
+								//DB.getCollectionObjectDAO().deleteField(id, "collectedResources."+i+".body.audioUrl");
+								//DB.getCollectionObjectDAO().deleteField(id, "collectedResources."+i+".body.videoUrl");
+								//DB.getCollectionObjectDAO().deleteField(id, "collectedResources."+i+".body.videoDescription");
+						    	newContextData.add(exhData);
+					    	}
+					    	else {
+					    		System.out.println(i+ ": no body");
+					    		oldContext.setBody(null);
+					    		newContextData.add(oldContext);
+					    	}
+							i++;
+					    }
+						col.setCollectedResources(newContextData);
+					    DB.getCollectionObjectDAO().makePermanent(col);
+			    	}
+				}
+			//}
+		}
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			mongoClient.close();
+			return ok(result);
+		}
+	}
+
 }

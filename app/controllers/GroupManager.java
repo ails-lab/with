@@ -97,13 +97,15 @@ public class GroupManager extends WithController {
 			if (!json.has("username")) {
 				error.put("error", "Must specify name for the group");
 				return badRequest(error);
-			} else if(json.get("username").asText().length() < 3) {
-				error.put("error", "Username of " + groupType + " must contain at least 3 characters");
+			} else if (json.get("username").asText().length() < 3) {
+				error.put("error", "Username of " + groupType
+						+ " must contain at least 3 characters");
 				return badRequest(error);
 			}
-			if(json.has("friendlyName") &&
-				(json.get("friendlyName").asText().length() < 3)) {
-				error.put("error", "Short Name of  " + groupType + " must contain at least 3 characters");
+			if (json.has("friendlyName")
+					&& (json.get("friendlyName").asText().length() < 3)) {
+				error.put("error", "Short Name of  " + groupType
+						+ " must contain at least 3 characters");
 				return badRequest(error);
 			}
 
@@ -202,12 +204,10 @@ public class GroupManager extends WithController {
 		return ok(Json.toJson(DB.getUserGroupDAO().get(groupDbId)));
 	}
 
-
-
 	private static void updatePage(ObjectId groupId, JsonNode json) {
 		UserGroup group = DB.getUserGroupDAO().get(groupId);
-		if (!json.has("page") || (!(group instanceof Organization)
-				&& !(group instanceof Project)))
+		if (!json.has("page")
+				|| (!(group instanceof Organization) && !(group instanceof Project)))
 			return;
 		Page newPage = Json.fromJson(json.get("page"), Page.class);
 		if ((newPage.getAddress() == null) && (newPage.getCity() == null)
@@ -234,8 +234,9 @@ public class GroupManager extends WithController {
 		fullAddress = fullAddress.replace(" ", "+");
 		try {
 			JsonNode response = HttpConnector.getWSHttpConnector()
-					.getURLContent("https://maps.googleapis.com/maps/api/geocode/json?address="
-							+ fullAddress);
+					.getURLContent(
+							"https://maps.googleapis.com/maps/api/geocode/json?address="
+									+ fullAddress);
 			Point coordinates = GeoJson.point(
 					response.get("results").get(0).get("geometry")
 							.get("location").get("lat").asDouble(),
@@ -440,7 +441,7 @@ public class GroupManager extends WithController {
 	public static Result getGroup(String groupId) {
 		try {
 			UserGroup group = DB.getUserGroupDAO().get(new ObjectId(groupId));
-			return ok(Json.toJson(group));
+			return ok(userGroupToJSON(group));
 		} catch (Exception e) {
 			log.error("Cannot retrieve group from database!", e);
 			return internalServerError("Cannot retrieve group from database!");
@@ -502,13 +503,14 @@ public class GroupManager extends WithController {
 				g.put("totalExhibitions", hits.y);
 			}
 			boolean add = true;
-			for(int i=0; i<result.size(); i++) {
-				if(group.getDbId().toString().equals(result.get(i).get("dbId").asText())) {
-					add=false;
+			for (int i = 0; i < result.size(); i++) {
+				if (group.getDbId().toString()
+						.equals(result.get(i).get("dbId").asText())) {
+					add = false;
 					break;
 				}
 			}
-			if(add)
+			if (add)
 				result.add(g);
 		}
 		return result;
@@ -595,14 +597,19 @@ public class GroupManager extends WithController {
 			return badRequest(result);
 		}
 		if ((category.equals("users") || category.equals("both"))
-				&& (group.getUsers().size() > group.getAdminIds().size())) {
-			group.getUsers().removeAll(group.getAdminIds());
+				&& (group.getUsers().size() >= group.getAdminIds().size())) {
+		//	group.getUsers().removeAll(group.getAdminIds());
 			User u;
 			for (ObjectId oid : group.getUsers()) {
 				if ((u = DB.getUserDAO().get(oid)) == null) {
 					log.error("No User with dbId: " + oid);
 				}
-				users.add(userOrGroupJson(u));
+				ObjectNode userJSON = userOrGroupJson(u);
+				if (group.getAdminIds().contains(oid))
+					userJSON.put("admin", true);
+				else
+					userJSON.put("admin", false);
+				users.add(userJSON);
 			}
 		}
 		if ((category.equals("groups") || category.equals("both"))) {
@@ -635,41 +642,51 @@ public class GroupManager extends WithController {
 		return userJSON;
 	}
 
+	public static ObjectNode userGroupToJSON(UserGroup group) {
+		ObjectNode g = (ObjectNode) Json.toJson(group);
+
+		ObjectId userId = effectiveUserDbId();
+		User user = DB.getUserDAO().get(userId);
+		g.put("firstName", user.getFirstName());
+		g.put("lastName", user.getLastName());
+		Query<CollectionObject> q = DB.getCollectionObjectDAO().createQuery();
+		// Criteria criteria1 =
+		// DB.getCollectionObjectDAO().formAccessLevelQuery(new
+		// Tuple(restrictedById, Access.READ), QueryOperator.GTE);
+		Criteria criteria2 = DB.getCollectionObjectDAO().formAccessLevelQuery(
+				new Tuple(group.getDbId(), Access.READ), QueryOperator.GT);
+		// Criteria criteria3 = DB.getCollectionObjectDAO().createQuery()
+		// .criteria("administrative.access.isPublic").equal(true);
+		// q.and(criteria1, criteria2);
+		q.and(criteria2);
+		Tuple<Integer, Integer> hits = DB.getCollectionObjectDAO().getHits(q,
+				Optional.ofNullable(null));
+		ObjectNode count = Json.newObject();
+		count.put("Collections", hits.x);
+		count.put("Exhibitions", hits.y);
+		g.put("count", count);
+		return g;
+	}
+
 	public static ArrayNode userGroupsToJSON(List<UserGroup> groups) {
 		ArrayNode result = Json.newObject().arrayNode();
 		for (UserGroup group : groups) {
-			ObjectNode g = (ObjectNode) Json.toJson(group);
-
-			ObjectId userId = effectiveUserDbId();
-			User user = DB.getUserDAO().get(userId);
-			g.put("firstName", user.getFirstName());
-			g.put("lastName", user.getLastName());
-			Query<CollectionObject> q = DB.getCollectionObjectDAO()
-					.createQuery();
-			// Criteria criteria1 =
-			// DB.getCollectionObjectDAO().formAccessLevelQuery(new
-			// Tuple(restrictedById, Access.READ), QueryOperator.GTE);
-			Criteria criteria2 = DB.getCollectionObjectDAO()
-					.formAccessLevelQuery(
-							new Tuple(group.getDbId(), Access.READ),
-							QueryOperator.GT);
-			// Criteria criteria3 = DB.getCollectionObjectDAO().createQuery()
-			// .criteria("administrative.access.isPublic").equal(true);
-			// q.and(criteria1, criteria2);
-			q.and(criteria2);
-			Tuple<Integer, Integer> hits = DB.getCollectionObjectDAO().getHits(
-					q, Optional.ofNullable(null));
-			ObjectNode count = Json.newObject();
-			count.put("Collections", hits.x);
-			count.put("Exhibitions", hits.y);
-			g.put("count", count);
-			result.add(g);
+			result.add(userGroupToJSON(group));
 		}
+		return result;
+	}
+
+	public static ObjectNode groupsWithCount(List<UserGroup> groups,
+			int groupCount) {
+		ObjectNode result = Json.newObject();
+		result.put("groups", userGroupsToJSON(groups));
+		result.put("groupCount", groupCount);
 		return result;
 	}
 
 	public static Result listUserGroups(String groupType, int offset,
 			int count, boolean belongsOnly) {
+
 		List<UserGroup> groups = new ArrayList<UserGroup>();
 		try {
 			GroupType type = GroupType.valueOf(groupType);
@@ -682,10 +699,10 @@ public class GroupManager extends WithController {
 			Set<ObjectId> userGroupsIds = user.getUserGroupsIds();
 			groups = DB.getUserGroupDAO().findByIds(userGroupsIds, type,
 					offset, count);
-			if (groups.size() == count)
-				return ok(userGroupsToJSON(groups));
 			int userGroupCount = DB.getUserGroupDAO().getGroupCount(
 					userGroupsIds, type);
+			if (groups.size() == count)
+				return ok(groupsWithCount(groups, userGroupCount));
 			if (offset < userGroupCount)
 				offset = 0;
 			else
@@ -694,11 +711,9 @@ public class GroupManager extends WithController {
 			if (!belongsOnly)
 				groups.addAll(DB.getUserGroupDAO().findPublicWithRestrictions(
 						type, offset, count, userGroupsIds));
-			return ok(userGroupsToJSON(groups));
-			// return ok(Json.toJson(groups));
+			return ok(groupsWithCount(groups, userGroupCount));
 		} catch (Exception e) {
-			return ok(userGroupsToJSON(groups));
-			// return ok(Json.toJson(groups));
+			return ok(groupsWithCount(groups, groups.size()));
 		}
 	}
 }

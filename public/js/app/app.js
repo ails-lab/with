@@ -652,7 +652,7 @@ define("app", ['knockout', 'facebook', 'imagesloaded', 'moment', './js/app/plugi
 			dataType: "json",
 			url: "/collection/list",
 			processData: false,
-			data: "creator=" + self.currentUser.username() + "&offset="+offset+"&count="+count+"&isExhibition=" + isExhibition + "&totalHits=true"
+			data: "creator=" + self.currentUser.username() + "&offset="+offset+"&count="+count+"&isExhibition=" + isExhibition + "&collectionHits=true"
 		}).done(
 			function (data) {
 				return data;
@@ -669,7 +669,7 @@ define("app", ['knockout', 'facebook', 'imagesloaded', 'moment', './js/app/plugi
 			dataType: "json",
 			url: "/collection/list",
 			processData: false,
-			data: "creator=" + self.currentUser.username() + "&offset=0&count=1000&isExhibition=false&totalHits=true"
+			data: "creator=" + self.currentUser.username() + "&offset=0&count=1000&isExhibition=false&collectionHits=true"
 		}).done(
 			function (data) {
 				// console.log("User collections " + JSON.stringify(data));
@@ -789,16 +789,18 @@ define("app", ['knockout', 'facebook', 'imagesloaded', 'moment', './js/app/plugi
 	};
 
 	autoCompleteUserName = function (elem, valueAccessor, allBindingsAccessor, viewModel, context, callback) {
-		var category = allBindingsAccessor.get('category') || 0;
+		var onlyParents = allBindingsAccessor.get('onlyParents') || false;
+		var forUsers = allBindingsAccessor.get('forUsers') || false;
+		var paramsJSON = { "onlyParents": onlyParents, "forUsers" : forUsers};
+		if (allBindingsAccessor.has('forGroupType')) {
+			paramsJSON.forGroupType = allBindingsAccessor.get('forGroupType');
+		}
 		$(elem).devbridgeAutocomplete({
 			minChars: 3,
 			lookupLimit: 10,
 			serviceUrl: "/user/listNames",
 			paramName: "prefix",
-			params: {
-				onlyParents: false,
-				specifyCategory: category
-			},
+			params: paramsJSON,
 			ajaxSettings: {
 				dataType: "json"
 			},
