@@ -181,7 +181,7 @@ public class DigitalNZSpaceSource extends ISpaceSource {
 			JsonNode record = response;
 			if (record != null) {
 				jsonMetadata.add(new RecordJSONMetadata(Format.JSON_DNZ, record.toString()));
-				String json = Json.toJson(formatreader.readObjectFrom(record.path("record"))).toString();
+				String json = Json.toJson(formatreader.overwriteObjectFrom(fullRecord,record.path("record"))).toString();
 				jsonMetadata.add(new RecordJSONMetadata(Format.JSON_WITH, json));
 			}
 			Document xmlResponse = getHttpConnector()

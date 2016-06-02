@@ -18,6 +18,8 @@ package sources.core;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
+import model.resources.CulturalObject;
+import model.resources.RecordResource;
 import model.resources.WithResource;
 import sources.utils.JsonContextRecord;
 
@@ -36,6 +38,7 @@ public abstract class JsonContextRecordFormatReader<T extends WithResource> {
 	}
 
 	protected abstract T fillObjectFrom(JsonContextRecord text);
+	public abstract CulturalObject overwriteObjectFrom(RecordResource object, JsonNode text);
 
 	public T readObjectFrom(JsonNode text) {
 		return readObjectFrom(new JsonContextRecord(text));
@@ -44,5 +47,6 @@ public abstract class JsonContextRecordFormatReader<T extends WithResource> {
 	public T readObjectFrom(JsonContextRecord text) {
 		return fillObjectFrom(text);
 	}
+	
 
 }

@@ -222,10 +222,15 @@ public class JsonContextRecord {
 			// is a index
 			if (Utils.isNumericInteger(elements[1])) {
 				int index = Integer.parseInt(elements[1]);
-				if (p.equals(""))
-					res.add(node.get(index));
-				else
-					res.add(node.path(p).get(index));
+				if (p.equals("")) {
+					JsonNode e = node.get(index);
+					if (e!=null)
+					res.add(e);
+				} else {
+					JsonNode e = node.path(p).get(index);
+					if (e!=null)
+					res.add(e);
+				}
 			} else {
 				// should be a condition:
 				if (!p.equals(""))
@@ -240,12 +245,14 @@ public class JsonContextRecord {
 						String string = elements[h];
 						ok &= checkCondition(i, current, string);
 					}
-					if (ok)
+					if (ok && current!=null)
 						res.add(current);
 				}
 			}
-		} else
-			res.add(node.path(path));
+		} else{
+			if (node.path(path)!=null)
+				res.add(node.path(path));
+		}
 		return res;
 	}
 
