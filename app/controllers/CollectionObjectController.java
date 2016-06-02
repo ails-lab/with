@@ -1015,10 +1015,12 @@ public class CollectionObjectController extends WithResourceController {
 		}
 		List<List<Tuple<ObjectId, Access>>> accessedByUserOrGroup = new ArrayList<List<Tuple<ObjectId, Access>>>();
 		List<Tuple<ObjectId, Access>> accessedByLoggedInUser = new ArrayList<Tuple<ObjectId, Access>>();
-		for (String effectiveId : effectiveUserIds()) {
+		/*for (String effectiveId : effectiveUserIds()) {
 				accessedByLoggedInUser.add(new Tuple<ObjectId, Access>(
 						new ObjectId(effectiveId), Access.READ));
-		}
+		}*/
+		accessedByLoggedInUser.add(new Tuple<ObjectId, Access>(
+				new ObjectId(effectiveUserId()), Access.READ));
 		accessedByUserOrGroup.add(accessedByLoggedInUser);
 
 
@@ -1031,15 +1033,18 @@ public class CollectionObjectController extends WithResourceController {
 
 		SearchOptions options =  new SearchOptions();
 		options.accessList = accessedByUserOrGroup;
-		if(creator != null)
-			if(!isShared)
+
+		SearchResponse resp = null;
+		if((creator != null) && creator.isDefined())
+			if(!isShared) {
 				options.addFilter("creatorUsername", creator.get());
+				resp = searcher.searchMycollections(term, options);
+			}
 			else {
-				//options.setFilterType("not");
-				//options.addFilter("creatorUsername", creator);
+				resp = searcher.searchSharedCollections(term, creator.get(), options);
 			}
 
-		SearchResponse resp = searcher.searchMycollections(term, options);
+
 		ArrayNode filteredCols = Json.newObject().arrayNode();
 		for(SearchHit h: resp.getHits().getHits())
 			filteredCols.add(Json.toJson(DB.getCollectionObjectDAO().getById(new ObjectId(h.getId()))));

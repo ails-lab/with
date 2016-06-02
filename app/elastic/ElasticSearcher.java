@@ -94,6 +94,9 @@ public class ElasticSearcher {
 		public HashMap<String, ArrayList<String>> filters = new HashMap<String, ArrayList<String>>();
 		public int filterType = FILTER_AND;
 		public List<List<Tuple<ObjectId, Access>>> accessList = new ArrayList<List<Tuple<ObjectId, Access>>>();
+		public boolean isShared = false;
+		public String creatorUsername;
+		public boolean isPublic = true;
 		// used for method searchForCollections
 
 		public SearchOptions() {
@@ -266,6 +269,26 @@ public class ElasticSearcher {
 		multi_match_q.type(Type.PHRASE);
 		multi_match_q.operator(org.elasticsearch.index.query.MatchQueryBuilder.Operator.OR);
 		multi_match_q.fuzziness("AUTO");
+
+		options.isPublic = false;
+
+		return this.execute(multi_match_q, options);
+	}
+
+	/*
+	 * Search for shared with user collections
+	 * Specify the type to search only for collecitonobject type
+	 */
+	public SearchResponse searchSharedCollections(String term, String exUsername,SearchOptions options) {
+		MultiMatchQueryBuilder multi_match_q = QueryBuilders.multiMatchQuery(term, Elastic.searchFieldsWin);
+		multi_match_q.type(Type.PHRASE);
+		multi_match_q.operator(org.elasticsearch.index.query.MatchQueryBuilder.Operator.OR);
+		multi_match_q.fuzziness("AUTO");
+
+		options.isShared = true;
+		options.creatorUsername = exUsername;
+		options.isPublic = false;
+
 		return this.execute(multi_match_q, options);
 	}
 
@@ -394,7 +417,9 @@ public class ElasticSearcher {
 
 		OrFilterBuilder outer_or = FilterBuilders.orFilter();
 		NestedFilterBuilder nested_filter = FilterBuilders.nestedFilter("access", and_filter);
-		outer_or.add(nested_filter).add(this.filter("isPublic", "true"));
+		outer_or.add(nested_filter);
+		if(options.isPublic )
+			outer_or.add(this.filter("isPublic", "true"));
 		if(options.filterType == FILTER_OR) {
 			((OrFilterBuilder) f).add(outer_or);
 		}
@@ -441,9 +466,20 @@ public class ElasticSearcher {
 		}
 
 		addQueryPermissions(filterBuilder, options);
+		if(options.isShared )
+			if(options.filterType == FILTER_OR) {
+				((OrFilterBuilder) filterBuilder).add(
+						FilterBuilders.notFilter(
+								this.filter("creatorUsername", options.creatorUsername))).cache(true);
+			}
+			else {
+				((AndFilterBuilder) filterBuilder).add(
+						FilterBuilders.notFilter(
+								this.filter("creatorUsername", options.creatorUsername))).cache(true);
+			}
+
 		QueryBuilder filtered = QueryBuilders.filteredQuery(query, filterBuilder);
 		search.setQuery(filtered);
-
 		return search;
 	}
 
