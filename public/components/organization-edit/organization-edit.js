@@ -358,7 +358,8 @@ define(['bridget','knockout', 'text!./organization-edit.html', 'isotope','images
 			});
 		};
 
-		self.isAdminToggle = function(admin, userId){
+		self.isAdminToggle = function(admin
+			, userId){
 			if (!admin) 
 				self.makeMember(userId);
 			else 
