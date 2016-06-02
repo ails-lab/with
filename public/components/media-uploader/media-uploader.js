@@ -80,11 +80,14 @@ define(['knockout', 'text!./_image-upload.html', 'app', 'knockout-validation', '
 
 		self.close = function () {
 			self.title('');
-			self.description = ko.observable();
-			self.dataProvider = ko.observable().extend();
+			self.description('');
+			self.dataProvider('');
+			//self.description = ko.observable('');
+			//self.dataProvider = ko.observable('').extend();
 
 			self.originalUrl = ko.observable();
-			self.mediumUrl = ko.observable();
+			//self.mediumUrl = ko.observable('');
+			self.mediumUrl('');
 			self.thumbnailUrl = ko.observable();
 			self.squareUrl = ko.observable();
 			self.tinyUrl = ko.observable();
