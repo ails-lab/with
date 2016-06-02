@@ -139,11 +139,11 @@ public class RijksmuseumSpaceSource extends ISpaceSource {
 				jsonMetadata.add(new RecordJSONMetadata(Format.JSON_RIJ, record.toString()));
 				CulturalRecordFormatter f = new RijksmuseumItemRecordFormatter();
 				// TODO make another reader
-				CulturalObject res = f .readObjectFrom(record);
-				if (fullRecord!=null && Utils.hasInfo(fullRecord.getMedia())){
-					EmbeddedMediaObject object = ((HashMap<MediaVersion, EmbeddedMediaObject>)fullRecord.getMedia().get(0)).get(MediaVersion.Thumbnail);
-					res.addMedia(MediaVersion.Thumbnail, object);
-				}
+				CulturalObject res = f .overwriteObjectFrom(fullRecord,record);
+//				if (fullRecord!=null && Utils.hasInfo(fullRecord.getMedia())){
+//					EmbeddedMediaObject object = ((HashMap<MediaVersion, EmbeddedMediaObject>)fullRecord.getMedia().get(0)).get(MediaVersion.Thumbnail);
+//					res.addMedia(MediaVersion.Thumbnail, object);
+//				}
 					
 				String json = Json.toJson(res).toString();
 				jsonMetadata.add(new RecordJSONMetadata(Format.JSON_WITH, json));

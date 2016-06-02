@@ -400,7 +400,7 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 			if (response != null) {
 //				jsonMetadata.add(new RecordJSONMetadata(Format.JSON_EDM, record.toString()));
 				EuropeanaItemRecordFormatter f = new EuropeanaItemRecordFormatter();
-				String json = Json.toJson(f.readObjectFrom(record)).toString();
+				String json = Json.toJson(f.overwriteObjectFrom(fullRecord,record)).toString();
 				jsonMetadata.add(new RecordJSONMetadata(Format.JSON_WITH, json));
 //				RecordQuality q = new RecordQuality();
 //				q.compute(new JsonContextRecord(json));

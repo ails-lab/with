@@ -200,7 +200,7 @@ public class NLASpaceSource extends ISpaceSource {
 			JsonNode record = response;
 			if (record != null) {
 				jsonMetadata.add(new RecordJSONMetadata(Format.JSON_NLA, record.toString()));
-				String json = Json.toJson(formatreader.readObjectFrom(record)).toString();
+				String json = Json.toJson(formatreader.overwriteObjectFrom(fullRecord,record)).toString();
 				jsonMetadata.add(new RecordJSONMetadata(Format.JSON_WITH, json));
 			}
 			Document xmlResponse = getHttpConnector().getURLContentAsXML(
