@@ -140,6 +140,8 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 	function isEmpty(str) {
 		return (!str || 0 === str.length);
 	}
+	
+	
 
 	var ExhibitionEditModel = function (params) {
 		var self = this;
@@ -154,44 +156,33 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 		};
 		self.mapping = {
 			create: function (options) {
-				//customize at the root level: add title and description observables, based on multiliteral
-				//TODO: support multilinguality, have to be observable arrays of type [{lang: default, values: []}, ...]
+				// customize at the root level: add title and description
+				// observables, based on multiliteral
+				// TODO: support multilinguality, have to be observable arrays
+				// of type [{lang: default, values: []}, ...]
 		        var record = options.data;
 		        var newRecord =  ko.mapping.fromJS(record, {});
 				if ($.isEmptyObject(newRecord.contextData.body)) {
 					body = ko.mapping.fromJS({
-							"audioUrl": "",
 							"text": {"default": ""},
-							"videoUrl": "",
-							"videoDescription": ""
+							"mediaType": null,
+							"mediaUrl": "",
+							"mediaDescription": "",
+							"textPosition": "RIGHT"
 						}, {});
 					newRecord.contextData.body =body;
 				}
-			    newRecord.containsAudio = ko.pureComputed(function() {
-		        	if (newRecord.contextData.body == undefined 
-		        		|| newRecord.contextData.body.audioUrl == undefined)
-		        		return false;
-		        	else
-		        		return (newRecord.contextData.body.audioUrl() !== '');
-
-				 });
-				 newRecord.containsVideo = ko.pureComputed(function () {
-					if (newRecord.contextData.body.videoUrl == undefined) {
-						return false;
-					} else {
-						return (newRecord.contextData.body.videoUrl() !== '');
-					}
-					return result;
-				 });
-				 newRecord.containsVideoDescription = ko.pureComputed(function () {
-					if (newRecord.contextData.body.videoDescription == undefined) {
-						return false;
-					} else {
-						return (newRecord.contextData.body.videoDescription() !== '');
-					}
-					return result;
-				 });
-				 newRecord.containsText = ko.pureComputed(function () {
+				newRecord.containsContextField = function(field) {
+					return ko.pureComputed(function () {
+						if (newRecord.contextData.body == undefined || newRecord.contextData.body[field] == undefined) {
+							return false;
+						} else {
+							return (newRecord.contextData.body[field]() !== null && newRecord.contextData.body[field]() !== '');
+						}
+					});
+				};
+				
+				newRecord.containsText = ko.pureComputed(function () {
 					if (newRecord.contextData.body == undefined 
 						|| newRecord.contextData.body.text == undefined 
 						|| newRecord.contextData.body.text.default == undefined) {
@@ -201,8 +192,9 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 					}
 				 });
 				 newRecord.embeddedVideoUrl = ko.pureComputed(function () {
-					if (newRecord.containsVideo()) {
-						var urlMatch = newRecord.contextData.body.videoUrl().match(/youtube\.com.*(\?v=|\/embed\/)(.{11})/);
+					if (newRecord.containsContextField("mediaUrl")() && newRecord.containsContextField("mediaType")()
+						&& newRecord.contextData.body.mediaType() == "VIDEO") {
+						var urlMatch = newRecord.contextData.body.mediaUrl().match(/youtube\.com.*(\?v=|\/embed\/)(.{11})/);
 						if (urlMatch !== null) {
 							var youtube_video_id = urlMatch.pop();
 							var embeddedVideoPath = 'https://www.youtube.com/embed/' + youtube_video_id;
@@ -223,7 +215,7 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 				}	
 		        var fullres="";
 			    
-		        if(newRecord.media()!=null &&  newRecord.media()[0] !=null && newRecord.media()[0].Original!=null  && newRecord.media()[0].Original.url()!="null") {
+		        if(newRecord.media()!=null &&  newRecord.media()[0] !=null && newRecord.media()[0].Original!=null  && newRecord.media()[0].Original.url != undefined) {
 		        	 fullres=newRecord.media()[0].Original.url();
 		        }
 		        if (fullres.indexOf("empty")!=-1) {fullres="";}
@@ -258,10 +250,15 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 		var _removeItem = false;
 		var _startIndex = -1;
 		self.dbId(params.id);
-		self.userSavedItemsArray = ko.mapping.fromJS([], {});  //holds the selected collections items
-		self.collectionItemsArray = ko.mapping.fromJS([], {}); //holds the exhibitions items
-		//self.exhibitionItem = ko.observable({});
+		self.userSavedItemsArray = ko.mapping.fromJS([], {});  // holds the
+																// selected
+																// collections
+																// items
+		self.collectionItemsArray = ko.mapping.fromJS([], {}); // holds the
+																// exhibitions
+																// items
 		self.itemText = ko.observable("");
+		self.itemTextPosition = ko.observable(true);
 		self.itemVideoUrl = ko.observable("").extend({
 			required: true,
 			pattern: {
@@ -269,11 +266,24 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 				params: /youtube\.com.*(\?v=|\/embed\/)(.{11})/
 			}
 		});
+		self.itemAudioUrl = ko.observable("").extend({
+			required: true,
+			pattern: {
+				message: 'Not valid url.',
+				params: (/^(?:(?:https?|ftp):\/\/)(?:\S+(?::\S*)?@)?(?:(?!10(?:\.\d{1,3}){3})(?!127(?:\.‌​\d{1,3}){3})(?!169\.254(?:\.\d{1,3}){2})(?!192\.168(?:\.\d{1,3}){2})(?!172\.(?:1[‌​6-9]|2\d|3[0-1])(?:\.\d{1,3}){2})(?:[1-9]\d?|1\d\d|2[01]\d|22[0-3])(?:\.(?:1?\d{1‌​,2}|2[0-4]\d|25[0-5])){2}(?:\.(?:[1-9]\d?|1\d\d|2[0-4]\d|25[0-4]))|(?:(?:[a-z\u00‌​a1-\uffff0-9]+-?)*[a-z\u00a1-\uffff0-9]+)(?:\.(?:[a-z\u00a1-\uffff0-9]+-?)*[a-z\u‌​00a1-\uffff0-9]+)*(?:\.(?:[a-z\u00a1-\uffff]{2,})))(?::\d{2,5})?(?:\/[^\s]*)?$/i)
+			}
+		});
 		self.itemPosition = ko.observable(0);
 		self.itemId = ko.observable("");
-		self.itemVideoDescription = ko.observable(undefined);
-		self.validationModel = ko.validatedObservable({
+		self.itemMediaDescription = ko.observable("").extend({maxLength: 50});
+		self.validationModelVideo = ko.validatedObservable({
 			itemVideoUrl: self.itemVideoUrl
+		});
+		self.validationModelAudio = ko.validatedObservable({
+			itemAudioUrl: self.itemAudioUrl
+		});
+		self.validationModelMediaDescription = ko.validatedObservable({
+			itemMediaDescription: self.itemMediaDescription
 		});
 		self.backgroundImg = ko.observable("");
 		self.displayCoverImage = ko.pureComputed(function () {
@@ -286,7 +296,7 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 		self.newBackgroundImg = ko.observable(false);
 		var collections = [];
 		var promise = app.getAllUserCollections();
-		self.myCollections = ko.mapping.fromJS([]); //holds all the collections
+		self.myCollections = ko.mapping.fromJS([]); // holds all the collections
 		$.when(promise).done(function (data) {
 			var collections = [];
 			if (data.hasOwnProperty('collectionsOrExhibitions')) {
@@ -296,10 +306,11 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 				return new MyCollection(collectionData);
 			}));
 
-			//then initialise select
+			// then initialise select
 			// $('.selectpicker').selectpicker();
 		});
-
+		self.itemMediaType = ko.observable("");
+		
 		var mappingExhibition = {
 			'dbId': {
 				key: function (data) {
@@ -366,7 +377,7 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 					ko.mapping.fromJS(self.firstEntries, self.mapping, self.userSavedItemsArray);
 					self.searchPage = 0;
 					WITHApp.initTooltip();
-					//self.userSavedItemsArray(data.records);
+					// self.userSavedItemsArray(data.records);
 				},
 				error: function (result) {
 					// Empty
@@ -395,10 +406,27 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 
 		self.itemsLoaded = 0;
         
+		self.textPositionToBoolean = function (textPosition) {
+			if (textPosition == "RIGHT")
+				return true;
+			else if (textPosition == "LEFT")
+				return false;
+			else 
+				return undefined;
+		};
+		
+		self.textPositionToString = function (textPosition) {
+			if (textPosition)
+				return "RIGHT";
+			else 
+				return "LEFT";
+		};
+		
 		self.showNewItem = function (elem, index, record) {
 			$(elem).hide().fadeIn(500);
-			if ($(elem).hasClass('box fill')) { //it gets called for all elements rendered with the foreach
-				
+			if ($(elem).hasClass('box fill')) { // it gets called for all
+												// elements rendered with the
+												// foreach
 				if (self.creationMode && self.itemsLoaded < self.loadingInitialItemsCount) {
 					self.itemsLoaded++;
 					if(self.itemsLoaded==self.loadingInitialItemsCount){self.creationMode=false;}
@@ -408,11 +436,14 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 				if (_bIsMoveOperation) {
 					if (_startIndex >= 0) {
 						moveItemInExhibition(self.dbId(), record.dbId(), _startIndex, index);
-						_startIndex = -1;		// Move was successful, reset the startIndex
+						_startIndex = -1;		// Move was successful, reset
+												// the startIndex
 					} else {
 						if(self.itemsLoaded<self.loadingInitialItemsCount){self.creationMode=true;}
 						saveItemToExhibition(record, index, self.dbId());
-						_removeItem = true;		// Item was added but not removed, so mark it for removal
+						_removeItem = true;		// Item was added but not
+												// removed, so mark it for
+												// removal
 					}
 					$(elem).find('#loadingIcon').fadeOut();
 				} else {
@@ -426,8 +457,11 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 
 		self.removeItem = function (elem, index, record) {
 			if (_bIsMoveOperation) {
-				_startIndex = index;	// If removeItem is executed before the showNewItem, save the startIndex for moving the record
-				if (_removeItem) {		// If removeItem is executed after the showNewItem, remove the item
+				_startIndex = index;	// If removeItem is executed before the
+										// showNewItem, save the startIndex for
+										// moving the record
+				if (_removeItem) {		// If removeItem is executed after the
+										// showNewItem, remove the item
 					deleteItemFromExhibition(self.dbId(), record.dbId(), index);
 					_removeItem = false;
 				}
@@ -439,14 +473,24 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 			var context = ko.contextFor(event.target);
 			var index = context.$index();
 			self.itemPosition(index);
-			if (typeof exhibitionItem.contextData.body.text !== 'undefined' && exhibitionItem.contextData.body.text.default !== undefined) {
+			if (typeof exhibitionItem.contextData.body.mediaType !== 'undefined')
+				self.itemMediaType(exhibitionItem.contextData.body.mediaType());
+			if (self.itemMediaType() == "VIDEO") {
+				if (typeof exhibitionItem.contextData.body.mediaUrl !== 'undefined') {
+					self.itemVideoUrl(exhibitionItem.contextData.body.mediaUrl());
+				}
+			}
+			else if (self.itemMediaType() == "AUDIO") {
+				if (typeof exhibitionItem.contextData.body.mediaUrl !== 'undefined') {
+					self.itemAudioUrl(exhibitionItem.contextData.body.mediaUrl());
+				}
+			}
+			if (typeof exhibitionItem.contextData.body.text !== 'undefined' &&  typeof exhibitionItem.contextData.body.text.default !== 'undefined') {
 				self.itemText(exhibitionItem.contextData.body.text.default());
+				self.itemTextPosition(self.textPositionToBoolean(exhibitionItem.contextData.body.textPosition()));
 			}
-			if (typeof exhibitionItem.contextData.body.videoUrl !== 'undefined') {
-				self.itemVideoUrl(exhibitionItem.contextData.body.videoUrl());
-			}
-			if (typeof exhibitionItem.contextData.body.videoDescription !== 'undefined') {
-				self.itemVideoDescription(exhibitionItem.contextData.body.videoDescription());
+			if (typeof exhibitionItem.contextData.body.mediaDescription !== 'undefined') {
+				self.itemMediaDescription(exhibitionItem.contextData.body.mediaDescription());
 			}
 			self.itemId(exhibitionItem.dbId());
 			$('.action').removeClass('active');
@@ -454,65 +498,85 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 		};
 		
 		self.editItem = function (editMode) {
-			if (self.itemVideoUrl() == "" || self.validationModel.isValid()) {
-				var itemEmbeddedVideoUrl = "";
-				var urlMatch = self.itemVideoUrl().match(/youtube\.com.*(\?v=|\/embed\/)(.{11})/);
-				if (urlMatch !== null) {
-					var youtube_video_id = urlMatch.pop();
-					itemEmbeddedVideoUrl = 'https://www.youtube.com/embed/' + youtube_video_id;	
+			console.log(self.validationModelMediaDescription.isValid() + " " + self.itemMediaDescription());
+			if (self.itemMediaType() == "" || (self.itemMediaType() == "VIDEO" && ((self.itemVideoUrl() == "" || self.validationModelVideo.isValid()))) ||
+					(self.itemMediaType() == "AUDIO" && ((self.itemAudioUrl() == "" || self.validationModelAudio.isValid()))) 
+					&& self.validationModelMediaDescription.isValid()) {
+				var mediaUrl;
+				if (self.itemMediaType() == "VIDEO") {
+					var itemEmbeddedVideoUrl = "";
+					var urlMatch = self.itemVideoUrl().match(/youtube\.com.*(\?v=|\/embed\/)(.{11})/);
+					if (urlMatch !== null) {
+						var youtube_video_id = urlMatch.pop();
+						itemEmbeddedVideoUrl = 'https://www.youtube.com/embed/' + youtube_video_id;	
+					}
+					mediaUrl = itemEmbeddedVideoUrl;
 				}
-				var promise = self.updateRecord(self.itemId(), self.itemText(), itemEmbeddedVideoUrl, self.itemVideoDescription(), self.dbId(), self.itemPosition());
+				else if (self.itemMediaType() == "AUDIO")
+					mediaUrl = self.itemAudioUrl();
+				var promise = self.updateRecord(self.itemId(), self.itemText(), self.textPositionToString(self.itemTextPosition()), self.itemMediaType(), mediaUrl, self.itemMediaDescription(), self.dbId(), self.itemPosition());
 				$.when(promise).done(function (data) {
-					//console.log(JSON.stringify(self.collectionItemsArray()[self.itemPosition()].contextData.body()));
 					if (typeof self.collectionItemsArray()[self.itemPosition()].contextData.body.text === 'undefined'
-						&& typeof self.collectionItemsArray()[self.itemPosition()].contextData.body.videoUrl === 'undefined') {
+						&& typeof self.collectionItemsArray()[self.itemPosition()].contextData.body.mediaUrl === 'undefined') {
 						self.collectionItemsArray()[self.itemPosition()].contextData.body = {
 							text: {
 								default: ko.observable("")
 							},
-							videoUrl : ko.observable(""),
-							videoDescription : ko.observable("")
+							mediaUrl : ko.observable(""),
+							mediaDescription : ko.observable(""),
+							meduaType: ko.observable(null)
 						};
 					}
 					if (editMode == "editText") {
 						self.collectionItemsArray()[self.itemPosition()].contextData.body.text.default(self.itemText());
-					} else if (editMode == "editVideo") {
-						self.collectionItemsArray()[self.itemPosition()].contextData.body.videoUrl(self.itemVideoUrl());
-						self.collectionItemsArray()[self.itemPosition()].contextData.body.videoDescription(self.itemVideoDescription());
+						self.collectionItemsArray()[self.itemPosition()].contextData.body.textPosition(self.textPositionToString(self.itemTextPosition()));
+					} else if (editMode == "editMedia") {
+						self.collectionItemsArray()[self.itemPosition()].contextData.body.mediaType(self.itemMediaType());
+						self.collectionItemsArray()[self.itemPosition()].contextData.body.mediaDescription(self.itemMediaDescription());
+						if (self.itemMediaType() == "VIDEO")
+							self.collectionItemsArray()[self.itemPosition()].contextData.body.mediaUrl(self.itemVideoUrl());
+						else if (self.itemMediaType() == "AUDIO")
+							self.collectionItemsArray()[self.itemPosition()].contextData.body.mediaUrl(self.itemAudioUrl());
 					}
 					self.closeSideBar();
 				}).fail(function (data) {
-					//alert('text edit failed');
+					// alert('text edit failed');
 					self.closeSideBar();
 				});
 			} else {
-				self.validationModel.errors.showAllMessages();
-			}	
+				self.validationModelMediaDescription.errors.showAllMessages();
+				self.validationModelVideo.errors.showAllMessages();
+				self.validationModelAudio.errors.showAllMessages();
+			}
 		};
 		
-		self.deleteVideo = function(exhibitionItem, event) {
+		self.deleteMedia = function(exhibitionItem, event) {
 			var context = ko.contextFor(event.target);
 			var index = context.$index();
-			var promise = self.updateRecord(exhibitionItem.dbId(), self.itemText(), "", "", self.dbId(), index);
+			var promise = self.updateRecord(exhibitionItem.dbId(), self.itemText(), self.textPositionToString(self.itemTextPosition()), null, "", "", self.dbId(), index);
 			$.when(promise).done(function (data) {
-				self.collectionItemsArray()[index].contextData.body.videoUrl("");
-				self.collectionItemsArray()[index].contextData.body.videoDescription("");
+				self.collectionItemsArray()[index].contextData.body.mediaUrl("");
+				self.collectionItemsArray()[index].contextData.body.mediaDescription("");
+				self.collectionItemsArray()[index].contextData.body.mediaType(null);
 			});
 		}
 		
 		self.closeSideBar = function () {
 			self.itemPosition(-1);
 			self.itemText("");
+			self.itemTextPosition(true);
 			self.itemVideoUrl("");
-			self.itemVideoDescription("");
+			self.itemAudioUrl("");
+			self.itemMediaDescription("");
 			self.itemId("");
+			self.itemMediaType("");
 			self.newBackgroundImg(false);
-			//$('textarea').hide();
-			//$('.add').show();
+			// $('textarea').hide();
+			// $('.add').show();
 			$('.action').removeClass('active');
 		};
 		
-		self.updateRecord = function(dbId, text, videoUrl, videoDescription, colId, position) {
+		self.updateRecord = function(dbId, text, textPosition, mediaType, mediaUrl, mediaDescription, colId, position) {
 			var jsonData = {};
 			jsonData = {
 				"contextDataType": "ExhibitionData",
@@ -522,8 +586,10 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 				},
 				"body" : {
 					"text": {"default": text},
-					"videoUrl": videoUrl,
-					"videoDescription": videoDescription
+					"textPosition": textPosition,
+					"mediaUrl": mediaUrl,
+					"mediaDescription": mediaDescription,
+					"mediaType": mediaType
 				}
 			};
 			jsonData = JSON.stringify(jsonData);
@@ -605,7 +671,8 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 					}
 				});
 			}
-			//updateExhibitionProperty(self, "descriptiveData.backgroundImg", self.backgroundImg());
+			// updateExhibitionProperty(self, "descriptiveData.backgroundImg",
+			// self.backgroundImg());
 		}
 		self.editCredits = function() {
 			$('.action').removeClass('active');
@@ -628,14 +695,14 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 		}
 		
 		self.deleteExhibition = function() {
-			//ko.contextFor(mycollections).$data.deleteMyCollection(exhibition);
-			//copy-pasted here from mycollections!!!
+			// ko.contextFor(mycollections).$data.deleteMyCollection(exhibition);
+			// copy-pasted here from mycollections!!!
 			self.showDelCollPopup(self.title(), self.dbId());
 			self.closeSideBar();
 		}
 		
-		//copy-pasted from mycollections!!!
-		self.showDelCollPopup = function (collectionTitle, collectionId) {
+		// copy-pasted from mycollections!!!
+		self.showDelCollPopup = function(collectionTitle, collectionId) {
 			var myself = this;
 			myself.id = collectionId;
 			$.smkConfirm({
@@ -649,18 +716,27 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 			});
 		};
 		
-		deleteCollection = function (collectionId) {
+		deleteCollection = function(collectionId) {
 			$.ajax({
 				"url": "/collection/" + collectionId,
 				"method": "DELETE",
 				success: function (result) {
 					$.smkAlert({text: 'Collection removed', type: 'success'});
-					//redirect to myCollections
+					// redirect to myCollections
 					window.location.href = "#mycollections";
 				}
 			});
 		};
-
+		
+		self.selectMediaType = function(selectedMediaType) {
+			// self.selectedMediaType(selectedMediaType);
+			if (selectedMediaType == "VIDEO") {
+				
+			}
+			else if (selectedMediaType == "AUDIO") {
+				
+			}
+		}
 		
 		self.bindFileUpload = function() {
 			$('.action').removeClass('active');
@@ -671,10 +747,10 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 				success: function (data, textStatus, jqXHR) {
 					self.backgroundImg(data.original);
 					self.newBackgroundImg(true);
-					//self.mediumBIUrl(data.medium);
+					// self.mediumBIUrl(data.medium);
 					self.thumbnailBIUrl = data.thumbnail;
-					//self.squareBIUrl(data.square);
-					//self.tinyBIUrl(data.tiny);
+					// self.squareBIUrl(data.square);
+					// self.tinyBIUrl(data.tiny);
 				},
 				error: function (e, data) {
 					console.log(data);
@@ -723,19 +799,20 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 						$("#collscroll").css({
 							"overflow-y": "hidden"
 						});
-						//un comment below statement
-						//$('.outer').autoscroll('destroy');
+						// un comment below statement
+						// $('.outer').autoscroll('destroy');
 						_draggedItem = undefined;
 					}
 				};
-				if (dragElement.hasClass('box fill')) { //if item selected from exhibitions
-					//dragOptions.appendTo = $('.left');
+				if (dragElement.hasClass('box fill')) { // if item selected from
+														// exhibitions
+					// dragOptions.appendTo = $('.left');
 					dragOptions.helper = function () {
 						var $imageElementHelper = $(this).find('#itemImage').clone();
 						$imageElementHelper.css('margin', 0).css({
 							'padding-top': 0
 						});
-						//to fix the scroll issues remove it from div
+						// to fix the scroll issues remove it from div
 						return $imageElementHelper;
 					};
 					dragOptions.cursorAt = {
@@ -782,10 +859,11 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 								permanent: true
 							});
 						}
-						//newItem.contextData()[0].target.position(indexNewItem);
+						// newItem.contextData()[0].target.position(indexNewItem);
 						var indexDraggedItem = self.collectionItemsArray.indexOf(_draggedItem);
 						_startIndex = indexDraggedItem;
-						//don't do anything if it is moved to its direct left or right dashed box
+						// don't do anything if it is moved to its direct left
+						// or right dashed box
 						if (_bIsMoveOperation) {// moved from exhibition itself
 							if (indexDraggedItem == indexNewItem || (indexDraggedItem + 1) == indexNewItem) {
 								_draggedItem = undefined;
@@ -795,9 +873,10 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 						dropElement.animate({
 							width: "60px"
 						}, 200);
-						/*dropElement.find('#droppable-Children').css({
-							display: "none"
-						});*/
+						/*
+						 * dropElement.find('#droppable-Children').css({
+						 * display: "none" });
+						 */
 						self.creationMode=false;
 						if (_bIsMoveOperation) {
 							_removeItem = false;
@@ -866,7 +945,7 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 						if (parentContainer.scrollWidth - (parentContainer.scrollLeft + parentContainer.offsetWidth) < 150) {
 							if (self.updating) {
 								loadFunc();
-								//self.updating = false;
+								// self.updating = false;
 							}
 						} else {
 							self.updating = true;
@@ -925,7 +1004,8 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 		};
 
 		self.moreItems = function (isForExhibition) {
-			if (self.searchPage > 0) {//items in collectionItemsArray are search results
+			if (self.searchPage > 0) {// items in collectionItemsArray are
+										// search results
 				if (!isForExhibition) {
 					self.searchPage++;
 					self.search();
@@ -1008,13 +1088,13 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 			}
 		});
 
-		//fix for hover issue
+		// fix for hover issue
 		self.showXbutton = function (data, event) {
 			$('#bottom-box').removeClass('box-Hover');
 			$(event.target).addClass('box-Hover');
 		};
 
-		//hide the nav bar
+		// hide the nav bar
 		$('#bottomBar').fadeOut(500);
 	};
 	

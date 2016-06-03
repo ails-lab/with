@@ -270,6 +270,7 @@ define(['bridget','knockout', 'text!./organization-edit.html', 'isotope','images
 				success : function (result) {
 					if (result.users !== undefined) {
 						var users = result.users;
+						console.log(users);
 						ko.mapping.fromJS(users, self.usersMapping, self.userMembers);
 					}
 					if (result.groups !== undefined) {
@@ -327,11 +328,12 @@ define(['bridget','knockout', 'text!./organization-edit.html', 'isotope','images
 			});
 		};
 
-		self.makeAdmin = function (userData) {
+		self.makeAdmin = function (userId) {
+			console.log("makeAdmin");
 			$.ajax({
 				method : "PUT",
 				contentType : "text/plain",
-				url : "/group/admin/" + self.id() + "?id=" + userData.userId,
+				url : "/group/admin/" + self.id() + "?id=" + userId,
 				success : function (result) {
 					/*self.image = userData.image;
 					self.userMembers.push(ko.mapping.fromJS(userData));*/
@@ -342,20 +344,27 @@ define(['bridget','knockout', 'text!./organization-edit.html', 'isotope','images
 			});
 		};
 
-		self.makeMember = function (userData) {
+		self.makeMember = function (userId) {
+			console.log("makeMember");
 			$.ajax({
 				method : "DELETE",
 				contentType : "text/plain",
-				url : "/group/admin/" + self.id() + "?id=" + userData.userId,
+				url : "/group/admin/" + self.id() + "?id=" + userId,
 				success : function (result) {
-					/*self.image = userData.image;
-					self.userMembers.push(ko.mapping.fromJS(userData));*/
 				},
 				error : function (result) {
 					$.smkAlert({ text: result.responseJSON.error, type: 'danger', time: 10 });
 				}
 			});
 		};
+
+		self.isAdminToggle = function(admin, userId){
+			if (!admin) 
+				self.makeMember(userId);
+			else 
+				self.makeAdmin(userId);
+			return true;
+		}
 
 		self.excecuteRemove = function (id, category) {
 			$.ajax({

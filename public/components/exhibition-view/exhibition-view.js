@@ -1,4 +1,5 @@
-define(['knockout', 'text!./_exhibition-view.html', 'app', 'magnific-popup', 'slick'], function (ko, template, app, magnificPopup, slick) {
+define(['knockout', 'text!./_exhibition-view.html', 'app', 'magnific-popup', 'slick', 'knockout-else'], 
+		function (ko, template, app, magnificPopup, slick, KnockoutElse) {
 
 	ko.bindingHandlers.backgroundImage = {
 		update: function (element, valueAccessor, allBindingsAccessor, viewModel, context) {
@@ -83,9 +84,9 @@ define(['knockout', 'text!./_exhibition-view.html', 'app', 'magnific-popup', 'sl
 	function EViewModel(params) {
 		document.body.setAttribute("data-page", "exhibition");
 		// $("div[role='main']").toggleClass("homepage", false);
-
 		var self = this;
 		self.route = params.route;
+		KnockoutElse.init([spec = {}]);
 		var counter = 1;
 		self.exhName = ko.observable('');
 		//self.access = ko.observable([]);
@@ -116,13 +117,10 @@ define(['knockout', 'text!./_exhibition-view.html', 'app', 'magnific-popup', 'sl
 						&& result.contextData.body != null
 						&& ! $.isEmptyObject(result.contextData.body)) {
 					record.annotation = result.contextData.body.text.default;
-					record.videoUrl = result.contextData.body.videoUrl;
-//					for (var j in result.contextData) {
-//						if (result.contextData[j].target.collectionId == self.id() && result.contextData[j].target.position == i) {
-//							record.annotation = result.contextData[j].body.text.default;
-//							record.videoUrl = result.contextData[j].body.videoUrl;
-//						}
-//					}
+					record.mediaUrl = result.contextData.body.mediaUrl;
+					record.mediaType = result.contextData.body.mediaType;
+					record.mediaDescription = result.contextData.body.mediaDescription;
+					record.textPosition = result.contextData.body.textPosition;
 				}
 				var styleId = self.exhItems().length % 5 || 0;
 				var styleIdMapping = {

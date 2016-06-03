@@ -33,7 +33,7 @@
 								<a href="void(0);"  onclick="window.history.go(-1); return false;" data-toggle="tooltip" data-placement="top" title="Back previous page" class="back" data-bind="visible: !isFavorites()"><i class="fa fa-angle-left"></i></a>
 								
 								<div class="filtertype"><img src="img/ui/ic-mag.png" class="mag">
-				                    <input type="text" placeholder="Search collection item" class="filtertext">
+				                    <input type="text" placeholder="Search collection item" class="filtertext" data-bind="value:query,  filterItems:query, valueUpdate:'afterkeydown'">
 				                </div>
 								<!-- control-->
 								<div class="list-control">
@@ -74,7 +74,7 @@
 								<div class="input-style"><span class="get">GET</span>
 									<input type="text" data-bind="value: getAPIUrlCollection()">
 								</div>
-								<div class="input-style"><span class="post">POST</span>
+								<div class="input-style"><span class="get">GET</span>
 									<input type="text" data-bind="value: getAPIUrlRecords()">
 								</div>
 							</div>

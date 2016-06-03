@@ -75,7 +75,7 @@ public class RecordResourceController extends WithResourceController {
 				//filterContextData(record);
 				if (format.isDefined()) {
 					String formats = format.get();
-					if (format.equals("contentOnly")) {
+					if (formats.equals("contentOnly")) {
 						return ok(Json.toJson(record.getContent()));
 					} else {
 						if (formats.equals("noContent")) {
@@ -90,7 +90,7 @@ public class RecordResourceController extends WithResourceController {
 						} else {
 							result.put("error",
 									"Resource does not contain representation for format "
-											+ format);
+											+ formats);
 							return play.mvc.Results.notFound(result);
 						}
 					}

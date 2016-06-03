@@ -77,7 +77,7 @@
           <!-- explore-->
           <section class="explore">
             <!-- input search-->
-             <input type="text" placeholder="Search" data-bind="value: term" class="searchinput">
+             <input type="text" placeholder="Search" data-bind="value: term, valueUpdate = 'afterkeydown', event: { 'keyup': enterSearch}" class="searchinput">
             <!-- icon--><img src="img/ui/ic-mag.png" class="icon" data-bind="attr: {src: ko.contextFor(withsearchid).$data.searching()==true ? 'img/ui/ic-loading.gif' : 'img/ui/ic-mag.png'}, click: function() { search(true,true); }">
           
           </section>

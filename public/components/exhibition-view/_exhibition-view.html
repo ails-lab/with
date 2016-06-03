@@ -35,32 +35,83 @@
                   </div>
                   <!-- item-->
                   <!-- ko foreach: exhItems -->
-                  <div data-bind="css: css">
+                  	<div class="item style1">
                     <div class="container">
-                      <!-- image-->
-                      <div class="imagewrap"><img data-bind="attr: { src: fullres }" alt="">
+                      <!--  ko if: $data.hasOwnProperty('mediaUrl') && mediaUrl != null && mediaUrl != "" --> 
+                      <!-- ko if: $data.textPosition == 'LEFT' -->
+                      	 <div class="textbox">
+                          <div class="wrap">
+                          <h2  data-bind="text: title"></h2>
+                          <p data-bind="text: annotation">
+                          </p>
+                         </div>
+                        </div>
+                        <!-- /ko -->
+                      <div data-bind="css: {imagewrapvideo: $data.mediaType == 'VIDEO', imagewrapaudio: $data.mediaType == 'AUDIO'}">
+                      	<img data-bind="{attr: { src: fullres}}" alt="">
                         <ul class="action">
                           <li class="zoom"><a data-bind="attr: { href: fullres, 'title': title }" class="imagezoom"><i class="glyphicon glyphicon-resize-full"></i></a></li>
                           <li class="view"><a data-bind="attr: { href: view_url }" title="#"><i class="glyphicon glyphicon-link"></i></a></li>
                         </ul>
                       </div>
-                      <!-- title-->
-                      <div class="textbox">
-                        <div class="wrap">
+                      <!-- ko if: $data.textPosition == 'RIGHT' -->
+                      	 <div class="textbox" style="padding-right: 20px">
+                          <div class="wrap">
                           <h2  data-bind="text: title"></h2>
                           <p data-bind="text: annotation">
                           </p>
-                          <!--  ko if: $data.hasOwnProperty('videoUrl') -->
-                            <div class="videoWrap">
-                                <div class="embed-responsive embed-responsive-16by9">
-                                    <iframe width="100%" height="100%" data-bind="attr: { src: videoUrl }" frameborder="0" allowfullscreen></iframe>
-                                </div>
-                            </div>
-                            <!-- /ko -->
-                          <div class="expand"><a title="#"><i class="glyphicon glyphicon-chevron-up"></i></a></div>
+                         </div>
                         </div>
+                        <!-- /ko -->
+                    	<!-- ko if: mediaType == "VIDEO" -->
+                    	<div class="videowrap">
+                        	<div class="embed-responsive embed-responsive-16by9">
+                            	<iframe width="100%" height="100%" data-bind="attr: { src: mediaUrl }" frameborder="0" allowfullscreen></iframe>
+                        	</div>
+                        	<!--  ko if: $data.hasOwnProperty('mediaDescription') -->
+                   		   <center><span class="mediadescription" data-bind="text: mediaDescription"></span></center>
+                    		<!-- /ko -->
+                        </div>
+                        <!-- /ko -->
+                        <!-- ko if: mediaType == "AUDIO" -->
+                        <div class="audiowrap">
+                            <div class="thumb"><img style="width: 180px;" src="img/ui/sounds_exhibition1.jpg"></div>
+                          	<audio id="mediaplayer" controls style="width: 180px;" width="576" height="324">
+                          		<source data-bind="attr:{src: mediaUrl}" type="audio/mpeg">Your browser does not support HTML5
+                          	</audio>
+                          	<!--  ko if: $data.hasOwnProperty('mediaDescription') -->
+                   		    <span class="mediadescription" style="width: 180px;" data-bind="text: mediaDescription"></span>
+                    	    <!-- /ko -->
+                        </div>
+						<!-- /ko -->            	
+                    <!-- /ko -->
+                    <!-- ko else -->
+                       <!-- ko if: $data.textPosition == 'LEFT' -->
+                      	 <div class="textbox">
+                          <div class="wrap">
+                          <h2  data-bind="text: title"></h2>
+                          <p data-bind="text: annotation">
+                          </p>
+                         </div>
+                        </div>
+                        <!-- /ko -->
+                       <div class="imagewrap"><img data-bind="attr: { src: fullres}" alt="" width="75%">
+                        <ul class="action">
+                          <li class="zoom"><a data-bind="attr: { href: fullres, 'title': title }" class="imagezoom"><i class="glyphicon glyphicon-resize-full"></i></a></li>
+                          <li class="view"><a data-bind="attr: { href: view_url }" title="#"><i class="glyphicon glyphicon-link"></i></a></li>
+                        </ul>
                       </div>
-                    </div>
+                      <!-- ko if: $data.textPosition == 'RIGHT' -->
+                      	 <div class="textbox">
+                          <div class="wrap">
+                          <h2  data-bind="text: title"></h2>
+                          <p data-bind="text: annotation">
+                          </p>
+                         </div>
+                        </div>
+                        <!-- /ko -->
+                    <!-- /ko -->
+                  </div>
                   </div>
                   <!--/ko-->
                   <!-- item-->
@@ -83,8 +134,7 @@
                             </div>-->
                             <!-- right-->
                             <!--<div class="right">           
-                            </div>-->
-                            
+                            </div>-->           
                     	</div>
                     </div>
                 	</div>

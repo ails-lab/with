@@ -26,10 +26,10 @@
                 <div class="list-head">
                   <!-- item count--><span class="item-count"><!-- ko text: groupCount() --><!-- /ko --></span>
                   <div class="filtertype"><img src="img/ui/ic-mag.png" class="mag">
-                    <input type="text" placeholder="Search" class="filtertext">
+                    <input type="text" placeholder="Search" class="filtertext" data-bind="autocompleteGroupname:myUsername, onlyParents:true, forUsers:false, forGroupType:name" >
                   </div>
                   <!-- control-->
-                  <div class="list-control"><a href="#" data-toggle="tooltip" data-placement="top" title="API Calls" class="fa fa-rss detail-control single"></a></div>
+                  <div class="list-control"><a data-toggle="tooltip" data-placement="top" title="API Calls" class="fa fa-rss detail-control single"></a></div>
                 </div>
 					<!-- listing-->
 					<ul class="list-body list" data-bind="foreach: groups">
@@ -345,45 +345,53 @@
 					</div>
 					<div class="action-body">
 						<div class="group">
-							<div class="title">Users access</div>
-							<input id="userName" type="text" placeholder="Start typing username" data-bind="autocompleteUsername: myUsername, category:1">
+							<div class="title">Manage users</div>
+							<input id="userName" type="text" placeholder="Start typing username" data-bind="autocompleteUsername: myUsername, forUsers:true">
 
 
 							<ul class="members-list" data-bind="foreach: userMembers">
 								<li>
-								     
 									<!-- ko if: $data.image -->
-									<div class="toggle">
-                         					 <input type="checkbox" id="u1">
-                         					 <label for="u1"></label><span class="member">member</span><span class="admin">admin</span>
-                     				   </div>
 									<div class="thumbnails"><img data-bind="attr: {src: image, id: 'image_' + userId()}">
 									<a href="#" data-toggle="tooltip" data-placement="top" data-bind="click: $parent.excecuteRemove.bind($data, userId(), 'user'),
 									attr: { title: username }"  class="trash">
 										<i class="fa fa-trash"></i>
 									</a></div>
-									<div class="username">Username 1</div>
-								     <!-- /ko -->
-									<!-- ko ifnot: $data.image -->
 									<div class="toggle">
-                         					 <input type="checkbox" id="u1">
-                         					 <label for="u1"></label><span class="member">member</span><span class="admin">admin</span>
-                     				   </div>
+			                          <input type="checkbox" data-bind="{checked: admin , click: $parent.isAdminToggle.bind($data, admin(), userId()), attr: {id: username}} ">
+			                          <label data-bind="{attr: {for: username}}" ></label>
+			                          <span class="member">member</span>
+			                          <span class="admin">admin</span>
+			                        </div>
+			                        <div class="username" data-bind="text: username"></div>
+									
+
+
+									<!-- /ko -->
+									<!-- ko ifnot: $data.image -->
 									<div class="thumbnails"><img src="images/user.png">
 									<a href="#" data-toggle="tooltip" data-placement="top" data-bind="click: $parent.excecuteRemove.bind($data, userId(), 'user'),
 									attr: { title: username }"
 									 class="trash">
 										<i class="fa fa-trash"></i>
 									</a></div>
-									<div class="username">Username 1</div>
-									
+									<div class="toggle">
+			                            <input type="checkbox"   data-bind="{checked: admin , click: $parent.isAdminToggle.bind($data, admin(),userId()),attr: {id: username}}">
+			                          <label data-bind="{attr: {for: username}}"></label>
+			                          <span class="member">member</span>
+			                          <span class="admin">admin</span>
+			                        </div>
+			                        <div class="username" data-bind="text: username"></div>
+								
+
+
 									<!-- /ko -->
 								</li>
 							</ul>
 						</div>
 						<div class="group">
-							<div class="title">Groups access</div>
-							<input id="groupName" type="text" placeholder="Start typing group name" data-bind="autocompleteUsername: myUsername, category:2">
+							<div class="title">Manage groups</div>
+							<input id="groupName" type="text" placeholder="Start typing group name" data-bind="autocompleteUsername: myUsername, onlyParents:false, forUsers:false, forGroupType:'UserGroup'">
 							<ul class="members-list" data-bind="foreach: groupMembers">
 							       
 							<!-- <li data-bind="attr: { class: $parent.colors[$index]%4  }"> -->
@@ -395,12 +403,7 @@
 										 class="trash">
 											<i class="fa fa-trash"></i>
 										</a></span>
-										<div class="toggle">
-			                          <input type="checkbox" id="g1">
-			                          <label for="g1"></label><span class="member">view</span><span class="admin">co-edit</span>
-			                        </div>
-			                        <div class="username">Europeana Space</div>
-									
+										<div class="username" data-bind="text: username"></div>									
 									<!-- /ko -->
 									<!-- ko ifnot: $data.image -->
 										<span class="text" data-bind="text: username().substring(0,2).toUpperCase()">
@@ -409,11 +412,7 @@
 										 class="trash">
 											<i class="fa fa-trash"></i>
 										</a></span>
-									<div class="toggle">
-			                          <input type="checkbox" id="g1">
-			                          <label for="g1"></label><span class="member">view</span><span class="admin">co-edit</span>
-			                        </div>
-			                        <div class="username">Europeana Space</div>
+			                        <div class="username" data-bind="text: username"></div>
 									<!-- /ko -->
 								</li>
 							</ul>
@@ -421,6 +420,21 @@
 					</div>
 					<div class="button-group"><a href="#" class="btn-green cancel">Close</a></div>
 				</section>
+				<!-- group api-->
+						<section class="action api">
+							<div class="action-header">
+								<div class="title">API Calls</div>
+							</div>
+							<div class="action-body">
+								<div class="input-style"><span class="get">GET</span>
+									<input type="text" data-bind="value: getAPIUrlGroup(true)">
+								</div>
+								<div class="input-style"><span class="get">GET</span>
+									<input type="text" data-bind="value: getAPIUrlGroup(false)">
+								</div>
+							</div>
+							<div class="button-group"><a class="btn-green cancel">close</a></div>
+						</section>
 			</section>
 		</main>
 	</div>

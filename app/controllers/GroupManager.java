@@ -441,7 +441,7 @@ public class GroupManager extends WithController {
 	public static Result getGroup(String groupId) {
 		try {
 			UserGroup group = DB.getUserGroupDAO().get(new ObjectId(groupId));
-			return ok(Json.toJson(group));
+			return ok(userGroupToJSON(group));
 		} catch (Exception e) {
 			log.error("Cannot retrieve group from database!", e);
 			return internalServerError("Cannot retrieve group from database!");
@@ -597,8 +597,8 @@ public class GroupManager extends WithController {
 			return badRequest(result);
 		}
 		if ((category.equals("users") || category.equals("both"))
-				&& (group.getUsers().size() > group.getAdminIds().size())) {
-			group.getUsers().removeAll(group.getAdminIds());
+				&& (group.getUsers().size() >= group.getAdminIds().size())) {
+		//	group.getUsers().removeAll(group.getAdminIds());
 			User u;
 			for (ObjectId oid : group.getUsers()) {
 				if ((u = DB.getUserDAO().get(oid)) == null) {
@@ -606,9 +606,9 @@ public class GroupManager extends WithController {
 				}
 				ObjectNode userJSON = userOrGroupJson(u);
 				if (group.getAdminIds().contains(oid))
-					userJSON.put("isAdmin", "true");
+					userJSON.put("admin", true);
 				else
-					userJSON.put("isAdmin", "false");
+					userJSON.put("admin", false);
 				users.add(userJSON);
 			}
 		}
@@ -642,35 +642,36 @@ public class GroupManager extends WithController {
 		return userJSON;
 	}
 
+	public static ObjectNode userGroupToJSON(UserGroup group) {
+		ObjectNode g = (ObjectNode) Json.toJson(group);
+
+		ObjectId userId = effectiveUserDbId();
+		User user = DB.getUserDAO().get(userId);
+		g.put("firstName", user.getFirstName());
+		g.put("lastName", user.getLastName());
+		Query<CollectionObject> q = DB.getCollectionObjectDAO().createQuery();
+		// Criteria criteria1 =
+		// DB.getCollectionObjectDAO().formAccessLevelQuery(new
+		// Tuple(restrictedById, Access.READ), QueryOperator.GTE);
+		Criteria criteria2 = DB.getCollectionObjectDAO().formAccessLevelQuery(
+				new Tuple(group.getDbId(), Access.READ), QueryOperator.GT);
+		// Criteria criteria3 = DB.getCollectionObjectDAO().createQuery()
+		// .criteria("administrative.access.isPublic").equal(true);
+		// q.and(criteria1, criteria2);
+		q.and(criteria2);
+		Tuple<Integer, Integer> hits = DB.getCollectionObjectDAO().getHits(q,
+				Optional.ofNullable(null));
+		ObjectNode count = Json.newObject();
+		count.put("Collections", hits.x);
+		count.put("Exhibitions", hits.y);
+		g.put("count", count);
+		return g;
+	}
+
 	public static ArrayNode userGroupsToJSON(List<UserGroup> groups) {
 		ArrayNode result = Json.newObject().arrayNode();
 		for (UserGroup group : groups) {
-			ObjectNode g = (ObjectNode) Json.toJson(group);
-
-			ObjectId userId = effectiveUserDbId();
-			User user = DB.getUserDAO().get(userId);
-			g.put("firstName", user.getFirstName());
-			g.put("lastName", user.getLastName());
-			Query<CollectionObject> q = DB.getCollectionObjectDAO()
-					.createQuery();
-			// Criteria criteria1 =
-			// DB.getCollectionObjectDAO().formAccessLevelQuery(new
-			// Tuple(restrictedById, Access.READ), QueryOperator.GTE);
-			Criteria criteria2 = DB.getCollectionObjectDAO()
-					.formAccessLevelQuery(
-							new Tuple(group.getDbId(), Access.READ),
-							QueryOperator.GT);
-			// Criteria criteria3 = DB.getCollectionObjectDAO().createQuery()
-			// .criteria("administrative.access.isPublic").equal(true);
-			// q.and(criteria1, criteria2);
-			q.and(criteria2);
-			Tuple<Integer, Integer> hits = DB.getCollectionObjectDAO().getHits(
-					q, Optional.ofNullable(null));
-			ObjectNode count = Json.newObject();
-			count.put("Collections", hits.x);
-			count.put("Exhibitions", hits.y);
-			g.put("count", count);
-			result.add(g);
+			result.add(userGroupToJSON(group));
 		}
 		return result;
 	}
