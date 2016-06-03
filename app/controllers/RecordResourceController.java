@@ -41,7 +41,8 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import db.DB;
-
+import java.util.Random;
+import java.util.HashSet;
 /**
  * @author mariaral
  *
@@ -253,8 +254,8 @@ public class RecordResourceController extends WithResourceController {
 	public static ObjectNode getRandomRecords(String groupId, int batchCount) {
 		ObjectNode result = Json.newObject();
 		ObjectId group = new ObjectId(groupId);
-		CollectionAndRecordsCounts collectionsAndCount = getCollectionsOfGroup(groupId);
-		int collectionCount = collectionsAndCount.size();
+		CollectionAndRecordsCounts collectionsAndCount = getCollectionsAndCountOfGroup(group);
+		int collectionCount = collectionsAndCount.collectionsAndCount.size();
 		//generate batchCount unique numbers from 0 to totalRecordsCount
 		Random rng = new Random();
 		Set<Integer> randomNumbers = new HashSet<Integer>();
@@ -267,11 +268,11 @@ public class RecordResourceController extends WithResourceController {
 		return result;
 	}
 	
-	private CollectionAndRecordsCounts getCollectionsAndCountOfGroup(ObjectId groupId) {
-		return new CollectionAndRecordsCounts;
+	private static CollectionAndRecordsCounts getCollectionsAndCountOfGroup(ObjectId groupId) {
+		return new CollectionAndRecordsCounts();
 	}
 	
-	private class CollectionAndRecordsCounts {
+	private static class CollectionAndRecordsCounts {
 		HashMap<ObjectId, Integer> collectionsAndCount = new HashMap<ObjectId, Integer>();
 		int totalRecordsCount = 0;
 	}
