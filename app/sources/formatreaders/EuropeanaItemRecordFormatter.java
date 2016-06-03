@@ -132,7 +132,7 @@ public class EuropeanaItemRecordFormatter extends CulturalRecordFormatter {
 		model.getDates().addAll(rec.getWithDateArrayValue("year"));
 		LiteralOrResource isShownBy = model.getIsShownBy();
 		String uri2 = isShownBy==null?null:isShownBy.getURI();
-		LiteralOrResource ro = rec.getLiteralOrResourceValue("edmObject");
+		LiteralOrResource ro = rec.getLiteralOrResourceValue("edmObject","aggregations[0].edmObject");
 		String uriThumbnail = ro==null?null:ro.getURI();
 		if (Utils.hasInfo(uriThumbnail)){
 			EmbeddedMediaObject medThumb = new EmbeddedMediaObject();
@@ -152,7 +152,8 @@ public class EuropeanaItemRecordFormatter extends CulturalRecordFormatter {
 				med.setUrl(cacheURL );
 				med.setOriginalRights(rights);
 				med.setWithRights(withMediaRights);
-				object.addMediaView(MediaVersion.Original, med);
+				object.addMediaView(MediaVersion.Thumbnail, med);
+				log.debug("added THUMBNAIL ", cacheURL);
 			} catch (UnsupportedEncodingException e) {
 				log.error("Bad encoding ", e);
 			}
