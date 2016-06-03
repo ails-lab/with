@@ -16,6 +16,7 @@
 
 package controllers;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
 
@@ -248,4 +249,31 @@ public class RecordResourceController extends WithResourceController {
 			return null;
 		}
 	}
+	
+	public static ObjectNode getRandomRecords(String groupId, int batchCount) {
+		ObjectNode result = Json.newObject();
+		ObjectId group = new ObjectId(groupId);
+		CollectionAndRecordsCounts collectionsAndCount = getCollectionsOfGroup(groupId);
+		int collectionCount = collectionsAndCount.size();
+		//generate batchCount unique numbers from 0 to totalRecordsCount
+		Random rng = new Random();
+		Set<Integer> randomNumbers = new HashSet<Integer>();
+		while (randomNumbers.size() < batchCount)
+		{
+		    Integer next = rng.nextInt(collectionsAndCount.totalRecordsCount) + 1;
+		    randomNumbers.add(next);
+		}
+		
+		return result;
+	}
+	
+	private CollectionAndRecordsCounts getCollectionsAndCountOfGroup(ObjectId groupId) {
+		return new CollectionAndRecordsCounts;
+	}
+	
+	private class CollectionAndRecordsCounts {
+		HashMap<ObjectId, Integer> collectionsAndCount = new HashMap<ObjectId, Integer>();
+		int totalRecordsCount = 0;
+	}
+	
 }
