@@ -14,23 +14,9 @@
  */
 
 
-package model.annotations;
+package model.annotations.bodies;
 
-import model.annotations.Annotation.AnnotationTarget;
-import model.annotations.Annotation.AnnotationBody;
-import model.basicDataTypes.Language;
-
-
-public class TextAnnotation extends Annotation<AnnotationBodyTagging, TextAnnotation.TextAnnotationTarget>{
+public class AnnotationBody {
+	double confidence;
 	
-	public static class TextAnnotationTarget extends AnnotationTarget {
-		//full json path (?)
-		String propertyName;
-		Language language;
-		//why store original value, it is in the record
-		String originalValue;
-		//what is start end?
-		int start, end;
-	}
-
 }

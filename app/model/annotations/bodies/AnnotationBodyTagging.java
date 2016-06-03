@@ -14,23 +14,24 @@
  */
 
 
-package model.annotations;
+package model.annotations.bodies;
 
-import model.annotations.Annotation.AnnotationTarget;
-import model.annotations.Annotation.AnnotationBody;
-import model.basicDataTypes.Language;
+import java.util.ArrayList;
 
+import model.annotations.Annotation.MotivationType;
+import model.basicDataTypes.MultiLiteral;
 
-public class TextAnnotation extends Annotation<AnnotationBodyTagging, TextAnnotation.TextAnnotationTarget>{
+public class AnnotationBodyTagging extends AnnotationBody {
 	
-	public static class TextAnnotationTarget extends AnnotationTarget {
-		//full json path (?)
-		String propertyName;
-		Language language;
-		//why store original value, it is in the record
-		String originalValue;
-		//what is start end?
-		int start, end;
+	String uri;
+	MultiLiteral uriLabel;
+	ArrayList<String> uriType;
+	
+	public static enum Vocabulary {
+		DBPEDIA_ONT,DBPEDIA_RES, MIMO, FASHION, GEMET, AAT, PARTAGE, PHOTO
 	}
-
+	
+	Vocabulary uriVocabulary;
+	MultiLiteral text;
+	
 }
