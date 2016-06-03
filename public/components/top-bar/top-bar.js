@@ -5,6 +5,7 @@ define(['knockout', 'text!./top-bar.html', 'app', 'autocomplete', 'knockout-swit
 		var self           = this;
 		self.notifications = ko.observableArray();
 		self.templateName = ko.observable('top-bar');
+		self.term = ko.observable("");
 		
 		ko.computed(function () {
 			var tmp = app.currentUser.notifications.userNotifications().concat(app.currentUser.notifications.groupNotifications());
@@ -28,8 +29,30 @@ define(['knockout', 'text!./top-bar.html', 'app', 'autocomplete', 'knockout-swit
 			   return false;
 		}
 
+		self.search = function(){
+			showSearch(true);
+			ko.contextFor(withsearchid).$data.term(self.term());
+			ko.contextFor(withsearchid).$data.search(true,true);
+			
+		}
 
+		
+		$(".searchinput").keyup(function(event){
+            if(event.keyCode == 13){
+            	self.search();
+            }
+      });
+		
+		self.enterSearch = function(data, event){
+			if(event.keyCode == 13){
+				showSearch(true);
+				ko.contextFor(withsearchid).$data.term(self.term());
+				ko.contextFor(withsearchid).$data.search(true,true);
+			}
+			
+		}
 
+		
 		// self.username      = app.currentUser.username;
 		self.username = ko.pureComputed(function () {
 			return app.currentUser.firstName() + ' ' + app.currentUser.lastName();

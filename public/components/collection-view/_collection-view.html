@@ -11,24 +11,35 @@
 					<!-- collection section-->
 					<section class="collection">
 						<section class="header">
-							<span class="title"><!-- ko text:displayTitle() --><!-- /ko --></span>
-							<span class="item-count" data-bind="visible: entryCount() > -1 "><!-- ko text:itemCount() --><!-- /ko --></span>
-							<p class="description" data-bind="text:desc.display"></p>
-							<span><a data-bind="visible: desc.showButton, text: desc.showAll() ? '  show less' : '...show more', click: desc.toggleShowAll" href="#"></a></span>
+						
+						    <!-- info-->
+			                <div class="actioninfo">
+			                  <!-- upload--><a class="upload" data-bind="visible: isLogged() && !isFavorites() && (access() == 'WRITE' || access() == 'OWN')"><span class="plus"></span><span class="text">Upload Image</span></a>
+			                </div>
+			                <!-- collection detail-->
+			                <div class="collectiondetail"><span class="title"><!-- ko text:displayTitle() --><!-- /ko --></span>
+			                 <p class="description" data-bind="text:desc.display"></p>
+							<span><a data-bind="visible: desc.showButton, text: desc.showAll() ? '  show less' : '...show more', click: desc.toggleShowAll" href="#"></a></span> </div>
+							
 						</section>
 						<!-- collection main-->
 						<section class="collection-list">
 							<!-- collection main header-->
 							<div class="list-head">
-								<!-- back-->
-								<a href="void(0);"  onclick="window.history.go(-1); return false;" title="back" class="back" data-bind="visible: !isFavorites()">Return to previous page</a>
+							
+							 <!-- item count--><span class="item-count" data-bind="visible: entryCount() > -1 "><!-- ko text:itemCount() --><!-- /ko --></span>
+							
+                 				<!-- back-->
+								<a href="void(0);"  onclick="window.history.go(-1); return false;" data-toggle="tooltip" data-placement="top" title="Back previous page" class="back" data-bind="visible: !isFavorites()"><i class="fa fa-angle-left"></i></a>
+								
+								<div class="filtertype"><img src="img/ui/ic-mag.png" class="mag">
+				                    <input type="text" placeholder="Search collection item" class="filtertext" data-bind="value:query,  filterItems:query, valueUpdate:'afterkeydown'">
+				                </div>
 								<!-- control-->
 								<div class="list-control">
-									<!-- upload-->
-									<a class="upload" data-bind="visible: isLogged() && !isFavorites() && (access() == 'WRITE' || access() == 'OWN')"><span class="plus"></span><span class="text">Upload Image</span></a>
 									<a data-bind="visible: isLogged() && !isFavorites() && (access() == 'WRITE' || access() == 'OWN')" data-toggle="tooltip" data-placement="top" title="Edit Collection" class="fa fa-pencil editaction"></a>
 									<a data-toggle="tooltip" data-placement="top" title="API Calls" class="fa fa-rss detail-control"></a>
-									<a data-bind="visible: isLogged() && !isFavorites() && (access() == 'WRITE' || access() == 'OWN'), click: deleteMyCollection"  data-toggle="tooltip" data-placement="top" title="Delete Collection" class="fa fa-trash"></a>
+									<a data-bind="visible: isLogged() && !isFavorites() && (access() == 'WRITE' || access() == 'OWN'), click: deleteMyCollection"  data-toggle="tooltip" data-placement="top" title="Delete Collection" class="fa fa-trash deleteaction"></a>
 								</div>
 							</div>
 						</section>
@@ -63,7 +74,7 @@
 								<div class="input-style"><span class="get">GET</span>
 									<input type="text" data-bind="value: getAPIUrlCollection()">
 								</div>
-								<div class="input-style"><span class="post">POST</span>
+								<div class="input-style"><span class="get">GET</span>
 									<input type="text" data-bind="value: getAPIUrlRecords()">
 								</div>
 							</div>

@@ -1,3 +1,4 @@
+@import url(https://fonts.googleapis.com/css?family=Roboto:400,400italic,300italic,300,500,500italic);
 a {
   outline: 0 !important;
 }
@@ -53,6 +54,7 @@ a {
 .listing .grid .sizer .wrap .thumb,
 .listing .grid .item .wrap .thumb {
   position: relative;
+  border: 1px solid #ccc;
 }
 .listing .grid .sizer .wrap .thumb .counter,
 .listing .grid .item .wrap .thumb .counter {
@@ -72,14 +74,21 @@ a {
 }
 .listing .grid .sizer .wrap .info,
 .listing .grid .item .wrap .info {
-  padding: 30px;
+  padding: 30px 30px 30px 30px;
 }
 .listing .grid .sizer .wrap .info .title,
 .listing .grid .item .wrap .info .title {
-  margin: 0 0 20px;
+  margin: 0 0 10px;
   font-size: 20px;
   font-family: georgia, sans-serif;
   color: black;
+}
+.listing .grid .sizer .wrap .info .source,
+.listing .grid .item .wrap .info .source {
+  color: #999;
+  font-style: italic;
+  position: relative;
+  bottom: -3px;
 }
 .listing .grid .sizer .wrap .info .type,
 .listing .grid .item .wrap .info .type {
@@ -182,19 +191,8 @@ a {
 .listing .loadmore:hover div.top {
   width: 100%;
 }
-.listing.itemlistview .grid .item .info {
-  padding-bottom: 10px;
-}
-.listing.itemlistview .grid .item .info .title {
-  margin-bottom: 0;
-}
-.listing.itemlistview .grid .item.selected::after {
-  background: #4f7979;
-}
 .listing.itemlistview .action-group {
-  position: relative;
-  text-align: right;
-  padding: 0 30px 30px 30px !important;
+  padding: 0 15px 15px 0;
 }
 .listing.itemlistview .action-group:before,
 .listing.itemlistview .action-group:after {
@@ -206,15 +204,6 @@ a {
 }
 .listing.itemlistview .action-group .wrap {
   position: relative;
-}
-.listing.itemlistview .action-group .wrap::before {
-  content: '';
-  width: 100%;
-  height: 1px;
-  background-color: #ccc;
-  position: absolute;
-  top: 12px;
-  left: 0;
 }
 .listing.itemlistview .action-group .wrap .links {
   color: #4f7979;
@@ -236,30 +225,44 @@ a {
   position: relative;
   float: right;
   text-align: right;
-  background-color: white;
 }
 .listing.itemlistview .action-group .wrap ul li {
   list-style: none;
   display: inline-block;
-  margin-left: 10px;
+  float: left;
+  margin-left: -1px;
 }
 .listing.itemlistview .action-group .wrap ul li a {
   text-decoration: none;
-  font-size: 1.5rem;
-  color: #a4a4a4  !important;
+  font-size: 1.8rem;
+  color: #a4a4a4;
   -webkit-transition: color 0.3s;
   -o-transition: color 0.3s;
   transition: color 0.3s;
-  padding: 0 !important;
+  background-color: white;
+  display: block;
+  height: 32px;
+  padding: 6px 10px 0 10px;
+  border: 1px solid #ccc;
 }
 .listing.itemlistview .action-group .wrap ul li a:hover {
-  color: #444;
+  color: #4f7979;
 }
 .listing.itemlistview .action-group .wrap ul li a:hover.fa-heart {
-  color: #e46667  !important;
+  color: #e46667 !important;
 }
-.listing.itemlistview .action-group .wrap ul li .selectitem {
-  cursor: pointer;
+.listing.itemlistview .action-group .wrap ul li a:hover.fa-star {
+  color: #ff9806 !important;
+}
+.listing.itemlistview .action-group .wrap ul li:first-child a {
+  border-top-left-radius: 20px;
+  border-bottom-left-radius: 20px;
+  padding-left: 15px;
+}
+.listing.itemlistview .action-group .wrap ul li:last-child a {
+  border-top-right-radius: 20px;
+  border-bottom-right-radius: 20px;
+  padding-right: 15px;
 }
 body .popover {
   border-radius: 0px;
@@ -379,37 +382,37 @@ body header nav ul li.mobile {
 }
 body header .explore {
   float: right;
-  margin-right: 30px;
+  margin-right: 50px;
+  position: relative;
+  padding-top: 1px;
 }
-body header .explore a {
-  color: #fff;
-  background: #6a6a6a;
+body header .explore input {
+  border-radius: 28px;
   height: 30px;
-  width: 180px;
-  text-align: center;
-  display: block;
-  border-radius: 15px;
-  padding-top: 2px;
-}
-body header .explore a .text {
-  color: #a6a6a6;
-  font-size: 11px;
-  display: inline-block;
-  margin-left: 10px;
-  letter-spacing: 1px;
-  font-weight: bold;
+  border: 0;
+  background: #606060;
   -webkit-transition: all 0.3s;
   -o-transition: all 0.3s;
   transition: all 0.3s;
+  padding: 0 0 0 34px;
+  line-height: 1.2rem;
+  color: #fff;
 }
-body header .explore a:hover {
-  background: #7a7a7a;
+body header .explore input:hover {
+  background: #656565;
 }
-body header .explore a:hover .text {
-  color: #c9c9c9;
+body header .explore input:focus {
+  outline: 0;
+  background: #555;
+}
+body header .explore .icon {
+  position: absolute;
+  left: 11px;
+  top: 8px;
 }
 body header .login-section {
   float: right;
+  margin-left: 30px;
   position: relative;
 }
 body header .login-section .login,
@@ -624,12 +627,12 @@ body header .notification a:hover img {
   filter: alpha(opacity=100);
 }
 body header .notification a .counter {
-  width: 16px;
-  height: 16px;
+  width: 18px;
+  height: 18px;
   font-size: 10px;
   font-weight: bold;
   background-color: #e5a326;
-  border-radius: 8px;
+  border-radius: 9px;
   display: block;
   position: absolute;
   text-align: center;
@@ -670,7 +673,7 @@ body header .notification .dropdown-menu::after {
 body header .notification .dropdown-menu h3 {
   font-size: 14px;
   text-align: center;
-  font-family: "Proxima Nova", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-family: 'Roboto', "Helvetica Neue", Helvetica, Arial, sans-serif;
   margin: 0px 0 12px 0;
   padding: 0 0 15px 0;
   border-bottom: 1px solid #e4e4e4;
@@ -1775,7 +1778,7 @@ body div[role='main'] .wrapper aside .app ul li a .counter {
   border: 1px solid #9a9a9a;
   color: #9a9a9a;
   width: 38px;
-  padding-top: 5px;
+  padding-top: 4px;
   text-align: center;
   font-size: 11px;
   line-height: 10px;
@@ -1829,6 +1832,11 @@ body div[role='main'] .wrapper aside .app ul li.active a .icon {
 }
 body div[role='main'] .wrapper aside .app ul li.active a .text {
   color: #4f7979;
+}
+body div[role='main'] .wrapper aside .app ul li.active a .counter {
+  background: #7f9d9d;
+  color: #fff;
+  border-color: #7f9d9d;
 }
 body div[role='main'] .wrapper aside .site {
   position: absolute;
@@ -1936,6 +1944,11 @@ body div[role='main'] .wrapper main section.message .message-body a .cross::afte
   -ms-transform: rotate(90deg);
   -webkit-transform: rotate(90deg);
 }
+body div[role='main'] .wrapper main section.achievement {
+  margin: 50px 0 30px 0;
+  padding: 50px 0 50px 0;
+  border-top: 1px solid #ccc;
+}
 body div[role='main'] .wrapper main section.header {
   position: relative;
 }
@@ -1947,58 +1960,112 @@ body div[role='main'] .wrapper main section.header:after {
 body div[role='main'] .wrapper main section.header:after {
   clear: both;
 }
-body div[role='main'] .wrapper main section.header .picker {
-  float: left;
-  text-decoration: none;
+body div[role='main'] .wrapper main section.header .picker-wrap {
+  float: right;
+  margin-right: 20px;
+  position: relative;
 }
-body div[role='main'] .wrapper main section.header .picker .text {
+body div[role='main'] .wrapper main section.header .picker-wrap .picker {
+  text-decoration: none;
+  border: 1px solid #dedede;
+  padding: 2px 20px 5px 25px;
+  display: block;
+  border-radius: 20px;
+  -webkit-transition: all 0.3s;
+  -o-transition: all 0.3s;
+  transition: all 0.3s;
+}
+body div[role='main'] .wrapper main section.header .picker-wrap .picker .text {
   color: #5a5a5a;
   margin-right: 10px;
   -webkit-transition: all 0.3s;
   -o-transition: all 0.3s;
   transition: all 0.3s;
 }
-body div[role='main'] .wrapper main section.header .picker .arrow {
+body div[role='main'] .wrapper main section.header .picker-wrap .picker .arrow {
   display: inline-block;
-  width: 10px;
-  height: 7px;
-  margin-top: 12px;
-  background: url('../img/ui/ic-arrow-dark.png') no-repeat;
+  width: 9px;
+  height: 10px;
+  margin-top: 8px;
+  background: url('../img/ui/ic-arrow-down.png') no-repeat;
   -webkit-transition: all 0.3s;
   -o-transition: all 0.3s;
   transition: all 0.3s;
 }
-body div[role='main'] .wrapper main section.header .picker:hover .text {
+body div[role='main'] .wrapper main section.header .picker-wrap .picker:hover .text {
   color: #4f7979;
 }
-body div[role='main'] .wrapper main section.header.open .picker .arrow {
-  background-position: 0 -9px;
-}
-body div[role='main'] .wrapper main section.header .dropdown-menu {
-  top: 30px;
+body div[role='main'] .wrapper main section.header .picker-wrap .dropdown-menu {
+  top: 40px;
   border-radius: 0;
 }
-body div[role='main'] .wrapper main section.header .dropdown-menu li {
+body div[role='main'] .wrapper main section.header .picker-wrap .dropdown-menu li {
   padding: 0px 0px;
   -webkit-transition: all 0.3s;
   -o-transition: all 0.3s;
   transition: all 0.3s;
 }
-body div[role='main'] .wrapper main section.header .dropdown-menu li a {
+body div[role='main'] .wrapper main section.header .picker-wrap .dropdown-menu li a {
   color: #b5b5b5;
   -webkit-transition: all 0.3s;
   -o-transition: all 0.3s;
   transition: all 0.3s;
   font-size: 14px;
 }
-body div[role='main'] .wrapper main section.header .dropdown-menu li:hover a {
+body div[role='main'] .wrapper main section.header .picker-wrap .dropdown-menu li:hover a {
   background: transparent;
   color: black;
+}
+body div[role='main'] .wrapper main section.header .typeselect {
+  margin: 0 15px 0 0;
+  padding: 0;
+  float: right;
+}
+body div[role='main'] .wrapper main section.header .typeselect li {
+  list-style: none;
+  float: left;
+}
+body div[role='main'] .wrapper main section.header .typeselect li a {
+  height: 32px;
+  border: 1px solid #ccc;
+  padding: 2px 15px 0 15px;
+  display: block;
+}
+body div[role='main'] .wrapper main section.header .typeselect li a:hover {
+  text-decoration: none;
+  color: #4f7979;
+}
+body div[role='main'] .wrapper main section.header .typeselect li.active a {
+  background: #4f7979;
+  color: #fff;
+  border-color: #4f7979;
+}
+body div[role='main'] .wrapper main section.header .typeselect li:first-child a {
+  border-top-left-radius: 20px;
+  border-bottom-left-radius: 20px;
+  padding-left: 20px;
+}
+body div[role='main'] .wrapper main section.header .typeselect li:last-child a {
+  border-top-right-radius: 20px;
+  border-bottom-right-radius: 20px;
+  padding-right: 20px;
+  border-left: 0px;
+}
+body div[role='main'] .wrapper main section.header .item-count {
+  color: #4f7979;
+  float: right;
+  border: 1px solid #4f7979;
+  border-radius: 20px;
+  padding: 3px 15px 0 15px;
+  margin-right: 15px;
+  font-size: 1.4rem;
+  height: 32px;
 }
 body div[role='main'] .wrapper main section.header .new {
   float: right;
   text-decoration: none;
   color: #4f7979;
+  margin-top: 4px;
 }
 body div[role='main'] .wrapper main section.header .new:hover .text {
   box-shadow: inset 0 -1px 0 0;
@@ -2027,90 +2094,109 @@ body div[role='main'] .wrapper main section.header .new .text {
   -o-transition: all 0.3s;
   transition: all 0.3s;
 }
-body div[role='main'] .wrapper main section.header .title {
+body div[role='main'] .wrapper main section.header .actioninfo {
+  float: right;
+}
+body div[role='main'] .wrapper main section.header .actioninfo .upload {
+  color: #4f7979;
+  text-decoration: none;
+  padding-left: 10px;
+  float: right;
+  margin-top: 3px;
+}
+body div[role='main'] .wrapper main section.header .actioninfo .upload.exhibition {
+  padding-left: 0;
+  padding-right: 10px;
+}
+body div[role='main'] .wrapper main section.header .actioninfo .upload .plus {
+  margin-right: 10px;
+  display: inline-block;
+  width: 10px;
+  height: 1px;
+  position: relative;
+  top: -5px;
+  background-color: #4f7979;
+}
+body div[role='main'] .wrapper main section.header .actioninfo .upload .plus::after {
+  content: '';
+  display: block;
+  background-color: inherit;
+  width: inherit;
+  height: inherit;
+  transform: rotate(90deg);
+  -ms-transform: rotate(90deg);
+  -webkit-transform: rotate(90deg);
+}
+body div[role='main'] .wrapper main section.header .actioninfo .upload .text {
+  -webkit-transition: all 0.3s;
+  -o-transition: all 0.3s;
+  transition: all 0.3s;
+}
+body div[role='main'] .wrapper main section.header .actioninfo .upload:hover {
+  text-decoration: none;
+}
+body div[role='main'] .wrapper main section.header .actioninfo .upload:hover .text {
+  box-shadow: inset 0 -1px 0 0;
+}
+body div[role='main'] .wrapper main section.header .actioninfo .item-count {
+  color: #4f7979;
+  float: right;
+  border: 1px solid #4f7979;
+  border-radius: 20px;
+  padding: 3px 15px 0 15px;
+  margin-right: 10px;
+  font-size: 1.4rem;
+  height: 32px;
+}
+body div[role='main'] .wrapper main section.header .collectiondetail {
+  float: left;
+  width: 70%;
+}
+body div[role='main'] .wrapper main section.header .collectiondetail .title {
   color: #4f7979;
   float: left;
   font-size: 1.6rem;
 }
-body div[role='main'] .wrapper main section.header .item-count {
-  color: #4f7979;
-  float: right;
-  border: 1px solid #4f7979;
-  border-radius: 15px;
-  padding: 0 15px 0 15px;
-  font-size: 1.4rem;
-}
-body div[role='main'] .wrapper main section.header .description {
+body div[role='main'] .wrapper main section.header .collectiondetail .description {
   clear: both;
-  width: 60%;
 }
-body div[role='main'] .wrapper main section.collection .list-head,
-body div[role='main'] .wrapper main section.exhibition .list-head,
-body div[role='main'] .wrapper main section.project .list-head,
-body div[role='main'] .wrapper main section.favorite .list-head {
-  margin-bottom: 20px;
-  position: relative;
-  text-align: right;
-}
-body div[role='main'] .wrapper main section.collection .list-head::before,
-body div[role='main'] .wrapper main section.exhibition .list-head::before,
-body div[role='main'] .wrapper main section.project .list-head::before,
-body div[role='main'] .wrapper main section.favorite .list-head::before {
-  content: '';
-  width: 100%;
-  height: 1px;
-  background-color: #ccc;
-  position: absolute;
-  top: 13px;
-  left: 0;
-  z-index: -1;
-}
-body div[role='main'] .wrapper main section.collection .list-head .title,
-body div[role='main'] .wrapper main section.exhibition .list-head .title,
-body div[role='main'] .wrapper main section.project .list-head .title,
-body div[role='main'] .wrapper main section.favorite .list-head .title {
-  float: left;
-  padding: 0 10px 0 0;
-  background: #fff;
-  color: #4f7979;
-}
-body div[role='main'] .wrapper main section.collection .list-head .toggle,
-body div[role='main'] .wrapper main section.exhibition .list-head .toggle,
-body div[role='main'] .wrapper main section.project .list-head .toggle,
-body div[role='main'] .wrapper main section.favorite .list-head .toggle {
-  margin-top: 4px;
+body div[role='main'] .wrapper main section.collection .toggle,
+body div[role='main'] .wrapper main section.exhibition .toggle,
+body div[role='main'] .wrapper main section.project .toggle,
+body div[role='main'] .wrapper main section.favorite .toggle {
+  margin-top: 3px;
   margin-left: 60px;
   position: relative;
   float: right;
 }
-body div[role='main'] .wrapper main section.collection .list-head .toggle:before,
-body div[role='main'] .wrapper main section.exhibition .list-head .toggle:before,
-body div[role='main'] .wrapper main section.project .list-head .toggle:before,
-body div[role='main'] .wrapper main section.favorite .list-head .toggle:before,
-body div[role='main'] .wrapper main section.collection .list-head .toggle:after,
-body div[role='main'] .wrapper main section.exhibition .list-head .toggle:after,
-body div[role='main'] .wrapper main section.project .list-head .toggle:after,
-body div[role='main'] .wrapper main section.favorite .list-head .toggle:after {
+body div[role='main'] .wrapper main section.collection .toggle:before,
+body div[role='main'] .wrapper main section.exhibition .toggle:before,
+body div[role='main'] .wrapper main section.project .toggle:before,
+body div[role='main'] .wrapper main section.favorite .toggle:before,
+body div[role='main'] .wrapper main section.collection .toggle:after,
+body div[role='main'] .wrapper main section.exhibition .toggle:after,
+body div[role='main'] .wrapper main section.project .toggle:after,
+body div[role='main'] .wrapper main section.favorite .toggle:after {
   content: " ";
   display: table;
 }
-body div[role='main'] .wrapper main section.collection .list-head .toggle:after,
-body div[role='main'] .wrapper main section.exhibition .list-head .toggle:after,
-body div[role='main'] .wrapper main section.project .list-head .toggle:after,
-body div[role='main'] .wrapper main section.favorite .list-head .toggle:after {
+body div[role='main'] .wrapper main section.collection .toggle:after,
+body div[role='main'] .wrapper main section.exhibition .toggle:after,
+body div[role='main'] .wrapper main section.project .toggle:after,
+body div[role='main'] .wrapper main section.favorite .toggle:after {
   clear: both;
 }
-body div[role='main'] .wrapper main section.collection .list-head .toggle input,
-body div[role='main'] .wrapper main section.exhibition .list-head .toggle input,
-body div[role='main'] .wrapper main section.project .list-head .toggle input,
-body div[role='main'] .wrapper main section.favorite .list-head .toggle input {
+body div[role='main'] .wrapper main section.collection .toggle input,
+body div[role='main'] .wrapper main section.exhibition .toggle input,
+body div[role='main'] .wrapper main section.project .toggle input,
+body div[role='main'] .wrapper main section.favorite .toggle input {
   display: none;
 }
-body div[role='main'] .wrapper main section.collection .list-head .toggle input + label,
-body div[role='main'] .wrapper main section.exhibition .list-head .toggle input + label,
-body div[role='main'] .wrapper main section.project .list-head .toggle input + label,
-body div[role='main'] .wrapper main section.favorite .list-head .toggle input + label {
-  margin: 1px 5px 0 0;
+body div[role='main'] .wrapper main section.collection .toggle input + label,
+body div[role='main'] .wrapper main section.exhibition .toggle input + label,
+body div[role='main'] .wrapper main section.project .toggle input + label,
+body div[role='main'] .wrapper main section.favorite .toggle input + label {
+  margin: 3px 5px 0 0;
   outline: 0;
   float: left;
   vertical-align: middle;
@@ -2124,83 +2210,151 @@ body div[role='main'] .wrapper main section.favorite .list-head .toggle input + 
   padding: 2px;
   transition: all .4s ease;
 }
-body div[role='main'] .wrapper main section.collection .list-head .toggle input + label:after,
-body div[role='main'] .wrapper main section.exhibition .list-head .toggle input + label:after,
-body div[role='main'] .wrapper main section.project .list-head .toggle input + label:after,
-body div[role='main'] .wrapper main section.favorite .list-head .toggle input + label:after,
-body div[role='main'] .wrapper main section.collection .list-head .toggle input + label:before,
-body div[role='main'] .wrapper main section.exhibition .list-head .toggle input + label:before,
-body div[role='main'] .wrapper main section.project .list-head .toggle input + label:before,
-body div[role='main'] .wrapper main section.favorite .list-head .toggle input + label:before {
+body div[role='main'] .wrapper main section.collection .toggle input + label:after,
+body div[role='main'] .wrapper main section.exhibition .toggle input + label:after,
+body div[role='main'] .wrapper main section.project .toggle input + label:after,
+body div[role='main'] .wrapper main section.favorite .toggle input + label:after,
+body div[role='main'] .wrapper main section.collection .toggle input + label:before,
+body div[role='main'] .wrapper main section.exhibition .toggle input + label:before,
+body div[role='main'] .wrapper main section.project .toggle input + label:before,
+body div[role='main'] .wrapper main section.favorite .toggle input + label:before {
   position: relative;
   display: block;
   content: "";
   width: 50%;
   height: 100%;
 }
-body div[role='main'] .wrapper main section.collection .list-head .toggle input + label:after,
-body div[role='main'] .wrapper main section.exhibition .list-head .toggle input + label:after,
-body div[role='main'] .wrapper main section.project .list-head .toggle input + label:after,
-body div[role='main'] .wrapper main section.favorite .list-head .toggle input + label:after {
+body div[role='main'] .wrapper main section.collection .toggle input + label:after,
+body div[role='main'] .wrapper main section.exhibition .toggle input + label:after,
+body div[role='main'] .wrapper main section.project .toggle input + label:after,
+body div[role='main'] .wrapper main section.favorite .toggle input + label:after {
   left: 0;
   border-radius: 50%;
   background: #fff;
   transition: all .2s ease;
 }
-body div[role='main'] .wrapper main section.collection .list-head .toggle input + label:before,
-body div[role='main'] .wrapper main section.exhibition .list-head .toggle input + label:before,
-body div[role='main'] .wrapper main section.project .list-head .toggle input + label:before,
-body div[role='main'] .wrapper main section.favorite .list-head .toggle input + label:before {
+body div[role='main'] .wrapper main section.collection .toggle input + label:before,
+body div[role='main'] .wrapper main section.exhibition .toggle input + label:before,
+body div[role='main'] .wrapper main section.project .toggle input + label:before,
+body div[role='main'] .wrapper main section.favorite .toggle input + label:before {
   display: none;
 }
-body div[role='main'] .wrapper main section.collection .list-head .toggle input ~ .public,
-body div[role='main'] .wrapper main section.exhibition .list-head .toggle input ~ .public,
-body div[role='main'] .wrapper main section.project .list-head .toggle input ~ .public,
-body div[role='main'] .wrapper main section.favorite .list-head .toggle input ~ .public {
+body div[role='main'] .wrapper main section.collection .toggle input ~ .public,
+body div[role='main'] .wrapper main section.exhibition .toggle input ~ .public,
+body div[role='main'] .wrapper main section.project .toggle input ~ .public,
+body div[role='main'] .wrapper main section.favorite .toggle input ~ .public {
   color: #d2d2d2;
   float: left;
   font-size: 1.2rem;
   text-transform: uppercase;
 }
-body div[role='main'] .wrapper main section.collection .list-head .toggle input ~ .private,
-body div[role='main'] .wrapper main section.exhibition .list-head .toggle input ~ .private,
-body div[role='main'] .wrapper main section.project .list-head .toggle input ~ .private,
-body div[role='main'] .wrapper main section.favorite .list-head .toggle input ~ .private {
+body div[role='main'] .wrapper main section.collection .toggle input ~ .private,
+body div[role='main'] .wrapper main section.exhibition .toggle input ~ .private,
+body div[role='main'] .wrapper main section.project .toggle input ~ .private,
+body div[role='main'] .wrapper main section.favorite .toggle input ~ .private {
   font-size: 1.2rem;
   text-transform: uppercase;
   color: #969696;
   position: absolute;
   left: -55px;
 }
-body div[role='main'] .wrapper main section.collection .list-head .toggle input:checked + label,
-body div[role='main'] .wrapper main section.exhibition .list-head .toggle input:checked + label,
-body div[role='main'] .wrapper main section.project .list-head .toggle input:checked + label,
-body div[role='main'] .wrapper main section.favorite .list-head .toggle input:checked + label {
+body div[role='main'] .wrapper main section.collection .toggle input:checked + label,
+body div[role='main'] .wrapper main section.exhibition .toggle input:checked + label,
+body div[role='main'] .wrapper main section.project .toggle input:checked + label,
+body div[role='main'] .wrapper main section.favorite .toggle input:checked + label {
   background: #9FD6AE;
 }
-body div[role='main'] .wrapper main section.collection .list-head .toggle input:checked + label:after,
-body div[role='main'] .wrapper main section.exhibition .list-head .toggle input:checked + label:after,
-body div[role='main'] .wrapper main section.project .list-head .toggle input:checked + label:after,
-body div[role='main'] .wrapper main section.favorite .list-head .toggle input:checked + label:after {
+body div[role='main'] .wrapper main section.collection .toggle input:checked + label:after,
+body div[role='main'] .wrapper main section.exhibition .toggle input:checked + label:after,
+body div[role='main'] .wrapper main section.project .toggle input:checked + label:after,
+body div[role='main'] .wrapper main section.favorite .toggle input:checked + label:after {
   left: 50%;
 }
-body div[role='main'] .wrapper main section.collection .list-head .toggle input:checked ~ .private,
-body div[role='main'] .wrapper main section.exhibition .list-head .toggle input:checked ~ .private,
-body div[role='main'] .wrapper main section.project .list-head .toggle input:checked ~ .private,
-body div[role='main'] .wrapper main section.favorite .list-head .toggle input:checked ~ .private {
+body div[role='main'] .wrapper main section.collection .toggle input:checked ~ .private,
+body div[role='main'] .wrapper main section.exhibition .toggle input:checked ~ .private,
+body div[role='main'] .wrapper main section.project .toggle input:checked ~ .private,
+body div[role='main'] .wrapper main section.favorite .toggle input:checked ~ .private {
   color: #d2d2d2;
 }
-body div[role='main'] .wrapper main section.collection .list-head .toggle input:checked ~ .public,
-body div[role='main'] .wrapper main section.exhibition .list-head .toggle input:checked ~ .public,
-body div[role='main'] .wrapper main section.project .list-head .toggle input:checked ~ .public,
-body div[role='main'] .wrapper main section.favorite .list-head .toggle input:checked ~ .public {
+body div[role='main'] .wrapper main section.collection .toggle input:checked ~ .public,
+body div[role='main'] .wrapper main section.exhibition .toggle input:checked ~ .public,
+body div[role='main'] .wrapper main section.project .toggle input:checked ~ .public,
+body div[role='main'] .wrapper main section.favorite .toggle input:checked ~ .public {
   color: #969696;
 }
-body div[role='main'] .wrapper main section.collection .list-head .toggle input:checked + label,
-body div[role='main'] .wrapper main section.exhibition .list-head .toggle input:checked + label,
-body div[role='main'] .wrapper main section.project .list-head .toggle input:checked + label,
-body div[role='main'] .wrapper main section.favorite .list-head .toggle input:checked + label {
+body div[role='main'] .wrapper main section.collection .toggle input:checked + label,
+body div[role='main'] .wrapper main section.exhibition .toggle input:checked + label,
+body div[role='main'] .wrapper main section.project .toggle input:checked + label,
+body div[role='main'] .wrapper main section.favorite .toggle input:checked + label {
   background: #9FD6AE;
+}
+body div[role='main'] .wrapper main section.collection .toggle.exhibitiontoggle,
+body div[role='main'] .wrapper main section.exhibition .toggle.exhibitiontoggle,
+body div[role='main'] .wrapper main section.project .toggle.exhibitiontoggle,
+body div[role='main'] .wrapper main section.favorite .toggle.exhibitiontoggle {
+  margin: 0 0 20px 0;
+}
+body div[role='main'] .wrapper main section.collection .list-head,
+body div[role='main'] .wrapper main section.exhibition .list-head,
+body div[role='main'] .wrapper main section.project .list-head,
+body div[role='main'] .wrapper main section.favorite .list-head {
+  margin-bottom: 30px;
+  position: relative;
+  text-align: right;
+  clear: both;
+}
+body div[role='main'] .wrapper main section.collection .list-head:before,
+body div[role='main'] .wrapper main section.exhibition .list-head:before,
+body div[role='main'] .wrapper main section.project .list-head:before,
+body div[role='main'] .wrapper main section.favorite .list-head:before,
+body div[role='main'] .wrapper main section.collection .list-head:after,
+body div[role='main'] .wrapper main section.exhibition .list-head:after,
+body div[role='main'] .wrapper main section.project .list-head:after,
+body div[role='main'] .wrapper main section.favorite .list-head:after {
+  content: " ";
+  display: table;
+}
+body div[role='main'] .wrapper main section.collection .list-head:after,
+body div[role='main'] .wrapper main section.exhibition .list-head:after,
+body div[role='main'] .wrapper main section.project .list-head:after,
+body div[role='main'] .wrapper main section.favorite .list-head:after {
+  clear: both;
+}
+body div[role='main'] .wrapper main section.collection .list-head::before,
+body div[role='main'] .wrapper main section.exhibition .list-head::before,
+body div[role='main'] .wrapper main section.project .list-head::before,
+body div[role='main'] .wrapper main section.favorite .list-head::before {
+  content: '';
+  width: 100%;
+  height: 1px;
+  background-color: #ccc;
+  position: absolute;
+  top: 16px;
+  left: 0;
+  z-index: -1;
+}
+body div[role='main'] .wrapper main section.collection .list-head .title,
+body div[role='main'] .wrapper main section.exhibition .list-head .title,
+body div[role='main'] .wrapper main section.project .list-head .title,
+body div[role='main'] .wrapper main section.favorite .list-head .title {
+  float: left;
+  padding: 0 10px 0 0;
+  background: #fff;
+  color: #4f7979;
+}
+body div[role='main'] .wrapper main section.collection .list-head .item-count,
+body div[role='main'] .wrapper main section.exhibition .list-head .item-count,
+body div[role='main'] .wrapper main section.project .list-head .item-count,
+body div[role='main'] .wrapper main section.favorite .list-head .item-count {
+  background: #4f7979;
+  display: inline-block;
+  color: #fff;
+  border: 1px solid #4f7979;
+  border-radius: 20px;
+  padding: 3px 15px 0 15px;
+  font-size: 1.4rem;
+  height: 32px;
+  margin-right: 10px;
 }
 body div[role='main'] .wrapper main section.collection .list-head .sort,
 body div[role='main'] .wrapper main section.exhibition .list-head .sort,
@@ -2208,17 +2362,20 @@ body div[role='main'] .wrapper main section.project .list-head .sort,
 body div[role='main'] .wrapper main section.favorite .list-head .sort {
   display: inline-block;
   position: relative;
-  padding: 0 10px;
+  padding: 2px 17px 0 17px;
   background-color: white;
-  margin-right: 20px;
+  margin-right: 10px;
   vertical-align: middle;
   color: #959595;
+  border: 1px solid #ccc;
+  border-radius: 20px;
+  height: 32px;
 }
 body div[role='main'] .wrapper main section.collection .list-head .sort.open .arrow,
 body div[role='main'] .wrapper main section.exhibition .list-head .sort.open .arrow,
 body div[role='main'] .wrapper main section.project .list-head .sort.open .arrow,
 body div[role='main'] .wrapper main section.favorite .list-head .sort.open .arrow {
-  background-position: 0 -7px;
+  background-position: 0 -9px;
 }
 body div[role='main'] .wrapper main section.collection .list-head .sort a,
 body div[role='main'] .wrapper main section.exhibition .list-head .sort a,
@@ -2290,11 +2447,84 @@ body div[role='main'] .wrapper main section.favorite .list-head .sort .dropdown-
   background: transparent;
   color: black;
 }
+body div[role='main'] .wrapper main section.collection .list-head .filtertype,
+body div[role='main'] .wrapper main section.exhibition .list-head .filtertype,
+body div[role='main'] .wrapper main section.project .list-head .filtertype,
+body div[role='main'] .wrapper main section.favorite .list-head .filtertype {
+  float: left;
+  margin-right: 15px;
+  display: inline-block;
+  position: relative;
+}
+body div[role='main'] .wrapper main section.collection .list-head .filtertype .mag,
+body div[role='main'] .wrapper main section.exhibition .list-head .filtertype .mag,
+body div[role='main'] .wrapper main section.project .list-head .filtertype .mag,
+body div[role='main'] .wrapper main section.favorite .list-head .filtertype .mag {
+  position: absolute;
+  left: 12px;
+  top: 10px;
+}
+body div[role='main'] .wrapper main section.collection .list-head .filtertype .filtertext,
+body div[role='main'] .wrapper main section.exhibition .list-head .filtertype .filtertext,
+body div[role='main'] .wrapper main section.project .list-head .filtertype .filtertext,
+body div[role='main'] .wrapper main section.favorite .list-head .filtertype .filtertext {
+  border: 1px solid #dedede;
+  border-radius: 20px;
+  height: 35px;
+  padding-left: 35px;
+  -webkit-transition: all 0.3s;
+  -o-transition: all 0.3s;
+  transition: all 0.3s;
+  width: 250px;
+}
+body div[role='main'] .wrapper main section.collection .list-head .filtertype .filtertext:hover,
+body div[role='main'] .wrapper main section.exhibition .list-head .filtertype .filtertext:hover,
+body div[role='main'] .wrapper main section.project .list-head .filtertype .filtertext:hover,
+body div[role='main'] .wrapper main section.favorite .list-head .filtertype .filtertext:hover {
+  border-color: #7f9d9d;
+}
+body div[role='main'] .wrapper main section.collection .list-head .filtertype .filtertext:active,
+body div[role='main'] .wrapper main section.exhibition .list-head .filtertype .filtertext:active,
+body div[role='main'] .wrapper main section.project .list-head .filtertype .filtertext:active,
+body div[role='main'] .wrapper main section.favorite .list-head .filtertype .filtertext:active {
+  border-color: #4f7979;
+}
+body div[role='main'] .wrapper main section.collection .list-head .item-count-info,
+body div[role='main'] .wrapper main section.exhibition .list-head .item-count-info,
+body div[role='main'] .wrapper main section.project .list-head .item-count-info,
+body div[role='main'] .wrapper main section.favorite .list-head .item-count-info {
+  background: #4f7979;
+  display: inline-block;
+  color: #fff;
+  border: 1px solid #4f7979;
+  border-radius: 20px;
+  padding: 2px 15px 0 15px;
+  font-size: 1.4rem;
+  height: 32px;
+  float: left;
+}
+body div[role='main'] .wrapper main section.collection .list-head a.back,
+body div[role='main'] .wrapper main section.exhibition .list-head a.back,
+body div[role='main'] .wrapper main section.project .list-head a.back,
+body div[role='main'] .wrapper main section.favorite .list-head a.back {
+  float: left;
+  margin-right: 15px;
+  height: 32px;
+  border: 1px solid #ccc;
+  border-radius: 20px;
+  width: 32px;
+  text-align: center;
+  font-size: 1.8rem;
+  line-height: 2.6rem;
+  padding: 0 3px 0 0;
+}
 body div[role='main'] .wrapper main section.collection .list-head .list-control,
 body div[role='main'] .wrapper main section.exhibition .list-head .list-control,
 body div[role='main'] .wrapper main section.project .list-head .list-control,
 body div[role='main'] .wrapper main section.favorite .list-head .list-control {
   padding: 0px 0 0 0px;
+  margin: 0 0 0 0;
+  float: right;
   background-color: white;
   display: inline-block;
 }
@@ -2307,17 +2537,35 @@ body div[role='main'] .wrapper main section.favorite .list-head .list-control .f
   vertical-align: middle;
   color: #ccc;
   font-size: 2rem;
-  margin-left: 15px;
-  margin-top: 2px;
+  margin-left: -1px;
+  margin-top: 0px;
   -webkit-transition: all 0.3s;
   -o-transition: all 0.3s;
   transition: all 0.3s;
+  border: 1px solid #ccc;
+}
+body div[role='main'] .wrapper main section.collection .list-head .list-control .fa.fa-bars,
+body div[role='main'] .wrapper main section.exhibition .list-head .list-control .fa.fa-bars,
+body div[role='main'] .wrapper main section.project .list-head .list-control .fa.fa-bars,
+body div[role='main'] .wrapper main section.favorite .list-head .list-control .fa.fa-bars {
+  border-top-left-radius: 20px;
+  border-bottom-left-radius: 20px;
+  padding: 5px 10px 5px 17px;
+}
+body div[role='main'] .wrapper main section.collection .list-head .list-control .fa.fa-rss,
+body div[role='main'] .wrapper main section.exhibition .list-head .list-control .fa.fa-rss,
+body div[role='main'] .wrapper main section.project .list-head .list-control .fa.fa-rss,
+body div[role='main'] .wrapper main section.favorite .list-head .list-control .fa.fa-rss {
+  border-radius: 20px;
+  padding: 5px 17px 5px 17px;
 }
 body div[role='main'] .wrapper main section.collection .list-head .list-control .fa.fa-th,
 body div[role='main'] .wrapper main section.exhibition .list-head .list-control .fa.fa-th,
 body div[role='main'] .wrapper main section.project .list-head .list-control .fa.fa-th,
 body div[role='main'] .wrapper main section.favorite .list-head .list-control .fa.fa-th {
-  margin-top: 4px;
+  padding: 5px 17px 5px 10px;
+  border-top-right-radius: 20px;
+  border-bottom-right-radius: 20px;
 }
 body div[role='main'] .wrapper main section.collection .list-head .list-control .fa:hover,
 body div[role='main'] .wrapper main section.exhibition .list-head .list-control .fa:hover,
@@ -2329,6 +2577,35 @@ body div[role='main'] .wrapper main section.project .list-head .list-control .fa
 body div[role='main'] .wrapper main section.favorite .list-head .list-control .fa.active {
   color: #4f7979;
 }
+body div[role='main'] .wrapper main section.collection .list-head .list-control .editaction,
+body div[role='main'] .wrapper main section.exhibition .list-head .list-control .editaction,
+body div[role='main'] .wrapper main section.project .list-head .list-control .editaction,
+body div[role='main'] .wrapper main section.favorite .list-head .list-control .editaction {
+  border-top-left-radius: 20px;
+  border-bottom-left-radius: 20px;
+  padding: 5px 10px 5px 17px;
+}
+body div[role='main'] .wrapper main section.collection .list-head .list-control .detail-control,
+body div[role='main'] .wrapper main section.exhibition .list-head .list-control .detail-control,
+body div[role='main'] .wrapper main section.project .list-head .list-control .detail-control,
+body div[role='main'] .wrapper main section.favorite .list-head .list-control .detail-control {
+  padding: 5px 15px 5px 15px !important;
+  border-radius: 0 !important;
+}
+body div[role='main'] .wrapper main section.collection .list-head .list-control .detail-control.single,
+body div[role='main'] .wrapper main section.exhibition .list-head .list-control .detail-control.single,
+body div[role='main'] .wrapper main section.project .list-head .list-control .detail-control.single,
+body div[role='main'] .wrapper main section.favorite .list-head .list-control .detail-control.single {
+  border-radius: 20px !important;
+}
+body div[role='main'] .wrapper main section.collection .list-head .list-control .deleteaction,
+body div[role='main'] .wrapper main section.exhibition .list-head .list-control .deleteaction,
+body div[role='main'] .wrapper main section.project .list-head .list-control .deleteaction,
+body div[role='main'] .wrapper main section.favorite .list-head .list-control .deleteaction {
+  padding: 5px 17px 5px 10px;
+  border-top-right-radius: 20px;
+  border-bottom-right-radius: 20px;
+}
 body div[role='main'] .wrapper main section.collection .list-head .list-control .text,
 body div[role='main'] .wrapper main section.exhibition .list-head .list-control .text,
 body div[role='main'] .wrapper main section.project .list-head .list-control .text,
@@ -2337,6 +2614,64 @@ body div[role='main'] .wrapper main section.favorite .list-head .list-control .t
   -o-transition: all 0.3s;
   transition: all 0.3s;
 }
+body div[role='main'] .wrapper main section.collection .list-head .list-control li,
+body div[role='main'] .wrapper main section.exhibition .list-head .list-control li,
+body div[role='main'] .wrapper main section.project .list-head .list-control li,
+body div[role='main'] .wrapper main section.favorite .list-head .list-control li {
+  list-style: none;
+  float: left;
+}
+body div[role='main'] .wrapper main section.collection .list-head .organization-list-control,
+body div[role='main'] .wrapper main section.exhibition .list-head .organization-list-control,
+body div[role='main'] .wrapper main section.project .list-head .organization-list-control,
+body div[role='main'] .wrapper main section.favorite .list-head .organization-list-control {
+  float: right;
+  margin: 0;
+  padding: 0;
+}
+body div[role='main'] .wrapper main section.collection .list-head .organization-list-control li,
+body div[role='main'] .wrapper main section.exhibition .list-head .organization-list-control li,
+body div[role='main'] .wrapper main section.project .list-head .organization-list-control li,
+body div[role='main'] .wrapper main section.favorite .list-head .organization-list-control li {
+  float: left;
+  list-style: none;
+  margin-left: -1px;
+}
+body div[role='main'] .wrapper main section.collection .list-head .organization-list-control li a,
+body div[role='main'] .wrapper main section.exhibition .list-head .organization-list-control li a,
+body div[role='main'] .wrapper main section.project .list-head .organization-list-control li a,
+body div[role='main'] .wrapper main section.favorite .list-head .organization-list-control li a {
+  display: block;
+  border: 1px solid #ccc;
+  color: #a4a4a4;
+  height: 32px;
+  padding: 5px 10px 0 10px;
+  background: #fff;
+  font-size: 1.8rem;
+}
+body div[role='main'] .wrapper main section.collection .list-head .organization-list-control li a:hover,
+body div[role='main'] .wrapper main section.exhibition .list-head .organization-list-control li a:hover,
+body div[role='main'] .wrapper main section.project .list-head .organization-list-control li a:hover,
+body div[role='main'] .wrapper main section.favorite .list-head .organization-list-control li a:hover {
+  text-decoration: none;
+  color: #4f7979;
+}
+body div[role='main'] .wrapper main section.collection .list-head .organization-list-control li:first-child a,
+body div[role='main'] .wrapper main section.exhibition .list-head .organization-list-control li:first-child a,
+body div[role='main'] .wrapper main section.project .list-head .organization-list-control li:first-child a,
+body div[role='main'] .wrapper main section.favorite .list-head .organization-list-control li:first-child a {
+  border-top-left-radius: 20px;
+  border-bottom-left-radius: 20px;
+  padding-left: 17px;
+}
+body div[role='main'] .wrapper main section.collection .list-head .organization-list-control li:last-child a,
+body div[role='main'] .wrapper main section.exhibition .list-head .organization-list-control li:last-child a,
+body div[role='main'] .wrapper main section.project .list-head .organization-list-control li:last-child a,
+body div[role='main'] .wrapper main section.favorite .list-head .organization-list-control li:last-child a {
+  border-top-right-radius: 20px;
+  border-bottom-right-radius: 20px;
+  padding-right: 17px;
+}
 body div[role='main'] .wrapper main section.collection .list-head .upload,
 body div[role='main'] .wrapper main section.exhibition .list-head .upload,
 body div[role='main'] .wrapper main section.project .list-head .upload,
@@ -2344,13 +2679,6 @@ body div[role='main'] .wrapper main section.favorite .list-head .upload {
   color: #4f7979;
   text-decoration: none;
   padding-left: 10px;
-}
-body div[role='main'] .wrapper main section.collection .list-head .upload.exhibition,
-body div[role='main'] .wrapper main section.exhibition .list-head .upload.exhibition,
-body div[role='main'] .wrapper main section.project .list-head .upload.exhibition,
-body div[role='main'] .wrapper main section.favorite .list-head .upload.exhibition {
-  padding-left: 0;
-  padding-right: 10px;
 }
 body div[role='main'] .wrapper main section.collection .list-head .upload .plus,
 body div[role='main'] .wrapper main section.exhibition .list-head .upload .plus,
@@ -2430,18 +2758,6 @@ body div[role='main'] .wrapper main section.exhibition section.project-list,
 body div[role='main'] .wrapper main section.project section.project-list,
 body div[role='main'] .wrapper main section.favorite section.project-list {
   padding-top: 20px;
-}
-body div[role='main'] .wrapper main section.collection section.project-list,
-body div[role='main'] .wrapper main section.exhibition section.project-list,
-body div[role='main'] .wrapper main section.project section.project-list,
-body div[role='main'] .wrapper main section.favorite section.project-list {
-  padding-top: 30px;
-}
-body div[role='main'] .wrapper main section.collection section.favorite-list,
-body div[role='main'] .wrapper main section.exhibition section.favorite-list,
-body div[role='main'] .wrapper main section.project section.favorite-list,
-body div[role='main'] .wrapper main section.favorite section.favorite-list {
-  padding-top: 0;
 }
 body div[role='main'] .wrapper main section.collection section.exhibition-list .list-body.list li .thumbnails,
 body div[role='main'] .wrapper main section.exhibition section.exhibition-list .list-body.list li .thumbnails,
@@ -2526,13 +2842,6 @@ body div[role='main'] .wrapper main section.exhibition section.exhibition-list .
 body div[role='main'] .wrapper main section.project section.exhibition-list .list-body.list li .meta,
 body div[role='main'] .wrapper main section.favorite section.exhibition-list .list-body.list li .meta {
   width: 70%;
-}
-body div[role='main'] .wrapper main section.collection section.project-list,
-body div[role='main'] .wrapper main section.exhibition section.project-list,
-body div[role='main'] .wrapper main section.project section.project-list,
-body div[role='main'] .wrapper main section.favorite section.project-list {
-  margin-top: 10px;
-  border-top: 1px solid #ccc;
 }
 body div[role='main'] .wrapper main section.collection section.project-list .list-body.list li .thumbnails,
 body div[role='main'] .wrapper main section.exhibition section.project-list .list-body.list li .thumbnails,
@@ -2678,47 +2987,48 @@ body div[role='main'] .wrapper main section.project .list-body.grids:after,
 body div[role='main'] .wrapper main section.favorite .list-body.grids:after {
   clear: both;
 }
-body div[role='main'] .wrapper main section.collection .list-body.grids li,
-body div[role='main'] .wrapper main section.exhibition .list-body.grids li,
-body div[role='main'] .wrapper main section.project .list-body.grids li,
-body div[role='main'] .wrapper main section.favorite .list-body.grids li {
+body div[role='main'] .wrapper main section.collection .list-body.grids > li,
+body div[role='main'] .wrapper main section.exhibition .list-body.grids > li,
+body div[role='main'] .wrapper main section.project .list-body.grids > li,
+body div[role='main'] .wrapper main section.favorite .list-body.grids > li {
   width: 31.33333333%;
   position: relative;
   margin-bottom: 30px;
   float: left;
 }
-body div[role='main'] .wrapper main section.collection .list-body.grids li + li,
-body div[role='main'] .wrapper main section.exhibition .list-body.grids li + li,
-body div[role='main'] .wrapper main section.project .list-body.grids li + li,
-body div[role='main'] .wrapper main section.favorite .list-body.grids li + li {
+body div[role='main'] .wrapper main section.collection .list-body.grids > li + li,
+body div[role='main'] .wrapper main section.exhibition .list-body.grids > li + li,
+body div[role='main'] .wrapper main section.project .list-body.grids > li + li,
+body div[role='main'] .wrapper main section.favorite .list-body.grids > li + li {
   margin-left: 3%;
 }
-body div[role='main'] .wrapper main section.collection .list-body.grids li:nth-child(3n+1),
-body div[role='main'] .wrapper main section.exhibition .list-body.grids li:nth-child(3n+1),
-body div[role='main'] .wrapper main section.project .list-body.grids li:nth-child(3n+1),
-body div[role='main'] .wrapper main section.favorite .list-body.grids li:nth-child(3n+1) {
+body div[role='main'] .wrapper main section.collection .list-body.grids > li:nth-child(3n+1),
+body div[role='main'] .wrapper main section.exhibition .list-body.grids > li:nth-child(3n+1),
+body div[role='main'] .wrapper main section.project .list-body.grids > li:nth-child(3n+1),
+body div[role='main'] .wrapper main section.favorite .list-body.grids > li:nth-child(3n+1) {
   margin-left: 0;
 }
-body div[role='main'] .wrapper main section.collection .list-body.grids li .thumbnails,
-body div[role='main'] .wrapper main section.exhibition .list-body.grids li .thumbnails,
-body div[role='main'] .wrapper main section.project .list-body.grids li .thumbnails,
-body div[role='main'] .wrapper main section.favorite .list-body.grids li .thumbnails {
+body div[role='main'] .wrapper main section.collection .list-body.grids > li .thumbnails,
+body div[role='main'] .wrapper main section.exhibition .list-body.grids > li .thumbnails,
+body div[role='main'] .wrapper main section.project .list-body.grids > li .thumbnails,
+body div[role='main'] .wrapper main section.favorite .list-body.grids > li .thumbnails {
   height: 147px;
   overflow: hidden;
+  border: 1px solid #ddd;
 }
-body div[role='main'] .wrapper main section.collection .list-body.grids li .thumbnails .wrap,
-body div[role='main'] .wrapper main section.exhibition .list-body.grids li .thumbnails .wrap,
-body div[role='main'] .wrapper main section.project .list-body.grids li .thumbnails .wrap,
-body div[role='main'] .wrapper main section.favorite .list-body.grids li .thumbnails .wrap {
+body div[role='main'] .wrapper main section.collection .list-body.grids > li .thumbnails .wrap,
+body div[role='main'] .wrapper main section.exhibition .list-body.grids > li .thumbnails .wrap,
+body div[role='main'] .wrapper main section.project .list-body.grids > li .thumbnails .wrap,
+body div[role='main'] .wrapper main section.favorite .list-body.grids > li .thumbnails .wrap {
   position: relative;
   background: #ccc;
   width: 100%;
   height: 100%;
 }
-body div[role='main'] .wrapper main section.collection .list-body.grids li .thumbnails img,
-body div[role='main'] .wrapper main section.exhibition .list-body.grids li .thumbnails img,
-body div[role='main'] .wrapper main section.project .list-body.grids li .thumbnails img,
-body div[role='main'] .wrapper main section.favorite .list-body.grids li .thumbnails img {
+body div[role='main'] .wrapper main section.collection .list-body.grids > li .thumbnails img,
+body div[role='main'] .wrapper main section.exhibition .list-body.grids > li .thumbnails img,
+body div[role='main'] .wrapper main section.project .list-body.grids > li .thumbnails img,
+body div[role='main'] .wrapper main section.favorite .list-body.grids > li .thumbnails img {
   width: 100%;
   position: absolute;
   top: 50%;
@@ -2727,124 +3037,143 @@ body div[role='main'] .wrapper main section.favorite .list-body.grids li .thumbn
   -webkit-transform: translate(-50%, -50%);
   z-index: 1;
 }
-body div[role='main'] .wrapper main section.collection .list-body.grids li .thumbnails .category,
-body div[role='main'] .wrapper main section.exhibition .list-body.grids li .thumbnails .category,
-body div[role='main'] .wrapper main section.project .list-body.grids li .thumbnails .category,
-body div[role='main'] .wrapper main section.favorite .list-body.grids li .thumbnails .category {
+body div[role='main'] .wrapper main section.collection .list-body.grids > li .thumbnails .category,
+body div[role='main'] .wrapper main section.exhibition .list-body.grids > li .thumbnails .category,
+body div[role='main'] .wrapper main section.project .list-body.grids > li .thumbnails .category,
+body div[role='main'] .wrapper main section.favorite .list-body.grids > li .thumbnails .category {
   z-index: 5;
 }
-body div[role='main'] .wrapper main section.collection .list-body.grids li .thumbnails .small,
-body div[role='main'] .wrapper main section.exhibition .list-body.grids li .thumbnails .small,
-body div[role='main'] .wrapper main section.project .list-body.grids li .thumbnails .small,
-body div[role='main'] .wrapper main section.favorite .list-body.grids li .thumbnails .small {
+body div[role='main'] .wrapper main section.collection .list-body.grids > li .thumbnails .small,
+body div[role='main'] .wrapper main section.exhibition .list-body.grids > li .thumbnails .small,
+body div[role='main'] .wrapper main section.project .list-body.grids > li .thumbnails .small,
+body div[role='main'] .wrapper main section.favorite .list-body.grids > li .thumbnails .small {
   display: none;
 }
-body div[role='main'] .wrapper main section.collection .list-body.grids li .meta,
-body div[role='main'] .wrapper main section.exhibition .list-body.grids li .meta,
-body div[role='main'] .wrapper main section.project .list-body.grids li .meta,
-body div[role='main'] .wrapper main section.favorite .list-body.grids li .meta {
+body div[role='main'] .wrapper main section.collection .list-body.grids > li .meta,
+body div[role='main'] .wrapper main section.exhibition .list-body.grids > li .meta,
+body div[role='main'] .wrapper main section.project .list-body.grids > li .meta,
+body div[role='main'] .wrapper main section.favorite .list-body.grids > li .meta {
   border-left: 1px solid #dddddd;
   border-right: 1px solid #dddddd;
   border-bottom: 1px solid #dddddd;
 }
-body div[role='main'] .wrapper main section.collection .list-body.grids li .meta .action-group,
-body div[role='main'] .wrapper main section.exhibition .list-body.grids li .meta .action-group,
-body div[role='main'] .wrapper main section.project .list-body.grids li .meta .action-group,
-body div[role='main'] .wrapper main section.favorite .list-body.grids li .meta .action-group {
+body div[role='main'] .wrapper main section.collection .list-body.grids > li .meta .action-group,
+body div[role='main'] .wrapper main section.exhibition .list-body.grids > li .meta .action-group,
+body div[role='main'] .wrapper main section.project .list-body.grids > li .meta .action-group,
+body div[role='main'] .wrapper main section.favorite .list-body.grids > li .meta .action-group {
   position: relative;
   text-align: right;
+  padding-top: 10px;
 }
-body div[role='main'] .wrapper main section.collection .list-body.grids li .meta .action-group:before,
-body div[role='main'] .wrapper main section.exhibition .list-body.grids li .meta .action-group:before,
-body div[role='main'] .wrapper main section.project .list-body.grids li .meta .action-group:before,
-body div[role='main'] .wrapper main section.favorite .list-body.grids li .meta .action-group:before,
-body div[role='main'] .wrapper main section.collection .list-body.grids li .meta .action-group:after,
-body div[role='main'] .wrapper main section.exhibition .list-body.grids li .meta .action-group:after,
-body div[role='main'] .wrapper main section.project .list-body.grids li .meta .action-group:after,
-body div[role='main'] .wrapper main section.favorite .list-body.grids li .meta .action-group:after {
+body div[role='main'] .wrapper main section.collection .list-body.grids > li .meta .action-group:before,
+body div[role='main'] .wrapper main section.exhibition .list-body.grids > li .meta .action-group:before,
+body div[role='main'] .wrapper main section.project .list-body.grids > li .meta .action-group:before,
+body div[role='main'] .wrapper main section.favorite .list-body.grids > li .meta .action-group:before,
+body div[role='main'] .wrapper main section.collection .list-body.grids > li .meta .action-group:after,
+body div[role='main'] .wrapper main section.exhibition .list-body.grids > li .meta .action-group:after,
+body div[role='main'] .wrapper main section.project .list-body.grids > li .meta .action-group:after,
+body div[role='main'] .wrapper main section.favorite .list-body.grids > li .meta .action-group:after {
   content: " ";
   display: table;
 }
-body div[role='main'] .wrapper main section.collection .list-body.grids li .meta .action-group:after,
-body div[role='main'] .wrapper main section.exhibition .list-body.grids li .meta .action-group:after,
-body div[role='main'] .wrapper main section.project .list-body.grids li .meta .action-group:after,
-body div[role='main'] .wrapper main section.favorite .list-body.grids li .meta .action-group:after {
+body div[role='main'] .wrapper main section.collection .list-body.grids > li .meta .action-group:after,
+body div[role='main'] .wrapper main section.exhibition .list-body.grids > li .meta .action-group:after,
+body div[role='main'] .wrapper main section.project .list-body.grids > li .meta .action-group:after,
+body div[role='main'] .wrapper main section.favorite .list-body.grids > li .meta .action-group:after {
   clear: both;
 }
-body div[role='main'] .wrapper main section.collection .list-body.grids li .meta .action-group::before,
-body div[role='main'] .wrapper main section.exhibition .list-body.grids li .meta .action-group::before,
-body div[role='main'] .wrapper main section.project .list-body.grids li .meta .action-group::before,
-body div[role='main'] .wrapper main section.favorite .list-body.grids li .meta .action-group::before {
-  content: '';
-  width: 100%;
-  height: 1px;
-  background-color: #ccc;
-  position: absolute;
-  top: 14px;
-  left: 0;
-  z-index: -1;
+body div[role='main'] .wrapper main section.collection .list-body.grids > li .meta .action-group .wrap,
+body div[role='main'] .wrapper main section.exhibition .list-body.grids > li .meta .action-group .wrap,
+body div[role='main'] .wrapper main section.project .list-body.grids > li .meta .action-group .wrap,
+body div[role='main'] .wrapper main section.favorite .list-body.grids > li .meta .action-group .wrap {
+  float: right;
 }
-body div[role='main'] .wrapper main section.collection .list-body.grids li .meta .action-group a,
-body div[role='main'] .wrapper main section.exhibition .list-body.grids li .meta .action-group a,
-body div[role='main'] .wrapper main section.project .list-body.grids li .meta .action-group a,
-body div[role='main'] .wrapper main section.favorite .list-body.grids li .meta .action-group a {
+body div[role='main'] .wrapper main section.collection .list-body.grids > li .meta .action-group .wrap ul,
+body div[role='main'] .wrapper main section.exhibition .list-body.grids > li .meta .action-group .wrap ul,
+body div[role='main'] .wrapper main section.project .list-body.grids > li .meta .action-group .wrap ul,
+body div[role='main'] .wrapper main section.favorite .list-body.grids > li .meta .action-group .wrap ul {
+  margin: 0;
+  padding: 0;
+}
+body div[role='main'] .wrapper main section.collection .list-body.grids > li .meta .action-group .wrap ul:before,
+body div[role='main'] .wrapper main section.exhibition .list-body.grids > li .meta .action-group .wrap ul:before,
+body div[role='main'] .wrapper main section.project .list-body.grids > li .meta .action-group .wrap ul:before,
+body div[role='main'] .wrapper main section.favorite .list-body.grids > li .meta .action-group .wrap ul:before,
+body div[role='main'] .wrapper main section.collection .list-body.grids > li .meta .action-group .wrap ul:after,
+body div[role='main'] .wrapper main section.exhibition .list-body.grids > li .meta .action-group .wrap ul:after,
+body div[role='main'] .wrapper main section.project .list-body.grids > li .meta .action-group .wrap ul:after,
+body div[role='main'] .wrapper main section.favorite .list-body.grids > li .meta .action-group .wrap ul:after {
+  content: " ";
+  display: table;
+}
+body div[role='main'] .wrapper main section.collection .list-body.grids > li .meta .action-group .wrap ul:after,
+body div[role='main'] .wrapper main section.exhibition .list-body.grids > li .meta .action-group .wrap ul:after,
+body div[role='main'] .wrapper main section.project .list-body.grids > li .meta .action-group .wrap ul:after,
+body div[role='main'] .wrapper main section.favorite .list-body.grids > li .meta .action-group .wrap ul:after {
+  clear: both;
+}
+body div[role='main'] .wrapper main section.collection .list-body.grids > li .meta .action-group .wrap ul li,
+body div[role='main'] .wrapper main section.exhibition .list-body.grids > li .meta .action-group .wrap ul li,
+body div[role='main'] .wrapper main section.project .list-body.grids > li .meta .action-group .wrap ul li,
+body div[role='main'] .wrapper main section.favorite .list-body.grids > li .meta .action-group .wrap ul li {
+  list-style: none;
+  float: left;
+}
+body div[role='main'] .wrapper main section.collection .list-body.grids > li .meta .action-group .wrap ul li a,
+body div[role='main'] .wrapper main section.exhibition .list-body.grids > li .meta .action-group .wrap ul li a,
+body div[role='main'] .wrapper main section.project .list-body.grids > li .meta .action-group .wrap ul li a,
+body div[role='main'] .wrapper main section.favorite .list-body.grids > li .meta .action-group .wrap ul li a {
   background-color: white;
-  opacity: 1;
   color: #a4a4a4;
-  text-decoration: none;
-  font-size: 1.5rem;
-  padding: 5px 7px;
-  -webkit-transition: color 0.3s;
-  -o-transition: color 0.3s;
-  transition: color 0.3s;
+  font-size: 1.8rem;
+  padding: 5px 10px;
+  border: 1px solid #ccc;
+  margin-left: -1px;
+  height: 32px;
 }
-body div[role='main'] .wrapper main section.collection .list-body.grids li .meta .action-group a:first-child,
-body div[role='main'] .wrapper main section.exhibition .list-body.grids li .meta .action-group a:first-child,
-body div[role='main'] .wrapper main section.project .list-body.grids li .meta .action-group a:first-child,
-body div[role='main'] .wrapper main section.favorite .list-body.grids li .meta .action-group a:first-child {
+body div[role='main'] .wrapper main section.collection .list-body.grids > li .meta .action-group .wrap ul li a:hover,
+body div[role='main'] .wrapper main section.exhibition .list-body.grids > li .meta .action-group .wrap ul li a:hover,
+body div[role='main'] .wrapper main section.project .list-body.grids > li .meta .action-group .wrap ul li a:hover,
+body div[role='main'] .wrapper main section.favorite .list-body.grids > li .meta .action-group .wrap ul li a:hover {
+  color: #4f7979;
+  text-decoration: none;
+}
+body div[role='main'] .wrapper main section.collection .list-body.grids > li .meta .action-group .wrap ul li a:hover.fa-heart,
+body div[role='main'] .wrapper main section.exhibition .list-body.grids > li .meta .action-group .wrap ul li a:hover.fa-heart,
+body div[role='main'] .wrapper main section.project .list-body.grids > li .meta .action-group .wrap ul li a:hover.fa-heart,
+body div[role='main'] .wrapper main section.favorite .list-body.grids > li .meta .action-group .wrap ul li a:hover.fa-heart {
+  color: #e46667 !important;
+}
+body div[role='main'] .wrapper main section.collection .list-body.grids > li .meta .action-group .wrap ul li a:hover.fa-star,
+body div[role='main'] .wrapper main section.exhibition .list-body.grids > li .meta .action-group .wrap ul li a:hover.fa-star,
+body div[role='main'] .wrapper main section.project .list-body.grids > li .meta .action-group .wrap ul li a:hover.fa-star,
+body div[role='main'] .wrapper main section.favorite .list-body.grids > li .meta .action-group .wrap ul li a:hover.fa-star {
+  color: #ff9806 !important;
+}
+body div[role='main'] .wrapper main section.collection .list-body.grids > li .meta .action-group .wrap ul li:first-child a,
+body div[role='main'] .wrapper main section.exhibition .list-body.grids > li .meta .action-group .wrap ul li:first-child a,
+body div[role='main'] .wrapper main section.project .list-body.grids > li .meta .action-group .wrap ul li:first-child a,
+body div[role='main'] .wrapper main section.favorite .list-body.grids > li .meta .action-group .wrap ul li:first-child a {
+  border-top-left-radius: 20px;
+  border-bottom-left-radius: 20px;
   padding-left: 15px;
 }
-body div[role='main'] .wrapper main section.collection .list-body.grids li .meta .action-group a:hover,
-body div[role='main'] .wrapper main section.exhibition .list-body.grids li .meta .action-group a:hover,
-body div[role='main'] .wrapper main section.project .list-body.grids li .meta .action-group a:hover,
-body div[role='main'] .wrapper main section.favorite .list-body.grids li .meta .action-group a:hover {
-  color: #444;
+body div[role='main'] .wrapper main section.collection .list-body.grids > li .meta .action-group .wrap ul li:last-child a,
+body div[role='main'] .wrapper main section.exhibition .list-body.grids > li .meta .action-group .wrap ul li:last-child a,
+body div[role='main'] .wrapper main section.project .list-body.grids > li .meta .action-group .wrap ul li:last-child a,
+body div[role='main'] .wrapper main section.favorite .list-body.grids > li .meta .action-group .wrap ul li:last-child a {
+  border-top-right-radius: 20px;
+  border-bottom-right-radius: 20px;
+  padding-right: 15px;
 }
-body div[role='main'] .wrapper main section.collection .list-body.grids li .meta .action-group a:hover.fa-heart,
-body div[role='main'] .wrapper main section.exhibition .list-body.grids li .meta .action-group a:hover.fa-heart,
-body div[role='main'] .wrapper main section.project .list-body.grids li .meta .action-group a:hover.fa-heart,
-body div[role='main'] .wrapper main section.favorite .list-body.grids li .meta .action-group a:hover.fa-heart {
-  color: #e46667;
-}
-body div[role='main'] .wrapper main section.collection .list-body.grids li .meta .action-group a.links,
-body div[role='main'] .wrapper main section.exhibition .list-body.grids li .meta .action-group a.links,
-body div[role='main'] .wrapper main section.project .list-body.grids li .meta .action-group a.links,
-body div[role='main'] .wrapper main section.favorite .list-body.grids li .meta .action-group a.links {
-  color: #4f7979;
-  float: left;
-  text-align: left;
-  padding: 0 10px 0 0;
-}
-body div[role='main'] .wrapper main section.collection .list-body.grids li .meta .action-group a.links:hover,
-body div[role='main'] .wrapper main section.exhibition .list-body.grids li .meta .action-group a.links:hover,
-body div[role='main'] .wrapper main section.project .list-body.grids li .meta .action-group a.links:hover,
-body div[role='main'] .wrapper main section.favorite .list-body.grids li .meta .action-group a.links:hover {
-  color: #273b3b;
-}
-body div[role='main'] .wrapper main section.collection .list-body.grids li .meta .action-group a.active.fa-heart,
-body div[role='main'] .wrapper main section.exhibition .list-body.grids li .meta .action-group a.active.fa-heart,
-body div[role='main'] .wrapper main section.project .list-body.grids li .meta .action-group a.active.fa-heart,
-body div[role='main'] .wrapper main section.favorite .list-body.grids li .meta .action-group a.active.fa-heart {
-  color: #e46667;
-}
-body div[role='main'] .wrapper main section.collection .list-body.grids li .meta .description,
-body div[role='main'] .wrapper main section.exhibition .list-body.grids li .meta .description,
-body div[role='main'] .wrapper main section.project .list-body.grids li .meta .description,
-body div[role='main'] .wrapper main section.favorite .list-body.grids li .meta .description,
-body div[role='main'] .wrapper main section.collection .list-body.grids li .meta .other-info,
-body div[role='main'] .wrapper main section.exhibition .list-body.grids li .meta .other-info,
-body div[role='main'] .wrapper main section.project .list-body.grids li .meta .other-info,
-body div[role='main'] .wrapper main section.favorite .list-body.grids li .meta .other-info {
+body div[role='main'] .wrapper main section.collection .list-body.grids > li .meta .description,
+body div[role='main'] .wrapper main section.exhibition .list-body.grids > li .meta .description,
+body div[role='main'] .wrapper main section.project .list-body.grids > li .meta .description,
+body div[role='main'] .wrapper main section.favorite .list-body.grids > li .meta .description,
+body div[role='main'] .wrapper main section.collection .list-body.grids > li .meta .other-info,
+body div[role='main'] .wrapper main section.exhibition .list-body.grids > li .meta .other-info,
+body div[role='main'] .wrapper main section.project .list-body.grids > li .meta .other-info,
+body div[role='main'] .wrapper main section.favorite .list-body.grids > li .meta .other-info {
   display: none;
 }
 body div[role='main'] .wrapper main section.collection .list-body.list:before,
@@ -2864,54 +3193,55 @@ body div[role='main'] .wrapper main section.project .list-body.list:after,
 body div[role='main'] .wrapper main section.favorite .list-body.list:after {
   clear: both;
 }
-body div[role='main'] .wrapper main section.collection .list-body.list li,
-body div[role='main'] .wrapper main section.exhibition .list-body.list li,
-body div[role='main'] .wrapper main section.project .list-body.list li,
-body div[role='main'] .wrapper main section.favorite .list-body.list li {
+body div[role='main'] .wrapper main section.collection .list-body.list > li,
+body div[role='main'] .wrapper main section.exhibition .list-body.list > li,
+body div[role='main'] .wrapper main section.project .list-body.list > li,
+body div[role='main'] .wrapper main section.favorite .list-body.list > li {
   width: 100%;
   margin-bottom: 30px;
 }
-body div[role='main'] .wrapper main section.collection .list-body.list li:before,
-body div[role='main'] .wrapper main section.exhibition .list-body.list li:before,
-body div[role='main'] .wrapper main section.project .list-body.list li:before,
-body div[role='main'] .wrapper main section.favorite .list-body.list li:before,
-body div[role='main'] .wrapper main section.collection .list-body.list li:after,
-body div[role='main'] .wrapper main section.exhibition .list-body.list li:after,
-body div[role='main'] .wrapper main section.project .list-body.list li:after,
-body div[role='main'] .wrapper main section.favorite .list-body.list li:after {
+body div[role='main'] .wrapper main section.collection .list-body.list > li:before,
+body div[role='main'] .wrapper main section.exhibition .list-body.list > li:before,
+body div[role='main'] .wrapper main section.project .list-body.list > li:before,
+body div[role='main'] .wrapper main section.favorite .list-body.list > li:before,
+body div[role='main'] .wrapper main section.collection .list-body.list > li:after,
+body div[role='main'] .wrapper main section.exhibition .list-body.list > li:after,
+body div[role='main'] .wrapper main section.project .list-body.list > li:after,
+body div[role='main'] .wrapper main section.favorite .list-body.list > li:after {
   content: " ";
   display: table;
 }
-body div[role='main'] .wrapper main section.collection .list-body.list li:after,
-body div[role='main'] .wrapper main section.exhibition .list-body.list li:after,
-body div[role='main'] .wrapper main section.project .list-body.list li:after,
-body div[role='main'] .wrapper main section.favorite .list-body.list li:after {
+body div[role='main'] .wrapper main section.collection .list-body.list > li:after,
+body div[role='main'] .wrapper main section.exhibition .list-body.list > li:after,
+body div[role='main'] .wrapper main section.project .list-body.list > li:after,
+body div[role='main'] .wrapper main section.favorite .list-body.list > li:after {
   clear: both;
 }
-body div[role='main'] .wrapper main section.collection .list-body.list li .thumbnails,
-body div[role='main'] .wrapper main section.exhibition .list-body.list li .thumbnails,
-body div[role='main'] .wrapper main section.project .list-body.list li .thumbnails,
-body div[role='main'] .wrapper main section.favorite .list-body.list li .thumbnails {
+body div[role='main'] .wrapper main section.collection .list-body.list > li .thumbnails,
+body div[role='main'] .wrapper main section.exhibition .list-body.list > li .thumbnails,
+body div[role='main'] .wrapper main section.project .list-body.list > li .thumbnails,
+body div[role='main'] .wrapper main section.favorite .list-body.list > li .thumbnails {
   float: right;
   width: 45%;
   height: 200px;
   position: relative;
 }
-body div[role='main'] .wrapper main section.collection .list-body.list li .thumbnails .wrap,
-body div[role='main'] .wrapper main section.exhibition .list-body.list li .thumbnails .wrap,
-body div[role='main'] .wrapper main section.project .list-body.list li .thumbnails .wrap,
-body div[role='main'] .wrapper main section.favorite .list-body.list li .thumbnails .wrap {
+body div[role='main'] .wrapper main section.collection .list-body.list > li .thumbnails .wrap,
+body div[role='main'] .wrapper main section.exhibition .list-body.list > li .thumbnails .wrap,
+body div[role='main'] .wrapper main section.project .list-body.list > li .thumbnails .wrap,
+body div[role='main'] .wrapper main section.favorite .list-body.list > li .thumbnails .wrap {
   width: 70%;
   height: 100%;
   position: relative;
   background: #ccc;
   float: left;
   border: 1px solid #fff;
+  overflow: hidden;
 }
-body div[role='main'] .wrapper main section.collection .list-body.list li .thumbnails .wrap img,
-body div[role='main'] .wrapper main section.exhibition .list-body.list li .thumbnails .wrap img,
-body div[role='main'] .wrapper main section.project .list-body.list li .thumbnails .wrap img,
-body div[role='main'] .wrapper main section.favorite .list-body.list li .thumbnails .wrap img {
+body div[role='main'] .wrapper main section.collection .list-body.list > li .thumbnails .wrap img,
+body div[role='main'] .wrapper main section.exhibition .list-body.list > li .thumbnails .wrap img,
+body div[role='main'] .wrapper main section.project .list-body.list > li .thumbnails .wrap img,
+body div[role='main'] .wrapper main section.favorite .list-body.list > li .thumbnails .wrap img {
   width: 100%;
   position: absolute;
   top: 50%;
@@ -2920,64 +3250,64 @@ body div[role='main'] .wrapper main section.favorite .list-body.list li .thumbna
   -webkit-transform: translate(-50%, -50%);
   z-index: 1;
 }
-body div[role='main'] .wrapper main section.collection .list-body.list li .thumbnails .wrap.small,
-body div[role='main'] .wrapper main section.exhibition .list-body.list li .thumbnails .wrap.small,
-body div[role='main'] .wrapper main section.project .list-body.list li .thumbnails .wrap.small,
-body div[role='main'] .wrapper main section.favorite .list-body.list li .thumbnails .wrap.small {
+body div[role='main'] .wrapper main section.collection .list-body.list > li .thumbnails .wrap.small,
+body div[role='main'] .wrapper main section.exhibition .list-body.list > li .thumbnails .wrap.small,
+body div[role='main'] .wrapper main section.project .list-body.list > li .thumbnails .wrap.small,
+body div[role='main'] .wrapper main section.favorite .list-body.list > li .thumbnails .wrap.small {
   width: 30%;
   height: 100px;
 }
-body div[role='main'] .wrapper main section.collection .list-body.list li .thumbnails .category,
-body div[role='main'] .wrapper main section.exhibition .list-body.list li .thumbnails .category,
-body div[role='main'] .wrapper main section.project .list-body.list li .thumbnails .category,
-body div[role='main'] .wrapper main section.favorite .list-body.list li .thumbnails .category {
+body div[role='main'] .wrapper main section.collection .list-body.list > li .thumbnails .category,
+body div[role='main'] .wrapper main section.exhibition .list-body.list > li .thumbnails .category,
+body div[role='main'] .wrapper main section.project .list-body.list > li .thumbnails .category,
+body div[role='main'] .wrapper main section.favorite .list-body.list > li .thumbnails .category {
   top: 1px;
   left: 1px;
   z-index: 5;
 }
-body div[role='main'] .wrapper main section.collection .list-body.list li .meta,
-body div[role='main'] .wrapper main section.exhibition .list-body.list li .meta,
-body div[role='main'] .wrapper main section.project .list-body.list li .meta,
-body div[role='main'] .wrapper main section.favorite .list-body.list li .meta {
+body div[role='main'] .wrapper main section.collection .list-body.list > li .meta,
+body div[role='main'] .wrapper main section.exhibition .list-body.list > li .meta,
+body div[role='main'] .wrapper main section.project .list-body.list > li .meta,
+body div[role='main'] .wrapper main section.favorite .list-body.list > li .meta {
   float: left;
   width: 50%;
   padding-top: 0;
   padding-left: 0px;
 }
-body div[role='main'] .wrapper main section.collection .list-body.list li .meta .header,
-body div[role='main'] .wrapper main section.exhibition .list-body.list li .meta .header,
-body div[role='main'] .wrapper main section.project .list-body.list li .meta .header,
-body div[role='main'] .wrapper main section.favorite .list-body.list li .meta .header {
+body div[role='main'] .wrapper main section.collection .list-body.list > li .meta .header,
+body div[role='main'] .wrapper main section.exhibition .list-body.list > li .meta .header,
+body div[role='main'] .wrapper main section.project .list-body.list > li .meta .header,
+body div[role='main'] .wrapper main section.favorite .list-body.list > li .meta .header {
   color: #4f7979;
-  font-family: "Proxima Nova", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-family: 'Roboto', "Helvetica Neue", Helvetica, Arial, sans-serif;
   font-size: 1.8rem;
   margin-bottom: 5px;
   display: inline-block;
 }
-body div[role='main'] .wrapper main section.collection .list-body.list li .meta .header:hover,
-body div[role='main'] .wrapper main section.exhibition .list-body.list li .meta .header:hover,
-body div[role='main'] .wrapper main section.project .list-body.list li .meta .header:hover,
-body div[role='main'] .wrapper main section.favorite .list-body.list li .meta .header:hover {
+body div[role='main'] .wrapper main section.collection .list-body.list > li .meta .header:hover,
+body div[role='main'] .wrapper main section.exhibition .list-body.list > li .meta .header:hover,
+body div[role='main'] .wrapper main section.project .list-body.list > li .meta .header:hover,
+body div[role='main'] .wrapper main section.favorite .list-body.list > li .meta .header:hover {
   color: #314b4b;
 }
-body div[role='main'] .wrapper main section.collection .list-body.list li .meta .description,
-body div[role='main'] .wrapper main section.exhibition .list-body.list li .meta .description,
-body div[role='main'] .wrapper main section.project .list-body.list li .meta .description,
-body div[role='main'] .wrapper main section.favorite .list-body.list li .meta .description {
+body div[role='main'] .wrapper main section.collection .list-body.list > li .meta .description,
+body div[role='main'] .wrapper main section.exhibition .list-body.list > li .meta .description,
+body div[role='main'] .wrapper main section.project .list-body.list > li .meta .description,
+body div[role='main'] .wrapper main section.favorite .list-body.list > li .meta .description {
   color: #8c8c8c;
   font-size: 1.5rem;
   line-height: 1.3em;
 }
-body div[role='main'] .wrapper main section.collection .list-body.list li .meta .other-info,
-body div[role='main'] .wrapper main section.exhibition .list-body.list li .meta .other-info,
-body div[role='main'] .wrapper main section.project .list-body.list li .meta .other-info,
-body div[role='main'] .wrapper main section.favorite .list-body.list li .meta .other-info {
+body div[role='main'] .wrapper main section.collection .list-body.list > li .meta .other-info,
+body div[role='main'] .wrapper main section.exhibition .list-body.list > li .meta .other-info,
+body div[role='main'] .wrapper main section.project .list-body.list > li .meta .other-info,
+body div[role='main'] .wrapper main section.favorite .list-body.list > li .meta .other-info {
   position: relative;
 }
-body div[role='main'] .wrapper main section.collection .list-body.list li .meta .other-info::before,
-body div[role='main'] .wrapper main section.exhibition .list-body.list li .meta .other-info::before,
-body div[role='main'] .wrapper main section.project .list-body.list li .meta .other-info::before,
-body div[role='main'] .wrapper main section.favorite .list-body.list li .meta .other-info::before {
+body div[role='main'] .wrapper main section.collection .list-body.list > li .meta .other-info::before,
+body div[role='main'] .wrapper main section.exhibition .list-body.list > li .meta .other-info::before,
+body div[role='main'] .wrapper main section.project .list-body.list > li .meta .other-info::before,
+body div[role='main'] .wrapper main section.favorite .list-body.list > li .meta .other-info::before {
   content: '';
   width: 100%;
   height: 1px;
@@ -2987,18 +3317,18 @@ body div[role='main'] .wrapper main section.favorite .list-body.list li .meta .o
   left: 0;
   z-index: -1;
 }
-body div[role='main'] .wrapper main section.collection .list-body.list li .meta .other-info .count,
-body div[role='main'] .wrapper main section.exhibition .list-body.list li .meta .other-info .count,
-body div[role='main'] .wrapper main section.project .list-body.list li .meta .other-info .count,
-body div[role='main'] .wrapper main section.favorite .list-body.list li .meta .other-info .count,
-body div[role='main'] .wrapper main section.collection .list-body.list li .meta .other-info .date,
-body div[role='main'] .wrapper main section.exhibition .list-body.list li .meta .other-info .date,
-body div[role='main'] .wrapper main section.project .list-body.list li .meta .other-info .date,
-body div[role='main'] .wrapper main section.favorite .list-body.list li .meta .other-info .date,
-body div[role='main'] .wrapper main section.collection .list-body.list li .meta .other-info .user,
-body div[role='main'] .wrapper main section.exhibition .list-body.list li .meta .other-info .user,
-body div[role='main'] .wrapper main section.project .list-body.list li .meta .other-info .user,
-body div[role='main'] .wrapper main section.favorite .list-body.list li .meta .other-info .user {
+body div[role='main'] .wrapper main section.collection .list-body.list > li .meta .other-info .count,
+body div[role='main'] .wrapper main section.exhibition .list-body.list > li .meta .other-info .count,
+body div[role='main'] .wrapper main section.project .list-body.list > li .meta .other-info .count,
+body div[role='main'] .wrapper main section.favorite .list-body.list > li .meta .other-info .count,
+body div[role='main'] .wrapper main section.collection .list-body.list > li .meta .other-info .date,
+body div[role='main'] .wrapper main section.exhibition .list-body.list > li .meta .other-info .date,
+body div[role='main'] .wrapper main section.project .list-body.list > li .meta .other-info .date,
+body div[role='main'] .wrapper main section.favorite .list-body.list > li .meta .other-info .date,
+body div[role='main'] .wrapper main section.collection .list-body.list > li .meta .other-info .user,
+body div[role='main'] .wrapper main section.exhibition .list-body.list > li .meta .other-info .user,
+body div[role='main'] .wrapper main section.project .list-body.list > li .meta .other-info .user,
+body div[role='main'] .wrapper main section.favorite .list-body.list > li .meta .other-info .user {
   vertical-align: middle;
   color: #464646;
   font-size: 1.4rem;
@@ -3007,58 +3337,97 @@ body div[role='main'] .wrapper main section.favorite .list-body.list li .meta .o
   padding: 10px;
   background-color: white;
 }
-body div[role='main'] .wrapper main section.collection .list-body.list li .meta .other-info .count,
-body div[role='main'] .wrapper main section.exhibition .list-body.list li .meta .other-info .count,
-body div[role='main'] .wrapper main section.project .list-body.list li .meta .other-info .count,
-body div[role='main'] .wrapper main section.favorite .list-body.list li .meta .other-info .count {
+body div[role='main'] .wrapper main section.collection .list-body.list > li .meta .other-info .count,
+body div[role='main'] .wrapper main section.exhibition .list-body.list > li .meta .other-info .count,
+body div[role='main'] .wrapper main section.project .list-body.list > li .meta .other-info .count,
+body div[role='main'] .wrapper main section.favorite .list-body.list > li .meta .other-info .count {
   padding-left: 0;
 }
-body div[role='main'] .wrapper main section.collection .list-body.list li .meta .action-group,
-body div[role='main'] .wrapper main section.exhibition .list-body.list li .meta .action-group,
-body div[role='main'] .wrapper main section.project .list-body.list li .meta .action-group,
-body div[role='main'] .wrapper main section.favorite .list-body.list li .meta .action-group {
-  margin-top: 2px;
-  margin-left: 1px;
+body div[role='main'] .wrapper main section.collection .list-body.list > li .meta .action-group,
+body div[role='main'] .wrapper main section.exhibition .list-body.list > li .meta .action-group,
+body div[role='main'] .wrapper main section.project .list-body.list > li .meta .action-group,
+body div[role='main'] .wrapper main section.favorite .list-body.list > li .meta .action-group {
+  position: relative;
+  text-align: left;
+  margin-top: 5px;
 }
-body div[role='main'] .wrapper main section.collection .list-body.list li .meta .action-group:before,
-body div[role='main'] .wrapper main section.exhibition .list-body.list li .meta .action-group:before,
-body div[role='main'] .wrapper main section.project .list-body.list li .meta .action-group:before,
-body div[role='main'] .wrapper main section.favorite .list-body.list li .meta .action-group:before,
-body div[role='main'] .wrapper main section.collection .list-body.list li .meta .action-group:after,
-body div[role='main'] .wrapper main section.exhibition .list-body.list li .meta .action-group:after,
-body div[role='main'] .wrapper main section.project .list-body.list li .meta .action-group:after,
-body div[role='main'] .wrapper main section.favorite .list-body.list li .meta .action-group:after {
+body div[role='main'] .wrapper main section.collection .list-body.list > li .meta .action-group:before,
+body div[role='main'] .wrapper main section.exhibition .list-body.list > li .meta .action-group:before,
+body div[role='main'] .wrapper main section.project .list-body.list > li .meta .action-group:before,
+body div[role='main'] .wrapper main section.favorite .list-body.list > li .meta .action-group:before,
+body div[role='main'] .wrapper main section.collection .list-body.list > li .meta .action-group:after,
+body div[role='main'] .wrapper main section.exhibition .list-body.list > li .meta .action-group:after,
+body div[role='main'] .wrapper main section.project .list-body.list > li .meta .action-group:after,
+body div[role='main'] .wrapper main section.favorite .list-body.list > li .meta .action-group:after {
   content: " ";
   display: table;
 }
-body div[role='main'] .wrapper main section.collection .list-body.list li .meta .action-group:after,
-body div[role='main'] .wrapper main section.exhibition .list-body.list li .meta .action-group:after,
-body div[role='main'] .wrapper main section.project .list-body.list li .meta .action-group:after,
-body div[role='main'] .wrapper main section.favorite .list-body.list li .meta .action-group:after {
+body div[role='main'] .wrapper main section.collection .list-body.list > li .meta .action-group:after,
+body div[role='main'] .wrapper main section.exhibition .list-body.list > li .meta .action-group:after,
+body div[role='main'] .wrapper main section.project .list-body.list > li .meta .action-group:after,
+body div[role='main'] .wrapper main section.favorite .list-body.list > li .meta .action-group:after {
   clear: both;
 }
-body div[role='main'] .wrapper main section.collection .list-body.list li .meta .action-group a,
-body div[role='main'] .wrapper main section.exhibition .list-body.list li .meta .action-group a,
-body div[role='main'] .wrapper main section.project .list-body.list li .meta .action-group a,
-body div[role='main'] .wrapper main section.favorite .list-body.list li .meta .action-group a {
-  padding: 5px 10px;
-  display: block;
+body div[role='main'] .wrapper main section.collection .list-body.list > li .meta .action-group .wrap ul,
+body div[role='main'] .wrapper main section.exhibition .list-body.list > li .meta .action-group .wrap ul,
+body div[role='main'] .wrapper main section.project .list-body.list > li .meta .action-group .wrap ul,
+body div[role='main'] .wrapper main section.favorite .list-body.list > li .meta .action-group .wrap ul {
+  margin: 0;
+  padding: 0;
+}
+body div[role='main'] .wrapper main section.collection .list-body.list > li .meta .action-group .wrap ul li,
+body div[role='main'] .wrapper main section.exhibition .list-body.list > li .meta .action-group .wrap ul li,
+body div[role='main'] .wrapper main section.project .list-body.list > li .meta .action-group .wrap ul li,
+body div[role='main'] .wrapper main section.favorite .list-body.list > li .meta .action-group .wrap ul li {
+  list-style: none;
   float: left;
+}
+body div[role='main'] .wrapper main section.collection .list-body.list > li .meta .action-group .wrap ul li a,
+body div[role='main'] .wrapper main section.exhibition .list-body.list > li .meta .action-group .wrap ul li a,
+body div[role='main'] .wrapper main section.project .list-body.list > li .meta .action-group .wrap ul li a,
+body div[role='main'] .wrapper main section.favorite .list-body.list > li .meta .action-group .wrap ul li a {
+  background-color: white;
+  color: #a4a4a4;
   font-size: 1.8rem;
-  border: 1px solid #4f7979;
+  padding: 5px 10px;
+  border: 1px solid #ccc;
+  margin-left: -1px;
+  height: 32px;
+}
+body div[role='main'] .wrapper main section.collection .list-body.list > li .meta .action-group .wrap ul li a:hover,
+body div[role='main'] .wrapper main section.exhibition .list-body.list > li .meta .action-group .wrap ul li a:hover,
+body div[role='main'] .wrapper main section.project .list-body.list > li .meta .action-group .wrap ul li a:hover,
+body div[role='main'] .wrapper main section.favorite .list-body.list > li .meta .action-group .wrap ul li a:hover {
   color: #4f7979;
   text-decoration: none;
-  -webkit-transition: all 0.3s;
-  -o-transition: all 0.3s;
-  transition: all 0.3s;
-  margin-left: -1px;
 }
-body div[role='main'] .wrapper main section.collection .list-body.list li .meta .action-group a:hover,
-body div[role='main'] .wrapper main section.exhibition .list-body.list li .meta .action-group a:hover,
-body div[role='main'] .wrapper main section.project .list-body.list li .meta .action-group a:hover,
-body div[role='main'] .wrapper main section.favorite .list-body.list li .meta .action-group a:hover {
-  background-color: #4f7979;
-  color: white;
+body div[role='main'] .wrapper main section.collection .list-body.list > li .meta .action-group .wrap ul li a:hover.fa-heart,
+body div[role='main'] .wrapper main section.exhibition .list-body.list > li .meta .action-group .wrap ul li a:hover.fa-heart,
+body div[role='main'] .wrapper main section.project .list-body.list > li .meta .action-group .wrap ul li a:hover.fa-heart,
+body div[role='main'] .wrapper main section.favorite .list-body.list > li .meta .action-group .wrap ul li a:hover.fa-heart {
+  color: #e46667 !important;
+}
+body div[role='main'] .wrapper main section.collection .list-body.list > li .meta .action-group .wrap ul li a:hover.fa-star,
+body div[role='main'] .wrapper main section.exhibition .list-body.list > li .meta .action-group .wrap ul li a:hover.fa-star,
+body div[role='main'] .wrapper main section.project .list-body.list > li .meta .action-group .wrap ul li a:hover.fa-star,
+body div[role='main'] .wrapper main section.favorite .list-body.list > li .meta .action-group .wrap ul li a:hover.fa-star {
+  color: #ff9806 !important;
+}
+body div[role='main'] .wrapper main section.collection .list-body.list > li .meta .action-group .wrap ul li:first-child a,
+body div[role='main'] .wrapper main section.exhibition .list-body.list > li .meta .action-group .wrap ul li:first-child a,
+body div[role='main'] .wrapper main section.project .list-body.list > li .meta .action-group .wrap ul li:first-child a,
+body div[role='main'] .wrapper main section.favorite .list-body.list > li .meta .action-group .wrap ul li:first-child a {
+  border-top-left-radius: 20px;
+  border-bottom-left-radius: 20px;
+  padding-left: 15px;
+}
+body div[role='main'] .wrapper main section.collection .list-body.list > li .meta .action-group .wrap ul li:last-child a,
+body div[role='main'] .wrapper main section.exhibition .list-body.list > li .meta .action-group .wrap ul li:last-child a,
+body div[role='main'] .wrapper main section.project .list-body.list > li .meta .action-group .wrap ul li:last-child a,
+body div[role='main'] .wrapper main section.favorite .list-body.list > li .meta .action-group .wrap ul li:last-child a {
+  border-top-right-radius: 20px;
+  border-bottom-right-radius: 20px;
+  padding-right: 15px;
 }
 body div[role='main'] .wrapper main section.collection .loadmore,
 body div[role='main'] .wrapper main section.exhibition .loadmore,
@@ -3289,28 +3658,51 @@ body div[role='main'] .wrapper main section.favorite section.isotope .listing {
   background-color: white;
   border: 0;
 }
-body div[role='main'] .wrapper main section.collection section.isotope .listing .grid .sizer a .info,
-body div[role='main'] .wrapper main section.exhibition section.isotope .listing .grid .sizer a .info,
-body div[role='main'] .wrapper main section.project section.isotope .listing .grid .sizer a .info,
-body div[role='main'] .wrapper main section.favorite section.isotope .listing .grid .sizer a .info,
-body div[role='main'] .wrapper main section.collection section.isotope .listing .grid .item a .info,
-body div[role='main'] .wrapper main section.exhibition section.isotope .listing .grid .item a .info,
-body div[role='main'] .wrapper main section.project section.isotope .listing .grid .item a .info,
-body div[role='main'] .wrapper main section.favorite section.isotope .listing .grid .item a .info {
+body div[role='main'] .wrapper main section.collection section.isotope .listing .grid .sizer .info,
+body div[role='main'] .wrapper main section.exhibition section.isotope .listing .grid .sizer .info,
+body div[role='main'] .wrapper main section.project section.isotope .listing .grid .sizer .info,
+body div[role='main'] .wrapper main section.favorite section.isotope .listing .grid .sizer .info,
+body div[role='main'] .wrapper main section.collection section.isotope .listing .grid .item .info,
+body div[role='main'] .wrapper main section.exhibition section.isotope .listing .grid .item .info,
+body div[role='main'] .wrapper main section.project section.isotope .listing .grid .item .info,
+body div[role='main'] .wrapper main section.favorite section.isotope .listing .grid .item .info {
   border-left: 1px solid #ccc;
   border-right: 1px solid #ccc;
-  border-bottom: 0;
-  padding-bottom: 0px;
+  padding-bottom: 20px;
 }
-body div[role='main'] .wrapper main section.collection section.isotope .listing .grid .sizer a .info .title,
-body div[role='main'] .wrapper main section.exhibition section.isotope .listing .grid .sizer a .info .title,
-body div[role='main'] .wrapper main section.project section.isotope .listing .grid .sizer a .info .title,
-body div[role='main'] .wrapper main section.favorite section.isotope .listing .grid .sizer a .info .title,
-body div[role='main'] .wrapper main section.collection section.isotope .listing .grid .item a .info .title,
-body div[role='main'] .wrapper main section.exhibition section.isotope .listing .grid .item a .info .title,
-body div[role='main'] .wrapper main section.project section.isotope .listing .grid .item a .info .title,
-body div[role='main'] .wrapper main section.favorite section.isotope .listing .grid .item a .info .title {
-  margin-bottom: 0;
+body div[role='main'] .wrapper main section.collection section.isotope .listing .grid .sizer .info .title,
+body div[role='main'] .wrapper main section.exhibition section.isotope .listing .grid .sizer .info .title,
+body div[role='main'] .wrapper main section.project section.isotope .listing .grid .sizer .info .title,
+body div[role='main'] .wrapper main section.favorite section.isotope .listing .grid .sizer .info .title,
+body div[role='main'] .wrapper main section.collection section.isotope .listing .grid .item .info .title,
+body div[role='main'] .wrapper main section.exhibition section.isotope .listing .grid .item .info .title,
+body div[role='main'] .wrapper main section.project section.isotope .listing .grid .item .info .title,
+body div[role='main'] .wrapper main section.favorite section.isotope .listing .grid .item .info .title {
+  margin-bottom: 10px;
+}
+body div[role='main'] .wrapper main section.collection section.isotope .listing .grid .sizer .info .source,
+body div[role='main'] .wrapper main section.exhibition section.isotope .listing .grid .sizer .info .source,
+body div[role='main'] .wrapper main section.project section.isotope .listing .grid .sizer .info .source,
+body div[role='main'] .wrapper main section.favorite section.isotope .listing .grid .sizer .info .source,
+body div[role='main'] .wrapper main section.collection section.isotope .listing .grid .item .info .source,
+body div[role='main'] .wrapper main section.exhibition section.isotope .listing .grid .item .info .source,
+body div[role='main'] .wrapper main section.project section.isotope .listing .grid .item .info .source,
+body div[role='main'] .wrapper main section.favorite section.isotope .listing .grid .item .info .source {
+  color: #999;
+  font-style: italic;
+  position: relative;
+  bottom: -3px;
+}
+body div[role='main'] .wrapper main section.collection section.isotope .listing .grid .sizer .info .provider,
+body div[role='main'] .wrapper main section.exhibition section.isotope .listing .grid .sizer .info .provider,
+body div[role='main'] .wrapper main section.project section.isotope .listing .grid .sizer .info .provider,
+body div[role='main'] .wrapper main section.favorite section.isotope .listing .grid .sizer .info .provider,
+body div[role='main'] .wrapper main section.collection section.isotope .listing .grid .item .info .provider,
+body div[role='main'] .wrapper main section.exhibition section.isotope .listing .grid .item .info .provider,
+body div[role='main'] .wrapper main section.project section.isotope .listing .grid .item .info .provider,
+body div[role='main'] .wrapper main section.favorite section.isotope .listing .grid .item .info .provider {
+  margin-bottom: 0px;
+  display: inline-block;
 }
 body div[role='main'] .wrapper main section.collection section.isotope .listing .grid .sizer .action-group,
 body div[role='main'] .wrapper main section.exhibition section.isotope .listing .grid .sizer .action-group,
@@ -3323,8 +3715,7 @@ body div[role='main'] .wrapper main section.favorite section.isotope .listing .g
   border-left: 1px solid #ccc;
   border-right: 1px solid #ccc;
   border-bottom: 1px solid #ccc;
-  position: relative;
-  padding: 10px 30px 30px 30px;
+  padding: 0 15px 15px 0;
 }
 body div[role='main'] .wrapper main section.collection section.isotope .listing .grid .sizer .action-group:before,
 body div[role='main'] .wrapper main section.exhibition section.isotope .listing .grid .sizer .action-group:before,
@@ -3364,22 +3755,6 @@ body div[role='main'] .wrapper main section.exhibition section.isotope .listing 
 body div[role='main'] .wrapper main section.project section.isotope .listing .grid .item .action-group .wrap,
 body div[role='main'] .wrapper main section.favorite section.isotope .listing .grid .item .action-group .wrap {
   position: relative;
-}
-body div[role='main'] .wrapper main section.collection section.isotope .listing .grid .sizer .action-group .wrap::before,
-body div[role='main'] .wrapper main section.exhibition section.isotope .listing .grid .sizer .action-group .wrap::before,
-body div[role='main'] .wrapper main section.project section.isotope .listing .grid .sizer .action-group .wrap::before,
-body div[role='main'] .wrapper main section.favorite section.isotope .listing .grid .sizer .action-group .wrap::before,
-body div[role='main'] .wrapper main section.collection section.isotope .listing .grid .item .action-group .wrap::before,
-body div[role='main'] .wrapper main section.exhibition section.isotope .listing .grid .item .action-group .wrap::before,
-body div[role='main'] .wrapper main section.project section.isotope .listing .grid .item .action-group .wrap::before,
-body div[role='main'] .wrapper main section.favorite section.isotope .listing .grid .item .action-group .wrap::before {
-  content: '';
-  width: 100%;
-  height: 1px;
-  background-color: #ccc;
-  position: absolute;
-  top: 14px;
-  left: 0;
 }
 body div[role='main'] .wrapper main section.collection section.isotope .listing .grid .sizer .action-group .wrap .links,
 body div[role='main'] .wrapper main section.exhibition section.isotope .listing .grid .sizer .action-group .wrap .links,
@@ -3422,7 +3797,6 @@ body div[role='main'] .wrapper main section.favorite section.isotope .listing .g
   position: relative;
   float: right;
   text-align: right;
-  background-color: white;
 }
 body div[role='main'] .wrapper main section.collection section.isotope .listing .grid .sizer .action-group .wrap ul li,
 body div[role='main'] .wrapper main section.exhibition section.isotope .listing .grid .sizer .action-group .wrap ul li,
@@ -3434,7 +3808,8 @@ body div[role='main'] .wrapper main section.project section.isotope .listing .gr
 body div[role='main'] .wrapper main section.favorite section.isotope .listing .grid .item .action-group .wrap ul li {
   list-style: none;
   display: inline-block;
-  margin-left: 10px;
+  float: left;
+  margin-left: -1px;
 }
 body div[role='main'] .wrapper main section.collection section.isotope .listing .grid .sizer .action-group .wrap ul li a,
 body div[role='main'] .wrapper main section.exhibition section.isotope .listing .grid .sizer .action-group .wrap ul li a,
@@ -3445,12 +3820,16 @@ body div[role='main'] .wrapper main section.exhibition section.isotope .listing 
 body div[role='main'] .wrapper main section.project section.isotope .listing .grid .item .action-group .wrap ul li a,
 body div[role='main'] .wrapper main section.favorite section.isotope .listing .grid .item .action-group .wrap ul li a {
   text-decoration: none;
-  font-size: 1.5rem;
-  color: #a4a4a4  !important;
+  font-size: 1.8rem;
+  color: #a4a4a4;
   -webkit-transition: color 0.3s;
   -o-transition: color 0.3s;
   transition: color 0.3s;
-  padding: 0 !important;
+  background-color: white;
+  display: block;
+  height: 32px;
+  padding: 6px 10px 0 10px;
+  border: 1px solid #ccc;
 }
 body div[role='main'] .wrapper main section.collection section.isotope .listing .grid .sizer .action-group .wrap ul li a:hover,
 body div[role='main'] .wrapper main section.exhibition section.isotope .listing .grid .sizer .action-group .wrap ul li a:hover,
@@ -3460,7 +3839,7 @@ body div[role='main'] .wrapper main section.collection section.isotope .listing 
 body div[role='main'] .wrapper main section.exhibition section.isotope .listing .grid .item .action-group .wrap ul li a:hover,
 body div[role='main'] .wrapper main section.project section.isotope .listing .grid .item .action-group .wrap ul li a:hover,
 body div[role='main'] .wrapper main section.favorite section.isotope .listing .grid .item .action-group .wrap ul li a:hover {
-  color: #444;
+  color: #4f7979;
 }
 body div[role='main'] .wrapper main section.collection section.isotope .listing .grid .sizer .action-group .wrap ul li a:hover.fa-heart,
 body div[role='main'] .wrapper main section.exhibition section.isotope .listing .grid .sizer .action-group .wrap ul li a:hover.fa-heart,
@@ -3470,116 +3849,95 @@ body div[role='main'] .wrapper main section.collection section.isotope .listing 
 body div[role='main'] .wrapper main section.exhibition section.isotope .listing .grid .item .action-group .wrap ul li a:hover.fa-heart,
 body div[role='main'] .wrapper main section.project section.isotope .listing .grid .item .action-group .wrap ul li a:hover.fa-heart,
 body div[role='main'] .wrapper main section.favorite section.isotope .listing .grid .item .action-group .wrap ul li a:hover.fa-heart {
-  color: #e46667  !important;
+  color: #e46667 !important;
 }
-body div[role='main'] .wrapper main section.collection .list-head {
-  margin-bottom: 0px;
+body div[role='main'] .wrapper main section.collection section.isotope .listing .grid .sizer .action-group .wrap ul li a:hover.fa-star,
+body div[role='main'] .wrapper main section.exhibition section.isotope .listing .grid .sizer .action-group .wrap ul li a:hover.fa-star,
+body div[role='main'] .wrapper main section.project section.isotope .listing .grid .sizer .action-group .wrap ul li a:hover.fa-star,
+body div[role='main'] .wrapper main section.favorite section.isotope .listing .grid .sizer .action-group .wrap ul li a:hover.fa-star,
+body div[role='main'] .wrapper main section.collection section.isotope .listing .grid .item .action-group .wrap ul li a:hover.fa-star,
+body div[role='main'] .wrapper main section.exhibition section.isotope .listing .grid .item .action-group .wrap ul li a:hover.fa-star,
+body div[role='main'] .wrapper main section.project section.isotope .listing .grid .item .action-group .wrap ul li a:hover.fa-star,
+body div[role='main'] .wrapper main section.favorite section.isotope .listing .grid .item .action-group .wrap ul li a:hover.fa-star {
+  color: #ff9806 !important;
 }
-body div[role='main'] .wrapper main section.collection section.isotope .listing {
-  background-color: white;
-  border: 0;
+body div[role='main'] .wrapper main section.collection section.isotope .listing .grid .sizer .action-group .wrap ul li:first-child a,
+body div[role='main'] .wrapper main section.exhibition section.isotope .listing .grid .sizer .action-group .wrap ul li:first-child a,
+body div[role='main'] .wrapper main section.project section.isotope .listing .grid .sizer .action-group .wrap ul li:first-child a,
+body div[role='main'] .wrapper main section.favorite section.isotope .listing .grid .sizer .action-group .wrap ul li:first-child a,
+body div[role='main'] .wrapper main section.collection section.isotope .listing .grid .item .action-group .wrap ul li:first-child a,
+body div[role='main'] .wrapper main section.exhibition section.isotope .listing .grid .item .action-group .wrap ul li:first-child a,
+body div[role='main'] .wrapper main section.project section.isotope .listing .grid .item .action-group .wrap ul li:first-child a,
+body div[role='main'] .wrapper main section.favorite section.isotope .listing .grid .item .action-group .wrap ul li:first-child a {
+  border-top-left-radius: 20px;
+  border-bottom-left-radius: 20px;
+  padding-left: 15px;
 }
-body div[role='main'] .wrapper main section.collection section.isotope .listing .grid .sizer a .info,
-body div[role='main'] .wrapper main section.collection section.isotope .listing .grid .item a .info {
-  border-left: 1px solid #ccc;
-  border-right: 1px solid #ccc;
-  border-bottom: 0;
-  padding-bottom: 0px;
-}
-body div[role='main'] .wrapper main section.collection section.isotope .listing .grid .sizer a .info .title,
-body div[role='main'] .wrapper main section.collection section.isotope .listing .grid .item a .info .title {
-  margin-bottom: 0;
-}
-body div[role='main'] .wrapper main section.collection section.isotope .listing .grid .sizer .action-group,
-body div[role='main'] .wrapper main section.collection section.isotope .listing .grid .item .action-group {
-  border-left: 1px solid #ccc;
-  border-right: 1px solid #ccc;
-  border-bottom: 1px solid #ccc;
-  position: relative;
-  padding: 10px 30px 30px 30px;
-}
-body div[role='main'] .wrapper main section.collection section.isotope .listing .grid .sizer .action-group:before,
-body div[role='main'] .wrapper main section.collection section.isotope .listing .grid .item .action-group:before,
-body div[role='main'] .wrapper main section.collection section.isotope .listing .grid .sizer .action-group:after,
-body div[role='main'] .wrapper main section.collection section.isotope .listing .grid .item .action-group:after {
-  content: " ";
-  display: table;
-}
-body div[role='main'] .wrapper main section.collection section.isotope .listing .grid .sizer .action-group:after,
-body div[role='main'] .wrapper main section.collection section.isotope .listing .grid .item .action-group:after {
-  clear: both;
-}
-body div[role='main'] .wrapper main section.collection section.isotope .listing .grid .sizer .action-group .wrap,
-body div[role='main'] .wrapper main section.collection section.isotope .listing .grid .item .action-group .wrap {
-  position: relative;
-}
-body div[role='main'] .wrapper main section.collection section.isotope .listing .grid .sizer .action-group .wrap::before,
-body div[role='main'] .wrapper main section.collection section.isotope .listing .grid .item .action-group .wrap::before {
-  content: '';
-  width: 100%;
-  height: 1px;
-  background-color: #ccc;
-  position: absolute;
-  top: 14px;
-  left: 0;
-}
-body div[role='main'] .wrapper main section.collection section.isotope .listing .grid .sizer .action-group .wrap .links,
-body div[role='main'] .wrapper main section.collection section.isotope .listing .grid .item .action-group .wrap .links {
-  color: #4f7979;
-  float: left;
-  text-align: left;
-  padding: 0 10px 0 0;
-  max-width: 50%;
-  position: relative;
-  z-index: 0;
-  background: #fff;
-}
-body div[role='main'] .wrapper main section.collection section.isotope .listing .grid .sizer .action-group .wrap .links:hover,
-body div[role='main'] .wrapper main section.collection section.isotope .listing .grid .item .action-group .wrap .links:hover {
-  color: #273b3b;
-}
-body div[role='main'] .wrapper main section.collection section.isotope .listing .grid .sizer .action-group .wrap ul,
-body div[role='main'] .wrapper main section.collection section.isotope .listing .grid .item .action-group .wrap ul {
-  margin: 0;
-  padding: 0;
-  z-index: 0;
-  position: relative;
-  float: right;
-  text-align: right;
-  background-color: white;
-}
-body div[role='main'] .wrapper main section.collection section.isotope .listing .grid .sizer .action-group .wrap ul li,
-body div[role='main'] .wrapper main section.collection section.isotope .listing .grid .item .action-group .wrap ul li {
-  list-style: none;
-  display: inline-block;
-  margin-left: 10px;
-}
-body div[role='main'] .wrapper main section.collection section.isotope .listing .grid .sizer .action-group .wrap ul li a,
-body div[role='main'] .wrapper main section.collection section.isotope .listing .grid .item .action-group .wrap ul li a {
-  text-decoration: none;
-  font-size: 1.5rem;
-  color: #a4a4a4  !important;
-  -webkit-transition: color 0.3s;
-  -o-transition: color 0.3s;
-  transition: color 0.3s;
-  padding: 0 !important;
-}
-body div[role='main'] .wrapper main section.collection section.isotope .listing .grid .sizer .action-group .wrap ul li a:hover,
-body div[role='main'] .wrapper main section.collection section.isotope .listing .grid .item .action-group .wrap ul li a:hover {
-  color: #444;
-}
-body div[role='main'] .wrapper main section.collection section.isotope .listing .grid .sizer .action-group .wrap ul li a:hover.fa-heart,
-body div[role='main'] .wrapper main section.collection section.isotope .listing .grid .item .action-group .wrap ul li a:hover.fa-heart {
-  color: #e46667  !important;
+body div[role='main'] .wrapper main section.collection section.isotope .listing .grid .sizer .action-group .wrap ul li:last-child a,
+body div[role='main'] .wrapper main section.exhibition section.isotope .listing .grid .sizer .action-group .wrap ul li:last-child a,
+body div[role='main'] .wrapper main section.project section.isotope .listing .grid .sizer .action-group .wrap ul li:last-child a,
+body div[role='main'] .wrapper main section.favorite section.isotope .listing .grid .sizer .action-group .wrap ul li:last-child a,
+body div[role='main'] .wrapper main section.collection section.isotope .listing .grid .item .action-group .wrap ul li:last-child a,
+body div[role='main'] .wrapper main section.exhibition section.isotope .listing .grid .item .action-group .wrap ul li:last-child a,
+body div[role='main'] .wrapper main section.project section.isotope .listing .grid .item .action-group .wrap ul li:last-child a,
+body div[role='main'] .wrapper main section.favorite section.isotope .listing .grid .item .action-group .wrap ul li:last-child a {
+  border-top-right-radius: 20px;
+  border-bottom-right-radius: 20px;
+  padding-right: 15px;
 }
 body div[role='main'] .wrapper main section.favorite {
   padding-top: 0;
 }
 body div[role='main'] .wrapper main section.favorite .list-head {
-  margin-bottom: 0px;
+  margin-bottom: 10px;
+}
+body div[role='main'] .wrapper main section.collection-detail .list-head {
+  margin-bottom: 10px;
+}
+body div[role='main'] .wrapper main section.project .uploadimage {
+  color: #4f7979;
+  text-decoration: none;
+  padding-left: 10px;
+  margin-bottom: 20px;
+  float: right;
+}
+body div[role='main'] .wrapper main section.project .uploadimage.exhibition {
+  padding-left: 0;
+  padding-right: 10px;
+}
+body div[role='main'] .wrapper main section.project .uploadimage .plus {
+  margin-right: 10px;
+  display: inline-block;
+  width: 10px;
+  height: 1px;
+  position: relative;
+  top: -5px;
+  background-color: #4f7979;
+}
+body div[role='main'] .wrapper main section.project .uploadimage .plus::after {
+  content: '';
+  display: block;
+  background-color: inherit;
+  width: inherit;
+  height: inherit;
+  transform: rotate(90deg);
+  -ms-transform: rotate(90deg);
+  -webkit-transform: rotate(90deg);
+}
+body div[role='main'] .wrapper main section.project .uploadimage .text {
+  -webkit-transition: all 0.3s;
+  -o-transition: all 0.3s;
+  transition: all 0.3s;
+}
+body div[role='main'] .wrapper main section.project .uploadimage:hover {
+  text-decoration: none;
+}
+body div[role='main'] .wrapper main section.project .uploadimage:hover .text {
+  box-shadow: inset 0 -1px 0 0;
 }
 body div[role='main'] .wrapper main section.project .list-head {
   margin-bottom: 30px;
+  clear: both;
 }
 body div[role='main'] .wrapper main section.project section.message {
   padding-bottom: 10px;
@@ -3587,7 +3945,6 @@ body div[role='main'] .wrapper main section.project section.message {
 body div[role='main'] .wrapper main section.project .isotope .listing .grid .sizer .wrap .info,
 body div[role='main'] .wrapper main section.project .isotope .listing .grid .item .wrap .info {
   padding: 20px;
-  border-bottom: 1px solid #ccc;
 }
 body div[role='main'] .wrapper main section.project .isotope .listing .grid .sizer .wrap .info .text,
 body div[role='main'] .wrapper main section.project .isotope .listing .grid .item .wrap .info .text {
@@ -3612,7 +3969,7 @@ body div[role='main'] .wrapper main section.search .list-head::before {
   height: 1px;
   background-color: #ccc;
   position: absolute;
-  top: 13px;
+  top: 15px;
   left: 0;
   z-index: -1;
 }
@@ -3826,7 +4183,7 @@ body div[role='main'] .wrapper main section.dashboard section.notification {
   display: table;
 }
 body div[role='main'] .wrapper main section.dashboard section.notification .list-head {
-  margin-bottom: 20px;
+  margin-bottom: 40px;
   position: relative;
   text-align: right;
 }
@@ -3836,18 +4193,57 @@ body div[role='main'] .wrapper main section.dashboard section.notification .list
   height: 1px;
   background-color: #ccc;
   position: absolute;
-  top: 13px;
+  top: 15px;
   left: 0;
   z-index: -1;
+}
+body div[role='main'] .wrapper main section.dashboard section.notification .list-head .typeselect {
+  margin: 0 0px 0 0;
+  padding: 0;
+  float: right;
+}
+body div[role='main'] .wrapper main section.dashboard section.notification .list-head .typeselect li {
+  list-style: none;
+  float: left;
+}
+body div[role='main'] .wrapper main section.dashboard section.notification .list-head .typeselect li a {
+  height: 32px;
+  border: 1px solid #ccc;
+  background: #fff;
+  padding: 2px 15px 0 15px;
+  display: block;
+}
+body div[role='main'] .wrapper main section.dashboard section.notification .list-head .typeselect li a:hover {
+  text-decoration: none;
+  color: #4f7979;
+}
+body div[role='main'] .wrapper main section.dashboard section.notification .list-head .typeselect li.active a {
+  background: #4f7979;
+  color: #fff;
+  border-color: #4f7979;
+}
+body div[role='main'] .wrapper main section.dashboard section.notification .list-head .typeselect li:first-child a {
+  border-top-left-radius: 20px;
+  border-bottom-left-radius: 20px;
+  padding-left: 20px;
+}
+body div[role='main'] .wrapper main section.dashboard section.notification .list-head .typeselect li:last-child a {
+  border-top-right-radius: 20px;
+  border-bottom-right-radius: 20px;
+  padding-right: 20px;
+  border-left: 0px;
 }
 body div[role='main'] .wrapper main section.dashboard section.notification .list-head .sort {
   display: inline-block;
   position: relative;
-  padding: 0 10px;
   background-color: white;
   margin-right: 0px;
   vertical-align: middle;
   color: #959595;
+  border: 1px solid #ccc;
+  border-radius: 20px;
+  height: 32px;
+  padding: 2px 17px 0 12px;
 }
 body div[role='main'] .wrapper main section.dashboard section.notification .list-head .sort.open .arrow {
   background-position: 0 -7px;
@@ -4015,7 +4411,6 @@ body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .scroll 
 }
 body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .box,
 body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .add {
-  width: 350px;
   height: 383px !important;
   display: inline-block;
   margin-right: 20px;
@@ -4025,7 +4420,6 @@ body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .add {
 }
 body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .box.fill,
 body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .add.fill {
-  width: 750px;
   padding: 20px 20px 20px 20px;
 }
 body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .box.fill:before,
@@ -4042,19 +4436,19 @@ body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .add.fil
 body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .box.fill .left,
 body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .add.fill .left {
   float: left;
-  width: 35%;
+  width: 200px;
   padding: 0 20px 0 0;
 }
 body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .box.fill .right,
 body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .add.fill .right {
   float: left;
-  width: 50%;
+  width: 400px;
   padding: 0 20px 0 0;
 }
 body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .box.fill .video,
 body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .add.fill .video {
   float: left;
-  width: 15%;
+  width: 200px;
   height: 280px;
   border: 1px solid #c6c6c6;
   padding: 10px;
@@ -4075,10 +4469,18 @@ body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .add.fil
   height: 100%;
   display: block;
   text-align: center;
+  font-size: 1.3rem;
+  line-height: 1.9rem;
+  color: #999;
+  padding-top: 103px;
 }
 body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .box.fill .video .addvideo img,
 body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .add.fill .video .addvideo img {
   margin-top: 113px;
+}
+body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .box.fill .video .addvideo .fa,
+body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .add.fill .video .addvideo .fa {
+  font-size: 2rem;
 }
 body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .box.fill .video .addvideo:hover,
 body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .add.fill .video .addvideo:hover {
@@ -4108,23 +4510,6 @@ body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .add.fil
   text-align: center;
   position: relative;
   background: #fff;
-}
-body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .box.fill.videoadded .left,
-body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .add.fill.videoadded .left {
-  float: left;
-  width: 35%;
-  padding: 0 20px 0 0;
-}
-body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .box.fill.videoadded .right,
-body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .add.fill.videoadded .right {
-  float: left;
-  width: 40%;
-  padding: 0 20px 0 0;
-}
-body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .box.fill.videoadded .video,
-body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .add.fill.videoadded .video {
-  float: left;
-  width: 25%;
 }
 body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .box.fill .imgwrap,
 body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .add.fill .imgwrap {
@@ -4184,14 +4569,40 @@ body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .box.fil
 body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .add.fill .boxaction ul li {
   list-style: none;
   display: inline-block;
-  margin-left: 10px;
+  margin-left: -1px;
+  float: left;
 }
 body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .box.fill .boxaction ul li a,
 body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .add.fill .boxaction ul li a {
   color: #a4a4a4;
+  background: #fff;
+  height: 32px;
+  display: block;
+  padding: 0 10px 0 10px;
+  font-size: 1.8rem;
+  text-align: center;
+  border: 1px solid #ccc;
+  line-height: 2.8rem;
+}
+body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .box.fill .boxaction ul li a:hover,
+body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .add.fill .boxaction ul li a:hover {
+  color: #4f7979;
+}
+body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .box.fill .boxaction ul li:first-child a,
+body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .add.fill .boxaction ul li:first-child a {
+  border-top-left-radius: 20px;
+  border-bottom-left-radius: 20px;
+  padding-left: 15px;
+}
+body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .box.fill .boxaction ul li:last-child a,
+body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .add.fill .boxaction ul li:last-child a {
+  border-top-right-radius: 20px;
+  border-bottom-right-radius: 20px;
+  padding-right: 15px;
 }
 body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .boxinputs {
   float: left;
+  width: 100%;
 }
 body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .add {
   background: none;
@@ -4210,7 +4621,7 @@ body div[role='main'] .wrapper main section.exhibition .editorbox .wrap h1,
 body div[role='main'] .wrapper main section.exhibition .editorbox .wrap h2,
 body div[role='main'] .wrapper main section.exhibition .editorbox .wrap h3 {
   font-size: 2.4rem;
-  font-family: "Proxima Nova", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-family: 'Roboto', "Helvetica Neue", Helvetica, Arial, sans-serif;
   color: #6c6c6c;
   margin: 0 0 10px 0;
   padding: 0;
@@ -4222,7 +4633,7 @@ body div[role='main'] .wrapper main section.exhibition .editorbox .wrap p {
 body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .editortext {
   width: 100%;
   font-size: 2rem;
-  font-family: "Proxima Nova", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-family: 'Roboto', "Helvetica Neue", Helvetica, Arial, sans-serif;
   color: #888;
   border: 1px solid #f4f4f4;
   padding: 5px 0 5px 10px;
@@ -4240,7 +4651,7 @@ body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .editort
 }
 body div[role='main'] .wrapper main section.exhibition .editorbox .wrap .editortextarea {
   width: 100%;
-  height: 200px;
+  height: 250px;
   margin-top: 10px;
   border: 1px solid #f4f4f4;
   padding: 5px 0 0px 10px;
@@ -4273,38 +4684,40 @@ body div[role='main'] .wrapper main section.exhibition .assets .actions::before 
   left: 0;
   right: 0;
   height: 1px;
-  background: #dfdfdf;
+  background: #ccc;
   z-index: -1;
   content: "";
   width: 100%;
-  top: 22px;
+  top: 19px;
 }
 body div[role='main'] .wrapper main section.exhibition .assets .actions .collectionlist {
-  border-radius: 0;
-  padding: 0 10px;
+  border-radius: 20px;
+  padding: 0;
   width: 100%;
-  border: 1px solid #d2d2d2;
+  border: 1px solid #ccc;
   outline: 0;
   width: 220px;
-  height: 45px;
+  height: 38px;
   float: left;
+  margin-right: 15px;
+  padding-left: 10px;
 }
 body div[role='main'] .wrapper main section.exhibition .assets .actions .collectionsearch {
   position: relative;
   float: left;
-  border-left: 10px solid #fff;
-  border-right: 10px solid #fff;
+  padding: 0;
 }
 body div[role='main'] .wrapper main section.exhibition .assets .actions .collectionsearch input {
-  border: 1px solid #d2d2d2;
-  height: 45px;
+  border: 1px solid #ccc;
+  height: 38px;
+  border-radius: 20px;
   width: 220px;
   padding: 0 40px 0 20px;
 }
 body div[role='main'] .wrapper main section.exhibition .assets .actions .collectionsearch .icon {
   position: absolute;
   right: 15px;
-  top: 15px;
+  top: 12px;
 }
 body div[role='main'] .wrapper main section.exhibition .assets .actions .notification {
   float: right;
@@ -4313,7 +4726,7 @@ body div[role='main'] .wrapper main section.exhibition .assets .actions .notific
   color: #959595;
   background: #fff;
   padding-left: 10px;
-  margin-top: 9px;
+  margin-top: 6px;
 }
 body div[role='main'] .wrapper main section.exhibition .assets .assetlisting {
   width: 100%;
@@ -4426,7 +4839,7 @@ body div[role='main'] .wrapper .search .searchbar::before {
   right: 30px;
   background: #dfdfdf;
   height: 1px;
-  top: 30px;
+  top: 29px;
 }
 body div[role='main'] .wrapper .search .searchbar .container-fluid {
   position: relative;
@@ -4434,8 +4847,7 @@ body div[role='main'] .wrapper .search .searchbar .container-fluid {
 body div[role='main'] .wrapper .search .searchbar .wrap {
   margin: 0 auto;
   display: table;
-  background-color: white;
-  padding: 0 15px;
+  padding: 0;
 }
 body div[role='main'] .wrapper .search .searchbar .wrap:before,
 body div[role='main'] .wrapper .search .searchbar .wrap:after {
@@ -4446,11 +4858,18 @@ body div[role='main'] .wrapper .search .searchbar .wrap:after {
   clear: both;
 }
 body div[role='main'] .wrapper .search .searchbar .settings {
-  margin: 6px 15px 0 0;
-  float: left;
+  margin: 0px 30px 0 0;
+  float: right;
   position: relative;
+  background-color: white;
 }
 body div[role='main'] .wrapper .search .searchbar .settings a {
+  display: block;
+  height: 38px;
+  border: 1px solid #ccc;
+  padding: 4px 0px 0 0px;
+  border-radius: 20px;
+  width: 38px;
   opacity: 0.7;
   filter: alpha(opacity=70);
   -webkit-transition: all 0.3s;
@@ -4471,9 +4890,6 @@ body div[role='main'] .wrapper .search .searchbar .settings.active .searchsettin
 body div[role='main'] .wrapper .search .searchbar a.close {
   opacity: 1;
   filter: alpha(opacity=100);
-  position: absolute;
-  right: 30px;
-  top: 12px;
   display: inline-block;
   background-color: white;
   color: #ccc;
@@ -4482,19 +4898,88 @@ body div[role='main'] .wrapper .search .searchbar a.close {
   -webkit-transition: all 0.3s;
   -o-transition: all 0.3s;
   transition: all 0.3s;
-  padding-left: 15px;
+  height: 38px;
+  border-radius: 20px;
+  display: block;
   background: #fff;
+  border: 1px solid #ccc;
+  width: 38px;
+  padding-top: 10px;
+}
+body div[role='main'] .wrapper .search .searchbar .view {
+  margin: 0 30px 0 0px;
+  padding: 0;
+  float: right;
+  right: 100px;
+  top: 0px;
+}
+body div[role='main'] .wrapper .search .searchbar .view li {
+  list-style: none;
+  float: left;
+  -webkit-transition: all 0.3s;
+  -o-transition: all 0.3s;
+  transition: all 0.3s;
+}
+body div[role='main'] .wrapper .search .searchbar .view li a {
+  display: block;
+  height: 38px;
+  padding: 4px 10px 0px 10px;
+  background: #fff;
+  border: 1px solid #ccc;
+  text-align: center;
+}
+body div[role='main'] .wrapper .search .searchbar .view li a.listview .icon {
+  display: inline-block;
+  width: 15px;
+  margin-top: 5px;
+  height: 19px;
+  background: url('../img/ui/ic-list.png');
+}
+body div[role='main'] .wrapper .search .searchbar .view li a.gridview .icon {
+  display: inline-block;
+  width: 15px;
+  height: 15px;
+  margin-top: 6px;
+  background: url('../img/ui/ic-grid.png');
+}
+body div[role='main'] .wrapper .search .searchbar .view li a:hover.listview .icon {
+  background: url('../img/ui/ic-list-hover.png');
+}
+body div[role='main'] .wrapper .search .searchbar .view li a:hover.gridview .icon {
+  background: url('../img/ui/ic-grid-hover.png');
+}
+body div[role='main'] .wrapper .search .searchbar .view li.active a.listview .icon {
+  background: url('../img/ui/ic-list-hover.png');
+}
+body div[role='main'] .wrapper .search .searchbar .view li.active a.gridview .icon {
+  background: url('../img/ui/ic-grid-hover.png');
+}
+body div[role='main'] .wrapper .search .searchbar .view li:nth-child( n+2 ) {
+  margin-left: -1px;
+}
+body div[role='main'] .wrapper .search .searchbar .view li:first-child a {
+  border-bottom-left-radius: 20px;
+  border-top-left-radius: 20px;
+  padding-left: 17px;
+}
+body div[role='main'] .wrapper .search .searchbar .view li:last-child a {
+  border-bottom-right-radius: 20px;
+  border-top-right-radius: 20px;
+  padding-right: 17px;
 }
 body div[role='main'] .wrapper .search .searchbar .searchbox {
   float: left;
   position: relative;
   display: inline-block;
+  margin-left: -1px;
 }
 body div[role='main'] .wrapper .search .searchbar .searchbox .searchinput {
-  width: 300px;
+  width: 350px;
   height: 38px;
-  padding: 7px 0px 6px 35px;
+  padding: 3px 0px 6px 35px;
   border: 1px solid #ccc;
+  border-bottom-right-radius: 20px;
+  border-top-right-radius: 20px;
   -webkit-transition: all 0.3s;
   -o-transition: all 0.3s;
   transition: all 0.3s;
@@ -4507,12 +4992,53 @@ body div[role='main'] .wrapper .search .searchbar .searchbox .searchinput:focus 
 body div[role='main'] .wrapper .search .searchbar .searchbox .icon {
   position: absolute;
   left: 13px;
-  top: 11px;
+  top: 10px;
+}
+body div[role='main'] .wrapper .search .searchbar .typeselect {
+  margin: 0 15px 0 15px;
+  padding: 0;
+  float: left;
+}
+body div[role='main'] .wrapper .search .searchbar .typeselect li {
+  list-style: none;
+  float: left;
+}
+body div[role='main'] .wrapper .search .searchbar .typeselect li a {
+  height: 38px;
+  border: 1px solid #ccc;
+  padding: 4px 15px 0 15px;
+  display: block;
+  background: #fff;
+}
+body div[role='main'] .wrapper .search .searchbar .typeselect li a:hover {
+  text-decoration: none;
+  color: #4f7979;
+}
+body div[role='main'] .wrapper .search .searchbar .typeselect li.active a {
+  background: #4f7979;
+  color: #fff;
+  border-color: #4f7979;
+}
+body div[role='main'] .wrapper .search .searchbar .typeselect li:first-child a {
+  border-top-left-radius: 20px;
+  border-bottom-left-radius: 20px;
+  padding-left: 20px;
+}
+body div[role='main'] .wrapper .search .searchbar .typeselect li:last-child a {
+  border-top-right-radius: 20px;
+  border-bottom-right-radius: 20px;
+  padding-right: 20px;
+  border-left: 0px;
 }
 body div[role='main'] .wrapper .search .searchbar .provider {
   position: relative;
   float: left;
-  margin: 5px 15px 0;
+  margin: 0 0 0 15px;
+  border: 1px solid #ccc;
+  height: 38px;
+  border-radius: 20px;
+  padding: 3px 17px 0 17px;
+  background: #fff;
 }
 body div[role='main'] .wrapper .search .searchbar .provider .picker {
   float: left;
@@ -4561,40 +5087,6 @@ body div[role='main'] .wrapper .search .searchbar .provider .dropdown-menu li a 
 body div[role='main'] .wrapper .search .searchbar .provider .dropdown-menu li:hover a {
   background: transparent;
   color: black;
-}
-body div[role='main'] .wrapper .search .searchbar .view {
-  margin: 0 0 0 0px;
-  padding: 0;
-  float: left;
-}
-body div[role='main'] .wrapper .search .searchbar .view li {
-  list-style: none;
-  float: left;
-  border: 1px solid #fff;
-  opacity: 0.5;
-  filter: alpha(opacity=50);
-  -webkit-transition: all 0.3s;
-  -o-transition: all 0.3s;
-  transition: all 0.3s;
-}
-body div[role='main'] .wrapper .search .searchbar .view li a {
-  display: block;
-  width: 36px;
-  height: 36px;
-  padding-top: 5px;
-}
-body div[role='main'] .wrapper .search .searchbar .view li:hover {
-  opacity: 1;
-  filter: alpha(opacity=100);
-  border-color: #ccc;
-}
-body div[role='main'] .wrapper .search .searchbar .view li.active {
-  opacity: 1;
-  filter: alpha(opacity=100);
-  border-color: #ccc;
-}
-body div[role='main'] .wrapper .search .searchbar .view li:nth-child( n+2 ) {
-  margin-left: -1px;
 }
 body div[role='main'] .wrapper .search .searchbar.local .view {
   display: none;
@@ -4760,12 +5252,20 @@ body div[role='main'] .wrapper .search .gridlist .listing .grid .item .wrap .inf
   padding: 20px 30px 10px 30px;
 }
 body div[role='main'] .wrapper .search .gridlist .listing .grid .item .wrap .info .title {
-  margin-bottom: 0;
+  margin-bottom: 10px;
+}
+body div[role='main'] .wrapper .search .gridlist .listing .grid .item .wrap .info .source {
+  color: #999;
+  font-style: italic;
+  position: relative;
+  bottom: -3px;
+}
+body div[role='main'] .wrapper .search .gridlist .listing .grid .item .wrap .info .provider {
+  margin-bottom: 20px;
+  display: inline-block;
 }
 body div[role='main'] .wrapper .search .gridlist .listing .grid .item .wrap .action-group {
-  position: relative;
-  text-align: right;
-  padding: 0px 20px 20px 30px;
+  padding: 0 15px 15px 0;
 }
 body div[role='main'] .wrapper .search .gridlist .listing .grid .item .wrap .action-group:before,
 body div[role='main'] .wrapper .search .gridlist .listing .grid .item .wrap .action-group:after {
@@ -4775,50 +5275,63 @@ body div[role='main'] .wrapper .search .gridlist .listing .grid .item .wrap .act
 body div[role='main'] .wrapper .search .gridlist .listing .grid .item .wrap .action-group:after {
   clear: both;
 }
-body div[role='main'] .wrapper .search .gridlist .listing .grid .item .wrap .action-group::before {
-  content: '';
-  width: 100%;
-  height: 1px;
-  background-color: #ccc;
-  position: absolute;
-  top: 14px;
-  left: 0;
-  z-index: -1;
+body div[role='main'] .wrapper .search .gridlist .listing .grid .item .wrap .action-group .wrap ul {
+  margin: 0;
+  padding: 0;
 }
-body div[role='main'] .wrapper .search .gridlist .listing .grid .item .wrap .action-group a {
+body div[role='main'] .wrapper .search .gridlist .listing .grid .item .wrap .action-group .wrap ul:before,
+body div[role='main'] .wrapper .search .gridlist .listing .grid .item .wrap .action-group .wrap ul:after {
+  content: " ";
+  display: table;
+}
+body div[role='main'] .wrapper .search .gridlist .listing .grid .item .wrap .action-group .wrap ul:after {
+  clear: both;
+}
+body div[role='main'] .wrapper .search .gridlist .listing .grid .item .wrap .action-group .wrap ul li {
+  list-style: none;
+  float: left;
+}
+body div[role='main'] .wrapper .search .gridlist .listing .grid .item .wrap .action-group .wrap ul li a,
+body div[role='main'] .wrapper .search .gridlist .listing .grid .item .wrap .action-group .wrap ul li .inputcheck {
   background-color: white;
-  opacity: 1;
-  color: #dedede;
-  text-decoration: none;
-  font-size: 1.5rem;
-  padding: 5px 7px;
-  -webkit-transition: color 0.3s;
-  -o-transition: color 0.3s;
-  transition: color 0.3s;
-  display: inline-block;
+  color: #a4a4a4;
+  font-size: 1.8rem;
+  padding: 5px 10px;
+  border: 1px solid #ccc;
+  margin-left: -1px;
+  height: 32px;
 }
-body div[role='main'] .wrapper .search .gridlist .listing .grid .item .wrap .action-group a:first-child {
+body div[role='main'] .wrapper .search .gridlist .listing .grid .item .wrap .action-group .wrap ul li a:hover,
+body div[role='main'] .wrapper .search .gridlist .listing .grid .item .wrap .action-group .wrap ul li .inputcheck:hover {
+  color: #4f7979;
+  text-decoration: none;
+}
+body div[role='main'] .wrapper .search .gridlist .listing .grid .item .wrap .action-group .wrap ul li a:hover.fa-heart,
+body div[role='main'] .wrapper .search .gridlist .listing .grid .item .wrap .action-group .wrap ul li .inputcheck:hover.fa-heart {
+  color: #e46667 !important;
+}
+body div[role='main'] .wrapper .search .gridlist .listing .grid .item .wrap .action-group .wrap ul li a:hover.fa-star,
+body div[role='main'] .wrapper .search .gridlist .listing .grid .item .wrap .action-group .wrap ul li .inputcheck:hover.fa-star {
+  color: #ff9806 !important;
+}
+body div[role='main'] .wrapper .search .gridlist .listing .grid .item .wrap .action-group .wrap ul li .inputcheck {
+  line-height: 24px;
+  padding-top: 0;
+}
+body div[role='main'] .wrapper .search .gridlist .listing .grid .item .wrap .action-group .wrap ul li .inputcheck input {
+  cursor: pointer;
+}
+body div[role='main'] .wrapper .search .gridlist .listing .grid .item .wrap .action-group .wrap ul li:first-child a,
+body div[role='main'] .wrapper .search .gridlist .listing .grid .item .wrap .action-group .wrap ul li:first-child .inputcheck {
+  border-top-left-radius: 20px;
+  border-bottom-left-radius: 20px;
   padding-left: 15px;
 }
-body div[role='main'] .wrapper .search .gridlist .listing .grid .item .wrap .action-group a:hover {
-  color: #444;
-}
-body div[role='main'] .wrapper .search .gridlist .listing .grid .item .wrap .action-group a:hover.fa-heart {
-  color: #e46667;
-}
-body div[role='main'] .wrapper .search .gridlist .listing .grid .item .wrap .action-group a.links {
-  color: #4f7979;
-  float: left;
-  text-align: left;
-  padding: 0 10px 0 0;
-  max-width: 60%;
-  line-height: 1.4em;
-}
-body div[role='main'] .wrapper .search .gridlist .listing .grid .item .wrap .action-group a.links:hover {
-  color: #273b3b;
-}
-body div[role='main'] .wrapper .search .gridlist .listing .grid .item .wrap .action-group a.active.fa-heart {
-  color: #e46667;
+body div[role='main'] .wrapper .search .gridlist .listing .grid .item .wrap .action-group .wrap ul li:last-child a,
+body div[role='main'] .wrapper .search .gridlist .listing .grid .item .wrap .action-group .wrap ul li:last-child .inputcheck {
+  border-top-right-radius: 20px;
+  border-bottom-right-radius: 20px;
+  padding-right: 15px;
 }
 body div[role='main'] .wrapper .search .gridlist .listing .grid .item .wrap .rights {
   margin: 5px 0 0 10px;
@@ -5015,7 +5528,7 @@ body div[role='main'] .wrapper .itemview .header h3 {
   margin: 26px 0 0 0px;
   display: inline-block;
   padding: 0;
-  font-family: "Proxima Nova", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-family: 'Roboto', "Helvetica Neue", Helvetica, Arial, sans-serif;
   font-size: 1.5rem;
   color: #4f7979;
   z-index: 2;
@@ -5025,34 +5538,65 @@ body div[role='main'] .wrapper .itemview .header h3 {
 }
 body div[role='main'] .wrapper .itemview .header .actions {
   float: right;
-  margin: 22px 0 0 0;
+  margin: 18px 0 0 0;
   z-index: 2;
   position: relative;
   background: #fff;
-  padding: 0 0 0 15px;
-  font-size: 1.6rem;
+  padding: 0;
 }
-body div[role='main'] .wrapper .itemview .header .actions .collectbutton {
-  position: relative;
-  top: 2px;
-  color: #999;
-  margin-left: 15px;
+body div[role='main'] .wrapper .itemview .header .actions li {
+  list-style: none;
+  float: left;
+  margin-left: -1px;
 }
-body div[role='main'] .wrapper .itemview .header .actions .favorite {
+body div[role='main'] .wrapper .itemview .header .actions li a {
+  border: 1px solid #ccc;
+  height: 32px;
+  display: block;
+  float: right;
+  font-size: 1.8rem;
+  padding: 6px 15px 0 15px;
   color: #999;
+}
+body div[role='main'] .wrapper .itemview .header .actions li a:hover {
+  text-decoration: none;
+  color: #4f7979;
+}
+body div[role='main'] .wrapper .itemview .header .actions li:first-child a {
+  border-top-left-radius: 20px;
+  border-bottom-left-radius: 20px;
+  padding-left: 17px;
+}
+body div[role='main'] .wrapper .itemview .header .actions li:last-child a {
+  border-top-right-radius: 20px;
+  border-bottom-right-radius: 20px;
+  padding-right: 17px;
 }
 body div[role='main'] .wrapper .itemview .header .actions .favorite:hover {
   text-decoration: none;
   color: #e46667;
 }
-body div[role='main'] .wrapper .itemview .header .actions .closemedia {
-  margin-left: 15px;
-}
-body div[role='main'] .wrapper .itemview .header .actions .medialink {
-  color: #999;
+body div[role='main'] .wrapper .itemview .header .close {
+  float: right;
+  margin: 18px 0 0 15px;
   position: relative;
-  top: 2px;
-  margin-left: 15px;
+  z-index: 2;
+  padding: 0;
+  opacity: 1;
+  filter: alpha(opacity=100);
+}
+body div[role='main'] .wrapper .itemview .header .close li {
+  list-style: none;
+}
+body div[role='main'] .wrapper .itemview .header .close li a {
+  display: block;
+  width: 32px;
+  background: #fff;
+  height: 32px;
+  border-radius: 20px;
+  padding-top: 1px;
+  border: 1px solid #ccc;
+  text-align: center;
 }
 body div[role='main'] .wrapper .itemview .header::before {
   height: 1px;
@@ -5099,7 +5643,7 @@ body div[role='main'] .wrapper .itemview .mediacontent .container-fluid .wrap .m
 body div[role='main'] .wrapper .itemview .mediacontent .container-fluid .wrap .metadata .infowrap h1 {
   font-size: 1.8rem;
   color: #4f7979;
-  font-family: "Proxima Nova", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-family: 'Roboto', "Helvetica Neue", Helvetica, Arial, sans-serif;
   margin: 0 0 0px 0;
 }
 body div[role='main'] .wrapper .itemview .mediacontent .container-fluid .wrap .metadata .infowrap .tab-content {
@@ -5127,7 +5671,7 @@ body div[role='main'] .wrapper .itemview .mediacontent .container-fluid .wrap .m
 }
 body div[role='main'] .wrapper .itemview .mediacontent .container-fluid .wrap .metadata .infowrap .top .infocollect {
   float: right;
-  padding: 6px 15px 5px 15px;
+  padding: 4px 15px 5px 15px;
   border: 1px solid #c1c1c1;
   color: #c1c1c1;
   font-size: 12px;
@@ -5136,6 +5680,8 @@ body div[role='main'] .wrapper .itemview .mediacontent .container-fluid .wrap .m
   -webkit-transition: all 0.3s;
   -o-transition: all 0.3s;
   transition: all 0.3s;
+  border-radius: 20px;
+  height: 32px;
 }
 body div[role='main'] .wrapper .itemview .mediacontent .container-fluid .wrap .metadata .infowrap .top .infocollect:hover {
   background: #4f7979;
@@ -5792,13 +6338,15 @@ body div[role='main'] .wrapper section.action .toggle input + label:after {
 body div[role='main'] .wrapper section.action .toggle input + label:before {
   display: none;
 }
-body div[role='main'] .wrapper section.action .toggle input ~ .public {
+body div[role='main'] .wrapper section.action .toggle input ~ .public,
+body div[role='main'] .wrapper section.action .toggle input ~ .admin {
   color: #d2d2d2;
   float: left;
   font-size: 1.2rem;
   text-transform: uppercase;
 }
-body div[role='main'] .wrapper section.action .toggle input ~ .private {
+body div[role='main'] .wrapper section.action .toggle input ~ .private,
+body div[role='main'] .wrapper section.action .toggle input ~ .member {
   font-size: 1.2rem;
   text-transform: uppercase;
   color: #969696;
@@ -5811,10 +6359,12 @@ body div[role='main'] .wrapper section.action .toggle input:checked + label {
 body div[role='main'] .wrapper section.action .toggle input:checked + label:after {
   left: 50%;
 }
-body div[role='main'] .wrapper section.action .toggle input:checked ~ .private {
+body div[role='main'] .wrapper section.action .toggle input:checked ~ .private,
+body div[role='main'] .wrapper section.action .toggle input:checked ~ .member {
   color: #d2d2d2;
 }
-body div[role='main'] .wrapper section.action .toggle input:checked ~ .public {
+body div[role='main'] .wrapper section.action .toggle input:checked ~ .public,
+body div[role='main'] .wrapper section.action .toggle input:checked ~ .admin {
   color: #969696;
 }
 body div[role='main'] .wrapper section.action .toggle input:checked + label {
@@ -5888,6 +6438,12 @@ body div[role='main'] .wrapper section.action .action-body textarea {
 }
 body div[role='main'] .wrapper section.action .action-body .toggle input ~ .private {
   left: -35px;
+}
+body div[role='main'] .wrapper section.action .action-body .toggle input ~ .member {
+  left: -58px;
+}
+body div[role='main'] .wrapper section.action .action-body .toggle input ~ .admin {
+  left: 23px;
 }
 body div[role='main'] .wrapper section.action .action-body .add {
   font-size: 1.4rem;
@@ -5970,6 +6526,54 @@ body div[role='main'] .wrapper section.action .action-body ul.access-list {
   list-style: none;
   padding: 0;
   margin: 0 0 0px;
+  /* members
+						&.members-list {
+							margin-bottom: 10px;
+							margin-top: -10px;
+
+							// li
+							li {
+								text-align: center;
+								max-width: 65px;
+								padding-top: 30px;
+								padding-bottom: 0;
+								margin-bottom: 0;
+
+								// trash
+								.trash {
+									left: 7px;
+									top: 30px;
+								}
+
+								// username
+								.username {
+									font-size: 1.2rem;
+									line-height: 1.2em;
+									margin-top: 5px;
+									height: 30px;
+									color: #888;
+								}
+
+								// thumbnails
+								.thumbnails {
+									margin: auto;
+								}
+
+								// toggle
+								.toggle {
+									left: -40px;
+									top: 0px;
+								}
+
+								// hover
+								&:hover {
+									.username {
+										color: #000;
+									}
+								}
+
+							}
+						}*/
 }
 body div[role='main'] .wrapper section.action .action-body ul.access-list:before,
 body div[role='main'] .wrapper section.action .action-body ul.access-list:after {
@@ -6042,15 +6646,133 @@ body div[role='main'] .wrapper section.action .action-body ul.access-list li .tr
 }
 body div[role='main'] .wrapper section.action .action-body ul.access-list li .toggle {
   bottom: 0;
-  left: 13px;
+  left: -45px;
   position: absolute;
   display: none;
 }
-body div[role='main'] .wrapper section.action .action-body ul.access-list li .toggle input ~ .public {
+body div[role='main'] .wrapper section.action .action-body ul.access-list li .toggle input ~ .public,
+body div[role='main'] .wrapper section.action .action-body ul.access-list li .toggle input ~ .admin {
   position: absolute;
   left: 30px;
   width: 55px;
   display: block;
+}
+body div[role='main'] .wrapper section.action .action-body ul.access-list li .toggle input ~ .admin {
+  position: absolute;
+  left: 28px;
+  width: 55px;
+  display: block;
+}
+body div[role='main'] .wrapper section.action .action-body ul.members-list {
+  list-style: none;
+  padding: 10px 0 0 0;
+  margin: 0 0 0px;
+}
+body div[role='main'] .wrapper section.action .action-body ul.members-list:before,
+body div[role='main'] .wrapper section.action .action-body ul.members-list:after {
+  content: " ";
+  display: table;
+}
+body div[role='main'] .wrapper section.action .action-body ul.members-list:after {
+  clear: both;
+}
+body div[role='main'] .wrapper section.action .action-body ul.members-list li {
+  float: left;
+  margin: 0 5px 0px;
+  position: relative;
+  width: 75px;
+  height: 110px;
+  text-align: center;
+}
+body div[role='main'] .wrapper section.action .action-body ul.members-list li:hover .toggle {
+  display: block;
+}
+body div[role='main'] .wrapper section.action .action-body ul.members-list li:hover .trash {
+  display: block;
+}
+body div[role='main'] .wrapper section.action .action-body ul.members-list li.blue span.text {
+  background-color: #1f71a1;
+}
+body div[role='main'] .wrapper section.action .action-body ul.members-list li.orange span.text {
+  background-color: #f39e31;
+}
+body div[role='main'] .wrapper section.action .action-body ul.members-list li.green span.text {
+  background-color: #8ec95f;
+}
+body div[role='main'] .wrapper section.action .action-body ul.members-list li span.text {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  text-align: center;
+  line-height: 50px;
+  display: block;
+  color: white;
+  margin: auto;
+  position: relative;
+}
+body div[role='main'] .wrapper section.action .action-body ul.members-list li .thumbnails {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  overflow: hidden;
+  position: relative;
+  margin: auto;
+}
+body div[role='main'] .wrapper section.action .action-body ul.members-list li .thumbnails img {
+  width: 100%;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  -webkit-transform: translate(-50%, -50%);
+  -ms-transform: translate(-50%, -50%);
+  -o-transform: translate(-50%, -50%);
+  transform: translate(-50%, -50%);
+}
+body div[role='main'] .wrapper section.action .action-body ul.members-list li .trash {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  text-align: center;
+  line-height: 50px;
+  background-color: rgba(217, 83, 79, 0.7);
+  color: #f4f4f4;
+  display: none;
+  font-size: 1.9rem;
+}
+body div[role='main'] .wrapper section.action .action-body ul.members-list li .toggle {
+  top: -28px;
+  left: -34px;
+  position: absolute;
+  display: none;
+  height: 40px;
+}
+body div[role='main'] .wrapper section.action .action-body ul.members-list li .toggle input ~ .public,
+body div[role='main'] .wrapper section.action .action-body ul.members-list li .toggle input ~ .admin {
+  position: absolute;
+  left: 30px;
+  width: 55px;
+  display: block;
+}
+body div[role='main'] .wrapper section.action .action-body ul.members-list li .toggle input ~ .admin {
+  position: absolute;
+  left: 23px;
+  width: 55px;
+  display: block;
+}
+body div[role='main'] .wrapper section.action .action-body ul.members-list li .username {
+  font-size: 1.1rem;
+  text-transform: uppercase;
+  color: #999;
+  line-height: 1.3em;
+  margin: 5px 0 0 0;
+  height: 30px;
+  overflow: hidden;
+}
+body div[role='main'] .wrapper section.action.creditsection .action-body textarea {
+  height: 300px;
 }
 body div[role='main'] .wrapper section.action .button-group {
   float: right;
@@ -6167,7 +6889,7 @@ body div[role='main'] .wrapper section.exhibitionviewer .exhibitionplayer .carou
 body div[role='main'] .wrapper section.exhibitionviewer .exhibitionplayer .carouselexhibition .item .title {
   font-size: 3.5rem;
   color: #fff;
-  font-family: "Proxima Nova", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-family: 'Roboto', "Helvetica Neue", Helvetica, Arial, sans-serif;
   margin: 60px 0 0 0;
   width: 50%;
 }
@@ -6274,7 +6996,7 @@ body div[role='main'] .wrapper section.exhibitionviewer .exhibitionplayer .carou
 body div[role='main'] .wrapper section.exhibitionviewer .exhibitionplayer .carouselexhibition .item.style2 .textbox h2,
 body div[role='main'] .wrapper section.exhibitionviewer .exhibitionplayer .carouselexhibition .item.style3 .textbox h2 {
   margin: 0;
-  font-family: "Proxima Nova", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-family: 'Roboto', "Helvetica Neue", Helvetica, Arial, sans-serif;
   font-size: 1.2em;
   line-height: 1.5em;
 }
@@ -6324,7 +7046,7 @@ body div[role='main'] .wrapper section.exhibitionviewer .exhibitionplayer .carou
   overflow-x: hidden;
 }
 body div[role='main'] .wrapper section.exhibitionviewer .exhibitionplayer .carouselexhibition .item.credit .creditwrap .title {
-  font-family: "Proxima Nova", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-family: 'Roboto', "Helvetica Neue", Helvetica, Arial, sans-serif;
   font-size: 1.2em;
   font-weight: bold;
   margin: 0 0 35px 0;
@@ -6508,9 +7230,10 @@ body div[role='main'] .viewer .collectioninfo .item-count {
   color: #4f7979;
   float: right;
   border: 1px solid #4f7979;
-  border-radius: 15px;
-  padding: 0 15px 0 15px;
+  border-radius: 20px;
+  padding: 3px 15px 0 15px;
   font-size: 1.4rem;
+  height: 32px;
 }
 body div[role='main'] .viewer .collectioninfo .description {
   clear: both;
@@ -6639,7 +7362,7 @@ body div[role='main'] .viewer section.search .list-head::before {
   height: 1px;
   background-color: #ccc;
   position: absolute;
-  top: 13px;
+  top: 15px;
   left: 0;
   z-index: -1;
 }
@@ -6946,6 +7669,7 @@ body div[role='main'] section.entrance .input-group .errormsg {
   display: block;
   padding: 3px 0 0 0;
   font-style: italic;
+  font-size: 1.4rem;
 }
 body div[role='main'] section.entrance .input-group input[type="text"],
 body div[role='main'] section.entrance .input-group input[type="password"] {
@@ -6994,6 +7718,7 @@ body div[role='main'] section.entrance .input-group.ack label {
   cursor: pointer;
   color: #bebebe;
   margin-left: 5px;
+  font-size: 1.4rem;
 }
 body div[role='main'] section.entrance .input-group.ack label a {
   font-weight: 300;

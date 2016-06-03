@@ -24,7 +24,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import javax.validation.ConstraintViolation;
 
@@ -35,20 +34,28 @@ import com.codahale.metrics.Histogram;
 import com.codahale.metrics.Meter;
 import com.codahale.metrics.Timer;
 
+import org.bson.Document;
 import org.bson.types.ObjectId;
+import org.mongodb.morphia.query.Query;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.mongodb.MongoClient;
+import com.mongodb.client.FindIterable;
+import com.mongodb.client.MongoDatabase;
 
 import controllers.parameterTypes.MyPlayList;
 import controllers.parameterTypes.StringTuple;
 import db.DB;
 import model.annotations.ContextData;
 import model.annotations.ContextData.ContextDataBody;
+import model.annotations.ExhibitionData;
+import model.annotations.ExhibitionData.MediaType;
 import model.basicDataTypes.Language;
+import model.basicDataTypes.Literal;
 import model.basicDataTypes.MultiLiteral;
 import model.basicDataTypes.ProvenanceInfo;
 import model.basicDataTypes.WithAccess;
@@ -61,6 +68,7 @@ import model.resources.WithResource;
 import model.resources.WithResource.WithResourceType;
 import model.resources.collection.CollectionObject;
 import model.resources.collection.CollectionObject.CollectionAdmin;
+import model.resources.collection.Exhibition;
 import model.resources.collection.SimpleCollection;
 import model.usersAndGroups.Organization;
 import model.usersAndGroups.Page;
@@ -86,6 +94,8 @@ import sources.core.Utils;
 import utils.Locks;
 import utils.MetricsUtils;
 import utils.Tuple;
+
+
 
 
 @SuppressWarnings("rawtypes")
@@ -892,7 +902,6 @@ public class CollectionObjectController extends WithResourceController {
 		} else
 			return badRequest("User or group with name " + userOrGroupName
 					+ " does not exist or has no specified page.");
-
 	}
 
 	/**
@@ -1092,4 +1101,5 @@ public class CollectionObjectController extends WithResourceController {
 		}
 		return 0;
 	}
+	
 }

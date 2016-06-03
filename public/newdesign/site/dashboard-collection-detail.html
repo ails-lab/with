@@ -41,7 +41,7 @@
           </section>
           <!-- notification-->
           <section class="notification">
-            <!-- button--><a id="notificationbutton" href="#" title="notification" data-toggle="dropdown"><img src="img/ui/ic-notification.png"><span class="counter">12</span></a>
+            <!-- button--><a id="notificationbutton" href="#" title="Notification" data-toggle="dropdown"><img src="img/ui/ic-notification.png"><span class="counter">12</span></a>
             <!-- dropdown menu-->
             <div aria-labelledby="notificationbutton" class="dropdown-menu">
               <!-- header-->
@@ -57,9 +57,13 @@
             </div>
           </section>
           <!-- home-->
-          <section class="home"><a href="dashboard.html" title="Home"><img src="img/ui/ic-home.png" alt="Home"></a></section>
+          <section class="home"><a href="dashboard.html" title="Dashboard Home"><img src="img/ui/ic-home.png" alt="Home"></a></section>
           <!-- explore-->
-          <section class="explore"><a href="dashboard-search.html" title="explore"><img src="img/ui/ic-search.png"><span class="text">EXPLORE</span></a></section>
+          <section class="explore">
+            <!-- input search-->
+            <input type="text" placeholder="Search">
+            <!-- icon--><img src="img/ui/ic-mag.png" class="icon">
+          </section>
         </div>
       </div>
     </header>
@@ -80,6 +84,12 @@
                 <li class="active"><a href="dashboard-collection.html"><span class="counter">7</span><span class="icon"><i class="fa fa-clone"></i></span><span class="text">My Collection</span></a></li>
                 <li><a href="dashboard-exhibition.html"><span class="counter">10</span><span class="icon"><i class="fa fa-television"></i></span><span class="text">My Exhibition</span></a></li>
                 <li><a href="dashboard-favorite.html"><span class="counter">5</span><span class="icon"><i class="fa fa-heart-o"></i></span><span class="text">My Favorite</span></a></li>
+                <!-- li( class=page === "annotation" ? "active" : "" )
+                a(href='dashboard-annotation.html')
+                 span.icon
+                  i.fa.fa-edit
+                 span.text My Annotation
+                -->
                 <li><a href="dashboard-organizations.html"><span class="icon"><i class="fa fa-bookmark-o"></i></span><span class="text">Organizations</span></a></li>
                 <li><a href="dashboard-projects.html"><span class="icon"><i class="fa fa-comment-o"></i></span><span class="text">Projects</span></a></li>
               </ul>
@@ -100,18 +110,27 @@
           <main>
             <!-- collection section-->
             <section class="collection">
-              <section class="header"><span class="title">My Collection Title</span><span class="item-count">3 Items</span>
-                <p class="description">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip.</p>
+              <section class="header">
+                <!-- info-->
+                <div class="actioninfo">
+                  <!-- upload--><a href="#" class="upload"><span class="plus"></span><span class="text">Upload Image</span></a>
+                </div>
+                <!-- collection detail-->
+                <div class="collectiondetail"><span class="title">My Collection Title</span>
+                  <p class="description">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip.</p>
+                </div>
               </section>
               <!-- collection main-->
-              <section class="collection-list">
+              <section class="collection-list collection-detail">
                 <!-- collection main header-->
                 <div class="list-head">
-                  <!-- back--><a href="dashboard-collection.html" class="back">Return to collection list</a>
-                  <!-- control-->
-                  <div class="list-control">
-                    <!-- upload--><a href="#" class="upload"><span class="plus"></span><span class="text">Upload Image</span></a><a href="#" data-toggle="tooltip" data-placement="top" title="Edit Collection" class="fa fa-pencil editaction"></a><a href="#" data-toggle="tooltip" data-placement="top" title="API Calls" class="fa fa-rss detail-control"></a><a href="#" data-toggle="tooltip" data-placement="top" title="Delete Collection" class="fa fa-trash"></a>
+                  <!-- item count--><span class="item-count">3 items</span>
+                  <!-- back--><a href="dashboard-collection.html" data-toggle="tooltip" data-placement="top" title="Back to collection list" class="back"><i class="fa fa-angle-left"></i></a>
+                  <div class="filtertype"><img src="img/ui/ic-mag.png" class="mag">
+                    <input type="text" placeholder="Search collection item" class="filtertext">
                   </div>
+                  <!-- control-->
+                  <div class="list-control"><a href="#" data-toggle="tooltip" data-placement="top" title="Edit Collection" class="fa fa-pencil editaction"></a><a href="#" data-toggle="tooltip" data-placement="top" title="API Calls" class="fa fa-rss detail-control"></a><a href="#" data-toggle="tooltip" data-placement="top" title="Delete Collection" class="fa fa-trash deleteaction"></a></div>
                 </div>
               </section>
               <!-- isotope section-->
@@ -121,12 +140,11 @@
                     <div class="sizer"></div>
                     <div class="item">
                       <div class="wrap"><a href="#" title="Lorem ipsum">
-                          <div class="thumb"><img src="img/content/content-1.png" alt="Lorem ipsum"></div>
-                          <div class="info">
-                            <h2 class="title">Lorem ipsum dolor sit amet conceptus</h2>
-                          </div></a>
+                          <div class="thumb"><img src="img/content/content-1-white.png" alt="Lorem ipsum"></div></a>
+                        <div class="info"><a href="#" title="Lorem ipsum">
+                            <h2 class="title">Lorem ipsum dolor sit amet conceptus</h2><span class="source">National Library of Latvia</span></a><span class="provider"><a href="#" class="links">digitainz.org</a></span></div>
                         <div class="action-group">
-                          <div class="wrap"><a href="#" class="links">digitainz.org</a>
+                          <div class="wrap">
                             <ul>
                               <li><a href="#" data-toggle="tooltip" data-placement="top" title="Delete media" class="fa fa-trash-o"></a></li>
                               <li><a href="#" data-toggle="tooltip" data-placement="top" title="Add to favorite" class="fa fa-heart"></a></li>
@@ -138,12 +156,11 @@
                     </div>
                     <div class="item">
                       <div class="wrap"><a href="#" title="Lorem ipsum">
-                          <div class="thumb"><img src="img/content/content-1.png" alt="Lorem ipsum"></div>
-                          <div class="info">
-                            <h2 class="title">Lorem ipsum dolor sit amet conceptus</h2>
-                          </div></a>
+                          <div class="thumb"><img src="img/content/content-1.png" alt="Lorem ipsum"></div></a>
+                        <div class="info"><a href="#" title="Lorem ipsum">
+                            <h2 class="title">Lorem ipsum dolor sit amet conceptus</h2><span class="source">National Library of Latvia</span></a><span class="provider"><a href="#" class="links">digitainz.org</a></span></div>
                         <div class="action-group">
-                          <div class="wrap"><a href="#" class="links">digitainz.org</a>
+                          <div class="wrap">
                             <ul>
                               <li><a href="#" data-toggle="tooltip" data-placement="top" title="Delete media" class="fa fa-trash-o"></a></li>
                               <li><a href="#" data-toggle="tooltip" data-placement="top" title="Add to favorite" class="fa fa-heart"></a></li>
@@ -155,12 +172,11 @@
                     </div>
                     <div class="item">
                       <div class="wrap"><a href="#" title="Lorem ipsum">
-                          <div class="thumb"><img src="img/content/content-3.png" alt="Lorem ipsum"></div>
-                          <div class="info">
-                            <h2 class="title">Lorem ipsum dolor sit amet conceptus</h2>
-                          </div></a>
+                          <div class="thumb"><img src="img/content/content-3.png" alt="Lorem ipsum"></div></a>
+                        <div class="info"><a href="#" title="Lorem ipsum">
+                            <h2 class="title">Lorem ipsum dolor sit amet conceptus</h2><span class="source">National Library of Latvia</span></a><span class="provider"><a href="#" class="links">digitainz.org</a></span></div>
                         <div class="action-group">
-                          <div class="wrap"><a href="#" class="links">digitainz.org</a>
+                          <div class="wrap">
                             <ul>
                               <li><a href="#" data-toggle="tooltip" data-placement="top" title="Delete media" class="fa fa-trash-o"></a></li>
                               <li><a href="#" data-toggle="tooltip" data-placement="top" title="Add to favorite" class="fa fa-heart"></a></li>
@@ -172,12 +188,11 @@
                     </div>
                     <div class="item">
                       <div class="wrap"><a href="#" title="Lorem ipsum">
-                          <div class="thumb"><img src="img/content/content-2.png" alt="Lorem ipsum"></div>
-                          <div class="info">
-                            <h2 class="title">Lorem ipsum dolor sit amet conceptus</h2>
-                          </div></a>
+                          <div class="thumb"><img src="img/content/content-2.png" alt="Lorem ipsum"></div></a>
+                        <div class="info"><a href="#" title="Lorem ipsum">
+                            <h2 class="title">Lorem ipsum dolor sit amet conceptus</h2><span class="source">National Library of Latvia</span></a><span class="provider"><a href="#" class="links">digitainz.org</a></span></div>
                         <div class="action-group">
-                          <div class="wrap"><a href="#" class="links">digitainz.org</a>
+                          <div class="wrap">
                             <ul>
                               <li><a href="#" data-toggle="tooltip" data-placement="top" title="Delete media" class="fa fa-trash-o"></a></li>
                               <li><a href="#" data-toggle="tooltip" data-placement="top" title="Add to favorite" class="fa fa-heart"></a></li>

@@ -69,10 +69,10 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 			        	 if(data){
 			 				return data;}
 			 			  else{
-			 				   return "img/content/thumb-empty.png";
+			 				   return "img/ui/ic-noimage.png";
 			 			   }
 			        	}
-			        	return "img/content/thumb-empty.png";
+			        	return "img/ui/ic-noimage.png";
 			        });
 
 			        self.type=ko.computed(function() {
@@ -247,10 +247,16 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 			};
 	  
 		self.revealSpaceItems = function (data) {
-			if(data.length==0 || data.length<self.fetchitemnum){self.morespaces(false);self.nospaces(true);}
+			var groups;
+			if (typeof data.groups === 'object') {
+				groups = data.groups;
+			} else {
+				groups = data;
+			}
+			if(groups.length==0 || groups.length<self.fetchitemnum){self.morespaces(false);self.nospaces(true);}
 			var items = [];
-				for (var i in data) {
-					var page=data[i].page;
+				for (var i in groups) {
+					var page=groups[i].page;
 					var thumb=null;
 					var url="";
 					
@@ -259,7 +265,7 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 						url=page.url;
 					}
 					
-					var spacetocollection={resourceType: 'Space', administrative:{isShownAt:url}, descriptiveData:{label:{default:[data[i].friendlyName]}},media:[{Thumbnail:{url: thumb}}]};
+					var spacetocollection={resourceType: 'Space', administrative:{isShownAt:url}, descriptiveData:{label:{default:[groups[i].friendlyName]}},media:[{Thumbnail:{url: thumb}}]};
 					var c=new Collection(
 								spacetocollection				
 					);
@@ -512,12 +518,25 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 	  function getItem(collection) {
 			var tile = '<div class="' + collection.data.css() + '"> <div class="wrap">';
 
+			if (collection.data.type()==='COLLECTION' || collection.data.type()==='EXHIBITION') {
+				var entryCount;
+				if (collection.data.administrative.entryCount === 1) {
+					entryCount = collection.data.administrative.entryCount+' item';
+				} else {
+					entryCount = collection.data.administrative.entryCount+' items';
+				}
+				tile += '<a href="#" onclick="loadUrl(\'' + collection.data.url() + '\',event)">' +
+				'<div class="thumb"><img src="' + collection.data.thumbnail() + '">'+'<div class="counter">'+entryCount+'</div>'+'</div>' +
+				'<div class="info"><span class="type">' + collection.data.type() + '</span><h1 class="title">' +
+				collection.data.title + '</h1><span class="owner">'+collection.data.owner()+'</span></div>' +
+				'</a></div></div>';
+			} else {
 			tile += '<a href="#" onclick="loadUrl(\'' + collection.data.url() + '\',event)">' +
 				'<div class="thumb"><img src="' + collection.data.thumbnail() + '"></div>' +
 				'<div class="info"><span class="type">' + collection.data.type() + '</span><h1 class="title">' +
 				collection.data.title + '</h1><span class="owner">'+collection.data.owner()+'</span></div>' +
 				'</a></div></div>';
-
+			}
 			return tile;
 		}
 

@@ -17,7 +17,7 @@
 									<div class="input-group input-group-bg col-lg-10">
 										<input type="search" class="form-control" id="userName"
 											placeholder="User name or email"
-											data-bind="autocompleteUsername: myUsername, category:1" />
+											data-bind="autocompleteUsername: myUsername, forUsers:true" />
 									</div>
 									<span style="padding-left: 10px;">
 										<button type="button" class="btn btn-primary btn-xs"
@@ -85,7 +85,7 @@
 									<div class="input-group input-group-bg col-lg-10">
 										<input type="search" class="form-control" id="groupName"
 											placeholder="Group name or email"
-											data-bind="autocompleteUsername: myUsername, category:2" />
+											data-bind="autocompleteUsername: myUsername, forUsers:false, forGroupType:'UserGroup'" />
 									</div>
 									<span style="padding-left: 10px;">
 										<button type="button" class="btn btn-primary btn-xs"

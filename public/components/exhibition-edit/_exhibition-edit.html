@@ -7,20 +7,24 @@
 			<main>
 				<!-- collection section-->
 				<section class="exhibition">
-					<!-- head-->
-					<div class="list-head">
-						<!-- back-->
-						<div class="title">Exhibition Editor</div>
-						<!-- control-->
-						<div class="list-control">
-							<a title="Preview Exhibition" data-placement="top" data-toggle="tooltip" data-bind="attr: {href: 'index.html#exhibitionview/'+dbId()}" class="fa fa-eye"></a>
-							<a id="coverImg" href="#" data-bind="click: bindFileUpload" data-toggle="tooltip" data-placement="top" title="Upload background image" class="fa fa-image exhibition"></a>
-							<div class="toggle">
-								<input type="checkbox" id="toggle2">
-								<label for="toggle2"></label><span class="private">private</span><span class="public">public</span>
-							</div>
-						</div>
-					</div>
+				   <!-- toggle-->
+	              <div class="toggle exhibitiontoggle">
+	                <input type="checkbox" id="toggle2">
+	                <label for="toggle2"></label><span class="private">private</span><span class="public">public</span>
+	              </div>
+	              <!-- head-->
+	              <div class="list-head">
+	                 <a href="void(0);"  onclick="window.history.go(-1); return false;" data-toggle="tooltip" data-placement="top" title="Back to previous page" class="back"><i class="fa fa-angle-left"></i></a>
+								
+	                <!-- control-->
+	                <ul class="organization-list-control">
+	                  <li><a href="exhibition-view.html" data-toggle="tooltip" data-placement="top" title="Preview Exhibition" class="fa fa-eye" data-bind="attr: {href: 'index.html#exhibitionview/'+dbId()}" ></a></li>
+	                  <li><a href="#" data-toggle="tooltip" data-placement="top" title="Add credits section" class="fa fa-copyright creditbutton"></a></li>
+	                  <li><a href="#" data-toggle="tooltip" data-placement="top" data-bind="click: bindFileUpload" title="Upload background image" class="fa fa-image upload exhibition"></a></li>
+	                  <li><a href="#" data-toggle="tooltip" data-bind="click: deleteExhibition.bind($data, $root)" data-placement="top" title="Delete Exhibition" class="fa fa-trash"></a></li>
+	                </ul>
+	              </div>
+					
 					<!-- editor box-->
 					<div class="editorbox">
 						<div class="wrap" >
@@ -39,16 +43,19 @@
 								  <div data-toggle="tooltip" data-placement="top" title="Drag an item here" class="add" data-bind="drop: {index: $index}">
 								  	<span><a href="javascript:void(null);"><img src="img/ui/ic-add.png"></a></span>
 								  </div>
-								  <div class="box fill" data-bind="{css: {videoadded: containsVideo}, drag: {item: $data, move: true}}">
+								  <div class="box fill" data-bind="{css: {videoadded: containsContextField('mediaUrl')}}">
 									<div class="boxaction">
 										<ul>
 										<li><a href="#" data-toggle="tooltip" data-placement="top" title="Edit item text" data-bind="click: $parent.prepareForItemEdit" class="editbox"> <i class="fa fa-pencil-square-o"></i></a></li>
-										<li><a href="#" data-toggle="tooltip" data-placement="top" title="Delete item" data-bind="click: $parent.xButtonClicked"> <i class="fa fa-trash-o"></i></a><li>
+										 <!--  ko if: !containsContextField("mediaUrl")() -->
+										 <li><a href="#" data-toggle="tooltip" data-placement="top" title="Add media" data-bind="click: $parent.prepareForItemEdit" class="addmediabutton"><i class="fa fa-play-circle"></i></a></li>
+                          				 <!-- /ko -->
+                          				<li><a href="#" data-toggle="tooltip" data-placement="top" title="Delete item" data-bind="click: $parent.xButtonClicked"> <i class="fa fa-trash-o"></i></a><li>
 										</ul>
 									</div>
-									<div class="left">
+									<div class="left" data-bind="drag: {item: $data, move: true}">
 										<div class="imgwrap">
-											<img data-bind="attr: { src: fullres.length>0 ? fullres : thumbnailUrl }" id="itemImage" onError="javascript:this.src='img/content/thumb-empty.png'"/>
+											<img data-bind="attr: { src: fullres.length>0 ? fullres : thumbnailUrl }" id="itemImage" onError="javascript:this.src='img/ui/ic-noimage.png'"/>
 										</div>
 										<div class="imginfo">
 											<span class="mediatitle" data-bind="text: title"></span><br/>
@@ -67,9 +74,10 @@
 					                        </div>
 										<!--  /ko -->
 									<!-- /ko -->
-								    <!--  ko if: containsVideo -->
+								    <!--  ko if: containsContextField("mediaUrl")() && containsContextField("mediaType")()-->
 									<div class="video">
 				                        <div class="imgwrap">
+				                          <!-- ko if: contextData.body.mediaType() == "VIDEO" -->
 				                          <!-- ko if: embeddedVideoUrl -->
 				                          <div class="embed-responsive embed-responsive-4by3">
 				                            <iframe data-bind="attr: {src: embeddedVideoUrl}" frameborder="0" allowfullscreen class="embed-responsive-item"></iframe>
@@ -77,23 +85,26 @@
 				                          <!-- /ko -->
 				                          <!-- ko else -->
 				                          <div>Invalid video url:</div>
-				                          <span style="color:red" data-bind="text: contextData.body.videoUrl"></span>
+				                          <span style="color:red" data-bind="text: contextData.body.mediaUrl"></span>
 				                          <!-- /ko -->
+				                          <!-- /ko -->
+				                          <!-- ko if: contextData.body.mediaType() == "AUDIO" -->
+				                            <p></p>
+				                          	<audio id="mediaplayer" controls style="width: 180px;" width="576" height="324">
+				                          		<source data-bind="attr:{src: contextData.body.mediaUrl}" type="audio/mpeg">Your browser does not support HTML5
+				                          	</audio>
+										  <!-- /ko -->
 				                        </div>
-				                        <!--  ko if: containsVideoDescription -->
-				                        <div class="imginfo"><span class="mediatitle" data-bind="text: contextData.body.videoDescription"></span></div>
+				                        <!--  ko if: containsContextField("mediaDescription")() -->
+				                       		<div class="imginfo"><span class="mediatitle" data-bind="text: contextData.body.mediaDescription"></span></div>
 				                        <!-- /ko -->
 				                        <ul class="action">
-				                          <li><a href="#" data-toggle="tooltip" data-placement="top" title="Edit video" data-bind="click: $parent.prepareForItemEdit"><i class="fa fa-pencil videobox"></i></a></li>
-				                          <li><a href="#" data-toggle="tooltip" data-placement="top" title="Delete video" data-bind="click: $parent.deleteVideo"><i class="fa fa-trash-o"></i></a></li>
+				                          <li><a href="#" data-toggle="tooltip" data-placement="top" title="Edit media" data-bind="click: $parent.prepareForItemEdit"><i class="fa fa-pencil videobox"></i></a></li>
+				                          <li><a href="#" data-toggle="tooltip" data-placement="top" title="Delete media" data-bind="click: $parent.deleteMedia"><i class="fa fa-trash-o"></i></a></li>
 				                        </ul>
 				                     </div>
 				                     <!-- /ko -->
-				                     <!-- ko else -->
-									 <div class="video"><a href="javascript:void(0)" data-toggle="tooltip" data-placement="top" title="Add video" class="addvideo videobox" data-bind="click: $parent.prepareForItemEdit">
-									 	<img src="img/ui/ic-add.png"></a>
-									 </div>
-									 <!-- /ko -->
+				                     
 									<div id="loadingIcon">
 										<i class="fa fa-spinner fa-pulse"></i>
 									</div>
@@ -125,7 +136,7 @@
 									<a class="bottom-box"  data-toggle="tooltip" data-placement="top" 
 									data-bind="{drag: {item: $data, move: false}, attr: {title: title}}">
 										<div class="hue">
-											<img data-bind="attr: { src: thumbnailUrl }" class="itemImage" onerror="javascript:this.src='img/content/thumb-empty.png';"/>
+											<img data-bind="attr: { src: thumbnailUrl }" class="itemImage" onerror="javascript:this.src='img/ui/ic-noimage.png';"/>
 											<div class="color"></div>
 										</div>
 									</a>
@@ -159,28 +170,81 @@
 					</div>
 					<div class="action-body">
 						<textarea type="text" placeholder="Add text" data-bind="value: itemText"></textarea>
-						<!--  <div class="sectionside">
-							<div class="head">Media location</div>
-							<div class="toggle">
-								<input type="checkbox" id="toggle3">
-								<label for="toggle3"></label><span class="private">left</span><span class="public">right</span>
-							</div>
-						</div> -->
+						<div class="sectionside">
+		                  <div class="head">Text location</div>
+		                  <div class="toggle">
+		                    <input type="checkbox" id="toggle3" data-bind="{checked: itemTextPosition}">
+		                    <label for="toggle3"></label><span class="private">left</span><span class="public">right</span>
+		                  </div>
+		                </div>
 					</div>
 					<div class="button-group"><a class="btn-green-o cancel" data-bind="click: closeSideBar">Cancel</a>
 					<a class="btn-green" data-bind="click: editItem.bind($data, 'editText')">Save</a></div>
 				</section>
 				<section class="action editvideo">
 					<div class="action-header">
-						<div class="title">Edit video</div>
+						<div class="title">Edit media</div>
 					</div>
 					<div class="action-body">
-						<textarea type="text" placeholder="Add youtube url" data-bind="value: itemVideoUrl"></textarea>
-						<textarea type="text" placeholder="Add video description" data-bind="value: itemVideoDescription"></textarea>
-					</div>
+	                <div class="group">
+	                  <div class="title">Select media type</div>
+	                  <select class="form-control" data-bind="value: itemMediaType">
+	                    <option>VIDEO</option>
+	                    <option>AUDIO</option>
+	                  </select>
+	                </div>
+	                <div class="group">
+	                  <div class="title">Media URL</div>
+	                  <!-- ko if: itemMediaType() == "VIDEO" --> 
+	                  	<input type="text" data-bind="value: itemVideoUrl" value="http://">
+	                  <!-- /ko -->
+	                  <!-- ko if: itemMediaType() == "AUDIO" --> 
+	                  	<input type="text" data-bind="value: itemAudioUrl" value="http://">
+	                  <!-- /ko -->
+	                  <input type="text" data-bind="value: itemMediaDescription" placeholder="Media description"></input>
+	                </div>
+	              </div>
 					<div class="button-group"><a class="btn-green-o cancel" data-bind="click: closeSideBar">Cancel</a>
-					<a class="btn-green" data-bind="click: editItem.bind($data, 'editVideo')">Save</a></div>
+					<a class="btn-green" data-bind="click: editItem.bind($data, 'editMedia')">Save</a></div>
 				</section>
+				 <!-- collection new-->
+            <section class="action creditsection">
+              <div class="action-header">
+                <div class="title">Add credit</div>
+              </div>
+              <div class="action-body">
+                <textarea type="text" placeholder="Credits" data-bind="value: credits"></textarea>
+              </div>
+              <div class="button-group"><a href="#" class="btn-green-o cancel" data-bind="click: closeSideBar">Cancel</a>
+              	<a href="#" class="btn-green" data-bind="click: editCredits">Save</a></div>
+            </section>
+            <!-- collection give access-->
+            <section class="action addmediasection">
+              <div class="action-header">
+                <div class="title">Add media</div>
+              </div>
+              <div class="action-body">
+                <div class="group">
+                  <div class="title">Select media type</div>
+                  <select class="form-control" data-bind="value: itemMediaType">
+                    <option>VIDEO</option>
+                    <option>AUDIO</option>
+                  </select>
+                </div>
+                <div class="group">
+                  <div class="title">Media URL</div>
+                  <!-- ko if: itemMediaType() == "VIDEO" --> 
+                  	<input type="text" data-bind="value: itemVideoUrl" value="http://">
+                  <!-- /ko -->
+                  <!-- ko if: itemMediaType() == "AUDIO" --> 
+                  	<input type="text" data-bind="value: itemAudioUrl" value="http://">
+                  <!-- /ko -->
+                  <input type="text" data-bind="value: itemMediaDescription" placeholder="Media description"></input>
+                </div>
+              </div>
+              <div class="button-group"><a href="#" class="btn-green-o cancel">Cancel</a>
+              	<a href="#" data-bind="click: editItem.bind($data, 'editMedia')" data-bclass="btn-green">Add media</a></div>
+            </section>
 			</main>
 		</div>
 	</div>

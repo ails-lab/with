@@ -39,6 +39,7 @@ object CustomAssets {
         val basePath = "custom/base/" + path;
 
         Action.async { implicit request =>
+          log.debug( request.host + " " + request.rawQueryString );
             val resultF1 = Assets.at( "/public", customPath )(request)
             resultF1.flatMap {
                 customRes:Result => customRes.header.status match {
@@ -47,6 +48,7 @@ object CustomAssets {
                     Future.successful( customRes )
                   }
                   case _ => {
+                    log.debug( request.host + " " + request.rawQueryString );
                      val resultF2 = Assets.at( "/public", basePath )(request)
                      resultF2.flatMap{ 
                        baseRes:Result => baseRes.header.status match {
@@ -55,7 +57,8 @@ object CustomAssets {
                            Future.successful( baseRes )
                          }
                          case _ => {
-                           log.debug( "Fallback to public " + path )
+                            log.debug( request.host + " " + request.rawQueryString );
+                            log.debug( "Fallback to public " + path )
                            Assets.at( "/public", path )(request)
                          }
                        }

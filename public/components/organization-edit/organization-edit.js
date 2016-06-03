@@ -27,10 +27,10 @@ define(['bridget','knockout', 'text!./organization-edit.html', 'isotope','images
 					if (data) {
 						return data;
 					} else {
-						return "img/content/thumb-empty.png";
+						return "img/ui/ic-noimage.png";
 					}
 				}
-				return "img/content/thumb-empty.png";
+				return "img/ui/ic-noimage.png";
 			});
 			self.type = ko.computed(function () {
 				if (self.resourceType) {
@@ -100,10 +100,10 @@ define(['bridget','knockout', 'text!./organization-edit.html', 'isotope','images
 			        	 if(data){
 			 				return data;}
 			 			  else{
-			 				   return "img/content/thumb-empty.png";
+			 				   return "img/ui/ic-noimage.png";
 			 			   }
 			        	}
-			        	return "img/content/thumb-empty.png";
+			        	return "img/ui/ic-noimage.png";
 			        });
 
 			        self.type=ko.computed(function() {
@@ -270,6 +270,7 @@ define(['bridget','knockout', 'text!./organization-edit.html', 'isotope','images
 				success : function (result) {
 					if (result.users !== undefined) {
 						var users = result.users;
+						console.log(users);
 						ko.mapping.fromJS(users, self.usersMapping, self.userMembers);
 					}
 					if (result.groups !== undefined) {
@@ -326,6 +327,44 @@ define(['bridget','knockout', 'text!./organization-edit.html', 'isotope','images
 				}
 			});
 		};
+
+		self.makeAdmin = function (userId) {
+			console.log("makeAdmin");
+			$.ajax({
+				method : "PUT",
+				contentType : "text/plain",
+				url : "/group/admin/" + self.id() + "?id=" + userId,
+				success : function (result) {
+					/*self.image = userData.image;
+					self.userMembers.push(ko.mapping.fromJS(userData));*/
+				},
+				error : function (result) {
+					$.smkAlert({ text: result.responseJSON.error, type: 'danger', time: 10 });
+				}
+			});
+		};
+
+		self.makeMember = function (userId) {
+			console.log("makeMember");
+			$.ajax({
+				method : "DELETE",
+				contentType : "text/plain",
+				url : "/group/admin/" + self.id() + "?id=" + userId,
+				success : function (result) {
+				},
+				error : function (result) {
+					$.smkAlert({ text: result.responseJSON.error, type: 'danger', time: 10 });
+				}
+			});
+		};
+
+		self.isAdminToggle = function(admin, userId){
+			if (!admin) 
+				self.makeMember(userId);
+			else 
+				self.makeAdmin(userId);
+			return true;
+		}
 
 		self.excecuteRemove = function (id, category) {
 			$.ajax({
@@ -695,7 +734,11 @@ define(['bridget','knockout', 'text!./organization-edit.html', 'isotope','images
 			   tile+='<a href="'+collection.data.url()+'">'
                 +'<div class="thumb"><img src="'+collection.data.thumbnail()+'"><div class="counter">'+collection.data.entryCount+' ITEMS</div></div>'
                 +' <div class="info"><div class="type">'+collection.data.type()+'</div><h2 class="title">'+collection.data.title+'</h2></div>'
-                +'</a></div></div>';
+                +'</a>'
+                +'<div class="action-group"><div class="wrap"><ul><li><a href="#" data-toggle="tooltip" data-placement="top" title="Unshare media" class="fa fa-ban"></a></li>'
+                +'<li><a href="#" data-toggle="tooltip" data-placement="top" title="Set as featured" class="fa fa-star featuredbutton"></a></li>'
+                +'</ul></div></div>'
+                +'</div></div>';
 			return tile;
 
 		}

@@ -1,4 +1,5 @@
-define(['knockout', 'text!./_exhibition-view.html', 'app', 'magnific-popup', 'slick'], function (ko, template, app, magnificPopup, slick) {
+define(['knockout', 'text!./_exhibition-view.html', 'app', 'magnific-popup', 'slick', 'knockout-else'], 
+		function (ko, template, app, magnificPopup, slick, KnockoutElse) {
 
 	ko.bindingHandlers.backgroundImage = {
 		update: function (element, valueAccessor, allBindingsAccessor, viewModel, context) {
@@ -58,7 +59,7 @@ define(['knockout', 'text!./_exhibition-view.html', 'app', 'magnific-popup', 'sl
 				self.collectedIn = usage.collectedIn;
 			}
 
-			self.thumb = media[0] != null && media[0].Thumbnail != null && media[0].Thumbnail.url != "null" ? media[0].Thumbnail.url : "img/content/thumb-empty.png";
+			self.thumb = media[0] != null && media[0].Thumbnail != null && media[0].Thumbnail.url != "null" ? media[0].Thumbnail.url : "img/ui/ic-noimage.png";
 			//self.fullres = media[0] != null && media[0].Original != null && media[0].Original.url != "null" ? media[0].Original.url : null,
 			if(media[0] != null && media[0].Original != null && media[0].Original.url != "null"){
 				self.fullres(media[0].Original.url);
@@ -83,9 +84,9 @@ define(['knockout', 'text!./_exhibition-view.html', 'app', 'magnific-popup', 'sl
 	function EViewModel(params) {
 		document.body.setAttribute("data-page", "exhibition");
 		// $("div[role='main']").toggleClass("homepage", false);
-
 		var self = this;
 		self.route = params.route;
+		KnockoutElse.init([spec = {}]);
 		var counter = 1;
 		self.exhName = ko.observable('');
 		//self.access = ko.observable([]);
@@ -98,6 +99,7 @@ define(['knockout', 'text!./_exhibition-view.html', 'app', 'magnific-popup', 'sl
 		self.loading = ko.observable(false);
 		self.showCarousel = ko.observable(false);
 		self.backgroundImgWithUrl = ko.observable('');
+		self.credits = ko.observable('');
 		self.initCarousel = function () {
 			WITHApp.initTooltip();
 			WITHApp.initCarousel();
@@ -115,13 +117,10 @@ define(['knockout', 'text!./_exhibition-view.html', 'app', 'magnific-popup', 'sl
 						&& result.contextData.body != null
 						&& ! $.isEmptyObject(result.contextData.body)) {
 					record.annotation = result.contextData.body.text.default;
-					record.videoUrl = result.contextData.body.videoUrl;
-//					for (var j in result.contextData) {
-//						if (result.contextData[j].target.collectionId == self.id() && result.contextData[j].target.position == i) {
-//							record.annotation = result.contextData[j].body.text.default;
-//							record.videoUrl = result.contextData[j].body.videoUrl;
-//						}
-//					}
+					record.mediaUrl = result.contextData.body.mediaUrl;
+					record.mediaType = result.contextData.body.mediaType;
+					record.mediaDescription = result.contextData.body.mediaDescription;
+					record.textPosition = result.contextData.body.textPosition;
 				}
 				var styleId = self.exhItems().length % 5 || 0;
 				var styleIdMapping = {
@@ -156,12 +155,12 @@ define(['knockout', 'text!./_exhibition-view.html', 'app', 'magnific-popup', 'sl
 						}
 					}
 					var adminData = data.administrative;
-					var descData = data.descriptiveData;
 					self.exhName(findByLang(data.descriptiveData.label));
 					self.desc(findByLang(data.descriptiveData.description));
 					self.owner(data.withCreatorInfo.username);
 					self.ownerId(data.administrative.withCreator);
 					self.entryCount(data.administrative.entryCount);
+					self.credits(data.descriptiveData.credits);
 					var backgroundImg = data.descriptiveData.backgroundImg;
 					//self.access(adminData.access);
 					if (self.entryCount() && self.entryCount() > 0) {
