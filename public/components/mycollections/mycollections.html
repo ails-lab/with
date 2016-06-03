@@ -362,8 +362,7 @@
 					  <div class="user"data-bind="text: creatorName()"></div>
 					</div>
 					<div class="action-group"><div class="wrap">
-                          <ul>
-                            
+                          <ul>  
 						<!--  ko if: myAccess() ==  "OWN" -->
 						<!-- ko if: $parent.showsExhibitions -->
 						<li><a data-toggle="tooltip" data-bind="click: $parent.deleteMyCollection" data-placement="top" title="Delete exhibition" class="fa fa-trash-o"></a></li>
@@ -378,7 +377,7 @@
 						<li><a data-toggle="tooltip" data-bind="click: $parent.prepareForEditCollection" data-placement="top" title="Edit" class="fa fa-pencil editaction"></a></li>
 						<!-- /ko -->
 						</ul>
-						<span data-bind="visible: myAccess() == 'READ'">&nbsp;</span></div>
+					</div>
 					</div>
 				  </div>
 				</li>

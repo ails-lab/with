@@ -41,21 +41,23 @@ object CustomAssets {
         Action.async { implicit request =>
             val resultF1 = Assets.at( "/public", customPath )(request)
             resultF1.flatMap {
-                customRes:Result => customRes.header.status match {
-                  case 200 => {
+                customRes:Result =>
+                  customRes.header.status match {
+                  case 200|304 => {
                     log.debug( "Direct custom hit at " + customPath )
                     Future.successful( customRes )
                   }
                   case _ => {
                      val resultF2 = Assets.at( "/public", basePath )(request)
                      resultF2.flatMap{ 
-                       baseRes:Result => baseRes.header.status match {
-                         case 200 => {
+                       baseRes:Result => 
+                         baseRes.header.status match {
+                         case 200|304 => {
                            log.debug( "Hit at base " + basePath )
                            Future.successful( baseRes )
                          }
                          case _ => {
-                           log.debug( "Fallback to public " + path )
+                            log.debug( "Fallback to public " + path )
                            Assets.at( "/public", path )(request)
                          }
                        }
