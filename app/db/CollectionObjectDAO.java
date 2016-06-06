@@ -105,13 +105,6 @@ public class CollectionObjectDAO extends WithResourceDAO<CollectionObject> {
 		this.update(q, updateOps);
 	}
 
-	public List<RecordResource> getFirstEntries(ObjectId dbId, int upperBound) {
-		ArrayList<String> retrievedFields = new ArrayList<String>();
-		retrievedFields.add("media");
-		return DB.getRecordResourceDAO().getByCollectionBetweenPositions(dbId,
-				0, upperBound, retrievedFields);
-	}
-
 
 	public CollectionObject getSliceOfCollectedResources(ObjectId id, int startIdx, int slice) {
 		BasicDBObject query = new BasicDBObject("_id", id);
