@@ -57,17 +57,6 @@ public class Annotation<T1 extends AnnotationBodyTagging> {
 	}
 	
 	MotivationType motivation;
-	
-	
-
-	
-	public MotivationType getMotivation() {
-		return motivation;
-	}
-
-	public void setMotivation(MotivationType motivation) {
-		this.motivation = motivation;
-	}
 
 	public static class AnnotationAdmin{
 		@JsonSerialize(using = Serializer.DateSerializer.class)
@@ -77,9 +66,19 @@ public class Annotation<T1 extends AnnotationBodyTagging> {
 		@JsonSerialize(using = Serializer.DateSerializer.class)
 		@JsonDeserialize(using = Deserializer.DateDeserializer.class)
 		Date generated;
-		
+		@JsonSerialize(using = Serializer.ObjectIdSerializer.class)
+		ObjectId withCreator; // a with user
 		String generator;
+		float confidence;
 		
+		public float getConfidence() {
+			return confidence;
+		}
+
+		public void setConfidence(float confidence) {
+			this.confidence = confidence;
+		}
+
 		public String getGenerator() {
 			return generator;
 		}
@@ -87,10 +86,6 @@ public class Annotation<T1 extends AnnotationBodyTagging> {
 		public void setGenerator(String generator) {
 			this.generator = generator;
 		}
-
-		@JsonSerialize(using = Serializer.ObjectIdSerializer.class)
-		ObjectId withCreator; // a with user
-		
 		
 		public Date getGenerated() {
 			return generated;
@@ -160,8 +155,6 @@ public class Annotation<T1 extends AnnotationBodyTagging> {
 		
 	}
 	
-	
-	
 	@Embedded
 	T1 body;
 	@Embedded
@@ -189,6 +182,14 @@ public class Annotation<T1 extends AnnotationBodyTagging> {
 
 	public void setLastModified(Date lastModified) {
 		this.lastModified = lastModified;
+	}
+	
+	public MotivationType getMotivation() {
+		return motivation;
+	}
+
+	public void setMotivation(MotivationType motivation) {
+		this.motivation = motivation;
 	}
 	
 	public T1 getBody() {
