@@ -977,9 +977,7 @@ public class CollectionObjectController extends WithResourceController {
 						recordsList.add(Json.toJson(profiledRecord));
 						fillContextData(
 								DB.getCollectionObjectDAO()
-										.getById(
-												colId,
-												Arrays.asList("collectedResources"))
+										.getSliceOfCollectedResources(colId, start, start + count)
 										.getCollectedResources(), recordsList);
 						continue;
 					}
