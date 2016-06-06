@@ -157,11 +157,11 @@ public class CollectionObject<T extends CollectionObject.CollectionDescriptiveDa
 		idx_map.put("dctermsaudience", this.getDescriptiveData().getDctermsaudience());
 		idx_map.put("dclanguage", this.getDescriptiveData().getDclanguage());
 
-		ArrayNode cd = (ArrayNode) Json.toJson(this.getCollectedResources());
+		/*ArrayNode cd = (ArrayNode) Json.toJson(this.getCollectedResources());
 		ObjectMapper mapper = new ObjectMapper();
 		mapper.setSerializationInclusion(Include.NON_NULL);
 		List<Object> cd_map = mapper.convertValue(cd, List.class);
-		idx_map.put("collectedResources", cd_map);
+		idx_map.put("collectedResources", cd_map);*/
 		return idx_map;
 	}
 

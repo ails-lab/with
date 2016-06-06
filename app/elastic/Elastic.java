@@ -75,6 +75,9 @@ public class Elastic {
 	public static String alias   		    = getConf().getString("elasticsearch.alias.name");
 	public static String mappingResource    = getConf().getString("elasticsearch.index.mapping.resource");
 
+	// Search within collections confs
+	public static String[] searchFieldsWin  = getConf().getString("elasticsearch.searchWithin.fields").split(",");
+
 	public static final String typeResource       = WithResourceType.RecordResource.toString().toLowerCase();
 	public static final List<String> allTypes 	  = Arrays.asList(WithResourceType.values()).stream()
 														.map(wr -> wr.toString().toLowerCase())
