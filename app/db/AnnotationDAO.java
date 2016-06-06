@@ -16,7 +16,12 @@
 
 package db;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
+import java.util.Set;
+
+import model.annotations.Annotation;
 
 import org.bson.types.ObjectId;
 import org.mongodb.morphia.query.Query;
@@ -24,23 +29,31 @@ import org.mongodb.morphia.query.UpdateOperations;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
-import model.annotations.Annotation;
-import model.resources.collection.CollectionObject;
-
-
+@SuppressWarnings("rawtypes")
 public class AnnotationDAO extends DAO<Annotation> {
 
 	public AnnotationDAO() {
 		super(Annotation.class);
 	}
-	
+
+	public List<Annotation> getByIds(Set<ObjectId> annotationIds) {
+		if (annotationIds == null || annotationIds.isEmpty())
+			return new ArrayList<Annotation>();
+		try {
+			Query<Annotation> q = this.createQuery().field("_id")
+					.in(annotationIds);
+			return this.find(q).asList();
+		} catch (Exception e) {
+			return new ArrayList<Annotation>();
+		}
+	}
+
 	public void editAnnotationBody(ObjectId dbId, JsonNode json) {
 		Query<Annotation> q = this.createQuery().field("_id").equal(dbId);
-		UpdateOperations<Annotation> updateOps = this
-				.createUpdateOperations();
+		UpdateOperations<Annotation> updateOps = this.createUpdateOperations();
 		updateFields("body", json, updateOps);
 		updateOps.set("lastModified", new Date());
 		this.update(q, updateOps);
 	}
-	
+
 }
