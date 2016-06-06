@@ -16,6 +16,7 @@
 
 package controllers;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -27,13 +28,21 @@ import java.util.Set;
 import javax.validation.ConstraintViolation;
 
 import org.bson.types.ObjectId;
+
+import com.codahale.metrics.Counter;
+import com.codahale.metrics.Histogram;
+import com.codahale.metrics.Meter;
+import com.codahale.metrics.Timer;
+
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.search.SearchHit;
 import org.bson.Document;
 import org.bson.types.ObjectId;
 import org.mongodb.morphia.query.Query;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.mongodb.MongoClient;
@@ -88,6 +97,7 @@ import sources.core.CommonQuery;
 import sources.core.SourceResponse;
 import sources.core.Utils;
 import utils.Locks;
+import utils.MetricsUtils;
 import utils.Tuple;
 
 
@@ -422,8 +432,8 @@ public class CollectionObjectController extends WithResourceController {
 			if (!response.toString().equals(ok().toString()))
 				return response;
 			else {
-				CollectionObject collection = DB.getCollectionObjectDAO().get(
-						new ObjectId(id));
+				CollectionObject collection = DB.getCollectionObjectDAO().getByIdAndExclude(
+						new ObjectId(id), new ArrayList<String>() {{add("collectedResources");}});
 				CollectionObject profiledCollection = collection.getCollectionProfile(profile);
 				filterResourceByLocale(locale, profiledCollection);
 				return ok(Json.toJson(profiledCollection));
@@ -560,6 +570,20 @@ public class CollectionObjectController extends WithResourceController {
 			int count, String profile, Option<String> locale) {
 		ObjectNode result = Json.newObject().objectNode();
 		ArrayNode collArray = Json.newObject().arrayNode();
+
+		/*
+		 * Metrics helper code
+		 */
+		final Histogram histogramResponseSize = MetricsUtils.registry.histogram(
+				MetricsUtils.registry.name(CollectionObjectController.class, "listCollection", "histogram-response-size"));
+		final Timer call_timer = MetricsUtils.registry.timer(
+				MetricsUtils.registry.name(CollectionObjectController.class, "listCollection", "time"));
+		final Timer.Context call_timeContext = call_timer.time();
+		/*
+		 *
+		 */
+
+
 		List<CollectionObject> userCollections;
 		List<String> effectiveUserIds = effectiveUserIds();
 		List<List<Tuple<ObjectId, Access>>> accessedByUserOrGroup = accessibleByUserOrGroup(
@@ -575,6 +599,7 @@ public class CollectionObjectController extends WithResourceController {
 			if (creatorId == null)
 				return badRequest("User with username " + creator.get() + " does not exist.");
 		}
+
 		if (effectiveUserIds.isEmpty()
 				|| (isPublic.isDefined() && (isPublic.get() == true))) {
 			// if not logged or ask for public collections, return all public
@@ -607,6 +632,15 @@ public class CollectionObjectController extends WithResourceController {
 			return ok(result);
 		} else { // logged in, check if super user, if not, restrict query to
 					// accessible by effectiveUserIds
+			/*
+			 * Metrics timer for collections DB retrieval
+			 */
+			final Timer dao_timer = MetricsUtils.registry.timer(
+					MetricsUtils.registry.name(CollectionObjectController.class, "listCollection", "collectionsDBRetrival-time"));
+			final Timer.Context dao_timeContext = dao_timer.time();
+			/*
+			 *
+			 */
 			Tuple<List<CollectionObject>, Tuple<Integer, Integer>> info;
 			if (!isSuperUser())
 				info = DB.getCollectionObjectDAO().getByLoggedInUsersAndAcl(
@@ -628,7 +662,24 @@ public class CollectionObjectController extends WithResourceController {
 				collArray.add(c);
 			}
 			result.put("collectionsOrExhibitions", collArray);
-			return ok(result);
+
+			try {
+				return ok(result);
+			} finally {
+				/*
+				 * Metrics helper code
+				 */
+				 ObjectMapper objm = new ObjectMapper();
+				 byte[] yourBytes = new byte[0];
+				try {
+					yourBytes = objm.writeValueAsBytes(result);
+				} catch (JsonProcessingException e) {
+					log.debug("Cannot get bytes of result json.", e);
+				}
+				 histogramResponseSize.update(yourBytes.length-histogramResponseSize.getCount());
+				 call_timeContext.stop();
+				 dao_timeContext.stop();
+			}
 		}
 	}
 
@@ -1137,5 +1188,5 @@ public class CollectionObjectController extends WithResourceController {
 		}
 		return 0;
 	}
-	
+
 }

@@ -19,6 +19,7 @@ package controllers;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -30,11 +31,10 @@ import java.util.regex.Pattern;
 import javax.net.ssl.HttpsURLConnection;
 
 import model.ApiKey;
-
 import model.resources.collection.CollectionObject;
-
 import model.usersAndGroups.User;
 import model.usersAndGroups.UserGroup;
+import notifications.Notification;
 
 import org.apache.commons.mail.DefaultAuthenticator;
 import org.apache.commons.mail.Email;
@@ -54,6 +54,8 @@ import java.util.HashSet;
 import scala.concurrent.Await;
 import scala.concurrent.Future;
 import scala.concurrent.duration.Duration;
+import utils.Serializer;
+import utils.Serializer.LightUserSerializer;
 import actors.ApiKeyManager.Create;
 import akka.actor.ActorSelection;
 import akka.pattern.Patterns;
@@ -63,6 +65,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
+import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
@@ -198,8 +201,10 @@ public class UserManager extends WithController {
 
 	public static Result getUser(String id) {
 		try {
-			User user = DB.getUserDAO().get(new ObjectId(id));
+			//User user = DB.getUserDAO().getById(new ObjectId(id), new ArrayList<String>() {{ add("firstName"); add("lastName"); }});
+			User user = DB.getUserDAO().getById(new ObjectId(id));
 			if (user != null) {
+				//return ok(lightUserSerialization(user));
 				return ok(Json.toJson(user));
 			}
 			return badRequest();
@@ -207,10 +212,10 @@ public class UserManager extends WithController {
 			return internalServerError();
 		}
 	}
-	
+
 	public static Result getMyUser() {
 		try {
-			User user = effectiveUser();		
+			User user = effectiveUser();
 			if (user != null) {
 				return ok(Json.toJson(user));
 			}
@@ -219,7 +224,6 @@ public class UserManager extends WithController {
 			return internalServerError();
 		}
 	}
-	
 
 	/**
 	 * Creates a user and stores him at the database
@@ -252,7 +256,7 @@ public class UserManager extends WithController {
 	 * she owns. In case she shares any collections she owns with other people,
 	 * or she is the creator of groups with others, the user is not deleted but
 	 * has to contact the developers about that.
-	 * 
+	 *
 	 * @return success or JSON error
 	 */
 	public static Result deleteUser(String id) {
@@ -262,7 +266,7 @@ public class UserManager extends WithController {
 			Status errorMessage = badRequest(Json
 					.parse("{'error':'User cannot be deleted due to ownership of "
 							+ "shared collections or groups. Please contact the developers'}"));
-			if (currentUserId == null || !currentUserId.equals(userId) && !WithController.isSuperUser() )
+			if ((currentUserId == null) || (!currentUserId.equals(userId) && !WithController.isSuperUser()) )
 				return forbidden(Json
 						.parse("{'error' : 'No rights for user deletion'}"));
 			Set<ObjectId> groupsToDelete = new HashSet<ObjectId>();
@@ -273,7 +277,7 @@ public class UserManager extends WithController {
 			for (ObjectId groupId : groups) {
 				UserGroup group = DB.getUserGroupDAO().getById(groupId,
 						Arrays.asList("creator, users"));
-				if (group == null || !group.getCreator().equals(userId))
+				if ((group == null) || !group.getCreator().equals(userId))
 					continue;
 				if (group.getUsers().size() > 1) {
 					return errorMessage;
@@ -320,6 +324,7 @@ public class UserManager extends WithController {
 			}
 			u.setGoogleId(googleId);
 			DB.getUserDAO().makePermanent(u);
+			//return ok(lightUserSerialization(u));
 			return ok(Json.toJson(u));
 		} catch (Exception e) {
 			return badRequest(Json
@@ -346,6 +351,7 @@ public class UserManager extends WithController {
 			}
 			u.setFacebookId(facebookId);
 			DB.getUserDAO().makePermanent(u);
+			//return ok(lightUserSerialization(u));
 			return ok(Json.toJson(u));
 		} catch (Exception e) {
 			return badRequest(Json
@@ -455,6 +461,7 @@ public class UserManager extends WithController {
 			session().put("sourceIp", request().remoteAddress());
 			session().put("lastAccessTime",
 					Long.toString(System.currentTimeMillis()));
+			//return ok(lightUserSerialization(u));
 			return ok(Json.toJson(u));
 		} else {
 			error.put("password", "Invalid Password");
@@ -577,7 +584,7 @@ public class UserManager extends WithController {
 		 * String[2]; imageInfo = imageUpload.split(","); String info =
 		 * imageInfo[0]; mimeType = info.substring(5); // check if image is
 		 * encoded in base64 format imageBytes = imageInfo[1].getBytes();
-		 * 
+		 *
 		 * // check if image is given as URL } else if
 		 * (imageUpload.startsWith("http")) { try { URL url = new
 		 * URL(imageUpload); HttpsURLConnection connection =
@@ -601,15 +608,15 @@ public class UserManager extends WithController {
 		 * user.setGender(json.get("gender").asText());
 		 * user.setFirstName(firstName); user.setLastName(lastName); if
 		 * (json.has("about")) { user.setAbout(json.get("about").asText()); }
-		 * 
+		 *
 		 * if (json.has("location")) {
 		 * user.setLocation(json.get("location").asText()); }
-		 * 
+		 *
 		 * DB.getUserDAO().makePermanent(user); result = (ObjectNode)
 		 * Json.parse(DB.getJson(user)); result.remove("md5Password"); return
 		 * ok(Json.toJson(user)); } else { return badRequest(Json
 		 * .parse("{\"error\":\"User does not exist\"}"));
-		 * 
+		 *
 		 * } } catch (IllegalArgumentException e) { return
 		 * badRequest(Json.parse("{\"error\":\"User does not exist\"}")); }
 		 */
@@ -968,4 +975,11 @@ public class UserManager extends WithController {
 		return badRequest(result);
 	}
 
+	private static ObjectNode lightUserSerialization(User u) {
+		ObjectMapper uMapper = new ObjectMapper();
+		SimpleModule module = new SimpleModule();
+		module.addSerializer(User.class, new Serializer.LightUserSerializer());
+		uMapper.registerModule(module);
+		return uMapper.valueToTree(u);
+	}
 }

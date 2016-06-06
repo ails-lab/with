@@ -306,8 +306,10 @@ public class WithResourceDAO<T extends WithResource> extends DAO<T> {
 				effectiveIds, actionToAccess(action));
 		Query<T> q = this.createQuery();
 		q.field("_id").equal(resourceId);
+		q.retrievedFields(true, "_id");
+		q.limit(1);
 		q.or(criteria);
-		return (this.find(q).asList().size() == 0 ? false : true);
+		return (this.findIds(q).size() == 0 ? false : true);
 	}
 
 	public Access actionToAccess(Action action) {

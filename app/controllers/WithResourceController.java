@@ -76,6 +76,7 @@ public class WithResourceController extends WithController {
 
 	public static Status errorIfNoAccessToWithResource(
 			WithResourceDAO resourceDAO, Action action, ObjectId id) {
+
 		ObjectNode result = Json.newObject();
 		if (!resourceDAO.existsEntity(id)) {
 			log.error("Cannot retrieve resource from database");
@@ -179,9 +180,9 @@ public class WithResourceController extends WithController {
 			// position.get());
 			RecordResource record = (RecordResource) Json.fromJson(json, clazz);
 			MultiLiteral label = record.getDescriptiveData().getLabel();
-			if (label == null || label.get(Language.DEFAULT) == null
+			if ((label == null) || (label.get(Language.DEFAULT) == null)
 					|| label.get(Language.DEFAULT).isEmpty()
-					|| label.get(Language.DEFAULT).get(0) == "")
+					|| (label.get(Language.DEFAULT).get(0) == ""))
 				return badRequest("A label for the record has to be provided");
 			int last = 0;
 			Sources source = Sources.UploadedByUser;
@@ -375,7 +376,7 @@ public class WithResourceController extends WithController {
 			if (!response.toString().equals(ok().toString())) {
 				return response;
 			} else {
-				if (json == null || !json.isArray()) {
+				if ((json == null) || !json.isArray()) {
 					result.put("error", "Invalid JSON");
 					return badRequest(result);
 				} else {

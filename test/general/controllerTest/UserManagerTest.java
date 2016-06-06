@@ -70,47 +70,6 @@ public class UserManagerTest {
 		});
 	}
 
-	// @Test
-	public void testLogin() {
-
-		// make a user with password
-		User u = new User();
-		u.setEmail("my@you.me");
-		u.setUsername("cool_url");
-		// set password after email, email salts the password!
-		u.setPassword("secret");
-		DB.getUserDAO().makePermanent(u);
-
-		try {
-			running(fakeApplication(), new Runnable() {
-				public void run() {
-					Result result = route(fakeRequest(GET, "/api/login"), HOUR);
-					assertThat(status(result)).isEqualTo(Status.BAD_REQUEST);
-
-					result = route(
-							fakeRequest(GET, "/api/login?password=secret"),
-							HOUR);
-					assertThat(status(result)).isEqualTo(Status.BAD_REQUEST);
-					JsonNode j = Json.parse(contentAsString(result));
-					assertThat(j.has("error")).isTrue();
-
-					result = route(
-							fakeRequest(GET,
-									"/api/login?password=secret&email=my@you.me"),
-							HOUR);
-					assertThat(status(result)).isEqualTo(Status.OK);
-					assertThat(session(result).isEmpty()).isFalse();
-					assertThat(session(result).get("user")).isNotEmpty();
-
-					j = Json.parse(contentAsString(result));
-					assertThat(j.get("username").asText())
-							.isEqualTo("cool_url");
-				}
-			});
-		} finally {
-			DB.getUserDAO().makeTransient(u);
-		}
-	}
 
 	// @Test
 	public void testGetByUsername() {
@@ -302,6 +261,62 @@ public class UserManagerTest {
 			public void run() {
 				Result result = route(fakeRequest("GET", "/user/addToGroup/"
 						+ user.getDbId() + "?gid=" + parentGroup1.getDbId()));
+
+				JsonParser parser = new JsonParser();
+				Gson gson = new GsonBuilder().setPrettyPrinting().create();
+				JsonElement el = parser.parse(contentAsString(result));
+				System.out.println(gson.toJson(el));
+
+				if (status(result) == 200)
+					assertThat(status(result)).isEqualTo(OK);
+				else {
+					System.out.println(status(result));
+					Assert.fail();
+				}
+
+			}
+		});
+	}
+
+	@Test
+	public void testGetUser() {
+		User u = DB.getUserDAO().getByUsername("ksismanis");
+
+		running(fakeApplication(), new Runnable() {
+			@Override
+			public void run() {
+				Result result = route(fakeRequest("GET", "/user/"
+						+ u.getDbId())
+						.withSession("user",
+								u.getDbId().toString()));;
+
+				JsonParser parser = new JsonParser();
+				Gson gson = new GsonBuilder().setPrettyPrinting().create();
+				JsonElement el = parser.parse(contentAsString(result));
+				System.out.println(gson.toJson(el));
+
+				if (status(result) == 200)
+					assertThat(status(result)).isEqualTo(OK);
+				else {
+					System.out.println(status(result));
+					Assert.fail();
+				}
+
+			}
+		});
+	}
+
+	@Test
+	public void testGetNotifications() {
+		User u = DB.getUserDAO().getByUsername("qwerty");
+
+		running(fakeApplication(), new Runnable() {
+			@Override
+			public void run() {
+				Result result = route(fakeRequest("GET", "/user/"
+						+ u.getDbId() + "/notifications")
+						.withSession("user",
+								u.getDbId().toString()));;
 
 				JsonParser parser = new JsonParser();
 				Gson gson = new GsonBuilder().setPrettyPrinting().create();

@@ -54,6 +54,7 @@ import controllers.WithController.Profile;
 	@Index(fields = @Field(value = "resourceType", type = IndexType.ASC), options = @IndexOptions()),
 	@Index(fields = @Field(value = "administrative.withCreator", type = IndexType.ASC), options = @IndexOptions()),
 	@Index(fields = @Field(value = "administrative.externalId", type = IndexType.ASC), options = @IndexOptions()),
+	@Index(fields = @Field(value = "administrative.lastModified", type = IndexType.DESC), options = @IndexOptions()),
 	@Index(fields = @Field(value = "provenance.provider", type = IndexType.ASC), options = @IndexOptions()),
 	@Index(fields = @Field(value = "provenance.resourceId", type = IndexType.ASC), options = @IndexOptions()),
 	@Index(fields = @Field(value = "descriptiveData.label", type = IndexType.ASC), options = @IndexOptions()),

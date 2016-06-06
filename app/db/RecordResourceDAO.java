@@ -35,6 +35,8 @@ import model.basicDataTypes.WithAccess.Access;
 import model.basicDataTypes.WithAccess.AccessEntry;
 import model.resources.RecordResource;
 import model.resources.collection.CollectionObject;
+import model.resources.collection.CollectionObject.CollectionAdmin;
+import model.resources.collection.CollectionObject.CollectionDescriptiveData;
 
 import org.apache.commons.beanutils.BeanToPropertyValueTransformer;
 import org.apache.commons.collections.CollectionUtils;
@@ -87,9 +89,8 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 
 	public List<RecordResource> getByCollectionBetweenPositions(
 			ObjectId collectionId, int lowerBound, int upperBound) {
-		CollectionObject collection = DB.getCollectionObjectDAO().getById(
-				collectionId,
-				new ArrayList<String>(Arrays.asList("collectedResources")));
+		CollectionObject collection = DB.getCollectionObjectDAO()
+				.getSliceOfCollectedResources(collectionId, lowerBound, upperBound-lowerBound);
 		Query<RecordResource> q = this.createQuery();
 		return getByCollectionBetweenPositions(
 				collection.getCollectedResources(), lowerBound, upperBound, q);
@@ -110,12 +111,7 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 			int lowerBound, int upperBound, Query<RecordResource> q) {
 		if (collectedResources == null)
 			return new ArrayList<RecordResource>();
-		if (lowerBound >= collectedResources.size())
-			return new ArrayList<RecordResource>();
-		if (upperBound > collectedResources.size())
-			upperBound = collectedResources.size();
-		List<ContextData<ContextDataBody>> contextData = collectedResources
-				.subList(lowerBound, upperBound);
+		List<ContextData<ContextDataBody>> contextData = collectedResources;
 		List<ObjectId> recordIds = (List<ObjectId>) CollectionUtils.collect(
 				contextData, new BeanToPropertyValueTransformer(
 						"target.recordId"));
@@ -380,8 +376,8 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 
 	private void removeRecordIfNotCollected(ObjectId recordId) {
 		RecordResource record = this.getById(recordId);
-		if (record.getCollectedIn() == null
-				|| record.getCollectedIn().size() == 0) {
+		if ((record.getCollectedIn() == null)
+				|| (record.getCollectedIn().size() == 0)) {
 			this.makeTransient(record);
 		}
 	}
@@ -401,7 +397,7 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 
 	public List<RecordResource> getByMedia(String mediaUrl) {
 		Query<RecordResource> q = this.createQuery().disableValidation()
-				.field("media.0.Original.url").equal(mediaUrl);
+				.field("media.Original.url").equal(mediaUrl);
 		return this.find(q.retrievedFields(true, "_id")).asList();
 	}
 
