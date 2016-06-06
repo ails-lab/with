@@ -16,6 +16,8 @@
 
 package controllers;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
@@ -24,8 +26,10 @@ import javax.validation.ConstraintViolation;
 
 import model.annotations.ContextData;
 import model.annotations.ContextData.ContextDataType;
+import model.basicDataTypes.WithAccess.Access;
 import model.resources.RecordResource;
 import model.resources.collection.CollectionObject;
+import model.resources.collection.CollectionObject.CollectionAdmin;
 
 import org.bson.types.ObjectId;
 
@@ -35,12 +39,14 @@ import play.data.validation.Validation;
 import play.libs.F.Option;
 import play.libs.Json;
 import play.mvc.Result;
+import utils.Tuple;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import db.DB;
+
 import java.util.Random;
 import java.util.HashSet;
 /**
@@ -251,29 +257,54 @@ public class RecordResourceController extends WithResourceController {
 		}
 	}
 	
-	public static ObjectNode getRandomRecords(String groupId, int batchCount) {
-		ObjectNode result = Json.newObject();
+	public static Result getRandomRecords(String groupId, int batchCount) {
 		ObjectId group = new ObjectId(groupId);
-		CollectionAndRecordsCounts collectionsAndCount = getCollectionsAndCountOfGroup(group);
-		int collectionCount = collectionsAndCount.collectionsAndCount.size();
+		CollectionAndRecordsCounts collectionsAndCount = getCollsAndCountAccessiblebyGroup(group);
+		//int collectionCount = collectionsAndCount.collectionsRecordCount.size();
 		//generate batchCount unique numbers from 0 to totalRecordsCount
 		Random rng = new Random();
 		Set<Integer> randomNumbers = new HashSet<Integer>();
+		List<RecordResource> records = new ArrayList<RecordResource>();
 		while (randomNumbers.size() < batchCount)
 		{
-		    Integer next = rng.nextInt(collectionsAndCount.totalRecordsCount) + 1;
+		    Integer next = rng.nextInt(collectionsAndCount.totalRecordsCount);
 		    randomNumbers.add(next);
 		}
-		
-		return result;
+		int colPosition = 0;
+		int previousRecords = 0;
+		for (Integer random: randomNumbers) {	
+			int recordCount = collectionsAndCount.collectionsRecordCount.get(colPosition).y;
+			while (random > recordCount + previousRecords) {
+				colPosition++;
+				previousRecords += recordCount;
+			}
+			int recordPosition = random - previousRecords - 1;
+			CollectionObject collection = DB.getCollectionObjectDAO().getById(
+					collectionsAndCount.collectionsRecordCount.get(colPosition).x, Arrays.asList("collectedResources"));
+			ContextData contextData = (ContextData) collection.getCollectedResources().get(recordPosition);
+			ObjectId recordId = contextData.getTarget().getRecordId();
+			records.add(DB.getRecordResourceDAO().getById(recordId));
+		}
+		ArrayNode recordsList = Json.newObject().arrayNode();
+		for (RecordResource record : records) {
+			recordsList.add(Json.toJson(record));
+		}
+		return ok(recordsList);
 	}
 	
-	private static CollectionAndRecordsCounts getCollectionsAndCountOfGroup(ObjectId groupId) {
-		return new CollectionAndRecordsCounts();
+	private static CollectionAndRecordsCounts getCollsAndCountAccessiblebyGroup(ObjectId groupId) {
+		List<CollectionObject> collections = DB.getCollectionObjectDAO().getAccessibleByGroupAndPublic(groupId);
+		CollectionAndRecordsCounts colAndRecs = new CollectionAndRecordsCounts();
+		for (CollectionObject col: collections) {
+			int entryCount = ((CollectionAdmin) col.getAdministrative()).getEntryCount();
+			colAndRecs.collectionsRecordCount.add(new Tuple(col.getDbId(), entryCount));
+			colAndRecs.totalRecordsCount += entryCount;
+		}
+		return colAndRecs;
 	}
 	
 	private static class CollectionAndRecordsCounts {
-		HashMap<ObjectId, Integer> collectionsAndCount = new HashMap<ObjectId, Integer>();
+		List<Tuple<ObjectId, Integer>> collectionsRecordCount = new ArrayList<Tuple<ObjectId, Integer>>();
 		int totalRecordsCount = 0;
 	}
 	
