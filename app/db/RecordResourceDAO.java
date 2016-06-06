@@ -75,25 +75,15 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 		super(RecordResource.class);
 	}
 
-	public List<RecordResource> getByCollectionBetweenPositions(
-			ObjectId collectionId, int lowerBound, int upperBound,
-			List<String> retrievedFields) {
-		CollectionObject collection = DB.getCollectionObjectDAO().getById(
-				collectionId,
-				new ArrayList<String>(Arrays.asList("collectedResources")));
-		Query<RecordResource> q = this.createQuery().retrievedFields(true,
-				retrievedFields.toArray(new String[retrievedFields.size()]));
-		return getByCollectionBetweenPositions(
-				collection.getCollectedResources(), lowerBound, upperBound, q);
-	}
 
 	public List<RecordResource> getByCollectionBetweenPositions(
 			ObjectId collectionId, int lowerBound, int upperBound) {
+		if (upperBound < lowerBound)
+			return new ArrayList<RecordResource>();
 		CollectionObject collection = DB.getCollectionObjectDAO()
 				.getSliceOfCollectedResources(collectionId, lowerBound, upperBound-lowerBound);
 		Query<RecordResource> q = this.createQuery();
-		return getByCollectionBetweenPositions(
-				collection.getCollectedResources(), lowerBound, upperBound, q);
+		return getRecords(collection.getCollectedResources(), q);
 	}
 
 	/**
@@ -106,10 +96,10 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 	 *            , lowerBound, upperBound
 	 * @return
 	 */
-	public List<RecordResource> getByCollectionBetweenPositions(
+	public List<RecordResource> getRecords(
 			List<ContextData<ContextDataBody>> collectedResources,
-			int lowerBound, int upperBound, Query<RecordResource> q) {
-		if (collectedResources == null)
+			Query<RecordResource> q) {
+		if (collectedResources == null || collectedResources.isEmpty())
 			return new ArrayList<RecordResource>();
 		List<ContextData<ContextDataBody>> contextData = collectedResources;
 		List<ObjectId> recordIds = (List<ObjectId>) CollectionUtils.collect(
