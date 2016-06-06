@@ -17,21 +17,96 @@
 package model.annotations.bodies;
 
 import java.util.ArrayList;
-
-import model.annotations.Annotation.MotivationType;
 import model.basicDataTypes.MultiLiteral;
 
 public class AnnotationBodyTagging extends AnnotationBody {
 	
+	/**
+	 * The uri of the tag.
+	 */
 	String uri;
+	
+	/**
+	 * The tag type. This valu should be a ur either of a class of of a property.
+	 */
+	String tagType;
+	
+	/**
+	 * The pref label of the URI tag, that will be used for display purposes.
+	 */
 	MultiLiteral uriLabel;
+	
+	
+	/**
+	 * The types of the uri. This value should be a uri of the class to whcih the tag belongs to.
+	 * i.e. http://dbpedia.org/ontology/Building  etc
+	 */
 	ArrayList<String> uriType;
+	
+	/**
+	 * A value taken from an enumeration that includes all the vocabularies used in WITH and by the
+	 * annotator generators.
+	 */
+	Vocabulary uriVocabulary;
+	
+	/**
+	 * This should be only populated when the tag of the annotation is not a URI but a text values.
+	 * When this value exists the uri, uriLabel, uriType and uriVocabulary should be null.
+	 */
+	MultiLiteral text;
 	
 	public static enum Vocabulary {
 		DBPEDIA_ONT,DBPEDIA_RES, MIMO, FASHION, GEMET, AAT, PARTAGE, PHOTO
 	}
 	
-	Vocabulary uriVocabulary;
-	MultiLiteral text;
+	
+	public String getUri() {
+		return uri;
+	}
+
+	public void setUri(String uri) {
+		this.uri = uri;
+	}
+
+	public String getTagType() {
+		return tagType;
+	}
+
+	public void setTagType(String tagType) {
+		this.tagType = tagType;
+	}
+
+	public MultiLiteral getUriLabel() {
+		return uriLabel;
+	}
+
+	public void setUriLabel(MultiLiteral uriLabel) {
+		this.uriLabel = uriLabel;
+	}
+
+	public ArrayList<String> getUriType() {
+		return uriType;
+	}
+
+	public void setUriType(ArrayList<String> uriType) {
+		this.uriType = uriType;
+	}
+
+	public Vocabulary getUriVocabulary() {
+		return uriVocabulary;
+	}
+
+	public void setUriVocabulary(Vocabulary uriVocabulary) {
+		this.uriVocabulary = uriVocabulary;
+	}
+
+	public MultiLiteral getText() {
+		return text;
+	}
+
+	public void setText(MultiLiteral text) {
+		this.text = text;
+	}
+
 	
 }

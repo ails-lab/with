@@ -19,7 +19,6 @@ package model.annotations;
 import java.util.ArrayList;
 import java.util.Date;
 
-import model.annotations.selectors.SelectorType;
 
 import org.bson.types.ObjectId;
 import org.mongodb.morphia.annotations.Embedded;
@@ -33,132 +32,130 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import model.annotations.bodies.AnnotationBodyTagging;
+import model.annotations.targets.AnnotationTarget;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Entity("Annotation")
 public class Annotation<T1 extends AnnotationBodyTagging> {
 	
-	
+	public ObjectId getWithCreator() {
+		return withCreator;
+	}
+
+	public void setWithCreator(ObjectId withCreator) {
+		this.withCreator = withCreator;
+	}
+
+	public String getGenerator() {
+		return generator;
+	}
+
+	public void setGenerator(String generator) {
+		this.generator = generator;
+	}
+
+	public Date getCreated() {
+		return created;
+	}
+
+	public void setCreated(Date created) {
+		this.created = created;
+	}
+
+	public Date getGenerated() {
+		return generated;
+	}
+
+	public void setGenerated(Date generated) {
+		this.generated = generated;
+	}
+
+	public ArrayList<T1> getBodies() {
+		return bodies;
+	}
+
+	public void setBodies(ArrayList<T1> bodies) {
+		this.bodies = bodies;
+	}
+
+	public ArrayList<AnnotationTarget> getTargets() {
+		return targets;
+	}
+
+	public void setTargets(ArrayList<AnnotationTarget> targets) {
+		this.targets = targets;
+	}
+
+	/**
+	 * The dbIdentfier for retrieving this annotation from Mongo.
+	 */
 	@Id
 	@JsonSerialize(using = Serializer.ObjectIdSerializer.class)
 	ObjectId dbId;	
 	
-	//This is the annotationWithURI
+	/**
+	 * The URI of the annotation - this should normally result to the JSON representation of the annotation.
+	 */
 	String annotationWithURI;
-
+	
+	/**
+	 * The with user who created this annotation.
+	 */
+	@JsonSerialize(using = Serializer.ObjectIdSerializer.class)
+	ObjectId withCreator; // a with user
+	
+	/**
+	 * The tool used for generating this annotation 
+	 */
+	String generator;
+	
+	/**
+	 * The date this annotation has been created.
+	 */
+	@JsonSerialize(using = Serializer.DateSerializer.class)
+	@JsonDeserialize(using = Deserializer.DateDeserializer.class)
+	Date created;
+	
+	/**
+	 * The date this annotation has been created.
+	 */
+	@JsonSerialize(using = Serializer.DateSerializer.class)
+	@JsonDeserialize(using = Deserializer.DateDeserializer.class)
+	Date generated;
+	
+	/**
+	 * The date this annotation has been last modified.
+	 */
 	@JsonSerialize(using = Serializer.DateSerializer.class)
 	@JsonDeserialize(using = Deserializer.DateDeserializer.class)
 	Date lastModified;
-
-	ArrayList<AnnotationAdmin> annotators;
 	
+	/**
+	 * The motivation why this annotation has been created. This takes values from an enumerated
+	 * list that currently includes Tagging, Linking, Commenting, Editing
+	 */
+	MotivationType motivation;
+	
+	/**
+	 * The list of bodies that include the annotation details.
+	 */
+	@Embedded
+	ArrayList<T1> bodies;
+	
+	/**
+	 * The list of targets to which the bodies refer to.
+	 */
+	@Embedded
+	ArrayList<AnnotationTarget> targets;
+	
+	/**
+	 * @author nsimou
+	 * This enumeration included the motivation types for an annotation. It currently includes
+	 * includes Tagging, Linking, Commenting, Editing
+	 */
 	public static enum MotivationType {
 		Tagging, Linking, Commenting, Editing
 	}
-	
-	MotivationType motivation;
-
-	public static class AnnotationAdmin{
-		@JsonSerialize(using = Serializer.DateSerializer.class)
-		@JsonDeserialize(using = Deserializer.DateDeserializer.class)
-		Date created;
-		
-		@JsonSerialize(using = Serializer.DateSerializer.class)
-		@JsonDeserialize(using = Deserializer.DateDeserializer.class)
-		Date generated;
-		@JsonSerialize(using = Serializer.ObjectIdSerializer.class)
-		ObjectId withCreator; // a with user
-		String generator;
-		float confidence;
-		
-		public float getConfidence() {
-			return confidence;
-		}
-
-		public void setConfidence(float confidence) {
-			this.confidence = confidence;
-		}
-
-		public String getGenerator() {
-			return generator;
-		}
-
-		public void setGenerator(String generator) {
-			this.generator = generator;
-		}
-		
-		public Date getGenerated() {
-			return generated;
-		}
-
-		public void setGenerated(Date generated) {
-			this.generated = generated;
-		}
-		
-		
-		public Date getCreated() {
-			return created;
-		}
-
-		public void setCreated(Date created) {
-			this.created = created;
-		}
-		
-		
-		public ObjectId getWithCreator() {
-			return withCreator;
-		}
-
-		public void setWithCreator(ObjectId withCreator) {
-			this.withCreator = withCreator;
-		}
-
-	}
-	
-		
-	// base class what the annotation references
-	public static class AnnotationTarget {
-
-		String withURI;
-		String externalId;
-		
-		@Id
-		@JsonSerialize(using = Serializer.ObjectIdSerializer.class)
-		ObjectId dbId;	
-		
-		SelectorType selector;
-		
-		public ObjectId getDbId() {
-			return dbId;
-		}
-
-		public void setDbId(ObjectId dbId) {
-			this.dbId = dbId;
-		}
-
-		public String getWithURI() {
-			return withURI;
-		}
-
-		public void setWithURI(String withURI) {
-			this.withURI = withURI;
-		}
-
-		public String getExternalId() {
-			return externalId;
-		}
-
-		public void setExternalId(String externalId) {
-			this.externalId = externalId;
-		}
-
-		
-	}
-	
-	@Embedded
-	T1 body;
-	@Embedded
-	AnnotationTarget target;
 	
 	public ObjectId getDbId() {
 		return dbId;
@@ -190,27 +187,6 @@ public class Annotation<T1 extends AnnotationBodyTagging> {
 
 	public void setMotivation(MotivationType motivation) {
 		this.motivation = motivation;
-	}
-	
-	public T1 getBody() {
-		return body;
-	}
-
-	public void setBody(T1 body) {
-		this.body = body;
-	}
-
-	public AnnotationTarget getTarget() {
-		return target;
-	}
-
-	public void setTarget(AnnotationTarget target) {
-		this.target = target;
-	}
-	
-	public Annotation() {
-		this.target = new AnnotationTarget();
-		this.body = (T1) new AnnotationBodyTagging();
 	}
 	
 }
