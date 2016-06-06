@@ -156,14 +156,14 @@ public class CollectionObject<T extends CollectionObject.CollectionDescriptiveDa
 		idx_map.put("dctermsaudience", this.getDescriptiveData().getDctermsaudience());
 		idx_map.put("dclanguage", this.getDescriptiveData().getDclanguage());
 
-		ArrayNode cd = (ArrayNode) Json.toJson(this.getCollectedResources());
+		/*ArrayNode cd = (ArrayNode) Json.toJson(this.getCollectedResources());
 		ObjectMapper mapper = new ObjectMapper();
 		mapper.setSerializationInclusion(Include.NON_NULL);
 		List<Object> cd_map = mapper.convertValue(cd, List.class);
-		idx_map.put("collectedResources", cd_map);
+		idx_map.put("collectedResources", cd_map);*/
 		return idx_map;
 	}
-	
+
 	public CollectionObject getCollectionProfile(String profileString) {
 		Profile profile = Profile.valueOf(profileString);
 		if (profile == null)
@@ -180,7 +180,7 @@ public class CollectionObject<T extends CollectionObject.CollectionDescriptiveDa
 				Exhibition output = new Exhibition();
 				addCommonCollectionFields(output);
 				ExhibitionDescriptiveData edd = (ExhibitionDescriptiveData) getDescriptiveData();
-				if (edd.getBackgroundImg() != null && edd.getBackgroundImg().containsKey(MediaVersion.Original))
+				if ((edd.getBackgroundImg() != null) && edd.getBackgroundImg().containsKey(MediaVersion.Original))
 					edd.getBackgroundImg().remove(MediaVersion.Original);
 				output.getDescriptiveData().setBackgroundImg(edd.getBackgroundImg());
 				output.getDescriptiveData().setCredits(edd.getCredits());
@@ -191,9 +191,9 @@ public class CollectionObject<T extends CollectionObject.CollectionDescriptiveDa
 		}
 		else return this;
 	}
-	
+
 	private void addCommonCollectionFields(CollectionObject output) {
-		output.setAdministrative((CollectionAdmin) getAdministrative());
+		output.setAdministrative(getAdministrative());
 		output.setDbId(getDbId());
 		output.getDescriptiveData().setLabel(getDescriptiveData().getLabel());
 		output.getDescriptiveData().setDescription(getDescriptiveData().getDescription());

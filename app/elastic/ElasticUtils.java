@@ -209,7 +209,7 @@ public class ElasticUtils {
 		 * Add the username and email of the creator
 		 * NOT the dbId
 		 */
-		if(rr.getWithCreatorInfo() != null ) {
+		if(rr.getWithCreator() != null ) {
 			idx_doc.put("creatorUsername", rr.getWithCreator().getUsername());
 			idx_doc.put("creatorEmail", rr.getWithCreator().getEmail());
 		}

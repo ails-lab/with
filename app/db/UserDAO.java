@@ -22,6 +22,7 @@ import java.util.List;
 import model.usersAndGroups.User;
 
 import org.bson.types.ObjectId;
+import org.mongodb.morphia.Key;
 import org.mongodb.morphia.query.Query;
 import org.mongodb.morphia.query.UpdateOperations;
 
@@ -38,6 +39,14 @@ public class UserDAO extends DAO<User> {
 
 	public User getByEmail(String email) {
 		return this.findOne("email", email);
+	}
+
+	public Key<User> getIdByUsername(String username) {
+		return this.findOneId("username", username);
+	}
+
+	public User getByUsername(String username, List<String> retrievedFields) {
+		return this.getUniqueByFieldAndValue("username", username, retrievedFields);
 	}
 
 	public User getByUsername(String username) {

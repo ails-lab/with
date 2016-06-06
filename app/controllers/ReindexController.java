@@ -84,6 +84,24 @@ public class ReindexController extends WithController {
 	}
 
 	/*
+	 * Api call to reindex all collection resources.
+	 * Mongo and Elastic should be consistent talking
+	 * about collection terms.
+	 */
+	public static Result reindexAllCollections() {
+
+		try {
+			Promise<Boolean> p = Promise.promise(() -> ElasticReindexer.reindexAllDbCollections());
+		} catch(Exception e) {
+			log.error(e.getMessage(), e);
+			return internalServerError(e.getMessage());
+		}
+
+		return ok();
+	}
+
+
+	/*
 	 * Api call to reindex all thesaurus resources.
 	 * Mongo and Elastic should be consistent talking
 	 * about thesaurus terms.
