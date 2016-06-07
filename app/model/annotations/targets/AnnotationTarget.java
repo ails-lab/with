@@ -16,17 +16,28 @@
 
 package model.annotations.targets;
 
+import org.bson.types.ObjectId;
+
 public class AnnotationTarget {
 
+	private ObjectId recordId;
 	/**
 	 * The withURI to which the annotation refers.
 	 */
-	String withURI;
+	private String withURI;
 	
 	/**
 	 * The external id of the object to which the annotations refers.
 	 */
-	String externalId;
+	private String externalId;
+
+	public ObjectId getRecordId() {
+		return recordId;
+	}
+
+	public void setRecordId(ObjectId recordId) {
+		this.recordId = recordId;
+	}
 
 	public String getWithURI() {
 		return withURI;

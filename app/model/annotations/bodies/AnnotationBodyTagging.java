@@ -24,39 +24,39 @@ public class AnnotationBodyTagging extends AnnotationBody {
 	/**
 	 * The uri of the tag.
 	 */
-	String uri;
+	private String uri;
 	
 	/**
 	 * The tag type. This valu should be a ur either of a class of of a property.
 	 */
-	String tagType;
+	private String tagType;
 	
 	/**
 	 * The pref label of the URI tag, that will be used for display purposes.
 	 */
-	MultiLiteral uriLabel;
+	private MultiLiteral uriLabel;
 	
 	
 	/**
 	 * The types of the uri. This value should be a uri of the class to whcih the tag belongs to.
 	 * i.e. http://dbpedia.org/ontology/Building  etc
 	 */
-	ArrayList<String> uriType;
+	private ArrayList<String> uriType;
 	
 	/**
 	 * A value taken from an enumeration that includes all the vocabularies used in WITH and by the
 	 * annotator generators.
 	 */
-	Vocabulary uriVocabulary;
+	private Vocabulary uriVocabulary;
 	
 	/**
 	 * This should be only populated when the tag of the annotation is not a URI but a text values.
 	 * When this value exists the uri, uriLabel, uriType and uriVocabulary should be null.
 	 */
-	MultiLiteral text;
+	private MultiLiteral text;
 	
 	public static enum Vocabulary {
-		DBPEDIA_ONT,DBPEDIA_RES, MIMO, FASHION, GEMET, AAT, PARTAGE, PHOTO
+		DBPEDIA_ONT,DBPEDIA_RES, MIMO, FASHION, GEMET, AAT, PARTAGE, PHOTO, WORDNET
 	}
 	
 	
