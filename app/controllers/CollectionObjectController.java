@@ -28,10 +28,19 @@ import java.util.Set;
 import javax.validation.ConstraintViolation;
 
 import org.bson.types.ObjectId;
+
 import com.codahale.metrics.Counter;
 import com.codahale.metrics.Histogram;
 import com.codahale.metrics.Meter;
 import com.codahale.metrics.Timer;
+
+import org.elasticsearch.action.search.SearchResponse;
+import org.elasticsearch.search.SearchHit;
+import org.bson.Document;
+import org.bson.types.ObjectId;
+import org.mongodb.morphia.query.Query;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -665,7 +674,13 @@ public class CollectionObjectController extends WithResourceController {
 				 * Metrics helper code
 				 */
 				 ObjectMapper objm = new ObjectMapper();
-				 byte[] yourBytes = objm.writeValueAsBytes(result);
+
+				 byte[] yourBytes = new byte[0];
+				try {
+					yourBytes = objm.writeValueAsBytes(result);
+				} catch (JsonProcessingException e) {
+					log.debug("Cannot get bytes of result json.", e);
+				}
 				 histogramResponseSize.update(yourBytes.length-histogramResponseSize.getCount());
 				 call_timeContext.stop();
 				 dao_timeContext.stop();
@@ -1179,5 +1194,5 @@ public class CollectionObjectController extends WithResourceController {
 		}
 		return 0;
 	}
-	
+
 }
