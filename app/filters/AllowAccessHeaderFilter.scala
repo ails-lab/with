@@ -49,7 +49,7 @@ class AllowAccessHeaderFilter extends Filter {
   val log = Logger(this.getClass())
   
   def apply(next: (RequestHeader) => Future[Result])(rh: RequestHeader) = {
-    next( rh ).map {result => result.withHeaders(HeaderNames.ACCESS_CONTROL_ALLOW_ORIGIN -> "*")}
+    next( rh ).map {result => result.withHeaders(HeaderNames.ACCESS_CONTROL_ALLOW_ORIGIN -> "*").withHeaders(HeaderNames.ACCESS_CONTROL_ALLOW_METHODS -> "*")}
   }
   
 }
