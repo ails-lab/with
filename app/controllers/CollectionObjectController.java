@@ -358,13 +358,13 @@ public class CollectionObjectController extends WithResourceController {
 					.getById(collectionDbId,
 							Arrays.asList("administrative.entryCount"))
 					.getAdministrative()).getEntryCount();
-			
+			entryCount = Math.min(entryCount, 5000);
 			int pageSize = Math.min(entryCount, 100);
 			int pos = 0;
 			while (pos<entryCount){
 				List<RecordResource> records = DB.getRecordResourceDAO()
-						.getByCollectionBetweenPositions(collectionDbId, 0,
-								pageSize);
+						.getByCollectionBetweenPositions(collectionDbId, pos,
+								pos+pageSize);
 				for (RecordResource recordResource : records) {
 					if (recordResource instanceof CulturalObject) {
 						CulturalObject new_record = (CulturalObject) recordResource;
