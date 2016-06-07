@@ -85,6 +85,19 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 		Query<RecordResource> q = this.createQuery();
 		return getRecords(collection.getCollectedResources(), q);
 	}
+	
+	
+	
+	public List<RecordResource> getByCollectionBetweenPositionsAndSort(
+			ObjectId collectionId, int lowerBound, int upperBound, String sortingCriteria) {
+		if (upperBound < lowerBound)
+			return new ArrayList<RecordResource>();
+		CollectionObject collection = DB.getCollectionObjectDAO()
+				.getSliceOfCollectedResources(collectionId, lowerBound, upperBound-lowerBound);
+		Query<RecordResource> q = this.createQuery().order(sortingCriteria);
+		return getRecords(
+				collection.getCollectedResources(), q);
+	}
 
 	/**
 	 * Retrieve records from specific collection whose position is between
@@ -153,7 +166,25 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 					.collect(collectedResources,
 							new BeanToPropertyValueTransformer(
 									"target.recordId"));
-			q.field("_id").in(recordIds);
+			q.field("_id").in(recordIds).order("q");
+			return this.find(q).asList();
+		} catch (Exception e) {
+			return new ArrayList<RecordResource>();
+		}
+	}
+	/**
+	 * sorts the result considering {@link sortingFiled}
+	 * @see {@code ResourceRecord.getByCollection}
+	 */
+	public List<RecordResource> getByCollectionAndSort(
+			List<ContextData<ContextDataBody>> collectedResources,
+			Query<RecordResource> q, String sortingField) {
+		try {
+			List<ObjectId> recordIds = (List<ObjectId>) CollectionUtils
+					.collect(collectedResources,
+							new BeanToPropertyValueTransformer(
+									"target.recordId"));
+			q.field("_id").in(recordIds).order(sortingField);
 			return this.find(q).asList();
 		} catch (Exception e) {
 			return new ArrayList<RecordResource>();

@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.StringWriter;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import org.bson.types.ObjectId;
@@ -43,6 +44,7 @@ import org.semanticweb.owlapi.util.SimpleIRIMapper;
 import model.DescriptiveData.Quality;
 import model.basicDataTypes.Language;
 import model.basicDataTypes.MultiLiteral;
+import model.basicDataTypes.MultiLiteralOrResource;
 import model.resources.CulturalObject;
 import model.resources.CulturalObject.CulturalObjectData;
 import model.resources.RecordResource.RecordDescriptiveData;
@@ -180,7 +182,9 @@ public class OWLExporter {
 			for (String c : toManyText(descriptiveData.getDccontributor())) {
 				exportRoleAssertion(instance, "hasContributor", c);
 			}
-			for (String c : toManyText(descriptiveData.getDccreator())) {
+			MultiLiteralOrResource dccreator = descriptiveData.getDccreator();
+			List<String> manyText = toManyText(dccreator);
+			for (String c : manyText) {
 				exportRoleAssertion(instance, "hasCreator", c);
 			}
 			for (Language c : ListUtils.transform(toManyText(descriptiveData.getDclanguage()), (x)->Language.getLanguage(x))) {
@@ -199,6 +203,12 @@ public class OWLExporter {
 		private String toText(MultiLiteral literal) {
 			if (Utils.hasInfo(literal)){
 				List<String> list = literal.get(Language.DEFAULT);
+				if (list==null){
+					Iterator<List<String>> it = literal.values().iterator();
+					if (it.hasNext())
+						return it.next().toString();
+				}
+					
 				return list.toString();
 			} else
 				return null;
@@ -206,7 +216,12 @@ public class OWLExporter {
 		
 		private List<String> toManyText(MultiLiteral literal) {
 			if (Utils.hasInfo(literal)){
-				List<String> list = literal.get(Language.DEFAULT);
+				List<String> list = literal.fillDEF().get(Language.DEFAULT);
+				if (list==null){
+					Iterator<List<String>> it = literal.values().iterator();
+					if (it.hasNext())
+						return it.next();
+				}
 				return list;
 			} else
 				return new ArrayList<>();

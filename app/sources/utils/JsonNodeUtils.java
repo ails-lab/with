@@ -114,8 +114,13 @@ public class JsonNodeUtils {
 				Entry<String, JsonNode> next = iterator.next();
 				Language language = Language.getLanguage(next.getKey());
 				JsonNode value = next.getValue();
-				if (language != null)
+				if (language != null){
+					if (value.isArray())
 					res.addLiteral(language, value.get(0).asText());
+					else
+						res.addLiteral(language, value.asText());
+					
+				}
 				else
 					res.addSmartLiteral(asString(value), suggestedLanguages);
 			}

@@ -96,6 +96,7 @@ import sources.OWLExporter.CulturalItemOWLExporter;
 import sources.core.CommonQuery;
 import sources.core.SourceResponse;
 import sources.core.Utils;
+import utils.ListUtils;
 import utils.Locks;
 import utils.MetricsUtils;
 import utils.Tuple;
@@ -279,10 +280,20 @@ public class CollectionObjectController extends WithResourceController {
 			List<RecordResource> records = DB.getRecordResourceDAO()
 					.getByCollectionBetweenPositions(collectionDbId, 0,
 							Math.min(entryCount, 1000));
+			log.debug(ListUtils.transform(records, (x)->x.getQualityMeasure()).toString());
 			RecordResource<?>[] array = records
 					.toArray(new RecordResource<?>[] {});
-			Arrays.sort(array, Utils.compareThumbs);
-			log.debug("Items sorted based on image quality");
+			Arrays.sort(array, Utils.compareQuality);
+			for (int i = 0; i < array.length; i++) {
+				DB.getCollectionObjectDAO().updateContextData(collectionDbId, new ContextData<>(array[i].getDbId()), i);
+			}
+			log.info("Items sorted based quality metric");
+			
+			records = DB.getRecordResourceDAO()
+					.getByCollectionBetweenPositions(collectionDbId, 0,
+							Math.min(entryCount, 1000));
+			log.debug(ListUtils.transform(records, (x)->x.getQualityMeasure()).toString());
+			
 			return ok();
 		} catch (Exception e) {
 			result.put("error", e.getMessage());
@@ -293,13 +304,13 @@ public class CollectionObjectController extends WithResourceController {
 	public static Result exportCollectionObjectToOWL(String cname) {
 
 		ObjectNode resultInfo = Json.newObject();
-		ObjectId creatorDbId = new ObjectId(loggedInUser());
+//		ObjectId creatorDbId = new ObjectId(loggedInUser());
 		CollectionObject ccid = null;
-		if (!isCollectionCreated(creatorDbId, cname)) {
+		List<CollectionObject> col = DB.getCollectionObjectDAO()
+				.getByLabel(Language.DEFAULT, cname);
+		if (!Utils.hasInfo(col)) {
 			return badRequest(resultInfo);
 		} else {
-			List<CollectionObject> col = DB.getCollectionObjectDAO()
-					.getByLabel(Language.DEFAULT, cname);
 			ccid = col.get(0);
 		}
 		ObjectNode result = Json.newObject();
@@ -323,6 +334,7 @@ public class CollectionObjectController extends WithResourceController {
 			}
 			return ok(exporter.export());
 		} catch (Exception e) {
+			e.printStackTrace();
 			result.put("error", e.getMessage());
 			return internalServerError(result);
 		}
@@ -941,7 +953,7 @@ public class CollectionObjectController extends WithResourceController {
 	 * List all Records from a Collection using a start item and a page size
 	 */
 	public static Result listRecordResources(String collectionId,
-			String contentFormat, int start, int count, String profile, Option<String> locale) {
+			String contentFormat, int start, int count, String profile, Option<String> locale, Option<String> sortingCriteria) {
 		ObjectNode result = Json.newObject();
 		ObjectId colId = new ObjectId(collectionId);
 		Locks locks = null;
@@ -952,9 +964,12 @@ public class CollectionObjectController extends WithResourceController {
 			if (!response.toString().equals(ok().toString()))
 				return response;
 			else {
-				List<RecordResource> records = DB.getRecordResourceDAO()
+				List<RecordResource> records = (!sortingCriteria.isDefined())? DB.getRecordResourceDAO()
 						.getByCollectionBetweenPositions(colId, start,
-								start + count);
+								start + count)
+				:  DB.getRecordResourceDAO()
+						.getByCollectionBetweenPositionsAndSort(colId, start,
+								start + count,sortingCriteria.get());
 				if (records == null) {
 					result.put("message",
 							"Cannot retrieve records from database!");
