@@ -18,7 +18,6 @@ package controllers;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
 
@@ -26,7 +25,7 @@ import javax.validation.ConstraintViolation;
 
 import model.annotations.ContextData;
 import model.annotations.ContextData.ContextDataType;
-import model.basicDataTypes.WithAccess.Access;
+import model.basicDataTypes.Language;
 import model.resources.RecordResource;
 import model.resources.collection.CollectionObject;
 import model.resources.collection.CollectionObject.CollectionAdmin;
@@ -49,6 +48,8 @@ import db.DB;
 
 import java.util.Random;
 import java.util.HashSet;
+
+import play.libs.F.Some;
 /**
  * @author mariaral
  *
@@ -270,17 +271,15 @@ public class RecordResourceController extends WithResourceController {
 		    Integer next = rng.nextInt(collectionsAndCount.totalRecordsCount);
 		    randomNumbers.add(next);
 		}
-		int colPosition = -1;
-		int previousRecords = 0;
 		for (Integer random: randomNumbers) {
-			System.out.println("random: "+ random);
+			int colPosition = -1;
+			int previousRecords = 0;
+			int recordCount = 0;
 			while (random > previousRecords) {
-				int recordCount = collectionsAndCount.collectionsRecordCount.get(++colPosition).y;
+				recordCount = collectionsAndCount.collectionsRecordCount.get(++colPosition).y;
 				previousRecords += recordCount;
-				System.out.println(previousRecords + " " + recordCount);
 			}
-			int recordPosition = random - previousRecords - 1;
-			System.out.println(recordPosition);
+			int recordPosition = random - (previousRecords - recordCount) - 1;
 			CollectionObject collection = DB.getCollectionObjectDAO().getById(
 					collectionsAndCount.collectionsRecordCount.get(colPosition).x, Arrays.asList("collectedResources"));
 			ContextData contextData = (ContextData) collection.getCollectedResources().get(recordPosition);
@@ -289,7 +288,10 @@ public class RecordResourceController extends WithResourceController {
 		}
 		ArrayNode recordsList = Json.newObject().arrayNode();
 		for (RecordResource record : records) {
-			recordsList.add(Json.toJson(record));
+			Some<String> locale = new Some(Language.DEFAULT.toString());
+			RecordResource profiledRecord = record.getRecordProfile(Profile.MEDIUM.toString());
+			filterResourceByLocale(locale, profiledRecord);
+			recordsList.add(Json.toJson(profiledRecord));
 		}
 		return ok(recordsList);
 	}
