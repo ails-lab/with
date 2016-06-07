@@ -23,8 +23,10 @@ import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
+import model.basicDataTypes.ProvenanceInfo;
 import sources.core.CommonFilterLogic;
 import sources.core.CommonFilterResponse;
+import sources.core.Utils;
 
 public class ListUtils {
 
@@ -85,6 +87,13 @@ public class ListUtils {
 			}
 		}
 		return res;
+	}
+
+	public static <T> T getLast(List<T> list) {
+		if (Utils.hasInfo(list)){
+			return list.get(list.size()-1);
+		}
+		return null;
 	}
 
 }

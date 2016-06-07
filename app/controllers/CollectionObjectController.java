@@ -24,6 +24,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Function;
 
 import javax.validation.ConstraintViolation;
 
@@ -94,6 +95,8 @@ import sources.EuropeanaCollectionSpaceSource;
 import sources.EuropeanaSpaceSource;
 import sources.OWLExporter.CulturalItemOWLExporter;
 import sources.core.CommonQuery;
+import sources.core.ParallelAPICall;
+import sources.core.ParallelAPICall.Priority;
 import sources.core.SourceResponse;
 import sources.core.Utils;
 import utils.ListUtils;
@@ -300,6 +303,39 @@ public class CollectionObjectController extends WithResourceController {
 			return internalServerError(result);
 		}
 	}
+	
+	public static Result updateCollectionObject(String collectionId) {
+		ObjectNode result = Json.newObject();
+		try {
+			ObjectId collectionDbId = new ObjectId(collectionId);
+			int entryCount = ((CollectionAdmin) DB
+					.getCollectionObjectDAO()
+					.getById(collectionDbId,
+							Arrays.asList("administrative.entryCount"))
+					.getAdministrative()).getEntryCount();
+			Function<String, String> update = (String id) ->{
+				int pos = 0;
+				int pageSize = Math.min(entryCount, 100);
+				while (pos<entryCount){
+					List<RecordResource> records = DB.getRecordResourceDAO()
+							.getByCollectionBetweenPositions(collectionDbId, pos, pos+pageSize,"provenance");
+					for (int i = 0; i < records.size(); i++) {
+						RecordResource recordResource = records.get(i);
+						@SuppressWarnings("unchecked")
+						ProvenanceInfo provenance = (ProvenanceInfo) ListUtils.getLast(recordResource.getProvenance());
+						WithResourceController.updateRecord(recordResource.getDbId(), provenance.getProvider(),provenance.getResourceId());
+					}
+					pos+=pageSize;
+				}
+				return null;
+			};
+			ParallelAPICall.createPromise(update, collectionId,Priority.BACKEND);
+			return ok();
+		} catch (Exception e) {
+			result.put("error", e.getMessage());
+			return internalServerError(result);
+		}
+	}
 
 	public static Result exportCollectionObjectToOWL(String cname) {
 
@@ -322,19 +358,25 @@ public class CollectionObjectController extends WithResourceController {
 					.getById(collectionDbId,
 							Arrays.asList("administrative.entryCount"))
 					.getAdministrative()).getEntryCount();
-			List<RecordResource> records = DB.getRecordResourceDAO()
-					.getByCollectionBetweenPositions(collectionDbId, 0,
-							Math.min(entryCount, 1000));
-
-			for (RecordResource recordResource : records) {
-				if (recordResource instanceof CulturalObject) {
-					CulturalObject new_record = (CulturalObject) recordResource;
-					exporter.exportItem(new_record);
+			
+			int pageSize = Math.min(entryCount, 100);
+			int pos = 0;
+			while (pos<entryCount){
+				List<RecordResource> records = DB.getRecordResourceDAO()
+						.getByCollectionBetweenPositions(collectionDbId, 0,
+								pageSize);
+				for (RecordResource recordResource : records) {
+					if (recordResource instanceof CulturalObject) {
+						CulturalObject new_record = (CulturalObject) recordResource;
+						exporter.exportItem(new_record);
+					}
 				}
+				pos+=pageSize;
 			}
+			
+			
 			return ok(exporter.export());
 		} catch (Exception e) {
-			e.printStackTrace();
 			result.put("error", e.getMessage());
 			return internalServerError(result);
 		}

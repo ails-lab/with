@@ -86,6 +86,15 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 		return getRecords(collection.getCollectedResources(), q);
 	}
 	
+	public List<RecordResource> getByCollectionBetweenPositions(
+			ObjectId collectionId, int lowerBound, int upperBound,String... retrievedFields) {
+		if (upperBound < lowerBound)
+			return new ArrayList<RecordResource>();
+		CollectionObject collection = DB.getCollectionObjectDAO()
+				.getSliceOfCollectedResources(collectionId, lowerBound, upperBound-lowerBound);
+		Query<RecordResource> q = this.createQuery().retrievedFields(true,retrievedFields);
+		return getRecords(collection.getCollectedResources(), q);
+	}
 	
 	
 	public List<RecordResource> getByCollectionBetweenPositionsAndSort(
