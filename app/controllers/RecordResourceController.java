@@ -270,15 +270,17 @@ public class RecordResourceController extends WithResourceController {
 		    Integer next = rng.nextInt(collectionsAndCount.totalRecordsCount);
 		    randomNumbers.add(next);
 		}
-		int colPosition = 0;
+		int colPosition = -1;
 		int previousRecords = 0;
-		for (Integer random: randomNumbers) {	
-			int recordCount = collectionsAndCount.collectionsRecordCount.get(colPosition).y;
-			while (random > recordCount + previousRecords) {
-				colPosition++;
+		for (Integer random: randomNumbers) {
+			System.out.println("random: "+ random);
+			while (random > previousRecords) {
+				int recordCount = collectionsAndCount.collectionsRecordCount.get(++colPosition).y;
 				previousRecords += recordCount;
+				System.out.println(previousRecords + " " + recordCount);
 			}
 			int recordPosition = random - previousRecords - 1;
+			System.out.println(recordPosition);
 			CollectionObject collection = DB.getCollectionObjectDAO().getById(
 					collectionsAndCount.collectionsRecordCount.get(colPosition).x, Arrays.asList("collectedResources"));
 			ContextData contextData = (ContextData) collection.getCollectedResources().get(recordPosition);
