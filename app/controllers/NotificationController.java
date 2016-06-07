@@ -20,6 +20,7 @@ import java.sql.Timestamp;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
+
 import model.usersAndGroups.User;
 import model.usersAndGroups.UserGroup;
 import notifications.Notification;
@@ -36,9 +37,11 @@ import play.libs.Json;
 import play.mvc.Controller;
 import play.mvc.Result;
 import play.mvc.WebSocket;
+import utils.MetricsUtils;
 import utils.NotificationCenter;
 import actors.NotificationActor;
 
+import com.codahale.metrics.Timer;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -104,7 +107,7 @@ public class NotificationController extends WithController {
 			return internalServerError(result);
 		}
 	}
-	
+
 	public static Result respondToRequest(String notificationId, boolean accept) {
 		ObjectNode result = Json.newObject();
 		try {
@@ -153,7 +156,7 @@ public class NotificationController extends WithController {
 					if (!accept) {
 						//TODO: downgrade to previous access
 						ObjectId resourceId = resourceNotification.getResource();
-						RightsController.changeAccess(resourceId, shareInfo.getUserOrGroup(), shareInfo.getPreviousAccess(), shareInfo.getOwnerEffectiveIds(), 
+						RightsController.changeAccess(resourceId, shareInfo.getUserOrGroup(), shareInfo.getPreviousAccess(), shareInfo.getOwnerEffectiveIds(),
 								true, false);
 						ResourceNotification newNotification = new ResourceNotification();
 						newNotification.setActivity(Activity.COLLECTION_REJECTED);
@@ -173,7 +176,7 @@ public class NotificationController extends WithController {
 					result.put("error", "User is not authorized for this action");
 					return internalServerError(result);
 				}
-				
+
 			default:
 				result.put("error", "Notification does not require acceptance");
 				return badRequest(result);
@@ -186,6 +189,9 @@ public class NotificationController extends WithController {
 	}
 
 	public static Result getUserNotifications() {
+		final Timer timer = MetricsUtils.registry.timer(
+				MetricsUtils.registry.name(Notification.class, "getUserNotification", "time"));
+		final Timer.Context timeContext = timer.time();
 		try {
 			ObjectId userId = new ObjectId(loggedInUser());
 			Set<ObjectId> userOrGroupIds = new HashSet<ObjectId>();
@@ -205,12 +211,16 @@ public class NotificationController extends WithController {
 			} else {
 				notifications = unreadNotifications;
 			}
+
 			return ok(Json.toJson(notifications));
+
 		} catch (Exception e) {
 			ObjectNode result = Json.newObject();
 			result.put("error", e.getMessage());
 			return internalServerError(result);
 
+		} finally {
+			timeContext.stop();
 		}
 	}
 
