@@ -367,8 +367,29 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 					  $( settings.mSelector ).isotope({ filter: selector });
 					  return false;
 				}
-					  
-	 
+	
+	  
+	  self.startAnnotate = function() {
+		  self.randomRecords();
+	  };
+	  
+	  self.randomRecords = function() {
+			$.ajax({
+		    	"url": "/record/randomRecords?groupId=56e13d2e75fe2450755e553a&batchcount=10",
+		    	"method": "GET",
+		    	"success": function( data, textStatus, jQxhr ){
+		    		alert(JSON.stringify(data));
+		    		self.recordsToAnnotate(data);
+		    		//for recordsToAnnotate itemShow(selrecord);
+		    		$.each(data, function (i, record) {
+		    			itemShow(record);
+		    		});
+				},
+				"error": function (result) {
+					$.smkAlert({ text: 'An error occured', type: 'danger', time: 10 });
+				}         
+		    });	
+		};
 	
   }
   
