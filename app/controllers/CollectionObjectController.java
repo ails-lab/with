@@ -288,12 +288,12 @@ public class CollectionObjectController extends WithResourceController {
 				DB.getCollectionObjectDAO().updateContextData(collectionDbId, new ContextData<>(array[i].getDbId()), i);
 			}
 			log.info("Items sorted based quality metric");
-			
+
 			records = DB.getRecordResourceDAO()
 					.getByCollectionBetweenPositions(collectionDbId, 0,
 							Math.min(entryCount, 1000));
 			log.debug(ListUtils.transform(records, (x)->x.getQualityMeasure()).toString());
-			
+
 			return ok();
 		} catch (Exception e) {
 			result.put("error", e.getMessage());
@@ -561,7 +561,7 @@ public class CollectionObjectController extends WithResourceController {
 	public static Result list(Option<MyPlayList> directlyAccessedByUserOrGroup,
 			Option<String> creator, Option<Boolean> isExhibition,
 			 Boolean collectionHits, int offset, int count, String profile, Option<String> locale) {
-		if(directlyAccessedByUserOrGroup.get()==null) {
+		if(directlyAccessedByUserOrGroup.isDefined() && (directlyAccessedByUserOrGroup.get()==null)) {
 			return badRequest("Parameter 'directlyAccessedByUserOrGroup' was not well defined!");
 		}
 
