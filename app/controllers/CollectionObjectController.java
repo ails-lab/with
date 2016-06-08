@@ -561,6 +561,10 @@ public class CollectionObjectController extends WithResourceController {
 	public static Result list(Option<MyPlayList> directlyAccessedByUserOrGroup,
 			Option<String> creator, Option<Boolean> isExhibition,
 			 Boolean collectionHits, int offset, int count, String profile, Option<String> locale) {
+		if(directlyAccessedByUserOrGroup.get()==null) {
+			return badRequest("Parameter 'directlyAccessedByUserOrGroup' was not well defined!");
+		}
+
 		if (WithController.isSuperUser()) {
 			return list(Option.None(), Option.None(),Option.None(), Option.Some(true), isExhibition, collectionHits, offset, count, profile, locale);
 		}
