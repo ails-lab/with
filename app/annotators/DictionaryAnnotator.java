@@ -39,6 +39,7 @@ import com.aliasi.dict.ExactDictionaryChunker;
 import com.aliasi.dict.MapDictionary;
 import com.aliasi.tokenizer.IndoEuropeanTokenizerFactory;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import elastic.Elastic;
@@ -75,8 +76,8 @@ public class DictionaryAnnotator extends Annotator {
 		SearchResponse res = es.execute(query, new SearchOptions(0, Integer.MAX_VALUE), new String[] {langField, uriField, thesaurusField, enField} );
 		SearchHits sh = res.getHits();
 
-		MapDictionary<String> dict = new MapDictionary<>();
-
+		Map<String, ArrayList<ObjectNode>> map = new HashMap<>();
+		
 		for (Iterator<SearchHit> iter = sh.iterator(); iter.hasNext();) {
 			SearchHit hit = iter.next();
 			
@@ -86,9 +87,11 @@ public class DictionaryAnnotator extends Annotator {
 			SearchHitField enLabel = hit.field(enField);
 			
 			if (label != null && uri != null) {
+				String labelx  = label.getValue().toString();
+				
 				ObjectNode cc = Json.newObject();
 				cc.put("uri", uri.getValue().toString());
-				cc.put("label", label.getValue().toString());
+				cc.put("label", labelx);
 				cc.put("vocabulary", thesaurus.getValue().toString());
 
 				if (enLabel != null) {
@@ -97,8 +100,24 @@ public class DictionaryAnnotator extends Annotator {
 					cc.put("label-en", label.getValue().toString());
 				}
 				
-				dict.addEntry(new DictionaryEntry<String>(label.getValue().toString(),  Json.stringify(cc)));
+				ArrayList<ObjectNode> list = map.get(labelx);
+				if (list == null) {
+					list = new ArrayList<>();
+					map.put(labelx, list);
+				}
+				list.add(cc);
 			}
+		}
+		
+		MapDictionary<String> dict = new MapDictionary<>();
+		
+		for (Map.Entry<String, ArrayList<ObjectNode>> entry : map.entrySet()) {
+			ArrayNode cc = Json.newObject().arrayNode();
+			for (ObjectNode node : entry.getValue()) {
+				cc.add(node);
+			}
+			dict.addEntry(new DictionaryEntry<String>(entry.getKey(), Json.stringify(cc)));
+//			System.out.println(entry.getKey() + " " + Json.stringify(cc));
 		}
 			
 		tt = new ExactDictionaryChunker(dict, IndoEuropeanTokenizerFactory.INSTANCE, false, caseSensitive);
@@ -125,13 +144,18 @@ public class DictionaryAnnotator extends Annotator {
 	
 	@Override
 	public List<Annotation> annotate(String text, Map<String, Object> properties) throws Exception {
+		text = strip(text);
+		
 		List<Annotation> res = new ArrayList<>();
 		
 		Chunking chunking = tt.chunk(text);
 	    for (Chunk chunk : chunking.chunkSet()) {
-	    	JsonNode node = Json.parse(chunk.type());
+	    	JsonNode array = Json.parse(chunk.type());
 	    	
-	        res.add(new Annotation(this.getClass(), chunk.start(), chunk.end(), 1.0f, node.get("uri").asText(), node.get("label-en").asText(), node.get("vocabulary").asText()));
+	    	for (Iterator<JsonNode> iter = array.elements(); iter.hasNext();) {
+	    		JsonNode node = iter.next();
+	    		res.add(new Annotation(this.getClass(), chunk.start(), chunk.end(), 1.0f, node.get("uri").asText(), node.get("label-en").asText(), node.get("vocabulary").asText()));
+	    	}
 	    }
 
 		return res;

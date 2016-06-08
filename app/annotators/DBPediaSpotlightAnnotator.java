@@ -33,10 +33,10 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
-
 import org.apache.http.impl.client.HttpClientBuilder;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.hp.hpl.jena.query.QueryExecution;
 import com.hp.hpl.jena.query.QueryExecutionFactory;
 import com.hp.hpl.jena.query.QueryFactory;
@@ -99,6 +99,8 @@ public class DBPediaSpotlightAnnotator extends Annotator {
 	}
 	
 	public List<Annotation> annotate(String text, Map<String, Object> props) throws Exception {
+		text = strip(text);
+		
 		List<Annotation> res = new ArrayList<>();
 		
 		HttpClient client = HttpClientBuilder.create().build();
@@ -115,7 +117,7 @@ public class DBPediaSpotlightAnnotator extends Annotator {
 		
 		int responseCode = response.getStatusLine().getStatusCode();
 		
-		BufferedReader br = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
+		BufferedReader br = new BufferedReader(new InputStreamReader(response.getEntity().getContent(), Charset.forName("UTF-8")));
     
 		StringBuffer resx = new StringBuffer();
 	    String line;
@@ -133,7 +135,7 @@ public class DBPediaSpotlightAnnotator extends Annotator {
 	    		JsonNode resource = iter.next();
 	    		
 	    		String URI = resource.get("@URI").asText();
-	    		String types = resource.get("@types").asText();
+//	    		String types = resource.get("@types").asText();
 	    		String surfaceForm = resource.get("@surfaceForm").asText();
 	    		int offset = resource.get("@offset").asInt();
 	    		double score = resource.get("@similarityScore").asDouble();
@@ -144,8 +146,6 @@ public class DBPediaSpotlightAnnotator extends Annotator {
 	    		} else {
 	    			query = "select ?label where { ?x <http://www.w3.org/2000/01/rdf-schema#label> ?label . ?x <http://www.w3.org/2002/07/owl#sameAs> <" + URI + "> }";
 	    		}
-	    		
-	    		System.out.println(query);
 
 	    	    QueryExecution qe = QueryExecutionFactory.sparqlService(DPBEDIA_ENDPOINT, QueryFactory.create(query, Syntax.syntaxSPARQL));
 	    		ResultSet rs = qe.execSelect();

@@ -17,9 +17,9 @@
                     <!-- wrap-->
                     <div class="wrap">
                       <!-- item-->
-                      <div class="media" id="mediadiv">
+                      <div class="media" id="mediadiv" style="vertical-align:top;">
                       <!-- ko if: record().vtype == "IMAGE" --> 
-                      <img data-bind="attr: {src: record().fullres()},event: {error: function(){changeSource($data)}}"/>
+                      <!--  <img data-bind="attr: {src: record().fullres()},event: {error: function(){changeSource($data)}}"/> --> 
                       <!-- /ko --> 
                       </div> 
                       <!-- metadata-->
@@ -138,22 +138,33 @@
                             </div>
                             
 							<div id="annotations" class="tab-pane">
+                                <!-- title-->
+                              <div class="meta">
+                                <div class="list" data-bind="if: record().title">
+                                  <div class="title">
+                                    <div class="titlewrap">Title</div>
+                                  </div>
+                                  <div class="field newlines" id="ann-title" data-bind="html:record().title">
+                                  </div>
+                                </div>
+
                                 <!-- description-->
                               <div class="meta">
                                 <div class="list" data-bind="if: record().description">
                                   <div class="title">
                                     <div class="titlewrap">Description</div>
                                   </div>
-                                  <div class="field newlines" id="anndescription" data-bind="html:record().description">
+                                  <div class="field newlines" id="ann-description" data-bind="html:record().description">
                                   </div>
                                 </div>
+                                <!-- 
                                 <div class="list"  data-bind="if: record().dataProvider">
                                   <div class="title">
                                     <div class="titlewrap">Provider</div>
                                   </div>
                                   <div class="field" data-bind="text:record().dataProvider"></div>
                                 </div>
-                                <!-- 
+                                
                                 <div class="list" data-bind="if: record().creator">
                                   <div class="title">
                                     <div class="titlewrap">Creator</div>
@@ -187,10 +198,13 @@
                                 
                                 <div class="list">
                                   <div class="title">
-                                    <div class="titlewrap">Resources</div>
+                                    <div class="titlewrap">Tags</div>
                                   </div>
                                   <!-- ko foreach: record().annotationsKeys -->
-                                  <div class="field newlines ann-resource" data-bind="attr: {id: id}, text:$parent.record().getAnnotationLabel($data), event: {click: function(){$parent.record().annShow(uri);}}"></div>
+                                  <div class="term">
+                                    <a target="_blank" data-bind="attr: {href: uri, title: uri}, css: {'glyphicon glyphicon-link': true}"></a>&nbsp;
+                                  	<a class="ann-resource" href="#" data-bind="attr: {id: id}, text:$parent.record().getAnnotationLabel($data), event: {click: function(){$parent.record().annShow(uri);}}"></a>
+                                  </div>
                                  <!-- /ko --> 
                                   </div>
                                  

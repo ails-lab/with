@@ -50,7 +50,6 @@ define(['knockout', 'text!./_item.html', 'app','smoke'], function (ko, template,
 		
 		
 		self.annotations = ko.observableArray([]);
-//		self.annotationsMap = ko.observableArray([]);
 		self.annotationsKeys = ko.observableArray([]);		
 		self.referenceMap = ko.observableArray([]);
 		 
@@ -103,6 +102,18 @@ define(['knockout', 'text!./_item.html', 'app','smoke'], function (ko, template,
 					self.vtype = "MEDIA";
 					$('#mediadiv').html('<audio id="mediaplayer" autoplay="true" controls width="576" height="324"><source src="' + self.fullres() + '" type="audio/mpeg">Your browser does not support HTML5</audio>');
 				}
+			}
+			
+			if (data.fullrestype == null || (data.fullrestype != null && data.fullrestype == "IMAGE")) {
+				var img = new Image();
+				img.onload = function() {
+					$('#mediadiv').html("<svg style='height:100%;width:100%;max-height:" + img.height + "px; max-width:" + img.width + "px;' viewBox='0 0 " + img.width + " " + img.height + "' preserveAspectRatio='xMidYMin meet' version='1.1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink'>" +
+						                    "<image width='" + img.width + "' height='" + img.height + "' xlink:href='" + self.fullres() + "'/>" +
+			         		  	        "</svg>");
+					self.vtype = "IMAGE";
+				};
+				img.src = self.fullres();
+
 			} 			
 		};
 
@@ -137,13 +148,14 @@ define(['knockout', 'text!./_item.html', 'app','smoke'], function (ko, template,
 		}
 		
 		self.getAnnotationLabel = function (data) {
-			if (data.label == undefined || data.vocabulary == undefined) {
-				return data.uri;
+			if (data.label == undefined) {
+				return data.vocabulary + " : " + data.uri;
 			} else {
 				return data.vocabulary + " : " + data.label;
 			}
 		}
 
+		var fieldMap = { label: "title"};
 		
 		self.parseAnnotations = function(data){
 			
@@ -154,6 +166,9 @@ define(['knockout', 'text!./_item.html', 'app','smoke'], function (ko, template,
 			for (x in anns) {
 				var location = anns[x].target.selector.value;
 				var property = location.substring(2,location.indexOf("&t="));
+				if (fieldMap[property] != undefined) {
+					property = fieldMap[property];
+				}
 				
 				if (annotations[property] == undefined) {
 					annotations[property] = [];
@@ -166,9 +181,8 @@ define(['knockout', 'text!./_item.html', 'app','smoke'], function (ko, template,
 				}
 			}
 			
-			
-			for (entry in annotations) {
-				self.annotations.push(new Annotations({ field:entry, values: annotations[entry] }));
+			for (property in annotations) {
+				self.annotations.push(new Annotations({ field:property, values: annotations[property] }));
 			}
 			
 			var properties = [];
@@ -204,6 +218,10 @@ define(['knockout', 'text!./_item.html', 'app','smoke'], function (ko, template,
 
 				var location = anns[x].target.selector.value;
 				var property = location.substring(2,location.indexOf("&t="));
+				if (fieldMap[property] != undefined) {
+					property = fieldMap[property];
+				}
+
 				var position = location.substring(location.indexOf("&t=") + 3);
 				var sp = parseInt(position.substring(0, position.indexOf(",")));
 				var ep = parseInt(position.substring(position.indexOf(",") + 1));
@@ -228,6 +246,22 @@ define(['knockout', 'text!./_item.html', 'app','smoke'], function (ko, template,
 				positionsArray[property].push({uri:uri, pos:ep, type:1, index:self.annotationIndex[uri]});
 			}
 			
+			self.annotationsKeys.sort(function(a, b) {
+				if (a.vocabulary < b.vocabulary) {
+					return -1;
+				} else if (a.vocabulary > b.vocabulary) {
+					return 1;
+				} else {
+					if (a.label < b.label) {
+						return -1;
+					} else if (a.label < b.label) {
+						return 1;
+					} else {
+						return 0;
+					}
+				}
+			});
+			
 			for (v in positionsArray) {
 				positionsArray[v].sort(function(a, b) {
 					if (a.pos < b.pos) {
@@ -246,97 +280,97 @@ define(['knockout', 'text!./_item.html', 'app','smoke'], function (ko, template,
 				});
 			}
 			
+//			var array = positionsArray["description"];
+//			for (v = 0; v < array.length; v++) {
+//				alert(array[v].uri + " " + array[v].pos + " " +  array[v].type + " " + array[v].index);
+//			}
+			
+			
 			for (v in properties) {
-				if (properties[v] == "description") {
-					var ppos = -1;
-					var text = self.description;
-					var rtext = "";
-					
-					var current = [];
-					
-					var array = positionsArray[properties[v]];
-					
-					var i;
-					
-					for (i = 0; i < array.length;) {
-						var s = i;
-						var e = i;
-						while (e < array.length - 1) {
-							if (array[e + 1].pos == array[s].pos) {
-								e++;
-							} else {
-								break;
-							}
-						}
-						
-						var removed = false;
-						var t;
-						for (t = s; t <= e; t++) {
-							if (array[t].type == 0) {
-								current.push(array[t].uri);
-							} else if (array[t].type == 1) {
-								for (var j = 0; j < current.length; j++) {
-									if (current[j] == array[t].uri) {
-										removed = true;
-										current.splice(j, 1);
-									}
-								}
-							}
-						}
-						
-						if (ppos == -1) {
-							rtext += text.substring(0, array[s].pos)
+				var ppos = -1;
+				var text = this[properties[v]];
+				var rtext = "";
+				
+				var current = [];
+				
+				var array = positionsArray[properties[v]];
+				
+				var i;
+				
+				for (i = 0; i < array.length;) {
+					var s = i;
+					var e = i;
+					while (e < array.length - 1) {
+						if (array[e + 1].pos == array[s].pos) {
+							e++;
 						} else {
-							rtext += text.substring(ppos, array[s].pos)
+							break;
 						}
-						
-						ppos = array[s].pos;
-
-						if (removed) {
-							rtext += "</span>";
-						}
-
-						if (current.length > 0) {
-							rtext += "<span class='";
-							for (var j = 0; j < current.length; j++) {
-								if (j > 0) {
-									rtext += " ";
-								}
-								rtext += "ann-value-" + self.annotationIndex[current[j]];
-							}
-							
-							rtext += "'>"
-						}
-						
-						i = e + 1;
 					}
 					
-					rtext += text.substring(ppos);
+					var removed = false;
+					var t;
+					for (t = s; t <= e; t++) {
+						if (array[t].type == 0) {
+							current.push(array[t].uri);
+						} else if (array[t].type == 1) {
+							for (var j = 0; j < current.length; j++) {
+								if (current[j] == array[t].uri) {
+									removed = true;
+									current.splice(j, 1);
+								}
+							}
+						}
+					}
 					
-					$("#anndescription").html(rtext);
+					if (ppos == -1) {
+						rtext += text.substring(0, array[s].pos)
+					} else {
+						rtext += text.substring(ppos, array[s].pos)
+					}
+					
+					ppos = array[s].pos;
+
+					if (removed) {
+						rtext += "</span>";
+					}
+
+					if (current.length > 0) {
+						rtext += "<span class='";
+						for (var j = 0; j < current.length; j++) {
+							if (j > 0) {
+								rtext += " ";
+							}
+							rtext += "ann-value-" + self.annotationIndex[current[j]];
+						}
+						
+						rtext += "'>"
+					}
+					
+					i = e + 1;
 				}
+				
+				rtext += text.substring(ppos);
+				
+				$("#ann-" + properties[v]).html(rtext);
 			}
 			
 			
 		};
 		
-		self.annDescription = function(data) {
-			return self.annotatedTexts()["description"];
-		}
-
 		var selectedAnnotations = [];
 		
 		self.annShow = function(uri) {
-			$(".ann-resource").css("color","black");
+			$(".ann-resource").removeClass("tag-selection");
 			
-			$("#ann-key-" + self.annotationIndex[uri]).css("color","red");
+			$("#ann-key-" + self.annotationIndex[uri]).addClass("tag-selection");
 			
 			for (v in selectedAnnotations) {
-				$(".ann-value-" + selectedAnnotations[v]).css("color","black");
+				$(".ann-value-" + selectedAnnotations[v]).removeClass("tag-selection");
 			}
 			selectedAnnotations.push(self.annotationIndex[uri]);
 			
-			$(".ann-value-" + self.annotationIndex[uri]).css("color","red");
+			$(".ann-value-" + self.annotationIndex[uri]).addClass("tag-selection");
 		};
 
 		
@@ -620,6 +654,7 @@ define(['knockout', 'text!./_item.html', 'app','smoke'], function (ko, template,
 			 if (vid != null) {
 			    vid.pause();
 			}
+			 $('#mediadiv').html("");
 		};
 
 		self.changeSource = function (item) {

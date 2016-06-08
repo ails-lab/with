@@ -17,8 +17,11 @@
 package annotators;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import model.basicDataTypes.Language;
 import model.resources.RecordResource;
@@ -34,6 +37,41 @@ public abstract class Annotator {
 	public abstract List<Annotation> annotate(String text, Map<String, Object> properties) throws Exception;
 	
 	public void annotate(RecordResource rr) {	}
+	
+	private Pattern p = Pattern.compile("(<.*?>)");
+	
+	protected String strip(String text) {
+		Matcher m = p.matcher(text);
+		
+		StringBuffer sb = new StringBuffer();
+		
+		int prev = -1;
+		while (m.find()) {
+			int s = m.start(1);
+			int e = m.end(1);
+			
+			if (prev == -1) {
+				sb.append(text.substring(0,s));
+			} else {
+				sb.append(text.substring(prev, s));
+			}
+			
+			char[] c = new char[e - s];
+			Arrays.fill(c, ' ');
+			
+			sb.append(c);
+			
+			prev = e;
+		}
+		
+		if (prev == -1) {
+			return text;
+		} else {
+			sb.append(text.substring(prev));
+		
+			return sb.toString();
+		}
+	}
 	
 	public static List<Annotator> getAnnotators(Language lang) {
 		List<Annotator> res = new ArrayList<>();

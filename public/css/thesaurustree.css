@@ -27,3 +27,7 @@
 .newlines {
 	white-space: pre-wrap;
 }
+
+.tag-selection {
+	color: #ff0000;
+}

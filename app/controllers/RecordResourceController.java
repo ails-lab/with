@@ -285,8 +285,8 @@ public class RecordResourceController extends WithResourceController {
 			if (!response.toString().equals(ok().toString()))
 				return response;
 			else {
-//				String[] fields = new String[] {"description", "label"};
-				String[] fields = new String[] {"description"};
+				String[] fields = new String[] {"description", "label"};
+//				String[] fields = new String[] {"description"};
 				
 				DescriptiveData dd = record.getDescriptiveData();
 				
