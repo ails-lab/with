@@ -87,6 +87,7 @@ public class DBPediaSpotlightAnnotator extends Annotator {
     }  
     
     private DBPediaSpotlightAnnotator(Language language) {
+    	this.lang = lang;
     	service = serverMap.get(language);
     }
 

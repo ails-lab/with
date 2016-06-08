@@ -28,6 +28,8 @@ import model.resources.RecordResource;
 
 public abstract class Annotator {
 
+	protected Language lang;
+	
 	public static String LANGUAGE = "lang";
 	
 	public abstract String getName();

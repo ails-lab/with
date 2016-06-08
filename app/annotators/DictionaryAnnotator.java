@@ -21,6 +21,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.index.query.BoolQueryBuilder;
@@ -63,7 +64,10 @@ public class DictionaryAnnotator extends Annotator {
     } 
     
 	private DictionaryAnnotator(Language lang, boolean caseSensitive) {
+		this.lang = lang;
+		
 		String langField = "prefLabel." + lang.getDefaultCode();
+		String altLangField = "altLabel." + lang.getDefaultCode();
 		String enField = "prefLabel.en";
 		String uriField = "uri";
 		String thesaurusField = "thesaurus";
@@ -73,7 +77,7 @@ public class DictionaryAnnotator extends Annotator {
 		BoolQueryBuilder query = QueryBuilders.boolQuery();
 		query.must(QueryBuilders.termQuery("_type", Elastic.thesaurusResource));
 
-		SearchResponse res = es.execute(query, new SearchOptions(0, Integer.MAX_VALUE), new String[] {langField, uriField, thesaurusField, enField} );
+		SearchResponse res = es.execute(query, new SearchOptions(0, Integer.MAX_VALUE), new String[] {langField, altLangField, uriField, thesaurusField, enField} );
 		SearchHits sh = res.getHits();
 
 		Map<String, ArrayList<ObjectNode>> map = new HashMap<>();
@@ -82,6 +86,7 @@ public class DictionaryAnnotator extends Annotator {
 			SearchHit hit = iter.next();
 			
 			SearchHitField label = hit.field(langField);
+			SearchHitField altLabel = hit.field(altLangField);
 			SearchHitField uri = hit.field(uriField);
 			SearchHitField thesaurus = hit.field(thesaurusField);
 			SearchHitField enLabel = hit.field(enField);
@@ -107,6 +112,31 @@ public class DictionaryAnnotator extends Annotator {
 				}
 				list.add(cc);
 			}
+			
+			if (altLabel != null  && uri != null) {
+				for (Object altValue : altLabel.getValues()) {
+					String labelx  = altValue.toString();
+					
+					ObjectNode cc = Json.newObject();
+					cc.put("uri", uri.getValue().toString());
+					cc.put("label", labelx);
+					cc.put("vocabulary", thesaurus.getValue().toString());
+
+					if (enLabel != null) {
+						cc.put("label-en", enLabel.getValue().toString());
+					} else {
+						cc.put("label-en", label.getValue().toString());
+					}
+					
+					ArrayList<ObjectNode> list = map.get(labelx);
+					if (list == null) {
+						list = new ArrayList<>();
+						map.put(labelx, list);
+					}
+					list.add(cc);
+
+				}
+			}
 		}
 		
 		MapDictionary<String> dict = new MapDictionary<>();
@@ -125,10 +155,10 @@ public class DictionaryAnnotator extends Annotator {
 	}
 	
 	public static void main(String[] args) throws Exception {
-		String text = "This is a red silk dress"; 
+		String text = "Have a look at these books and that book. This is a nice mother of pearl. I felt especially proud to receive my commission as an officer in front of my grandmother, The Queen. She has been an incredible role model to me over the years, so it was very special to have her present for my graduation. I know it was also a memorable moment for my fellow officers to take part in the Parade in front of The Queen as Head of the Armed Forces."; 
 		
 		DictionaryAnnotator ta = DictionaryAnnotator.getAnnotator(Language.EN, true);
-		ta.annotate("This is a red silk dress", new HashMap<String, Object>());
+		ta.annotate(text, new HashMap<String, Object>());
 	}
 	
 	
@@ -149,12 +179,38 @@ public class DictionaryAnnotator extends Annotator {
 		List<Annotation> res = new ArrayList<>();
 		
 		Chunking chunking = tt.chunk(text);
+		
+		StanfordNLPThesaurusAnnotator sann = StanfordNLPThesaurusAnnotator.getThesaurusAnnotator(lang);
+		AnnotationIndex ai = sann.analyze(text);
+		
 	    for (Chunk chunk : chunking.chunkSet()) {
 	    	JsonNode array = Json.parse(chunk.type());
+
+	    	int start = chunk.start();
+	    	int end = chunk.end();
+	    	
+//	    	Reject annotations not containing a noun
+	    	ArrayList<AnnotatedObject> aos = ai.getAnnotationsInSpan(new Span(start, end));
+	    	boolean accept = false; 
+	    	loop:
+	    	for (AnnotatedObject ao : aos) {
+	    		for (AnnotationValue value : ao.get("POS")) {
+	    			if (value.getValue().toString().startsWith("NN")) {
+	    				accept = true;
+	    				break loop;
+	    			}
+	    		}
+	    	}
+	    	
+	    	if (!accept) {
+	    		continue;
+	    	}
 	    	
 	    	for (Iterator<JsonNode> iter = array.elements(); iter.hasNext();) {
 	    		JsonNode node = iter.next();
-	    		res.add(new Annotation(this.getClass(), chunk.start(), chunk.end(), 1.0f, node.get("uri").asText(), node.get("label-en").asText(), node.get("vocabulary").asText()));
+	    		
+//	    		System.out.println(start + " " + end  + " " + node.get("vocabulary").asText() + " " + node.get("label-en").asText());
+	    		res.add(new Annotation(this.getClass(), start, end, 1.0f, node.get("uri").asText(), node.get("label-en").asText(), node.get("vocabulary").asText()));
 	    	}
 	    }
 
