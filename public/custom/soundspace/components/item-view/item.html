@@ -39,9 +39,23 @@
 				  </span>
 				  </h1>
                   <div class="owner" data-bind="text:record().dataProvider"></div>
+                   <!-- annotate box-->
+                  <div class="annotatebox">
+                    <div class="question">What kind of musical instrument do you see in this item?</div>
+                    <div class="info">Lorem ipsum dolor sit amet conceptuos </div>
+                    <!-- answers-->
+                    <ul class="answers">
+                      <li>Banjo</li>
+                      <li>Harmonica</li>
+                      <li>Guitar</li>
+                    </ul>
+                    <!-- answer action-->
+                    <ul class="answeraction">
+                      <li><a href="#">NEXT ITEM</a></li>
+                      <li class="dontknow"><a href="#">I DONT KNOW</a></li>
+                    </ul>
+                  </div>
                   <!-- metadata-->
-                  
-				
 				  <ul role="tablist" class="nav nav-tabs">
                     <li class="active"><a href="#information" title="" data-toggle="tab">Info</a></li>
                     <li><a href="#related" title="" data-toggle="tab" data-bind="event:{ click: function(){record().findsimilar()}}">Related</a></li>

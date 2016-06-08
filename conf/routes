@@ -100,7 +100,6 @@ DELETE   /group/admin/:groupId     			    controllers.UserAndGroupManager.remove
 POST	/group/:groupId/addFeatured				controllers.GroupManager.addFeatured(groupId)
 POST 	/group/:groupId/removeFeatured	   	    controllers.GroupManager.removeFeatured(groupId)
 
-
 # Rights Controller
 GET      /rights/:colId/:right                  controllers.RightsController.editCollectionRights(colId, right, username: String ?=null, membersDowngrade: Boolean ?= false)
 GET      /rights/:colId							controllers.RightsController.editCollectionPublicity(colId, isPublic: Boolean, membersDowngrade: Boolean ?= false)
