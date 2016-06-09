@@ -47,9 +47,9 @@ import play.libs.F.Option;
 import play.mvc.Controller;
 
 public abstract class WithController extends Controller {
-	
+
 	public enum Profile {FULL, BASIC, MEDIUM};
-	
+
 	public static final ALogger log = Logger.of(WithController.class);
 
 	public static enum Action {
@@ -62,7 +62,7 @@ public abstract class WithController extends Controller {
 		String userId = effectiveUserIds().get(0);
 		return (DB.getUserDAO().isSuperUser(new ObjectId(userId)));
 	}
-	
+
 	public static User effectiveUser() {
 		ObjectId userId = effectiveUserDbId();
 		if (userId != null)
@@ -128,7 +128,7 @@ public abstract class WithController extends Controller {
 	 * This methods supposes we have all user ids and all userGroup ids
 	 * (recursively obtained) for the user, in a comma-separated list. It then
 	 * transforms the comma-separated in java.util.List
-	 * 
+	 *
 	 * @param effectiveUserIds
 	 * @return
 	 */
@@ -166,13 +166,13 @@ public abstract class WithController extends Controller {
 
 	public static ObjectId effectiveUserDbId() {
 		String effectiveUserIds = session().get("effectiveUserIds");
-		if (effectiveUserIds == null || effectiveUserIds.isEmpty())
+		if ((effectiveUserIds == null) || effectiveUserIds.isEmpty())
 			return null;
 		String[] ids = effectiveUserIds.split(",");
 		return new ObjectId(ids[0]);
 	}
-	
-	
+
+
 	public static String getLocale(Option<String> lang) {
 		String locale = Language.DEFAULT.toString();
 		if (!lang.isDefined()) {
@@ -191,7 +191,7 @@ public abstract class WithController extends Controller {
 		}
 		return locale;
 	}
-	
+
 	public static void filterResourceByLocale(Option<String> locale, WithResource resource) {
 		String localeString = getLocale(locale);
 		//assume only descriptiveData has literal type of fields
@@ -224,9 +224,20 @@ public abstract class WithController extends Controller {
 					        	for (String k: filteredHm.keySet())
 					        		fhm.put(k, (List<String>) filteredHm.get(k));
 									method.invoke(descriptiveData, fhm);
-					        }	
-					        else if (type.equals(Literal.class) || type.equals(LiteralOrResource.class)) {
-					        	method.invoke(descriptiveData, (value.getClass().cast(filteredHm)));
+					        }
+					        else if (type.equals(Literal.class)) {
+					        	Literal lor = new Literal();
+					        	for(String u: filteredHm.keySet()) {
+					        		hm.put(u, filteredHm.get(u));
+									method.invoke(descriptiveData, lor);
+					        	}
+					        }
+					        else if(type.equals(LiteralOrResource.class)) {
+					        	LiteralOrResource lor = new LiteralOrResource();
+					        	for(String u: filteredHm.keySet()) {
+					        		hm.put(u, filteredHm.get(u));
+									method.invoke(descriptiveData, lor);
+					        	}
 					        }
 			        	}
 		        	}
@@ -237,14 +248,14 @@ public abstract class WithController extends Controller {
 			}
 	    }
 	}
-	
+
 	private static void getOneLevelInclParentFields(Class clazz, List<Field> fields) {
         fields.addAll(Arrays.asList(clazz.getDeclaredFields()));
-        if (clazz.getSuperclass() != null && !clazz.getSimpleName().equals("model.resources.WithResource")) {
+        if ((clazz.getSuperclass() != null) && !clazz.getSimpleName().equals("model.resources.WithResource")) {
             getOneLevelInclParentFields(clazz.getSuperclass(), fields);
         }
 	}
-	
+
 	private static void getLiteralFields(List<Field> allFields, List<Field> literalFields) {
         for (Field cf: allFields) {
         	Class<?> type = cf.getType();
@@ -257,14 +268,14 @@ public abstract class WithController extends Controller {
 	        }
 		}
     }
-	
+
 	private static HashMap<String, Object> filterHashMapByLocale(HashMap<String, Object> hm, String locale) {
     	HashMap<String, Object> filteredHm = new HashMap<String, Object>();
-    	if (hm.containsKey(locale)) 
+    	if (hm.containsKey(locale))
         	filteredHm.put(locale, hm.get(locale));
     	//URI entries are always returned
-    	if (hm.containsKey("URI"))
-    		filteredHm.put("URI", hm.get("URI"));
+    	if (hm.containsKey("uri"))
+    		filteredHm.put("uri", hm.get("uri"));
     	return filteredHm;
 	}
 
