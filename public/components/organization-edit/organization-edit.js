@@ -775,7 +775,6 @@ define(['bridget','knockout', 'text!./organization-edit.html', 'isotope','images
 			}
 			else {
 					result =  false;
-				$
 			}
 			return result;
 		}
@@ -796,24 +795,9 @@ define(['bridget','knockout', 'text!./organization-edit.html', 'isotope','images
 				return collection.dbId === id;
 			});
 
-			/*app.likeItem(rec, function (status) {
-				
-				if (status) {
-					$('[id="'+id+'"]').find("fa fa-star featuredbutton").css("color","#ec5a62");
-				} else {
-					$('[id="'+id+'"]').find("fa fa-star featuredbutton").css("color","");
-				}
-			});*/
+			
 		};
 
-	/*	removeSelection = function(data,event){
-        	//event.preventDefault();
-			var selrecord = ko.utils.arrayFirst(self.mixresults(), function(record) {
-				   return record.externalId === data;
-				});
-			self.multipleSelection.remove(selrecord);
-			
-        }*/
 
 		self.addFeatured = function (id,type) {
 			if (type=="COLLECTION"){
