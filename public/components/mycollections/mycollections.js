@@ -78,7 +78,7 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 					$.smkAlert({ text: 'An error occured', type: 'danger', time: 10 });
 					self.closeSideBar();
 				}         
-		 });		
+		    });		
 		};
 		
 		self.importCollectionName = ko.observable("");

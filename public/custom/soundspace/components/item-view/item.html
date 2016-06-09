@@ -50,10 +50,12 @@
                       <li>Guitar</li>
                     </ul>
                     <!-- answer action-->
+                    <!-- ko if: record().nextItemToAnnotate && record().nextItemToAnnotate().length > 0 -->
                     <ul class="answeraction">
-                      <li><a href="#">NEXT ITEM</a></li>
-                      <li class="dontknow"><a href="#">I DONT KNOW</a></li>
+                      <li><a href="#" data-bind="click: nextItem">NEXT ITEM</a></li>
+                      <!--<li class="dontknow"><a href="#">I DONT KNOW</a></li>-->
                     </ul>
+                    <!-- /ko -->
                   </div>
                   <!-- metadata-->
 				  <ul role="tablist" class="nav nav-tabs">
