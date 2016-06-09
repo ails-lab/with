@@ -261,7 +261,6 @@ define(['bridget','knockout', 'text!./organization-edit.html', 'isotope','images
 		};
 
 		self.getMembersInfo = function (category) {
-			console.log("members info");
 			$.ajax({
 				method : "GET",
 				contentType : "application/json",
@@ -270,7 +269,6 @@ define(['bridget','knockout', 'text!./organization-edit.html', 'isotope','images
 				success : function (result) {
 					if (result.users !== undefined) {
 						var users = result.users;
-						console.log(users);
 						ko.mapping.fromJS(users, self.usersMapping, self.userMembers);
 					}
 					if (result.groups !== undefined) {
@@ -329,7 +327,6 @@ define(['bridget','knockout', 'text!./organization-edit.html', 'isotope','images
 		};
 
 		self.makeAdmin = function (userId) {
-			console.log("makeAdmin");
 			$.ajax({
 				method : "PUT",
 				contentType : "text/plain",
@@ -345,7 +342,6 @@ define(['bridget','knockout', 'text!./organization-edit.html', 'isotope','images
 		};
 
 		self.makeMember = function (userId) {
-			console.log("makeMember");
 			$.ajax({
 				method : "DELETE",
 				contentType : "text/plain",
@@ -439,8 +435,12 @@ define(['bridget','knockout', 'text!./organization-edit.html', 'isotope','images
 				Square: ko.observable(),
 				Thumbnail: ko.observable(),
 				Medium: ko.observable()
-			}
+			},			
+			featuredCollections: ko.observableArray(),
+			featuredExhibitions: ko.observableArray()
 		};
+
+
 
 		// Computed & Utility Observables
 		self.count = ko.observable(0);
@@ -626,6 +626,25 @@ define(['bridget','knockout', 'text!./organization-edit.html', 'isotope','images
 					self.page.cover.Medium(null);
 					self.page.cover.Tiny(null);
 				}
+
+				//self.page.featuredCollections =	ko.mapping.fromJS(data.page.featuredCollections);
+				//self.page.featuredExhibitions =	ko.mapping.fromJS(data.page.featuredExhibitions);
+				if (data.page.featuredCollections != null){
+					self.page.featuredCollections(data.page.featuredCollections);	
+				}
+				else{
+				self.page.featuredCollections([]);	
+				}
+
+
+				if (data.page.featuredExhibitions != null){
+					self.page.featuredExhibitions(data.page.featuredExhibitions);	
+				}
+				else{
+				self.page.featuredExhibitions([]);	
+				}
+				
+				
 			}
 
 			// Load Collections
@@ -728,24 +747,180 @@ define(['bridget','knockout', 'text!./organization-edit.html', 'isotope','images
 		};
 		
 		function getItem(collection) {
-
-
-
 			  var tile= '<div class="'+collection.data.css()+'"> <div class="wrap">';
 			   tile+='<a href="'+collection.data.url()+'">'
                 +'<div class="thumb"><img src="'+collection.data.thumbnail()+'"><div class="counter">'+collection.data.entryCount+' ITEMS</div></div>'
                 +' <div class="info"><div class="type">'+collection.data.type()+'</div><h2 class="title">'+collection.data.title+'</h2></div>'
                 +'</a>'
-                +'<div class="action-group"><div class="wrap"><ul><li><a href="#" data-toggle="tooltip" data-placement="top" title="Unshare media" class="fa fa-ban"></a></li>'
-                +'<li><a href="#" data-toggle="tooltip" data-placement="top" title="Set as featured" class="fa fa-star featuredbutton"></a></li>'
-                +'</ul></div></div>'
+                +'<div class="action-group"><div class="wrap"><ul><li><a href="#" data-toggle="tooltip" data-placement="top" title="Unshare media" class="fa fa-ban" onclick="unShareCollection(\'' + collection.data.dbId + '\',event);"></a></li>';
+                if (isFeatured(collection.data.dbId,collection.data.type()))
+                	tile +='<li><a href="#" data-toggle="tooltip" data-placement="top" title="Set as Featured" id='+collection.data.dbId+' class="fa fa-star  featuredbutton" style="color:#ff9806" onclick="toggleFeaturedCollection(\'' + collection.data.dbId + '\',\'' + collection.data.type() + '\',event);"></a></li>';
+                
+            	else
+            		tile +='<li><a href="#" data-toggle="tooltip" data-placement="top" title="Set as Featured" id='+collection.data.dbId+' class="fa fa-star  featuredbutton"  onclick="toggleFeaturedCollection(\'' + collection.data.dbId + '\',\'' + collection.data.type() + '\',event);"></a></li>';
+            		
+                tile+='</ul></div></div>'
                 +'</div></div>';
 			return tile;
 
 		}
 
+		function isFeatured(id,type){
+			var result;
+			if (type=="COLLECTION" && self.page.featuredCollections.indexOf(id) > -1) {			
+				result = true;
+			}
+			else if (type=="EXHIBITION" && self.page.featuredExhibitions.indexOf(id) > -1) {
+				result =  true;
+			}
+			else {
+					result =  false;
+				$
+			}
+			return result;
+		}
 
+		toggleFeaturedCollection = function (id,type,event) {
+        	event.preventDefault();
 
+			if (isFeatured(id,type)) self.removeFeatured(id,type);
+
+			else self.addFeatured(id,type);
+			
+
+		};
+
+		unShareCollection = function (id,event) {
+        	event.preventDefault();
+			var rec = ko.utils.arrayFirst(self.items, function (collection) {
+				return collection.dbId === id;
+			});
+
+			/*app.likeItem(rec, function (status) {
+				
+				if (status) {
+					$('[id="'+id+'"]').find("fa fa-star featuredbutton").css("color","#ec5a62");
+				} else {
+					$('[id="'+id+'"]').find("fa fa-star featuredbutton").css("color","");
+				}
+			});*/
+		};
+
+	/*	removeSelection = function(data,event){
+        	//event.preventDefault();
+			var selrecord = ko.utils.arrayFirst(self.mixresults(), function(record) {
+				   return record.externalId === data;
+				});
+			self.multipleSelection.remove(selrecord);
+			
+        }*/
+
+		self.addFeatured = function (id,type) {
+			if (type=="COLLECTION"){
+				var data = {
+				"fCollections":[
+								id
+							],
+				"fExhibitions":[
+				]
+				};
+			}
+			else if (type=="EXHIBITION"){
+				var data = {
+				"fCollections":[
+							],
+				"fExhibitions":[
+							id
+					]
+				};
+			}
+			$.ajax({
+				type: 'POST',
+				url: '/group/' + self.id() +'/addFeatured',
+				contentType: 'application/json',
+				dataType: 'json',
+				processData: false,
+				data: ko.toJSON(data),
+				success: function (data, text) {
+					$.smkAlert({
+						text: 'Update successful!',
+						type: 'success'
+					});
+
+					if (type=="COLLECTION"){
+					self.page.featuredCollections.push(id);
+					}
+					else if(type=="EXHIBITION"){
+					self.page.featuredExhibitions.push(id);
+					}
+					$(document.getElementById(id)).css( "color", "#ff9806" );
+
+				},
+				error: function (request, status, error) {
+					var err = JSON.parse(request.responseText);
+					$.smkAlert({
+						text: err.error,
+						type: 'danger'
+					});
+				}
+			});
+		};
+
+		self.removeFeatured = function (id,type) {
+			if (type=="COLLECTION"){
+				var data = {
+				"fCollections":[
+								id
+							],
+				"fExhibitions":[
+				]
+				};
+			}
+			else if (type=="EXHIBITION"){
+				var data = {
+				"fCollections":[
+							],
+				"fExhibitions":[
+							id
+					]
+				};
+			}
+			$.ajax({
+				type: 'POST',
+				url: '/group/' + self.id() +'/removeFeatured',
+				contentType: 'application/json',
+				dataType: 'json',
+				processData: false,
+				data: ko.toJSON(data),
+				success: function (data, text) {
+					$.smkAlert({
+						text: 'Update successful!',
+						type: 'success'
+					});
+					if (type=="COLLECTION"){
+						var index = self.page.featuredCollections().indexOf(id);
+						if (index > -1) {
+							self.page.featuredCollections().splice(index, 1);
+						}
+					}
+					else if(type=="EXHIBITION"){
+						var index = self.page.featuredExhibitions().indexOf(id);
+						if (index > -1) {
+							self.page.featuredExhibitions().splice(index, 1);
+						}
+					}
+
+					$(document.getElementById(id)).css( "color", "" );
+				},
+				error: function (request, status, error) {
+					var err = JSON.parse(request.responseText);
+					$.smkAlert({
+						text: err.error,
+						type: 'danger'
+					});
+				}
+			});
+		};
 
 
   function getItems(data) {
