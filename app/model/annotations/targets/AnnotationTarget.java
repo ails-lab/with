@@ -18,14 +18,19 @@ package model.annotations.targets;
 
 import org.bson.types.ObjectId;
 
+import utils.Serializer;
+
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+
 public class AnnotationTarget {
 
+	@JsonSerialize(using = Serializer.ObjectIdSerializer.class)
 	private ObjectId recordId;
 	/**
 	 * The withURI to which the annotation refers.
 	 */
 	private String withURI;
-	
+
 	/**
 	 * The external id of the object to which the annotations refers.
 	 */

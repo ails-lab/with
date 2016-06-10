@@ -23,7 +23,6 @@ import java.util.List;
 
 import model.annotations.Annotation;
 import model.annotations.Annotation.AnnotationAdmin;
-import model.annotations.Annotation.MotivationType;
 import model.annotations.bodies.AnnotationBody;
 import model.basicDataTypes.Language;
 import model.resources.RecordResource;
@@ -98,11 +97,12 @@ public class AnnotationController extends Controller {
 			AnnotationAdmin administrative = new AnnotationAdmin();
 			administrative.setWithCreator(WithController.effectiveUserDbId());
 			administrative.setCreated(new Date());
-			if (json.has("genarator"))
+			if (json.has("generator"))
 				administrative.setGenerator(json.get("generator").asText());
-			if (json.has("body.confidence"))
-				administrative.setConfidence(json.get("body.confidence")
+			if (json.has("body") && json.get("body").has("confidence")) {
+				administrative.setConfidence(json.get("body").get("confidence")
 						.asDouble());
+			}
 			annotation.setAnnotators(new ArrayList(Arrays
 					.asList(administrative)));
 			return annotation;

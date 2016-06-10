@@ -26,6 +26,7 @@ import model.annotations.Annotation.AnnotationAdmin;
 import model.annotations.Annotation.MotivationType;
 import model.annotations.bodies.AnnotationBody;
 import model.annotations.bodies.AnnotationBodyTagging;
+import model.basicDataTypes.Language;
 
 import org.bson.types.ObjectId;
 import org.mongodb.morphia.query.Query;
@@ -61,10 +62,11 @@ public class AnnotationDAO extends DAO<Annotation> {
 		if (annotation.getMotivation().equals(MotivationType.Tagging)) {
 			AnnotationBodyTagging body = (AnnotationBodyTagging) annotation
 					.getBody();
-			if (body.getLabel() != null)
-				q.field("body.label").equal(body.getLabel());
 			if (body.getUri() != null)
 				q.field("body.uri").equal(body.getUri());
+			if (body.getLabel() != null)
+				q.field("body.label.default").equal(
+						body.getLabel().get(Language.DEFAULT));
 		} else {
 			return null;
 		}
