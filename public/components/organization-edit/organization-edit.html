@@ -103,7 +103,7 @@
 
 									<!-- /ko -->
 									<!-- ko ifnot: $data.image -->
-									<div class="thumbnails"><img src="images/user.png">
+									<div class="thumbnails"><img src="images/person.png">
 									<a href="#" data-toggle="tooltip" data-placement="top" data-bind="click: $parent.excecuteRemove.bind($data, userId(), 'user'),
 									attr: { title: username }"
 									 class="trash">
@@ -128,23 +128,30 @@
 							<input id="groupName" type="text" placeholder="Start typing group name" data-bind="autocompleteUsername: myUsername, onlyParents:false, forUsers:false, forGroupType:'UserGroup'">
 							<ul class="access-list" data-bind="foreach: groupMembers">
 <!-- 								 <li data-bind="attr: { class: $parent.colors[$index]%4  }"> -->
-									<li class="blue">
+									<li>
  									<!-- ko if: $data.image -->
-										<span class="text"  data-bind="text: username().substring(0,2).toUpperCase()">
+ 									<div class="thumbnails"><img src="images/group.jpeg">
+										<!-- <span class="text"  data-bind="text: username().substring(0,2).toUpperCase()"> -->
 										<a href="#" data-toggle="tooltip" data-placement="top" data-bind="click: $parent.excecuteRemove.bind($data, userId(), 'group'),
 										attr: { title: username }"
 										 class="trash">
 											<i class="fa fa-trash"></i>
-										</a></span>
+										</a>
+										<!-- </span> -->
+										</div>
 			                        <div class="username" data-bind="text: username"></div>
 									<!-- /ko -->
 									<!-- ko ifnot: $data.image -->
-										<span class="text" data-bind="text: username().substring(0,2).toUpperCase()">
+									 	<div class="thumbnails"><img src="images/group.jpeg">
+
+										<!-- <span class="text" data-bind="text: username().substring(0,2).toUpperCase()"> -->
 										<a href="#" data-toggle="tooltip" data-placement="top" data-bind="click: $parent.excecuteRemove.bind($data, userId(), 'group'),
 										attr: { title: username }"
 										 class="trash">
 											<i class="fa fa-trash"></i>
-										</a></span>
+										</a>
+										<!-- </span> -->
+										</div>
 			                        <div class="username" data-bind="text: username"></div>
 									<!-- /ko -->
 								</li>
