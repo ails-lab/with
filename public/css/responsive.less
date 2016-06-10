@@ -22,11 +22,61 @@
 						}
 					}
 				}
+
+				// main
+				main {
+
+					// collection, exhibition, project page
+					section.collection, section.exhibition, section.project, section.favorite {
+
+						// body
+						.list-body {
+
+							// grids
+							&.grids {
+								.clearfix;
+
+								> li {
+									width: 94%/3%;
+
+									+ li {
+										margin-left: 3%;
+									}
+
+									&:nth-child(4n+1) {
+										margin-left: 3%;
+									}
+
+									&:nth-child(3n+1) {
+										margin-left: 0;
+									}
+
+
+
+									
+								}
+							}
+						}
+					}
+				}
 			}
 
 			// entrance
 			section.entrance {
 				width: 70%;
+			}
+		}
+	}
+
+	// listing
+	.listing {
+
+		// grid
+		.grid {
+
+			// ite,
+			.sizer, .item {
+				width: 25%;
 			}
 		}
 	}

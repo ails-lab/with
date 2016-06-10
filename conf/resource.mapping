@@ -1,80 +1,56 @@
 {
-   "properties": {
-      "access": {
-        "type": "nested",
-        "properties": {
-          "acl": {
-            "type": "object",
-            "properties": {
-              "user": {
-                "type": "string"
-              },
-              "level": {
-                "type": "long"
-              }
-            }
-          }
-        }
-      },
-      "collectedResources": {
-      	"type": "object",
-      	"properties": {
-      		"body": {
-      			"type": "object",
-      			"properties": {
-      				"audioUrl": {
-      					"type":     "string",
-        				"index":    "no"
-      				},
-      				"videoUrl": {
-      					"type":     "string",
-        				"index":    "no"
-      				}
-      			}
-      		}
-      	}
-      }
-    },
-    "dynamic_date_formats": [
-      "yyyy-MM-dd",
-      "dd-MM-yyyy"
-    ],
-    "dynamic_templates": [
-      {
+    "properties": {
         "access": {
-          "match": "access",
-          "mapping": {
             "type": "nested",
             "properties": {
-              "acl": {
-                "type": "object",
-                "properties": {
-                  "user": {
+                "user": {
                     "type": "string"
-                  },
-                  "level": {
+                },
+                "level": {
                     "type": "long"
-                  }
                 }
-              }
             }
-          }
+        },
+        "collectedResources": {
+            "type": "object",
+            "enabled": false
         }
-      },
-      {
-        "strings": {
-          "match_mapping_type": "string",
-          "mapping": {
-            "type": "string",
-            "fields": {
-              "all": {
-                "type": "string",
-                "index": "not_analyzed",
-                "ignore_above": 512
-              }
+    },
+    "dynamic_date_formats": [
+        "yyyy-MM-dd",
+        "dd-MM-yyyy"
+    ],
+    "dynamic_templates": [
+        {
+            "access": {
+                "match": "access",
+                "mapping": {
+                    "type": "nested",
+                    "properties": {
+                        "user": {
+                            "type": "string"
+                        },
+                        "level": {
+                            "type": "long"
+                        }
+                    }
+                }
             }
-          }
+        },
+        {
+            "strings": {
+                "match_mapping_type": "string",
+                "mapping": {
+                    "type": "string",
+                    "fields": {
+                        "all": {
+                            "type": "string",
+                            "index": "not_analyzed",
+                            "ignore_above": 512
+                        }
+                    }
+                }
+            }
         }
-      }
     ]
 }

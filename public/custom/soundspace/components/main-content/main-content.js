@@ -6,7 +6,12 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 	
 	self.loading=ko.observable(false);
 	
-					
+	var recmapping={
+			'dbId': {
+				key: function(data) {
+		            return ko.utils.unwrapObservable(data.dbId);
+		        }
+			 }};			
 		
 	function Collection(data) {
 		var self=this;
@@ -79,17 +84,9 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 			     }
 			  
 		};
-		
-		
-		var recmapping={
-				'dbId': {
-					key: function(data) {
-			            return ko.utils.unwrapObservable(data.dbId);
-			        }
-				 }};
+
 		self.isLoaded = ko.observable(false);
 		self.records=ko.mapping.fromJS([], recmapping);
-		
 		
 		self.data = ko.mapping.fromJS({"dbID":"","administrative":"","descriptiveData":""}, mapping);
 		
@@ -367,8 +364,37 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 					  $( settings.mSelector ).isotope({ filter: selector });
 					  return false;
 				}
-					  
-	 
+	
+	  
+	  self.startAnnotate = function() {
+		  self.randomRecords();
+	  };
+	  
+	  self.addNextAnnot = function(randomList, inner) {
+		  if (randomList.length > 0) {
+			  initRecord = randomList[0];
+			  initRecord.nextItemToAnnotate = inner;
+			  randomList.splice(0, 1);
+			  return self.addNextAnnot(randomList, initRecord);
+		  }
+		  else {
+			  return inner;
+		  }
+	  }
+	  
+	  self.randomRecords = function() {
+			$.ajax({
+		    	"url": "/record/randomRecords?groupId=56e13d2e75fe2450755e553a&batchCount=3",
+		    	"method": "GET",
+		    	"success": function( data, textStatus, jQxhr ){
+		    		recordToAnnotate = self.addNextAnnot(data, {});
+		    		itemShow(formatRecord(recordToAnnotate));
+				},
+				"error": function (result) {
+					$.smkAlert({ text: 'An error occured', type: 'danger', time: 10 });
+				}         
+		    });	
+		};
 	
   }
   

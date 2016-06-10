@@ -160,7 +160,7 @@ public class HistorypinSpaceSource extends ISpaceSource {
 			if (response != null) {
 				jsonMetadata.add(new RecordJSONMetadata(Format.JSON_Historypin, record.toString()));
 				HistorypinItemRecordFormatter f = new HistorypinItemRecordFormatter();
-				String json = Json.toJson(f.overwritedObjectFrom((CulturalObject)fullRecord,record)).toString();
+				String json = Json.toJson(f.overwriteObjectFrom(fullRecord,record)).toString();
 				jsonMetadata.add(new RecordJSONMetadata(Format.JSON_WITH, json));
 			}
 

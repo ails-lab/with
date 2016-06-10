@@ -184,7 +184,7 @@ public class DPLASpaceSource extends ISpaceSource {
 			JsonNode record = response.get("docs").get(0);
 			if (record != null) {
 				jsonMetadata.add(new RecordJSONMetadata(Format.JSONLD_DPLA, record.toString()));
-				String json = Json.toJson(formatreader.readObjectFrom(record)).toString();
+				String json = Json.toJson(formatreader.overwriteObjectFrom(fullRecord,record)).toString();
 				jsonMetadata.add(new RecordJSONMetadata(Format.JSON_WITH, json));
 			}
 			return jsonMetadata;

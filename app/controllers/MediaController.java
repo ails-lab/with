@@ -69,11 +69,12 @@ import play.mvc.Http.MultipartFormData.FilePart;
 import play.mvc.Result;
 import sources.core.HttpConnector;
 import sources.core.ParallelAPICall;
-
+import utils.MetricsUtils;
 import actors.MediaCheckerActor.MediaCheckMessage;
 import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
 
+import com.codahale.metrics.Timer;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -325,6 +326,13 @@ public class MediaController extends WithController {
 	private static ObjectNode storeMedia(MediaObject med, File x)
 			throws IOException, Exception {
 
+		final Timer storeMedia_timer;
+		Timer.Context storeMedia_timeContext =  null;
+		if(DB.getConf().getBoolean("measures.mediaController.storeMedia.time")) {
+			storeMedia_timer = MetricsUtils.registry.timer(
+					MetricsUtils.registry.name(MediaController.class, "storeMedia", "time"));
+			storeMedia_timeContext = storeMedia_timer.time();
+		}
 		ObjectNode result = Json.newObject();
 		if (!x.isFile()) {
 			result.put("error", "uploaded file is not valid");
@@ -345,8 +353,15 @@ public class MediaController extends WithController {
 		DB.getMediaObjectDAO().makePermanent(med);
 		med.setUrl("/media/" + med.getDbId().toString() + "?file=true");
 		DB.getMediaObjectDAO().makePermanent(med);
+
 		result = makeThumbs(med, image);
-		return result;
+		try {
+			return result;
+		} finally {
+			if(DB.getConf().getBoolean("measures.mediaController.storeMedia.time") &&
+					(storeMedia_timeContext != null))
+				storeMedia_timeContext.stop();
+		}
 	}
 
 	private static boolean checkJsonArray(ArrayNode allRes, String string) {
@@ -416,6 +431,14 @@ public class MediaController extends WithController {
 	private static ObjectNode makeThumbs(MediaObject med, BufferedImage image)
 			throws Exception {
 
+		final Timer makeThumbs_timer;
+		Timer.Context makeThumbs_timeContext = null;
+		if(DB.getConf().getBoolean("measures.mediaController.makeThumbs.time")) {
+			makeThumbs_timer = MetricsUtils.registry.timer(
+				MetricsUtils.registry.name(MediaController.class, "makeThumbs", "time"));
+			makeThumbs_timeContext = makeThumbs_timer.time();
+		}
+
 		// makeThumb(med, image);
 		MediaObject tiny = new MediaObject();
 		MediaObject square = new MediaObject();
@@ -468,7 +491,12 @@ public class MediaController extends WithController {
 		// singleRes.put("isShownBy", "/media/"
 		// + med.getDbId().toString());
 
-		return results;
+		try {
+			return results;
+		} finally {
+			if(DB.getConf().getBoolean("measures.mediaController.makeThumbs.time"))
+				makeThumbs_timeContext.stop();
+		}
 	}
 
 	// use the libraries we will use for video editing!

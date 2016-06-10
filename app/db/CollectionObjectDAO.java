@@ -53,6 +53,7 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.mongodb.BasicDBObject;
 
 import controllers.MediaController;
 import db.DAO.QueryOperator;
@@ -104,11 +105,19 @@ public class CollectionObjectDAO extends WithResourceDAO<CollectionObject> {
 		this.update(q, updateOps);
 	}
 
-	public List<RecordResource> getFirstEntries(ObjectId dbId, int upperBound) {
-		ArrayList<String> retrievedFields = new ArrayList<String>();
-		retrievedFields.add("media");
-		return DB.getRecordResourceDAO().getByCollectionBetweenPositions(dbId,
-				0, upperBound, retrievedFields);
+
+	public CollectionObject getSliceOfCollectedResources(ObjectId id, int startIdx, int slice) {
+		BasicDBObject query = new BasicDBObject("_id", id);
+		BasicDBObject projections = new BasicDBObject();
+		projections.put("collectedResources", 1);
+		projections.put("descriptiveData", 0);
+		projections.put("media", 0);
+		projections.put("usage", 0);
+		projections.put("collectedResources", new BasicDBObject("$slice", new int[] { startIdx, slice }));
+
+
+		return DB.getMorphia().fromDBObject(CollectionObject.class,
+				this.getCollection().findOne(query, projections));
 	}
 
 	public void editCollection(ObjectId dbId, JsonNode json) {
