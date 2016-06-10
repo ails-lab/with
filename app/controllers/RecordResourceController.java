@@ -296,7 +296,7 @@ public class RecordResourceController extends WithResourceController {
 		return ok(recordsList);
 	}
 	
-	private static CollectionAndRecordsCounts getCollsAndCountAccessiblebyGroup(ObjectId groupId) {
+	static CollectionAndRecordsCounts getCollsAndCountAccessiblebyGroup(ObjectId groupId) {
 		List<CollectionObject> collections = DB.getCollectionObjectDAO().getAccessibleByGroupAndPublic(groupId);
 		CollectionAndRecordsCounts colAndRecs = new CollectionAndRecordsCounts();
 		for (CollectionObject col: collections) {
@@ -307,7 +307,7 @@ public class RecordResourceController extends WithResourceController {
 		return colAndRecs;
 	}
 	
-	private static class CollectionAndRecordsCounts {
+	public static class CollectionAndRecordsCounts {
 		List<Tuple<ObjectId, Integer>> collectionsRecordCount = new ArrayList<Tuple<ObjectId, Integer>>();
 		int totalRecordsCount = 0;
 	}

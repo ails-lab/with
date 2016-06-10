@@ -33,11 +33,13 @@ import play.libs.F.Some;
 import play.libs.Json;
 import play.mvc.Controller;
 import play.mvc.Result;
+import utils.Tuple;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
+import controllers.RecordResourceController.CollectionAndRecordsCounts;
 import controllers.WithController.Profile;
 import db.DB;
 
@@ -63,6 +65,23 @@ public class AnnotationController extends Controller {
 					annotation.getAnnotators());
 		}
 		return ok();
+	}
+
+	public static Result getAnnotationPercentage(String groupId) {
+		ObjectNode result = Json.newObject();
+		ObjectId group = new ObjectId(groupId);
+		CollectionAndRecordsCounts collectionsAndCount = RecordResourceController
+				.getCollsAndCountAccessiblebyGroup(group);
+		int totalRecords = collectionsAndCount.totalRecordsCount;
+		long annotatedRecords = 0;
+		for (Tuple<ObjectId, Integer> collectionWithCount : collectionsAndCount.collectionsRecordCount) {
+			ObjectId collectionId = collectionWithCount.x;
+			annotatedRecords += DB.getRecordResourceDAO()
+					.countAnnotatedRecords(collectionId);
+		}
+		float percentage = ((float) annotatedRecords / totalRecords) * 100;
+		result.put("annotatedRecordsPercentage", percentage);
+		return ok(result);
 	}
 
 	public static Result getUserAnnotations(int offset, int count) {

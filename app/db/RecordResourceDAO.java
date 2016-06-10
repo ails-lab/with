@@ -74,28 +74,27 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 		super(RecordResource.class);
 	}
 
-
 	public List<RecordResource> getByCollectionBetweenPositions(
 			ObjectId collectionId, int lowerBound, int upperBound) {
 		if (upperBound < lowerBound)
 			return new ArrayList<RecordResource>();
 		CollectionObject collection = DB.getCollectionObjectDAO()
-				.getSliceOfCollectedResources(collectionId, lowerBound, upperBound-lowerBound);
+				.getSliceOfCollectedResources(collectionId, lowerBound,
+						upperBound - lowerBound);
 		Query<RecordResource> q = this.createQuery();
 		return getRecords(collection.getCollectedResources(), q);
 	}
-	
-	
-	
+
 	public List<RecordResource> getByCollectionBetweenPositionsAndSort(
-			ObjectId collectionId, int lowerBound, int upperBound, String sortingCriteria) {
+			ObjectId collectionId, int lowerBound, int upperBound,
+			String sortingCriteria) {
 		if (upperBound < lowerBound)
 			return new ArrayList<RecordResource>();
 		CollectionObject collection = DB.getCollectionObjectDAO()
-				.getSliceOfCollectedResources(collectionId, lowerBound, upperBound-lowerBound);
+				.getSliceOfCollectedResources(collectionId, lowerBound,
+						upperBound - lowerBound);
 		Query<RecordResource> q = this.createQuery().order(sortingCriteria);
-		return getRecords(
-				collection.getCollectedResources(), q);
+		return getRecords(collection.getCollectedResources(), q);
 	}
 
 	/**
@@ -161,7 +160,7 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 						"target.recordId"));
 		Query<RecordResource> q = this.createQuery().field("_id").in(recordIds);
 		List<RecordResource> records = this.find(q).asList();
-		return records;	
+		return records;
 	}
 
 	/**
@@ -186,8 +185,10 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 			return new ArrayList<RecordResource>();
 		}
 	}
+
 	/**
 	 * sorts the result considering {@link sortingFiled}
+	 * 
 	 * @see {@code ResourceRecord.getByCollection}
 	 */
 	public List<RecordResource> getByCollectionAndSort(
@@ -430,6 +431,14 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 		return this.get(recordId);
 	}
 
+	public long countAnnotatedRecords(ObjectId collectionId) {
+		long count = this.createQuery().disableValidation()
+				.field("collectedIn").equal(collectionId)
+				.field("annotationIds").greaterThan(new ArrayList()).countAll();
+		return count;
+
+	}
+
 	public List<RecordResource> getByMedia(String mediaUrl) {
 		Query<RecordResource> q = this.createQuery().disableValidation()
 				.field("media.Original.url").equal(mediaUrl);
@@ -452,9 +461,10 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 		updateOps.set("administrative.lastModified", new Date());
 		this.update(q, updateOps);
 	}
-	
+
 	public void addAnnotation(ObjectId recordId, ObjectId annotationId) {
-		Query<RecordResource> q = this.createQuery().field("_id").equal(recordId);
+		Query<RecordResource> q = this.createQuery().field("_id")
+				.equal(recordId);
 		UpdateOperations<RecordResource> updateOps = this
 				.createUpdateOperations();
 		updateOps.add("annotationIds", annotationId);
