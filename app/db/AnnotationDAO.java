@@ -55,13 +55,14 @@ public class AnnotationDAO extends DAO<Annotation> {
 	public Annotation getExistingAnnotation(Annotation annotation) {
 		if (annotation.getDbId() != null)
 			return this.getById(annotation.getDbId());
-		Query<Annotation> q = this.createQuery().field("target.recordId")
+		Query<Annotation> q = this.createQuery().disableValidation()
+				.field("target.recordId")
 				.equal(annotation.getTarget().getRecordId());
 		if (annotation.getMotivation().equals(MotivationType.Tagging)) {
 			AnnotationBodyTagging body = (AnnotationBodyTagging) annotation
 					.getBody();
-			if (body.getText() != null)
-				q.field("body.text").equal(body.getText());
+			if (body.getLabel() != null)
+				q.field("body.text").equal(body.getLabel());
 			if (body.getUri() != null)
 				q.field("body.uri").equal(body.getUri());
 		} else {

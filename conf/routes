@@ -122,6 +122,7 @@ GET		/user/logout						    controllers.UserManager.logout()
 GET		/user/emailAvailable	                controllers.UserManager.emailAvailable(email:java.lang.String)
 GET		/user/token				                controllers.UserManager.getToken()
 GET 	/user/loginWithToken	                controllers.UserManager.loginWithToken( token: java.lang.String )
+GET		/user/annotations						controllers.AnnotationController.getUserAnnotations(offset: Integer ?=0, count: Integer ?=10)
 # both users and groups
 GET      /user/findByUserOrGroupNameOrEmail        controllers.UserAndGroupManager.findByUserOrGroupNameOrEmail(userOrGroupNameOrEmail: String, collectionId ?= null)
 GET      /user/listNames                           controllers.UserAndGroupManager.listNames(prefix:java.lang.String ?= "", onlyParents: Boolean ?= false, forUsers: Boolean ?= true, forGroupType: play.libs.F.Option[String])

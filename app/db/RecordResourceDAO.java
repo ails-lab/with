@@ -156,6 +156,8 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 		List<Annotation> annotations = DB.getAnnotationDAO()
 				.getUserAnnotations(userId, offset, count,
 						Arrays.asList("target.recordId"));
+		if (annotations.isEmpty())
+			return new ArrayList<RecordResource>();
 		List<ObjectId> recordIds = (List<ObjectId>) CollectionUtils.collect(
 				annotations, new BeanToPropertyValueTransformer(
 						"target.recordId"));

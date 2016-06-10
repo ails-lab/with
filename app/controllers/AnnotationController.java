@@ -23,6 +23,8 @@ import java.util.List;
 
 import model.annotations.Annotation;
 import model.annotations.Annotation.AnnotationAdmin;
+import model.annotations.Annotation.MotivationType;
+import model.annotations.bodies.AnnotationBody;
 import model.basicDataTypes.Language;
 import model.resources.RecordResource;
 
@@ -40,6 +42,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import controllers.WithController.Profile;
 import db.DB;
 
+@SuppressWarnings({ "rawtypes", "unchecked", "deprecation" })
 public class AnnotationController extends Controller {
 
 	public static Result addAnnotation() {
@@ -49,7 +52,7 @@ public class AnnotationController extends Controller {
 			error.put("error", "Invalid JSON");
 			return badRequest();
 		}
-		Annotation annotation = Json.fromJson(json, Annotation.class);
+		Annotation annotation = getAnnotationFromJson(json);
 		Annotation existingAnnotation = DB.getAnnotationDAO()
 				.getExistingAnnotation(annotation);
 		if (existingAnnotation == null)
@@ -60,10 +63,13 @@ public class AnnotationController extends Controller {
 		return ok();
 	}
 
-	public static Result getUserAnnotations(String userId, int offset, int count) {
+	public static Result getUserAnnotations(int offset, int count) {
 		ObjectId withUser = WithController.effectiveUserDbId();
 		List<RecordResource> records = DB.getRecordResourceDAO()
 				.getAnnotatedRecords(withUser, offset, count);
+		long annotationCount = DB.getAnnotationDAO().countUserAnnotations(
+				withUser);
+		ObjectNode recordsWithCount = Json.newObject();
 		ArrayNode recordsList = Json.newObject().arrayNode();
 		for (RecordResource record : records) {
 			Some<String> locale = new Some(Language.DEFAULT.toString());
@@ -72,21 +78,34 @@ public class AnnotationController extends Controller {
 			WithController.filterResourceByLocale(locale, profiledRecord);
 			recordsList.add(Json.toJson(profiledRecord));
 		}
-		return ok(recordsList);
+		recordsWithCount.put("records", recordsList);
+		recordsWithCount.put("annotationCount", annotationCount);
+		return ok(recordsWithCount);
 	}
 
-	private Annotation getAnnotationFromJson(JsonNode json) {
-		Annotation annotation = Json.fromJson(json, Annotation.class);
-		AnnotationAdmin administrative = new AnnotationAdmin();
-		administrative.setWithCreator(WithController.effectiveUserDbId());
-		administrative.setCreated(new Date());
-		if (json.has("genarator"))
-			administrative.setGenerator(json.get("generator").asText());
-		if (json.has("body.confidence"))
-			administrative
-					.setConfidence(json.get("body.confidence").asDouble());
-		annotation.setAnnotators(new ArrayList(Arrays.asList(administrative)));
-		return annotation;
+	private static Annotation getAnnotationFromJson(JsonNode json) {
+		try {
+			Annotation annotation = Json.fromJson(json, Annotation.class);
+			Class<?> clazz = Class
+					.forName("model.annotations.bodies.AnnotationBody"
+							+ annotation.getMotivation());
+			AnnotationBody body = (AnnotationBody) Json.fromJson(
+					json.get("body"), clazz);
+			annotation.setBody(body);
+			AnnotationAdmin administrative = new AnnotationAdmin();
+			administrative.setWithCreator(WithController.effectiveUserDbId());
+			administrative.setCreated(new Date());
+			if (json.has("genarator"))
+				administrative.setGenerator(json.get("generator").asText());
+			if (json.has("body.confidence"))
+				administrative.setConfidence(json.get("body.confidence")
+						.asDouble());
+			annotation.setAnnotators(new ArrayList(Arrays
+					.asList(administrative)));
+			return annotation;
+		} catch (ClassNotFoundException e) {
+			return new Annotation();
+		}
 	}
 
 }
