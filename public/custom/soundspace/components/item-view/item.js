@@ -4,7 +4,7 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
     helper_thumb = "";
     
 
-	function Record(data) {
+	function Record(data, isRelated) {
 		var self = this;
 	    self.recordId = "-1";
 		self.title = "";
@@ -55,7 +55,7 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 		});
 		self.isLoaded = ko.observable(false);
 		
-		self.load = function(data) {
+		self.load = function(data, isRelated) {
 			if(data.title==undefined){
 				self.title="No title";
 			}else{self.title=data.title;}
@@ -106,15 +106,19 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 			self.nextItemToAnnotate(data.nextItemToAnnotate);
 			self.annotations(data.annotations);
 			self.loading(false);
-			if (data.fullrestype != null) {
-				if (data.fullrestype == "VIDEO") {
+			if (data.mediatype != null) {
+				if (data.mediatype == "VIDEO") {		
 					self.vtype = "MEDIA";
-					$('#mediadiv').html('<video id="mediaplayer" autoplay="true" controls width="576" height="324"><source src="' + self.fullres() + '" type="video/mp4">Your browser does not support HTML5</video>');        
-				} else if (data.fullrestype == "AUDIO") {
+					if (!isRelated) {
+						$('#mediadiv').append('<video id="mediaplayer" autoplay="true" controls width="576" height="324"><source src="' + self.fullres() + '" type="video/mp4">Your browser does not support HTML5</video>');
+					}
+				} else if (data.mediatype == "AUDIO") {
 					self.vtype = "MEDIA";
-					$('#mediadiv').html('<audio id="mediaplayer" autoplay="true" controls width="576" height="324"><source src="' + self.fullres() + '" type="audio/mpeg">Your browser does not support HTML5</audio>');
+					if (!isRelated) {
+						$('#mediadiv').append('<audio id="mediaplayer" autoplay="true" controls width="576" height="324"><source src="' + self.fullres() + '" type="audio/mpeg">Your browser does not support HTML5</audio>');
+					}
 				}
-			}
+			} 	
 			console.log(helper_thumb);
 			helper_thumb = self.calcOnErrorThumbnail();
 		};
@@ -144,7 +148,7 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 						for (var i in data) {
 							var result = data[i];
 							 if(result !=null){		
-						        var record = new Record(formatRecord(result));
+						        var record = new Record(formatRecord(result), true);
 						        if(record.thumb && record.thumb.length>0 && record.externalId!=self.externalId)
 							       items.push(record);
 							}
@@ -183,7 +187,7 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 							for (var i in data) {
 								var result = data[i];
 								 if(result !=null){
-							        var record = new Record(formatRecord(result));
+							        var record = new Record(formatRecord(result), true);
 							        if(record.thumb && record.thumb.length>0 && record.externalId!=self.externalId)
 								       items.push(record);
 								}
@@ -207,13 +211,11 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 		}
 		
 		self.calcThumbnail = ko.pureComputed(function() {
-
-
-			   if(self.thumb){
+			   if(self.thumb && self.thumb.indexOf("empty")==-1){
 					return self.thumb;
 				}
 			   else{
-				   return "img/content/thumb-empty.png";
+				   return "img/ui/ic-noimage.png";
 			   }
 			});
 		
@@ -266,7 +268,10 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 
 		
 		
-		if(data != undefined) self.load(data);
+		if (data != undefined) { 
+			if(isRelated) self.load(data, true); 
+			else self.load(data);
+		};
 	}
 
 	function ItemViewModel(params) {
@@ -433,7 +438,7 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 				"method": "get",
 				"contentType": "application/json",
 				"success": function (result) {
-					 var record = new Record(formatRecord(result));
+					var record = new Record(formatRecord(result));
 					self.record(record);
 					$('.nav-tabs a[href="#information"]').tab('show');
 					self.open();

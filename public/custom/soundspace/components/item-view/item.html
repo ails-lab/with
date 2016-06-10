@@ -40,8 +40,8 @@
 				  </h1>
                   <div class="owner" data-bind="text:record().dataProvider"></div>
                    <!-- annotate box-->
+                   <!-- ko if: record().nextItemToAnnotate || record().annotations -->
                   <div class="annotatebox">
-                  	 <!-- ko if: record().nextItemToAnnotate || record().annotations -->
                     <div class="question">What kind of musical instrument do you see in this item?</div>
                     <div class="info">Lorem ipsum dolor sit amet conceptuos</div>
                     <!-- /ko -->
@@ -57,8 +57,8 @@
                       <li><a href="#" data-bind="click: nextItem">NEXT ITEM</a></li>
                       <!--<li class="dontknow"><a href="#">I DONT KNOW</a></li>-->
                     </ul>
-                    <!-- /ko -->
                   </div>
+                  <!-- /ko -->
                   <!-- metadata-->
 				  <ul role="tablist" class="nav nav-tabs">
                     <li class="active"><a href="#information" title="" data-toggle="tab">Info</a></li>
