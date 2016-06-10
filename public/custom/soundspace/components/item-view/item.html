@@ -41,14 +41,16 @@
                   <div class="owner" data-bind="text:record().dataProvider"></div>
                    <!-- annotate box-->
                   <div class="annotatebox">
+                  	 <!-- ko if: record().nextItemToAnnotate || record().annotations -->
                     <div class="question">What kind of musical instrument do you see in this item?</div>
-                    <div class="info">Lorem ipsum dolor sit amet conceptuos </div>
+                    <div class="info">Lorem ipsum dolor sit amet conceptuos</div>
+                    <!-- /ko -->
                     <!-- answers-->
-                    <ul class="answers">
-                      <li>Banjo</li>
-                      <li>Harmonica</li>
-                      <li>Guitar</li>
+                    <!-- ko if: record().annotations-->
+                    <ul class="answers" data-bind="foreach: record().annotations">
+                      <li data-bind="text: body.label()"></li>
                     </ul>
+                    <!-- /ko -->
                     <!-- answer action-->
                     <!-- ko if: record().nextItemToAnnotate && !jQuery.isEmptyObject(record().nextItemToAnnotate()) -->
                     <ul class="answeraction">

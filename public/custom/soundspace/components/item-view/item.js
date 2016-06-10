@@ -49,7 +49,7 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 		    return false;
 		};
 		self.nextItemToAnnotate = ko.observable({});
-		 
+		self.annotations = ko.observableArray([]);
 		self.isLiked = ko.pureComputed(function () {
 			return app.isLiked(self.externalId);
 		});
@@ -104,6 +104,7 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 			var likeval=app.isLiked(self.externalId);
 			self.isLike(likeval);
 			self.nextItemToAnnotate(data.nextItemToAnnotate);
+			self.annotations(data.annotations);
 			self.loading(false);
 			if (data.fullrestype != null) {
 				if (data.fullrestype == "VIDEO") {
@@ -335,7 +336,8 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 							collectedIn:backendRecord.collectedIn,
 							fullrestype: media[0] != null && media[0].Original != null
 								&& media[0].Original.type != "null" ? media[0].Original.type : "",
-							nextItemToAnnotate: backendRecord.nextItemToAnnotate
+							nextItemToAnnotate: backendRecord.nextItemToAnnotate,
+							annotations: backendRecord.annotations
 				  };
 			 return record;
 		};
