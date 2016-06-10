@@ -147,7 +147,6 @@ public class DictionaryAnnotator extends Annotator {
 				cc.add(node);
 			}
 			dict.addEntry(new DictionaryEntry<String>(entry.getKey(), Json.stringify(cc)));
-//			System.out.println(entry.getKey() + " " + Json.stringify(cc));
 		}
 			
 		tt = new ExactDictionaryChunker(dict, IndoEuropeanTokenizerFactory.INSTANCE, false, caseSensitive);
@@ -180,7 +179,7 @@ public class DictionaryAnnotator extends Annotator {
 		
 		Chunking chunking = tt.chunk(text);
 		
-		StanfordNLPThesaurusAnnotator sann = StanfordNLPThesaurusAnnotator.getThesaurusAnnotator(lang);
+		StanfordNLPAnnotator sann = StanfordNLPAnnotator.getAnnotator(lang);
 		AnnotationIndex ai = sann.analyze(text);
 		
 	    for (Chunk chunk : chunking.chunkSet()) {

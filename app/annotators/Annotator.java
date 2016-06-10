@@ -89,6 +89,10 @@ public abstract class Annotator {
 			res.add(ann);
 		}
 
+		ann = StanfordNLPAnnotator.getAnnotator(lang);
+		if (ann != null) {
+			res.add(ann);
+		}
 		
 		return res;
 	}

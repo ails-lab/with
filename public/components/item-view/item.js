@@ -131,6 +131,7 @@ define(['knockout', 'text!./_item.html', 'app','smoke'], function (ko, template,
 		
 		self.annotate = function(){
 			if(self.annotations().length==0) {
+				self.loading(true);
 		           $.ajax({
 						type    : "get",
 						url     : "/annotate/" + self.recordId,
@@ -138,6 +139,7 @@ define(['knockout', 'text!./_item.html', 'app','smoke'], function (ko, template,
 						dataType: "json",
 						success : function(result) {
 							self.parseAnnotations(result);
+							self.loading(false);
 						},
 						error   : function(request, status, error) {
 							self.loading(false);
@@ -280,21 +282,13 @@ define(['knockout', 'text!./_item.html', 'app','smoke'], function (ko, template,
 				});
 			}
 			
-//			var array = positionsArray["description"];
-//			for (v = 0; v < array.length; v++) {
-//				alert(array[v].uri + " " + array[v].pos + " " +  array[v].type + " " + array[v].index);
-//			}
-			
 			
 			for (v in properties) {
 				var ppos = -1;
 				var text = this[properties[v]];
 				var rtext = "";
-				
 				var current = [];
-				
 				var array = positionsArray[properties[v]];
-				
 				var i;
 				
 				for (i = 0; i < array.length;) {
@@ -308,15 +302,18 @@ define(['knockout', 'text!./_item.html', 'app','smoke'], function (ko, template,
 						}
 					}
 					
-					var removed = false;
+					var close = false;
 					var t;
 					for (t = s; t <= e; t++) {
 						if (array[t].type == 0) {
+							if (current.length > 0) {
+								close = true;
+							}
 							current.push(array[t].uri);
 						} else if (array[t].type == 1) {
 							for (var j = 0; j < current.length; j++) {
 								if (current[j] == array[t].uri) {
-									removed = true;
+									close = true;
 									current.splice(j, 1);
 								}
 							}
@@ -331,7 +328,7 @@ define(['knockout', 'text!./_item.html', 'app','smoke'], function (ko, template,
 					
 					ppos = array[s].pos;
 
-					if (removed) {
+					if (close) {
 						rtext += "</span>";
 					}
 
@@ -344,7 +341,7 @@ define(['knockout', 'text!./_item.html', 'app','smoke'], function (ko, template,
 							rtext += "ann-value-" + self.annotationIndex[current[j]];
 						}
 						
-						rtext += "'>"
+						rtext += "'>";
 					}
 					
 					i = e + 1;
