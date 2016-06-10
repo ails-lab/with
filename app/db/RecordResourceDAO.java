@@ -36,8 +36,6 @@ import model.basicDataTypes.WithAccess.Access;
 import model.basicDataTypes.WithAccess.AccessEntry;
 import model.resources.RecordResource;
 import model.resources.collection.CollectionObject;
-import model.resources.collection.CollectionObject.CollectionAdmin;
-import model.resources.collection.CollectionObject.CollectionDescriptiveData;
 
 import org.apache.commons.beanutils.BeanToPropertyValueTransformer;
 import org.apache.commons.collections.CollectionUtils;
@@ -452,6 +450,14 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 				.createUpdateOperations();
 		updateFields(root, json, updateOps);
 		updateOps.set("administrative.lastModified", new Date());
+		this.update(q, updateOps);
+	}
+	
+	public void addAnnotation(ObjectId recordId, ObjectId annotationId) {
+		Query<RecordResource> q = this.createQuery().field("_id").equal(recordId);
+		UpdateOperations<RecordResource> updateOps = this
+				.createUpdateOperations();
+		updateOps.add("annotationIds", annotationId);
 		this.update(q, updateOps);
 	}
 

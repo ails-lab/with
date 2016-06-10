@@ -55,11 +55,14 @@ public class AnnotationController extends Controller {
 		Annotation annotation = getAnnotationFromJson(json);
 		Annotation existingAnnotation = DB.getAnnotationDAO()
 				.getExistingAnnotation(annotation);
-		if (existingAnnotation == null)
+		if (existingAnnotation == null) {
 			DB.getAnnotationDAO().makePermanent(annotation);
-		else
+			DB.getRecordResourceDAO().addAnnotation(
+					annotation.getTarget().getRecordId(), annotation.getDbId());
+		} else {
 			DB.getAnnotationDAO().addAnnotators(existingAnnotation.getDbId(),
 					annotation.getAnnotators());
+		}
 		return ok();
 	}
 

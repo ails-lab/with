@@ -62,7 +62,7 @@ public class AnnotationDAO extends DAO<Annotation> {
 			AnnotationBodyTagging body = (AnnotationBodyTagging) annotation
 					.getBody();
 			if (body.getLabel() != null)
-				q.field("body.text").equal(body.getLabel());
+				q.field("body.label").equal(body.getLabel());
 			if (body.getUri() != null)
 				q.field("body.uri").equal(body.getUri());
 		} else {

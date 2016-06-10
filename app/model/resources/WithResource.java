@@ -394,6 +394,7 @@ public class WithResource<T extends DescriptiveData, U extends WithResource.With
 		this.qualityMeasure = qualityMeasure;
 	}
 	
+	@JsonSerialize(using = Serializer.ObjectIdArraySerializer.class)
 	private Set<ObjectId> annotationIds;
 	private List<Annotation> annotations;
 
