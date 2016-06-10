@@ -50,7 +50,7 @@
                       <li>Guitar</li>
                     </ul>
                     <!-- answer action-->
-                    <!-- ko if: record().nextItemToAnnotate && record().nextItemToAnnotate().length > 0 -->
+                    <!-- ko if: record().nextItemToAnnotate && !jQuery.isEmptyObject(record().nextItemToAnnotate()) -->
                     <ul class="answeraction">
                       <li><a href="#" data-bind="click: nextItem">NEXT ITEM</a></li>
                       <!--<li class="dontknow"><a href="#">I DONT KNOW</a></li>-->

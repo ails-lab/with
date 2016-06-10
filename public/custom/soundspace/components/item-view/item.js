@@ -103,7 +103,6 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 			self.mail="mailto:?subject="+self.title+"&body="+encodeURIComponent(self.loc());
 			var likeval=app.isLiked(self.externalId);
 			self.isLike(likeval);
-			alert(JSON.stringify(data.nextItemToAnnotate));
 			self.nextItemToAnnotate(data.nextItemToAnnotate);
 			self.loading(false);
 			if (data.fullrestype != null) {
@@ -285,9 +284,8 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 		self.id = ko.observable(params.id);
 		
 		self.nextItem = function() {
-			alert("next"+JSON.stringify(self.record.nextItemToAnnotate()));
-			formattedNextRecord = formatRecord(self.record.nextItemToAnnotate());
-			itemShow(formattedRecord);
+			formattedNextRecord = formatRecord(self.record().nextItemToAnnotate());
+			itemShow(formattedNextRecord);
 		};
 		
 		formatRecord =  function(backendRecord) {
@@ -350,7 +348,6 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 			
 			self.open();
 			self.record(new Record(data));
-			alert("!!!!"+JSON.stringify(self.record().nextItemToAnnotate()));
 			if(self.record().recordId!="-1"){
 				self.addDisqus();
 			}
