@@ -34,7 +34,7 @@ public class AnnotationBodyTagging extends AnnotationBody {
 	/**
 	 * The pref label of the URI tag, that will be used for display purposes.
 	 */
-	private MultiLiteral uriLabel;
+	private MultiLiteral label;
 	
 	
 	/**
@@ -53,7 +53,7 @@ public class AnnotationBodyTagging extends AnnotationBody {
 	 * This should be only populated when the tag of the annotation is not a URI but a text values.
 	 * When this value exists the uri, uriLabel, uriType and uriVocabulary should be null.
 	 */
-	private MultiLiteral text;
+	/*private MultiLiteral text;*/
 	
 	public static enum Vocabulary {
 		DBPEDIA_ONT,DBPEDIA_RES, MIMO, FASHION, GEMET, AAT, PARTAGE, PHOTO, WORDNET
@@ -76,12 +76,12 @@ public class AnnotationBodyTagging extends AnnotationBody {
 		this.tagType = tagType;
 	}
 
-	public MultiLiteral getUriLabel() {
-		return uriLabel;
+	public MultiLiteral getLabel() {
+		return label;
 	}
 
-	public void setUriLabel(MultiLiteral uriLabel) {
-		this.uriLabel = uriLabel;
+	public void setLabel(MultiLiteral label) {
+		this.label = label;
 	}
 
 	public ArrayList<String> getUriType() {
@@ -100,13 +100,13 @@ public class AnnotationBodyTagging extends AnnotationBody {
 		this.uriVocabulary = uriVocabulary;
 	}
 
-	public MultiLiteral getText() {
+	/*public MultiLiteral getText() {
 		return text;
 	}
 
 	public void setText(MultiLiteral text) {
 		this.text = text;
-	}
+	}*/
 
 	
 }
