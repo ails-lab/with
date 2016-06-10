@@ -70,16 +70,17 @@ public class AnnotationController extends Controller {
 	public static Result getAnnotationPercentage(String groupId) {
 		ObjectNode result = Json.newObject();
 		ObjectId group = new ObjectId(groupId);
+		int totalRecords = 30;
 		CollectionAndRecordsCounts collectionsAndCount = RecordResourceController
 				.getCollsAndCountAccessiblebyGroup(group);
-		int totalRecords = collectionsAndCount.totalRecordsCount;
+//		int totalRecords = collectionsAndCount.totalRecordsCount;
 		long annotatedRecords = 0;
 		for (Tuple<ObjectId, Integer> collectionWithCount : collectionsAndCount.collectionsRecordCount) {
 			ObjectId collectionId = collectionWithCount.x;
 			annotatedRecords += DB.getRecordResourceDAO()
 					.countAnnotatedRecords(collectionId);
 		}
-		float percentage = ((float) annotatedRecords / totalRecords) * 100;
+		float percentage = Math.min(((float) annotatedRecords / totalRecords) * 100 , 100) ;
 		result.put("annotatedRecordsPercentage", percentage);
 		return ok(result);
 	}
