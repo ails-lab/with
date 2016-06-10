@@ -367,7 +367,8 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 	
 	  
 	  self.startAnnotate = function() {
-		  self.randomRecords();
+		  //self.randomRecords();
+		  self.getTestRecords();
 	  };
 	  
 	  self.addNextAnnot = function(randomList, inner) {
@@ -387,14 +388,32 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 		    	"url": "/record/randomRecords?groupId=56e13d2e75fe2450755e553a&batchCount=3",
 		    	"method": "GET",
 		    	"success": function( data, textStatus, jQxhr ){
-		    		recordToAnnotate = self.addNextAnnot(data, {});
-		    		itemShow(formatRecord(recordToAnnotate));
+		    		if (data.length > 0) {
+			    		recordToAnnotate = self.addNextAnnot(data, {});
+			    		itemShow(formatRecord(recordToAnnotate));
+		    		}
 				},
 				"error": function (result) {
 					$.smkAlert({ text: 'An error occured', type: 'danger', time: 10 });
 				}         
 		    });	
 		};
+		
+		self.getTestRecords = function() {
+			$.ajax({
+		    	"url": "http://localhost:9000/user/annotations",
+		    	"method": "GET",
+		    	"success": function( data, textStatus, jQxhr ){
+		    		if (data.records.length > 0) {
+			    		recordToAnnotate = self.addNextAnnot(data.records, {});
+			    		itemShow(formatRecord(recordToAnnotate));
+		    		}
+				},
+				"error": function (result) {
+					$.smkAlert({ text: 'An error occured', type: 'danger', time: 10 });
+				}         
+		    });	
+		}
 	
   }
   
