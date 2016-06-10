@@ -15,10 +15,10 @@ PUT      /notifications/read                       controllers.NotificationContr
 POST     /notifications/send                       controllers.NotificationController.sendMessage(receiverId)
 
 POST     /api/advancedsearch        controllers.SearchController.searchwithfilter()
-GET     /api/advancedsearchGET        controllers.SearchController.searchwithfilterGET(q: sources.core.CommonQuery)
+GET     /api/advancedsearchGET      controllers.SearchController.searchwithfilterGET(q: sources.core.CommonQuery)
 POST     /api/initialfilters        controllers.SearchController.getfilters()
-GET      /api/searchsources        controllers.SearchController.searchSources()
-POST     /api/mergefilters         controllers.SearchController.mergeFilters()
+GET      /api/searchsources        	controllers.SearchController.searchSources()
+POST     /api/mergefilters         	controllers.SearchController.mergeFilters()
 POST     /api/search            	controllers.SearchController.search()
 
 #Autocomplete
@@ -32,6 +32,7 @@ GET 	/custom/:customName/					controllers.CustomAssets.redirect(customName)
 GET 	/custom/:customName/*file				controllers.CustomAssets.getFile(customName:String, file:String)
 
 GET     /record/randomRecords					controllers.RecordResourceController.getRandomRecords(groupId: String, batchCount: Integer)
+POST	/record/annotation						controllers.AnnotationController.addAnnotation()
 PUT		/record/contextData			            controllers.RecordResourceController.editContextData(collectionId)
 GET		/record/:id							    controllers.RecordResourceController.getRecordResource(id, format: play.libs.F.Option[String], profile: String ?="MEDIUM", locale: play.libs.F.Option[java.lang.String])
 PUT		/record/:id								controllers.RecordResourceController.editRecordResource(id)
@@ -138,4 +139,3 @@ GET	/api/chind										controllers.ReindexController.changeIndice(newIndice: St
 GET	/api/mkconst									controllers.ReindexController.makeConsistent()
 GET	/api/idxres										controllers.ReindexController.reindexAllResources()
 GET	/api/idxthes									controllers.ReindexController.reindexAllThesaurus()
-

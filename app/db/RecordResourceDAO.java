@@ -28,6 +28,7 @@ import java.util.function.Function;
 
 import model.EmbeddedMediaObject;
 import model.EmbeddedMediaObject.MediaVersion;
+import model.annotations.Annotation;
 import model.annotations.ContextData;
 import model.annotations.ContextData.ContextDataBody;
 import model.basicDataTypes.WithAccess;
@@ -45,10 +46,10 @@ import org.mongodb.morphia.query.UpdateOperations;
 import play.Logger;
 import play.Logger.ALogger;
 import sources.core.ParallelAPICall;
-import controllers.WithController.Action;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
+import controllers.WithController.Action;
 import elastic.ElasticEraser;
 
 /*
@@ -149,6 +150,19 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 		Query<RecordResource> q = this.createQuery().retrievedFields(true,
 				retrievedFields.toArray(new String[retrievedFields.size()]));
 		return getByCollection(collection.getCollectedResources(), q);
+	}
+
+	public List<RecordResource> getAnnotatedRecords(ObjectId userId,
+			int offset, int count) {
+		List<Annotation> annotations = DB.getAnnotationDAO()
+				.getUserAnnotations(userId, offset, count,
+						Arrays.asList("target.recordId"));
+		List<ObjectId> recordIds = (List<ObjectId>) CollectionUtils.collect(
+				annotations, new BeanToPropertyValueTransformer(
+						"target.recordId"));
+		Query<RecordResource> q = this.createQuery().field("_id").in(recordIds);
+		List<RecordResource> records = this.find(q).asList();
+		return records;	
 	}
 
 	/**

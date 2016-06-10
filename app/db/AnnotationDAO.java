@@ -22,6 +22,10 @@ import java.util.List;
 import java.util.Set;
 
 import model.annotations.Annotation;
+import model.annotations.Annotation.AnnotationAdmin;
+import model.annotations.Annotation.MotivationType;
+import model.annotations.bodies.AnnotationBody;
+import model.annotations.bodies.AnnotationBodyTagging;
 
 import org.bson.types.ObjectId;
 import org.mongodb.morphia.query.Query;
@@ -46,6 +50,60 @@ public class AnnotationDAO extends DAO<Annotation> {
 		} catch (Exception e) {
 			return new ArrayList<Annotation>();
 		}
+	}
+
+	public Annotation getExistingAnnotation(Annotation annotation) {
+		if (annotation.getDbId() != null)
+			return this.getById(annotation.getDbId());
+		Query<Annotation> q = this.createQuery().field("target.recordId")
+				.equal(annotation.getTarget().getRecordId());
+		if (annotation.getMotivation().equals(MotivationType.Tagging)) {
+			AnnotationBodyTagging body = (AnnotationBodyTagging) annotation
+					.getBody();
+			if (body.getText() != null)
+				q.field("body.text").equal(body.getText());
+			if (body.getUri() != null)
+				q.field("body.uri").equal(body.getUri());
+		} else {
+			return null;
+		}
+		return this.findOne(q);
+	}
+
+	public List<Annotation> getUserAnnotations(ObjectId userId, int offset,
+			int count) {
+		Query<Annotation> q = this.createQuery()
+				.field("annotators.withCreator").equal(userId).offset(offset)
+				.limit(count);
+		return this.find(q).asList();
+	}
+
+	public List<Annotation> getUserAnnotations(ObjectId userId, int offset,
+			int count, List<String> retrievedFields) {
+		Query<Annotation> q = this
+				.createQuery()
+				.field("annotators.withCreator")
+				.equal(userId)
+				.offset(offset)
+				.limit(count)
+				.retrievedFields(
+						true,
+						retrievedFields.toArray(new String[retrievedFields
+								.size()]));
+		return this.find(q).asList();
+	}
+
+	public long countUserAnnotations(ObjectId userId) {
+		long count = this.createQuery().field("annotators.withCreator")
+				.equal(userId).countAll();
+		return count;
+	}
+
+	public void addAnnotators(ObjectId id, List<AnnotationAdmin> annotators) {
+		Query<Annotation> q = this.createQuery().field("_id").equal(id);
+		UpdateOperations<Annotation> updateOps = this.createUpdateOperations();
+		updateOps.addAll("annotators", annotators, false);
+		this.update(q, updateOps);
 	}
 
 	public void editAnnotationBody(ObjectId dbId, JsonNode json) {

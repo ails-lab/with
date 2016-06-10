@@ -27,7 +27,7 @@ public class AnnotationBodyTagging extends AnnotationBody {
 	private String uri;
 	
 	/**
-	 * The tag type. This valu should be a ur either of a class of of a property.
+	 * The tag type. This value should be a uri either of a class of of a property.
 	 */
 	private String tagType;
 	
@@ -38,7 +38,7 @@ public class AnnotationBodyTagging extends AnnotationBody {
 	
 	
 	/**
-	 * The types of the uri. This value should be a uri of the class to whcih the tag belongs to.
+	 * The types of the uri. This value should be a uri of the class to which the tag belongs to.
 	 * i.e. http://dbpedia.org/ontology/Building  etc
 	 */
 	private ArrayList<String> uriType;
