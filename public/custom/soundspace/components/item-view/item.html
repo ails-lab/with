@@ -43,18 +43,17 @@
                    <!-- ko if: record().nextItemToAnnotate || record().annotations -->
                   <div class="annotatebox">
                     <div class="question">What kind of musical instrument do you see in this item?</div>
-                    <div class="info">Lorem ipsum dolor sit amet conceptuos</div>
+                    <div class="info">Choose a concept from MIMO Vocabulary using PUNDIT</div>
                     <!-- answers-->
                     <!-- ko if: record().annotations-->
                     <ul class="answers" data-bind="foreach: record().annotations()">
-                      <li data-bind="text: body.label()"></li>
+                      <li><a data-bind="{text: body.label.default[0], attr: {href: body.uri}}" style="color: inherit;text-decoration: none" target="_blank"></a></li>
                     </ul>
                     <!-- /ko -->
                     <!-- answer action-->
                     <!-- ko if: record().nextItemToAnnotate && !jQuery.isEmptyObject(record().nextItemToAnnotate()) -->
                     <ul class="answeraction">
                       <li><a href="#" data-bind="click: nextItem">NEXT ITEM</a></li>
-                      <!--<li class="dontknow"><a href="#">I DONT KNOW</a></li>-->
                     </ul>
                     <!-- /ko -->
                   </div>

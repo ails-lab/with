@@ -1,4 +1,4 @@
-define(['knockout', 'text!./_item.html', 'app','smoke'], function (ko, template, app) {
+define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, app) {
 
 	self.disqusLoaded=ko.observable(false);
 	
