@@ -1,4 +1,4 @@
-define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded','app'], function(bridget,ko, template,Isotope,imagesLoaded,app) {
+define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded','app', 'easypiechart'], function(bridget,ko, template,Isotope,imagesLoaded,app) {
 	
 	
 	$.bridget('isotope', Isotope);
@@ -145,7 +145,7 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 	  self.totalExhibitions=ko.observable(0);
 	  self.collections=ko.observableArray();
 	  self.fetchitemnum=20;
-	  
+      self.annotationPercentage = ko.observable(50);
 	  var $container = $(".grid").isotope({
 			itemSelector: '.item',
 			transitionDuration: transDuration,
@@ -158,7 +158,7 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 	  
 	  
 	  self.loadAll = function () {
-		  //this should replaced with get space collections + exhibitions
+         $('.chart').easyPieChart({});
 		 loading(true);
 		 var count=40;
 		 if(sessionStorage.getItem("homemasonrycount")){
@@ -188,13 +188,24 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
         	  self.exhibitloaded(true);
         	  WITHApp.initCharacterLimiter();
           });
-          
+          //self.getAnnotationPercentage();
 		  
 		};
-		//TODO:get project from backend. Update hard-coded group name parameter in list collections call.
+		
+		self.getAnnotationPercentage = function() {
+			return $.ajax({
+				type: "GET",
+				contentType: "application/json",
+				dataType: "json",
+				url: "/record/annotationPercentage",
+				processData: false,
+				data: "groupId="+WITHApp.projectId,
+			}).success (function(data) {
+				self.annotationPercentage(data.annotatedRecordsPercentage);
+			});
+		}
 		
 		self.getSpaceCollections = function () {
-			//call should be replaced with space collections+exhibitions
 			return $.ajax({
 				type: "GET",
 				contentType: "application/json",
@@ -385,7 +396,7 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 	  
 	  self.randomRecords = function() {
 			$.ajax({
-		    	"url": "/record/randomRecords?groupId=56e13d2e75fe2450755e553a&batchCount=3",
+		    	"url": "/record/randomRecords?groupId="+WITHApp.projectId,
 		    	"method": "GET",
 		    	"success": function( data, textStatus, jQxhr ){
 		    		if (data.length > 0) {
