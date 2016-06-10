@@ -352,7 +352,6 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 			$('.nav-tabs a[href="#information"]').tab('show');
 			$(".mediathumb > img").attr("src","");
 			$("span.pnd-resource").attr('about','');
-			
 			self.open();
 			self.record(new Record(data));
 			if(self.record().recordId!="-1"){

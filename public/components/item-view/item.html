@@ -42,6 +42,26 @@
                            </div>
                             <!-- collect--><a href="#" title="collect" class="infocollect collectbutton" data-bind="visible:loggedUser, event: { click: function(data,event) { collect(record(),event); } }">COLLECT ITEM</a>
                           </div>
+                          <!-- annotate box-->
+		                   <!-- ko if: record().nextItemToAnnotate || record().annotations -->
+		                  <div class="annotatebox">
+		                    <div class="question">What kind of musical instrument do you see in this item?</div>
+		                    <div class="info">Lorem ipsum dolor sit amet conceptuos</div>
+		                    <!-- answers-->
+		                    <!-- ko if: record().annotations-->
+		                    <ul class="answers" data-bind="foreach: record().annotations()">
+		                      <li data-bind="text: body.label()"></li>
+		                    </ul>
+		                    <!-- /ko -->
+		                    <!-- answer action-->
+		                    <!-- ko if: record().nextItemToAnnotate && !jQuery.isEmptyObject(record().nextItemToAnnotate()) -->
+		                    <ul class="answeraction">
+		                      <li><a href="#" data-bind="click: nextItem">NEXT ITEM</a></li>
+		                      <!--<li class="dontknow"><a href="#">I DONT KNOW</a></li>-->
+		                    </ul>
+		                    <!-- /ko -->
+		                  </div>
+		                  <!-- /ko -->
                           <!-- metadata-->
                           <ul id="itemTabs" role="tablist" class="nav nav-tabs">
                             <li class="active"><a href="#information" title="" data-toggle="tab">Info</a></li>
