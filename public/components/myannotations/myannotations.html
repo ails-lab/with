@@ -7,7 +7,7 @@
           <main>
             <section class="collection">
               <section class="header">
-                <!-- new collection--><a href="#" class="new"><span class="plus"></span><span class="text">Annotate new collection</span></a>
+                <!-- new collection--><!-- <a href="#" class="new"><span class="plus"></span><span class="text">Annotate new collection</span></a> -->
                 <!-- picker wrap
                 .picker-wrap
                  a#picker(href="#", data-toggle='dropdown').picker
@@ -26,7 +26,10 @@
               <section class="message"><img src="img/ui/ic-annotate.png" class="hero">
                 <div class="message-body">
                   <div class="header">Welcome to My Annotations</div>
-                  <div class="description">This is <b> My Annotations </b>, all of your annotation will be collected in here.</div><a href="#"><span class="cross"></span><span class="text">Hide welcome message</span></a>
+                  <div class="description">This is <b> My Annotations </b>, all of your annotation will be collected in here.</div>
+                  <a href="#" data-bind="click: hideMessage">
+                  <span class="cross">
+                  </span><span class="text">Hide welcome message</span></a>
                 </div>
               </section>
               <!-- achievements-->
@@ -39,7 +42,7 @@
                   <div class="info">
                     <h2>You have earned the Silver badge!</h2>
                     <p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo</p>
-                    <!-- action button--><a href="#filter" class="annotatebtn">Annotate now</a>
+                    <!-- action button--><a href="../custom/soundspace/index.html" class="annotatebtn">Annotate now</a>
                   </div>
                 </div>
                 <!-- goal-->
@@ -64,196 +67,48 @@
                 <!-- collection main header-->
                 <div class="list-head">
                   <!-- sort-->
-                  <div class="sort"><span>Sort by</span><a id="sorting" href="#" data-toggle="dropdown"><span class="text">Title</span><span class="arrow"></span></a>
-                    <!-- dropdown-->
+                  <!-- <div class="sort"><span>Sort by</span><a id="sorting" href="#" data-toggle="dropdown"><span class="text">Title</span><span class="arrow"></span></a>
+                    dropdown
                     <ul aria-labelledby="sorting" class="dropdown-menu">
-                      <li><a href="#">Title</a></li>
-                      <li><a href="#">Date</a></li>
-                    </ul>
-                  </div>
-                  <div class="list-control"><a href="#" data-toggle="tooltip" data-placement="top" title="List view" class="fa fa-bars"></a><a href="#" data-toggle="tooltip" data-placement="top" title="Grid view" class="fa fa-th active"></a></div>
+				  	<li><a href="#" data-bind="click: sortByDate">Date</a></li>
+					<li><a href="#" data-bind="click: sortByTitle">Title</a></li>
+					<li><a href="#" >Date</a></li>
+					<li><a href="#" >Title</a></li>
+				  </ul>
+                  </div> -->
                   <!-- search-->
-                  <!-- item count--><span class="item-count-info">You have annotated 4 items</span>
+                  <!-- item count--><span class="item-count-info">You have annotated <!-- ko text: annotationCount() --><!-- /ko --> annotated items</span>
                 </div>
                 <!-- loader-->
                 <div class="loader hidden"><img src="img/ui/ic-loader.gif"></div>
               </section>
+              
+              
               <!-- isotope section-->
               <section class="isotope">
                 <section class="listing">
-                  <div class="grid">
-                    <div class="sizer"></div>
-                    <div class="item">
-                      <div class="wrap"><a href="#" title="Lorem ipsum">
-                          <div class="thumb"><img src="img/content/content-1-white.png" alt="Lorem ipsum"></div></a>
-                        <div class="info"><a href="#" title="Lorem ipsum">
-                            <h2 class="title">Lorem ipsum dolor sit amet conceptus</h2><span class="source">National Library of Latvia</span></a><span class="provider"><a href="#" class="links">digitainz.org</a></span></div>
-                        <div class="action-group">
-                          <div class="wrap">
-                            <ul>
-                              <li><a href="#" data-toggle="tooltip" data-placement="top" title="Delete media" class="fa fa-trash-o"></a></li>
-                              <li><a href="#" data-toggle="tooltip" data-placement="top" title="Add to favorite" class="fa fa-heart"></a></li>
-                              <li><a href="#" data-toggle="tooltip" data-placement="top" title="Collect it" class="fa fa-download collectbutton"></a></li>
-                              <li><a href="#" data-toggle="tooltip" data-placement="top" title="Show similar items" class="fa fa-search-plus"></a></li>
-                            </ul>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                    <div class="item">
-                      <div class="wrap"><a href="#" title="Lorem ipsum">
-                          <div class="thumb"><img src="img/content/content-1.png" alt="Lorem ipsum"></div></a>
-                        <div class="info"><a href="#" title="Lorem ipsum">
-                            <h2 class="title">Lorem ipsum dolor sit amet conceptus</h2><span class="source">National Library of Latvia</span></a><span class="provider"><a href="#" class="links">digitainz.org</a></span></div>
-                        <div class="action-group">
-                          <div class="wrap">
-                            <ul>
-                              <li><a href="#" data-toggle="tooltip" data-placement="top" title="Delete media" class="fa fa-trash-o"></a></li>
-                              <li><a href="#" data-toggle="tooltip" data-placement="top" title="Add to favorite" class="fa fa-heart"></a></li>
-                              <li><a href="#" data-toggle="tooltip" data-placement="top" title="Collect it" class="fa fa-download collectbutton"></a></li>
-                              <li><a href="#" data-toggle="tooltip" data-placement="top" title="Show similar items" class="fa fa-search-plus"></a></li>
-                            </ul>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                    <div class="item">
-                      <div class="wrap"><a href="#" title="Lorem ipsum">
-                          <div class="thumb"><img src="img/content/content-3.png" alt="Lorem ipsum"></div></a>
-                        <div class="info"><a href="#" title="Lorem ipsum">
-                            <h2 class="title">Lorem ipsum dolor sit amet conceptus</h2><span class="source">National Library of Latvia</span></a><span class="provider"><a href="#" class="links">digitainz.org</a></span></div>
-                        <div class="action-group">
-                          <div class="wrap">
-                            <ul>
-                              <li><a href="#" data-toggle="tooltip" data-placement="top" title="Delete media" class="fa fa-trash-o"></a></li>
-                              <li><a href="#" data-toggle="tooltip" data-placement="top" title="Add to favorite" class="fa fa-heart"></a></li>
-                              <li><a href="#" data-toggle="tooltip" data-placement="top" title="Collect it" class="fa fa-download collectbutton"></a></li>
-                              <li><a href="#" data-toggle="tooltip" data-placement="top" title="Show similar items" class="fa fa-search-plus"></a></li>
-                            </ul>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                    <div class="item">
-                      <div class="wrap"><a href="#" title="Lorem ipsum">
-                          <div class="thumb"><img src="img/content/content-2.png" alt="Lorem ipsum"></div></a>
-                        <div class="info"><a href="#" title="Lorem ipsum">
-                            <h2 class="title">Lorem ipsum dolor sit amet conceptus</h2><span class="source">National Library of Latvia</span></a><span class="provider"><a href="#" class="links">digitainz.org</a></span></div>
-                        <div class="action-group">
-                          <div class="wrap">
-                            <ul>
-                              <li><a href="#" data-toggle="tooltip" data-placement="top" title="Delete media" class="fa fa-trash-o"></a></li>
-                              <li><a href="#" data-toggle="tooltip" data-placement="top" title="Add to favorite" class="fa fa-heart"></a></li>
-                              <li><a href="#" data-toggle="tooltip" data-placement="top" title="Collect it" class="fa fa-download collectbutton"></a></li>
-                              <li><a href="#" data-toggle="tooltip" data-placement="top" title="Show similar items" class="fa fa-search-plus"></a></li>
-                            </ul>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
+                  <div class="grid" data-bind="attr: {id: id}">
+                    <div class="sizer"></div>           
+                              
                   </div>
                 </section>
-              </section><a href="#" class="loadmore">load more
-                <div class="left"></div>
-                <div class="right"></div>
-                <div class="top"></div>
-                <div class="bot"></div></a>
-              <!-- collection edit-->
-              <section class="action edit">
-                <div class="action-header">
-                  <div class="title">Edit Collection</div>
-                  <div class="toggle">
-                    <input type="checkbox" id="toggle1">
-                    <label for="toggle1"></label><span class="private">private</span><span class="public">public</span>
-                  </div>
-                </div>
-                <div class="action-body">
-                  <input type="text" placeholder="Name your collection">
-                  <textarea placeholder="Describe your collection"></textarea>
-                </div>
-                <div class="button-group"><a href="#" class="btn-green-o cancel">Cancel</a><a href="#" class="btn-green">Save collection</a></div>
+                <!-- load more -->
+							<a href="#" class="loadmore" data-bind="visible: citems().length>0 ,event: {click: loadNext}">
+								Load more
+								<div class="left"></div>
+								<div class="right"></div>
+								<div class="top"></div>
+								<div class="bot"></div>
+							</a>
+							<div class="more" data-bind="visible: loading"> <i class="fa fa-spinner fa-pulse"></i></div>
               </section>
-              <!-- collection new-->
-              <section class="action new">
-                <div class="action-header">
-                  <div class="title">New Collection</div>
-                  <div class="toggle">
-                    <input type="checkbox" id="toggle2">
-                    <label for="toggle2"></label><span class="private">private</span><span class="public">public</span>
-                  </div>
-                </div>
-                <div class="action-body">
-                  <input type="text" placeholder="Name your collection"><a href="#" class="add"><span class="plus"></span><span class="text">Add description</span></a>
-                </div>
-                <div class="button-group"><a href="#" class="btn-green-o cancel">Cancel</a><a href="#" class="btn-green">Create collection</a></div>
-              </section>
-              <!-- collection give access-->
-              <section class="action access">
-                <div class="action-header">
-                  <div class="title">Give access to collection</div>
-                </div>
-                <div class="action-body">
-                  <div class="group">
-                    <div class="title">Users access</div>
-                    <input type="text" placeholder="Start typing username">
-                    <ul class="access-list">
-                      <li>
-                        <div class="thumbnails"><img src="img/content/img-profile.jpg"></div><a href="#" data-toggle="tooltip" data-placement="top" title="List view" class="trash"><i class="fa fa-trash"></i></a>
-                        <div class="toggle">
-                          <input type="checkbox" id="u1">
-                          <label for="u1"></label><span class="private">view</span><span class="public">co-edit</span>
-                        </div>
-                      </li>
-                      <li>
-                        <div class="thumbnails"><img src="img/content/img-profile.jpg"></div><a href="#" data-toggle="tooltip" data-placement="top" title="List view" class="trash"><i class="fa fa-trash"></i></a>
-                        <div class="toggle">
-                          <input type="checkbox" id="u2">
-                          <label for="u2"></label><span class="private">view</span><span class="public">co-edit</span>
-                        </div>
-                      </li>
-                      <li>
-                        <div class="thumbnails"><img src="img/content/img-profile.jpg"></div><a href="#" data-toggle="tooltip" data-placement="top" title="List view" class="trash"><i class="fa fa-trash"></i></a>
-                        <div class="toggle">
-                          <input type="checkbox" id="u3">
-                          <label for="u3"></label><span class="private">view</span><span class="public">co-edit</span>
-                        </div>
-                      </li>
-                      <li>
-                        <div class="thumbnails"><img src="img/content/img-profile.jpg"></div><a href="#" data-toggle="tooltip" data-placement="top" title="List view" class="trash"><i class="fa fa-trash"></i></a>
-                        <div class="toggle">
-                          <input type="checkbox" id="u4">
-                          <label for="u4"></label><span class="private">view</span><span class="public">co-edit</span>
-                        </div>
-                      </li>
-                    </ul>
-                  </div>
-                  <div class="group">
-                    <div class="title">Groups access</div>
-                    <input type="text" placeholder="Start typing group name">
-                    <ul class="access-list">
-                      <li class="blue"><span class="text">DK</span><a href="#" data-toggle="tooltip" data-placement="top" title="List view" class="trash"><i class="fa fa-trash"></i></a>
-                        <div class="toggle">
-                          <input type="checkbox" id="g1">
-                          <label for="g1"></label><span class="private">view</span><span class="public">co-edit</span>
-                        </div>
-                      </li>
-                      <li class="green"><span class="text">US</span><a href="#" data-toggle="tooltip" data-placement="top" title="List view" class="trash"><i class="fa fa-trash"></i></a>
-                        <div class="toggle">
-                          <input type="checkbox" id="g2">
-                          <label for="g2"></label><span class="private">view</span><span class="public">co-edit</span>
-                        </div>
-                      </li>
-                      <li class="orange"><span class="text">MN</span><a href="#" data-toggle="tooltip" data-placement="top" title="List view" class="trash"><i class="fa fa-trash"></i></a>
-                        <div class="toggle">
-                          <input type="checkbox" id="g3">
-                          <label for="g3"></label><span class="private">view</span><span class="public">co-edit</span>
-                        </div>
-                      </li>
-                    </ul>
-                  </div>
-                </div>
-                <div class="button-group"><a href="#" class="btn-green cancel">Close</a></div>
-              </section>
+
+              <!-- item view-->
+			  <item-view params="route: route"></item-view>
+			  <!-- collection give access-->
+			  <section class="action collect">
+				<collection params="route: route"></collection>
+			  </section>
             </section>
           </main>
         </div>

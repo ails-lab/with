@@ -37,6 +37,7 @@ define(['bridget', 'knockout', 'text!./_collection-view.html', 'isotope', 'image
 	function Record(data) {
 		var self = this;
 
+		self.annotations = [];
 		self.title = "";
 		self.description = "";
 		self.thumb = "";
@@ -148,6 +149,7 @@ define(['bridget', 'knockout', 'text!./_collection-view.html', 'isotope', 'image
 				self.collected = usage.collected;
 			}
 
+			self.annotations = options.annotations;			
 			
 			
 			if(self.source=="Rijksmuseum" && media){
