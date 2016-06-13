@@ -332,8 +332,7 @@ define(['bridget','knockout', 'text!./organization-edit.html', 'isotope','images
 				contentType : "text/plain",
 				url : "/group/admin/" + self.id() + "?id=" + userId,
 				success : function (result) {
-					/*self.image = userData.image;
-					self.userMembers.push(ko.mapping.fromJS(userData));*/
+					
 				},
 				error : function (result) {
 					$.smkAlert({ text: result.responseJSON.error, type: 'danger', time: 10 });
@@ -747,7 +746,8 @@ define(['bridget','knockout', 'text!./organization-edit.html', 'isotope','images
 		};
 		
 		function getItem(collection) {
-			  var tile= '<div class="'+collection.data.css()+'"> <div class="wrap">';
+			  //var tile= '<div class="'+collection.data.css()+'"> <div class="wrap">';
+			  var tile= '<div class="item ' + collection.data.dbId + '"> <div class="wrap">';
 			   tile+='<a href="'+collection.data.url()+'">'
                 +'<div class="thumb"><img src="'+collection.data.thumbnail()+'"><div class="counter">'+collection.data.entryCount+' ITEMS</div></div>'
                 +' <div class="info"><div class="type">'+collection.data.type()+'</div><h2 class="title">'+collection.data.title+'</h2></div>'
@@ -789,7 +789,40 @@ define(['bridget','knockout', 'text!./organization-edit.html', 'isotope','images
 
 		};
 
-		unShareCollection = function (id,event) {
+		unShareCollection = function (id, event) {
+
+
+			var $elem = $(event.target).parents(".item");
+					$.ajax({
+						url:'/rights/' + id +'/NONE'+'?username='+ self.username()+'&membersDowngrade=false',
+						type: 'GET',
+						contentType: "application/json",
+						dataType: 'json',
+						success: function (data, textStatus, xhr) {
+							var foundrec = ko.utils.arrayFirst(self.items(), function (item) {
+								return item.dbId == id;
+							});
+							self.items.remove(foundrec);
+								if ($elem) {
+									self.$container.isotope('remove', $elem).isotope('layout');
+								}						
+							$.smkAlert({
+								text: 'Update successful!',
+								type: 'success'
+							});
+						},
+						error: function (xhr, textStatus, errorThrown) {
+							$.smkAlert({
+								text: 'An error has occured',
+								type: 'danger',
+								time: 10
+							});
+						}
+					});
+			};
+
+
+		/*unShareCollection = function (id,event) {
         	event.preventDefault();
 			self.Unshare(id);
 		};
@@ -799,24 +832,20 @@ define(['bridget','knockout', 'text!./organization-edit.html', 'isotope','images
 
 			$.ajax({
 				type: 'GET',
-				//"url": "/rights/" + collId + "/" + clickedRights + "?username=" + username + "&membersDowngrade=" + membersDowngrade,
-				//http://localhost:9000/rights/57564ec075fe24751b95ac62/NONE?username=littleorg&membersDowngrade=false
 				url:'/rights/' + id +'/NONE'+'?username='+ self.username()+'&membersDowngrade=true',
-				//url: '/group/' + self.id() +'/addFeatured',
 				contentType: 'application/json',
 				dataType: 'json',
 				processData: false,
-				//data: ko.toJSON(data),
 				success: function (data, text) {
 					$.smkAlert({
 						text: 'Update successful!',
 						type: 'success'
 					});
 
-					/*var index = self.items.indexOf(id);
+					var index = self.items.indexOf(id);
 						if (index > -1) {
 							self.items().splice(index, 1);
-						}*/
+						}
 					var foundrec = ko.utils.arrayFirst(self.items, function (item) {
 								return item.dbId == id;
 							});
@@ -834,7 +863,7 @@ define(['bridget','knockout', 'text!./organization-edit.html', 'isotope','images
 					});
 				}
 			});
-		};
+		};*/
 
 		self.addFeatured = function (id,type) {
 			if (type=="COLLECTION"){
