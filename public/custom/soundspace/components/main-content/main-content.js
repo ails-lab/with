@@ -135,7 +135,6 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 	  document.body.setAttribute("data-page","home");
 	  setTimeout(function(){ WITHApp.init(); }, 300);
 	 
-	 
 	  self.hash=window.location.hash;
 	  
 	  self.exhibitloaded=ko.observable(false);
@@ -146,6 +145,8 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 	  self.collections=ko.observableArray();
 	  self.fetchitemnum=20;
       self.annotationPercentage = ko.observable(50);
+      //cannot make data binding for data-percent work, so update within initCart
+      WITHApp.initChart(self.annotationPercentage());
 	  var $container = $(".grid").isotope({
 			itemSelector: '.item',
 			transitionDuration: transDuration,
@@ -158,7 +159,7 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 	  
 	  
 	  self.loadAll = function () {
-         $('.chart').easyPieChart({});
+         //$('.chart').easyPieChart({});
 		 loading(true);
 		 var count=40;
 		 if(sessionStorage.getItem("homemasonrycount")){
