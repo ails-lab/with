@@ -54,24 +54,6 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 			return app.isLiked(self.externalId);
 		});
 		self.isLoaded = ko.observable(false);
-		
-		document.addEventListener("Pundit.saveAnnotation", function(event) {
-			var annotationId = event.detail;
-			$.ajax({
-		    	url: "http://thepund.it:8083/annotationserver/api/open/annotations/"+annotationId+"/metadata?jsonp=withParseAnnot",
-		    	method: "GET",
-		    	contentType    : "application/json",
-		    	jsonpCallback: 'withParseAnnot',
-		    	dataType : 'jsonp'
-		    });
-			
-			withParseAnnot = function(data) {
-			    console.log(JSON.stringify(data));
-			    //save annotation, get with response and update annotations array
-			};
-		})
-		
-		
 
 		self.load = function(data, isRelated) {
 			if(data.title==undefined){
@@ -140,6 +122,41 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 			console.log(helper_thumb);
 			helper_thumb = self.calcOnErrorThumbnail();
 		};
+		
+		document.addEventListener("Pundit.saveAnnotation", function(event) {
+			var annotationId = event.detail;
+			$.ajax({
+		    	url: "http://thepund.it:8083/annotationserver/api/open/annotations/"+annotationId,
+		    	method: "GET",
+		    	contentType    : "application/json",
+		    	beforeSend : function (request) { request.setRequestHeader("Accept", "application/json"); },
+		    	success : function(punditAnnotation) {
+		    		console.log(JSON.stringify(punditAnnotation));
+		    		//save annotation, get with response and update annotations array
+		    		// Map pundit annotation JSON to WITH annotation JSON
+		    		var withAnnotation = JSON.stringify({
+		    			'generator': 'pundit',
+		    			'motivation': 'Tagging',
+		    			'target' : {
+		    				'recordId': self.recordId,
+		    				'withURI': '/record/'+self.recordId,
+		    			},
+		    			'body' : {
+		    				'uriType': [ 'http://www.mimo-db.eu/InstrumentsKeywords' ],
+		    				'uriVocabulary': 'MIMO' 
+		    			}
+		    		});
+		    		var annotationUri = punditAnnotation.metadata['http://purl.org/pundit/as/annotation/'+annotationId];
+		    		var serializedAt = annotationUri['http://www.openannotation.org/ns/serializedAt'];
+		    		withAnnotation.generated = serializedAt[0].value;
+		    		var graph = punditAnnotation.graph['http://purl.org/pundit/as/graph/body-'+annotationId];
+		    		console.log(Object.keys(graph)[0])
+		    		//withAnnotation.body.uri =  
+		    		console.log(withAnnotation);
+				// Send annotation to WITH
+			}
+		   });
+		});
 		
 		self.findsimilar=function(){
 		  if(self.related().length==0 && self.relatedsearch==false){
@@ -444,25 +461,7 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 		self.collect = function (rec,event) {
 				event.preventDefault();
 				collectionShow(rec);
-		};
-		
-		self.storePunditAnnotation = function (punditAnnotation) {
-			// Map pundit annotation JSON to WITH annotation JSON
-			var withAnnotation = JSON.stringify({
-				generator: pundit,
-				motivation: Tagging,
-				target : {
-					recordId: self.record.recordId(),
-					withURI: "/record/"+self.record.recordId()
-				},
-				body {
-					uriType: [ http:\/\/www.mimo-db.eu/InstrumentsKeywords ],
-					uriVocabulary: MIMO 
-			});
-			//withAnnotation.generated = punditAnnotation.
-			// Send annotation to WITH
-		};
-		
+		};		
 		
 		self.loadItem = function () {
 			$.ajax({
