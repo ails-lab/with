@@ -1,4 +1,4 @@
-define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded','app', 'easypiechart'], function(bridget,ko, template,Isotope,imagesLoaded,app) {
+define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded','app', 'knockout-else', 'easypiechart'], function(bridget,ko, template,Isotope,imagesLoaded,app,KnockoutElse) {
 	
 	
 	$.bridget('isotope', Isotope);
@@ -15,7 +15,7 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 		
 	function Collection(data) {
 		var self=this;
-		
+		KnockoutElse.init([spec = {}]);
 		var mapping = {
 				create: function(options) {
 			    	var self=this;
@@ -145,17 +145,7 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 	  self.collections=ko.observableArray();
 	  self.fetchitemnum=20;
       self.annotationPercentage = ko.observable(50);
-      //cannot make data binding for data-percent work, so update within initCart
-      WITHApp.initChart(self.annotationPercentage());
-	  var $container = $(".grid").isotope({
-			itemSelector: '.item',
-			transitionDuration: transDuration,
-			masonry: {
-				columnWidth		: '.sizer',
-				percentPosition	: true
-			
-			}
-		});	
+
 
 	  self.loadAll = function () {
          //$('.chart').easyPieChart({});
@@ -188,8 +178,18 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
         	  self.exhibitloaded(true);
         	  WITHApp.initCharacterLimiter();
           });
-          //self.getAnnotationPercentage();
-		  
+          self.annotationPercentage(self.getAnnotationPercentage());
+          //cannot make data binding for data-percent work, so update within initCart
+          WITHApp.initChart(self.annotationPercentage());
+    	  var $container = $(".grid").isotope({
+    			itemSelector: '.item',
+    			transitionDuration: transDuration,
+    			masonry: {
+    				columnWidth		: '.sizer',
+    				percentPosition	: true
+    			
+    			}
+    		});	
 		};
 		
 		self.getAnnotationPercentage = function() {
@@ -425,6 +425,11 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 				}         
 		    });	
 		}
+		
+		self.openLogin=function(event){
+			  event.preventDefault();
+			  $("#loginPopup").addClass("open");	 
+		  }
 	
   }
   

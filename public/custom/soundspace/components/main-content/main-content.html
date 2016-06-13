@@ -17,9 +17,15 @@
               <!-- info-->
               <div class="info">
                 <h2>Help us reach our goal</h2>
-                <p>By the end pf our crowdsourcing campaign, our objective is to have 3000 audio items annotated by users. 
+                <p>By the end pf our crowdsourcing campaign, our objective is to have 1000 audio items annotated by users. 
                 	The annotations used in the campaign</p>
-                <!-- action button--><a href="#" data-bind="click: startAnnotate" class="annotatebtn">Annotate now</a>
+                <!-- action button-->
+                <!-- ko if: isLogged -->
+                	<a href="#" data-bind="click: startAnnotate" class="annotatebtn">Annotate now</a>
+                <!-- /ko -->
+                <!-- ko else -->
+					<a a href="#" data-bind="visible: isLogged()==false, event :{ click: function(data,event){openLogin(event);}}" class="annotatebtn" target="_blank">Annotate now</a>
+                <!-- /ko -->
               </div>
             </div>
             <!-- badge-->
@@ -29,9 +35,15 @@
               <!-- info-->
               <div class="info">
                 <h2>Get your badge</h2>
-                <p>30 annotations grant you a bronze badge, 60 a silver, and with 100 annotations you win a golden badge. Special gifts will be
+                <p>10 annotations grant you a bronze badge, 20 a silver, and with 40 annotations you win a golden badge. Special gifts will be
                 	provided to golden winners!</p>
-                <!-- action button--><a href="#" data-bind="click: startAnnotate" class="annotatebtn">Annotate now</a>
+                <!-- action button-->
+                 <!-- ko if: isLogged -->
+                	<a href="../../assets/index.html#myannotations" class="annotatebtn">View your annotations</a>
+                <!-- /ko -->
+                <!-- ko else -->
+					<a a href="#" data-bind="visible: isLogged()==false, event :{click: function(data,event){openLogin(event);}}" class="annotatebtn" target="_blank">View your annotations</a>
+                <!-- /ko -->
               </div>
             </div>
           </div>
