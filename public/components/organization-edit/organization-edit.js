@@ -792,7 +792,7 @@ define(['bridget','knockout', 'text!./organization-edit.html', 'isotope','images
 		unShareCollection = function (id, event) {
 
 
-			var $elem = $(event.target).parents(".item");
+		//	var $elem = $(event.target).parents(".item");
 					$.ajax({
 						url:'/rights/' + id +'/NONE'+'?username='+ self.username()+'&membersDowngrade=false',
 						type: 'GET',
@@ -803,9 +803,9 @@ define(['bridget','knockout', 'text!./organization-edit.html', 'isotope','images
 								return item.dbId == id;
 							});
 							self.items.remove(foundrec);
-								if ($elem) {
+							//	if ($elem) {
 									self.$container.isotope('remove', $elem).isotope('layout');
-								}						
+							//	}						
 							$.smkAlert({
 								text: 'Update successful!',
 								type: 'success'
