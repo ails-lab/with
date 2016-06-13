@@ -435,10 +435,13 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 				motivation: Tagging,
 				target : {
 					recordId: self.record.recordId(),
-					withURI: "/record/"+self.record.recordId(),
-					externalId: self.record.externalId()
-				}
-			})
+					withURI: "/record/"+self.record.recordId()
+				},
+				body {
+					uriType: [ http:\/\/www.mimo-db.eu/InstrumentsKeywords ],
+					uriVocabulary: MIMO 
+			});
+			//withAnnotation.generated = punditAnnotation.
 			// Send annotation to WITH
 		};
 		
