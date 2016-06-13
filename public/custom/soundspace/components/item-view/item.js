@@ -428,7 +428,19 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 				collectionShow(rec);
 		};
 		
-		
+		self.storePunditAnnotation = function (punditAnnotation) {
+			// Map pundit annotation JSON to WITH annotation JSON
+			var withAnnotation = JSON.stringify({
+				generator: pundit,
+				motivation: Tagging,
+				target : {
+					recordId: self.record.recordId(),
+					withURI: "/record/"+self.record.recordId(),
+					externalId: self.record.externalId()
+				}
+			})
+			// Send annotation to WITH
+		};
 		
 		
 		self.loadItem = function () {
