@@ -156,8 +156,7 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 			
 			}
 		});	
-	  
-	  
+
 	  self.loadAll = function () {
          //$('.chart').easyPieChart({});
 		 loading(true);

@@ -55,6 +55,24 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 		});
 		self.isLoaded = ko.observable(false);
 		
+		document.addEventListener("Pundit.saveAnnotation", function(event) {
+			var annotationId = event.detail;
+			$.ajax({
+		    	url: "http://thepund.it:8083/annotationserver/api/open/annotations/"+annotationId+"/metadata?jsonp=withParseAnnot",
+		    	method: "GET",
+		    	contentType    : "application/json",
+		    	jsonpCallback: 'withParseAnnot',
+		    	dataType : 'jsonp'
+		    });
+			
+			withParseAnnot = function(data) {
+			    console.log(JSON.stringify(data));
+			    //save annotation, get with response and update annotations array
+			};
+		})
+		
+		
+
 		self.load = function(data, isRelated) {
 			if(data.title==undefined){
 				self.title="No title";
