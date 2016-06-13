@@ -791,13 +791,50 @@ define(['bridget','knockout', 'text!./organization-edit.html', 'isotope','images
 
 		unShareCollection = function (id,event) {
         	event.preventDefault();
-			var rec = ko.utils.arrayFirst(self.items, function (collection) {
-				return collection.dbId === id;
-			});
-
-			
+			self.Unshare(id);
 		};
 
+
+			self.Unshare = function (id) {
+
+			$.ajax({
+				type: 'GET',
+				//"url": "/rights/" + collId + "/" + clickedRights + "?username=" + username + "&membersDowngrade=" + membersDowngrade,
+				//http://localhost:9000/rights/57564ec075fe24751b95ac62/NONE?username=littleorg&membersDowngrade=false
+				url:'/rights/' + id +'/NONE'+'?username='+ self.username()+'&membersDowngrade=true',
+				//url: '/group/' + self.id() +'/addFeatured',
+				contentType: 'application/json',
+				dataType: 'json',
+				processData: false,
+				//data: ko.toJSON(data),
+				success: function (data, text) {
+					$.smkAlert({
+						text: 'Update successful!',
+						type: 'success'
+					});
+
+					/*var index = self.items.indexOf(id);
+						if (index > -1) {
+							self.items().splice(index, 1);
+						}*/
+					var foundrec = ko.utils.arrayFirst(self.items, function (item) {
+								return item.dbId == id;
+							});
+							self.items.remove(foundrec);
+							if ($elem) {
+								self.$container.isotope('remove', $elem).isotope('layout');
+							}
+						
+					},
+				error: function (request, status, error) {
+					var err = JSON.parse(request.responseText);
+					$.smkAlert({
+						text: err.error,
+						type: 'danger'
+					});
+				}
+			});
+		};
 
 		self.addFeatured = function (id,type) {
 			if (type=="COLLECTION"){
@@ -826,10 +863,10 @@ define(['bridget','knockout', 'text!./organization-edit.html', 'isotope','images
 				processData: false,
 				data: ko.toJSON(data),
 				success: function (data, text) {
-					$.smkAlert({
+					/*$.smkAlert({
 						text: 'Update successful!',
 						type: 'success'
-					});
+					});*/
 
 					if (type=="COLLECTION"){
 					self.page.featuredCollections.push(id);
@@ -877,10 +914,10 @@ define(['bridget','knockout', 'text!./organization-edit.html', 'isotope','images
 				processData: false,
 				data: ko.toJSON(data),
 				success: function (data, text) {
-					$.smkAlert({
+					/*$.smkAlert({
 						text: 'Update successful!',
 						type: 'success'
-					});
+					});*/
 					if (type=="COLLECTION"){
 						var index = self.page.featuredCollections().indexOf(id);
 						if (index > -1) {
