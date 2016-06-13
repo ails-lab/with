@@ -225,7 +225,7 @@ public class CollectionObjectController extends WithResourceController {
 		int firstPageCount1 = addResultToCollection(result, collection
 				.getDbId().toString(), mylimit, resultInfo, dontDuplicate);
 
-		Promise<Result> promiseOfInt = Promise.promise(new Function0<Result>() {
+		Function0<Result> function0 = new Function0<Result>() {
 			public Result apply() {
 				SourceResponse result;
 				int page = 1;
@@ -243,7 +243,9 @@ public class CollectionObjectController extends WithResourceController {
 						collection,
 						effectiveUserIds(), "BASIC", Option.Some("DEFAULT"))));
 			}
-		});
+		};
+		Promise<Result> promiseOfInt = Promise.promise(function0);
+//		Promise<Result> promiseOfInt = ParallelAPICall.createPromise(function0, Priority.BACKEND);
 		if (resultInfo.has("error"))
 			return Promise.pure((Result) badRequest(resultInfo));
 		if (waitToFinish)

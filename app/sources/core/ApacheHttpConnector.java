@@ -26,8 +26,10 @@ import java.net.URISyntaxException;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -48,29 +50,36 @@ public class ApacheHttpConnector extends HttpConnector {
 		return instance;
 	}
 
-	private HttpResponse getContentResponse(HttpUriRequest method) throws IOException, ClientProtocolException {
+	
+
+	private JsonNode getJsonContentResponse(HttpUriRequest method) throws IOException, ClientProtocolException {
 		URI url = method.getURI();
+		CloseableHttpClient client = null;
+		JsonNode readValue = null;
+		CloseableHttpResponse response = null;
+		BufferedReader rd = null;
 		try {
 			log.debug("calling: " + url);
 			long time = System.currentTimeMillis();
-			HttpClient client = HttpClientBuilder.create().build();
-			HttpResponse response = client.execute(method);
+			client = HttpClientBuilder.create().build();
+			response = client.execute(method);
 			long ftime = (System.currentTimeMillis() - time) / 1000;
 			log.debug("waited " + ftime + " sec for: " + url);
-			return response;
+			rd = new BufferedReader(new InputStreamReader(response.getEntity().getContent(), "UTF-8"));
+			ObjectMapper mapper = new ObjectMapper();
+			readValue = mapper.readValue(rd, JsonNode.class);
 		} catch (Exception e) {
 			log.error("calling: " + url);
 			log.error("msg: " + e.getMessage());
 			throw e;
+		} finally {
+			if (client != null)
+				client.close();
+			if (response != null)
+				response.close();
+			if (rd != null)
+				rd.close();
 		}
-	}
-
-	private JsonNode getJsonContentResponse(HttpUriRequest method) throws IOException, ClientProtocolException {
-		HttpResponse response = getContentResponse(method);
-		BufferedReader rd = new BufferedReader(new InputStreamReader(response.getEntity().getContent(), "UTF-8"));
-		ObjectMapper mapper = new ObjectMapper();
-		JsonNode readValue = mapper.readValue(rd, JsonNode.class);
-//		log.debug("Response: " + readValue);
 		
 		return readValue;
 	}
