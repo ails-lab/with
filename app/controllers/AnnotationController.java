@@ -58,6 +58,8 @@ public class AnnotationController extends Controller {
 				.getExistingAnnotation(annotation);
 		if (existingAnnotation == null) {
 			DB.getAnnotationDAO().makePermanent(annotation);
+			annotation.setAnnotationWithURI("/annotation/"+annotation.getDbId());
+			DB.getAnnotationDAO().makePermanent(annotation);
 			DB.getRecordResourceDAO().addAnnotation(
 					annotation.getTarget().getRecordId(), annotation.getDbId());
 		} else {
@@ -65,6 +67,15 @@ public class AnnotationController extends Controller {
 					annotation.getAnnotators());
 		}
 		return ok();
+	}
+	
+	public static Result getAnnotation(String id) {
+		try {
+			Annotation annotation = DB.getAnnotationDAO().getById(new ObjectId(id));
+			return ok(Json.toJson(annotation));
+		} catch (Exception e) {
+			return internalServerError();
+		}
 	}
 
 	public static Result getAnnotationPercentage(String groupId) {
