@@ -19,8 +19,7 @@ define(['knockout', 'text!./side-bar.html', 'app'], function (ko, template, app)
 		});
 		
 		self.annotationCount = ko.pureComputed(function () {
-			return 5;
-			//return app.currentUser.annotationCount();
+			return app.currentUser.annotationCount();
 		});
 	}
 
