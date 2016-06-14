@@ -369,7 +369,7 @@ define(['bootstrap', 'knockout', 'text!./myannotations.html', 'knockout-else','a
 						self.img('img/ui/ic-badge-gold');
 						self.badgeName('Gold');
 					}
-					//self.annotatedRecordCount(data.annotatedRecordCount);
+					self.annotatedRecordCount(data.annotatedRecordsCount);
 					var items = self.revealItems(data.records);
 					if (items.length > 0) {
 						var $newitems = getItems(items);
