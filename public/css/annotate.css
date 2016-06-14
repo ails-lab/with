@@ -78,6 +78,9 @@ body .annotatehero .top .annotatebtn a:hover img {
   opacity: 1;
   filter: alpha(opacity=100);
 }
+body[data-page="home"] header .annotatehero {
+    display: block;
+}
 body [role='main'] section.annotate {
   display: block;
 }

@@ -14,8 +14,13 @@
             <li><a href="javascript:void(0)" data-bind="event :{ click: function(data,event){goToPage('#home',event);}}" title="Home">Home</a></li>
             <li><a href="#providers" title="Content Provider">Content Providers</a></li>
             <li><a href="#about" title="About">About</a></li>
-        <li><a href="#" data-bind="visible: isLogged()==true,event :{ click: function(data,event){gotoWith(event);}}" title="WITH Login" target="_blank"><img  alt="with logo" src="img/with_logo.png" style="width: 20px;vertical-align: top;">&nbsp;<!-- ko text:currentUser.username() --><!-- /ko --></a><a href="#" data-bind="visible: isLogged()==false,event :{ click: function(data,event){openLogin(event);}}"  title="WITH Login" target="_blank">WITH Login</a></li>
-                <li class="subnav">
+        	<li><a href="#" data-bind="visible: isLogged()==true,event :{ click: function(data,event){gotoWith(event);}}" 
+        		title="WITH Login" target="_blank"><img  alt="with logo" src="img/with_logo.png" style="width: 20px;vertical-align: top;">
+        		&nbsp;<!-- ko text:currentUser.username() --><!-- /ko --></a>
+        		<a href="#" data-bind="visible: isLogged()==false,event :{ click: function(data,event){openLogin(event);}}"  
+        		title="WITH Login" target="_blank">WITH Login</a>
+        	</li>                
+        	<li class="subnav">
               <ul>
                 <li><a href="#terms" title="Terms of Usage">Terms of Use</a></li>
                 <li><a href="#privacy" title="Privacy Policy">Privacy Policy</a></li>
@@ -26,20 +31,5 @@
           </ul>
         </div>
       </nav>
-       <!-- hero, only to be rendered in index page-->
-       <section class="annotatehero">
-        <!-- top-->
-        <div class="top">
-          <!-- wrap-->
-          <div class="wrap">
-            <div class="container">
-              <!-- the wrap-->
-              <h1>Annotate</h1><span class="topic">Musical Instruments</span>
-              <!-- description-->
-              <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
-              <!-- action button-->
-              <div class="annotatebtn"><a> <span class="text">Annotate now and get your badge!</span></a></div>
-            </div>
-          </div>
-        </div>
-      </section>
+       <!-- hero, only to be rendered in index page => how? moved to index.html-->
+       
