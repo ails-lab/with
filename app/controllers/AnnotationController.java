@@ -93,6 +93,8 @@ public class AnnotationController extends Controller {
 		}
 		float percentage = Math.round(Math.min(((float) annotatedRecords / totalRecords) * 100 , 100)) ;
 		result.put("annotatedRecordsPercentage", percentage);
+		result.put("goal", totalRecords);
+		result.put("annotatedRecords", annotatedRecords);
 		return ok(result);
 	}
 
