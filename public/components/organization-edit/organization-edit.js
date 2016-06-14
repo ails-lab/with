@@ -829,48 +829,7 @@ define(['bridget','knockout', 'text!./organization-edit.html', 'isotope','images
 			};
 
 
-		/*unShareCollection = function (id,event) {
-        	event.preventDefault();
-			self.Unshare(id);
-		};
-
-
-			self.Unshare = function (id) {
-
-			$.ajax({
-				type: 'GET',
-				url:'/rights/' + id +'/NONE'+'?username='+ self.username()+'&membersDowngrade=true',
-				contentType: 'application/json',
-				dataType: 'json',
-				processData: false,
-				success: function (data, text) {
-					$.smkAlert({
-						text: 'Update successful!',
-						type: 'success'
-					});
-
-					var index = self.items.indexOf(id);
-						if (index > -1) {
-							self.items().splice(index, 1);
-						}
-					var foundrec = ko.utils.arrayFirst(self.items, function (item) {
-								return item.dbId == id;
-							});
-							self.items.remove(foundrec);
-							if ($elem) {
-								self.$container.isotope('remove', $elem).isotope('layout');
-							}
-						
-					},
-				error: function (request, status, error) {
-					var err = JSON.parse(request.responseText);
-					$.smkAlert({
-						text: err.error,
-						type: 'danger'
-					});
-				}
-			});
-		};*/
+		
 
 		self.addFeatured = function (id,type) {
 			if (type=="COLLECTION"){
