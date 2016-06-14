@@ -131,10 +131,9 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 		    	contentType    : "application/json",
 		    	beforeSend : function (request) { request.setRequestHeader("Accept", "application/json"); },
 		    	success : function(punditAnnotation) {
-		    		console.log(JSON.stringify(punditAnnotation));
 		    		//save annotation, get with response and update annotations array
 		    		// Map pundit annotation JSON to WITH annotation JSON
-		    		var withAnnotation = JSON.stringify({
+		    		var withAnnotation = {
 		    			'generator': 'pundit',
 		    			'motivation': 'Tagging',
 		    			'target' : {
@@ -145,14 +144,34 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 		    				'uriType': [ 'http://www.mimo-db.eu/InstrumentsKeywords' ],
 		    				'uriVocabulary': 'MIMO' 
 		    			}
-		    		});
+		    		};
+		    		if (self.recordId == "-1")
+		    			return;
 		    		var annotationUri = punditAnnotation.metadata['http://purl.org/pundit/as/annotation/'+annotationId];
 		    		var serializedAt = annotationUri['http://www.openannotation.org/ns/serializedAt'];
 		    		withAnnotation.generated = serializedAt[0].value;
 		    		var graph = punditAnnotation.graph['http://purl.org/pundit/as/graph/body-'+annotationId];
-		    		console.log(Object.keys(graph)[0])
-		    		//withAnnotation.body.uri =  
+		    		var externalId = Object.keys(graph)[0];
+		    		var annotationInfo = Object.values(graph)[0];
+		    		var tagType = Object.keys(annotationInfo)[0];
+		    		var uriInfo = annotationInfo[tagType];
+		    		var uri = uriInfo[0].value;
+		    		var itemsInfo = punditAnnotation.items[uri];
+		    		var labelInfo = itemsInfo['http://www.w3.org/2000/01/rdf-schema#label'];
+		    		var label = labelInfo[0].value;
 		    		console.log(withAnnotation);
+		    		withAnnotation['target'].externalId = externalId;
+		    		withAnnotation['body'].uri = uri;
+		    		withAnnotation['body'].tagType = tagType;
+		    		withAnnotation['body'].label = {'default' : [ label ]};
+		    		console.log(JSON.stringify(withAnnotation));
+		    		$.ajax({
+		    			url : '/record/annotation',
+				    	method : "POST",
+				    	contentType : "application/json",
+				    	data     : JSON.stringify(withAnnotation),
+						success : function(result) { }
+		    		});
 				// Send annotation to WITH
 			}
 		   });
