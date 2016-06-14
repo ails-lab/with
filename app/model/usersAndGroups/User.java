@@ -391,7 +391,12 @@ public class User extends UserOrGroup {
 			return new HashSet<Notification>();
 		}
 	}
-
+	
+	public String getAnnotationCount() {
+		String annotationCount = ""+ DB.getAnnotationDAO().countUserAnnotations(this.getDbId());
+		return annotationCount;
+	}
+	
 	public ObjectId getFavorites() {
 		if (favorites != null)
 			return favorites;
