@@ -790,7 +790,7 @@ define(['bridget','knockout', 'text!./organization-edit.html', 'isotope','images
 		};
 
 		unShareCollection = function (id, event) {
-
+        	event.preventDefault();
 
 		//	var $elem = $(event.target).parents(".item");
 					$.ajax({
@@ -799,17 +799,24 @@ define(['bridget','knockout', 'text!./organization-edit.html', 'isotope','images
 						contentType: "application/json",
 						dataType: 'json',
 						success: function (data, textStatus, xhr) {
-							var foundrec = ko.utils.arrayFirst(self.items(), function (item) {
-								return item.dbId == id;
-							});
-							self.items.remove(foundrec);
-							//	if ($elem) {
-									self.$container.isotope('remove', $elem).isotope('layout');
-							//	}						
-							$.smkAlert({
-								text: 'Update successful!',
-								type: 'success'
-							});
+							$.ajax({
+								type: "GET",
+								contentType: "application/json",
+								dataType: "json",
+								url: "/collection/list",
+								processData: false,
+								data: "offset=0&count=50&directlyAccessedByUserOrGroup=" + JSON.stringify([{group: self.username(), rights: "WRITE"}])
+							}).success(function (data, textStatus, jqXHR) {
+								var items=self.revealItems(data['collectionsOrExhibitions']);
+
+								
+									 var $newitems=getItems(items);
+
+									 providerIsotopeImagesReveal( $container,$newitems );
+
+										
+
+								});
 						},
 						error: function (xhr, textStatus, errorThrown) {
 							$.smkAlert({
