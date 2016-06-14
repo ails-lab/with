@@ -173,7 +173,7 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 				    	contentType : "application/json",
 				    	data     : JSON.stringify(withAnnotation),
 						success : function(result) {
-							self.annotations.push(result);
+							self.record().annotations.push(result);
 						}
 		    		});
 				// Send annotation to WITH
@@ -350,6 +350,11 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 		self.nextItem = function() {
 			formattedNextRecord = formatRecord(self.record().nextItemToAnnotate());
 			itemShow(formattedNextRecord);
+			var vid = document.getElementById("mediaplayer");
+			if (vid != null) {
+				vid.pause();
+			}
+			vid.parentNode.removeChild(vid);
 		};
 		
 		formatRecord =  function(backendRecord) {
