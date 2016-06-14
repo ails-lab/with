@@ -721,7 +721,7 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 				"url": "/collection/" + collectionId,
 				"method": "DELETE",
 				success: function (result) {
-					$.smkAlert({text: 'Collection removed', type: 'success'});
+					$.smkAlert({text: 'Exhibition removed', type: 'success'});
 					// redirect to myCollections
 					window.location.href = "#mycollections";
 				}
