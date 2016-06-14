@@ -3237,7 +3237,7 @@ body.expand [role='main'] .exhibitionplayer {
     padding: 17px 20px 0px 20px;
   }
   body [role='main'] .itemview .annotatebox .answers li {
-    margin: 0 5px 0px 0 !important;
+    margin: 0 5px 5px 0 !important;
   }
   .listing .grid .sizer,
   .listing .grid .item {
