@@ -78,10 +78,10 @@ public class AnnotationController extends Controller {
 		}
 	}
 
-	public static Result getAnnotationPercentage(String groupId) {
+	public static Result getAnnotationPercentage(String groupId, int goal) {
 		ObjectNode result = Json.newObject();
 		ObjectId group = new ObjectId(groupId);
-		int totalRecords = 30;
+		int totalRecords = goal;
 		CollectionAndRecordsCounts collectionsAndCount = RecordResourceController
 				.getCollsAndCountAccessiblebyGroup(group);
 //		int totalRecords = collectionsAndCount.totalRecordsCount;
