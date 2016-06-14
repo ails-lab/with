@@ -108,6 +108,10 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 			if (data.annotations !== undefined)
 				self.annotations(data.annotations);
 			self.loading(false);
+			if (data.view_url.indexOf('archives_items_') > -1) {
+				var id = data.view_url.split("_")[2];
+				$('#mediadiv').append('<iframe id="mediaplayer" src="http://archives.crem-cnrs.fr/archives/items/'+id+'/player/346x130/"height="250px scrolling="no"" width="361px"></iframe>');
+			} else {
 			if (data.mediatype != null) {
 				if (data.mediatype == "VIDEO") {		
 					self.vtype = "MEDIA";
@@ -120,7 +124,8 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 						$('#mediadiv').append('<audio id="mediaplayer" autoplay="true" controls width="576" height="324"><source src="' + self.fullres() + '" type="audio/mpeg">Your browser does not support HTML5</audio>');
 					}
 				}
-			} 	
+			}
+			}
 			console.log(helper_thumb);
 			helper_thumb = self.calcOnErrorThumbnail();
 		};
@@ -352,9 +357,8 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 			itemShow(formattedNextRecord);
 			var vid = document.getElementById("mediaplayer");
 			if (vid != null) {
-				vid.pause();
+				vid.parentNode.removeChild(vid);
 			}
-			vid.parentNode.removeChild(vid);
 		};
 		
 		formatRecord =  function(backendRecord) {
@@ -445,9 +449,8 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 			$( '.itemview' ).fadeOut();
 			var vid = document.getElementById("mediaplayer");
 			if (vid != null) {
-				vid.pause();
+				vid.parentNode.removeChild(vid);
 			}
-			vid.parentNode.removeChild(vid);
 		};
 
 		self.changeSource = function (item) {
