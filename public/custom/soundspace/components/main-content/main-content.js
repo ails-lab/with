@@ -378,8 +378,7 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 	
 	  
 	  self.startAnnotate = function() {
-		  //self.randomRecords();
-		  self.getTestRecords();
+		  self.randomRecords();
 	  };
 	  
 	  self.addNextAnnot = function(randomList, inner) {
@@ -412,7 +411,7 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 		
 		self.getTestRecords = function() {
 			$.ajax({
-		    	"url": "http://localhost:9000/user/annotations",
+		    	"url": "/user/annotations",
 		    	"method": "GET",
 		    	"success": function( data, textStatus, jQxhr ){
 		    		if (data.records.length > 0) {
