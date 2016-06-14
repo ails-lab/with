@@ -656,6 +656,7 @@ define(['bridget','knockout', 'text!./organization-edit.html', 'isotope','images
 
 		self.closeSideBar = function () {
 			// Reload Group to reset changes
+			console.log("close Sidebar");
 			$.ajax({
 				type: 'GET',
 				url: '/group/' + self.id(),
