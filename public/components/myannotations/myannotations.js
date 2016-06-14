@@ -315,6 +315,37 @@ define(['bootstrap', 'knockout', 'text!./myannotations.html', 'knockout-else','a
 		};
 		
 		
+		self.percentageCall = function() {
+			
+			$.ajax({
+				"url": '/record/annotationPercentage?groupId=' + "",
+				"method": "get",
+				"contentType": "application/json",
+				"success": function (data) {
+					
+				},
+				"error": function (result) {
+					$.smkAlert({
+						text: 'An error has occured',
+						type: 'danger',
+						permanent: true
+					});
+				}
+			});
+		}
+		
+		
+		self.percentage = function() {
+			return 10;
+			
+			
+			var promise = self.percentageCall();
+			$.when(promise).done(function (data) {
+				self.loading(false);
+				return data;
+			});
+		}
+		
 		self.loadAnnotations = function (id) {
 			self.loading(true);
 
