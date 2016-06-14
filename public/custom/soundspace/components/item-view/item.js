@@ -103,8 +103,10 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 			self.mail="mailto:?subject="+self.title+"&body="+encodeURIComponent(self.loc());
 			var likeval=app.isLiked(self.externalId);
 			self.isLike(likeval);
-			self.nextItemToAnnotate(data.nextItemToAnnotate);
-			self.annotations(data.annotations);
+			if (data.nextItemToAnnotate !== undefined)
+				self.nextItemToAnnotate(data.nextItemToAnnotate);
+			if (data.annotations !== undefined)
+				self.annotations(data.annotations);
 			self.loading(false);
 			if (data.mediatype != null) {
 				if (data.mediatype == "VIDEO") {		
@@ -413,7 +415,6 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 			if(self.record().recordId!="-1"){
 				self.addDisqus();
 			}
-			
 		};
 
 		self.open = function () {

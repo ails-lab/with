@@ -57,8 +57,8 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 		self.position=0;
 		self.dbId = "";
 		self.data = ko.observable('');
+		self.annotations = [];
 		self.thumbnail = ko.pureComputed(function () {
-
 			if (self.thumb) {
 				return self.thumb;
 			} 
@@ -177,7 +177,8 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 			}
 			self.isLoaded = ko.observable(false);
 			self.fullrestype = media[0] != null && media[0].Original != null 
-			&& media[0].Original.type != "null" ? media[0].Original.type : null;			
+			&& media[0].Original.type != "null" ? media[0].Original.type : null;
+			self.annotations = data.annotations;
 		};
 
 		if (data !== undefined) self.load(data);
