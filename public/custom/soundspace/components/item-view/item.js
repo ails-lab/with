@@ -441,6 +441,7 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 			if (vid != null) {
 				vid.pause();
 			}
+			vid.parentNode.removeChild(vid);
 		};
 
 		self.changeSource = function (item) {
