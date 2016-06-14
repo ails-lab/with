@@ -434,7 +434,7 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 	public long countAnnotatedRecords(ObjectId collectionId) {
 		long count = this.createQuery().disableValidation()
 				.field("collectedIn").equal(collectionId)
-				.field("annotationIds").greaterThan(new ArrayList()).countAll();
+				.field("annotationIds").exists().countAll();
 		return count;
 
 	}

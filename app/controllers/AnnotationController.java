@@ -91,7 +91,7 @@ public class AnnotationController extends Controller {
 			annotatedRecords += DB.getRecordResourceDAO()
 					.countAnnotatedRecords(collectionId);
 		}
-		float percentage = Math.min(((float) annotatedRecords / totalRecords) * 100 , 100) ;
+		float percentage = Math.round(Math.min(((float) annotatedRecords / totalRecords) * 100 , 100)) ;
 		result.put("annotatedRecordsPercentage", percentage);
 		return ok(result);
 	}
