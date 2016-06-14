@@ -28,7 +28,12 @@ import model.basicDataTypes.Language;
 import model.resources.RecordResource;
 
 import org.bson.types.ObjectId;
+import org.elasticsearch.action.search.SearchResponse;
+import org.elasticsearch.action.suggest.SuggestResponse;
+import org.elasticsearch.search.SearchHit;
 
+import play.Logger;
+import play.Logger.ALogger;
 import play.libs.F.Some;
 import play.libs.Json;
 import play.mvc.Controller;
@@ -42,9 +47,14 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import controllers.RecordResourceController.CollectionAndRecordsCounts;
 import controllers.WithController.Profile;
 import db.DB;
+import elastic.ElasticSearcher;
+import elastic.ElasticSearcher.SearchOptions;
 
 @SuppressWarnings({ "rawtypes", "unchecked", "deprecation" })
 public class AnnotationController extends Controller {
+
+	public static final ALogger log = Logger.of(AnnotationController.class);
+
 
 	public static Result addAnnotation() {
 		ObjectNode error = Json.newObject();
@@ -149,4 +159,30 @@ public class AnnotationController extends Controller {
 		}
 	}
 
+	public static Result searchRecordsOfGroup(String groupId, String term) {
+		ObjectNode result = Json.newObject();
+
+		try {
+			SearchOptions options = new SearchOptions();
+
+			ElasticSearcher recordSearcher = new ElasticSearcher();
+			SearchResponse resp = recordSearcher.searchForRecords(term, options);
+
+
+
+
+			List<ObjectId> recordIds = new ArrayList<ObjectId>();
+			resp.getHits().forEach( (h) -> {recordIds.add(new ObjectId(h.getId()));return;} );
+
+			List<RecordResource> hits = DB.getRecordResourceDAO().getByIds(recordIds);
+
+
+
+		} catch(Exception e) {
+			log.error("Search encountered a problem", e);
+			return internalServerError(e.getMessage());
+		}
+
+		return ok(result);
+	}
 }
