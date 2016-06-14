@@ -178,9 +178,7 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
         	  self.exhibitloaded(true);
         	  WITHApp.initCharacterLimiter();
           });
-          self.annotationPercentage(self.getAnnotationPercentage());
           //cannot make data binding for data-percent work, so update within initCart
-          WITHApp.initChart(self.annotationPercentage());
     	  var $container = $(".grid").isotope({
     			itemSelector: '.item',
     			transitionDuration: transDuration,
@@ -190,6 +188,7 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
     			
     			}
     		});	
+    	  self.getAnnotationPercentage();
 		};
 		
 		self.getAnnotationPercentage = function() {
@@ -199,9 +198,10 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 				dataType: "json",
 				url: "/record/annotationPercentage",
 				processData: false,
-				data: "groupId="+WITHApp.projectId,
+				data: "groupId="+WITHApp.projectId
 			}).success (function(data) {
 				self.annotationPercentage(data.annotatedRecordsPercentage);
+		        WITHApp.initChart(self.annotationPercentage());
 			});
 		}
 		

@@ -682,7 +682,6 @@ EUSpaceApp.ui = function( custom ){
 	var initChart = function(dataPercent){
 		// log
 		logger( 'info','plugins.js / initChart' );
-
 		// check
 		if( $( '.chart' ).length > 0 ) {
 
