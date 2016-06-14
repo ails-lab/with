@@ -173,9 +173,17 @@ define(['bootstrap', 'knockout', 'text!./myannotations.html', 'knockout-else','a
 				percentPosition: true
 			}
 		});
-		self.fetchitemnum = 20;
+		self.fetchitemnum = 10;
 		self.annotationCount = ko.observable();
+		self.annotatedRecordCount = ko.observable(5);
+		
+		self.annotationRecords = ko.observable();
+		self.annotationGoal = ko.observable();
+		self.annotationPercentage = ko.observable();
 		//self.myAnnotatios = ko.mapping.fromJS([], mapping);
+		
+		self.img = ko.observable("img/ui/ic-badge-bronze.png");
+		self.badgeName = ko.observable('Bronze');
 
 		
 		self.isotopeImagesReveal = function ($container, $items) {
@@ -315,6 +323,36 @@ define(['bootstrap', 'knockout', 'text!./myannotations.html', 'knockout-else','a
 		};
 		
 		
+		self.percentageCall = function() {
+			
+			$.ajax({
+				"url": '/record/annotationPercentage?groupId=56e13d2e75fe2450755e553a' + '&goal=1000',
+				"method": "get",
+				"contentType": "application/json",
+				"success": function (data) {
+					self.annotationRecords(data.annotatedRecords);
+					self.annotationGoal(data.goal);
+					self.annotationPercentage(data.annotatedRecordsPercentage);
+				},
+				"error": function (result) {
+					$.smkAlert({
+						text: 'An error has occured',
+						type: 'danger',
+						permanent: true
+					});
+				}
+			});
+		}
+		
+		
+		self.percentage = function() {
+		
+			var promise = self.percentageCall();
+			$.when(promise).done(function (data) {
+				self.loading(false);
+			});
+		}
+		
 		self.loadAnnotations = function (id) {
 			self.loading(true);
 
@@ -324,13 +362,20 @@ define(['bootstrap', 'knockout', 'text!./myannotations.html', 'knockout-else','a
 				"contentType": "application/json",
 				"success": function (data) {
 					self.annotationCount(data.annotationCount);
+					if(data.annotationCount > 10 && data.annotationCount <= 20) {
+						self.img('img/ui/ic-badge-silver.png');
+						self.badgeName('Silver');
+					} else if(data.annotationCount > 20) {
+						self.img('img/ui/ic-badge-gold');
+						self.badgeName('Gold');
+					}
+					//self.annotatedRecordCount(data.annotatedRecordCount);
 					var items = self.revealItems(data.records);
 					if (items.length > 0) {
 						var $newitems = getItems(items);
 
 						self.isotopeImagesReveal(self.$container, $newitems);
 					}
-
 					self.loading(false);
 				},
 				"error": function (result) {
@@ -345,12 +390,13 @@ define(['bootstrap', 'knockout', 'text!./myannotations.html', 'knockout-else','a
 		};
 		WITHApp.initTooltip();
 		self.loadAnnotations();
+		self.percentage();
 		
 	
 		self.loadNext = function () {
 						
-			if (self.loading() === true) {
-				self.loading(false);
+			if (self.loading() === false) {
+				self.loading(true);
 
 				var promise = self.moreItems();
 				$.when(promise).done(function (data) {
@@ -372,7 +418,7 @@ define(['bootstrap', 'knockout', 'text!./myannotations.html', 'knockout-else','a
 				contentType: "application/json",
 				url: "/user/annotations",
 				processData: false,
-				data: "count=" + self.fetchitemnum + "&start=" + self.citems().length
+				data: "count=" + self.fetchitemnum + "&offset=" + self.citems().length
 			}).success (function () {
 			});
 
