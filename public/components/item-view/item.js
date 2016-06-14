@@ -397,7 +397,10 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 			self.likeRecord = function (rec,event) {
         	event.preventDefault();
         	var $heart=$(event.target);
-			
+        	if(!app.currentUser._id()) {
+    			window.location.href = "/assets/index.html#login";
+    			return;
+    		}
         	app.likeItem(rec, function (status) {
 				if (status) {
 					$heart.addClass('redheart');

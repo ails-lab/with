@@ -389,31 +389,33 @@
 								</li>
 							</ul>
 						</div>
+<!-- 				<div class="group">
+				  <div class="title">Manage Groups</div>
+						<input id="groupName" type="text" placeholder="Start typing group name" data-bind="autocompleteUsername: myUsername, onlyParents:false, forUsers:false, forGroupType:'UserGroup'">
+							<ul class="members-list" data-bind="foreach: groupMembers">
+				  		<li class="blue">
+					    <span class="text" data-bind="text: username().substring(0,2).toUpperCase()"></span>
+						<a data-toggle="tooltip" data-placement="top" style="cursor:pointer;" data-bind="{attr: {title: username}, click: $parent.excecuteRemove.bind($data, userId(), 'group')}" class="trash">
+					  	<i class="fa fa-trash"></i></a>
+
+					</li>
+				  </ul>
+				</div> -->
+
 						<div class="group">
 							<div class="title">Manage groups</div>
 							<input id="groupName" type="text" placeholder="Start typing group name" data-bind="autocompleteUsername: myUsername, onlyParents:false, forUsers:false, forGroupType:'UserGroup'">
 							<ul class="members-list" data-bind="foreach: groupMembers">
-							       
-							<!-- <li data-bind="attr: { class: $parent.colors[$index]%4  }"> -->
-									<li class="blue">
- 									<!-- ko if: $data.image -->
-										<span class="text"  data-bind="text: username().substring(0,2).toUpperCase()">
+							 	<li>
+ 									<div class="thumbnails"><img src="images/group.jpeg">
+	
 										<a href="#" data-toggle="tooltip" data-placement="top" data-bind="click: $parent.excecuteRemove.bind($data, userId(), 'group'),
 										attr: { title: username }"
 										 class="trash">
 											<i class="fa fa-trash"></i>
-										</a></span>
-										<div class="username" data-bind="text: username"></div>									
-									<!-- /ko -->
-									<!-- ko ifnot: $data.image -->
-										<span class="text" data-bind="text: username().substring(0,2).toUpperCase()">
-										<a href="#" data-toggle="tooltip" data-placement="top" data-bind="click: $parent.excecuteRemove.bind($data, userId(), 'group'),
-										attr: { title: username }"
-										 class="trash">
-											<i class="fa fa-trash"></i>
-										</a></span>
-			                        <div class="username" data-bind="text: username"></div>
-									<!-- /ko -->
+										</a>
+										</div>
+										<div class="username" data-bind="text: username"></div>										
 								</li>
 							</ul>
 						</div>
