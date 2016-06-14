@@ -154,7 +154,7 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 		    		withAnnotation.generated = serializedAt[0].value;
 		    		var graph = punditAnnotation.graph['http://purl.org/pundit/as/graph/body-'+annotationId];
 		    		var externalId = Object.keys(graph)[0];
-		    		var annotationInfo = Object.values(graph)[0];
+		    		var annotationInfo = graph[externalId];
 		    		var tagType = Object.keys(annotationInfo)[0];
 		    		var uriInfo = annotationInfo[tagType];
 		    		var uri = uriInfo[0].value;
