@@ -170,7 +170,9 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 				    	method : "POST",
 				    	contentType : "application/json",
 				    	data     : JSON.stringify(withAnnotation),
-						success : function(result) { }
+						success : function(result) {
+							self.annotations.push(result);
+						}
 		    		});
 				// Send annotation to WITH
 			}
