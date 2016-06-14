@@ -151,14 +151,14 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 	public List<RecordResource> getAnnotatedRecords(ObjectId userId,
 			int offset, int count) {
 		List<Annotation> annotations = DB.getAnnotationDAO()
-				.getUserAnnotations(userId, offset, count,
+				.getUserAnnotations(userId,
 						Arrays.asList("target.recordId"));
 		if (annotations.isEmpty())
 			return new ArrayList<RecordResource>();
 		List<ObjectId> recordIds = (List<ObjectId>) CollectionUtils.collect(
 				annotations, new BeanToPropertyValueTransformer(
 						"target.recordId"));
-		Query<RecordResource> q = this.createQuery().field("_id").in(recordIds);
+		Query<RecordResource> q = this.createQuery().field("_id").in(recordIds).offset(offset).limit(count);
 		List<RecordResource> records = this.find(q).asList();
 		return records;
 	}

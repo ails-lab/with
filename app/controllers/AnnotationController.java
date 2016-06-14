@@ -58,7 +58,8 @@ public class AnnotationController extends Controller {
 				.getExistingAnnotation(annotation);
 		if (existingAnnotation == null) {
 			DB.getAnnotationDAO().makePermanent(annotation);
-			annotation.setAnnotationWithURI("/annotation/"+annotation.getDbId());
+			annotation.setAnnotationWithURI("/annotation/"
+					+ annotation.getDbId());
 			DB.getAnnotationDAO().makePermanent(annotation);
 			DB.getRecordResourceDAO().addAnnotation(
 					annotation.getTarget().getRecordId(), annotation.getDbId());
@@ -68,10 +69,11 @@ public class AnnotationController extends Controller {
 		}
 		return ok(Json.toJson(annotation));
 	}
-	
+
 	public static Result getAnnotation(String id) {
 		try {
-			Annotation annotation = DB.getAnnotationDAO().getById(new ObjectId(id));
+			Annotation annotation = DB.getAnnotationDAO().getById(
+					new ObjectId(id));
 			return ok(Json.toJson(annotation));
 		} catch (Exception e) {
 			return internalServerError();
@@ -84,14 +86,15 @@ public class AnnotationController extends Controller {
 		int totalRecords = goal;
 		CollectionAndRecordsCounts collectionsAndCount = RecordResourceController
 				.getCollsAndCountAccessiblebyGroup(group);
-//		int totalRecords = collectionsAndCount.totalRecordsCount;
+		// int totalRecords = collectionsAndCount.totalRecordsCount;
 		long annotatedRecords = 0;
 		for (Tuple<ObjectId, Integer> collectionWithCount : collectionsAndCount.collectionsRecordCount) {
 			ObjectId collectionId = collectionWithCount.x;
 			annotatedRecords += DB.getRecordResourceDAO()
 					.countAnnotatedRecords(collectionId);
 		}
-		float percentage = Math.round(Math.min(((float) annotatedRecords / totalRecords) * 100 , 100)) ;
+		float percentage = Math.round(Math.min(
+				((float) annotatedRecords / totalRecords) * 100, 100));
 		result.put("annotatedRecordsPercentage", percentage);
 		result.put("goal", totalRecords);
 		result.put("annotatedRecords", annotatedRecords);
@@ -102,6 +105,7 @@ public class AnnotationController extends Controller {
 		ObjectId withUser = WithController.effectiveUserDbId();
 		List<RecordResource> records = DB.getRecordResourceDAO()
 				.getAnnotatedRecords(withUser, offset, count);
+		long annotatedRecords = DB.getRecordResourceDAO().countAnnotatedRecords(withUser);
 		long annotationCount = DB.getAnnotationDAO().countUserAnnotations(
 				withUser);
 		ObjectNode recordsWithCount = Json.newObject();
@@ -115,6 +119,7 @@ public class AnnotationController extends Controller {
 		}
 		recordsWithCount.put("records", recordsList);
 		recordsWithCount.put("annotationCount", annotationCount);
+		recordsWithCount.put("annotatedRecordsCount", annotatedRecords);
 		return ok(recordsWithCount);
 	}
 

@@ -18,16 +18,18 @@ package db;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 import model.annotations.Annotation;
 import model.annotations.Annotation.AnnotationAdmin;
 import model.annotations.Annotation.MotivationType;
-import model.annotations.bodies.AnnotationBody;
 import model.annotations.bodies.AnnotationBodyTagging;
 import model.basicDataTypes.Language;
 
+import org.apache.commons.beanutils.BeanToPropertyValueTransformer;
+import org.apache.commons.collections.CollectionUtils;
 import org.bson.types.ObjectId;
 import org.mongodb.morphia.query.Query;
 import org.mongodb.morphia.query.UpdateOperations;
@@ -81,14 +83,11 @@ public class AnnotationDAO extends DAO<Annotation> {
 		return this.find(q).asList();
 	}
 
-	public List<Annotation> getUserAnnotations(ObjectId userId, int offset,
-			int count, List<String> retrievedFields) {
+	public List<Annotation> getUserAnnotations(ObjectId userId, List<String> retrievedFields) {
 		Query<Annotation> q = this
 				.createQuery()
 				.field("annotators.withCreator")
 				.equal(userId)
-				.offset(offset)
-				.limit(count)
 				.retrievedFields(
 						true,
 						retrievedFields.toArray(new String[retrievedFields
@@ -100,6 +99,21 @@ public class AnnotationDAO extends DAO<Annotation> {
 		long count = this.createQuery().field("annotators.withCreator")
 				.equal(userId).countAll();
 		return count;
+	}
+	
+	//TODO: Mongo distinct count
+	@SuppressWarnings("unchecked")
+	public long countUserAnnotatedRecords(ObjectId userId) {
+		Query<Annotation> q = this.createQuery().field("annotators.withCreator").equal(userId)
+				.retrievedFields(true, new String[] {"target.recordId"});
+		 List<Annotation> annotations =  this.find(q).asList();
+		 List<ObjectId> recordIds = (List<ObjectId>) CollectionUtils.collect(
+					annotations, new BeanToPropertyValueTransformer(
+							"target.recordId"));
+		 Set<ObjectId> hs = new HashSet<>();
+		 hs.addAll(recordIds);
+		 return hs.size();
+
 	}
 
 	public void addAnnotators(ObjectId id, List<AnnotationAdmin> annotators) {
