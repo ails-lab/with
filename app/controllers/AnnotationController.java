@@ -105,7 +105,8 @@ public class AnnotationController extends Controller {
 		ObjectId withUser = WithController.effectiveUserDbId();
 		List<RecordResource> records = DB.getRecordResourceDAO()
 				.getAnnotatedRecords(withUser, offset, count);
-		long annotatedRecords = DB.getRecordResourceDAO().countAnnotatedRecords(withUser);
+		long annotatedRecords = DB.getAnnotationDAO()
+				.countUserAnnotatedRecords(withUser);
 		long annotationCount = DB.getAnnotationDAO().countUserAnnotations(
 				withUser);
 		ObjectNode recordsWithCount = Json.newObject();
