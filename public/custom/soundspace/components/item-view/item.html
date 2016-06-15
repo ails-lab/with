@@ -1,3 +1,4 @@
+ <annotations-end params="route: route"></annotations-end>
  <div class="itemview">
         <!-- menu bar-->
         <nav class="menubar media">
@@ -12,8 +13,8 @@
          
               <li class="close"> <span class="star" data-bind="visible: loggedUser()==true && record().externalId!=null, css: { active: isLiked(record().externalId) }">
 			 <span class="fa-stack fa-fw" data-bind="event: { click: function(data,event) { likeRecord(record(),event); } }">
-							<i class="fa fa-heart fa-stack-1x"></i><i class="fa fa-heart-o fa-stack-1x fa-inverse"></i>
-						</span>
+					<i class="fa fa-heart fa-stack-1x"></i><i class="fa fa-heart-o fa-stack-1x fa-inverse"></i>
+			 </span>
 					</span></li>
 			 <li class="close" title="collect"><span class="fa-stack fa-fw" data-bind="visible:loggedUser, event: { click: function(data,event) { collect(record(),event); } }"><i class="fa fa-download fa-stack-1x"></i>
 						</span></li>
@@ -56,6 +57,11 @@
                       <li><a href="#" data-bind="click: nextItem">NEXT ITEM</a></li>
                     </ul>
                     <!-- /ko -->
+                     <!-- ko if: jQuery.isEmptyObject(record().nextItemToAnnotate()) -->
+                     <ul class="answeraction">
+                      <li><a href="#" data-bind="click: endBatch">NEXT ITEM</a></li>
+                    </ul>
+                     <!-- /ko -->
                   </div>
                   <!-- /ko -->
                   <!-- metadata-->

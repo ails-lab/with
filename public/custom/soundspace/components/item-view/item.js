@@ -130,62 +130,6 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 			helper_thumb = self.calcOnErrorThumbnail();
 		};
 		
-		document.addEventListener("Pundit.saveAnnotation", function(event) {
-			var annotationId = event.detail;
-			$.ajax({
-		    	url: "http://thepund.it:8083/annotationserver/api/open/annotations/"+annotationId,
-		    	method: "GET",
-		    	contentType    : "application/json",
-		    	beforeSend : function (request) { request.setRequestHeader("Accept", "application/json"); },
-		    	success : function(punditAnnotation) {
-		    		//save annotation, get with response and update annotations array
-		    		// Map pundit annotation JSON to WITH annotation JSON
-		    		var withAnnotation = {
-		    			'generator': 'pundit',
-		    			'motivation': 'Tagging',
-		    			'target' : {
-		    				'recordId': self.recordId,
-		    				'withURI': '/record/'+self.recordId,
-		    			},
-		    			'body' : {
-		    				'uriType': [ 'http://www.mimo-db.eu/InstrumentsKeywords' ],
-		    				'uriVocabulary': 'MIMO' 
-		    			}
-		    		};
-		    		if (self.recordId == "-1")
-		    			return;
-		    		var annotationUri = punditAnnotation.metadata['http://purl.org/pundit/as/annotation/'+annotationId];
-		    		var serializedAt = annotationUri['http://www.openannotation.org/ns/serializedAt'];
-		    		withAnnotation.generated = serializedAt[0].value;
-		    		var graph = punditAnnotation.graph['http://purl.org/pundit/as/graph/body-'+annotationId];
-		    		var externalId = Object.keys(graph)[0];
-		    		var annotationInfo = graph[externalId];
-		    		var tagType = Object.keys(annotationInfo)[0];
-		    		var uriInfo = annotationInfo[tagType];
-		    		var uri = uriInfo[0].value;
-		    		var itemsInfo = punditAnnotation.items[uri];
-		    		var labelInfo = itemsInfo['http://www.w3.org/2000/01/rdf-schema#label'];
-		    		var label = labelInfo[0].value;
-		    		console.log(withAnnotation);
-		    		withAnnotation['target'].externalId = externalId;
-		    		withAnnotation['body'].uri = uri;
-		    		withAnnotation['body'].tagType = tagType;
-		    		withAnnotation['body'].label = {'default' : [ label ]};
-		    		console.log(JSON.stringify(withAnnotation));
-		    		$.ajax({
-		    			url : '/record/annotation',
-				    	method : "POST",
-				    	contentType : "application/json",
-				    	data     : JSON.stringify(withAnnotation),
-						success : function(result) {
-							self.annotations.push(result);
-						}
-		    		});
-				// Send annotation to WITH
-			}
-		   });
-		});
-		
 		self.findsimilar=function(){
 		  if(self.related().length==0 && self.relatedsearch==false){
 			self.relatedsearch=true;  
@@ -341,6 +285,7 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 		var self = this;
 		document.body.setAttribute("data-page","item");
 		setTimeout(function(){ WITHApp.init(); }, 300);
+		self.batchItemsAnnotated = [];
 		
 		self.route = params.route;
 		self.from=window.location.href;	
@@ -352,6 +297,64 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 		self.record = ko.observable(new Record());
 		self.id = ko.observable(params.id);
 		
+		document.addEventListener("Pundit.saveAnnotation", function(event) {
+			var annotationId = event.detail;
+			$.ajax({
+		    	url: "http://thepund.it:8083/annotationserver/api/open/annotations/"+annotationId,
+		    	method: "GET",
+		    	contentType    : "application/json",
+		    	beforeSend : function (request) { request.setRequestHeader("Accept", "application/json"); },
+		    	success : function(punditAnnotation) {
+		    		//save annotation, get with response and update annotations array
+		    		// Map pundit annotation JSON to WITH annotation JSON
+		    		var withAnnotation = {
+		    			'generator': 'pundit',
+		    			'motivation': 'Tagging',
+		    			'target' : {
+		    				'recordId': self.recordId,
+		    				'withURI': '/record/'+self.recordId,
+		    			},
+		    			'body' : {
+		    				'uriType': [ 'http://www.mimo-db.eu/InstrumentsKeywords' ],
+		    				'uriVocabulary': 'MIMO' 
+		    			}
+		    		};
+		    		if (self.recordId == "-1")
+		    			return;
+		    		var annotationUri = punditAnnotation.metadata['http://purl.org/pundit/as/annotation/'+annotationId];
+		    		var serializedAt = annotationUri['http://www.openannotation.org/ns/serializedAt'];
+		    		withAnnotation.generated = serializedAt[0].value;
+		    		var graph = punditAnnotation.graph['http://purl.org/pundit/as/graph/body-'+annotationId];
+		    		var externalId = Object.keys(graph)[0];
+		    		var annotationInfo = graph[externalId];
+		    		var tagType = Object.keys(annotationInfo)[0];
+		    		var uriInfo = annotationInfo[tagType];
+		    		var uri = uriInfo[0].value;
+		    		var itemsInfo = punditAnnotation.items[uri];
+		    		var labelInfo = itemsInfo['http://www.w3.org/2000/01/rdf-schema#label'];
+		    		var label = labelInfo[0].value;
+		    		console.log(withAnnotation);
+		    		withAnnotation['target'].externalId = externalId;
+		    		withAnnotation['body'].uri = uri;
+		    		withAnnotation['body'].tagType = tagType;
+		    		withAnnotation['body'].label = {'default' : [ label ]};
+		    		console.log(JSON.stringify(withAnnotation));
+		    		$.ajax({
+		    			url : '/record/annotation',
+				    	method : "POST",
+				    	contentType : "application/json",
+				    	data     : JSON.stringify(withAnnotation),
+						success : function(result) {
+							self.record().annotations.push(result);
+							if (self.batchItemsAnnotated.indexOf(self.recordId) < 0)
+								self.batchItemsAnnotated.push(self.recordId);
+							alert(self.batchItemsAnnotated);
+						}
+		    		});
+			}
+		   });
+		});
+		
 		self.nextItem = function() {
 			formattedNextRecord = formatRecord(self.record().nextItemToAnnotate());
 			itemShow(formattedNextRecord);
@@ -359,6 +362,10 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 			if (vid != null) {
 				vid.parentNode.removeChild(vid);
 			}
+		};
+		
+		self.endBatch = function() {
+			showEndOfAnnotations(self.batchItemsAnnotated);
 		};
 		
 		formatRecord =  function(backendRecord) {
