@@ -24,7 +24,7 @@ define(['jquery','knockout', './router', 'knockout-mapping', 'bootstrap', 'knock
 	ko.components.register('privacy', { require: 'components/statichtml/statichtml' });
 	ko.components.register('terms', { require: 'components/statichtml/statichtml' });
 	ko.components.register('login-page', { require: 'components/login-register-page/login-register' });
-	
+	ko.components.register('annotations-end', { require: 'components/annotations-end/annotations-end' });
 	
 	ko.components.register('popup-login', {
 		viewModel: { require: 'components/login-register-page/login-register' },

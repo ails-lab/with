@@ -377,7 +377,7 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 				}
 	
 	  
-	  self.startAnnotate = function() {
+	  startAnnotate = function() {
 		  self.randomRecords();
 	  };
 	  

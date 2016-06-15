@@ -12,8 +12,6 @@
           <!-- nav-->
           <ul class="menu">
             <li><a href="javascript:void(0)" data-bind="event :{ click: function(data,event){goToPage('#home',event);}}" title="Home">Home</a></li>
-            <li><a href="#providers" title="Content Provider">Content Providers</a></li>
-            <li><a href="#about" title="About">About</a></li>
         	<li><a href="#" data-bind="visible: isLogged()==true,event :{ click: function(data,event){gotoWith(event);}}" 
         		title="WITH Login" target="_blank"><img  alt="with logo" src="img/with_logo.png" style="width: 20px;vertical-align: top;">
         		&nbsp;<!-- ko text:currentUser.username() --><!-- /ko --></a>
@@ -32,7 +30,7 @@
         </div>
       </nav>
        <!-- hero, only to be rendered in index page => how? moved to index.html-->
-       <section class="annotatehero" style="display: none">
+       <section class="annotatehero" id="annotatehero" style="display: none">
         <!-- top-->
         <div class="top">
           <!-- wrap-->

@@ -1,33 +1,67 @@
- <div class="annotations-end"  style="display:none">
-	<header>
-      <!-- mainnav-->
-      <nav class="main">
-        <div class="container">
-          <!-- logo-->
-          <h1 class="logo"><a href="index.html" title="Home">EUSPACE</a></h1>
-          <!-- mobile menu-->
-          <button type="button" role="button" aria-label="Show Navigation" class="mobilemenu"><span class="lines"></span></button>
-          <!-- search-->
-          <ul class="search">
-            <li><a href="search.html" title="Search"><img src="img/ic-search.png" alt="search"></a></li>
-          </ul>
-          <!-- nav-->
-          <ul class="menu">
-            <li><a href="index.html" title="Home">Home</a></li>
-            <li><a href="contentproviders.html" title="Content Provider">Content Providers</a></li>
-            <li><a href="about.html" title="About">About</a></li>
-            <li><a href="#" title="Login">Login</a></li>
-            <li class="subnav">
-              <ul>
-                <li><a href="terms.html" title="Terms of Usage">Terms of Use</a></li>
-                <li><a href="privacy.html" title="Privacy Policy">Privacy Policy</a></li>
-                <li><a href="contact.html" title="Contact">Feedback &amp; Contact</a></li>
-              </ul>
-            </li>
-            <li class="info">EUSpace is a place to discover exhibits and collections from museums and archives all around the world. </li>
-          </ul>
+ <div id="annotations-end" style="display: none">
+ 	<header>
+	<section class="annotatehero" id="annotateherothanks">
+        <!-- top-->
+        <div class="top">
+          <!-- wrap-->
+          <div class="wrap">
+            <div class="container">
+              <!-- the wrap-->
+              <!-- ko if: batchItemsAnnotated.length > 0 -->
+              <h1>Thank you for annotating <span data-bind="text: batchItemsAnnotated"></span> items</h1>
+              <!-- /ko -->
+              <!-- ko if: batchItemsAnnotated.length <= 0 -->
+                   <h1>The annotations batch has finished, you may try another turn.</h1>
+              <!-- /ko -->
+              <span class="topic">So far, you have earned a <span data-bind="text: badgeName" ></span> badge.</span>
+              <!-- description-->
+              <div class="badges" style="padding-top: 50px">
+              <center><div class="icon"><img data-bind="attr: {src: badgeImg()}"></div></center>
+              </div>
+            </div>
+          </div>
         </div>
-      </nav>
-      <!-- hero-->
-    </header>
+      </section>
+     </header>
+     <section class="annotate">
+        <!-- bottom-->
+        <div class="bottom">
+          <!-- container-->
+          <div class="container">
+            <div class="goal">
+              <div class="info">
+              	<h2>Help us reach our goal</h2>
+              	<!-- ko if: userTotalAnnotatedRecordsCount() > 0 -->
+                <p> In total, you have annotated <span data-bind="text: userTotalAnnotatedRecordsCount"> </span> items
+                	with <span data-bind="text: userTotalAnnotationCount"></span> annotations about musical instruments.</p>
+                <!-- action button-->
+                 <a href="#" data-bind="click: startAnnotate" class="annotatebtn">Try another annotation turn</a>
+              <!-- /ko -->
+          	<!-- ko if: userTotalAnnotatedRecordsCount() == 0 -->
+          		<p>10 annotations grant you a bronze badge, 20 a silver, and with 40 annotations you win a golden badge. Special gifts will be
+                	provided to golden winners!</p>
+          		<a href="#" data-bind="click: startAnnotate" class="annotatebtn">Try another annotation turn</a>
+          	<!-- /ko -->
+            </div>
+           </div>
+            <div class="goal">
+              <div class="info">
+                <h2>Thank you for contributing to Europeana Sounds objective.</h2>
+                <p>By the end of the crowdsourcing campaign, the objective is to have 1000 audio items annotated by users. 
+                	The annotations used in the campaign concern concepts about musical instruments (from the MIMO thesaurus).</p>
+                    <a href="#" data-bind="click: returnHomepage" class="annotatebtn">Go to homepage</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    
+	<!--<section class="isotope">
+	    <section class="listing">
+	      <div class="grid" data-bind="attr: {id: id}">
+	        <div class="sizer"></div>           
+	                  
+	      </div>
+	    </section>
+   </section>-->
 </div>

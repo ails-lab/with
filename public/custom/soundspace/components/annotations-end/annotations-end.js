@@ -17,16 +17,68 @@ define(['bridget','knockout', 'text!./annotations-end.html','isotope','imagesloa
   function AnnotationsEndModel(params) {
 	  this.route = params.route;
 	  var self = this;
-	  setTimeout(function(){ WITHApp.init(); }, 300);
-	  self.batchItemsAnnotated = ko.observable();
+	  //document.body.setAttribute("data-page","home");
 	  self.hash=window.location.hash;
+	  setTimeout(function(){ WITHApp.init(); }, 300);
+	  self.batchItemsAnnotated = ko.observableArray();
+	  self.batchAnnotationCount = ko.observable(0);
+	  self.userTotalAnnotationCount = ko.observable(0);
+	  self.userTotalAnnotatedRecordsCount = ko.observable(0);
+	  self.badgeImg = ko.observable("img/ui/ic-badge-bronze.png");
+	  self.badgeName = ko.observable('Bronze');
 	  //$( '.annotations-end' ).fadeOut();
 	  
-	  showEndOfAnnotations = function (batchItemsAnnotated) {
-		  $('.itemview').fadeOut();
-		  $('.annotations-end').fadeIn();
-		  alert(batchItemsAnnotated);
-	  };  
+	  showEndOfAnnotations = function (batchItemsAnnotated, batchAnnotationCount) {
+		  self.batchItemsAnnotated(batchItemsAnnotated);
+		  self.batchAnnotationCount(batchAnnotationCount);
+		  //window.location.href = "#annotations-end";
+		  $(".itemview").hide();
+		  $("#annotatehero").hide();
+		  $("#main-content").hide();
+		  $("#annotations-end").show();
+		  self.loadAnnotations();
+		  alert(JSON.stringify(batchItemsAnnotated));
+		  //var $items=batchItemsAnnotated;
+		  //homeisotopeImagesReveal( $container,$items );
+	  };
+	  
+	  self.loadAnnotations = function () {
+			$.ajax({
+				"url": '/user/annotations',
+				"method": "get",
+				"contentType": "application/json",
+				"success": function (data) {
+					if (data.annotationCount) {
+						self.userTotalAnnotationCount(data.annotationCount);
+					}
+					if (data.annotationCount > 10 && data.annotationCount <= 20) {
+						self.badgeImg('img/ui/ic-badge-silver.png');
+						self.badgeName('Silver');
+					} else if(data.annotationCount > 20) {
+						self.badgeImg('img/ui/ic-badge-gold');
+						self.badgeName('Gold');
+					}
+					if (data.annotatedRecordsCount) {
+						self.userTotalAnnotatedRecordsCount(data.annotatedRecordsCount);
+					}
+				},
+				"error": function (result) {
+					self.loading(false);
+					$.smkAlert({
+						text: 'An error has occured',
+						type: 'danger',
+						permanent: true
+					});
+				}
+			});
+		};
+	self.returnHomepage = function() {
+		window.location.href = "../../custom/soundspace/index.html";
+		//if next lines, scroll down in page does not work
+		/*$("#annotatehero").show();
+		$("#main-content").show();
+		$("#annotations-end").hide();*/
+	}
 	
   }
   

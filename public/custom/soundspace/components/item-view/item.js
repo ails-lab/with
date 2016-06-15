@@ -286,7 +286,7 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 		document.body.setAttribute("data-page","item");
 		setTimeout(function(){ WITHApp.init(); }, 300);
 		self.batchItemsAnnotated = [];
-		
+		self.batchAnnotationCount = 0;
 		self.route = params.route;
 		self.from=window.location.href;	
 		var thumb = "";
@@ -346,9 +346,16 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 				    	data     : JSON.stringify(withAnnotation),
 						success : function(result) {
 							self.record().annotations.push(result);
-							if (self.batchItemsAnnotated.indexOf(self.recordId) < 0)
-								self.batchItemsAnnotated.push(self.recordId);
-							alert(self.batchItemsAnnotated);
+							batchAnnotationCount++;
+							self.recordSimple = self.record();
+							self.recordSimple.nextItemToAnnotate = {};
+							var index = arrayFirstIndexOf(self.batchItemsAnnotated(), function (item) {
+								return item.id === self.recordSimple.id;
+							});
+							alert(index);
+							if (index < 0) {
+								self.batchItemsAnnotated.push(self.recordSimple());
+							}
 						}
 		    		});
 			}
@@ -365,7 +372,7 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 		};
 		
 		self.endBatch = function() {
-			showEndOfAnnotations(self.batchItemsAnnotated);
+			showEndOfAnnotations(self.batchItemsAnnotated, self.batchAnnotationCount);
 		};
 		
 		formatRecord =  function(backendRecord) {
