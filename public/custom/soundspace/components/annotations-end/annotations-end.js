@@ -36,6 +36,7 @@ define(['bridget','knockout', 'text!./annotations-end.html','isotope','imagesloa
 		  $("#annotatehero").hide();
 		  $("#main-content").hide();
 		  $("#annotations-end").show();
+		  dispatchDocumentEvent('Pundit.hide');
 		  self.loadAnnotations();
 		  //alert(JSON.stringify(batchItemsAnnotated));
 		  //var $items=batchItemsAnnotated;
