@@ -83,7 +83,8 @@ public class AnnotationDAO extends DAO<Annotation> {
 		return this.find(q).asList();
 	}
 
-	public List<Annotation> getUserAnnotations(ObjectId userId, List<String> retrievedFields) {
+	public List<Annotation> getUserAnnotations(ObjectId userId,
+			List<String> retrievedFields) {
 		Query<Annotation> q = this
 				.createQuery()
 				.field("annotators.withCreator")
@@ -100,19 +101,20 @@ public class AnnotationDAO extends DAO<Annotation> {
 				.equal(userId).countAll();
 		return count;
 	}
-	
-	//TODO: Mongo distinct count
+
+	// TODO: Mongo distinct count
 	@SuppressWarnings("unchecked")
 	public long countUserAnnotatedRecords(ObjectId userId) {
-		Query<Annotation> q = this.createQuery().field("annotators.withCreator").equal(userId)
-				.retrievedFields(true, new String[] {"target.recordId"});
-		 List<Annotation> annotations =  this.find(q).asList();
-		 List<ObjectId> recordIds = (List<ObjectId>) CollectionUtils.collect(
-					annotations, new BeanToPropertyValueTransformer(
-							"target.recordId"));
-		 Set<ObjectId> hs = new HashSet<>();
-		 hs.addAll(recordIds);
-		 return hs.size();
+		Query<Annotation> q = this.createQuery()
+				.field("annotators.withCreator").equal(userId)
+				.retrievedFields(true, new String[] { "target.recordId" });
+		List<Annotation> annotations = this.find(q).asList();
+		List<ObjectId> recordIds = (List<ObjectId>) CollectionUtils.collect(
+				annotations, new BeanToPropertyValueTransformer(
+						"target.recordId"));
+		Set<ObjectId> hs = new HashSet<>();
+		hs.addAll(recordIds);
+		return hs.size();
 
 	}
 
@@ -120,6 +122,13 @@ public class AnnotationDAO extends DAO<Annotation> {
 		Query<Annotation> q = this.createQuery().field("_id").equal(id);
 		UpdateOperations<Annotation> updateOps = this.createUpdateOperations();
 		updateOps.addAll("annotators", annotators, false);
+		this.update(q, updateOps);
+	}
+	
+	public void removeAnnotators(ObjectId id, List<AnnotationAdmin> annotators) {
+		Query<Annotation> q = this.createQuery().field("_id").equal(id);
+		UpdateOperations<Annotation> updateOps = this.createUpdateOperations();
+		updateOps.removeAll("annotators", annotators);
 		this.update(q, updateOps);
 	}
 
@@ -131,4 +140,10 @@ public class AnnotationDAO extends DAO<Annotation> {
 		this.update(q, updateOps);
 	}
 
+	public void deleteAnnotation(ObjectId annotationId) {
+		Annotation annotation = this.get(annotationId);
+		ObjectId recordId = annotation.getTarget().getRecordId();
+		DB.getRecordResourceDAO().removeAnnotation(recordId, annotationId);
+		this.deleteById(annotationId);
+	}
 }

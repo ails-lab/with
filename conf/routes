@@ -39,6 +39,7 @@ GET		/record/:id							    controllers.RecordResourceController.getRecordResourc
 PUT		/record/:id								controllers.RecordResourceController.editRecordResource(id)
 
 GET		/annotation/:id							controllers.AnnotationController.getAnnotation(id)
+DELETE	/annotation/:id							controllers.AnnotationController.deleteAnnotation(id)
 
 # Collection Controller
 #GET 	 /collection/list 						controllers.CollectionObjectController.list(directlyAccessedByUserOrGroup: play.libs.F.Option[controllers.parameterTypes.MyPlayList], recursivelyAccessedByUserOrGroup: play.libs.F.Option[controllers.parameterTypes.MyPlayList], creator: play.libs.F.Option[String], isPublic: play.libs.F.Option[java.lang.Boolean], isExhibition: play.libs.F.Option[java.lang.Boolean], collectionHits:Boolean ?= false, offset: Integer ?=0, count: Integer ?=10)

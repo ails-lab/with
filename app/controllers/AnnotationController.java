@@ -27,6 +27,8 @@ import model.annotations.bodies.AnnotationBody;
 import model.basicDataTypes.Language;
 import model.resources.RecordResource;
 
+import org.apache.commons.beanutils.BeanToPropertyValueTransformer;
+import org.apache.commons.collections.CollectionUtils;
 import org.bson.types.ObjectId;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.suggest.SuggestResponse;
@@ -54,7 +56,6 @@ import elastic.ElasticSearcher.SearchOptions;
 public class AnnotationController extends Controller {
 
 	public static final ALogger log = Logger.of(AnnotationController.class);
-
 
 	public static Result addAnnotation() {
 		ObjectNode error = Json.newObject();
@@ -160,6 +161,34 @@ public class AnnotationController extends Controller {
 		}
 	}
 
+	public static Result deleteAnnotation(String id) {
+		try {
+			ObjectId withUser = WithController.effectiveUserDbId();
+			ObjectId annotationId = new ObjectId(id);
+			Annotation annotation = DB.getAnnotationDAO().getById(annotationId,
+					Arrays.asList("annotators"));
+			if (annotation == null)
+				return badRequest();
+			ArrayList<AnnotationAdmin> annotators = annotation.getAnnotators();
+			AnnotationAdmin annotator = null;
+			for (AnnotationAdmin a : annotators) {
+				if (a.getWithCreator().equals(withUser)) {
+					annotator = a;
+				}
+			}
+			if (annotator == null)
+				return forbidden();
+			if (annotators.size() == 1)
+				DB.getAnnotationDAO().deleteAnnotation(annotationId);
+			else
+				DB.getAnnotationDAO().removeAnnotators(annotationId,
+						Arrays.asList(annotator));
+			return ok();
+		} catch (Exception e) {
+			return internalServerError();
+		}
+	}
+
 	public static Result searchRecordsOfGroup(String groupId, String term) {
 		ObjectNode result = Json.newObject();
 
@@ -167,19 +196,19 @@ public class AnnotationController extends Controller {
 			SearchOptions options = new SearchOptions();
 
 			ElasticSearcher recordSearcher = new ElasticSearcher();
-			SearchResponse resp = recordSearcher.searchForRecords(term, options);
-
-
-
+			SearchResponse resp = recordSearcher
+					.searchForRecords(term, options);
 
 			List<ObjectId> recordIds = new ArrayList<ObjectId>();
-			resp.getHits().forEach( (h) -> {recordIds.add(new ObjectId(h.getId()));return;} );
+			resp.getHits().forEach((h) -> {
+				recordIds.add(new ObjectId(h.getId()));
+				return;
+			});
 
-			List<RecordResource> hits = DB.getRecordResourceDAO().getByIds(recordIds);
+			List<RecordResource> hits = DB.getRecordResourceDAO().getByIds(
+					recordIds);
 
-
-
-		} catch(Exception e) {
+		} catch (Exception e) {
 			log.error("Search encountered a problem", e);
 			return internalServerError(e.getMessage());
 		}

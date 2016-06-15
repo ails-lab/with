@@ -505,6 +505,15 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 				.deleteManyResources(ids));
 		ParallelAPICall.createPromise(deleteResources, resourceIds);
 	}
+	
+	public void removeAnnotation(ObjectId recordId, ObjectId annotationId) {
+		UpdateOperations<RecordResource> recordUpdate = this
+				.createUpdateOperations();
+		Query<RecordResource> q = this.createQuery().field("_id")
+				.equal(recordId);
+		recordUpdate.removeAll("annotationIds", Arrays.asList(annotationId));
+		this.update(q, recordUpdate);
+	}
 
 	public void findUrlsFromRecords(Set<String> urls) {
 		log.info("Retrieving urls from the records");
