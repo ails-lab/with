@@ -346,21 +346,31 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 				    	data     : JSON.stringify(withAnnotation),
 						success : function(result) {
 							self.record().annotations.push(result);
-							batchAnnotationCount++;
-							self.recordSimple = self.record();
+							self.batchAnnotationCount++;
+							self.recordSimple = ko.toJS(self.record);
 							self.recordSimple.nextItemToAnnotate = {};
-							var index = arrayFirstIndexOf(self.batchItemsAnnotated(), function (item) {
+							//alert(JSON.stringify(self.recordSimple));
+							var index = self.arrayFirstIndexOf(self.batchItemsAnnotated, function (item) {
 								return item.id === self.recordSimple.id;
 							});
-							alert(index);
+							//alert(index);
 							if (index < 0) {
-								self.batchItemsAnnotated.push(self.recordSimple());
+								self.batchItemsAnnotated.push(self.recordSimple);
 							}
 						}
 		    		});
 			}
 		   });
 		});
+		
+		self.arrayFirstIndexOf = function (array, predicate) {
+			for (var i = 0, j = array.length; i < j; i++) {
+				if (predicate.call(undefined, array[i])) {
+					return i;
+				}
+			}
+			return -1;
+		};
 		
 		self.nextItem = function() {
 			formattedNextRecord = formatRecord(self.record().nextItemToAnnotate());

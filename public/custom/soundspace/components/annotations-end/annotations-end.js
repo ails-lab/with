@@ -37,7 +37,7 @@ define(['bridget','knockout', 'text!./annotations-end.html','isotope','imagesloa
 		  $("#main-content").hide();
 		  $("#annotations-end").show();
 		  self.loadAnnotations();
-		  alert(JSON.stringify(batchItemsAnnotated));
+		  //alert(JSON.stringify(batchItemsAnnotated));
 		  //var $items=batchItemsAnnotated;
 		  //homeisotopeImagesReveal( $container,$items );
 	  };
