@@ -196,7 +196,7 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 				type: "GET",
 				contentType: "application/json",
 				dataType: "json",
-				url: "/record/annotationPercentage",
+				url: "/record/annotationPercentage?goal=1000",
 				processData: false,
 				data: "groupId="+WITHApp.projectId
 			}).success (function(data) {
@@ -259,7 +259,7 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 					url: "/collection/list",
 					processData: false,
 					//data: "isPublic=true&count="+self.fetchitemnum+"&offset=" + self.homecollections().length,
-					data: "count="+self.fetchitemnum+"&offset=" + self.homecollections().length+"&directlyAccessedByUserOrGroup="+JSON.stringify([{group:WITHApp.projectName,rights:"READ"}]),
+					data: "count="+self.fetchitemnum+"&isExhibition=false"+"&offset=" + self.homecollections().length+"&directlyAccessedByUserOrGroup="+JSON.stringify([{group:WITHApp.projectName,rights:"READ"}]),
 					
 				}).success (function(){
 				});
@@ -381,25 +381,27 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 		  self.randomRecords();
 	  };
 	  
-	  self.addNextAnnot = function(randomList, inner) {
+	  self.addNextAnnot = function(randomList, inner, number) {
 		  if (randomList.length > 0) {
 			  initRecord = randomList[0];
 			  initRecord.nextItemToAnnotate = inner;
+			  initRecord.number = number;
 			  randomList.splice(0, 1);
-			  return self.addNextAnnot(randomList, initRecord);
+			  return self.addNextAnnot(randomList, initRecord, number+1);
 		  }
 		  else {
+			  inner.number = number;
 			  return inner;
 		  }
 	  }
 	  
 	  self.randomRecords = function() {
 			$.ajax({
-		    	"url": "/record/randomRecords?groupId="+WITHApp.projectId+"&batchCount=10",
+		    	"url": "/record/randomRecords?groupId="+WITHApp.projectId+"&batchCount=2",
 		    	"method": "GET",
 		    	"success": function( data, textStatus, jQxhr ){
 		    		if (data.length > 0) {
-			    		recordToAnnotate = self.addNextAnnot(data, {});
+			    		recordToAnnotate = self.addNextAnnot(data, {}, 0);
 			    		itemShow(formatRecord(recordToAnnotate));
 		    		}
 				},
