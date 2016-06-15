@@ -110,7 +110,7 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 			self.loading(false);
 			if (data.view_url.indexOf('archives_items_') > -1) {
 				var id = data.view_url.split("_")[2];
-				$('#mediadiv').append('<iframe id="mediaplayer" src="http://archives.crem-cnrs.fr/archives/items/'+id+'/player/346x130/"height="250px scrolling="no"" width="361px"></iframe>');
+				$('#mediathumbid').html('<div><iframe id="mediaplayer" src="http://archives.crem-cnrs.fr/archives/items/'+id+'/player/346x130/"height="250px scrolling="no"" width="361px"></iframe></div>');
 			} else {
 			if (data.mediatype != null) {
 				if (data.mediatype == "VIDEO") {		

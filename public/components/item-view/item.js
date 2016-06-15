@@ -1,7 +1,7 @@
 define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, app) {
 
 	self.disqusLoaded=ko.observable(false);
-	
+    helper_thumb = "";
 	
 	function Record(data,showMeta, isRelated) {
 		var self = this;
@@ -56,7 +56,7 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 		self.isLoaded = ko.observable(false);
 		
 		self.load = function(data, isRelated) {
-			$('#mediaplayer').remove();
+			//$('#mediaplayer').remove();
 			if(data.title==undefined){
 				self.title="No title";
 			}else{self.title=data.title;}
@@ -94,15 +94,14 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 			self.annotations(data.annotations);
 			self.loading(false);
 			//if (data.fullrestype != null) {
+			if (data.view_url.indexOf('archives_items_') > -1) {
+				var id = data.view_url.split("_")[2];
+				$('#mediadiv').html('<div><iframe id="mediaplayer" src="http://archives.crem-cnrs.fr/archives/items/'+id+'/player/346x130/"height="250px scrolling="no"" width="361px"></iframe></div>');
+			} else {
 			if (data.mediatype != null) {
 				//if (data.fullrestype == "VIDEO") {
 				if (data.mediatype == "VIDEO") {
 					self.vtype = "MEDIA";
-				/*	$('#mediadiv').html('<video id="mediaplayer" autoplay="true" controls width="576" height="324"><source src="' + self.fullres() + '" type="video/mp4">Your browser does not support HTML5</video>');        
-				} else if (data.fullrestype == "AUDIO") {
-					self.vtype = "MEDIA";
-					$('#mediadiv').html('<audio id="mediaplayer" autoplay="true" controls width="576" height="324"><source src="' + self.fullres() + '" type="audio/mpeg">Your browser does not support HTML5</audio>');
-				}*/
 					if(!isRelated){
 						$('#mediadiv').append('<video id="mediaplayer" autoplay="true" controls width="576" height="324"><source src="' + self.fullres() + '" type="video/mp4">Your browser does not support HTML5</video>');
 					}
@@ -110,10 +109,12 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 				} else if (data.mediatype == "AUDIO") {
 					self.vtype = "MEDIA";
 					if(!isRelated) {
-						$('#mediadiv').append('<audio id="mediaplayer" autoplay="true" controls width="576" height="324"><source src="' + self.fullres() + '" type="audio/mpeg">Your browser does not support HTML5</audio>');
+						$('#mediadiv').append('<div><audio id="mediaplayer" autoplay="true" controls width="576" height="324"><source src="' + self.fullres() + '" type="audio/mpeg">Your browser does not support HTML5</audio></div>');
 					}
 				}
-			} 			
+			} 
+			}
+			helper_thumb = self.calcOnErrorThumbnail();
 		};
 
 	   self.findsimilar=function(){
@@ -211,6 +212,18 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 				   return "img/ui/ic-noimage.png";
 			   }
 			});
+		
+		self.calcOnErrorThumbnail = ko.pureComputed(function() {
+
+
+			   if(self.thumb && self.thumb.indexOf('.pdf') == -1){
+					return self.thumb;
+				}
+			   else{
+				   return "img/content/thumb-empty.png";
+			   }
+			});
+		
 		self.sourceCredits = ko.pureComputed(function() {
 			 switch(self.source) {
 			    case "DPLA":
@@ -355,8 +368,7 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 			$( '.itemview' ).fadeOut();
 			var vid = document.getElementById("mediaplayer");
 			 if (vid != null) {
-			    vid.pause();
-			    $(vid).remove();
+				 vid.parentNode.removeChild(vid);
 			}
 		};
 
