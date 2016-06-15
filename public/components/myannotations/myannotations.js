@@ -253,8 +253,9 @@ define(['bootstrap', 'knockout', 'text!./myannotations.html', 'knockout-else','a
 		};
 		
 		function getItem(record) {
-			var tile = '<div class="item ' + record.dbId + '"><div class="wrap"><a href="#"  onclick="recordSelect(\'' + record.dbId + '\',event)"><div class="thumb"><img style="width:100%" src="' + record.thumbnail() + '" onError="this.src=\'img/ui/ic-noimage.png\'"/></a></div>';
-			tile += '<div class="info"><h2 class="title">' + record.title + '</h2>';
+			var tile = '<div class="item ' + record.dbId + '"><div class="wrap"><a href="#"  onclick="recordSelect(\'' + record.dbId + '\',event)">' +
+			'<div class="thumb"><img style="width:100%" src="' + record.thumbnail() + '" onError="this.src=\'img/ui/ic-noimage.png\'"/><div class="counter">' + record.annotations.length + '  Annotations</div></div>';
+			tile += '<div class="info"><h2 class="title truncate">' + record.title + '</h2></a>';
 			
 			var distitle = "";
 			if (record.creator && record.creator.length > 0) {
