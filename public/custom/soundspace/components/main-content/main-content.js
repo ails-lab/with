@@ -134,7 +134,7 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 	  var self = this;
 	  document.body.setAttribute("data-page","home");
 	  setTimeout(function(){ WITHApp.init(); }, 300);
-	 
+	  $(".annotatehero").show();
 	  self.hash=window.location.hash;
 	  
 	  self.exhibitloaded=ko.observable(false);
