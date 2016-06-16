@@ -42,7 +42,18 @@
                   <!-- icon-->
                   <div class="icon"><img data-bind="attr: {src: img() }"></div>
                   <!-- info-->
-                  <div class="info">
+
+                  <div class="info" data-bind="visible: annotatedRecordCount() < 10" >
+                    <h2>
+                      Annotate your way to the gold badge ! 
+                    </h2>
+                    <p>
+                      Annotate <!-- ko text: 10  - annotatedRecordCount() % 10 -->  <!-- /ko -->  more records to get your first badge.
+                    </p>
+                    <!-- action button--><a href="../custom/soundspace/index.html" class="annotatebtn">Crowdsourcing Space</a>
+                  </div>
+                  
+                  <div class="info" data-bind="visible: annotatedRecordCount() > 10" >
                     <h2>You have earned the <!-- ko text: badgeName() --><!-- /ko --> badge!</h2>
                     <p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo</p>
                     <!-- action button--><a href="../custom/soundspace/index.html" class="annotatebtn">Crowdsourcing Space</a>

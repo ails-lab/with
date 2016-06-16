@@ -182,7 +182,7 @@ define(['bootstrap', 'knockout', 'text!./myannotations.html', 'knockout-else','a
 		self.annotationPercentage = ko.observable();
 		//self.myAnnotatios = ko.mapping.fromJS([], mapping);
 		
-		self.img = ko.observable("img/ui/ic-badge-bronze.png");
+		self.img = ko.observable("img/ui/rookie.png");
 		self.badgeName = ko.observable('Bronze');
 
 		
@@ -364,11 +364,15 @@ define(['bootstrap', 'knockout', 'text!./myannotations.html', 'knockout-else','a
 				"success": function (data) {
 					self.annotationCount(data.annotationCount);
 					if(data.annotationCount > 10 && data.annotationCount <= 20) {
+						self.img('img/ui/ic-badge-bronze.png');
+						self.badgeName('Bronze');
+					} else if(data.annotationCount > 20) {
 						self.img('img/ui/ic-badge-silver.png');
 						self.badgeName('Silver');
-					} else if(data.annotationCount > 20) {
+					}
+					else if(data.annotationCount>30){
 						self.img('img/ui/ic-badge-gold');
-						self.badgeName('Gold');
+						self.badgeName('Golden');
 					}
 					self.annotatedRecordCount(data.annotatedRecordsCount);
 					var items = self.revealItems(data.records);
