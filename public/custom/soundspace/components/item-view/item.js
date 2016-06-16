@@ -313,8 +313,8 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 		    			'generator': 'pundit',
 		    			'motivation': 'Tagging',
 		    			'target' : {
-		    				'recordId': self.recordId,
-		    				'withURI': '/record/'+self.recordId,
+		    				'recordId': self.record().recordId,
+		    				'withURI': '/record/'+ self.record().recordId,
 		    			},
 		    			'body' : {
 		    				'uriType': [ 'http://www.mimo-db.eu/InstrumentsKeywords' ],
