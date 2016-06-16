@@ -48,7 +48,7 @@
                     <!-- answers-->
                     <!-- ko if: record().myAnnotations-->
                     <ul class="myanswers" data-bind="foreach: record().myAnnotations()">
-                      <li><a><i class="fa fa fa-times-circle"></i>  </a><a data-bind="{text: body.label.default[0], attr: {href: body.uri}}" style="color: inherit;text-decoration: none" target="_blank"></a></li>
+                      <li><a href="#" data-bind="click: $parent.deleteAnnotation"><i class="fa fa fa-times-circle"></i>  </a><a data-bind="{text: body.label.default[0], attr: {href: body.uri}}" style="color: inherit;text-decoration: none" target="_blank"></a></li>
                     </ul>
                     <!-- /ko -->
                     <!-- ko if: record().otherAnnotations-->

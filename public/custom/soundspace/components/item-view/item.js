@@ -562,6 +562,18 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 				}
 			});
 		};
+		
+		self.deleteAnnotation = function(annotation) {
+    		$.ajax({
+    			url : '/annotation/'+annotation.dbId,
+		    	method : "DELETE",
+				success : function(result) {
+					self.record().annotations.remove(annotation);
+					self.batchAnnotationCount--;
+				}
+    		});
+		};
+		
 		self.addDisqus= function(){
 			$("#disqus_thread").hide();
 			if(disqusLoaded()==false){
@@ -601,7 +613,6 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 			
 			self.loadItem();
 		}
-		
 		
 		self.annotate=function(){
 			
