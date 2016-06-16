@@ -324,8 +324,7 @@ define(['bootstrap', 'knockout', 'text!./myannotations.html', 'knockout-else','a
 		};
 		
 		
-		self.percentageCall = function() {
-			
+		self.percentageCall = function() {			
 			$.ajax({
 				"url": '/record/annotationPercentage?groupId=56e13d2e75fe2450755e553a' + '&goal=1000',
 				"method": "get",
@@ -334,6 +333,7 @@ define(['bootstrap', 'knockout', 'text!./myannotations.html', 'knockout-else','a
 					self.annotationRecords(data.annotatedRecords);
 					self.annotationGoal(data.goal);
 					self.annotationPercentage(data.annotatedRecordsPercentage);
+					WITHApp.initChart(self.annotationPercentage());
 				},
 				"error": function (result) {
 					$.smkAlert({
