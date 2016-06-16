@@ -1,4 +1,4 @@
-define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, app) {
+define(['knockout', 'text!./item.html', 'app', 'knockout-else', 'smoke'], function (ko, template, app, KnockoutElse) {
 
     self.disqusLoaded=ko.observable(false);
     helper_thumb = "";
@@ -99,9 +99,7 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 				$("span.pnd-resource").attr('about',pundit_url);
 				$("div.pnd-resource").attr('about',pundit_url);
 				dispatchDocumentEvent('Pundit.loadAnnotations');
-				dispatchDocumentEvent('Pundit.forceCompileButton');
-				
-				
+				dispatchDocumentEvent('Pundit.forceCompileButton');				
 			}
 			else{$("span.pnd-resource").hide();
 				$("div.pnd-resource").hide();
@@ -313,6 +311,7 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 		var self = this;
 		//document.body.setAttribute("data-page","item");
 		setTimeout(function(){ WITHApp.init(); }, 300);
+		KnockoutElse.init([spec = {}]);
 		self.batchItemsAnnotated = [];
 		self.batchAnnotationCount = 0;
 		self.route = params.route;
@@ -618,6 +617,7 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 			
 			window.open('http://euspndwidget.netseven.it/index.php?id='+self.record().externalId, self.record().externalId, 'top=10, left=10, width=900, height=600, status=no, menubar=no, toolbar=no scrollbars=no');
 		}
+		
 		
 		function adjustHeight() {
 

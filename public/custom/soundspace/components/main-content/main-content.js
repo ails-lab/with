@@ -15,7 +15,6 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 		
 	function Collection(data) {
 		var self=this;
-		KnockoutElse.init([spec = {}]);
 		var mapping = {
 				create: function(options) {
 			    	var self=this;
@@ -136,7 +135,7 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 	  setTimeout(function(){ WITHApp.init(); }, 300);
 	  $(".annotatehero").show();
 	  self.hash=window.location.hash;
-	  
+	  KnockoutElse.init([spec = {}]);
 	  self.exhibitloaded=ko.observable(false);
 	  self.featuredExhibition=ko.observable(null);	
 	  self.homecollections=ko.observableArray();
