@@ -32,9 +32,6 @@ import scala.concurrent.ExecutionContext;
 public class ParallelAPICall {
 
 	public enum Priority {
-		// TODO to remove!!!
-		MINE(ExecutionContexts.fromExecutorService(Executors
-				.newFixedThreadPool(4))),
 		BACKEND(ExecutionContexts.fromExecutorService(Executors
 				.newFixedThreadPool(4))),
 		FRONTEND(ExecutionContexts.global());

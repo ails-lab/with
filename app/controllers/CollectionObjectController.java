@@ -259,8 +259,8 @@ public class CollectionObjectController extends WithResourceController {
 						effectiveUserIds(), "BASIC", Option.Some("DEFAULT"))));
 			}
 		};
-//		Promise<Result> promiseOfInt = Promise.promise(function0);
-		Promise<Result> promiseOfInt = ParallelAPICall.createPromise(function0, Priority.MINE);
+		Promise<Result> promiseOfInt = Promise.promise(function0);
+//		Promise<Result> promiseOfInt = ParallelAPICall.createPromise(function0, Priority.MINE);
 		if (resultInfo.has("error"))
 			return Promise.pure((Result) badRequest(resultInfo));
 		if (waitToFinish)
@@ -400,7 +400,7 @@ public class CollectionObjectController extends WithResourceController {
 					.getById(collectionDbId,
 							Arrays.asList("administrative.entryCount"))
 					.getAdministrative()).getEntryCount();
-			entryCount = Math.min(entryCount, 5000);
+			entryCount = Math.min(entryCount, 8000);
 			int pageSize = Math.min(entryCount, 100);
 			int pos = 0;
 			while (pos<entryCount){
