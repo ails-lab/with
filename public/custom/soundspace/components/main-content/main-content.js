@@ -417,7 +417,7 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 		    	"method": "GET",
 		    	"success": function( data, textStatus, jQxhr ){
 		    		if (data.records.length > 0) {
-			    		recordToAnnotate = self.addNextAnnot(data.records.slice(7), {});
+			    		recordToAnnotate = self.addNextAnnot(data.records, {});
 			    		itemShow(formatRecord(recordToAnnotate));
 		    		}
 				},

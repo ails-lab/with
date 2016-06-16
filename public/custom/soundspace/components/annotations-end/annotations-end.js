@@ -33,8 +33,9 @@ define(['bridget','knockout', 'text!./annotations-end.html','isotope','imagesloa
 		  self.batchAnnotationCount(batchAnnotationCount);
 		  //window.location.href = "#annotations-end";
 		  $(".itemview").hide();
-		  $("#annotatehero").hide();
 		  $("#main-content").hide();
+		  document.body.setAttribute("data-page","home");
+		  $("#annotatehero").hide();
 		  $("#annotations-end").show();
 		  dispatchDocumentEvent('Pundit.hide');
 		  self.loadAnnotations();
