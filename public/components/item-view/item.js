@@ -49,7 +49,27 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 		};
 		self.nextItemToAnnotate = ko.observable({});
 		self.annotations = ko.observableArray([]);
-		
+		self.myAnnotations = ko.pureComputed(function () {
+			return self.annotations.filter(function(i) {
+				for (j = 0, len = i.annotators.length; j < len; j++) { 
+					if (i.annotators[j].withCreator == app.currentUser._id()) {
+						return true;
+					}
+				}
+				return false;
+		   	});
+		});
+		self.otherAnnotations = ko.pureComputed(function () {
+			return self.annotations.filter(function(i) {
+				var my = false;
+				for (j = 0, len = i.annotators.length; j < len; j++) { 
+					if (i.annotators[j].withCreator == app.currentUser._id()) {
+						my = true;
+					}
+				}
+				return (!my);
+			});
+		});
 		self.isLiked = ko.pureComputed(function () {
 			return app.isLiked(self.externalId);
 		});

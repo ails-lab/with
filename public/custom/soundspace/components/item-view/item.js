@@ -70,7 +70,6 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 				}
 				return (!my);
 		    });
-			return annotations;
 		});
 		self.isLiked = ko.pureComputed(function () {
 			return app.isLiked(self.externalId);
@@ -568,8 +567,10 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
     			url : '/annotation/'+annotation.dbId,
 		    	method : "DELETE",
 				success : function(result) {
-					self.record().annotations.remove(annotation);
-					self.batchAnnotationCount--;
+					if (result != undefined) {
+						self.record().annotations.remove(annotation);
+						self.batchAnnotationCount--;
+					}
 				}
     		});
 		};

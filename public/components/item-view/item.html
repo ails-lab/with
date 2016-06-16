@@ -43,10 +43,15 @@
 		                    <div class="question">What kind of musical instrument do you see in this item?</div>
 		                    <div class="info">Lorem ipsum dolor sit amet conceptuos</div>
 		                    <!-- answers-->
-		                    <!-- ko if: record().annotations-->
-		                    <ul class="answers" data-bind="foreach: record().annotations()">
-		                       <li><a data-bind="{text: body.label.default[0], attr: {href: body.uri}}" style="color: inherit;text-decoration: none" target="_blank"></a></li>
+		                    <!-- ko if: record().myAnnotations-->
+		                    <ul class="myanswers" data-bind="foreach: record().myAnnotations()">
+		                     <li><a><i class="fa fa fa-times-circle"></i>  </a><a data-bind="{text: body.label.default[0], attr: {href: body.uri}}" style="color: inherit;text-decoration: none" target="_blank"></a></li>
 		                    </ul>
+		                    <!-- ko if: record().otherAnnotations-->
+                     		<ul class="answers" data-bind="foreach: record().otherAnnotations()">
+                       		  <li><a data-bind="{text: body.label.default[0], attr: {href: body.uri}}" style="color: inherit;text-decoration: none" target="_blank"></a></li>
+                     		</ul>
+<!-- /ko -->
 		                    <!-- /ko -->
 		                    <!-- answer action-->
 		                    <!-- ko if: record().nextItemToAnnotate && !jQuery.isEmptyObject(record().nextItemToAnnotate()) -->
