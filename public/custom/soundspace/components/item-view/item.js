@@ -123,7 +123,7 @@ define(['knockout', 'text!./item.html', 'app', 'knockout-else', 'smoke'], functi
 			self.mail="mailto:?subject="+self.title+"&body="+encodeURIComponent(self.loc());
 			var likeval=app.isLiked(self.externalId);
 			self.isLike(likeval);
-			if (data.nextItemToAnnotate !== undefined)
+			//if (data.nextItemToAnnotate !== undefined)
 				self.nextItemToAnnotate(data.nextItemToAnnotate);
 			if (data.annotations !== undefined)
 				self.annotations(data.annotations);
@@ -323,7 +323,7 @@ define(['knockout', 'text!./item.html', 'app', 'knockout-else', 'smoke'], functi
 		});
 		self.record = ko.observable(new Record());
 		self.id = ko.observable(params.id);
-		
+		self.indexInBatch = ko.observable(0);
 		document.addEventListener("Pundit.saveAnnotation", function(event) {
 			var annotationId = event.detail;
 			$.ajax({
@@ -476,6 +476,7 @@ define(['knockout', 'text!./item.html', 'app', 'knockout-else', 'smoke'], functi
 			if(self.record().recordId!="-1"){
 				self.addDisqus();
 			}
+			self.indexInBatch(self.indexInBatch()+1);
 		};
 
 		self.open = function () {

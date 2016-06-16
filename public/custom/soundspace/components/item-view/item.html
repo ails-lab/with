@@ -34,6 +34,9 @@
               <div class="mediainfo">
                 <div class="infowrap">
                   <!-- title-->
+                  <!-- ko if: record().nextItemToAnnotate -->
+                  	<span>ITEM </span><span data-bind="text: indexInBatch"></span><span>/10</span>
+                  <!-- /ko -->
                   <h1><!-- ko text: record().title --><!-- /ko --> 
                   <!-- ko if: isLogged -->
                   	<span class="pnd-resource" onclick="dispatchDocumentEvent('Pundit.showBootstrap')"></span>
