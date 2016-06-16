@@ -50,6 +50,12 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 		};
 		self.nextItemToAnnotate = ko.observable({});
 		self.annotations = ko.observableArray([]);
+		self.myAnnotations = ko.pureComputed(function () {
+			return self.annotations;
+		});
+		self.otherAnnotations = ko.pureComputed(function () {
+			return self.annotations;
+		});
 		self.isLiked = ko.pureComputed(function () {
 			return app.isLiked(self.externalId);
 		});
@@ -108,6 +114,10 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 			if (data.annotations !== undefined)
 				self.annotations(data.annotations);
 			self.loading(false);
+			var vid = document.getElementById("mediaplayer");
+			if (vid != null) {
+				vid.parentNode.removeChild(vid);
+			}
 			$('#mediathumbid').show();
 			if (data.view_url.indexOf('archives_items_') > -1) {
 				var id = data.view_url.split("_")[2];
@@ -376,9 +386,6 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 			formattedNextRecord = formatRecord(self.record().nextItemToAnnotate());
 			itemShow(formattedNextRecord);
 			var vid = document.getElementById("mediaplayer");
-			if (vid != null) {
-				vid.parentNode.removeChild(vid);
-			}
 		};
 		
 		self.endBatch = function() {
@@ -471,10 +478,6 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 			dispatchDocumentEvent('Pundit.hide');
 			$('body').css('overflow','visible');
 			$( '.itemview' ).fadeOut();
-			var vid = document.getElementById("mediaplayer");
-			if (vid != null) {
-				vid.parentNode.removeChild(vid);
-			}
 		};
 
 		self.changeSource = function (item) {
