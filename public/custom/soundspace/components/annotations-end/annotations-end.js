@@ -60,6 +60,7 @@ define(['bridget','knockout', 'text!./annotations-end.html','isotope','imagesloa
 					else if(data.annotationCount > 30) {
 						self.badgeImg('img/ui/ic-badge-gold');
 						self.badgeName('Golden');
+					}
 					if (data.annotatedRecordsCount) {
 						self.userTotalAnnotatedRecordsCount(data.annotatedRecordsCount);
 					}
