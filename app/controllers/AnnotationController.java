@@ -27,12 +27,8 @@ import model.annotations.bodies.AnnotationBody;
 import model.basicDataTypes.Language;
 import model.resources.RecordResource;
 
-import org.apache.commons.beanutils.BeanToPropertyValueTransformer;
-import org.apache.commons.collections.CollectionUtils;
 import org.bson.types.ObjectId;
 import org.elasticsearch.action.search.SearchResponse;
-import org.elasticsearch.action.suggest.SuggestResponse;
-import org.elasticsearch.search.SearchHit;
 
 import play.Logger;
 import play.Logger.ALogger;
@@ -75,9 +71,16 @@ public class AnnotationController extends Controller {
 			DB.getRecordResourceDAO().addAnnotation(
 					annotation.getTarget().getRecordId(), annotation.getDbId());
 		} else {
+			ArrayList<AnnotationAdmin> annotators = existingAnnotation.getAnnotators();
+			for (AnnotationAdmin a : annotators) {
+				if (a.getWithCreator().equals(WithController.effectiveUserDbId())) {
+					return ok(Json.toJson(existingAnnotation));
+				}
+			}
 			DB.getAnnotationDAO().addAnnotators(existingAnnotation.getDbId(),
 					annotation.getAnnotators());
-			annotation = DB.getAnnotationDAO().get(existingAnnotation.getDbId());
+			annotation = DB.getAnnotationDAO()
+					.get(existingAnnotation.getDbId());
 		}
 		return ok(Json.toJson(annotation));
 	}
@@ -179,12 +182,14 @@ public class AnnotationController extends Controller {
 			}
 			if (annotator == null)
 				return forbidden();
-			if (annotators.size() == 1)
+			if (annotators.size() == 1) {
 				DB.getAnnotationDAO().deleteAnnotation(annotationId);
-			else
+				return ok();
+			} else {
 				DB.getAnnotationDAO().removeAnnotators(annotationId,
 						Arrays.asList(annotator));
-			return ok();
+				return ok(Json.toJson(DB.getAnnotationDAO().get(annotationId)));
+			}
 		} catch (Exception e) {
 			return internalServerError();
 		}
