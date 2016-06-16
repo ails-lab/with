@@ -157,6 +157,24 @@ define(['bootstrap', 'knockout', 'text!./myannotations.html', 'knockout-else','a
 	
 	
 	function MyAnnotationsModel(params) {
+		
+		ko.bindingHandlers.filterItems = {		
+				update: function (elem, valueAccessor, allBindingsAccessor, viewModel, context) {
+					var q = ko.utils.unwrapObservable(valueAccessor());
+					$(elem).keypress(function (event) {
+						var keyCode = (event.which ? event.which : event.keyCode);
+			            if (keyCode === 13) {
+							self.searchAnnotations();
+			                //allBindings.executeOnEnter.call(viewModel);
+			                return false;
+			            }
+			            return true;
+					});
+				}
+			};
+		
+		
+		
 		KnockoutElse.init([spec = {}]);
 		var self = this;
 		self.route = params.route;
@@ -186,6 +204,9 @@ define(['bootstrap', 'knockout', 'text!./myannotations.html', 'knockout-else','a
 		
 		self.img = ko.observable("img/ui/rookie.png");
 		self.badgeName = ko.observable('Rookie');
+
+		
+		self.query = ko.observable("");
 
 		
 		self.isotopeImagesReveal = function ($container, $items) {
@@ -255,6 +276,8 @@ define(['bootstrap', 'knockout', 'text!./myannotations.html', 'knockout-else','a
 		};
 		
 		function getItem(record) {
+			if(record.annotations == undefined)
+				record.annotations = [];
 			var tile = '<div class="item ' + record.dbId + '"><div class="wrap"><a href="#"  onclick="recordSelect(\'' + record.dbId + '\',event)">' +
 			'<div class="thumb"><img style="width:100%" src="' + record.thumbnail() + '" onError="this.src=\'img/ui/ic-noimage.png\'"/><div class="counter">' + record.annotations.length + '  Annotations</div></div>';
 			tile += '<div class="info"><h2 class="title truncate">' + record.title + '</h2></a>';
@@ -418,6 +441,42 @@ define(['bootstrap', 'knockout', 'text!./myannotations.html', 'knockout-else','a
 				});
 			}
 		};
+		
+		self.searchAnnotations = function() {
+			self.loading(true);
+
+			if(self.query() == null || self.query() == undefined 
+					|| self.query() == "") {
+				$( ".item" ).remove();
+				self.isotopeImagesReveal(self.$container, getItems(self.citems()));
+				return;
+			}
+			
+			
+			$.ajax({
+				"url": '/api/annotationsSearch?groupId=56e13d2e75fe2450755e553a&term=' + self.query(),
+				"method": "get",
+				"contentType": "application/json",
+				"success": function (data) {
+					$( ".item" ).remove();
+					var items = self.revealItems(data.hits);
+					if (items.length > 0) {
+						var $newitems = getItems(items);
+
+						self.isotopeImagesReveal(self.$container, $newitems);
+					}
+					self.loading(false);
+				},
+				"error": function (result) {
+					self.loading(false);
+					$.smkAlert({
+						text: 'An error has occured',
+						type: 'danger',
+						permanent: true
+					});
+				}
+			});
+		}
 		
 		self.moreItems = function () {
 			return $.ajax({

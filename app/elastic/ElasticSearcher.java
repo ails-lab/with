@@ -59,6 +59,8 @@ import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.QueryStringQueryBuilder;
 import org.elasticsearch.index.query.QueryStringQueryBuilder.Operator;
 import org.elasticsearch.index.query.RangeFilterBuilder;
+import org.elasticsearch.index.query.TermsQueryBuilder;
+import org.elasticsearch.index.query.WildcardQueryBuilder;
 import org.elasticsearch.index.query.functionscore.FunctionScoreQueryBuilder;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
 import org.elasticsearch.search.aggregations.bucket.terms.TermsBuilder;
@@ -80,6 +82,7 @@ public class ElasticSearcher {
 	private final Map<String, Float> fedSearchFieldsWithBoosts;
 	private List<String> fieldsForSimilarity;
 	private final List<String> aggregatedFields;
+	private String filterQueryType = "term";
 
 	private final Client client = null;
 	public static final int DEFAULT_COUNT = 10;
@@ -305,6 +308,16 @@ public class ElasticSearcher {
 		return this.execute(multi_match_q, options);
 	}
 
+
+	public SearchResponse searchInSpecificCollections(String term, List<String> ids, SearchOptions options) {
+		TermsQueryBuilder terms_q = QueryBuilders.termsQuery("collectedId", ids);
+		WildcardQueryBuilder wildcard_q = QueryBuilders.wildcardQuery("_all", term+"*");
+		//MatchQueryBuilder match_q = QueryBuilders.matchQuery("_all", term).fuzziness(1);
+		BoolQueryBuilder bool_q = QueryBuilders.boolQuery();
+		bool_q.must(terms_q).must(wildcard_q);
+
+		return this.execute(bool_q, options);
+	}
 	/*
 	 * Search for related records
 	 */
@@ -514,6 +527,10 @@ public class ElasticSearcher {
 			types = new ArrayList<String>();
 			types.add(type);
 		}
+	}
+
+	public void setFilterQueryType(String type) {
+		this.filterQueryType = type;
 	}
 
 }
