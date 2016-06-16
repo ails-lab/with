@@ -449,16 +449,21 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
        
        
        recordSelect = function (data,event) {
-       	
-       	event.preventDefault();
-			var selrecord = ko.utils.arrayFirst(self.citems(), function(record) {
+	    self.selrecord = ko.utils.arrayFirst(self.citems(), function(record) {
 				   return record.dbId === data;
 				});
-			itemShow(selrecord);
+       	if (isLogged()) {
+	       	event.preventDefault();
+			itemShow(self.selrecord);
 			return false;
-
+       	}
+       	else { 
+       		event.preventDefault();
+       		$("#loginPopup").addClass("open");
+       		$("#loginPopup").on("loginEvent", function(event) {itemShow(self.selrecord)});
+       	}
 		}
-
+		
        self.refresh=function(){
     	   
     	   loading(true);
