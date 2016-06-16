@@ -357,7 +357,13 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 				    	contentType : "application/json",
 				    	data     : JSON.stringify(withAnnotation),
 						success : function(result) {
-							self.record().annotations.push(result);
+							//check if duplicate
+							var index1 = self.arrayFirstIndexOf(ko.toJS(self.record().annotations), function (annotation) {
+								return annotation.dbId === result.dbId;
+							});
+							//alert(index1);
+							if (index1 < 0)
+								self.record().annotations.push(result);
 							self.batchAnnotationCount++;
 							self.recordSimple = ko.toJS(self.record);
 							self.recordSimple.nextItemToAnnotate = {};
