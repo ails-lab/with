@@ -646,9 +646,11 @@ public class GroupManager extends WithController {
 		ObjectNode g = (ObjectNode) Json.toJson(group);
 
 		ObjectId userId = effectiveUserDbId();
-		User user = DB.getUserDAO().get(userId);
-		g.put("firstName", user.getFirstName());
-		g.put("lastName", user.getLastName());
+		if(userId != null) {
+			User user = DB.getUserDAO().get(userId);
+			g.put("firstName", user.getFirstName());
+			g.put("lastName", user.getLastName());
+		}
 		Query<CollectionObject> q = DB.getCollectionObjectDAO().createQuery();
 		// Criteria criteria1 =
 		// DB.getCollectionObjectDAO().formAccessLevelQuery(new

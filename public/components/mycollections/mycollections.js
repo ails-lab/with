@@ -797,8 +797,8 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 		
 		self.closeSideBar = function () {
 			self.isPublicToEdit(false); //default value for isPublic
-			self.titleToEdit("");
-			self.descriptionToEdit("");
+			self.titleToEdit();
+			self.descriptionToEdit();
 			$('#usernameOrEmail').val("");
 			//$('textarea').hide();
 			//$('.add').show();

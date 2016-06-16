@@ -91,7 +91,7 @@ public class SearchController extends WithController {
 				return ParallelAPICall.<SourceResponse> combineResponses(r -> {
 					log.info(r.source + " found " + r.count);
 					return true;
-				} , promises);
+				} , promises, Priority.FRONTEND);
 			} catch (Exception e) {
 				log.error("",e);
 				return Promise.pure((Result) badRequest(e.getMessage()));

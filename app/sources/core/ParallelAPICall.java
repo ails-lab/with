@@ -113,8 +113,8 @@ public class ParallelAPICall {
 	 */
 	public static <R> Promise<Result> combineResponses(
 			final Function<R, Boolean> responseCollectionMethod,
-			Iterable<Promise<R>> promises) {
-		Promise<List<R>> promisesSequence = Promise.sequence(promises);
+			Iterable<Promise<R>> promises, Priority priority) {
+		Promise<List<R>> promisesSequence = Promise.sequence(promises, priority.getExcecutionContext());
 		Promise<Result> promiseResult = promisesSequence
 				.map(new play.libs.F.Function<Iterable<R>, Result>() {
 					List<R> finalResponses = new ArrayList<R>();
@@ -126,7 +126,7 @@ public class ParallelAPICall {
 						// + (System.currentTimeMillis()- initTime));
 						return toStatus(finalResponses);
 					}
-				});
+				}, priority.getExcecutionContext());
 		return promiseResult;
 	}
 
