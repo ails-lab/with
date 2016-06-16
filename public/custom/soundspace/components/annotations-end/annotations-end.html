@@ -66,12 +66,12 @@
             <!-- item-->
             <div class="item media" data-bind="click: itemShow">
               <div class="wrap">
-                <!-- anchor--><a href="#" data-view="inline" data-bind="text: title">
+                <!-- anchor--><a href="#" data-view="inline">
                   <!-- thumbnail-->
                   <div class="thumb"><img data-bind="attr: {src: thumb}"></div>
                   <!-- info-->
                   <div class="info">
-                    <h1 class="title" data-bind="text: description"></h1><span class="owner" data-bind="text: dataProvider"></span>
+                    <h1 class="title" data-bind="text: title"></h1><span class="owner" data-bind="text: dataProvider"></span>
                   </div>
                   <!-- rights--><span class="rights" data-bind="text: rights"></span>
                   <!-- pointer-->
@@ -80,6 +80,7 @@
             </div>
             <!-- /ko -->
            </div>
+        </div>
         </div>
       </section>
 </div>
