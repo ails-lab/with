@@ -351,11 +351,9 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 							self.batchAnnotationCount++;
 							self.recordSimple = ko.toJS(self.record);
 							self.recordSimple.nextItemToAnnotate = {};
-							//alert(JSON.stringify(self.recordSimple));
 							var index = self.arrayFirstIndexOf(self.batchItemsAnnotated, function (item) {
-								return item.id === self.recordSimple.id;
+								return item.recordId === self.recordSimple.recordId;
 							});
-							//alert(index);
 							if (index < 0) {
 								self.batchItemsAnnotated.push(self.recordSimple);
 							}
