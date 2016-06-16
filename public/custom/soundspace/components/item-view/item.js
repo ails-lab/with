@@ -567,9 +567,10 @@ define(['knockout', 'text!./item.html', 'app', 'knockout-else', 'smoke'], functi
     			url : '/annotation/'+annotation.dbId,
 		    	method : "DELETE",
 				success : function(result) {
-					if (result != undefined) {
-						self.record().annotations.remove(annotation);
-						self.batchAnnotationCount--;
+					self.record().annotations.remove(annotation);
+					self.batchAnnotationCount--;
+					if (result !== "") {
+						self.record().annotations.push(result);
 					}
 				}
     		});
