@@ -77,6 +77,7 @@ public class AnnotationController extends Controller {
 		} else {
 			DB.getAnnotationDAO().addAnnotators(existingAnnotation.getDbId(),
 					annotation.getAnnotators());
+			return ok(Json.toJson(existingAnnotation));
 		}
 		return ok(Json.toJson(annotation));
 	}
