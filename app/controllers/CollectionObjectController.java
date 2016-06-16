@@ -173,22 +173,9 @@ public class CollectionObjectController extends WithResourceController {
 
 	public static Result importIDs(String cname, String source, String ids) {
 		ObjectNode resultInfo = Json.newObject();
-		ObjectId creatorDbId = new ObjectId(loggedInUser());
-		CollectionObject ccid = null;
-		if (!isCollectionCreated(creatorDbId, cname)) {
-			CollectionObject collection = new SimpleCollection();
-			collection.getDescriptiveData().setLabel(
-					new MultiLiteral(cname).fillDEF());
-			boolean success = internalAddCollection(collection,
-					WithResourceType.SimpleCollection, creatorDbId, resultInfo);
-			if (!success)
-				return badRequest(resultInfo);
-			ccid = collection;
-		} else {
-			List<CollectionObject> col = DB.getCollectionObjectDAO()
-					.getByLabel(Language.DEFAULT, cname);
-			ccid = col.get(0);
-		}
+		CollectionObject ccid = getOrCreateCollection(cname, resultInfo);
+		if (ccid==null)
+			return internalServerError(resultInfo);
 		for (String oid : ids.split("[,\\s]+")) {
 			CulturalObject record = new CulturalObject();
 			CulturalObjectData descriptiveData = new CulturalObjectData();
@@ -199,6 +186,28 @@ public class CollectionObjectController extends WithResourceController {
 					F.Option.None(), resultInfo);
 		}
 		return ok(resultInfo);
+	}
+
+	private static CollectionObject getOrCreateCollection(String collectionName, ObjectNode resultInfo) {
+		ObjectId creatorDbId = new ObjectId(loggedInUser());
+		CollectionObject ccid = null;
+		if (!isCollectionCreated(creatorDbId, collectionName)) {
+			CollectionObject collection = new SimpleCollection();
+			collection.getDescriptiveData().setLabel(
+					new MultiLiteral(collectionName).fillDEF());
+			boolean success = internalAddCollection(collection,
+					WithResourceType.SimpleCollection, creatorDbId, resultInfo);
+			if (!success){
+				resultInfo.put("error", "Failed creating the collection");
+				return null;
+			}
+			ccid = collection;
+		} else {
+			List<CollectionObject> col = DB.getCollectionObjectDAO()
+					.getByLabel(Language.DEFAULT, collectionName);
+			ccid = col.get(0);
+		}
+		return ccid;
 	}
 
 	/**
@@ -272,16 +281,19 @@ public class CollectionObjectController extends WithResourceController {
 	}
 	
 	public static Result uploadCollection() {
-		
+		ObjectNode resultInfo = Json.newObject();
 		MultipartFormData body = request().body().asMultipartFormData();
 	    FilePart picture = body.getFile("items");
 	    String source = body.asFormUrlEncoded().get("source")[0];
+	    CollectionObject ccid = getOrCreateCollection(source, resultInfo);
+		if (ccid==null)
+			return internalServerError(resultInfo);
 	    if (picture != null) {
-	        String fileName = picture.getFilename();
-	        String contentType = picture.getContentType();
 	        File file = picture.getFile();
-	        ResourcesListImporter rec = new ResourcesListImporter(new DPLARecordFormatter());
-	        addResultToCollection(rec.process(file), source, -1, null, true);
+	        // TODO pick the correct reader
+	        DPLARecordFormatter itemReader = new DPLARecordFormatter();
+			ResourcesListImporter rec = new ResourcesListImporter(itemReader);
+	        addResultToCollection(rec.process(file), ccid.getDbId().toString(), -1, null, true);
 	        return ok("File uploaded");
 	    } else {
 	        flash("error", "Missing file");
