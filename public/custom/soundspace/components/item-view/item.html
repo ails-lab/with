@@ -138,13 +138,12 @@
                     </div>
                     <div id="share" class="tab-pane">
                       <!-- share-->
-                      <div class="sharetext" data-bind="text: record().title"></div>
-                      <ul class="social">
-                        <li><a data-bind="attr: {href:record().facebook}" title="share on facebook" onclick="javascript:window.open(this.href,'facebook-share-dialog','width=626,height=436'); return false;"><img src="img/ic-facebook.png" alt="facebook"></a></li>
-                        <li><a data-bind="attr: {href:record().twitter}" title="twitter share" onclick="javascript:window.open(this.href,'', 'menubar=no,toolbar=no,resizable=yes,scrollbars=yes,height=600,width=600');return false;""><img src="img/ic-twitter.png" alt="facebook"></a></li>
-                        <li data-bind="event: {click: function(){record().pinterest()}}"><a href="#" title="pin it"><img src="img/ic-pinterest.png" alt="facebook"></a></li>
-                        <li><a data-bind="attr: {href:record().mail}" title="email item"><img src="img/ic-mail.png" alt="facebook"></a></li>
-                      </ul>
+               		<ul class="social">
+                		<li><a data-bind="attr: {href:record().facebook}" title="share on facebook" onclick="javascript:window.open(this.href,'facebook-share-dialog','width=626,height=436'); return false;"><img src="img/ui/ic-facebook.png" alt="facebook"></a></li>
+                		<li><a data-bind="attr: {href:record().twitter}" title="twitter share" onclick="javascript:window.open(this.href,'', 'menubar=no,toolbar=no,resizable=yes,scrollbars=yes,height=600,width=600');return false;"><img src="img/ui/ic-twitter.png" alt="facebook"></a></li>
+                		<li data-bind="event: {click: function(){record().pinterest()}}"><a href="#" title="pin it"><img src="img/ui/ic-pinterest.png" alt="facebook"></a></li>
+                		<li><a data-bind="attr: {href:record().mail}" title="email item"><img src="img/ui/ic-mail.png" alt="facebook"></a></li>
+              		</ul>
                     </div>
                   </div>
                 </div>

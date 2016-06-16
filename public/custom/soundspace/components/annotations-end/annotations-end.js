@@ -39,8 +39,7 @@ define(['bridget','knockout', 'text!./annotations-end.html','isotope','imagesloa
 		  dispatchDocumentEvent('Pundit.hide');
 		  self.loadAnnotations();
 		  //alert(JSON.stringify(batchItemsAnnotated));
-		  //var $items=batchItemsAnnotated;
-		  //homeisotopeImagesReveal( $container,$items );
+
 	  };
 	  
 	  self.loadAnnotations = function () {
@@ -73,13 +72,18 @@ define(['bridget','knockout', 'text!./annotations-end.html','isotope','imagesloa
 				}
 			});
 		};
-	self.returnHomepage = function() {
-		window.location.href = "../../custom/soundspace/index.html";
-		//if next lines, scroll down in page does not work
-		/*$("#annotatehero").show();
-		$("#main-content").show();
-		$("#annotations-end").hide();*/
-	}
+		
+		self.returnHomepage = function() {
+			window.location.href = "../../custom/soundspace/index.html";
+			//if next lines, scroll down in page does not work
+			/*$("#annotatehero").show();
+			$("#main-content").show();
+			$("#annotations-end").hide();*/
+		}
+		
+		self.itemShow = function(item) {
+			itemShow(item);
+		}
 	
   }
   
