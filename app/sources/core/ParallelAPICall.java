@@ -32,6 +32,9 @@ import scala.concurrent.ExecutionContext;
 public class ParallelAPICall {
 
 	public enum Priority {
+		// TODO to remove!!!
+		MINE(ExecutionContexts.fromExecutorService(Executors
+				.newFixedThreadPool(4))),
 		BACKEND(ExecutionContexts.fromExecutorService(Executors
 				.newFixedThreadPool(4))),
 		FRONTEND(ExecutionContexts.global());
@@ -87,11 +90,7 @@ public class ParallelAPICall {
 	
 	public static <U, R> Promise<R> createPromise(
 			final Function0<R> methodQuery, Priority priority) {
-		Promise<R> p = Promise.promise(new Function0<R>() {
-			public R apply() throws Throwable {
-				return methodQuery.apply();
-			}
-		}, priority.getExcecutionContext());
+		Promise<R> p = Promise.promise(methodQuery, priority.getExcecutionContext());
 		return p;
 	}
 

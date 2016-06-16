@@ -16,6 +16,7 @@
 
 package sources.utils;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -66,6 +67,19 @@ public class JsonContextRecord {
 			log.error("",e);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
+			log.error("",e);
+		}
+	}
+	
+	public JsonContextRecord(File jsonFile) {
+		// TODO: what us context?
+		context = new ArrayList<>();
+		ObjectMapper mapper = new ObjectMapper();
+		try {
+			this.rootInformation = mapper.readTree(jsonFile);
+		} catch (JsonProcessingException e) {
+			log.error("",e);
+		} catch (IOException e) {
 			log.error("",e);
 		}
 	}

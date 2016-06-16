@@ -16,9 +16,17 @@
 
 package controllers;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -64,6 +72,7 @@ import model.basicDataTypes.Language;
 import model.basicDataTypes.Literal;
 import model.basicDataTypes.MultiLiteral;
 import model.basicDataTypes.ProvenanceInfo;
+import model.basicDataTypes.ProvenanceInfo.Sources;
 import model.basicDataTypes.WithAccess;
 import model.basicDataTypes.WithAccess.Access;
 import model.basicDataTypes.WithAccess.AccessEntry;
@@ -90,6 +99,8 @@ import play.libs.F.Function0;
 import play.libs.F.Option;
 import play.libs.F.Promise;
 import play.libs.Json;
+import play.mvc.Http.MultipartFormData;
+import play.mvc.Http.MultipartFormData.FilePart;
 import play.mvc.Result;
 import sources.EuropeanaCollectionSpaceSource;
 import sources.EuropeanaSpaceSource;
@@ -97,8 +108,11 @@ import sources.OWLExporter.CulturalItemOWLExporter;
 import sources.core.CommonQuery;
 import sources.core.ParallelAPICall;
 import sources.core.ParallelAPICall.Priority;
+import sources.core.ResourcesListImporter;
 import sources.core.SourceResponse;
 import sources.core.Utils;
+import sources.formatreaders.DPLARecordFormatter;
+import sources.utils.JsonContextRecord;
 import utils.ListUtils;
 import utils.Locks;
 import utils.MetricsUtils;
@@ -213,6 +227,7 @@ public class CollectionObjectController extends WithResourceController {
 				false);
 	}
 
+
 	private static Promise<Result> internalImport(EuropeanaSpaceSource src,
 			CollectionObject collection, CommonQuery q, int limit,
 			ObjectNode resultInfo, boolean dontDuplicate, boolean waitToFinish) {
@@ -244,8 +259,8 @@ public class CollectionObjectController extends WithResourceController {
 						effectiveUserIds(), "BASIC", Option.Some("DEFAULT"))));
 			}
 		};
-		Promise<Result> promiseOfInt = Promise.promise(function0);
-//		Promise<Result> promiseOfInt = ParallelAPICall.createPromise(function0, Priority.BACKEND);
+//		Promise<Result> promiseOfInt = Promise.promise(function0);
+		Promise<Result> promiseOfInt = ParallelAPICall.createPromise(function0, Priority.MINE);
 		if (resultInfo.has("error"))
 			return Promise.pure((Result) badRequest(resultInfo));
 		if (waitToFinish)
@@ -255,14 +270,39 @@ public class CollectionObjectController extends WithResourceController {
 					collection,
 					effectiveUserIds(), "BASIC", Option.Some("DEFAULT")))));
 	}
+	
+	public static Result uploadCollection() {
+		
+		MultipartFormData body = request().body().asMultipartFormData();
+	    FilePart picture = body.getFile("items");
+	    String source = body.asFormUrlEncoded().get("source")[0];
+	    if (picture != null) {
+	        String fileName = picture.getFilename();
+	        String contentType = picture.getContentType();
+	        File file = picture.getFile();
+	        ResourcesListImporter rec = new ResourcesListImporter(new DPLARecordFormatter());
+	        addResultToCollection(rec.process(file), source, -1, null, true);
+	        return ok("File uploaded");
+	    } else {
+	        flash("error", "Missing file");
+	        return badRequest();
+	    }
+	}
 
 	private static int addResultToCollection(SourceResponse result,
 			String collectionID, int limit, ObjectNode resultInfo,
 			boolean dontRepeat) {
+		Collection<WithResource<?, ?>> culturalCHO = result.items
+				.getCulturalCHO();
+		return addResultToCollection(culturalCHO, collectionID, limit, resultInfo, dontRepeat);
+	}
+
+	private static int addResultToCollection(Collection<WithResource<?, ?>> items, String collectionID, int limit,
+			ObjectNode resultInfo, boolean dontRepeat) {
+		log.debug("adding "+items.size()+" items to collection "+collectionID);
 		int itemsCount = 0;
-		for (Iterator<WithResource<?, ?>> iterator = result.items
-				.getCulturalCHO().iterator(); iterator.hasNext()
-				&& (itemsCount < limit);) {
+		for (Iterator<WithResource<?, ?>> iterator = items.iterator(); iterator.hasNext()
+				&& (limit<0 || itemsCount < limit);) {
 			WithResource<?, ?> item = iterator.next();
 			WithResourceController.internalAddRecordToCollection(collectionID,
 					(RecordResource) item, F.Option.None(), resultInfo,

@@ -24,6 +24,7 @@ import org.mongodb.morphia.annotations.Indexes;
 import org.mongodb.morphia.utils.IndexType;
 
 import db.converters.ProvenanceInfoConverter;
+import sources.utils.JsonContextRecord;
 
 @Converters(ProvenanceInfoConverter.class)
 public class ProvenanceInfo {
