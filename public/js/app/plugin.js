@@ -104,10 +104,7 @@ WITHApp.ui = function( custom ){
 
 		// init expand on exhibition 
 		initExpandExhibitionText();
-		
-		// init chart
-		initChart();
-		
+				
 	};
 	
 	this.initCharacterLimiter=function(){
@@ -147,8 +144,8 @@ WITHApp.ui = function( custom ){
 		initTooltip();
 	}
 	
-	this.initChart=function(){
-		initChart();
+	this.initChart=function(dataPercent){
+		initChart(dataPercent);
 	}
 	
 	// method to toggle search view mode
@@ -932,10 +929,9 @@ WITHApp.ui = function( custom ){
 	};
 	
 	// method to initialize chart
-	var initChart = function(){
+	var initChart = function(dataPercent){
 		// log
 		logger( 'info','plugins.js / initChart' );
-
 		// check
 		if( $( '.chart' ).length > 0 ) {
 
@@ -951,6 +947,10 @@ WITHApp.ui = function( custom ){
 					'barColor' : '#6fa130'
 				});
 			});
+			 //update instance after 5 sec
+		    setTimeout(function() {
+		        $('.chart').data('easyPieChart').update(dataPercent);
+		    }, 5);
 		}
 	};
 	

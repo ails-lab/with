@@ -600,6 +600,11 @@ body header .hero {
   height: 100vh;
   display: none;
 }
+body header .annotatehero {
+  height: 100vh;
+  display: none;
+}
+
 body header .hero .hue {
   background: rgba(0, 0, 0, 0.4);
   width: 100%;
@@ -2542,6 +2547,9 @@ body [role='main'] .annotate {
   display: none;
 }
 body[data-page='home'] header .hero {
+  display: block;
+}
+body[data-page='home'] header .annotatehero {
   display: block;
 }
 body.expand header .main {
