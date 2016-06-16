@@ -13,7 +13,8 @@
               <!-- ko if: batchItemsAnnotated.length <= 0 -->
                    <h1>The annotations batch has finished</h1>
               <!-- /ko -->
-              <span class="topic">So far, you have earned a <span data-bind="text: badgeName" ></span> badge.</span>
+              <span class="topic" data-bind="visible: annotatedRecordCount() > 10">So far, you have earned a <span data-bind="text: badgeName" ></span> badge.</span>
+              <span class="topic" data-bind="visible: annotatedRecordCount() < 10"><!-- ko text: 10  - annotatedRecordCount() % 10 -->  <!-- /ko -->  more records to get your first badge.</span>
               <!-- description-->
               <div class="badges" style="padding-top: 50px">
               <center><div class="icon"><img data-bind="attr: {src: badgeImg()}"></div></center>

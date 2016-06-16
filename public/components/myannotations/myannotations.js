@@ -183,7 +183,7 @@ define(['bootstrap', 'knockout', 'text!./myannotations.html', 'knockout-else','a
 		//self.myAnnotatios = ko.mapping.fromJS([], mapping);
 		
 		self.img = ko.observable("img/ui/rookie.png");
-		self.badgeName = ko.observable('Bronze');
+		self.badgeName = ko.observable('Rookie');
 
 		
 		self.isotopeImagesReveal = function ($container, $items) {

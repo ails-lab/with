@@ -24,8 +24,8 @@ define(['bridget','knockout', 'text!./annotations-end.html','isotope','imagesloa
 	  self.batchAnnotationCount = ko.observable(0);
 	  self.userTotalAnnotationCount = ko.observable(0);
 	  self.userTotalAnnotatedRecordsCount = ko.observable(0);
-	  self.badgeImg = ko.observable("img/ui/ic-badge-bronze.png");
-	  self.badgeName = ko.observable('Bronze');
+	  self.badgeImg = ko.observable("img/ui/rookie.png");
+	  self.badgeName = ko.observable('Rookie');
 	  //$( '.annotations-end' ).fadeOut();
 	  
 	  showEndOfAnnotations = function (batchItemsAnnotated, batchAnnotationCount) {
@@ -51,12 +51,15 @@ define(['bridget','knockout', 'text!./annotations-end.html','isotope','imagesloa
 						self.userTotalAnnotationCount(data.annotationCount);
 					}
 					if (data.annotationCount > 10 && data.annotationCount <= 20) {
+						self.badgeImg('img/ui/ic-badge-bronze.png');
+						self.badgeName('Bronze');
+					} else if(data.annotationCount > 20) {
 						self.badgeImg('img/ui/ic-badge-silver.png');
 						self.badgeName('Silver');
-					} else if(data.annotationCount > 20) {
-						self.badgeImg('img/ui/ic-badge-gold');
-						self.badgeName('Gold');
 					}
+					else if(data.annotationCount > 30) {
+						self.badgeImg('img/ui/ic-badge-gold');
+						self.badgeName('Golden');
 					if (data.annotatedRecordsCount) {
 						self.userTotalAnnotatedRecordsCount(data.annotatedRecordsCount);
 					}
