@@ -2,7 +2,10 @@ define(['bridget','knockout', 'text!./annotations-end.html','isotope','imagesloa
 	
 	
 	$.bridget('isotope', Isotope);
-		
+	ko.bindingHandlers.annotationsIsotope = {
+			init: app.initOrUpdate('init'),
+			update: app.initOrUpdate('update')
+		};
 	
 	self.loading=ko.observable(false);
 	
@@ -26,25 +29,18 @@ define(['bridget','knockout', 'text!./annotations-end.html','isotope','imagesloa
 	  self.userTotalAnnotatedRecordsCount = ko.observable(0);
 	  self.badgeImg = ko.observable("img/ui/rookie.png");
 	  self.badgeName = ko.observable('Rookie');
-	  //$( '.annotations-end' ).fadeOut();
-	  $(".grid").isotope({
-			itemSelector: '.item',
-			transitionDuration: transDuration,
-			masonry: {
-				columnWidth: '.sizer',
-				percentPosition: true
-			}
-	  });
+	  WITHApp.initIsotope();
 	  
 	  showEndOfAnnotations = function (batchItemsAnnotated, batchAnnotationCount) {
 		  self.batchItemsAnnotated(batchItemsAnnotated);
 		  self.batchAnnotationCount(batchAnnotationCount);
 		  //window.location.href = "#annotations-end";
-		  $(".itemview").hide();
+		  //$(".itemview").hide();
 		  $("#main-content").hide();
 		  document.body.setAttribute("data-page","home");
 		  $("#annotatehero").hide();
 		  $("#annotations-end").show();
+		  WITHApp.initIsotope();
 		  dispatchDocumentEvent('Pundit.hide');
 		  self.loadAnnotations();
 	  };

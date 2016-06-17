@@ -56,20 +56,28 @@
           </div>
         </div>
       </section>
-    
-	 <section class="listing">
-        <div class="container">
+   
+      <section class="listing">
+      <div class="container">
           <!-- grid-->
-          <div class="grid">
-            <!-- item-->
-            <div class="sizer"></div>
-            <!-- ko foreach: batchItemsAnnotated -->
-            <!-- item-->
-            <div class="item media" data-bind="click: itemShow">
+      <div class="grid" data-bind="annotationsIsotope: batchItemsAnnotated">
+         <!-- ko if: $index() === 0 -->
+          <div class="sizer"></div>
+          <!-- /ko -->
+           <div class="item media" data-bind="click: itemShow">
               <div class="wrap">
                 <!-- anchor--><a href="#" data-view="inline">
                   <!-- thumbnail-->
-                  <div class="thumb"><div class="counter"><span data-bind="text: annotations.length"></span> <span>Annotations</span></div>
+                  <div class="thumb"><div class="counter" style="background: #4f7979 none repeat scroll 0 0;
+    color: #fff;
+    font-size: 1.1rem;
+    font-weight: 500;
+    left: 0;
+    padding: 5px 15px;
+    position: absolute;
+    text-transform: uppercase;
+    top: 0;">
+                  	<span data-bind="text: annotations.length"></span> <span>Annotations</span></div>
                   	<img data-bind="attr: {src: thumb ? thumb: 'img/ui/ic-noimage.png'}" nerror="src='img/ui/ic-noimage.png'">
                   </div>
                   <!-- info-->
@@ -81,9 +89,8 @@
                   <div class="pointer"><span class="arrow"><img src="img/ic-right-arrow.png" alt="Arrow"></span></div></a>
               </div>
             </div>
-            <!-- /ko -->
-           </div>
         </div>
+		</div>
         </div>
       </section>
 </div>

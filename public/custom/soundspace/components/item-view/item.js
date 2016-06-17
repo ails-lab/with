@@ -417,6 +417,7 @@ define(['knockout', 'text!./item.html', 'app', 'knockout-else', 'smoke'], functi
 			if (vid != null) {
 				vid.parentNode.removeChild(vid);
 			}
+			self.close();
 			showEndOfAnnotations(self.batchItemsAnnotated, self.batchAnnotationCount);
 		};
 		
