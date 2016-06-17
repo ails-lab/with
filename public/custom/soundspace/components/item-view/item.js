@@ -314,7 +314,7 @@ define(['knockout', 'text!./item.html', 'app', 'knockout-else', 'smoke'], functi
 		self.batchItemsAnnotated = [];
 		self.batchAnnotationCount = 0;
 		self.route = params.route;
-		self.from=window.location.href;	
+		self.from=window.location.href;
 		var thumb = "";
 		self.loggedUser=ko.pureComputed(function(){
 			if(app.isLogged())return true;
@@ -387,6 +387,7 @@ define(['knockout', 'text!./item.html', 'app', 'knockout-else', 'smoke'], functi
 							if (index1 >= 0) 
 								self.batchItemsAnnotated.splice(index, 1);
 							self.batchItemsAnnotated.push(self.recordSimple);
+							updateRecordAnnotations(self.record().recordId, self.record().annotations());
 						}
 		    		});
 			}
