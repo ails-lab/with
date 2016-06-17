@@ -345,7 +345,7 @@ define(['knockout', 'text!./item.html', 'app', 'knockout-else', 'smoke'], functi
 		    				'uriVocabulary': 'MIMO' 
 		    			}
 		    		};
-		    		if (self.recordId == "-1")
+		    		if (self.record().recordId == "-1")
 		    			return;
 		    		var annotationUri = punditAnnotation.metadata['http://purl.org/pundit/as/annotation/'+annotationId];
 		    		var serializedAt = annotationUri['http://www.openannotation.org/ns/serializedAt'];
