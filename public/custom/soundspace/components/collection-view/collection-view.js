@@ -376,9 +376,6 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 			
 			
 		};
-
-		
-
 	
 		likeRecord = function (id,event) {
         	event.preventDefault();
@@ -405,6 +402,23 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 			
 			collectionShow(rec);
 		};
+		
+		updateRecordAnnotations = function(id, annotations) {
+			var index = self.arrayFirstIndexOf(ko.toJS(self.citems()), function (item) {
+				return item.dbId === id;
+			});
+			self.citems()[index].annotations = annotations;
+		}
+		
+		self.arrayFirstIndexOf = function (array, predicate) {
+			for (var i = 0, j = array.length; i < j; i++) {
+				if (predicate.call(undefined, array[i])) {
+					return i;
+				}
+			}
+			return -1;
+		};
+
 		
 		
 		function getItem(record) {
