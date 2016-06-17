@@ -45,7 +45,7 @@
                   <div class="owner" data-bind="text:record().dataProvider"></div>
                    <!-- annotate box-->
                   <div class="annotatebox">
-                  	<!-- ko if: record().annotations && record().annotations().length == 0-->
+                  	<!-- ko if: record().annotations && record().annotations().length > 0 -->
                     <div class="question">What musical instrument do you listen to in this item?</div>
                     <div class="info">The item has been annotated with the following concepts. Add more using PUNDIT.</div>
                     <!-- /ko -->
