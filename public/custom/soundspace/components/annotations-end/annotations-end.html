@@ -36,10 +36,10 @@
                 <p> In total, you have annotated <span data-bind="text: userTotalAnnotatedRecordsCount"> </span> items
                 	with <span data-bind="text: userTotalAnnotationCount"></span> annotations about musical instruments.</p>
                 <!-- action button-->
-                 <a href="#" data-bind="click: startAnnotate" class="annotatebtn">Try another annotation turn</a>
+                 <a href="#" data-bind="click: startAnnotate" class="annotatebtn">Try another turn of tagging</a>
               <!-- /ko -->
           	<!-- ko if: userTotalAnnotatedRecordsCount() == 0 -->
-          		<p>10 annotations grant you a bronze badge, 20 a silver, and with 40 annotations you win a golden badge. Special gifts will be
+          		<p>10 annotations grant you a bronze badge, 25 a silver, and with 50 annotations you earn a golden badge. Special gifts will be
                 	provided to golden winners!</p>
           		<a href="#" data-bind="click: startAnnotate" class="annotatebtn">Try another annotation turn</a>
           	<!-- /ko -->
@@ -48,8 +48,10 @@
             <div class="goal">
               <div class="info">
                 <h2>Thank you for contributing to Europeana Sounds objective.</h2>
-                <p>By the end of the crowdsourcing campaign, the objective is to have 1000 audio items annotated by users. 
-                	The annotations used in the campaign concern concepts about musical instruments (from the MIMO thesaurus).</p>
+                <p>	
+                	By the end of the crowdsourcing campaign (30th of June), the objective is to 
+                	have musical instruments identified in at least 1000 recordings from our archives.
+                	The tags are all controlled and available in many languages.</p>
                     <a href="#" data-bind="click: returnHomepage" class="annotatebtn">Go to homepage</a>
               </div>
             </div>

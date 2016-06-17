@@ -54,14 +54,14 @@ define(['bridget','knockout', 'text!./annotations-end.html','isotope','imagesloa
 					if (data.annotationCount) {
 						self.userTotalAnnotationCount(data.annotationCount);
 					}
-					if (data.annotationCount > 10 && data.annotationCount <= 20) {
+					if (data.annotationCount > 10 && data.annotationCount < 25) {
 						self.badgeImg('img/ui/ic-badge-bronze.png');
 						self.badgeName('Bronze');
-					} else if(data.annotationCount > 20) {
+					} else if(data.annotationCount >= 25 &&  data.annotationCount < 50) {
 						self.badgeImg('img/ui/ic-badge-silver.png');
 						self.badgeName('Silver');
 					}
-					else if(data.annotationCount > 30) {
+					else if(data.annotationCount >= 50) {
 						self.badgeImg('img/ui/ic-badge-gold');
 						self.badgeName('Golden');
 					}

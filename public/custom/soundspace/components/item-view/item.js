@@ -409,6 +409,7 @@ define(['knockout', 'text!./item.html', 'app', 'knockout-else', 'smoke'], functi
 			}
 			formattedNextRecord = formatRecord(self.record().nextItemToAnnotate());
 			self.indexInBatch(self.indexInBatch()+1);
+			dispatchDocumentEvent('Pundit.hide');
 			itemShow(formattedNextRecord);
 		};
 		

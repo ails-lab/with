@@ -18,11 +18,11 @@
               <!-- info-->
               <div class="info">
                 <h2>Help us reach our goal</h2>
-                <p>By the end of the crowdsourcing campaign, the objective is to have 1000 audio items annotated by users. 
-                	The annotations used in the campaign concern concepts about musical instruments (from the MIMO thesaurus). </p>
+                <p>The objective is to have musical instruments identified in at least 1000 recordings from our archives by the end of 
+                	the crowdsourcing campaign (30th of June). The tags are all controlled and available in many languages.</p>
                 <!-- action button-->
                 <!-- ko if: isLogged -->
-                	<a href="#" data-bind="click: startAnnotate" class="annotatebtn">Annotate now</a>
+                	<a href="#" data-bind="click: startAnnotate" class="annotatebtn">Start tagging now</a>
                 <!-- /ko -->
                 <!-- ko else -->
 					<a a href="#" data-bind="visible: isLogged()==false, event :{ click: function(data,event){openLogin(event);}}" class="annotatebtn" target="_blank">Annotate now</a>
@@ -36,11 +36,11 @@
               <!-- info-->
               <div class="info">
                 <h2>Get your badge</h2>
-                <p>10 annotations grant you a bronze badge, 20 a silver, and with 40 annotations you win a golden badge. Special gifts will be
-                	provided to golden winners!</p>
+                <p>10 tags grant you a bronze badge, 
+                	25 a silver, and with 50 tags you earn a golden badge. Special gifts will be provided to golden winners!</p>
                 <!-- action button-->
                  <!-- ko if: isLogged -->
-                	<a href="../../assets/index.html#myannotations" class="annotatebtn">View your annotations</a>
+                	<a href="../../assets/index.html#myannotations" class="annotatebtn">View your tags</a>
                 <!-- /ko -->
                 <!-- ko else -->
 					<a a href="#" data-bind="visible: isLogged()==false, event :{click: function(data,event){openLogin(event);}}" class="annotatebtn" target="_blank">View your annotations</a>
