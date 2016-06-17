@@ -397,7 +397,7 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 	  
 	  self.randomRecords = function() {
 			$.ajax({
-		    	"url": "/record/randomRecords?groupId="+WITHApp.projectId+"&batchCount=3",
+		    	"url": "/record/randomRecords?groupId="+WITHApp.projectId+"&batchCount=10",
 		    	"method": "GET",
 		    	"success": function( data, textStatus, jQxhr ){
 		    		if (data.length > 0) {
