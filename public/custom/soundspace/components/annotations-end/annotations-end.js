@@ -27,6 +27,14 @@ define(['bridget','knockout', 'text!./annotations-end.html','isotope','imagesloa
 	  self.badgeImg = ko.observable("img/ui/rookie.png");
 	  self.badgeName = ko.observable('Rookie');
 	  //$( '.annotations-end' ).fadeOut();
+	  $(".grid").isotope({
+			itemSelector: '.item',
+			transitionDuration: transDuration,
+			masonry: {
+				columnWidth: '.sizer',
+				percentPosition: true
+			}
+	  });
 	  
 	  showEndOfAnnotations = function (batchItemsAnnotated, batchAnnotationCount) {
 		  self.batchItemsAnnotated(batchItemsAnnotated);
