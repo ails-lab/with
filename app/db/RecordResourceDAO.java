@@ -151,14 +151,14 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 	public List<RecordResource> getAnnotatedRecords(ObjectId userId,
 			int offset, int count) {
 		List<Annotation> annotations = DB.getAnnotationDAO()
-				.getUserAnnotations(userId,
-						Arrays.asList("target.recordId"));
+				.getUserAnnotations(userId, Arrays.asList("target.recordId"));
 		if (annotations.isEmpty())
 			return new ArrayList<RecordResource>();
 		List<ObjectId> recordIds = (List<ObjectId>) CollectionUtils.collect(
 				annotations, new BeanToPropertyValueTransformer(
 						"target.recordId"));
-		Query<RecordResource> q = this.createQuery().field("_id").in(recordIds).offset(offset).limit(count);
+		Query<RecordResource> q = this.createQuery().field("_id").in(recordIds)
+				.offset(offset).limit(count);
 		List<RecordResource> records = this.find(q).asList();
 		return records;
 	}
@@ -434,7 +434,8 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 	public long countAnnotatedRecords(ObjectId collectionId) {
 		long count = this.createQuery().disableValidation()
 				.field("collectedIn").equal(collectionId)
-				.field("annotationIds").exists().countAll();
+				.field("annotationIds").exists().field("annotationIds").not()
+				.sizeEq(0).countAll();
 		return count;
 
 	}
@@ -505,7 +506,7 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 				.deleteManyResources(ids));
 		ParallelAPICall.createPromise(deleteResources, resourceIds);
 	}
-	
+
 	public void removeAnnotation(ObjectId recordId, ObjectId annotationId) {
 		UpdateOperations<RecordResource> recordUpdate = this
 				.createUpdateOperations();
