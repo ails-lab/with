@@ -403,12 +403,19 @@ define(['knockout', 'text!./item.html', 'app', 'knockout-else', 'smoke'], functi
 		};
 		
 		self.nextItem = function() {
+			var vid = document.getElementById("mediaplayer");
+			if (vid != null) {
+				vid.parentNode.removeChild(vid);
+			}
 			formattedNextRecord = formatRecord(self.record().nextItemToAnnotate());
 			itemShow(formattedNextRecord);
-			var vid = document.getElementById("mediaplayer");
 		};
 		
 		self.endBatch = function() {
+			var vid = document.getElementById("mediaplayer");
+			if (vid != null) {
+				vid.parentNode.removeChild(vid);
+			}
 			showEndOfAnnotations(self.batchItemsAnnotated, self.batchAnnotationCount);
 		};
 		
@@ -495,6 +502,10 @@ define(['knockout', 'text!./item.html', 'app', 'knockout-else', 'smoke'], functi
 		};
 
 		self.close = function () {
+			var vid = document.getElementById("mediaplayer");
+			if (vid != null) {
+				vid.parentNode.removeChild(vid);
+			}
 			//self.record(new Record());
 			dispatchDocumentEvent('Pundit.hide');
 			$('body').css('overflow','visible');
