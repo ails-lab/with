@@ -380,7 +380,7 @@ define(['knockout', 'text!./item.html', 'app', 'knockout-else', 'smoke'], functi
 							self.record().annotations.push(result);
 							self.batchAnnotationCount++;
 							self.recordSimple = ko.toJS(self.record);
-							self.recordSimple.nextItemToAnnotate(null);
+							self.recordSimple.nextItemToAnnotate = null;
 							var index = self.arrayFirstIndexOf(self.batchItemsAnnotated, function (item) {
 								return item.recordId === self.recordSimple.recordId;
 							});
@@ -408,6 +408,7 @@ define(['knockout', 'text!./item.html', 'app', 'knockout-else', 'smoke'], functi
 				vid.parentNode.removeChild(vid);
 			}
 			formattedNextRecord = formatRecord(self.record().nextItemToAnnotate());
+			self.indexInBatch(self.indexInBatch()+1);
 			itemShow(formattedNextRecord);
 		};
 		
@@ -482,7 +483,6 @@ define(['knockout', 'text!./item.html', 'app', 'knockout-else', 'smoke'], functi
 			if(self.record().recordId!="-1"){
 				self.addDisqus();
 			}
-			self.indexInBatch(self.indexInBatch()+1);
 		};
 
 		self.open = function () {

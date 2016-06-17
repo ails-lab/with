@@ -34,7 +34,7 @@
               <div class="mediainfo">
                 <div class="infowrap">
                   <!-- title-->
-                  <!-- ko if: record().nextItemToAnnotate -->
+                  <!-- ko if: record().nextItemToAnnotate() != null -->
                   	<span>ITEM </span><span data-bind="text: indexInBatch"></span><span>/10</span>
                   <!-- /ko -->
                   <h1><!-- ko text: record().title --><!-- /ko --> 
@@ -46,11 +46,11 @@
                    <!-- annotate box-->
                   <div class="annotatebox">
                   	<!-- ko if: record().annotations && record().annotations().length == 0-->
-                    <div class="question">What kind of musical instrument do you see in this item?</div>
+                    <div class="question">What musical instrument do you listen to in this item?</div>
                     <div class="info">The item has been annotated with the following concepts. Add more using PUNDIT.</div>
                     <!-- /ko -->
                     <!-- ko else: -->
-                    <div class="question">What kind of musical instrument do you see in this item?</div>
+                    <div class="question">What musical instrument do you listen to in this item?</div>
                     <div class="info">Add annotations using PUNDIT.</div>
                     <!-- /ko -->
                     <!-- answers-->
