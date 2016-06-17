@@ -318,7 +318,6 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 				var result = data[i];
 				if (result != null) {
 					var record = new Record(result);
-
 					items.push(record);
 					self.citems.push(record);
 				}

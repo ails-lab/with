@@ -44,10 +44,15 @@
 				  </h1>
                   <div class="owner" data-bind="text:record().dataProvider"></div>
                    <!-- annotate box-->
-                   <!-- ko if: record().nextItemToAnnotate || record().annotations -->
                   <div class="annotatebox">
+                  	<!-- ko if: record().annotations && record().annotations().length == 0-->
                     <div class="question">What kind of musical instrument do you see in this item?</div>
                     <div class="info">The item has been annotated with the following concepts. Add more using PUNDIT.</div>
+                    <!-- /ko -->
+                    <!-- ko else: -->
+                    <div class="question">What kind of musical instrument do you see in this item?</div>
+                    <div class="info">Add annotations using PUNDIT.</div>
+                    <!-- /ko -->
                     <!-- answers-->
                     <!-- ko if: record().myAnnotations-->
                     <ul class="myanswers" data-bind="foreach: record().myAnnotations()">
@@ -60,18 +65,17 @@
                     </ul>
                     <!-- /ko -->
                     <!-- answer action-->
-                    <!-- ko if: record().nextItemToAnnotate && !jQuery.isEmptyObject(record().nextItemToAnnotate()) -->
+                    <!-- ko if: record().nextItemToAnnotate() != null && !jQuery.isEmptyObject(record().nextItemToAnnotate()) -->
                     <ul class="answeraction">
                       <li><a href="#" data-bind="click: nextItem">NEXT ITEM</a></li>
                     </ul>
                     <!-- /ko -->
-                     <!-- ko if: jQuery.isEmptyObject(record().nextItemToAnnotate()) -->
+                     <!-- ko if: record().nextItemToAnnotate() != null && jQuery.isEmptyObject(record().nextItemToAnnotate()) -->
                      <ul class="answeraction">
                       <li><a href="#" data-bind="click: endBatch">NEXT ITEM</a></li>
                     </ul>
                      <!-- /ko -->
                   </div>
-                  <!-- /ko -->
                   <!-- metadata-->
 				  <ul role="tablist" class="nav nav-tabs">
                     <li class="active"><a href="#information" title="" data-toggle="tab">Info</a></li>
