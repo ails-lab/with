@@ -48,7 +48,7 @@ define(['knockout', 'text!./item.html', 'app', 'knockout-else', 'smoke'], functi
 		    "&description="+desc,'','height=500,width=750');
 		    return false;
 		};
-		self.nextItemToAnnotate = ko.observable({});
+		self.nextItemToAnnotate = ko.observable(null);
 		self.annotations = ko.observableArray([]);
 		self.myAnnotations = ko.pureComputed(function () {
 			return self.annotations.filter(function(i) {
@@ -122,7 +122,7 @@ define(['knockout', 'text!./item.html', 'app', 'knockout-else', 'smoke'], functi
 			self.mail="mailto:?subject="+self.title+"&body="+encodeURIComponent(self.loc());
 			var likeval=app.isLiked(self.externalId);
 			self.isLike(likeval);
-			//if (data.nextItemToAnnotate !== undefined)
+			if (data.nextItemToAnnotate !== undefined)
 				self.nextItemToAnnotate(data.nextItemToAnnotate);
 			if (data.annotations !== undefined)
 				self.annotations(data.annotations);
@@ -375,12 +375,11 @@ define(['knockout', 'text!./item.html', 'app', 'knockout-else', 'smoke'], functi
 							var index1 = self.arrayFirstIndexOf(ko.toJS(self.record().annotations), function (annotation) {
 								return annotation.dbId === result.dbId;
 							});
-							//alert(index1);
 							if (index1 < 0)
 								self.record().annotations.push(result);
 							self.batchAnnotationCount++;
 							self.recordSimple = ko.toJS(self.record);
-							self.recordSimple.nextItemToAnnotate = {};
+							self.recordSimple.nextItemToAnnotate(null);
 							var index = self.arrayFirstIndexOf(self.batchItemsAnnotated, function (item) {
 								return item.recordId === self.recordSimple.recordId;
 							});
@@ -477,8 +476,8 @@ define(['knockout', 'text!./item.html', 'app', 'knockout-else', 'smoke'], functi
 			$('.nav-tabs a[href="#information"]').tab('show');
 			$(".mediathumb > img").attr("src","");
 			$("span.pnd-resource").attr('about','');
-			self.open();
 			self.record(new Record(data));
+			self.open();
 			if(self.record().recordId!="-1"){
 				self.addDisqus();
 			}
@@ -491,7 +490,6 @@ define(['knockout', 'text!./item.html', 'app', 'knockout-else', 'smoke'], functi
 				
 			}
 			document.body.setAttribute("data-page","item");
-			
 			//e.preventDefault();
 			$( '.itemview' ).fadeIn();
 			//$('[role="main"]').addClass('itemopen');
