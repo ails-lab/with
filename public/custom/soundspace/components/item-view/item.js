@@ -375,17 +375,18 @@ define(['knockout', 'text!./item.html', 'app', 'knockout-else', 'smoke'], functi
 							var index1 = self.arrayFirstIndexOf(ko.toJS(self.record().annotations), function (annotation) {
 								return annotation.dbId === result.dbId;
 							});
-							if (index1 < 0)
-								self.record().annotations.push(result);
+							if (index1 >= 0)
+								self.record().annotations.splice(index1, 1);
+							self.record().annotations.push(result);
 							self.batchAnnotationCount++;
 							self.recordSimple = ko.toJS(self.record);
 							self.recordSimple.nextItemToAnnotate(null);
 							var index = self.arrayFirstIndexOf(self.batchItemsAnnotated, function (item) {
 								return item.recordId === self.recordSimple.recordId;
 							});
-							if (index < 0) {
-								self.batchItemsAnnotated.push(self.recordSimple);
-							}
+							if (index1 >= 0) 
+								self.batchItemsAnnotated.splice(index, 1);
+							self.batchItemsAnnotated.push(self.recordSimple);
 						}
 		    		});
 			}
