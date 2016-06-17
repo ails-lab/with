@@ -56,6 +56,7 @@ import sources.core.ESpaceSources;
 import sources.core.FiltersHelper;
 import sources.core.ISpaceSource;
 import sources.core.ParallelAPICall;
+import sources.core.ParallelAPICall.Priority;
 import sources.core.SearchResponse;
 import sources.core.SourceResponse;
 import sources.core.Utils;
@@ -90,7 +91,7 @@ public class SearchController extends WithController {
 				return ParallelAPICall.<SourceResponse> combineResponses(r -> {
 					log.info(r.source + " found " + r.count);
 					return true;
-				} , promises);
+				} , promises, Priority.FRONTEND);
 			} catch (Exception e) {
 				log.error("",e);
 				return Promise.pure((Result) badRequest(e.getMessage()));
@@ -289,7 +290,7 @@ public class SearchController extends WithController {
 				List<CommonQuery> list = src.splitFilters(q);
 				for (CommonQuery commonQuery : list) {
 					promises.add(ParallelAPICall.<ISpaceSource, CommonQuery, SourceResponse> createPromise(methodQuery,
-							src, commonQuery));
+							src, commonQuery, Priority.FRONTEND));
 				}
 			}
 		}
