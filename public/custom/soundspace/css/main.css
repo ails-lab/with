@@ -1094,6 +1094,19 @@ body [role='main'] .filter .wrap ul.nav li a {
 body [role='main'] .filter .wrap ul.nav li a:hover {
   background: none;
 }
+
+.listing .grid .sizer .item .wrap .thumb .counter {
+  background: #4f7979;
+  color: white;
+  font-size: 1.1rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  padding: 5px 15px;
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
 body [role='main'] .filter .wrap ul.counter {
   margin: 0;
   padding: 0;
