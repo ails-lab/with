@@ -143,5 +143,7 @@ public class RecordResource<T extends RecordResource.RecordDescriptiveData>
 		output.setDbId(getDbId());
 		output.setProvenance(getProvenance());
 		output.setDescriptiveData(getDescriptiveData());
+		output.setAnnotationIds(getAnnotationIds());
+		output.fillAnnotations();
 	}
 }

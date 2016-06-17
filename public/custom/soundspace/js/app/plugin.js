@@ -186,6 +186,10 @@ EUSpaceApp.ui = function( custom ){
 		this.initHomeScroll();
 	}
 	
+	this.initChart=function(dataPercent){
+		initChart(dataPercent);
+	}
+	
 	// method to initialize isotope
 	// dependency: js/vendor/isotope/
 	var initIsotope = function(){
@@ -674,6 +678,31 @@ EUSpaceApp.ui = function( custom ){
 		}
 	};
 	
+	// method to initialize chart
+	var initChart = function(dataPercent){
+		// log
+		logger( 'info','plugins.js / initChart' );
+		// check
+		if( $( '.chart' ).length > 0 ) {
+
+			// each
+			$( '.chart' ).each( function(){
+
+				// pie chart
+				$( this ).easyPieChart({
+					'scaleColor' : false,
+					'size': 160,
+					'lineCap' : 'round',
+					'lineWidth' : 6,
+					'barColor' : '#6fa130'
+				});
+			});
+			 //update instance after 5 sec
+		    setTimeout(function() {
+		        $('.chart').data('easyPieChart').update(dataPercent);
+		    }, 5);
+		}
+	};
 	
 	 
 };

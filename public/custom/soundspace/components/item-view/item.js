@@ -1,10 +1,10 @@
-define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, app) {
+define(['knockout', 'text!./item.html', 'app', 'knockout-else', 'smoke'], function (ko, template, app, KnockoutElse) {
 
     self.disqusLoaded=ko.observable(false);
     helper_thumb = "";
     
 
-	function Record(data) {
+	function Record(data, isRelated) {
 		var self = this;
 	    self.recordId = "-1";
 		self.title = "";
@@ -48,13 +48,35 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 		    "&description="+desc,'','height=500,width=750');
 		    return false;
 		};
-		 
+		self.nextItemToAnnotate = ko.observable(null);
+		self.annotations = ko.observableArray([]);
+		self.myAnnotations = ko.pureComputed(function () {
+			return self.annotations.filter(function(i) {
+				for (j = 0, len = i.annotators.length; j < len; j++) { 
+					if (i.annotators[j].withCreator == app.currentUser._id()) {
+						return true;
+					}
+				}
+				return false;
+		    });
+		});
+		self.otherAnnotations = ko.pureComputed(function () {
+			return self.annotations.filter(function(i) {
+				var my = false;
+				for (j = 0, len = i.annotators.length; j < len; j++) { 
+					if (i.annotators[j].withCreator == app.currentUser._id()) {
+						my = true;
+					}
+				}
+				return (!my);
+		    });
+		});
 		self.isLiked = ko.pureComputed(function () {
 			return app.isLiked(self.externalId);
 		});
 		self.isLoaded = ko.observable(false);
-		
-		self.load = function(data) {
+
+		self.load = function(data, isRelated) {
 			if(data.title==undefined){
 				self.title="No title";
 			}else{self.title=data.title;}
@@ -76,9 +98,7 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 				$("span.pnd-resource").attr('about',pundit_url);
 				$("div.pnd-resource").attr('about',pundit_url);
 				dispatchDocumentEvent('Pundit.loadAnnotations');
-				dispatchDocumentEvent('Pundit.forceCompileButton');
-				
-				
+				dispatchDocumentEvent('Pundit.forceCompileButton');				
 			}
 			else{$("span.pnd-resource").hide();
 				$("div.pnd-resource").hide();
@@ -102,21 +122,38 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 			self.mail="mailto:?subject="+self.title+"&body="+encodeURIComponent(self.loc());
 			var likeval=app.isLiked(self.externalId);
 			self.isLike(likeval);
+			if (data.nextItemToAnnotate !== undefined)
+				self.nextItemToAnnotate(data.nextItemToAnnotate);
+			if (data.annotations !== undefined)
+				self.annotations(data.annotations);
 			self.loading(false);
-			if (data.fullrestype != null) {
-				if (data.fullrestype == "VIDEO") {
+			var vid = document.getElementById("mediaplayer");
+			if (vid != null) {
+				vid.parentNode.removeChild(vid);
+			}
+			$('#mediathumbid').show();
+			if (data.view_url.indexOf('archives_items_') > -1) {
+				var id = data.view_url.split("_")[2];
+				$('#mediathumbid').hide();
+				$('#mediadiv').append('<iframe id="mediaplayer" src="http://archives.crem-cnrs.fr/archives/items/'+id+'/player/346x130/"height="250px scrolling="no"" width="361px"></iframe>');
+			} else {
+			if (data.mediatype != null) {
+				if (data.mediatype == "VIDEO") {		
 					self.vtype = "MEDIA";
-					$('#mediadiv').html('<video id="mediaplayer" autoplay="true" controls width="576" height="324"><source src="' + self.fullres() + '" type="video/mp4">Your browser does not support HTML5</video>');        
-				} else if (data.fullrestype == "AUDIO") {
+					if (!isRelated) {
+						$('#mediadiv').append('<video id="mediaplayer" autoplay="true" controls width="576" height="324"><source src="' + self.fullres() + '" type="video/mp4">Your browser does not support HTML5</video>');
+					}
+				} else if (data.mediatype == "AUDIO") {
 					self.vtype = "MEDIA";
-					$('#mediadiv').html('<audio id="mediaplayer" autoplay="true" controls width="576" height="324"><source src="' + self.fullres() + '" type="audio/mpeg">Your browser does not support HTML5</audio>');
+					if (!isRelated) {
+						$('#mediadiv').append('<audio id="mediaplayer" autoplay="true" controls width="576" height="324"><source src="' + self.fullres() + '" type="audio/mpeg">Your browser does not support HTML5</audio>');
+					}
 				}
+			}
 			}
 			console.log(helper_thumb);
 			helper_thumb = self.calcOnErrorThumbnail();
 		};
-
-		
 		
 		self.findsimilar=function(){
 		  if(self.related().length==0 && self.relatedsearch==false){
@@ -142,54 +179,8 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 					if(data!=null) {
 						for (var i in data) {
 							var result = data[i];
-							 if(result !=null){
-								 var admindata=result.administrative;
-								 var descdata=result.descriptiveData;
-								 var media=result.media;
-								 var provenance=result.provenance;
-								 var usage=result.usage;
-								var rights=null;
-								 if(media){
-								 if(media[0].Original){
-									 rights=findResOrLit(media[0].Original.originalRights);
-								 }else if(media[0].Thumbnail){
-									 rights=findResOrLit(media[0].Thumbnail.originalRights);
-								 }}
-									
-								 var source=findProvenanceValues(provenance,"source");
-									
-									if(source=="Rijksmuseum" && media){
-										media[0].Thumbnail=media[0].Original;
-									} 		
-								var mediatype="";
-								if(media &&  media[0]){
-									if(media[0].Original && media[0].Original.type){
-										mediatype=media[0].Original.type;
-									}else if(media[0].Thumbnail && media[0].Thumbnail.type){
-										mediatype=media[0].Thumbnail.type;
-									}
-								}
-						        var record = new Record({
-									        thumb: media!=null &&  media[0] !=null  && media[0].Thumbnail!=null  && media[0].Thumbnail.url!="null" ? media[0].Thumbnail.url:"img/content/thumb-empty.png",
-											fullres: media!=null &&  media[0] !=null && media[0].Original!=null  && media[0].Original.url!="null"  ? media[0].Original.url : "",
-											title: findByLang(descdata.label),
-											description: findByLang(descdata.description),
-											view_url: findProvenanceValues(provenance,"source_uri"),
-											creator: findByLang(descdata.dccreator),
-											dataProvider: findProvenanceValues(provenance,"dataProvider"),
-											dataProvider_uri: findProvenanceValues(provenance,"dataProvider_uri"),
-											provider: findProvenanceValues(provenance,"provider"),
-											rights: rights,
-											mediatype: mediatype,
-											externalId: admindata.externalId,
-											source: source,
-											likes: usage.likes,
-											collected: usage.collected,
-											collectedIn:result.collectedIn,
-											data: result,
-											fullrestype: media[0] != null && media[0].Original != null 
-											&& media[0].Original.type != "null" ? media[0].Original.type : ""
-								  });
+							 if(result !=null){		
+						        var record = new Record(formatRecord(result), true);
 						        if(record.thumb && record.thumb.length>0 && record.externalId!=self.externalId)
 							       items.push(record);
 							}
@@ -228,54 +219,7 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 							for (var i in data) {
 								var result = data[i];
 								 if(result !=null){
-									var admindata=result.administrative;
-									var descdata=result.descriptiveData;
-									var media=result.media;
-									var provenance=result.provenance;
-									var usage=result.usage;
-									var rights=null;
-								 if(media){
-								 if(media[0].Original){
-									 rights=findResOrLit(media[0].Original.originalRights);
-								 }else if(media[0].Thumbnail){
-									 rights=findResOrLit(media[0].Thumbnail.originalRights);
-								 }}
-									
-								 var source=findProvenanceValues(provenance,"source");
-									
-									if(source=="Rijksmuseum" && media){
-										media[0].Thumbnail=media[0].Original;
-									} 	
-									 var mediatype="";
-									 if(media &&  media[0]){
-											if(media[0].Original && media[0].Original.type){
-												mediatype=media[0].Original.type;
-											}else if(media[0].Thumbnail && media[0].Thumbnail.type){
-												mediatype=media[0].Thumbnail.type;
-											}
-										}
-							        var record = new Record({
-							            		thumb: media!=null &&  media[0] !=null  && media[0].Thumbnail!=null  && media[0].Thumbnail.url!="null" ? media[0].Thumbnail.url:"img/content/thumb-empty.png",
-												fullres: media!=null &&  media[0] !=null && media[0].Original!=null  && media[0].Original.url!="null"  ? media[0].Original.url : "",
-												title: findByLang(descdata.label),
-												description: findByLang(descdata.description),
-												view_url: findProvenanceValues(provenance,"source_uri"),
-												creator: findByLang(descdata.dccreator),
-												dataProvider: findProvenanceValues(provenance,"dataProvider"),
-												dataProvider_uri: findProvenanceValues(provenance,"dataProvider_uri"),
-												provider: findProvenanceValues(provenance,"provider"),
-												rights: rights,
-												mediatype: mediatype,
-												externalId: admindata.externalId,
-												source: source,
-												likes: usage.likes,
-												collected: usage.collected,
-												collectedIn:result.collectedIn,
-												data: result,
-												fullrestype: media[0] != null && media[0].Original != null 
-												&& media[0].Original.type != "null" ? media[0].Original.type : "",
-												vtype : "IMAGE"	
-									  });
+							        var record = new Record(formatRecord(result), true);
 							        if(record.thumb && record.thumb.length>0 && record.externalId!=self.externalId)
 								       items.push(record);
 								}
@@ -299,13 +243,11 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 		}
 		
 		self.calcThumbnail = ko.pureComputed(function() {
-
-
-			   if(self.thumb){
+			   if(self.thumb && self.thumb.indexOf("empty")==-1){
 					return self.thumb;
 				}
 			   else{
-				   return "img/content/thumb-empty.png";
+				   return "img/ui/ic-noimage.png";
 			   }
 			});
 		
@@ -358,14 +300,19 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 
 		
 		
-		if(data != undefined) self.load(data);
+		if (data != undefined) { 
+			if(isRelated) self.load(data, true); 
+			else self.load(data);
+		};
 	}
 
 	function ItemViewModel(params) {
 		var self = this;
-		document.body.setAttribute("data-page","item");
+		//document.body.setAttribute("data-page","item");
 		setTimeout(function(){ WITHApp.init(); }, 300);
-		
+		KnockoutElse.init([spec = {}]);
+		self.batchItemsAnnotated = [];
+		self.batchAnnotationCount = 0;
 		self.route = params.route;
 		self.from=window.location.href;	
 		var thumb = "";
@@ -375,21 +322,169 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 		});
 		self.record = ko.observable(new Record());
 		self.id = ko.observable(params.id);
+		self.indexInBatch = ko.observable(0);
+		document.addEventListener("Pundit.saveAnnotation", function(event) {
+			var annotationId = event.detail;
+			$.ajax({
+		    	url: "http://thepund.it:8083/annotationserver/api/open/annotations/"+annotationId,
+		    	method: "GET",
+		    	contentType    : "application/json",
+		    	beforeSend : function (request) { request.setRequestHeader("Accept", "application/json"); },
+		    	success : function(punditAnnotation) {
+		    		//save annotation, get with response and update annotations array
+		    		// Map pundit annotation JSON to WITH annotation JSON
+		    		var withAnnotation = {
+		    			'generator': 'pundit',
+		    			'motivation': 'Tagging',
+		    			'target' : {
+		    				'recordId': self.record().recordId,
+		    				'withURI': '/record/'+ self.record().recordId,
+		    			},
+		    			'body' : {
+		    				'uriType': [ 'http://www.mimo-db.eu/InstrumentsKeywords' ],
+		    				'uriVocabulary': 'MIMO' 
+		    			}
+		    		};
+		    		if (self.record().recordId == "-1")
+		    			return;
+		    		var annotationUri = punditAnnotation.metadata['http://purl.org/pundit/as/annotation/'+annotationId];
+		    		var serializedAt = annotationUri['http://www.openannotation.org/ns/serializedAt'];
+		    		withAnnotation.generated = serializedAt[0].value;
+		    		var graph = punditAnnotation.graph['http://purl.org/pundit/as/graph/body-'+annotationId];
+		    		var externalId = Object.keys(graph)[0];
+		    		var annotationInfo = graph[externalId];
+		    		var tagType = Object.keys(annotationInfo)[0];
+		    		var uriInfo = annotationInfo[tagType];
+		    		var uri = uriInfo[0].value;
+		    		var itemsInfo = punditAnnotation.items[uri];
+		    		var labelInfo = itemsInfo['http://www.w3.org/2000/01/rdf-schema#label'];
+		    		var label = labelInfo[0].value;
+		    		console.log(withAnnotation);
+		    		withAnnotation['target'].externalId = externalId;
+		    		withAnnotation['body'].uri = uri;
+		    		withAnnotation['body'].tagType = tagType;
+		    		withAnnotation['body'].label = {'default' : [ label ]};
+		    		console.log(JSON.stringify(withAnnotation));
+		    		$.ajax({
+		    			url : '/record/annotation',
+				    	method : "POST",
+				    	contentType : "application/json",
+				    	data     : JSON.stringify(withAnnotation),
+						success : function(result) {
+							//check if duplicate
+							var index1 = self.arrayFirstIndexOf(ko.toJS(self.record().annotations), function (annotation) {
+								return annotation.dbId === result.dbId;
+							});
+							if (index1 >= 0)
+								self.record().annotations.splice(index1, 1);
+							self.record().annotations.push(result);
+							self.batchAnnotationCount++;
+							self.recordSimple = ko.toJS(self.record);
+							self.recordSimple.nextItemToAnnotate = null;
+							var index = self.arrayFirstIndexOf(self.batchItemsAnnotated, function (item) {
+								return item.recordId === self.recordSimple.recordId;
+							});
+							if (index1 >= 0) 
+								self.batchItemsAnnotated.splice(index, 1);
+							self.batchItemsAnnotated.push(self.recordSimple);
+						}
+		    		});
+			}
+		   });
+		});
 		
-
+		self.arrayFirstIndexOf = function (array, predicate) {
+			for (var i = 0, j = array.length; i < j; i++) {
+				if (predicate.call(undefined, array[i])) {
+					return i;
+				}
+			}
+			return -1;
+		};
+		
+		self.nextItem = function() {
+			var vid = document.getElementById("mediaplayer");
+			if (vid != null) {
+				vid.parentNode.removeChild(vid);
+			}
+			formattedNextRecord = formatRecord(self.record().nextItemToAnnotate());
+			self.indexInBatch(self.indexInBatch()+1);
+			dispatchDocumentEvent('Pundit.hide');
+			itemShow(formattedNextRecord);
+		};
+		
+		self.endBatch = function() {
+			var vid = document.getElementById("mediaplayer");
+			if (vid != null) {
+				vid.parentNode.removeChild(vid);
+			}
+			self.close();
+			showEndOfAnnotations(self.batchItemsAnnotated, self.batchAnnotationCount);
+		};
+		
+		formatRecord =  function(backendRecord) {
+			var admindata=backendRecord.administrative;
+			var descdata=backendRecord.descriptiveData;
+			var media=backendRecord.media;
+			var provenance=backendRecord.provenance;
+			var usage=backendRecord.usage;
+			var rights=null;
+			
+			if(media){
+				 if(media[0].Original){
+					 rights=findResOrLit(media[0].Original.originalRights);
+				 }else if(media[0].Thumbnail){
+					 rights=findResOrLit(media[0].Thumbnail.originalRights);
+				 }}
+		    var source=findProvenanceValues(provenance,"source");
+					
+			if(source=="Rijksmuseum" && media){
+						media[0].Thumbnail=media[0].Original;
+					} 	
+			var mediatype="";
+			if(media &&  media[0]){
+				if(media[0].Original && media[0].Original.type){
+					mediatype=media[0].Original.type;
+				}else if(media[0].Thumbnail && media[0].Thumbnail.type){
+					mediatype=media[0].Thumbnail.type;
+				}
+			}
+			 var record = {
+				            thumb: media!=null &&  media[0] !=null  && media[0].Thumbnail!=null  && media[0].Thumbnail.url!="null" ? media[0].Thumbnail.url:"img/content/thumb-empty.png",
+						    fullres: media!=null &&  media[0] !=null && media[0].Original!=null  && media[0].Original.url!="null"  ? media[0].Original.url : "",
+							title: findByLang(descdata.label),
+							description: findByLang(descdata.description),
+							view_url: findProvenanceValues(provenance,"source_uri"),
+							creator: findByLang(descdata.dccreator),
+							dataProvider: findProvenanceValues(provenance,"dataProvider"),
+							dataProvider_uri: findProvenanceValues(provenance,"dataProvider_uri"),
+							provider: findProvenanceValues(provenance,"provider"),
+							mediatype: mediatype, 
+							rights: rights,
+							externalId: admindata.externalId,
+							source: source,
+							dbId:backendRecord.dbId,
+							likes: usage.likes,
+							collected: usage.collected,
+							collectedIn:backendRecord.collectedIn,
+							fullrestype: media[0] != null && media[0].Original != null
+								&& media[0].Original.type != "null" ? media[0].Original.type : "",
+							nextItemToAnnotate: backendRecord.nextItemToAnnotate,
+							annotations: backendRecord.annotations
+				  };
+			 return record;
+		};
+		
 		itemShow = function (e) {
 			data = ko.toJS(e);
 			$('.nav-tabs a[href="#information"]').tab('show');
 			$(".mediathumb > img").attr("src","");
 			$("span.pnd-resource").attr('about','');
-			
+			self.record(new Record(data));
 			self.open();
-			self.record(new Record(data
-					));
 			if(self.record().recordId!="-1"){
 				self.addDisqus();
 			}
-			
 		};
 
 		self.open = function () {
@@ -398,7 +493,6 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 				
 			}
 			document.body.setAttribute("data-page","item");
-			
 			//e.preventDefault();
 			$( '.itemview' ).fadeIn();
 			//$('[role="main"]').addClass('itemopen');
@@ -409,14 +503,14 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 		};
 
 		self.close = function () {
+			var vid = document.getElementById("mediaplayer");
+			if (vid != null) {
+				vid.parentNode.removeChild(vid);
+			}
 			//self.record(new Record());
 			dispatchDocumentEvent('Pundit.hide');
 			$('body').css('overflow','visible');
 			$( '.itemview' ).fadeOut();
-			var vid = document.getElementById("mediaplayer");
-			if (vid != null) {
-				vid.pause();
-			}
 		};
 
 		self.changeSource = function (item) {
@@ -458,10 +552,7 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 		self.collect = function (rec,event) {
 				event.preventDefault();
 				collectionShow(rec);
-		};
-		
-		
-	
+		};		
 		
 		self.loadItem = function () {
 			$.ajax({
@@ -469,55 +560,7 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 				"method": "get",
 				"contentType": "application/json",
 				"success": function (result) {
-					var admindata=result.administrative;
-					var descdata=result.descriptiveData;
-					var media=result.media;
-					var provenance=result.provenance;
-					var usage=result.usage;
-					var rights=null;
-					
-					if(media){
-						 if(media[0].Original){
-							 rights=findResOrLit(media[0].Original.originalRights);
-						 }else if(media[0].Thumbnail){
-							 rights=findResOrLit(media[0].Thumbnail.originalRights);
-						 }}
-							
-				    var source=findProvenanceValues(provenance,"source");
-							
-					if(source=="Rijksmuseum" && media){
-								media[0].Thumbnail=media[0].Original;
-							} 	
-					var mediatype="";
-					if(media &&  media[0]){
-						if(media[0].Original && media[0].Original.type){
-							mediatype=media[0].Original.type;
-						}else if(media[0].Thumbnail && media[0].Thumbnail.type){
-							mediatype=media[0].Thumbnail.type;
-						}
-					}
-					 var record = new Record({
-						            thumb: media!=null &&  media[0] !=null  && media[0].Thumbnail!=null  && media[0].Thumbnail.url!="null" ? media[0].Thumbnail.url:"img/content/thumb-empty.png",
-								    fullres: media!=null &&  media[0] !=null && media[0].Original!=null  && media[0].Original.url!="null"  ? media[0].Original.url : "",
-									title: findByLang(descdata.label),
-									description: findByLang(descdata.description),
-									view_url: findProvenanceValues(provenance,"source_uri"),
-									creator: findByLang(descdata.dccreator),
-									dataProvider: findProvenanceValues(provenance,"dataProvider"),
-									dataProvider_uri: findProvenanceValues(provenance,"dataProvider_uri"),
-									provider: findProvenanceValues(provenance,"provider"),
-									mediatype: mediatype, 
-									rights: rights,
-									externalId: admindata.externalId,
-									source: source,
-									dbId:result.dbId,
-									likes: usage.likes,
-									collected: usage.collected,
-									collectedIn:result.collectedIn,
-									data: result,
-									fullrestype: media[0] != null && media[0].Original != null
-									&& media[0].Original.type != "null" ? media[0].Original.type : ""
-						  });
+					var record = new Record(formatRecord(result));
 					self.record(record);
 					$('.nav-tabs a[href="#information"]').tab('show');
 					self.open();
@@ -530,6 +573,21 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 				}
 			});
 		};
+		
+		self.deleteAnnotation = function(annotation) {
+    		$.ajax({
+    			url : '/annotation/'+annotation.dbId,
+		    	method : "DELETE",
+				success : function(result) {
+					self.record().annotations.remove(annotation);
+					self.batchAnnotationCount--;
+					if (result !== "") {
+						self.record().annotations.push(result);
+					}
+				}
+    		});
+		};
+		
 		self.addDisqus= function(){
 			$("#disqus_thread").hide();
 			if(disqusLoaded()==false){
@@ -570,11 +628,11 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 			self.loadItem();
 		}
 		
-		
 		self.annotate=function(){
 			
 			window.open('http://euspndwidget.netseven.it/index.php?id='+self.record().externalId, self.record().externalId, 'top=10, left=10, width=900, height=600, status=no, menubar=no, toolbar=no scrollbars=no');
 		}
+		
 		
 		function adjustHeight() {
 

@@ -28,6 +28,7 @@ import java.util.function.Function;
 
 import model.EmbeddedMediaObject;
 import model.EmbeddedMediaObject.MediaVersion;
+import model.annotations.Annotation;
 import model.annotations.ContextData;
 import model.annotations.ContextData.ContextDataBody;
 import model.basicDataTypes.WithAccess;
@@ -35,8 +36,6 @@ import model.basicDataTypes.WithAccess.Access;
 import model.basicDataTypes.WithAccess.AccessEntry;
 import model.resources.RecordResource;
 import model.resources.collection.CollectionObject;
-import model.resources.collection.CollectionObject.CollectionAdmin;
-import model.resources.collection.CollectionObject.CollectionDescriptiveData;
 
 import org.apache.commons.beanutils.BeanToPropertyValueTransformer;
 import org.apache.commons.collections.CollectionUtils;
@@ -47,10 +46,10 @@ import org.mongodb.morphia.query.UpdateOperations;
 import play.Logger;
 import play.Logger.ALogger;
 import sources.core.ParallelAPICall;
-import controllers.WithController.Action;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
+import controllers.WithController.Action;
 import elastic.ElasticEraser;
 
 /*
@@ -75,28 +74,27 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 		super(RecordResource.class);
 	}
 
-
 	public List<RecordResource> getByCollectionBetweenPositions(
 			ObjectId collectionId, int lowerBound, int upperBound) {
 		if (upperBound < lowerBound)
 			return new ArrayList<RecordResource>();
 		CollectionObject collection = DB.getCollectionObjectDAO()
-				.getSliceOfCollectedResources(collectionId, lowerBound, upperBound-lowerBound);
+				.getSliceOfCollectedResources(collectionId, lowerBound,
+						upperBound - lowerBound);
 		Query<RecordResource> q = this.createQuery();
 		return getRecords(collection.getCollectedResources(), q);
 	}
-	
-	
-	
+
 	public List<RecordResource> getByCollectionBetweenPositionsAndSort(
-			ObjectId collectionId, int lowerBound, int upperBound, String sortingCriteria) {
+			ObjectId collectionId, int lowerBound, int upperBound,
+			String sortingCriteria) {
 		if (upperBound < lowerBound)
 			return new ArrayList<RecordResource>();
 		CollectionObject collection = DB.getCollectionObjectDAO()
-				.getSliceOfCollectedResources(collectionId, lowerBound, upperBound-lowerBound);
+				.getSliceOfCollectedResources(collectionId, lowerBound,
+						upperBound - lowerBound);
 		Query<RecordResource> q = this.createQuery().order(sortingCriteria);
-		return getRecords(
-				collection.getCollectedResources(), q);
+		return getRecords(collection.getCollectedResources(), q);
 	}
 
 	/**
@@ -150,6 +148,21 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 		return getByCollection(collection.getCollectedResources(), q);
 	}
 
+	public List<RecordResource> getAnnotatedRecords(ObjectId userId,
+			int offset, int count) {
+		List<Annotation> annotations = DB.getAnnotationDAO()
+				.getUserAnnotations(userId, Arrays.asList("target.recordId"));
+		if (annotations.isEmpty())
+			return new ArrayList<RecordResource>();
+		List<ObjectId> recordIds = (List<ObjectId>) CollectionUtils.collect(
+				annotations, new BeanToPropertyValueTransformer(
+						"target.recordId"));
+		Query<RecordResource> q = this.createQuery().field("_id").in(recordIds)
+				.offset(offset).limit(count);
+		List<RecordResource> records = this.find(q).asList();
+		return records;
+	}
+
 	/**
 	 * Retrieve all records that belong to that collection. If a record is
 	 * included several times in a collection, it will only appear a single time
@@ -172,8 +185,10 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 			return new ArrayList<RecordResource>();
 		}
 	}
+
 	/**
 	 * sorts the result considering {@link sortingFiled}
+	 * 
 	 * @see {@code ResourceRecord.getByCollection}
 	 */
 	public List<RecordResource> getByCollectionAndSort(
@@ -416,6 +431,15 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 		return this.get(recordId);
 	}
 
+	public long countAnnotatedRecords(ObjectId collectionId) {
+		long count = this.createQuery().disableValidation()
+				.field("collectedIn").equal(collectionId)
+				.field("annotationIds").exists().field("annotationIds").not()
+				.sizeEq(0).countAll();
+		return count;
+
+	}
+
 	public List<RecordResource> getByMedia(String mediaUrl) {
 		Query<RecordResource> q = this.createQuery().disableValidation()
 				.field("media.Original.url").equal(mediaUrl);
@@ -436,6 +460,15 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 				.createUpdateOperations();
 		updateFields(root, json, updateOps);
 		updateOps.set("administrative.lastModified", new Date());
+		this.update(q, updateOps);
+	}
+
+	public void addAnnotation(ObjectId recordId, ObjectId annotationId) {
+		Query<RecordResource> q = this.createQuery().field("_id")
+				.equal(recordId);
+		UpdateOperations<RecordResource> updateOps = this
+				.createUpdateOperations();
+		updateOps.add("annotationIds", annotationId);
 		this.update(q, updateOps);
 	}
 
@@ -472,6 +505,15 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 		Function<List<ObjectId>, Boolean> deleteResources = (List<ObjectId> ids) -> (ElasticEraser
 				.deleteManyResources(ids));
 		ParallelAPICall.createPromise(deleteResources, resourceIds);
+	}
+
+	public void removeAnnotation(ObjectId recordId, ObjectId annotationId) {
+		UpdateOperations<RecordResource> recordUpdate = this
+				.createUpdateOperations();
+		Query<RecordResource> q = this.createQuery().field("_id")
+				.equal(recordId);
+		recordUpdate.removeAll("annotationIds", Arrays.asList(annotationId));
+		this.update(q, recordUpdate);
 	}
 
 	public void findUrlsFromRecords(Set<String> urls) {

@@ -331,7 +331,8 @@ define("app", ['knockout', 'facebook', 'imagesloaded', 'moment', './js/app/plugi
 		"collectionCount": ko.observable(0),
 		"exhibitionCount": ko.observable(0),
 		"sharedCollectionCount": ko.observable(0),
-		"sharedExhibitionCount": ko.observable(0)
+		"sharedExhibitionCount": ko.observable(0),
+		"annotationCount": ko.observable(0)
 	};
 	isLogged = ko.observable(false);
 
@@ -359,7 +360,7 @@ define("app", ['knockout', 'facebook', 'imagesloaded', 'moment', './js/app/plugi
 		self.currentUser.usergroups(data.usergroups);
 		self.currentUser.organizations(data.organizations);
 		self.currentUser.projects(data.projects);
-
+		self.currentUser.annotationCount(data.annotationCount);
 		self.loadNotifications(data.notifications);
 
 		$(".star").each(function () {

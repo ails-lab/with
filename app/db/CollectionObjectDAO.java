@@ -38,6 +38,7 @@ import model.resources.WithResource;
 import model.resources.WithResource.WithResourceType;
 
 import org.bson.types.ObjectId;
+import org.elasticsearch.common.lang3.ArrayUtils;
 import org.mongodb.morphia.query.Criteria;
 import org.mongodb.morphia.query.CriteriaContainer;
 import org.mongodb.morphia.query.Query;
@@ -55,6 +56,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.mongodb.BasicDBObject;
 
 import controllers.MediaController;
+import db.DAO.QueryOperator;
 import elastic.Elastic;
 import elastic.ElasticUpdater;
 
@@ -276,6 +278,16 @@ public class CollectionObjectDAO extends WithResourceDAO<CollectionObject> {
 		return getByAcl(criteria, accessedByUserOrGroup, creator, isExhibition,
 				totalHits, offset, count);
 	}
+	
+	public List<CollectionObject> getAccessibleByGroupAndPublic(ObjectId groupId) {
+		Query<CollectionObject> q = this.createQuery().disableValidation()
+				.retrievedFields(true, "_id", "administrative.entryCount")
+				.field("descriptiveData.label.default.0")
+				.notEqual("_favorites").field("administrative.access.isPublic").equal(true);
+		q.field("resourceType").equal(WithResourceType.SimpleCollection);
+		q.and(formAccessLevelQuery(new Tuple(groupId, Access.READ), QueryOperator.GTE));
+		return this.find(q).asList();
+	}
 
 	public Tuple<List<CollectionObject>, Tuple<Integer, Integer>> getSharedAndByAcl(
 			List<List<Tuple<ObjectId, Access>>> accessedByUserOrGroup,
@@ -325,7 +337,7 @@ public class CollectionObjectDAO extends WithResourceDAO<CollectionObject> {
 					this.find(q).asList(), null);
 		}
 	}
-
+	
 	public ObjectNode countMyAndSharedCollections(
 			List<ObjectId> loggedInEffIds) {
 		ObjectNode result = Json.newObject().objectNode();

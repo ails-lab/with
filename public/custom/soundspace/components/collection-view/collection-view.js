@@ -57,8 +57,8 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 		self.position=0;
 		self.dbId = "";
 		self.data = ko.observable('');
+		self.annotations = [];
 		self.thumbnail = ko.pureComputed(function () {
-
 			if (self.thumb) {
 				return self.thumb;
 			} 
@@ -177,7 +177,8 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 			}
 			self.isLoaded = ko.observable(false);
 			self.fullrestype = media[0] != null && media[0].Original != null 
-			&& media[0].Original.type != "null" ? media[0].Original.type : null;			
+			&& media[0].Original.type != "null" ? media[0].Original.type : null;
+			self.annotations = data.annotations;
 		};
 
 		if (data !== undefined) self.load(data);
@@ -317,7 +318,6 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 				var result = data[i];
 				if (result != null) {
 					var record = new Record(result);
-
 					items.push(record);
 					self.citems.push(record);
 				}
@@ -448,16 +448,21 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
        
        
        recordSelect = function (data,event) {
-       	
-       	event.preventDefault();
-			var selrecord = ko.utils.arrayFirst(self.citems(), function(record) {
+	    self.selrecord = ko.utils.arrayFirst(self.citems(), function(record) {
 				   return record.dbId === data;
 				});
-			itemShow(selrecord);
+       	if (isLogged()) {
+	       	event.preventDefault();
+			itemShow(self.selrecord);
 			return false;
-
+       	}
+       	else { 
+       		event.preventDefault();
+       		$("#loginPopup").addClass("open");
+       		$("#loginPopup").on("loginEvent", function(event) {itemShow(self.selrecord)});
+       	}
 		}
-
+		
        self.refresh=function(){
     	   
     	   loading(true);

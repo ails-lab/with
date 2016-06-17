@@ -104,7 +104,7 @@ WITHApp.ui = function( custom ){
 
 		// init expand on exhibition 
 		initExpandExhibitionText();
-		
+				
 	};
 	
 	this.initCharacterLimiter=function(){
@@ -142,6 +142,10 @@ WITHApp.ui = function( custom ){
 	
 	this.initTooltip=function(){
 		initTooltip();
+	}
+	
+	this.initChart=function(dataPercent){
+		initChart(dataPercent);
 	}
 	
 	// method to toggle search view mode
@@ -771,26 +775,6 @@ WITHApp.ui = function( custom ){
 		}
 	};
 
-	// method to expand text on exhibition
-	var initExpandExhibitionText = function(){
-
-		// log
-		logger( 'info','plugins.js / initExpandExhibitionText' );
-
-		// check
-		if( $( '.exhibitionplayer .expand' ).length > 0 ) {
-
-			// each
-			$( '.exhibitionplayer .expand a').on( 'click', function( e ){
-
-				// prevent
-				e.preventDefault();
-
-				// set
-				$( this ).parent().parent().parent().toggleClass( 'expanded' );
-			});
-		}
-	};
 	
 	// method to initialize exhibition image zoom
 	var initImageZoom = function(){
@@ -944,6 +928,31 @@ WITHApp.ui = function( custom ){
 		}
 	};
 	
+	// method to initialize chart
+	var initChart = function(dataPercent){
+		// log
+		logger( 'info','plugins.js / initChart' );
+		// check
+		if( $( '.chart' ).length > 0 ) {
+
+			// each
+			$( '.chart' ).each( function(){
+
+				// pie chart
+				$( this ).easyPieChart({
+					'scaleColor' : false,
+					'size': 160,
+					'lineCap' : 'round',
+					'lineWidth' : 6,
+					'barColor' : '#6fa130'
+				});
+			});
+			 //update instance after 5 sec
+		    setTimeout(function() {
+		        $('.chart').data('easyPieChart').update(dataPercent);
+		    }, 5);
+		}
+	};
 	
 };
 

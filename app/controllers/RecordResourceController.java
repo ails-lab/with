@@ -16,6 +16,8 @@
 
 package controllers;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
@@ -23,8 +25,10 @@ import javax.validation.ConstraintViolation;
 
 import model.annotations.ContextData;
 import model.annotations.ContextData.ContextDataType;
+import model.basicDataTypes.Language;
 import model.resources.RecordResource;
 import model.resources.collection.CollectionObject;
+import model.resources.collection.CollectionObject.CollectionAdmin;
 
 import org.bson.types.ObjectId;
 
@@ -34,6 +38,7 @@ import play.data.validation.Validation;
 import play.libs.F.Option;
 import play.libs.Json;
 import play.mvc.Result;
+import utils.Tuple;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -41,6 +46,10 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import db.DB;
 
+import java.util.Random;
+import java.util.HashSet;
+
+import play.libs.F.Some;
 /**
  * @author mariaral
  *
@@ -248,4 +257,59 @@ public class RecordResourceController extends WithResourceController {
 			return null;
 		}
 	}
+	
+	public static Result getRandomRecords(String groupId, int batchCount) {
+		ObjectId group = new ObjectId(groupId);
+		CollectionAndRecordsCounts collectionsAndCount = getCollsAndCountAccessiblebyGroup(group);
+		//int collectionCount = collectionsAndCount.collectionsRecordCount.size();
+		//generate batchCount unique numbers from 0 to totalRecordsCount
+		Random rng = new Random();
+		Set<Integer> randomNumbers = new HashSet<Integer>();
+		List<RecordResource> records = new ArrayList<RecordResource>();
+		while (randomNumbers.size() < batchCount)
+		{
+		    Integer next = rng.nextInt(collectionsAndCount.totalRecordsCount);
+		    randomNumbers.add(next);
+		}
+		for (Integer random: randomNumbers) {
+			int colPosition = -1;
+			int previousRecords = 0;
+			int recordCount = 0;
+			while (random > previousRecords) {
+				recordCount = collectionsAndCount.collectionsRecordCount.get(++colPosition).y;
+				previousRecords += recordCount;
+			}
+			int recordPosition = random - (previousRecords - recordCount) - 1;
+			CollectionObject collection = DB.getCollectionObjectDAO().getById(
+					collectionsAndCount.collectionsRecordCount.get(colPosition).x, Arrays.asList("collectedResources"));
+			ContextData contextData = (ContextData) collection.getCollectedResources().get(recordPosition);
+			ObjectId recordId = contextData.getTarget().getRecordId();
+			records.add(DB.getRecordResourceDAO().getById(recordId));
+		}
+		ArrayNode recordsList = Json.newObject().arrayNode();
+		for (RecordResource record : records) {
+			Some<String> locale = new Some(Language.DEFAULT.toString());
+			RecordResource profiledRecord = record.getRecordProfile(Profile.MEDIUM.toString());
+			filterResourceByLocale(locale, profiledRecord);
+			recordsList.add(Json.toJson(profiledRecord));
+		}
+		return ok(recordsList);
+	}
+	
+	static CollectionAndRecordsCounts getCollsAndCountAccessiblebyGroup(ObjectId groupId) {
+		List<CollectionObject> collections = DB.getCollectionObjectDAO().getAccessibleByGroupAndPublic(groupId);
+		CollectionAndRecordsCounts colAndRecs = new CollectionAndRecordsCounts();
+		for (CollectionObject col: collections) {
+			int entryCount = ((CollectionAdmin) col.getAdministrative()).getEntryCount();
+			colAndRecs.collectionsRecordCount.add(new Tuple(col.getDbId(), entryCount));
+			colAndRecs.totalRecordsCount += entryCount;
+		}
+		return colAndRecs;
+	}
+	
+	public static class CollectionAndRecordsCounts {
+		List<Tuple<ObjectId, Integer>> collectionsRecordCount = new ArrayList<Tuple<ObjectId, Integer>>();
+		int totalRecordsCount = 0;
+	}
+	
 }

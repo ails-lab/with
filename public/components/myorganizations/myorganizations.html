@@ -390,7 +390,7 @@
 				<div class="group">
 				  <div class="title">Manage Groups</div>
 						<input id="groupName" type="text" placeholder="Start typing group name" data-bind="autocompleteUsername: myUsername, onlyParents:false, forUsers:false, forGroupType:'UserGroup'">
-							<ul class="members-list" data-bind="foreach: groupMembers">
+							<ul class="access-list" data-bind="foreach: groupMembers">
 				  		<li class="blue">
 					    <span class="text" data-bind="text: username().substring(0,2).toUpperCase()"></span>
 						<a data-toggle="tooltip" data-placement="top" style="cursor:pointer;" data-bind="{attr: {title: username}, click: $parent.excecuteRemove.bind($data, userId(), 'group')}" class="trash">

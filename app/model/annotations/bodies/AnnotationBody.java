@@ -14,23 +14,11 @@
  */
 
 
-package model.annotations;
+package model.annotations.bodies;
 
-import model.annotations.Annotation.AnnotationTarget;
-import model.annotations.Annotation.AnnotationBody;
-import model.basicDataTypes.Language;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
-
-public class TextAnnotation extends Annotation<AnnotationBody, TextAnnotation.TextAnnotationTarget>{
-	
-	public static class TextAnnotationTarget extends AnnotationTarget {
-		//full json path (?)
-		String propertyName;
-		Language language;
-		//why store original value, it is in the record
-		String originalValue;
-		//what is start end?
-		int start, end;
-	}
+@JsonIgnoreProperties(ignoreUnknown = true)
+public class AnnotationBody {
 
 }

@@ -1,0 +1,355 @@
+// import bootstrap variables, grid and mixins
+@import "../js/vendor/bootstrap/less/variables.less";
+@import "../js/vendor/bootstrap/less/mixins.less";
+
+
+// body
+body {
+
+	// header
+	// hero
+	.annotatehero {
+		
+		// res height: 600px;
+		height: 100vh;
+
+
+		// &.fixed
+		&.fixed {
+
+			// top
+			.top {
+				position: fixed;
+				top: 70px;
+				height: 100px;
+				z-index: 1;
+
+				// h1
+				p, .annotatebtn {
+					display: none;
+				}
+
+				// h1
+				h1 {
+					padding-top: 5px;
+				}
+			}
+		}
+
+		// top
+		.top {
+			// res height: 600px;
+			height: 100vh;
+
+			width: 100%;
+			background: url( '../img/bg-annotate-hero.png' );
+			background-size: cover;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+
+			// wrap
+			.wrap {
+				color: #fff;
+			}
+
+			// text
+			h1 {
+				text-align: center;
+				text-transform: uppercase;
+				margin: 0;
+				padding: 70px 0 0 0;
+			}
+
+			// topic
+			.topic {
+				text-align: center;
+				font-size: 1.200em;
+				display: block;
+				font-style: italic;
+				font-weight: bold;
+			}
+
+			// desc
+			p {
+				// res width: 80%;
+				width: 100%;
+
+				margin: auto;
+				margin-top: 20px;
+				.transition( all 0.3s );
+			}
+
+			// annotate button
+			.annotatebtn {
+				color: #fff;
+				width: 65%;
+				text-align: center;
+				margin: auto;
+				margin-top: 20px;
+
+				// anchor
+				a {
+					color: #fff;
+					font-weight: bold;
+
+					// img
+					img {
+						display: block;
+						margin: auto;
+						padding-top: 10px;
+						.opacity( 0.8);
+						.transition( all 0.3s );
+					}
+
+					// res
+					.text {
+						display: none;
+					}
+
+					// hover
+					&:hover {
+						text-decoration: none;
+						img {
+							.opacity( 1 );
+						}
+					}
+				}
+			}
+		}
+	}
+
+	// main
+	[ role = 'main' ] {
+
+		// annotate
+		section.annotate {
+			display: block;
+		}
+
+		// itemview
+		.itemview {
+
+			// annotate
+			.annotatebox {
+				display: block;
+				background: #f3f3f3;
+				padding: 20px;
+				margin: 15px 0 10px 0;
+
+				// question
+				.question {
+					font-size: 1.200em;
+					line-height: 1.3em;
+				}
+				.info {
+					font-style: italic;
+					color: #868686;
+					font-size: 0.933em;
+				}
+
+				// answers
+				.answers {
+					margin: 13px 0 10px 0;
+					padding: 0;
+
+					// li
+					li {
+						list-style: none;
+						margin: 0 5px 5px 0;
+						display: inline-block;
+						height: 30px;
+						padding: 4px 20px 0 30px;
+						border-radius: 3px;
+						color: #fff;
+						font-size: 0.933em;
+						background: #009ee2; /* Old browsers */
+						background: -moz-linear-gradient(left,  #009ee2 0%, #00cece 100%); /* FF3.6-15 */
+						background: -webkit-linear-gradient(left,  #009ee2 0%,#00cece 100%); /* Chrome10-25,Safari5.1-6 */
+						background: linear-gradient(to right,  #009ee2 0%,#00cece 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+						filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#009ee2', endColorstr='#00cece',GradientType=1 ); /* IE6-9 */
+						position: relative;
+
+						// before
+						&::before {
+							display: block;
+							width: 5px;
+							height: 5px;
+							background: #f2f2f2;
+							border-radius: 3px;
+							content: "";
+							position: absolute;
+							left: 15px;
+							top: 12px;
+						}
+					}
+				}
+
+				// answer action
+				.answeraction {
+					margin: 0 0 0 0;
+					padding: 10px 0 0 0;
+					text-align: right;
+					.clearfix;
+
+					// li
+					li {
+						list-style: none;
+						display: inline-block;
+						float: right;
+						margin-left: 10px;
+
+						// res
+						margin-bottom: 10px;
+
+						// anchor
+						a {
+							height: 32px;
+							padding: 6px 30px 0 30px;
+							text-align: center;
+							display: inline-block;
+							background: #009EE2;
+							border-radius: 20px;
+							color: #fff;
+							text-transform: uppercase;	
+							font-size: 0.85em;
+							.transition( all 0.3s );
+
+							// hover
+							&:hover {
+								background: darken(#009EE2, 10%);
+								text-decoration: none;
+							}
+						}
+
+						// dont know
+						&.dontknow {
+							a {
+								border: 2px solid #009EE2;
+								background: #f2f2f2;
+								color: #009EE2;
+								padding: 4px 30px 0 30px;
+
+								// hover
+								&:hover {
+									background: darken(#009EE2, 10%);
+									border-color: darken(#009EE2, 10%);
+									color: #fff;
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+
+	// annotate
+	section.annotate {
+		display: block;
+
+		// bottom
+		.bottom {
+			background: #fff;
+			padding: 50px 0 50px 0;
+			.clearfix;
+
+			// goal
+			.goal {
+				float: left;
+				width: 45%;
+				padding: 0 30px 0 0;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+
+				// res
+				width: 100%;
+				float: none;
+				padding: 0;
+				display: block;
+				margin: 0 0 30px 0;
+			}
+
+			// badges
+			.badges {
+				float: left;
+				width: 55%;
+				padding: 0 0 0 30px;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+
+				// res
+				width: 100%;
+				float: none;
+				padding: 0;
+				display: block;
+				border-top: 1px solid #dedede;
+				padding-top: 30px;
+			}
+
+			// icon
+			.icon {
+				float: left;
+				margin: 0 30px 0 0;
+
+				// res
+				float: none;
+				display: block;
+				margin: 0 0 20px 0;
+
+				// chart
+				.chart {
+					text-align: center;
+					position: relative;
+
+					// amount
+					.amount {
+						position: absolute;
+						top:50%;
+						left: 50%;
+						margin: -38px 0 0 -23px;
+						font-size: 4rem;
+
+						// span
+						span {
+							font-size: 2.5rem;
+						}
+
+					}
+				}
+			}
+
+			// info
+			.info {
+				overflow: auto;
+				font-size: 0.933em;
+
+				// h2
+				h2 {
+					margin-top: 0;
+				}
+
+				// annotate button
+				.annotatebtn {
+					padding: 5px 25px 5px 25px;
+					background: #009EE2;
+					display: inline-block;
+					color: #fff;
+					border-radius: 20px;
+					font-size: 1.067em;
+					.transition( all 0.3s );
+
+					// hover
+					&:hover {
+						background: darken(#009EE2, 10%);
+						text-decoration: none;
+					}
+				}
+			}
+		}
+	}
+
+	
+}
