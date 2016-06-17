@@ -378,7 +378,7 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 	  
 	  startAnnotate = function() {
 		  self.getTestRecords();
-		  //self.randomRecords();
+		  self.randomRecords();
 	  };
 	  
 	  self.addNextAnnot = function(randomList, inner, number) {
