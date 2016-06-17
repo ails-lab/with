@@ -437,7 +437,7 @@ define(['knockout', 'text!./login-register.html',  'facebook', 'app', 'knockout-
 		self.completeRegistration = function () {
 			// TODO: Get values, send to server
 			var withLoginPopup = localStorage.getItem('withLoginPopup');
-			alert(withLoginPopup);
+			//alert(withLoginPopup);
 			if (withLoginPopup) {
 				window.location.href = withLoginPopup;
 				localStorage.removeItem(withLoginPopup);
