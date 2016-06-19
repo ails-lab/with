@@ -330,11 +330,17 @@ public class UserManager extends WithController {
 				DB.getUserDAO().makePermanent(u);
 				ObjectId fav = CollectionObjectController.createFavorites(u
 						.getDbId());
-				u.setFavorites(fav);
 			}
 			u.setGoogleId(googleId);
 			DB.getUserDAO().makePermanent(u);
 			//return ok(lightUserSerialization(u));
+			if (u != null) {
+				session().put("user", u.getDbId().toHexString());
+				session().put("username", u.getUsername());
+				session().put("sourceIp", request().remoteAddress());
+				session().put("lastAccessTime",
+						Long.toString(System.currentTimeMillis()));
+			}
 			return ok(Json.toJson(u));
 		} catch (Exception e) {
 			return badRequest(Json
@@ -367,11 +373,17 @@ public class UserManager extends WithController {
 				DB.getUserDAO().makePermanent(u);
 				ObjectId fav = CollectionObjectController.createFavorites(u
 						.getDbId());
-				u.setFavorites(fav);
 			}
 			u.setFacebookId(facebookId);
 			DB.getUserDAO().makePermanent(u);
 			//return ok(lightUserSerialization(u));
+			if (u != null) {
+				session().put("user", u.getDbId().toHexString());
+				session().put("username", u.getUsername());
+				session().put("sourceIp", request().remoteAddress());
+				session().put("lastAccessTime",
+						Long.toString(System.currentTimeMillis()));
+			}
 			return ok(Json.toJson(u));
 		} catch (Exception e) {
 			return badRequest(Json
