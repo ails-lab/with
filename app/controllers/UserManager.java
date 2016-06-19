@@ -310,7 +310,7 @@ public class UserManager extends WithController {
 		User u = null;
 		try {
 			URL url = new URL(
-					"https://www.googleapis.com/oauth2/v3/tokeninfo?access_token="
+					"https://www.googleapis.com/oauth2/v1/userinfo?alt=json&access_token="
 							+ accessToken);
 			HttpsURLConnection connection = (HttpsURLConnection) url
 					.openConnection();
