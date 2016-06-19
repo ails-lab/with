@@ -22,10 +22,10 @@
                 	the crowdsourcing campaign (30th of June). The tags are all controlled and available in many languages.</p>
                 <!-- action button-->
                 <!-- ko if: isLogged -->
-                	<a href="#" data-bind="click: startAnnotate" class="annotatebtn">Start tagging now</a>
+                	<a href="#" data-bind="click: startAnnotate" class="annotatebtn">Start tagging</a>
                 <!-- /ko -->
                 <!-- ko else -->
-					<a a href="#" data-bind="visible: isLogged()==false, event :{ click: function(data,event){openLogin(event);}}" class="annotatebtn" target="_blank">Annotate now</a>
+					<a a href="#" data-bind="visible: isLogged()==false, event :{ click: function(data,event){openLogin(event);}}" class="annotatebtn" target="_blank">Start tagging</a>
                 <!-- /ko -->
               </div>
             </div>
@@ -43,7 +43,7 @@
                 	<a href="../../assets/index.html#myannotations" class="annotatebtn">View your tags</a>
                 <!-- /ko -->
                 <!-- ko else -->
-					<a a href="#" data-bind="visible: isLogged()==false, event :{click: function(data,event){openLogin(event);}}" class="annotatebtn" target="_blank">View your annotations</a>
+					<a a href="#" data-bind="visible: isLogged()==false, event :{click: function(data,event){openLogin(event);}}" class="annotatebtn" target="_blank">View your tags</a>
                 <!-- /ko -->
               </div>
             </div>
