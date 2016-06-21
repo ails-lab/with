@@ -1,6 +1,5 @@
 define(['bootstrap', 'knockout', 'text!./myannotations.html', 'knockout-else','app', 'moment', 'isotope', 'knockout-validation', 'easypiechart'], function (bootstrap, ko, template, KnockoutElse, app, moment, Isotope) {
 	
-	$.bridget('isotope', Isotope);
 	
 	function Record(data) {
 		var self = this;
@@ -165,9 +164,8 @@ define(['bootstrap', 'knockout', 'text!./myannotations.html', 'knockout-else','a
 		self.access = ko.observable("READ");
 		self.isFavorites = ko.observable(false);
 		//self.id = ko.observable(params.id);
-		self.id = ko.observable(app.currentUser._id());
-		setTimeout(function(){ WITHApp.init(); }, 300);
-		self.$container = $(".grid").isotope({
+		self.id = ko.observable(app.currentUser._id())
+		self.$container = $(".grid#" + self.id()).isotope({
 			itemSelector: '.item',
 			transitionDuration: transDuration,
 			masonry: {
@@ -189,13 +187,13 @@ define(['bootstrap', 'knockout', 'text!./myannotations.html', 'knockout-else','a
 
 		
 		self.isotopeImagesReveal = function ($container, $items) {
-			self.$container = $(".grid");
+			self.$container = $(".grid#" + self.id());
 			var iso = self.$container.data('isotope');
 			var itemSelector = ".item";
 			if (iso) {
 				itemSelector = iso.options.itemSelector;
 			} else {
-				self.$container = $(".grid").isotope({
+				self.$container = $(".grid#" + self.id()).isotope({
 					itemSelector: '.item',
 					transitionDuration: transDuration,
 					masonry: {
@@ -226,22 +224,22 @@ define(['bootstrap', 'knockout', 'text!./myannotations.html', 'knockout-else','a
 				
 				self.$container.isotope('layout');
 				var scrollpos = sessionStorage.getItem("collection-viewscroll" + self.id());
-				if (scrollpos && $(".grid").height() > scrollpos) {
+				if (scrollpos && $(".grid#" + self.id()).height() > scrollpos) {
 					$(window).scrollTop(scrollpos);
 					sessionStorage.removeItem("collection-viewscroll" + self.id());
-				} else if (scrollpos && $(".grid").height() < scrollpos) {
-					$(window).scrollTop($(".grid").height());
+				} else if (scrollpos && $(".grid#" + self.id()).height() < scrollpos) {
+					$(window).scrollTop($(".grid#" + self.id()).height());
 
 				}
 
 			}).always(function () {
 				var scrollpos = sessionStorage.getItem("collection-viewscroll" + self.id());
-				if (scrollpos && $(".grid").height() > scrollpos) {
+				if (scrollpos && $(".grid#" + self.id()).height() > scrollpos) {
 					$(window).scrollTop(scrollpos);
 					sessionStorage.removeItem("collection-viewscroll" + self.id());
-				} else if (scrollpos && $(".grid").height() < scrollpos) {
-					$(window).scrollTop($(".grid").height());
-					if (scrollpos != null && $(".grid").height() > scrollpos) {
+				} else if (scrollpos && $(".grid#" + self.id()).height() < scrollpos) {
+					$(window).scrollTop($(".grid#" + self.id()).height());
+					if (scrollpos != null && $(".grid#" + self.id()).height() > scrollpos) {
 						sessionStorage.removeItem("collection-viewscroll" + self.id());
 					}
 				}
