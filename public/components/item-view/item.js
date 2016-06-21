@@ -49,7 +49,7 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 		};
 		self.nextItemToAnnotate = ko.observable({});
 		self.annotations = ko.observableArray([]);
-		self.myAnnotations = ko.pureComputed(function () {
+		self.myAnnotations = ko.computed(function () {
 			return self.annotations.filter(function(i) {
 				for (j = 0, len = i.annotators.length; j < len; j++) { 
 					if (i.annotators[j].withCreator == app.currentUser._id()) {
@@ -59,7 +59,7 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 				return false;
 		   	});
 		});
-		self.otherAnnotations = ko.pureComputed(function () {
+		self.otherAnnotations = ko.computed(function () {
 			return self.annotations.filter(function(i) {
 				var my = false;
 				for (j = 0, len = i.annotators.length; j < len; j++) { 
@@ -397,6 +397,7 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 		};
 
 		self.collect = function (item) {
+			alert("1");
 			if (!isLogged()) {
 				showLoginPopup(self.record());
 			} else {

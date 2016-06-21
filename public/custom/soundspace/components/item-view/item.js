@@ -50,7 +50,7 @@ define(['knockout', 'text!./item.html', 'app', 'knockout-else', 'smoke'], functi
 		};
 		self.nextItemToAnnotate = ko.observable(null);
 		self.annotations = ko.observableArray([]);
-		self.myAnnotations = ko.pureComputed(function () {
+		self.myAnnotations = ko.computed(function () {
 			return self.annotations.filter(function(i) {
 				for (j = 0, len = i.annotators.length; j < len; j++) { 
 					if (i.annotators[j].withCreator == app.currentUser._id()) {
@@ -60,7 +60,7 @@ define(['knockout', 'text!./item.html', 'app', 'knockout-else', 'smoke'], functi
 				return false;
 		    });
 		});
-		self.otherAnnotations = ko.pureComputed(function () {
+		self.otherAnnotations = ko.computed(function () {
 			return self.annotations.filter(function(i) {
 				var my = false;
 				for (j = 0, len = i.annotators.length; j < len; j++) { 
