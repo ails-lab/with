@@ -187,19 +187,20 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
     			
     			}
     		});	
-    	  self.getAnnotationPercentage();
+    	  self.getAnnotationCount();
 		};
 		
-		self.getAnnotationPercentage = function() {
+		self.getAnnotationCount = function() {
 			return $.ajax({
 				type: "GET",
 				contentType: "application/json",
 				dataType: "json",
-				url: "/record/annotationPercentage?goal=1000",
+				url: "/record/annotationCount",
 				processData: false,
 				data: "groupId="+WITHApp.projectId
 			}).success (function(data) {
-				self.annotationPercentage(data.annotatedRecordsPercentage);
+				var percentage = Math.round(data.annotations/1000);
+				self.annotationPercentage(percentage);
 		        WITHApp.initChart(self.annotationPercentage());
 			});
 		}
