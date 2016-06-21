@@ -585,6 +585,13 @@ define(['knockout', 'text!./item.html', 'app', 'knockout-else', 'smoke'], functi
     		});
 		};
 		
+
+       self.login = function (data,event) {
+       		event.preventDefault();
+       		$("#loginPopup").addClass("open");
+       		//$("#loginPopup").on("loginEvent", function(event) {itemShow(self.selrecord)});
+		}
+		
 		self.addDisqus= function(){
 			$("#disqus_thread").hide();
 			if(disqusLoaded()==false){
