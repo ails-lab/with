@@ -26,10 +26,18 @@
           <div class="container">
             <div class="wrap">
               <!-- media itself-->
+              <!-- ko if: record().data.mediatype != "AUDIO"-->
               <div class="mediathumb"><img id="mediathumbid" data-bind="attr: {src: record().fullres()}" onError="this.src=helper_thumb"> 
               <div class="media" id="mediadiv">
              </div> 
              </div>
+             <!-- /ko -->
+             <!-- ko else: -->
+             <div class="mediathumb"><img id="mediathumbid" data-bind="attr: {src: record.calcThumbnail }"> 
+             <div class="media" id="mediadiv">
+             </div> 
+             </div>
+             <!-- /ko -->
               <!-- media information-->
               <div class="mediainfo">
                 <div class="infowrap">
