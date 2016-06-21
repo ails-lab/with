@@ -322,7 +322,7 @@ define(['knockout', 'text!./item.html', 'app', 'knockout-else', 'smoke'], functi
 		});
 		self.record = ko.observable(new Record());
 		self.id = ko.observable(params.id);
-		self.indexInBatch = ko.observable(0);
+		self.indexInBatch = ko.observable(1);
 		document.addEventListener("Pundit.saveAnnotation", function(event) {
 			var annotationId = event.detail;
 			$.ajax({
