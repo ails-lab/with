@@ -192,10 +192,10 @@ public class ElasticUtils {
 			idx_doc.put("access", aclMapper.readTree(aclString));
 		} catch (JsonProcessingException e1) {
 			// TODO Auto-generated catch block
-			e1.printStackTrace();
+			log.error("",e1);
 		} catch (IOException e1) {
 			// TODO Auto-generated catch block
-			e1.printStackTrace();
+			log.error("",e1);
 		}
 
 
@@ -209,7 +209,7 @@ public class ElasticUtils {
 		 * Add the username and email of the creator
 		 * NOT the dbId
 		 */
-		if(rr.getWithCreatorInfo() != null ) {
+		if(rr.getWithCreator() != null ) {
 			idx_doc.put("creatorUsername", rr.getWithCreator().getUsername());
 			idx_doc.put("creatorEmail", rr.getWithCreator().getEmail());
 		}

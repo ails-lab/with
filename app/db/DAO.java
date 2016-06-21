@@ -26,6 +26,8 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 
 import play.libs.F.Promise;
+import play.libs.Json;
+import model.quality.RecordQuality;
 import model.resources.WithResource.WithResourceType;
 
 import org.bson.types.ObjectId;
@@ -43,8 +45,11 @@ import org.mongodb.morphia.query.UpdateResults;
 import play.Logger;
 import play.libs.F.Callback;
 import sources.core.ParallelAPICall;
+import sources.utils.JsonContextRecord;
+import utils.MetricsUtils;
 import utils.Tuple;
 
+import com.codahale.metrics.Timer;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBCursor;
@@ -377,6 +382,18 @@ public class DAO<E> extends BasicDAO<E, ObjectId> {
 	}
 
 	/**
+	 * Get a resource by the dbId and exclude a bunch fields from the whole document
+	 *
+	 */
+	public E getByIdAndExclude(ObjectId id, List<String> excludedFields) {
+		Query<E> q = this.createQuery().field("_id").equal(id);
+		if (excludedFields != null)
+			q.retrievedFields(false,
+					excludedFields.toArray(new String[excludedFields.size()]));
+		return this.findOne(q);
+	}
+
+	/**
 	 * Remove an entiry by dbId
 	 *
 	 * @param id
@@ -409,8 +426,9 @@ public class DAO<E> extends BasicDAO<E, ObjectId> {
 
 	public boolean existsFieldWithValue(String field, Object value) {
 		Query<E> q = this.createQuery().disableValidation().field(field)
-				.equal(value).limit(1);
-		return (this.find(q).asList().size() == 0 ? false : true);
+				.equal(value).retrievedFields(true, "_id").limit(1);
+
+		return (this.find(q).asKeyList().size() == 0 ? false : true);
 	}
 
 	public boolean existsFieldsWithValues(
@@ -419,12 +437,24 @@ public class DAO<E> extends BasicDAO<E, ObjectId> {
 		for (Tuple<String, Object> tuple : fieldValues) {
 			q.field(tuple.x).equal(tuple.y);
 		}
-		return (this.find(q).asList().size() == 0 ? false : true);
+		return (this.findIds(q).size() == 0 ? false : true);
 	}
 
 	public boolean existsEntity(ObjectId id) {
 		return existsFieldWithValue("_id", id);
 	}
+
+
+
+
+	public void computeAndUpdateQuality(ObjectId id) {
+		RecordQuality q = new RecordQuality();
+		E obj = getById(id, Arrays.asList("descriptiveData","provenance", "media"));
+		double dq= q.compute(new JsonContextRecord(Json.toJson(obj)));
+		log.info("Quality "+dq);
+		updateField(id, "qualityMeasure", dq);
+	}
+
 
 	public void updateField(ObjectId id, String field, Object value) {
 		Query<E> q = this.createQuery().field("_id").equal(id);
@@ -485,16 +515,22 @@ public class DAO<E> extends BasicDAO<E, ObjectId> {
 				if (fieldValue.isArray()) {
 					String[] values = new String[fieldValue.size()];
 					for (int i = 0; i < fieldValue.size(); i++) {
-						if (fieldValue.get(i).isObject())
-							updateFields(newFieldName, fieldValue, updateOps);
+						if (fieldValue.get(i).isObject()) {
+							updateFields(newFieldName+"."+i, fieldValue.get(i), updateOps);
+						}
 						else
 							values[i] = fieldValue.get(i).asText();
 					}
-					if ((values.length > 0) && (values[0] != null) )
+					if ((values.length > 0) && (values[0] != null)) {
 						updateOps.disableValidation().set(newFieldName, values);
+					}
 				} else {
-					updateOps.disableValidation().set(newFieldName,
-							fieldValue.asText());
+					if(fieldValue.isBoolean())
+						updateOps.disableValidation().set(newFieldName,
+							fieldValue.asBoolean());
+					else
+						updateOps.disableValidation().set(newFieldName,
+								fieldValue.asText());
 				}
 			}
 		}

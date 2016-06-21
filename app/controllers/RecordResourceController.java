@@ -17,6 +17,8 @@
 package controllers;
 
 import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -31,6 +33,7 @@ import model.basicDataTypes.Language;
 import model.basicDataTypes.MultiLiteral;
 import model.resources.RecordResource;
 import model.resources.collection.CollectionObject;
+import model.resources.collection.CollectionObject.CollectionAdmin;
 
 import org.bson.types.ObjectId;
 
@@ -40,11 +43,9 @@ import play.data.validation.Validation;
 import play.libs.F.Option;
 import play.libs.Json;
 import play.mvc.Result;
-import utils.AccessManager.Action;
+import utils.Tuple;
 import annotators.Annotation;
 import annotators.Annotator;
-import annotators.DBPediaSpotlightAnnotator;
-import annotators.DictionaryAnnotator;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -52,6 +53,10 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import db.DB;
 
+import java.util.Random;
+import java.util.HashSet;
+
+import play.libs.F.Some;
 /**
  * @author mariaral
  *
@@ -71,7 +76,7 @@ public class RecordResourceController extends WithResourceController {
 	 *            the resource serialization
 	 * @return the resource metadata
 	 */
-	public static Result getRecordResource(String id, Option<String> format) {
+	public static Result getRecordResource(String id, Option<String> format, String profile, Option<String> locale) {
 		ObjectNode result = Json.newObject();
 		try {
 			RecordResource record = DB.getRecordResourceDAO().get(
@@ -85,20 +90,23 @@ public class RecordResourceController extends WithResourceController {
 				// which the user has no read access rights
 				//filterContextData(record);
 				if (format.isDefined()) {
-					if (format.equals("contentOnly")) {
+					String formats = format.get();
+					if (formats.equals("contentOnly")) {
 						return ok(Json.toJson(record.getContent()));
 					} else {
-						if (format.equals("noContent")) {
+						if (formats.equals("noContent")) {
 							record.getContent().clear();
-							return ok(Json.toJson(record));
+							RecordResource profiledRecord = record.getRecordProfile(profile);
+							filterResourceByLocale(locale, profiledRecord);
+							return ok(Json.toJson(profiledRecord));
 						} else if (record.getContent() != null
-								&& record.getContent().containsKey(format)) {
-							return ok(record.getContent().get(format)
+								&& record.getContent().containsKey(formats)) {
+							return ok(record.getContent().get(formats)
 									.toString());
 						} else {
 							result.put("error",
-									"Resource does not contain representation for format"
-											+ format);
+									"Resource does not contain representation for format "
+											+ formats);
 							return play.mvc.Results.notFound(result);
 						}
 					}
@@ -110,24 +118,6 @@ public class RecordResourceController extends WithResourceController {
 			return internalServerError(result);
 		}
 	}
-/*
-	public static void filterContextData(WithResource record) {
-		List<ContextData> contextAnns = record.getContextData();
-		List<ContextData> filteredContextAnns = new ArrayList<ContextData>();
-		List<CollectionObject> accessibleCols = DB.getCollectionObjectDAO()
-				.getAtLeastCollections(
-						AccessManager.effectiveUserDbIds(session().get(
-								"effectiveUserIds")), Access.READ, 0,
-						Integer.MAX_VALUE);
-		List<ObjectId> accessibleColIds = accessibleCols.stream()
-				.map(e -> e.getDbId()).collect(Collectors.toList());
-		for (ContextData contextAnn : contextAnns) {
-			if (accessibleColIds.contains(contextAnn.getTarget()
-					.getCollectionId()))
-				filteredContextAnns.add(contextAnn);
-		}
-		record.setContextData(filteredContextAnns);
-	}*/
 
 	/**
 	 * Edits the WITH resource according to the JSON body. For every field
@@ -165,7 +155,7 @@ public class RecordResourceController extends WithResourceController {
 		}
 	}
 
-	public static Result editContextData() throws Exception {
+	public static Result editContextData(String collectionId) throws Exception {
 		ObjectNode error = Json.newObject();
 		ObjectNode json = (ObjectNode) request().body().asJson();
 		if (json == null) {
@@ -186,22 +176,21 @@ public class RecordResourceController extends WithResourceController {
 									+ contextDataType);
 							ContextData newContextData = (ContextData) Json
 									.fromJson(json, clazz);
-							ObjectId collectionId = newContextData.getTarget()
-									.getCollectionId();
+							ObjectId collectionDbId = new ObjectId(collectionId);
 							// int position =
 							// newContextData.getTarget().getPosition();
 							if (collectionId != null
 									&& DB.getCollectionObjectDAO()
-											.existsEntity(collectionId)) {
+											.existsEntity(collectionDbId)) {
 								// filterContextData(record);
 								Result response = errorIfNoAccessToCollection(
-										Action.EDIT, collectionId);
+										Action.EDIT, collectionDbId);
 								if (!response.toString()
 										.equals(ok().toString()))
 									return response;
 								else {
 									DB.getCollectionObjectDAO()
-											.updateContextData(newContextData,
+											.updateContextData(collectionDbId, newContextData,
 													position);
 
 								}
@@ -209,7 +198,7 @@ public class RecordResourceController extends WithResourceController {
 						}
 						return ok("Edited context data.");
 					} catch (ClassNotFoundException e) {
-						e.printStackTrace();
+						log.error("",e);
 						return internalServerError(error);
 					}
 				} else
@@ -234,10 +223,10 @@ public class RecordResourceController extends WithResourceController {
 	 */
 	public static Result getFavorites() {
 		ObjectNode result = Json.newObject();
-		if (session().get("user") == null) {
+		if (loggedInUser() == null) {
 			return forbidden();
 		}
-		ObjectId userId = new ObjectId(session().get("user"));
+		ObjectId userId = new ObjectId(loggedInUser());
 		CollectionObject favorite;
 		ObjectId favoritesId;
 		if ((favorite = DB.getCollectionObjectDAO().getByOwnerAndLabel(userId,
@@ -356,5 +345,60 @@ public class RecordResourceController extends WithResourceController {
 			result.put("error", e.getMessage());
 			return internalServerError(result);
 		}
+	}
+
+	
+	public static Result getRandomRecords(String groupId, int batchCount) {
+		ObjectId group = new ObjectId(groupId);
+		CollectionAndRecordsCounts collectionsAndCount = getCollsAndCountAccessiblebyGroup(group);
+		//int collectionCount = collectionsAndCount.collectionsRecordCount.size();
+		//generate batchCount unique numbers from 0 to totalRecordsCount
+		Random rng = new Random();
+		Set<Integer> randomNumbers = new HashSet<Integer>();
+		List<RecordResource> records = new ArrayList<RecordResource>();
+		while (randomNumbers.size() < batchCount)
+		{
+		    Integer next = rng.nextInt(collectionsAndCount.totalRecordsCount);
+		    randomNumbers.add(next);
+		}
+		for (Integer random: randomNumbers) {
+			int colPosition = -1;
+			int previousRecords = 0;
+			int recordCount = 0;
+			while (random > previousRecords) {
+				recordCount = collectionsAndCount.collectionsRecordCount.get(++colPosition).y;
+				previousRecords += recordCount;
+			}
+			int recordPosition = random - (previousRecords - recordCount) - 1;
+			CollectionObject collection = DB.getCollectionObjectDAO().getById(
+					collectionsAndCount.collectionsRecordCount.get(colPosition).x, Arrays.asList("collectedResources"));
+			ContextData contextData = (ContextData) collection.getCollectedResources().get(recordPosition);
+			ObjectId recordId = contextData.getTarget().getRecordId();
+			records.add(DB.getRecordResourceDAO().getById(recordId));
+		}
+		ArrayNode recordsList = Json.newObject().arrayNode();
+		for (RecordResource record : records) {
+			Some<String> locale = new Some(Language.DEFAULT.toString());
+			RecordResource profiledRecord = record.getRecordProfile(Profile.MEDIUM.toString());
+			filterResourceByLocale(locale, profiledRecord);
+			recordsList.add(Json.toJson(profiledRecord));
+		}
+		return ok(recordsList);
+	}
+	
+	static CollectionAndRecordsCounts getCollsAndCountAccessiblebyGroup(ObjectId groupId) {
+		List<CollectionObject> collections = DB.getCollectionObjectDAO().getAccessibleByGroupAndPublic(groupId);
+		CollectionAndRecordsCounts colAndRecs = new CollectionAndRecordsCounts();
+		for (CollectionObject col: collections) {
+			int entryCount = ((CollectionAdmin) col.getAdministrative()).getEntryCount();
+			colAndRecs.collectionsRecordCount.add(new Tuple(col.getDbId(), entryCount));
+			colAndRecs.totalRecordsCount += entryCount;
+		}
+		return colAndRecs;
+	}
+	
+	public static class CollectionAndRecordsCounts {
+		List<Tuple<ObjectId, Integer>> collectionsRecordCount = new ArrayList<Tuple<ObjectId, Integer>>();
+		int totalRecordsCount = 0;
 	}
 }

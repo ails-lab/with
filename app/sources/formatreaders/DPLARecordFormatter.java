@@ -37,7 +37,7 @@ import sources.utils.StringUtils;
 public class DPLARecordFormatter extends CulturalRecordFormatter {
 
 	public DPLARecordFormatter() {
-		super(FilterValuesMap.getDPLAMap());
+		super(FilterValuesMap.getMap(Sources.DPLA));
 		object = new CulturalObject();
 	}
 

@@ -23,11 +23,10 @@ import elastic.ElasticReindexer;
 import play.Logger;
 import play.Logger.ALogger;
 import play.libs.F.Promise;
-import play.mvc.Controller;
 import play.mvc.Result;
 import sources.core.ParallelAPICall;
 
-public class ReindexController extends Controller {
+public class ReindexController extends WithController {
 
 	public static final ALogger log = Logger.of(ReindexController.class);
 
@@ -83,6 +82,24 @@ public class ReindexController extends Controller {
 
 		return ok();
 	}
+
+	/*
+	 * Api call to reindex all collection resources.
+	 * Mongo and Elastic should be consistent talking
+	 * about collection terms.
+	 */
+	public static Result reindexAllCollections() {
+
+		try {
+			Promise<Boolean> p = Promise.promise(() -> ElasticReindexer.reindexAllDbCollections());
+		} catch(Exception e) {
+			log.error(e.getMessage(), e);
+			return internalServerError(e.getMessage());
+		}
+
+		return ok();
+	}
+
 
 	/*
 	 * Api call to reindex all thesaurus resources.

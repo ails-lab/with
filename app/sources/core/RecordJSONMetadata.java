@@ -41,6 +41,10 @@ public class RecordJSONMetadata {
 		return jsonContent;
 	}
 	
+	public void setJsonContent(String jsonContent) {
+		this.jsonContent = jsonContent;
+	}
+
 	public boolean hasFormat(Format format){
 		return this.format.equals(format);
 	}

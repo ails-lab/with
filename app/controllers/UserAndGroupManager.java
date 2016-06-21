@@ -17,43 +17,38 @@
 package controllers;
 
 import java.sql.Timestamp;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Function;
 
+import model.EmbeddedMediaObject.MediaVersion;
+import model.MediaObject;
 import model.basicDataTypes.WithAccess.Access;
 import model.resources.collection.CollectionObject;
 import model.usersAndGroups.User;
 import model.usersAndGroups.UserGroup;
 import model.usersAndGroups.UserOrGroup;
+import notifications.GroupNotification;
+import notifications.Notification;
+import notifications.Notification.Activity;
 
 import org.apache.commons.codec.binary.Base64;
 import org.bson.types.ObjectId;
-
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import db.DB;
 import model.EmbeddedMediaObject;
-import model.EmbeddedMediaObject.MediaVersion;
-import model.MediaObject;
-import model.basicDataTypes.WithAccess.Access;
-import notifications.GroupNotification;
-import notifications.Notification;
-import notifications.Notification.Activity;
 import play.Logger;
 import play.Logger.ALogger;
+import play.libs.F.Option;
 import play.libs.Json;
-import play.mvc.Controller;
 import play.mvc.Result;
-import utils.AccessManager;
 import utils.NotificationCenter;
 
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-
-public class UserAndGroupManager extends Controller {
+public class UserAndGroupManager extends WithController {
 
 	public static final ALogger log = Logger.of(UserGroup.class);
 
@@ -71,52 +66,58 @@ public class UserAndGroupManager extends Controller {
 	 *         (or all of them)
 	 */
 	public static Result listNames(String prefix, Boolean onlyParents,
-			Integer specifyCategory) {
+			Boolean forUsers, Option<String> forGroupType) {
+		try {
+			ArrayNode suggestions = Json.newObject().arrayNode();
 
-		ArrayNode suggestions = Json.newObject().arrayNode();
-
-		if ((specifyCategory == 0) || (specifyCategory == 1)) {
-			List<User> users = DB.getUserDAO().getByUsernamePrefix(prefix);
-			for (User user : users) {
-				ObjectNode node = Json.newObject();
-				ObjectNode data = Json.newObject().objectNode();
-				data.put("category", "user");
-				// costly?
-				node.put("value", user.getUsername());
-				node.put("data", data);
-				suggestions.add(node);
-			}
-		}
-		if ((specifyCategory == 0) || (specifyCategory == 2)) {
-			List<UserGroup> groups = DB.getUserGroupDAO().getByGroupNamePrefix(
-					prefix);
-			List<UserGroup> groups2 = DB.getUserGroupDAO().getByFriendlyNamePrefix(prefix);
-			groups.addAll(groups2);
-			List<String> effectiveUserIds = AccessManager
-					.effectiveUserIds(session().get("effectiveUserIds"));
-			ObjectId userId = new ObjectId(effectiveUserIds.get(0));
-			for (UserGroup group : groups) {
-				if (!onlyParents
-						|| (onlyParents && group.getUsers().contains(userId))) {
-					ObjectNode node = Json.newObject().objectNode();
+			if (forUsers) {
+				List<User> users = DB.getUserDAO().getByUsernamePrefix(prefix);
+				for (User user : users) {
+					ObjectNode node = Json.newObject();
 					ObjectNode data = Json.newObject().objectNode();
-					data.put("category", "group");
-					node.put("value", group.getUsername());
-					// check if direct ancestor of user
-					/*
-					 * if (group.getUsers().contains(userId)) {
-					 * data.put("isParent", true); } else data.put("isParent",
-					 * false);
-					 */
-					node.put("value", group.getUsername());
+					data.put("category", "user");
+					// costly?
+					node.put("value", user.getUsername());
 					node.put("data", data);
 					suggestions.add(node);
 				}
 			}
+			if (forGroupType.isDefined()) {
+				Class<?> clazz = Class.forName("model.usersAndGroups."
+						+ forGroupType.get());
+				List<UserGroup> groups = DB.getUserGroupDAO()
+						.getByGroupOrFriendlyNamePrefix(prefix);
+				List<String> effectiveUserIds = effectiveUserIds();
+				User user = DB.getUserDAO().getById(
+						new ObjectId(effectiveUserIds.get(0)),
+						Arrays.asList("userGroupsIds"));
+				for (UserGroup group : groups) {
+					if (!onlyParents
+							|| (onlyParents && user.getUserGroupsIds()
+									.contains(group.getDbId()))) {
+						if (clazz.isInstance(group)) {
+							ObjectNode node = Json.newObject().objectNode();
+							ObjectNode data = Json.newObject().objectNode();
+							data.put("category", "group");
+							node.put("value", group.getUsername());
+							// check if direct ancestor of user
+							/*
+							 * if (group.getUsers().contains(userId)) {
+							 * data.put("isParent", true); } else
+							 * data.put("isParent", false);
+							 */
+							node.put("value", group.getUsername());
+							node.put("data", data);
+							suggestions.add(node);
+						}
+					}
+				}
 
+			}
+			return ok(suggestions);
+		} catch (Exception e) {
+			return internalServerError(e.getMessage());
 		}
-
-		return ok(suggestions);
 	}
 
 	/**
@@ -134,12 +135,12 @@ public class UserAndGroupManager extends Controller {
 				userJSON.put("lastName", ((User) u).getLastName());
 			}
 			if (collectionId != null) {
-				CollectionObject collection = DB.getCollectionObjectDAO().getById(
-						new ObjectId(collectionId));
+				CollectionObject collection = DB.getCollectionObjectDAO()
+						.getById(new ObjectId(collectionId));
 				if (collection != null) {
 					// TODO: have to do recursion here!
-					Access accessRights = collection.getAdministrative().getAccess().getAcl(
-							u.getDbId());
+					Access accessRights = collection.getAdministrative()
+							.getAccess().getAcl(u.getDbId());
 					if (accessRights != null)
 						userJSON.put("accessRights", accessRights.toString());
 					else
@@ -210,19 +211,19 @@ public class UserAndGroupManager extends Controller {
 	 *            the group id
 	 * @return success message
 	 */
-	//TODO: Implement with updates, not make permanent!
+	// TODO: Implement with updates, not make permanent!
 	public static Result addUserOrGroupToGroup(String id, String groupId) {
 		ObjectNode result = Json.newObject();
 		try {
-			String adminId = AccessManager.effectiveUserId(session().get(
-					"effectiveUserIds"));
+			String adminId = effectiveUserId();
 			if ((adminId == null) || (adminId.equals(""))) {
 				result.put("error",
 						"Only administrators of the group have the right to edit the group");
 				return forbidden(result);
 			}
-			if(id.equals(groupId)) {
-				result.put("error", "Sorry! You cannot add an organization as a member of itself");
+			if (id.equals(groupId)) {
+				result.put("error",
+						"Sorry! You cannot add an organization as a member of itself");
 				return badRequest(result);
 			}
 			User admin = DB.getUserDAO().get(new ObjectId(adminId));
@@ -249,7 +250,7 @@ public class UserAndGroupManager extends Controller {
 					return badRequest(result);
 				}
 
-				//add user to the group - database side
+				// add user to the group - database side
 				group.getUsers().add(user.getDbId());
 				user.addUserGroups(ancestorGroups);
 				DB.getUserDAO().makePermanent(user);
@@ -289,14 +290,15 @@ public class UserAndGroupManager extends Controller {
 			// Add group as a child of the group
 			if (DB.getUserGroupDAO().get(userOrGroupId) != null) {
 				UserGroup childGroup = DB.getUserGroupDAO().get(userOrGroupId);
-				if( !group.getParentGroups().contains(userOrGroupId) )
+				if (!group.getParentGroups().contains(userOrGroupId))
 					childGroup.getParentGroups().add(new ObjectId(groupId));
 				else {
-					result.put("error", "Sorry! The group/organization you are trying to add"
-										+ "is already parent of your current group/organization");
+					result.put(
+							"error",
+							"Sorry! The group/organization you are trying to add"
+									+ "is already parent of your current group/organization");
 					return badRequest(result);
 				}
-
 
 				for (ObjectId userId : childGroup.getUsers()) {
 					User user = DB.getUserDAO().get(userId);
@@ -320,8 +322,7 @@ public class UserAndGroupManager extends Controller {
 	public static Result removeUserOrGroupFromGroup(String id, String groupId) {
 		ObjectNode result = Json.newObject();
 		try {
-			String adminId = AccessManager.effectiveUserId(session().get(
-					"effectiveUserIds"));
+			String adminId = effectiveUserId();
 			if ((adminId == null) || (adminId.equals(""))) {
 				result.put("error",
 						"Only creator or administrators of the group have the right to edit the group");
@@ -367,15 +368,17 @@ public class UserAndGroupManager extends Controller {
 				if (!(DB.getUserDAO().makePermanent(user) == null)
 						&& !(DB.getUserGroupDAO().makePermanent(group) == null)) {
 
-					//remove pending invites on this group
+					// remove pending invites on this group
 					List<Notification> group_invites = DB.getNotificationDAO()
 							.getPendingGroupNotifications(user.getDbId(),
 									group.getDbId(), Activity.GROUP_INVITE);
-					for(Notification not: group_invites) {
-						if(DB.getNotificationDAO().makeTransient(not) != 1) {
-							log.error("Cannot remove notification with id: " + not.getDbId());
-							result.put("error_"+not.getDbId(),
-									"Cannot remove notification with id: " + not.getDbId());
+					for (Notification not : group_invites) {
+						if (DB.getNotificationDAO().makeTransient(not) != 1) {
+							log.error("Cannot remove notification with id: "
+									+ not.getDbId());
+							result.put("error_" + not.getDbId(),
+									"Cannot remove notification with id: "
+											+ not.getDbId());
 						}
 					}
 
@@ -396,8 +399,7 @@ public class UserAndGroupManager extends Controller {
 					// Send notification through socket to group
 					// administrators
 					NotificationCenter.sendNotification(notification);
-					result.put("message",
-							"User succesfully removed from group");
+					result.put("message", "User succesfully removed from group");
 					return ok(result);
 				} else {
 					result.put("error", "Could not remove user from group");
@@ -417,8 +419,7 @@ public class UserAndGroupManager extends Controller {
 	public static Result joinGroup(String groupId) {
 		ObjectNode result = Json.newObject();
 		try {
-			String userId = AccessManager.effectiveUserId(session().get(
-					"effectiveUserIds"));
+			String userId = effectiveUserId();
 			if (userId == null) {
 				result.put("error", "Must specify user for join request");
 				return forbidden(result);
@@ -473,8 +474,7 @@ public class UserAndGroupManager extends Controller {
 	public static Result leaveGroup(String groupId) {
 		ObjectNode result = Json.newObject();
 		try {
-			String userId = AccessManager.effectiveUserId(session().get(
-					"effectiveUserIds"));
+			String userId = effectiveUserId();
 			if (userId == null) {
 				result.put("error", "Must specify user for join request");
 				return forbidden(result);
@@ -527,7 +527,8 @@ public class UserAndGroupManager extends Controller {
 	}
 
 	public static String getImageBase64(UserOrGroup user) {
-		if ((user.getAvatar()!=null) && (user.getAvatar().get(MediaVersion.Thumbnail) != null)) {
+		if ((user.getAvatar() != null)
+				&& (user.getAvatar().get(MediaVersion.Thumbnail) != null)) {
 			String photoUrl = user.getAvatar().get(MediaVersion.Thumbnail);
 			MediaObject photo = DB.getMediaObjectDAO().getByUrl(photoUrl);
 			if (photo != null)
@@ -540,11 +541,10 @@ public class UserAndGroupManager extends Controller {
 		return null;
 	}
 
-	public static Result addAdminToGroup(String id, String groupId){
+	public static Result addAdminToGroup(String id, String groupId) {
 		ObjectNode result = Json.newObject();
 		try {
-			String adminId = AccessManager.effectiveUserId(session().get(
-					"effectiveUserIds"));
+			String adminId = effectiveUserId();
 			if ((adminId == null) || (adminId.equals(""))) {
 				result.put("error",
 						"Only creator or administrators of the group have the right to edit the group");
@@ -568,10 +568,9 @@ public class UserAndGroupManager extends Controller {
 				User user = DB.getUserDAO().get(userOrGroupId);
 
 				group.addAdministrator(userOrGroupId);
-				if (!(DB.getUserGroupDAO().makePermanent(group) == null)){
+				if (!(DB.getUserGroupDAO().makePermanent(group) == null)) {
 
-					result.put("message",
-							"User  is  a group administrator");
+					result.put("message", "User  is  a group administrator");
 					return ok(result);
 				} else {
 					result.put("error", "There was an error");
@@ -589,11 +588,10 @@ public class UserAndGroupManager extends Controller {
 
 	}
 
-	public static Result removeAdminFromGroup(String id, String groupId){
+	public static Result removeAdminFromGroup(String id, String groupId) {
 		ObjectNode result = Json.newObject();
 		try {
-			String adminId = AccessManager.effectiveUserId(session().get(
-					"effectiveUserIds"));
+			String adminId = effectiveUserId();
 			if ((adminId == null) || (adminId.equals(""))) {
 				result.put("error",
 						"Only creator or administrators of the group have the right to edit the group");
@@ -615,12 +613,11 @@ public class UserAndGroupManager extends Controller {
 			ObjectId userOrGroupId = new ObjectId(id);
 			if (DB.getUserDAO().get(userOrGroupId) != null) {
 				User user = DB.getUserDAO().get(userOrGroupId);
-				if (group.getAdminIds().contains(userOrGroupId)){
+				if (group.getAdminIds().contains(userOrGroupId)) {
 					group.removeAdministrator(userOrGroupId);
 				}
-				if (!(DB.getUserGroupDAO().makePermanent(group) == null)){
-					result.put("message",
-							"User is not a group administrator");
+				if (!(DB.getUserGroupDAO().makePermanent(group) == null)) {
+					result.put("message", "User is not a group administrator");
 					return ok(result);
 				} else {
 					result.put("error", "There was an error");
@@ -635,7 +632,6 @@ public class UserAndGroupManager extends Controller {
 			result.put("error", e.getMessage());
 			return internalServerError(result);
 		}
-
 
 	}
 

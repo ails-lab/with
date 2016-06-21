@@ -18,23 +18,24 @@ package controllers;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
 import java.util.Random;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.net.ssl.HttpsURLConnection;
 
 import model.ApiKey;
-import model.basicDataTypes.MultiLiteral;
 import model.resources.collection.CollectionObject;
 import model.usersAndGroups.User;
 import model.usersAndGroups.UserGroup;
+import notifications.Notification;
 
-import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.mail.DefaultAuthenticator;
 import org.apache.commons.mail.Email;
 import org.apache.commons.mail.EmailException;
@@ -46,11 +47,15 @@ import play.Logger.ALogger;
 import play.libs.Akka;
 import play.libs.Crypto;
 import play.libs.Json;
-import play.mvc.Controller;
 import play.mvc.Result;
+
+import java.util.HashSet;
+
 import scala.concurrent.Await;
 import scala.concurrent.Future;
 import scala.concurrent.duration.Duration;
+import utils.Serializer;
+import utils.Serializer.LightUserSerializer;
 import actors.ApiKeyManager.Create;
 import akka.actor.ActorSelection;
 import akka.pattern.Patterns;
@@ -60,15 +65,19 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
+import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import db.DB;
 
-public class UserManager extends Controller {
+public class UserManager extends WithController {
 
 	public static final ALogger log = Logger.of(UserManager.class);
 	private static final long TOKENTIMEOUT = 10 * 1000l /* 10 sec */;
+	private static final String facebookAccessTokenUrl = "https://graph.facebook.com/v2.3/oauth/access_token";
+	private static final String graphApiUrl = "https://graph.facebook.com/v2.3/me";
+	private static final String facebookSecret = "818572771c2f350e80790b264399cc81";
 
 	/**
 	 * Propose new username when it is already in use.
@@ -192,7 +201,21 @@ public class UserManager extends Controller {
 
 	public static Result getUser(String id) {
 		try {
-			User user = DB.getUserDAO().get(new ObjectId(id));
+			//User user = DB.getUserDAO().getById(new ObjectId(id), new ArrayList<String>() {{ add("firstName"); add("lastName"); }});
+			User user = DB.getUserDAO().getById(new ObjectId(id));
+			if (user != null) {
+				//return ok(lightUserSerialization(user));
+				return ok(Json.toJson(user));
+			}
+			return badRequest();
+		} catch (Exception e) {
+			return internalServerError();
+		}
+	}
+
+	public static Result getMyUser() {
+		try {
+			User user = effectiveUser();
 			if (user != null) {
 				return ok(Json.toJson(user));
 			}
@@ -218,8 +241,9 @@ public class UserManager extends Controller {
 		// If everything is ok store the user at the database
 		User user = Json.fromJson(json, User.class);
 		DB.getUserDAO().makePermanent(user);
-		ObjectId fav = CollectionObjectController.createFavorites(user.getDbId());
-		user.setFavorites(fav);		
+		ObjectId fav = CollectionObjectController.createFavorites(user
+				.getDbId());
+		user.setFavorites(fav);
 		session().put("user", user.getDbId().toHexString());
 		session().put("sourceIp", request().remoteAddress());
 		session().put("lastAccessTime",
@@ -227,12 +251,66 @@ public class UserManager extends Controller {
 		return ok(Json.toJson(user));
 	}
 
+	/**
+	 * Deletes a user from the database including all the collections and groups
+	 * she owns. In case she shares any collections she owns with other people,
+	 * or she is the creator of groups with others, the user is not deleted but
+	 * has to contact the developers about that.
+	 *
+	 * @return success or JSON error
+	 */
+	public static Result deleteUser(String id) {
+		try {
+			ObjectId userId = new ObjectId(id);
+			ObjectId currentUserId = WithController.effectiveUserDbId();
+			Status errorMessage = badRequest(Json
+					.parse("{'error':'User cannot be deleted due to ownership of "
+							+ "shared collections or groups. Please contact the developers'}"));
+			if ((currentUserId == null) || (!currentUserId.equals(userId) && !WithController.isSuperUser()) )
+				return forbidden(Json
+						.parse("{'error' : 'No rights for user deletion'}"));
+			Set<ObjectId> groupsToDelete = new HashSet<ObjectId>();
+			Set<ObjectId> collectionsToDelete = new HashSet<ObjectId>();
+			User user = DB.getUserDAO().getById(userId,
+					Arrays.asList("adminInGroups"));
+			Set<ObjectId> groups = user.getAdminInGroups();
+			for (ObjectId groupId : groups) {
+				UserGroup group = DB.getUserGroupDAO().getById(groupId,
+						Arrays.asList("creator, users"));
+				if ((group == null) || !group.getCreator().equals(userId))
+					continue;
+				if (group.getUsers().size() > 1) {
+					return errorMessage;
+				}
+				groupsToDelete.add(groupId);
+			}
+			List<CollectionObject> collections = DB.getCollectionObjectDAO()
+					.getByCreator(userId, 0, 0);
+			for (CollectionObject collection : collections) {
+				if (collection.getAdministrative().getAccess().getAcl().size() > 1) {
+					return errorMessage;
+				}
+				collectionsToDelete.add(collection.getDbId());
+			}
+			for (ObjectId groupId : groupsToDelete)
+				DB.getUserGroupDAO().deleteById(groupId);
+			for (ObjectId collectionId : collectionsToDelete)
+				DB.getCollectionObjectDAO().deleteById(collectionId);
+			DB.getUserDAO().deleteById(userId);
+			return ok(Json
+					.parse("{'success' : 'User was successfully deleted from the database'}"));
+		} catch (Exception e) {
+			return internalServerError(Json.parse("{'error' : '"
+					+ e.getMessage() + "'}"));
+		}
+	}
+
 	private static Result googleLogin(String googleId, String accessToken) {
 		log.info(accessToken);
 		User u = null;
 		try {
 			URL url = new URL(
-					"https://www.googleapis.com/oauth2/v1/tokeninfo?access_token="
+					"https://www.googleapis.com/oauth2/v1/userinfo?alt=json&access_token="
 							+ accessToken);
 			HttpsURLConnection connection = (HttpsURLConnection) url
 					.openConnection();
@@ -241,11 +319,28 @@ public class UserManager extends Controller {
 			String email = res.get("email").asText();
 			u = DB.getUserDAO().getByEmail(email);
 			if (u == null) {
-				return badRequest(Json
-						.parse("{\"error\":\"User not registered\"}"));
+				u = new User();
+				u.setEmail(email);
+				if (res.has("given_name"))
+					u.setFirstName(res.get("given_name").asText());
+				if (res.has("family_name"))
+					u.setLastName(res.get("family_name").asText());
+				String[] split = email.split("@");
+				u.setUsername(split[0]);
+				DB.getUserDAO().makePermanent(u);
+				ObjectId fav = CollectionObjectController.createFavorites(u
+						.getDbId());
 			}
 			u.setGoogleId(googleId);
 			DB.getUserDAO().makePermanent(u);
+			//return ok(lightUserSerialization(u));
+			if (u != null) {
+				session().put("user", u.getDbId().toHexString());
+				session().put("username", u.getUsername());
+				session().put("sourceIp", request().remoteAddress());
+				session().put("lastAccessTime",
+						Long.toString(System.currentTimeMillis()));
+			}
 			return ok(Json.toJson(u));
 		} catch (Exception e) {
 			return badRequest(Json
@@ -258,7 +353,7 @@ public class UserManager extends Controller {
 		User u = null;
 		try {
 			URL url = new URL(
-					"https://graph.facebook.com/me?fields=email&format=json&access_token="
+					"https://graph.facebook.com/me?fields=email,first_name,last_name&format=json&access_token="
 							+ accessToken);
 			HttpsURLConnection connection = (HttpsURLConnection) url
 					.openConnection();
@@ -267,15 +362,57 @@ public class UserManager extends Controller {
 			String email = res.get("email").asText();
 			u = DB.getUserDAO().getByEmail(email);
 			if (u == null) {
-				return badRequest(Json
-						.parse("{\"error\":\"User not registered\"}"));
+				u = new User();
+				u.setEmail(email);
+				if (res.has("first_name"))
+					u.setFirstName(res.get("first_name").asText());
+				if (res.has("last_name"))
+					u.setLastName(res.get("last_name").asText());
+				String[] split = email.split("@");
+				u.setUsername(split[0]);
+				DB.getUserDAO().makePermanent(u);
+				ObjectId fav = CollectionObjectController.createFavorites(u
+						.getDbId());
 			}
 			u.setFacebookId(facebookId);
 			DB.getUserDAO().makePermanent(u);
+			//return ok(lightUserSerialization(u));
+			if (u != null) {
+				session().put("user", u.getDbId().toHexString());
+				session().put("username", u.getUsername());
+				session().put("sourceIp", request().remoteAddress());
+				session().put("lastAccessTime",
+						Long.toString(System.currentTimeMillis()));
+			}
 			return ok(Json.toJson(u));
 		} catch (Exception e) {
 			return badRequest(Json
 					.parse("{\"error\":\"Couldn't validate user\"}"));
+		}
+	}
+
+	public static Result facebookLogin() {
+		try {
+			JsonNode json = request().body().asJson();
+			// Exchange authorization code for access token.
+			String params = "code=" + json.get("code").asText() + "&client_id="
+					+ json.get("clientId").asText() + "&redirect_uri="
+					+ json.get("redirectUri").asText() + "&client_secret="
+					// TODO: Put the facebookSecret in the configuration file
+					+ facebookSecret;
+			URL url = new URL(facebookAccessTokenUrl + "?" + params);
+			InputStream is = ((HttpsURLConnection) url.openConnection())
+					.getInputStream();
+			String accessToken = Json.parse(is).get("access_token").asText();
+			// Retrieve profile information about the current user.
+			url = new URL(graphApiUrl + "?access_token=" + accessToken);
+			is = ((HttpsURLConnection) url.openConnection()).getInputStream();
+			// TODO: Get email from answer when the method facebookLogin(String
+			// facebookId, String accessToken) becomes obsolete
+			String id = Json.parse(is).get("id").asText();
+			return facebookLogin(id, accessToken);
+		} catch (Exception e) {
+			return badRequest(Json.parse("{\"error\":\"Invalid credentials\"}"));
 		}
 	}
 
@@ -285,11 +422,9 @@ public class UserManager extends Controller {
 	 * @return OK status and the cookie or JSON error
 	 */
 	public static Result login() {
-
 		JsonNode json = request().body().asJson();
 		ObjectNode result = Json.newObject();
 		ObjectNode error = Json.newObject();
-
 		User u = null;
 		if (json.has("facebookId")) {
 			String facebookId = json.get("facebookId").asText();
@@ -302,8 +437,13 @@ public class UserManager extends Controller {
 						Long.toString(System.currentTimeMillis()));
 				return ok(Json.toJson(u));
 			} else {
-				String accessToken = json.get("accessToken").asText();
-				return facebookLogin(facebookId, accessToken);
+				if (!json.has("accessToken")) {
+					result.put("error", "facebookId is not valid.");
+					return badRequest(result);
+				} else {
+					String accessToken = json.get("accessToken").asText();
+					return facebookLogin(facebookId, accessToken);
+				}
 			}
 		}
 		if (json.has("googleId")) {
@@ -353,6 +493,7 @@ public class UserManager extends Controller {
 			session().put("sourceIp", request().remoteAddress());
 			session().put("lastAccessTime",
 					Long.toString(System.currentTimeMillis()));
+			//return ok(lightUserSerialization(u));
 			return ok(Json.toJson(u));
 		} else {
 			error.put("password", "Invalid Password");
@@ -475,7 +616,7 @@ public class UserManager extends Controller {
 		 * String[2]; imageInfo = imageUpload.split(","); String info =
 		 * imageInfo[0]; mimeType = info.substring(5); // check if image is
 		 * encoded in base64 format imageBytes = imageInfo[1].getBytes();
-		 * 
+		 *
 		 * // check if image is given as URL } else if
 		 * (imageUpload.startsWith("http")) { try { URL url = new
 		 * URL(imageUpload); HttpsURLConnection connection =
@@ -499,45 +640,19 @@ public class UserManager extends Controller {
 		 * user.setGender(json.get("gender").asText());
 		 * user.setFirstName(firstName); user.setLastName(lastName); if
 		 * (json.has("about")) { user.setAbout(json.get("about").asText()); }
-		 * 
+		 *
 		 * if (json.has("location")) {
 		 * user.setLocation(json.get("location").asText()); }
-		 * 
+		 *
 		 * DB.getUserDAO().makePermanent(user); result = (ObjectNode)
 		 * Json.parse(DB.getJson(user)); result.remove("md5Password"); return
 		 * ok(Json.toJson(user)); } else { return badRequest(Json
 		 * .parse("{\"error\":\"User does not exist\"}"));
-		 * 
+		 *
 		 * } } catch (IllegalArgumentException e) { return
 		 * badRequest(Json.parse("{\"error\":\"User does not exist\"}")); }
 		 */
 
-	}
-
-	/**
-	 * This is just a skeleton until design issues are solved
-	 *
-	 * @param id
-	 * @return
-	 */
-
-	public static Result deleteUser(String id) {
-
-		ObjectNode result = Json.newObject();
-		// ObjectNode error = (ObjectNode) Json.newObject();
-
-		try {
-			User user = DB.getUserDAO().getById(new ObjectId(id), null);
-			if (user != null) {
-				return ok(result);
-			} else {
-				return badRequest(Json
-						.parse("{\"error\":\"User does not exist\"}"));
-
-			}
-		} catch (IllegalArgumentException e) {
-			return badRequest(Json.parse("{\"error\":\"User does not exist\"}"));
-		}
 	}
 
 	public static Result apikey() {
@@ -617,7 +732,7 @@ public class UserManager extends Controller {
 			s = (String) Await.result(future, timeout.duration());
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			log.error("", e);
 		}
 
 		if (s == "") {
@@ -892,4 +1007,11 @@ public class UserManager extends Controller {
 		return badRequest(result);
 	}
 
+	private static ObjectNode lightUserSerialization(User u) {
+		ObjectMapper uMapper = new ObjectMapper();
+		SimpleModule module = new SimpleModule();
+		module.addSerializer(User.class, new Serializer.LightUserSerializer());
+		uMapper.registerModule(module);
+		return uMapper.valueToTree(u);
+	}
 }

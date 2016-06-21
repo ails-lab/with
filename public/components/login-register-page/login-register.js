@@ -266,6 +266,7 @@ define(['knockout', 'text!./login-register.html',  'facebook', 'app', 'knockout-
 								window.location.reload(true);
 							}
 						});
+						$("#loginPopup").trigger("loginEvent", []);
 					},
 					error   : function (request, status, error) {
 						var err = JSON.parse(request.responseText);
@@ -327,6 +328,7 @@ define(['knockout', 'text!./login-register.html',  'facebook', 'app', 'knockout-
 												window.location.reload(true);
 											}
 										});
+										$("#loginPopup").trigger("loginEvent", []);
 									},
 									error       : function (request, status, error) {
 										var err = JSON.parse(request.responseText);
@@ -386,6 +388,7 @@ define(['knockout', 'text!./login-register.html',  'facebook', 'app', 'knockout-
 										window.location.reload(true);
 									}
 								});
+								$("#loginPopup").trigger("loginEvent", []);
 							},
 							error       : function (request, status, error) {
 								var err = JSON.parse(request.responseText);
@@ -433,8 +436,14 @@ define(['knockout', 'text!./login-register.html',  'facebook', 'app', 'knockout-
 
 		self.completeRegistration = function () {
 			// TODO: Get values, send to server
-			window.location.href = "#dashboard";
-			window.location.reload(true);
+			var withLoginPopup = localStorage.getItem('withLoginPopup');
+			//alert(withLoginPopup);
+			if (withLoginPopup) {
+				window.location.href = withLoginPopup;
+				localStorage.removeItem(withLoginPopup);
+			} else {
+				window.location.href = "#dashboard";
+			}
 		};
 
 		self.route = params.route;

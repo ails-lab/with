@@ -19,9 +19,11 @@
                    <!-- tabs-->
                 <ul role="tablist" class="nav nav-tabs">
                  <li class="active"><a href="#datasources" data-toggle="tab" data-bind="event:{click: sourceBind}">Sources</a></li>
+  
 				  <!-- ko foreach: $parent.filters -->
 				  <!-- ko if: suggestedValues.length>0 -->
-				  <li><a data-bind="attr:{href:'#'+filterID},text:filterName,event:{click: $parent.listBind}"  data-toggle="tab"></a></li>
+				  <li><a data-bind="attr:{href:'#'+filterID, 'title':sources},text:filterName, event:{click: $parent.listBind}"  data-toggle="tab" 
+				   ></a></li>
 				  <!-- /ko -->
 				  <!-- /ko -->
                   
@@ -37,6 +39,7 @@
 				     </label>
 				     </li>
 				     <!--  /ko -->
+				     
 				    </ul>
 				  </div>
 				  
@@ -85,4 +88,3 @@
             <div class="button-group"><a class="btn-green cancel" data-bind="click: close">Close</a></div>
           </div>
           </section>
-

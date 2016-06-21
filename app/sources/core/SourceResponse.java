@@ -22,9 +22,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import model.resources.AgentObject;
+import model.basicDataTypes.ProvenanceInfo.Sources;
 import model.resources.CulturalObject;
-import model.resources.PlaceObject;
 import model.resources.RecordResource;
 import model.resources.WithResource;
 
@@ -46,7 +45,7 @@ public class SourceResponse {
 	public Map<String, List<?>> resourcesPerType;
 	public String source;
 	public JsonNode facets;
-	public List<CommonFilterResponse> filters;
+	private List<CommonFilterResponse> filters;
 	public List<CommonFilterLogic> filtersLogic;
 
 	public SourceResponse() {
@@ -108,7 +107,22 @@ public class SourceResponse {
 	public void setResourcesPerType(Map<String, List<?>> resourcesPerType) {
 		this.resourcesPerType = resourcesPerType;
 	}
+	
+	public void setSource(){
+		for (CommonFilterResponse f : filters) {
+			f.addSource(Sources.getSourceByID(this.source));
+		}
+	}
 
+
+	public List<CommonFilterResponse> getFilters() {
+		return filters;
+	}
+
+	public void setFilters(List<CommonFilterResponse> filters) {
+		this.filters = filters;
+		setSource();
+	}
 
 	public SourceResponse merge(SourceResponse r2) {
 		SourceResponse res = new SourceResponse();
@@ -123,9 +137,9 @@ public class SourceResponse {
 		if ((filtersLogic != null) && (r2.filtersLogic != null)) {
 			res.filtersLogic = filtersLogic;
 			FiltersHelper.merge(res.filtersLogic, r2.filtersLogic);
-			res.filters = ListUtils.transform(res.filtersLogic, (CommonFilterLogic x) -> {
+			res.setFilters(ListUtils.transform(res.filtersLogic, (CommonFilterLogic x) -> {
 				return x.export();
-			});
+			}));
 
 		}
 		return res;
@@ -154,3 +168,4 @@ public class SourceResponse {
 	}
 
 }
+

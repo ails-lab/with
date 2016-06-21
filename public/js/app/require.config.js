@@ -55,7 +55,8 @@ var require = {
 		"jquery.sticky"			    : "bower_modules/jquery-sticky/jquery.sticky",
 		"slick"						: "js/slick.min",
 		"knockout-switch-case"      : "bower_modules/knockout-switch-case/knockout-switch-case.min",
-		"moment"                    : "bower_modules/moment/min/moment.min"
+		"moment"                    : "bower_modules/moment/min/moment.min",
+		"easypiechart"              : "js/jquery.easypiechart.min" 
 	},
 	shim: {
 		"knockout":  { exports: 'ko' },

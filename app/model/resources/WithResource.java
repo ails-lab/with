@@ -22,6 +22,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import model.DescriptiveData;
 import model.EmbeddedMediaObject;
@@ -45,13 +46,17 @@ import org.mongodb.morphia.annotations.Indexes;
 import org.mongodb.morphia.annotations.Version;
 import org.mongodb.morphia.utils.IndexType;
 
+import play.Logger;
+import play.Logger.ALogger;
 import play.libs.Json;
+import sources.formatreaders.CulturalRecordFormatter;
 import utils.Deserializer;
 import utils.Serializer;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -73,6 +78,9 @@ import elastic.ElasticUtils;
 @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
 public class WithResource<T extends DescriptiveData, U extends WithResource.WithAdmin> {
 
+	public static final ALogger log = Logger.of( WithResource.class );
+	
+	
 	public static class WithAdmin {
 
 		// index
@@ -374,7 +382,20 @@ public class WithResource<T extends DescriptiveData, U extends WithResource.With
 	@Embedded
 	//@JsonDeserialize(using = Deserializer.ContextDataDeserializer.class)
 	private ContextData contextData;
+	
+	@JsonInclude(Include.ALWAYS)
+	private double qualityMeasure;
 
+	public double getQualityMeasure() {
+		return qualityMeasure;
+	}
+
+	public void setQualityMeasure(double qualityMeasure) {
+		this.qualityMeasure = qualityMeasure;
+	}
+	
+	@JsonSerialize(using = Serializer.ObjectIdArraySerializer.class)
+	private Set<ObjectId> annotationIds;
 	private List<Annotation> annotations;
 
 	public WithResource() {
@@ -501,17 +522,58 @@ public class WithResource<T extends DescriptiveData, U extends WithResource.With
 		this.media.get(viewIndex).put(mediaVersion, media);
 	}
 
+	/**
+	 * adds additional media objects to the resource.
+	 * @param mediaVersion
+	 * @param media
+	 */
 	public void addMediaView(MediaVersion mediaVersion,
 			EmbeddedMediaObject media) {
-		HashMap<MediaVersion, EmbeddedMediaObject> e = new HashMap<>();
-		e.put(mediaVersion, media);
 		media.setMediaVersion(mediaVersion);
-		this.media.add(e);
+		HashMap<MediaVersion, EmbeddedMediaObject> e = new HashMap<>();
+		HashMap<MediaVersion, EmbeddedMediaObject> map = findMedia(media);
+		if (map!=null){
+			log.debug("Media updated!!");
+			map.put(mediaVersion, media);
+		} else {
+			e.put(mediaVersion, media);
+			this.media.add(e);
+		}
 	}
 
+	private HashMap<MediaVersion, EmbeddedMediaObject> findMedia(EmbeddedMediaObject media2) {
+		for (HashMap<MediaVersion, EmbeddedMediaObject> med : media) {
+			if (media2.equals(med.get(media2.getMediaVersion())))
+				return med;
+		}
+		return null;
+	}
+
+	/**
+	 * sets the main media object to the resource without overriding the possibly existing media.
+	 * @param mediaVersion version of the media
+	 * @param media the media object
+	 */
 	public void addMedia(MediaVersion mediaVersion, EmbeddedMediaObject media) {
-		media.setMediaVersion(mediaVersion);
-		this.media.get(0).put(mediaVersion, media);
+		addMedia(mediaVersion, media, false);
+	}
+	
+	/**
+	 * sets the main media object to the resource
+	 * @param mediaVersion version of the media
+	 * @param media the media object
+	 * @param override if true overrides the existing media, otherwise it is added as a view (additional media information)
+	 */
+	public void addMedia(MediaVersion mediaVersion, EmbeddedMediaObject media, boolean override) {
+		if (override || !this.media.get(0).containsKey(mediaVersion) || !this.media.get(0).get(mediaVersion).isEmpty()){
+			media.setMediaVersion(mediaVersion);
+			this.media.get(0).put(mediaVersion, media);
+//			log.debug(mediaVersion+" overriten");
+		} else {
+			addMediaView(mediaVersion, media);
+//			log.debug(this.media.get(0).toString());
+//			log.debug(mediaVersion+" added as additional view");
+		}
 	}
 
 	public ContextData getContextData() {
@@ -522,12 +584,21 @@ public class WithResource<T extends DescriptiveData, U extends WithResource.With
 		this.contextData = contextData;
 	}
 
+	public Set<ObjectId> getAnnotationIds() {
+		return annotationIds;
+	}
+
+	public void setAnnotationIds(Set<ObjectId> annotationIds) {
+		this.annotationIds = annotationIds;
+	}
+
 	public List<Annotation> getAnnotations() {
 		return annotations;
 	}
 
-	public void setAnnotations(ArrayList<Annotation> annotations) {
-		this.annotations = annotations;
+	public void fillAnnotations() {
+		//TODO: group further the annotations returned if needed
+		this.annotations = DB.getAnnotationDAO().getByIds(this.annotationIds);
 	}
 
 	public ObjectNode getWithCreatorInfo() {

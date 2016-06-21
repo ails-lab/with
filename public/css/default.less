@@ -22,6 +22,7 @@ a {
 	min-width: 100px;
 	line-height: 16px !important;
 	z-index: 60;
+
 }
 
 // listing
@@ -72,6 +73,7 @@ a {
 				// thumb
 				.thumb {
 					position: relative;
+					border: 1px solid #ccc;
 
 					.counter {
 						background: #4f7979;
@@ -95,14 +97,22 @@ a {
 
 				// info
 				.info {
-					padding: 30px;
+					padding: 30px 30px 30px 30px;
 
 					// title
 					.title {
-						margin: 0 0 20px;
+						margin: 0 0 10px;
 						font-size: 20px;
 						font-family: georgia,sans-serif;
 						color: black;
+					}
+
+					// source
+					.source {
+						color: #999;
+						font-style: italic;
+						position: relative;
+						bottom: -3px;
 					}
 
 					// type
@@ -164,46 +174,18 @@ a {
 
 		// grid
 		.grid {
-			.item {
-				.info {
-					padding-bottom: 10px;
-					.title {
-						margin-bottom: 0;
-					}
-				}
-
-				// selected
-				&.selected {
-
-					// after
-					&::after {
-						background: @brand-dashboard;
-					}
-				}
+			.sizer, .item {
+				width: 25%;
 			}
 		}
-
-		// action
 		.action-group {
-			position: relative;
-			text-align: right;
-			padding: 0 30px 30px 30px !important;
+			padding: 0 15px 15px 0;
 			.clearfix;
+			
 
 			// wrap
 			.wrap {
 				position: relative;
-
-				// before
-				&::before {
-					content: '';
-					width: 100%;
-					height: 1px;
-					background-color: #ccc;
-					position: absolute;
-					top: 12px;
-					left: 0;
-				}
 
 				// links
 				.links {
@@ -230,41 +212,61 @@ a {
 					position: relative;
 					float: right;
 					text-align: right;
-					background-color: white;
+					
 
 					// li
 					li {
 						list-style: none;
 						display: inline-block;
-						margin-left: 10px;
+						float: left;
+						margin-left: -1px;
 
 						// anchor
 						a {
 							text-decoration: none;
-							font-size: 1.5rem;
-							color: #a4a4a4  !important;
+							font-size: 1.8rem;
+							color: #a4a4a4;
 							.transition(color .3s);
-							padding: 0 !important;
+							background-color: white;
+							display: block;
+							height: 32px;
+							padding: 6px 10px 0 10px;
+							border: 1px solid #ccc;
+
 
 							// hover
 							&:hover {
-								color: #444;
+								color: @brand-dashboard;
 
 								&.fa-heart {
-									color: #e46667  !important;
+									color: #e46667 !important;
+								}
+								&.fa-star {
+									color: #ff9806 !important;
 								}
 							}
 						}
 
-						// action
-						.selectitem {
-							cursor: pointer;
+						// first
+						&:first-child {
+							a {
+								border-top-left-radius: 20px;
+								border-bottom-left-radius: 20px;
+								padding-left: 15px;
+							}
 						}
+						// last
+						&:last-child {
+							a {
+								border-top-right-radius: 20px;
+								border-bottom-right-radius: 20px;
+								padding-right: 15px;
+							}
+						}
+
 					}
 				}
 			}
-
-			
 		}
 	}
 }

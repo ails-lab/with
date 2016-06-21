@@ -34,22 +34,33 @@ html
 						section.exhibition
 
 							section.header
-								// collection picker
-								a#picker(href="#", data-toggle='dropdown').picker
-									span.text My Exhibition
-									span.arrow
-
-								ul.dropdown-menu(aria-labelledby='picker')
-									li 
-										a(href="#") My Exhibition
-									li 
-										a(href="#") Exhibition shared with me
-
 
 								// new collection
 								a(href="#").new
 									span.plus
-									span.text New Exhibition
+									span.text New exhibition
+
+								// picker wrap
+									.picker-wrap
+										
+										a#picker(href="#", data-toggle='dropdown').picker
+											span.text My exhibition
+											span.arrow
+
+										ul.dropdown-menu(aria-labelledby='picker')
+											li 
+												a(href="#") My exhibition
+											li 
+												a(href="#") Exhibition shared with me
+
+								// tabs
+								ul.typeselect
+									li.active
+										a( href="#" title="Show only my exhibition") My exhibition
+									li
+										a( href="#" title="Show exhibition shared with me") Exhibition shared with me
+
+								
 
 							// message
 							section.message
@@ -67,6 +78,15 @@ html
 
 								// collection main header
 								.list-head
+
+									// item count
+									span.item-count 7 exhibitions
+
+									// search
+									.filtertype
+										img.mag( src="img/ui/ic-mag.png" )
+										input( type="text" class="filtertext" placeholder="Search exhibition" )
+
 									.sort
 										span Sort by
 										a#sorting(href="#", data-toggle='dropdown')
@@ -103,9 +123,40 @@ html
 												.date December 15, 2015
 												.user By Annac
 											.action-group
-												a(href="#" data-toggle="tooltip" data-placement="top" title="Delete exhibition").fa.fa-trash-o
-												a(href="#" data-toggle="tooltip" data-placement="top" title="Share exhibition").fa.fa-paper-plane-o
-												a(href="dashboard-exhibition-editor.html" data-toggle="tooltip" data-placement="top" title="Edit exhibition").fa.fa-pencil
+												.wrap
+													ul
+														li
+															a(href="#" data-toggle="tooltip" data-placement="top" title="Delete exhibition" ).fa.fa-trash-o
+														li
+															a(href="#" data-toggle="tooltip" data-placement="top" title="Share exhibition" ).fa.fa-paper-plane-o
+														li
+															a(href="dashboard-exhibition-editor.html" data-toggle="tooltip" data-placement="top" title="Edit exhibition" ).fa.fa-pencil
+									li
+										.thumbnails
+											.category public
+											.wrap
+												img(src="img/content/collection-hero.png")
+											.wrap.small
+												img(src="img/content/collection-hero.png")
+											.wrap.small
+												img(src="img/content/collection-hero.png")
+										.meta
+											a(href="exhibition-view.html" title="View exhibition").header Collection title orem ipsum dolor sit amet
+											.description
+												| Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip.
+											.other-info
+												.count 20 Items
+												.date December 15, 2015
+												.user By Annac
+											.action-group
+												.wrap
+													ul
+														li
+															a(href="#" data-toggle="tooltip" data-placement="top" title="Delete exhibition" ).fa.fa-trash-o
+														li
+															a(href="#" data-toggle="tooltip" data-placement="top" title="Share exhibition" ).fa.fa-paper-plane-o
+														li
+															a(href="dashboard-exhibition-editor.html" data-toggle="tooltip" data-placement="top" title="Edit exhibition" ).fa.fa-pencil
 
 									li
 										.thumbnails
@@ -125,9 +176,14 @@ html
 												.date December 15, 2015
 												.user By Annac
 											.action-group
-												a(href="#" data-toggle="tooltip" data-placement="top" title="Delete exhibition").fa.fa-trash-o
-												a(href="#" data-toggle="tooltip" data-placement="top" title="Share exhibition").fa.fa-paper-plane-o
-												a(href="dashboard-exhibition-editor.html" data-toggle="tooltip" data-placement="top" title="Edit exhibition").fa.fa-pencil
+												.wrap
+													ul
+														li
+															a(href="#" data-toggle="tooltip" data-placement="top" title="Delete exhibition" ).fa.fa-trash-o
+														li
+															a(href="#" data-toggle="tooltip" data-placement="top" title="Share exhibition" ).fa.fa-paper-plane-o
+														li
+															a(href="dashboard-exhibition-editor.html" data-toggle="tooltip" data-placement="top" title="Edit exhibition" ).fa.fa-pencil
 
 									li
 										.thumbnails
@@ -147,9 +203,14 @@ html
 												.date December 15, 2015
 												.user By Annac
 											.action-group
-												a(href="#" data-toggle="tooltip" data-placement="top" title="Delete exhibition").fa.fa-trash-o
-												a(href="#" data-toggle="tooltip" data-placement="top" title="Share exhibition").fa.fa-paper-plane-o
-												a(href="dashboard-exhibition-editor.html" data-toggle="tooltip" data-placement="top" title="Edit exhibition").fa.fa-pencil
+												.wrap
+													ul
+														li
+															a(href="#" data-toggle="tooltip" data-placement="top" title="Delete exhibition" ).fa.fa-trash-o
+														li
+															a(href="#" data-toggle="tooltip" data-placement="top" title="Share exhibition" ).fa.fa-paper-plane-o
+														li
+															a(href="dashboard-exhibition-editor.html" data-toggle="tooltip" data-placement="top" title="Edit exhibition" ).fa.fa-pencil
 
 									li
 										.thumbnails
@@ -169,9 +230,14 @@ html
 												.date December 15, 2015
 												.user By Annac
 											.action-group
-												a(href="#" data-toggle="tooltip" data-placement="top" title="Delete exhibition").fa.fa-trash-o
-												a(href="#" data-toggle="tooltip" data-placement="top" title="Share exhibition").fa.fa-paper-plane-o
-												a(href="dashboard-exhibition-editor.html" data-toggle="tooltip" data-placement="top" title="Edit exhibition").fa.fa-pencil
+												.wrap
+													ul
+														li
+															a(href="#" data-toggle="tooltip" data-placement="top" title="Delete exhibition" ).fa.fa-trash-o
+														li
+															a(href="#" data-toggle="tooltip" data-placement="top" title="Share exhibition" ).fa.fa-paper-plane-o
+														li
+															a(href="dashboard-exhibition-editor.html" data-toggle="tooltip" data-placement="top" title="Edit exhibition" ).fa.fa-pencil
 
 									li
 										.thumbnails
@@ -191,9 +257,14 @@ html
 												.date December 15, 2015
 												.user By Annac
 											.action-group
-												a(href="#" data-toggle="tooltip" data-placement="top" title="Delete exhibition").fa.fa-trash-o
-												a(href="#" data-toggle="tooltip" data-placement="top" title="Share exhibition").fa.fa-paper-plane-o
-												a(href="dashboard-exhibition-editor.html" data-toggle="tooltip" data-placement="top" title="Edit exhibition").fa.fa-pencil
+												.wrap
+													ul
+														li
+															a(href="#" data-toggle="tooltip" data-placement="top" title="Delete exhibition" ).fa.fa-trash-o
+														li
+															a(href="#" data-toggle="tooltip" data-placement="top" title="Share exhibition" ).fa.fa-paper-plane-o
+														li
+															a(href="dashboard-exhibition-editor.html" data-toggle="tooltip" data-placement="top" title="Edit exhibition" ).fa.fa-pencil
 
 									li
 										.thumbnails
@@ -213,31 +284,14 @@ html
 												.date December 15, 2015
 												.user By Annac
 											.action-group
-												a(href="#" data-toggle="tooltip" data-placement="top" title="Delete exhibition").fa.fa-trash-o
-												a(href="#" data-toggle="tooltip" data-placement="top" title="Share exhibition").fa.fa-paper-plane-o
-												a(href="dashboard-exhibition-editor.html" data-toggle="tooltip" data-placement="top" title="Edit exhibition").fa.fa-pencil
-
-									li
-										.thumbnails
-											.category public
-											.wrap
-												img(src="img/content/collection-hero.png")
-											.wrap.small
-												img(src="img/content/collection-hero.png")
-											.wrap.small
-												img(src="img/content/collection-hero.png")
-										.meta
-											a(href="exhibition-view.html" title="View exhibition").header Collection title orem ipsum dolor sit amet
-											.description
-												| Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip.
-											.other-info
-												.count 20 Items
-												.date December 15, 2015
-												.user By Annac
-											.action-group
-												a(href="#" data-toggle="tooltip" data-placement="top" title="Delete exhibition").fa.fa-trash-o
-												a(href="#" data-toggle="tooltip" data-placement="top" title="Share exhibition").fa.fa-paper-plane-o
-												a(href="dashboard-exhibition-editor.html" data-toggle="tooltip" data-placement="top" title="Edit exhibition").fa.fa-pencil
+												.wrap
+													ul
+														li
+															a(href="#" data-toggle="tooltip" data-placement="top" title="Delete exhibition" ).fa.fa-trash-o
+														li
+															a(href="#" data-toggle="tooltip" data-placement="top" title="Share exhibition" ).fa.fa-paper-plane-o
+														li
+															a(href="dashboard-exhibition-editor.html" data-toggle="tooltip" data-placement="top" title="Edit exhibition" ).fa.fa-pencil
 
 								a(href="#").loadmore 
 									| load more

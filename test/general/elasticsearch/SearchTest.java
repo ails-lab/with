@@ -24,6 +24,10 @@ import java.util.Map;
 
 import model.basicDataTypes.WithAccess;
 import model.basicDataTypes.WithAccess.Access;
+import model.resources.WithResource;
+import model.resources.WithResource.WithResourceType;
+import model.resources.collection.CollectionObject;
+import model.usersAndGroups.User;
 
 import org.bson.types.ObjectId;
 import org.elasticsearch.action.search.SearchResponse;
@@ -35,6 +39,7 @@ import org.junit.Test;
 
 import com.sun.org.apache.xalan.internal.xsltc.compiler.sym;
 
+import db.DB;
 import utils.Tuple;
 import elastic.Elastic;
 import elastic.ElasticSearcher;
@@ -136,5 +141,38 @@ public class SearchTest {
 		resp.getSuggest().getSuggestion("eirimnnirecord1").forEach( (o) ->  (o.forEach( (s) -> (
 								System.out.println(s.getText() + " with score " + s.getScore())) )) );
 		System.out.println("done");
+	}
+
+	@Test
+	public void testListUserCollections() {
+
+		User u = DB.getUserDAO().getByUsername("qwerty");
+		if(u==null) return;
+
+		ElasticSearcher searcher = new ElasticSearcher();
+		searcher.addType(WithResourceType.CollectionObject.toString().toLowerCase());
+		SearchOptions options = new SearchOptions();
+		List<Tuple<ObjectId, Access>> user_acl = new ArrayList<Tuple<ObjectId,Access>>();
+		user_acl.add(new Tuple<ObjectId, WithAccess.Access>(u.getDbId(), Access.OWN));
+		options.accessList.add(user_acl);
+
+		SearchResponse resp = searcher.searchAccessibleCollections(options);
+
+
+		Tuple<List<CollectionObject>, Tuple<Integer, Integer>> tree =
+				DB.getCollectionObjectDAO().getByAcl(options.accessList, u.getDbId(), false, true, 0, 200);
+
+		assertEquals((int)resp.getHits().getTotalHits(), (int)tree.y.x);
+
+	}
+
+	@Test
+	public void testSearchMycollections() {
+
+	}
+
+	@Test
+	public void testSearchWithinCollection() {
+
 	}
 }

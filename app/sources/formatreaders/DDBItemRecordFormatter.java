@@ -37,7 +37,7 @@ import sources.utils.StringUtils;
 public class DDBItemRecordFormatter extends CulturalRecordFormatter {
 
 	public DDBItemRecordFormatter() {
-		super(FilterValuesMap.getDDBMap());
+		super(FilterValuesMap.getMap(Sources.DDB));
 		object = new CulturalObject();
 	}
 
@@ -46,7 +46,7 @@ public class DDBItemRecordFormatter extends CulturalRecordFormatter {
 		CulturalObjectData model = (CulturalObjectData) object.getDescriptiveData();
 		rec.enterContext("RDF");
 		List<Object> vals = getValuesMap().translateToCommon(CommonFilters.TYPE.getId(), rec.getStringValue("ProvidedCHO.type"));
-		WithMediaType type = WithMediaType.getType(vals.get(0).toString());
+		WithMediaType type = (Utils.hasInfo(vals))? WithMediaType.getType(vals.get(0).toString()):WithMediaType.OTHER;
 		
 		// TODO read the language
 		

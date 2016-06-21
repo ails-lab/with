@@ -62,8 +62,8 @@ import sources.core.ISpaceSource;
 import sources.core.ParallelAPICall;
 import sources.core.ParallelAPICall.Priority;
 import sources.core.RecordJSONMetadata;
-import utils.AccessManager;
-import utils.AccessManager.Action;
+//import utils.AccessManager;
+//import utils.AccessManager.Action;
 import utils.Locks;
 
 import com.aliasi.dict.MapDictionary;
@@ -87,42 +87,6 @@ import elastic.ElasticSearcher.SearchOptions;
 public class ThesaurusController extends Controller {
 
 	public static final ALogger log = Logger.of(ThesaurusController.class);
-
-	public static Status errorIfNoAccessToWithResource(
-			WithResourceDAO resourceDAO, Action action, ObjectId id) {
-		ObjectNode result = Json.newObject();
-		List<String> effectiveUserIds = AccessManager
-				.effectiveUserIds(session().get("effectiveUserIds"));
-		if (!resourceDAO.existsEntity(id)) {
-			log.error("Cannot retrieve resource from database");
-			result.put("error", "Cannot retrieve resource " + id
-					+ " from database");
-			return internalServerError(result);
-			// TODO superuser
-		} else if (!resourceDAO.hasAccess(
-				AccessManager.effectiveUserDbIds(session().get(
-						"effectiveUserIds")), action, id)
-				&& !AccessManager.isSuperUser(effectiveUserIds.get(0))) {
-			result.put("error", "User does not have " + action
-					+ " access for resource " + id);
-			return forbidden(result);
-		} else {
-			return ok();
-		}
-	}
-
-	public static Status errorIfNoAccessToCollection(Action action,
-			ObjectId collectionDbId) {
-		return errorIfNoAccessToWithResource(DB.getCollectionObjectDAO(),
-				action, collectionDbId);
-	}
-
-	public static Status errorIfNoAccessToRecord(Action action,
-			ObjectId recordId) {
-		return errorIfNoAccessToWithResource(DB.getRecordResourceDAO(), action,
-				recordId);
-	}
-
 
 	public static Result addThesaurusTerm() {
 		JsonNode json = request().body().asJson();

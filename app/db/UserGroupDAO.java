@@ -22,6 +22,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import model.resources.collection.CollectionObject;
 import model.usersAndGroups.Organization;
 import model.usersAndGroups.Page;
 import model.usersAndGroups.Project;
@@ -32,6 +33,7 @@ import org.bson.types.ObjectId;
 import org.mongodb.morphia.geo.Point;
 import org.mongodb.morphia.query.Query;
 import org.mongodb.morphia.query.UpdateOperations;
+import org.mongodb.morphia.query.UpdateResults;
 
 import play.Logger;
 import play.Logger.ALogger;
@@ -96,10 +98,8 @@ public class UserGroupDAO extends DAO<UserGroup> {
 	}
 
 	public int getGroupCount(Set<ObjectId> groupIds, GroupType groupType) {
-
 		if (groupIds.isEmpty())
 			return 0;
-
 		Query<UserGroup> q = createQuery().disableValidation().field("_id")
 				.in(groupIds);
 		if (!groupType.equals(GroupType.All)) {
@@ -138,7 +138,7 @@ public class UserGroupDAO extends DAO<UserGroup> {
 		return find(q).asList();
 	}
 
-	//Is this fast or should we use ElasticSearch
+	// Is this fast or should we use ElasticSearch
 	public List<UserGroup> getByGroupNamePrefix(String prefix) {
 		Query<UserGroup> q = this.createQuery().field("username")
 				.startsWithIgnoreCase(prefix);
@@ -146,11 +146,19 @@ public class UserGroupDAO extends DAO<UserGroup> {
 
 	}
 
-	//Is this fast or should we use ElasticSearch
+	// Is this fast or should we use ElasticSearch
 	public List<UserGroup> getByFriendlyNamePrefix(String prefix) {
 		Query<UserGroup> q = this.createQuery().field("friendlyName")
 				.startsWithIgnoreCase(prefix);
 		return find(q).asList();
+	}
+
+	public List<UserGroup> getByGroupOrFriendlyNamePrefix(String prefix) {
+		Query<UserGroup> q = this.createQuery();
+		q.or(q.criteria("username").startsWithIgnoreCase(prefix),
+				q.criteria("friendlyName").startsWithIgnoreCase(prefix));
+		return find(q).asList();
+
 	}
 
 	public void setCreated() {
@@ -180,6 +188,27 @@ public class UserGroupDAO extends DAO<UserGroup> {
 		else
 			updateOps.unset("page.coordinates");
 		this.update(q, updateOps);
+	}
+
+	public int updateFeatured(ObjectId groupId, List<ObjectId> fCols, List<ObjectId> fExhs, String op) {
+		Query<UserGroup> q = this.createQuery().field("_id").equal(groupId);
+		UpdateOperations<UserGroup> updateOps = this.createUpdateOperations()
+				.disableValidation();
+		if(op.equals("+")) {
+			if(fCols.size() != 0)
+				updateOps.addAll("page.featuredCollections", fCols, false);
+			if(fExhs.size() != 0)
+				updateOps.addAll("page.featuredExhibitions", fExhs, false);
+		} else if(op.equals("-")) {
+			if(fCols.size() != 0)
+				updateOps.removeAll("page.featuredCollections", fCols);
+			if(fExhs.size() != 0)
+				updateOps.removeAll("page.featuredExhibitions", fExhs);
+		} else {
+			log.error("This operations is not supported when updating featured");
+		}
+
+		return this.update(q, updateOps).getUpdatedCount();
 	}
 
 	public void findUrlsFromAvatars(Set<String> urls) {
@@ -222,5 +251,17 @@ public class UserGroupDAO extends DAO<UserGroup> {
 				continue;
 			urls.addAll(page.getCover().values());
 		}
+	}
+	
+	public void addFeatured(ObjectId groupId, List<ObjectId> featured) {
+		Query<UserGroup> q = this.createQuery().field("_id").equal(groupId);
+		UpdateOperations<UserGroup> updateOps = this
+				.createUpdateOperations().disableValidation();
+
+	}
+	
+	
+	public void deleteFeatured(ObjectId groupId, List<ObjectId> featured) {
+		
 	}
 }

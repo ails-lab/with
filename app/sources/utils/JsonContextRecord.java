@@ -36,12 +36,16 @@ import model.basicDataTypes.LiteralOrResource;
 import model.basicDataTypes.MultiLiteral;
 import model.basicDataTypes.MultiLiteralOrResource;
 import model.basicDataTypes.WithDate;
+import play.Logger;
+import play.Logger.ALogger;
 import play.libs.Json;
 import scala.collection.mutable.HashMap;
 import sources.core.Utils;
 
 public class JsonContextRecord {
 
+	public static final ALogger log = Logger.of( JsonContextRecord.class );
+	
 	private JsonNode rootInformation;
 	private List<String> context;
 	private Language[] languages;
@@ -59,10 +63,10 @@ public class JsonContextRecord {
 			this.rootInformation = mapper.readTree(jsonString);
 		} catch (JsonProcessingException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			log.error("",e);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			log.error("",e);
 		}
 	}
 
@@ -218,10 +222,15 @@ public class JsonContextRecord {
 			// is a index
 			if (Utils.isNumericInteger(elements[1])) {
 				int index = Integer.parseInt(elements[1]);
-				if (p.equals(""))
-					res.add(node.get(index));
-				else
-					res.add(node.path(p).get(index));
+				if (p.equals("")) {
+					JsonNode e = node.get(index);
+					if (e!=null)
+					res.add(e);
+				} else {
+					JsonNode e = node.path(p).get(index);
+					if (e!=null)
+					res.add(e);
+				}
 			} else {
 				// should be a condition:
 				if (!p.equals(""))
@@ -236,12 +245,14 @@ public class JsonContextRecord {
 						String string = elements[h];
 						ok &= checkCondition(i, current, string);
 					}
-					if (ok)
+					if (ok && current!=null)
 						res.add(current);
 				}
 			}
-		} else
-			res.add(node.path(path));
+		} else{
+			if (node.path(path)!=null)
+				res.add(node.path(path));
+		}
 		return res;
 	}
 

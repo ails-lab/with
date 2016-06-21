@@ -25,7 +25,9 @@ import model.basicDataTypes.LiteralOrResource;
 import model.basicDataTypes.ProvenanceInfo;
 import model.resources.CulturalObject;
 import model.resources.CulturalObject.CulturalObjectData;
+import model.resources.RecordResource;
 import play.Logger;
+import play.Logger.ALogger;
 import sources.FilterValuesMap;
 import sources.core.JsonContextRecordFormatReader;
 import sources.core.Utils;
@@ -33,7 +35,8 @@ import sources.utils.JsonContextRecord;
 import sources.utils.StringUtils;
 
 public abstract class CulturalRecordFormatter extends JsonContextRecordFormatReader<CulturalObject> {
-
+	public static final ALogger log = Logger.of( CulturalRecordFormatter.class );
+	
 	private FilterValuesMap valuesMap;
 
 	public CulturalRecordFormatter(FilterValuesMap valuesMap) {
@@ -65,8 +68,7 @@ public abstract class CulturalRecordFormatter extends JsonContextRecordFormatRea
 		try {
 			fillObjectFrom(text);
 		} catch (Exception e) {
-			e.printStackTrace();
-			Logger.error(e.getMessage());
+			log.error("Error Importing object from source",e );
 		}
 		List<ProvenanceInfo> provenance = object.getProvenance();
 		int index = provenance.size() - 1;
@@ -76,26 +78,13 @@ public abstract class CulturalRecordFormatter extends JsonContextRecordFormatRea
 		return object;
 	}
 	
-	public CulturalObject overwriteObjectFrom(JsonContextRecord text) {
-		object.getAdministrative().getAccess().setIsPublic(true);
-		CulturalObjectData model = (CulturalObjectData) object.getDescriptiveData();
-		if (model==null){
-			model = new CulturalObjectData();
-			object.setDescriptiveData(model);
-		}
-		model.setMetadataRights(new LiteralOrResource("http://creativecommons.org/publicdomain/zero/1.0/"));
-		model.setRdfType("http://www.europeana.eu/schemas/edm/ProvidedCHO");
-
+	private CulturalObject internalOverwriteObjectFrom(JsonContextRecord text) {
+		
 		try {
 			fillObjectFrom(text);
 		} catch (Exception e) {
-			e.printStackTrace();
-			Logger.error(e.getMessage());
+			log.error("Error Importing object from source",e);
 		}
-		List<ProvenanceInfo> provenance = object.getProvenance();
-		int index = provenance.size() - 1;
-		String resourceId = provenance.get(index).getResourceId();
-		object.getAdministrative().setExternalId(resourceId);
 
 		return object;
 	}
@@ -104,9 +93,12 @@ public abstract class CulturalRecordFormatter extends JsonContextRecordFormatRea
 		return readObjectFrom(new JsonContextRecord(text));
 	}
 	
-	public CulturalObject overwritedObjectFrom(CulturalObject object, JsonNode text) {
-		this.object = object;
-		return overwriteObjectFrom(new JsonContextRecord(text));
+	public CulturalObject overwriteObjectFrom(RecordResource object, JsonNode text) {
+		if (object==null){
+			return readObjectFrom(text);
+		} else
+		this.object = (CulturalObject)object;
+		return internalOverwriteObjectFrom(new JsonContextRecord(text));
 	}
 
 	public FilterValuesMap getValuesMap() {

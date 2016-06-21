@@ -18,40 +18,26 @@ package sources.core;
 
 
 import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.List;
 
-import org.apache.commons.io.FileUtils;
 import org.apache.http.HttpResponse;
-import org.apache.http.NameValuePair;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpUriRequest;
-import org.apache.http.entity.ContentType;
-import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.message.BasicNameValuePair;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import oauth.signpost.http.HttpParameters;
 import play.Logger;
-import play.libs.F.Function;
-import play.libs.F.Promise;
-import play.libs.ws.WS;
-import play.libs.ws.WSResponse;
+import play.Logger.ALogger;
 
 public class ApacheHttpConnector extends HttpConnector {
+	public static final ALogger log = Logger.of( ApacheHttpConnector.class );
 	
 	private static ApacheHttpConnector instance;
 	
@@ -65,16 +51,16 @@ public class ApacheHttpConnector extends HttpConnector {
 	private HttpResponse getContentResponse(HttpUriRequest method) throws IOException, ClientProtocolException {
 		URI url = method.getURI();
 		try {
-			Logger.debug("calling: " + url);
+			log.debug("calling: " + url);
 			long time = System.currentTimeMillis();
 			HttpClient client = HttpClientBuilder.create().build();
 			HttpResponse response = client.execute(method);
 			long ftime = (System.currentTimeMillis() - time) / 1000;
-			Logger.debug("waited " + ftime + " sec for: " + url);
+			log.debug("waited " + ftime + " sec for: " + url);
 			return response;
 		} catch (Exception e) {
-			Logger.error("calling: " + url);
-			Logger.error("msg: " + e.getMessage());
+			log.error("calling: " + url);
+			log.error("msg: " + e.getMessage());
 			throw e;
 		}
 	}
@@ -83,11 +69,14 @@ public class ApacheHttpConnector extends HttpConnector {
 		HttpResponse response = getContentResponse(method);
 		BufferedReader rd = new BufferedReader(new InputStreamReader(response.getEntity().getContent(), "UTF-8"));
 		ObjectMapper mapper = new ObjectMapper();
-		return mapper.readValue(rd, JsonNode.class);
+		JsonNode readValue = mapper.readValue(rd, JsonNode.class);
+//		log.debug("Response: " + readValue);
+		
+		return readValue;
 	}
 
 	public <T> T getContent(String url) throws Exception {
-		Logger.debug("1 calling: " + url);
+		log.debug("1 calling: " + url);
 		JsonNode response = getJsonContentResponse(buildGet(url));
 		return (T) response;
 	}

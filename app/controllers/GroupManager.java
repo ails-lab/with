@@ -45,7 +45,6 @@ import play.libs.Json;
 import play.mvc.Controller;
 import play.mvc.Result;
 import sources.core.HttpConnector;
-import utils.AccessManager;
 import utils.Tuple;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -56,7 +55,7 @@ import db.DAO.QueryOperator;
 import db.DB;
 
 @SuppressWarnings({ "unchecked", "rawtypes" })
-public class GroupManager extends Controller {
+public class GroupManager extends WithController {
 
 	public static final ALogger log = Logger.of(UserGroup.class);
 
@@ -90,25 +89,23 @@ public class GroupManager extends Controller {
 				error.put("error", "Invalid JSON");
 				return badRequest(error);
 			}
-			if (AccessManager
-					.effectiveUserId(session().get("effectiveUserIds"))
-					.isEmpty()) {
+			ObjectId creator = effectiveUserDbId();
+			if (creator == null) {
 				error.put("error", "No rights for group creation");
 				return forbidden(error);
 			}
-			ObjectId creator = new ObjectId(
-					AccessManager.effectiveUserId(session().get(
-							"effectiveUserIds")));
 			if (!json.has("username")) {
 				error.put("error", "Must specify name for the group");
 				return badRequest(error);
-			} else if(json.get("username").asText().length() < 3) {
-				error.put("error", "Username of " + groupType + " must contain at least 3 characters");
+			} else if (json.get("username").asText().length() < 3) {
+				error.put("error", "Username of " + groupType
+						+ " must contain at least 3 characters");
 				return badRequest(error);
 			}
-			if(json.has("friendlyName") &&
-				(json.get("friendlyName").asText().length() < 3)) {
-				error.put("error", "Short Name of  " + groupType + " must contain at least 3 characters");
+			if (json.has("friendlyName")
+					&& (json.get("friendlyName").asText().length() < 3)) {
+				error.put("error", "Short Name of  " + groupType
+						+ " must contain at least 3 characters");
 				return badRequest(error);
 			}
 
@@ -187,11 +184,9 @@ public class GroupManager extends Controller {
 			result.put("error", "Cannot retrieve group from database.");
 			return internalServerError(result);
 		}
-		ObjectId userId = new ObjectId(AccessManager.effectiveUserIds(
-				session().get("effectiveUserIds")).get(0));
-		User user = DB.getUserDAO().get(userId);
+		User user = effectiveUser();
 		Set<ObjectId> groupAdmins = group.getAdminIds();
-		if (!groupAdmins.contains(userId) && !user.isSuperUser()) {
+		if (!groupAdmins.contains(user.getDbId()) && !user.isSuperUser()) {
 			result.put("error",
 					"Only an admin of the group has the right to edit the group.");
 			return forbidden(result);
@@ -209,12 +204,10 @@ public class GroupManager extends Controller {
 		return ok(Json.toJson(DB.getUserGroupDAO().get(groupDbId)));
 	}
 
-
-
 	private static void updatePage(ObjectId groupId, JsonNode json) {
 		UserGroup group = DB.getUserGroupDAO().get(groupId);
-		if (!json.has("page") || (!(group instanceof Organization)
-				&& !(group instanceof Project)))
+		if (!json.has("page")
+				|| (!(group instanceof Organization) && !(group instanceof Project)))
 			return;
 		Page newPage = Json.fromJson(json.get("page"), Page.class);
 		if ((newPage.getAddress() == null) && (newPage.getCity() == null)
@@ -241,8 +234,9 @@ public class GroupManager extends Controller {
 		fullAddress = fullAddress.replace(" ", "+");
 		try {
 			JsonNode response = HttpConnector.getWSHttpConnector()
-					.getURLContent("https://maps.googleapis.com/maps/api/geocode/json?address="
-							+ fullAddress);
+					.getURLContent(
+							"https://maps.googleapis.com/maps/api/geocode/json?address="
+									+ fullAddress);
 			Point coordinates = GeoJson.point(
 					response.get("results").get(0).get("geometry")
 							.get("location").get("lat").asDouble(),
@@ -253,6 +247,146 @@ public class GroupManager extends Controller {
 			log.error("Cannot update coordinates of group Page", e);
 			DB.getUserGroupDAO().updatePageCoordinates(groupId, null);
 
+		}
+	}
+
+
+	/*
+	 * This method get's as input a list of Collection and Exhibition
+	 * id's and updates the featuredCollections & featuredExhibitions
+	 * lists at a Page.
+	 */
+	public static Result addFeatured(String groupId) {
+
+		ObjectNode result = Json.newObject();
+		JsonNode json = request().body().asJson();
+
+		String userId = effectiveUserId();
+		if ((userId == null) || (userId.equals(""))) {
+			result.put("error",
+					"Sorry! Only logged in users have access to this API call");
+			return forbidden(result);
+		}
+
+		if(groupId == null) {
+			result.put("error",
+					"Invalid groupId specified!");
+			return badRequest(result);
+		}
+
+		UserGroup group = DB.getUserGroupDAO().get(new ObjectId(groupId));
+		if (!group.getAdminIds().contains(new ObjectId(userId)) &&
+				!isSuperUser()) {
+			result.put("error",
+					"Only group admin or super user have the access to add featured collections/exhibitions");
+			return forbidden(result);
+		}
+
+
+		if( !json.has("fCollections") &&	!json.has("fExhibitions")) {
+			result.put("success",
+					"Nothing to update!");
+			return ok(result);
+		}
+
+
+		ArrayNode fCollections = null;
+		ArrayNode fExhibitions = null;
+		try{
+			if(json.has("fCollections"))
+				fCollections = (ArrayNode)json.withArray("fCollections");
+			if(json.has("fExhibitions"))
+					fExhibitions  = (ArrayNode)json.withArray("fExhibitions");
+		} catch(UnsupportedOperationException opex) {
+			log.debug("Unsupported cast", opex);
+			result.put("error", "Bad value on json fields 'fCollection' or 'fExhibitions'");
+			return internalServerError(result);
+		}
+
+		if((fCollections.size() == 0) &&
+			(fExhibitions.size() == 0)) {
+			result.put("success",
+					"Nothing to update!");
+			return ok(result);
+		}
+
+		List<ObjectId> fCols = new ArrayList<ObjectId>();
+		fCollections.forEach(  id -> fCols.add(new ObjectId(id.asText())) );
+		List<ObjectId> fExhs = new ArrayList<ObjectId>();
+		fExhibitions.forEach(  id -> fExhs.add(new ObjectId(id.asText())) );
+
+		if(DB.getUserGroupDAO().updateFeatured(new ObjectId(groupId), fCols, fExhs, "+") == 1) {
+			result.put("success", "Featured Data succesfully updated!");
+			return ok(result);
+		} else {
+			result.put("error", "Featured Data were not updated due to system error");
+			return internalServerError(result);
+		}
+	}
+
+	public static Result removeFeatured(String groupId) {
+		ObjectNode result = Json.newObject();
+		JsonNode json = request().body().asJson();
+
+		String userId = effectiveUserId();
+		if ((userId == null) || (userId.equals(""))) {
+			result.put("error",
+					"Sorry! Only logged in users have access to this API call");
+			return forbidden(result);
+		}
+
+		if(groupId == null) {
+			result.put("error",
+					"Invalid groupId specified!");
+			return badRequest(result);
+		}
+
+		UserGroup group = DB.getUserGroupDAO().get(new ObjectId(groupId));
+		if (!group.getAdminIds().contains(new ObjectId(userId)) &&
+				!isSuperUser()) {
+			result.put("error",
+					"Only admin of the group or the super user have the right to delete featured collections/exhibitions");
+			return forbidden(result);
+		}
+
+		if( !json.has("fCollections") && !json.has("fExhibitions")) {
+			result.put("success",
+					"Nothing to update!");
+			return ok(result);
+		}
+
+
+		ArrayNode fCollections = null;
+		ArrayNode fExhibitions = null;
+		try{
+			if(json.has("fCollections"))
+				fCollections = (ArrayNode)json.withArray("fCollections");
+			if(json.has("fExhibitions"))
+					fExhibitions  = (ArrayNode)json.withArray("fExhibitions");
+		} catch(UnsupportedOperationException opex) {
+			log.debug("Unsupported cast", opex);
+			result.put("error", "Bad value on json fields 'fCollection' or 'fExhibitions'");
+			return internalServerError(result);
+		}
+
+		if((fCollections.size() == 0) &&
+			(fExhibitions.size() == 0)) {
+			result.put("success",
+					"Nothing to update!");
+			return ok(result);
+		}
+
+		List<ObjectId> fCols = new ArrayList<ObjectId>();
+		fCollections.forEach(  id -> fCols.add(new ObjectId(id.asText())) );
+		List<ObjectId> fExhs = new ArrayList<ObjectId>();
+		fExhibitions.forEach(  id -> fExhs.add(new ObjectId(id.asText())) );
+
+		if(DB.getUserGroupDAO().updateFeatured(new ObjectId(groupId), fCols, fExhs, "-") == 1) {
+			result.put("success", "Featured Data succesfully updated!");
+			return ok(result);
+		} else {
+			result.put("error", "Featured Data were not updated due to system error");
+			return internalServerError(result);
 		}
 	}
 
@@ -267,8 +401,7 @@ public class GroupManager extends Controller {
 	public static Result deleteGroup(String groupId) {
 
 		ObjectNode result = Json.newObject();
-		String userId = AccessManager.effectiveUserId(session().get(
-				"effectiveUserIds"));
+		String userId = effectiveUserId();
 		if ((userId == null) || (userId.equals(""))) {
 			result.put("error",
 					"Only creator of the group has the right to delete the group");
@@ -308,7 +441,7 @@ public class GroupManager extends Controller {
 	public static Result getGroup(String groupId) {
 		try {
 			UserGroup group = DB.getUserGroupDAO().get(new ObjectId(groupId));
-			return ok(Json.toJson(group));
+			return ok(userGroupToJSON(group));
 		} catch (Exception e) {
 			log.error("Cannot retrieve group from database!", e);
 			return internalServerError("Cannot retrieve group from database!");
@@ -370,13 +503,14 @@ public class GroupManager extends Controller {
 				g.put("totalExhibitions", hits.y);
 			}
 			boolean add = true;
-			for(int i=0; i<result.size(); i++) {
-				if(group.getDbId().toString().equals(result.get(i).get("dbId").asText())) {
-					add=false;
+			for (int i = 0; i < result.size(); i++) {
+				if (group.getDbId().toString()
+						.equals(result.get(i).get("dbId").asText())) {
+					add = false;
 					break;
 				}
 			}
-			if(add)
+			if (add)
 				result.add(g);
 		}
 		return result;
@@ -463,14 +597,19 @@ public class GroupManager extends Controller {
 			return badRequest(result);
 		}
 		if ((category.equals("users") || category.equals("both"))
-				&& (group.getUsers().size() > group.getAdminIds().size())) {
-			group.getUsers().removeAll(group.getAdminIds());
+				&& (group.getUsers().size() >= group.getAdminIds().size())) {
+		//	group.getUsers().removeAll(group.getAdminIds());
 			User u;
 			for (ObjectId oid : group.getUsers()) {
 				if ((u = DB.getUserDAO().get(oid)) == null) {
 					log.error("No User with dbId: " + oid);
 				}
-				users.add(userOrGroupJson(u));
+				ObjectNode userJSON = userOrGroupJson(u);
+				if (group.getAdminIds().contains(oid))
+					userJSON.put("admin", true);
+				else
+					userJSON.put("admin", false);
+				users.add(userJSON);
 			}
 		}
 		if ((category.equals("groups") || category.equals("both"))) {
@@ -503,47 +642,57 @@ public class GroupManager extends Controller {
 		return userJSON;
 	}
 
-	public static ArrayNode userGroupsToJSON(List<UserGroup> groups) {
-		ArrayNode result = Json.newObject().arrayNode();
-		for (UserGroup group : groups) {
-			ObjectNode g = (ObjectNode) Json.toJson(group);
+	public static ObjectNode userGroupToJSON(UserGroup group) {
+		ObjectNode g = (ObjectNode) Json.toJson(group);
 
-			ObjectId userId = AccessManager.effectiveUserDbId(session().get(
-					"effectiveUserIds"));
+		ObjectId userId = effectiveUserDbId();
+		if(userId != null) {
 			User user = DB.getUserDAO().get(userId);
 			g.put("firstName", user.getFirstName());
 			g.put("lastName", user.getLastName());
-			Query<CollectionObject> q = DB.getCollectionObjectDAO()
-					.createQuery();
-			// Criteria criteria1 =
-			// DB.getCollectionObjectDAO().formAccessLevelQuery(new
-			// Tuple(restrictedById, Access.READ), QueryOperator.GTE);
-			Criteria criteria2 = DB.getCollectionObjectDAO()
-					.formAccessLevelQuery(
-							new Tuple(group.getDbId(), Access.READ),
-							QueryOperator.GT);
-			// Criteria criteria3 = DB.getCollectionObjectDAO().createQuery()
-			// .criteria("administrative.access.isPublic").equal(true);
-			// q.and(criteria1, criteria2);
-			q.and(criteria2);
-			Tuple<Integer, Integer> hits = DB.getCollectionObjectDAO().getHits(
-					q, Optional.ofNullable(null));
-			ObjectNode count = Json.newObject();
-			count.put("Collections", hits.x);
-			count.put("Exhibitions", hits.y);
-			g.put("count", count);
-			result.add(g);
 		}
+		Query<CollectionObject> q = DB.getCollectionObjectDAO().createQuery();
+		// Criteria criteria1 =
+		// DB.getCollectionObjectDAO().formAccessLevelQuery(new
+		// Tuple(restrictedById, Access.READ), QueryOperator.GTE);
+		Criteria criteria2 = DB.getCollectionObjectDAO().formAccessLevelQuery(
+				new Tuple(group.getDbId(), Access.READ), QueryOperator.GT);
+		// Criteria criteria3 = DB.getCollectionObjectDAO().createQuery()
+		// .criteria("administrative.access.isPublic").equal(true);
+		// q.and(criteria1, criteria2);
+		q.and(criteria2);
+		Tuple<Integer, Integer> hits = DB.getCollectionObjectDAO().getHits(q,
+				Optional.ofNullable(null));
+		ObjectNode count = Json.newObject();
+		count.put("Collections", hits.x);
+		count.put("Exhibitions", hits.y);
+		g.put("count", count);
+		return g;
+	}
+
+	public static ArrayNode userGroupsToJSON(List<UserGroup> groups) {
+		ArrayNode result = Json.newObject().arrayNode();
+		for (UserGroup group : groups) {
+			result.add(userGroupToJSON(group));
+		}
+		return result;
+	}
+
+	public static ObjectNode groupsWithCount(List<UserGroup> groups,
+			int groupCount) {
+		ObjectNode result = Json.newObject();
+		result.put("groups", userGroupsToJSON(groups));
+		result.put("groupCount", groupCount);
 		return result;
 	}
 
 	public static Result listUserGroups(String groupType, int offset,
 			int count, boolean belongsOnly) {
+
 		List<UserGroup> groups = new ArrayList<UserGroup>();
 		try {
 			GroupType type = GroupType.valueOf(groupType);
-			ObjectId userId = AccessManager.effectiveUserDbId(session().get(
-					"effectiveUserIds"));
+			ObjectId userId = effectiveUserDbId();
 			if (userId == null) {
 				groups = DB.getUserGroupDAO().findPublic(type, offset, count);
 				return ok(Json.toJson(groups));
@@ -552,10 +701,10 @@ public class GroupManager extends Controller {
 			Set<ObjectId> userGroupsIds = user.getUserGroupsIds();
 			groups = DB.getUserGroupDAO().findByIds(userGroupsIds, type,
 					offset, count);
-			if (groups.size() == count)
-				return ok(userGroupsToJSON(groups));
 			int userGroupCount = DB.getUserGroupDAO().getGroupCount(
 					userGroupsIds, type);
+			if (groups.size() == count)
+				return ok(groupsWithCount(groups, userGroupCount));
 			if (offset < userGroupCount)
 				offset = 0;
 			else
@@ -564,11 +713,9 @@ public class GroupManager extends Controller {
 			if (!belongsOnly)
 				groups.addAll(DB.getUserGroupDAO().findPublicWithRestrictions(
 						type, offset, count, userGroupsIds));
-			return ok(userGroupsToJSON(groups));
-			// return ok(Json.toJson(groups));
+			return ok(groupsWithCount(groups, userGroupCount));
 		} catch (Exception e) {
-			return ok(userGroupsToJSON(groups));
-			// return ok(Json.toJson(groups));
+			return ok(groupsWithCount(groups, groups.size()));
 		}
 	}
 }

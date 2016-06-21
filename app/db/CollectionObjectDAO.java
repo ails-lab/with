@@ -38,6 +38,7 @@ import model.resources.WithResource;
 import model.resources.WithResource.WithResourceType;
 
 import org.bson.types.ObjectId;
+import org.elasticsearch.common.lang3.ArrayUtils;
 import org.mongodb.morphia.query.Criteria;
 import org.mongodb.morphia.query.CriteriaContainer;
 import org.mongodb.morphia.query.Query;
@@ -52,8 +53,10 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.mongodb.BasicDBObject;
 
 import controllers.MediaController;
+import db.DAO.QueryOperator;
 import elastic.Elastic;
 import elastic.ElasticUpdater;
 
@@ -102,11 +105,19 @@ public class CollectionObjectDAO extends WithResourceDAO<CollectionObject> {
 		this.update(q, updateOps);
 	}
 
-	public List<RecordResource> getFirstEntries(ObjectId dbId, int upperBound) {
-		ArrayList<String> retrievedFields = new ArrayList<String>();
-		retrievedFields.add("media");
-		return DB.getRecordResourceDAO().getByCollectionBetweenPositions(dbId,
-				0, upperBound, retrievedFields);
+
+	public CollectionObject getSliceOfCollectedResources(ObjectId id, int startIdx, int slice) {
+		BasicDBObject query = new BasicDBObject("_id", id);
+		BasicDBObject projections = new BasicDBObject();
+		projections.put("collectedResources", 1);
+		projections.put("descriptiveData", 0);
+		projections.put("media", 0);
+		projections.put("usage", 0);
+		projections.put("collectedResources", new BasicDBObject("$slice", new int[] { startIdx, slice }));
+
+
+		return DB.getMorphia().fromDBObject(CollectionObject.class,
+				this.getCollection().findOne(query, projections));
 	}
 
 	public void editCollection(ObjectId dbId, JsonNode json) {
@@ -267,6 +278,16 @@ public class CollectionObjectDAO extends WithResourceDAO<CollectionObject> {
 		return getByAcl(criteria, accessedByUserOrGroup, creator, isExhibition,
 				totalHits, offset, count);
 	}
+	
+	public List<CollectionObject> getAccessibleByGroupAndPublic(ObjectId groupId) {
+		Query<CollectionObject> q = this.createQuery().disableValidation()
+				.retrievedFields(true, "_id", "administrative.entryCount")
+				.field("descriptiveData.label.default.0")
+				.notEqual("_favorites").field("administrative.access.isPublic").equal(true);
+		q.field("resourceType").equal(WithResourceType.SimpleCollection);
+		q.and(formAccessLevelQuery(new Tuple(groupId, Access.READ), QueryOperator.GTE));
+		return this.find(q).asList();
+	}
 
 	public Tuple<List<CollectionObject>, Tuple<Integer, Integer>> getSharedAndByAcl(
 			List<List<Tuple<ObjectId, Access>>> accessedByUserOrGroup,
@@ -293,6 +314,7 @@ public class CollectionObjectDAO extends WithResourceDAO<CollectionObject> {
 			ObjectId creator, Boolean isExhibition, boolean totalHits,
 			int offset, int count) {
 		Query<CollectionObject> q = this.createQuery().disableValidation()
+				.retrievedFields(false, "collectedResources")
 				.field("descriptiveData.label.default.0")
 				.notEqual("_favorites");
 		q.order("-administrative.lastModified").offset(offset).limit(count);
@@ -315,7 +337,7 @@ public class CollectionObjectDAO extends WithResourceDAO<CollectionObject> {
 					this.find(q).asList(), null);
 		}
 	}
-
+	
 	public ObjectNode countMyAndSharedCollections(
 			List<ObjectId> loggedInEffIds) {
 		ObjectNode result = Json.newObject().objectNode();
@@ -484,7 +506,7 @@ public class CollectionObjectDAO extends WithResourceDAO<CollectionObject> {
 			HashMap<MediaVersion, EmbeddedMediaObject> media = recordMedia
 					.get(0);
 			if (media.containsKey(MediaVersion.Original)
-					&& !media.containsKey(MediaVersion.Thumbnail) 
+					&& !media.containsKey(MediaVersion.Thumbnail)
 					&& media.get(MediaVersion.Original).getType()
 					.equals(WithMediaType.IMAGE)) {
 				String originalUrl = media.get(MediaVersion.Original).getUrl();
@@ -517,9 +539,8 @@ public class CollectionObjectDAO extends WithResourceDAO<CollectionObject> {
 
 	}
 
-	public void updateContextData(ContextData contextData, int position)
+	public void updateContextData(ObjectId collectionId, ContextData contextData, int position)
 			throws Exception {
-		ObjectId collectionId = contextData.getTarget().getCollectionId();
 		ObjectId recordId = contextData.getTarget().getRecordId();
 		List<ContextData<ContextDataBody>> collectedResources = this
 				.getById(collectionId, Arrays.asList("collectedResources"))

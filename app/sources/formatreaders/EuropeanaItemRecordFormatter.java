@@ -16,6 +16,8 @@
 
 package sources.formatreaders;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.List;
 
 import model.EmbeddedMediaObject;
@@ -37,7 +39,7 @@ import sources.utils.StringUtils;
 public class EuropeanaItemRecordFormatter extends CulturalRecordFormatter {
 
 	public EuropeanaItemRecordFormatter() {
-		super(FilterValuesMap.getEuropeanaMap());
+		super(FilterValuesMap.getMap(Sources.Europeana));
 		object = new CulturalObject();
 	}
 
@@ -124,21 +126,38 @@ public class EuropeanaItemRecordFormatter extends CulturalRecordFormatter {
 				new ProvenanceInfo(Sources.Europeana.toString(),  uri,recID));
 
 		List<String> theViews = rec.getStringArrayValue("hasView");
-		LiteralOrResource ro = rec.getLiteralOrResourceValue("edmObject");
 		
 		rec.exitContext();
 
 		model.getDates().addAll(rec.getWithDateArrayValue("year"));
 		LiteralOrResource isShownBy = model.getIsShownBy();
 		String uri2 = isShownBy==null?null:isShownBy.getURI();
-		String uri3 = ro==null?null:ro.getURI();
-		if (Utils.hasInfo(uri3)){
+		LiteralOrResource ro = rec.getLiteralOrResourceValue("edmObject","aggregations[0].edmObject");
+		String uriThumbnail = ro==null?null:ro.getURI();
+		if (Utils.hasInfo(uriThumbnail)){
 			EmbeddedMediaObject medThumb = new EmbeddedMediaObject();
-			medThumb.setUrl(uri3);
+			medThumb.setUrl(uriThumbnail);
 			medThumb.setType(type);
 			medThumb.setOriginalRights(rights);
 			medThumb.setWithRights(withMediaRights);
 			object.addMedia(MediaVersion.Thumbnail, medThumb);
+			
+			// add another one from europeana cache.
+			
+			try {
+				EmbeddedMediaObject med = new EmbeddedMediaObject();
+				med.setType(type);
+				String cacheURL = "https://www.europeana.eu/api/v2/thumbnail-by-url.json?size=w400&type=IMAGE&uri="
+						+ URLEncoder.encode(uriThumbnail, "UTF-8");
+				med.setUrl(cacheURL );
+				med.setOriginalRights(rights);
+				med.setWithRights(withMediaRights);
+				object.addMediaView(MediaVersion.Thumbnail, med);
+				log.debug("added THUMBNAIL ", cacheURL);
+			} catch (UnsupportedEncodingException e) {
+				log.error("Bad encoding ", e);
+			}
+			
 		}
 		
 		if (Utils.hasInfo(uri2)){

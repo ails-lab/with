@@ -42,9 +42,15 @@ libraryDependencies ++= Seq(
  "com.jayway.jsonpath" % "json-path" % "2.0.0",
  "junit" % "junit" % "4.11",
  "org.im4java" % "im4java" % "1.4.0",
+"io.dropwizard.metrics" % "metrics-core" % "3.1.2",
+"io.dropwizard.metrics" % "metrics-graphite" % "3.1.2",
+"org.elasticsearch" % "metrics-elasticsearch-reporter" % "2.0",
  "net.coobird" % "thumbnailator" % "0.4.8",
- "org.apache.opennlp" % "opennlp-tools" % "1.6.0",
+  "org.apache.opennlp" % "opennlp-tools" % "1.6.0",
  "edu.stanford.nlp" % "stanford-corenlp" % "3.6.0",
  "edu.stanford.nlp" % "stanford-corenlp" % "3.6.0" classifier "models",
- "de.julielab" % "aliasi-lingpipe" % "4.1.0"
+ "de.julielab" % "aliasi-lingpipe" % "4.1.0",
+ "com.codahale.metrics" % "metrics-core" % "3.0.2"
 )
+
+sources in doc in Compile := List() 

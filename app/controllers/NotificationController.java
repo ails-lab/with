@@ -20,6 +20,7 @@ import java.sql.Timestamp;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
+
 import model.usersAndGroups.User;
 import model.usersAndGroups.UserGroup;
 import notifications.Notification;
@@ -36,17 +37,18 @@ import play.libs.Json;
 import play.mvc.Controller;
 import play.mvc.Result;
 import play.mvc.WebSocket;
-import utils.AccessManager;
+import utils.MetricsUtils;
 import utils.NotificationCenter;
 import actors.NotificationActor;
 
+import com.codahale.metrics.Timer;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import db.DB;
 
-public class NotificationController extends Controller {
+public class NotificationController extends WithController {
 	public static final ALogger log = Logger.of(NotificationController.class);
 
 	public static WebSocket<JsonNode> socket() {
@@ -105,11 +107,11 @@ public class NotificationController extends Controller {
 			return internalServerError(result);
 		}
 	}
-	
+
 	public static Result respondToRequest(String notificationId, boolean accept) {
 		ObjectNode result = Json.newObject();
 		try {
-			String currentUserId = session().get("user");
+			String currentUserId = loggedInUser();
 			if (currentUserId == null) {
 				result.put("error", "User is not authorized for this action");
 				return forbidden(result);
@@ -154,7 +156,7 @@ public class NotificationController extends Controller {
 					if (!accept) {
 						//TODO: downgrade to previous access
 						ObjectId resourceId = resourceNotification.getResource();
-						RightsController.changeAccess(resourceId, shareInfo.getUserOrGroup(), shareInfo.getPreviousAccess(), shareInfo.getOwnerEffectiveIds(), 
+						RightsController.changeAccess(resourceId, shareInfo.getUserOrGroup(), shareInfo.getPreviousAccess(), shareInfo.getOwnerEffectiveIds(),
 								true, false);
 						ResourceNotification newNotification = new ResourceNotification();
 						newNotification.setActivity(Activity.COLLECTION_REJECTED);
@@ -174,7 +176,7 @@ public class NotificationController extends Controller {
 					result.put("error", "User is not authorized for this action");
 					return internalServerError(result);
 				}
-				
+
 			default:
 				result.put("error", "Notification does not require acceptance");
 				return badRequest(result);
@@ -187,10 +189,11 @@ public class NotificationController extends Controller {
 	}
 
 	public static Result getUserNotifications() {
+		final Timer timer = MetricsUtils.registry.timer(
+				MetricsUtils.registry.name(Notification.class, "getUserNotification", "time"));
+		final Timer.Context timeContext = timer.time();
 		try {
-			ObjectId userId = new ObjectId(
-					AccessManager.effectiveUserId(session().get(
-							"effectiveUserIds")));
+			ObjectId userId = new ObjectId(loggedInUser());
 			Set<ObjectId> userOrGroupIds = new HashSet<ObjectId>();
 			Set<ObjectId> groups = DB.getUserDAO().get(userId)
 					.getAdminInGroups();
@@ -208,12 +211,16 @@ public class NotificationController extends Controller {
 			} else {
 				notifications = unreadNotifications;
 			}
+
 			return ok(Json.toJson(notifications));
+
 		} catch (Exception e) {
 			ObjectNode result = Json.newObject();
 			result.put("error", e.getMessage());
 			return internalServerError(result);
 
+		} finally {
+			timeContext.stop();
 		}
 	}
 
@@ -246,8 +253,7 @@ public class NotificationController extends Controller {
 	}
 
 	public static Result sendMessage(String receiverId) {
-		ObjectId sender = new ObjectId(AccessManager.effectiveUserId(session()
-				.get("effectiveUserIds")));
+		ObjectId sender = new ObjectId(loggedInUser());
 		JsonNode json = request().body().asJson();
 		if (!json.has("message")) {
 			ObjectNode error = Json.newObject();

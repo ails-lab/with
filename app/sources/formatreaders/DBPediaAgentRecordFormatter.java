@@ -35,6 +35,7 @@ import model.resources.AgentObject;
 import model.resources.AgentObject.AgentData;
 import model.resources.CulturalObject;
 import model.resources.CulturalObject.CulturalObjectData;
+import model.resources.RecordResource;
 import play.Logger;
 import sources.FilterValuesMap;
 import sources.core.Utils;
@@ -43,8 +44,8 @@ import sources.utils.StringUtils;
 
 public class DBPediaAgentRecordFormatter extends AgentRecordFormatter {
 
-	public DBPediaAgentRecordFormatter(FilterValuesMap map) {
-		super(map);
+	public DBPediaAgentRecordFormatter() {
+		super(FilterValuesMap.getMap(Sources.DBPedia));
 		object = new AgentObject();
 	}
 

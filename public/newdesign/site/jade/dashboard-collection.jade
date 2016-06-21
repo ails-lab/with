@@ -34,22 +34,37 @@ html
 						section.collection
 
 							section.header
-								// collection picker
-								a#picker(href="#", data-toggle='dropdown').picker
-									span.text My Collection
-									span.arrow
 
-								ul.dropdown-menu(aria-labelledby='picker')
-									li 
-										a(href="#") My Collection
-									li 
-										a(href="#") Collection shared with me
 
 
 								// new collection
 								a(href="#").new
 									span.plus
-									span.text New Collection
+									span.text New collection
+
+								// import picker wrap
+								.picker-wrap
+									a#picker(href="#", data-toggle='dropdown').picker
+										span.text Import Collection
+										span.arrow
+
+									ul.dropdown-menu(aria-labelledby='picker')
+										li 
+											a(href="#") Europeana collection
+										li 
+											a(href="#") Europeana search
+
+								// tabs
+								ul.typeselect
+									li.active
+										a( href="#" title="Show only my collection") My collection
+									li
+										a( href="#" title="Show collection shared with me") Collection shared with me		
+								
+
+								
+
+								
 
 							// message
 							section.message
@@ -69,6 +84,11 @@ html
 
 								// collection main header
 								.list-head
+
+									// item count
+									span.item-count 7 collections
+
+									// sort
 									.sort
 										span Sort by
 										a#sorting(href="#", data-toggle='dropdown')
@@ -86,8 +106,13 @@ html
 										a(href="#" data-toggle="tooltip" data-placement="top" title="List view").fa.fa-bars
 										a(href="#" data-toggle="tooltip" data-placement="top" title="Grid view").fa.fa-th.active
 
+									// search
+									.filtertype
+										img.mag( src="img/ui/ic-mag.png" )
+										input( type="text" class="filtertext" placeholder="Search collection" )
+
 								// loader
-								.loader
+								.loader.hidden
 									img( src="img/ui/ic-loader.gif" )
 
 								// listing
@@ -96,7 +121,8 @@ html
 										.thumbnails
 											.category private
 											.wrap
-												img(src="img/content/collection-hero.png")
+												img(src="img/ui/ic-noimage.png")
+
 											.wrap.small
 												img(src="img/content/collection-hero.png")
 											.wrap.small
@@ -109,9 +135,14 @@ html
 												.date December 15, 2015
 												.user By Annac
 											.action-group
-												a(href="#" data-toggle="tooltip" data-placement="top" title="Delete collection" ).fa.fa-trash-o
-												a(href="#" data-toggle="tooltip" data-placement="top" title="Share collection" ).fa.fa-paper-plane-o
-												a(href="#" data-toggle="tooltip" data-placement="top" title="Edit collection" ).fa.fa-pencil.editaction
+												.wrap
+													ul
+														li
+															a(href="#" data-toggle="tooltip" data-placement="top" title="Delete collection" ).fa.fa-trash-o
+														li
+															a(href="#" data-toggle="tooltip" data-placement="top" title="Share collection" ).fa.fa-paper-plane-o
+														li
+															a(href="#" data-toggle="tooltip" data-placement="top" title="Edit collection" ).fa.fa-pencil.editaction
 
 									li
 										.thumbnails
@@ -131,9 +162,14 @@ html
 												.date December 15, 2015
 												.user By Annac
 											.action-group
-												a(href="#" data-toggle="tooltip" data-placement="top" title="Delete collection" ).fa.fa-trash-o
-												a(href="#" data-toggle="tooltip" data-placement="top" title="Share collection" ).fa.fa-paper-plane-o
-												a(href="#" data-toggle="tooltip" data-placement="top" title="Edit collection" ).fa.fa-pencil.editaction
+												.wrap
+													ul
+														li
+															a(href="#" data-toggle="tooltip" data-placement="top" title="Delete collection" ).fa.fa-trash-o
+														li
+															a(href="#" data-toggle="tooltip" data-placement="top" title="Share collection" ).fa.fa-paper-plane-o
+														li
+															a(href="#" data-toggle="tooltip" data-placement="top" title="Edit collection" ).fa.fa-pencil.editaction
 
 									li
 										.thumbnails
@@ -153,9 +189,14 @@ html
 												.date December 15, 2015
 												.user By Annac
 											.action-group
-												a(href="#" data-toggle="tooltip" data-placement="top" title="Delete collection" ).fa.fa-trash-o
-												a(href="#" data-toggle="tooltip" data-placement="top" title="Share collection" ).fa.fa-paper-plane-o
-												a(href="#" data-toggle="tooltip" data-placement="top" title="Edit collection" ).fa.fa-pencil.editaction
+												.wrap
+													ul
+														li
+															a(href="#" data-toggle="tooltip" data-placement="top" title="Delete collection" ).fa.fa-trash-o
+														li
+															a(href="#" data-toggle="tooltip" data-placement="top" title="Share collection" ).fa.fa-paper-plane-o
+														li
+															a(href="#" data-toggle="tooltip" data-placement="top" title="Edit collection" ).fa.fa-pencil.editaction
 
 									li
 										.thumbnails
@@ -175,9 +216,14 @@ html
 												.date December 15, 2015
 												.user By Annac
 											.action-group
-												a(href="#" data-toggle="tooltip" data-placement="top" title="Delete collection" ).fa.fa-trash-o
-												a(href="#" data-toggle="tooltip" data-placement="top" title="Share collection" ).fa.fa-paper-plane-o
-												a(href="#" data-toggle="tooltip" data-placement="top" title="Edit collection" ).fa.fa-pencil.editaction
+												.wrap
+													ul
+														li
+															a(href="#" data-toggle="tooltip" data-placement="top" title="Delete collection" ).fa.fa-trash-o
+														li
+															a(href="#" data-toggle="tooltip" data-placement="top" title="Share collection" ).fa.fa-paper-plane-o
+														li
+															a(href="#" data-toggle="tooltip" data-placement="top" title="Edit collection" ).fa.fa-pencil.editaction
 
 									li
 										.thumbnails
@@ -197,9 +243,14 @@ html
 												.date December 15, 2015
 												.user By Annac
 											.action-group
-												a(href="#" data-toggle="tooltip" data-placement="top" title="Delete collection" ).fa.fa-trash-o
-												a(href="#" data-toggle="tooltip" data-placement="top" title="Share collection" ).fa.fa-paper-plane-o
-												a(href="#" data-toggle="tooltip" data-placement="top" title="Edit collection" ).fa.fa-pencil.editaction
+												.wrap
+													ul
+														li
+															a(href="#" data-toggle="tooltip" data-placement="top" title="Delete collection" ).fa.fa-trash-o
+														li
+															a(href="#" data-toggle="tooltip" data-placement="top" title="Share collection" ).fa.fa-paper-plane-o
+														li
+															a(href="#" data-toggle="tooltip" data-placement="top" title="Edit collection" ).fa.fa-pencil.editaction
 
 									li
 										.thumbnails
@@ -219,10 +270,14 @@ html
 												.date December 15, 2015
 												.user By Annac
 											.action-group
-												a(href="#" data-toggle="tooltip" data-placement="top" title="Delete collection" ).fa.fa-trash-o
-												a(href="#" data-toggle="tooltip" data-placement="top" title="Share collection" ).fa.fa-paper-plane-o
-												a(href="#" data-toggle="tooltip" data-placement="top" title="Edit collection" ).fa.fa-pencil.editaction
-
+												.wrap
+													ul
+														li
+															a(href="#" data-toggle="tooltip" data-placement="top" title="Delete collection" ).fa.fa-trash-o
+														li
+															a(href="#" data-toggle="tooltip" data-placement="top" title="Share collection" ).fa.fa-paper-plane-o
+														li
+															a(href="#" data-toggle="tooltip" data-placement="top" title="Edit collection" ).fa.fa-pencil.editaction
 									li
 										.thumbnails
 											.category public
@@ -241,9 +296,14 @@ html
 												.date December 15, 2015
 												.user By Annac
 											.action-group
-												a(href="#" data-toggle="tooltip" data-placement="top" title="Delete collection" ).fa.fa-trash-o
-												a(href="#" data-toggle="tooltip" data-placement="top" title="Share collection" ).fa.fa-paper-plane-o
-												a(href="#" data-toggle="tooltip" data-placement="top" title="Edit collection" ).fa.fa-pencil.editaction
+												.wrap
+													ul
+														li
+															a(href="#" data-toggle="tooltip" data-placement="top" title="Delete collection" ).fa.fa-trash-o
+														li
+															a(href="#" data-toggle="tooltip" data-placement="top" title="Share collection" ).fa.fa-paper-plane-o
+														li
+															a(href="#" data-toggle="tooltip" data-placement="top" title="Edit collection" ).fa.fa-pencil.editaction
 
 								a(href="#").loadmore 
 									| load more

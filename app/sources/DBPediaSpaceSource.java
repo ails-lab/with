@@ -56,10 +56,10 @@ public class DBPediaSpaceSource extends ISpaceSource {
 	
 	public DBPediaSpaceSource() {
 		super(Sources.DBPedia);
-		formatreader = new DBPediaAgentRecordFormatter(FilterValuesMap.getDBPediaMap());
+		formatreader = new DBPediaAgentRecordFormatter();
 		
 		agentformatreader = formatreader; 
-		placeformatreader = new DBPediaPlaceRecordFormatter(FilterValuesMap.getDBPediaMap());
+		placeformatreader = new DBPediaPlaceRecordFormatter();
 	}
 	
 	public String getHttpQuery(CommonQuery q) {

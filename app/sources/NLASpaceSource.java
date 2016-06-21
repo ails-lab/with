@@ -27,12 +27,13 @@ import com.fasterxml.jackson.databind.JsonNode;
 import model.basicDataTypes.ProvenanceInfo.Sources;
 import model.resources.RecordResource;
 import model.resources.WithResource;
+import play.Logger;
+import play.Logger.ALogger;
 import play.libs.Json;
 import sources.core.AdditionalQueryModifier;
 import sources.core.CommonFilterLogic;
 import sources.core.CommonFilters;
 import sources.core.CommonQuery;
-import sources.core.HttpConnector;
 import sources.core.ISpaceSource;
 import sources.core.QueryBuilder;
 import sources.core.QueryModifier;
@@ -42,15 +43,14 @@ import sources.core.SourceResponse;
 import sources.core.Utils;
 import sources.core.Utils.Pair;
 import sources.formatreaders.NLARecordFormatter;
-import utils.ListUtils;
 import utils.Serializer;
 
 public class NLASpaceSource extends ISpaceSource {
-
+	public static final ALogger log = Logger.of( NLASpaceSource.class);
+	
 	public NLASpaceSource() {
 		super(Sources.NLA);
 		apiKey = "SECRET_KEY";
-		vmap = FilterValuesMap.getNLAMap();
 		addDefaultQueryModifier(CommonFilters.TYPE.getId(), qfwriter("format"));
 		addDefaultQueryModifier(CommonFilters.YEAR.getId(), qfwriterYEAR());
 
@@ -110,6 +110,8 @@ public class NLASpaceSource extends ISpaceSource {
 
 	@Override
 	public SourceResponse getResults(CommonQuery q) {
+		if (!Utils.hasInfo(q.searchTerm) || q.searchTerm.equals("*"))
+			q.searchTerm = " ";
 		SourceResponse res = new SourceResponse();
 		res.source = getSourceName().toString();
 		String httpQuery = getHttpQuery(q);
@@ -128,7 +130,7 @@ public class NLASpaceSource extends ISpaceSource {
 				for (int i = 0; i < pa.size(); i++) {
 					JsonNode o = pa.get(i);
 					if (!o.path("name").asText().equals("people")) {
-						System.out.print(o.path("name").asText() + " ");
+						log.debug(o.path("name").asText() );
 						res.totalCount += Utils.readIntAttr(o.path("records"), "totalCount", true);
 						res.count += Utils.readIntAttr(o.path("records"), "n", true);
 						res.startIndex = Utils.readIntAttr(o.path("records"), "s", true);
@@ -175,8 +177,8 @@ public class NLASpaceSource extends ISpaceSource {
 				}
 
 				res.filtersLogic = new ArrayList<>();
-				// res.filtersLogic.add(type);
-				// res.filtersLogic.add(year);
+				 res.filtersLogic.add(type);
+				 res.filtersLogic.add(year);
 
 				// System.out.println(type);
 			} catch (Exception e) {
@@ -198,7 +200,7 @@ public class NLASpaceSource extends ISpaceSource {
 			JsonNode record = response;
 			if (record != null) {
 				jsonMetadata.add(new RecordJSONMetadata(Format.JSON_NLA, record.toString()));
-				String json = Json.toJson(formatreader.readObjectFrom(record)).toString();
+				String json = Json.toJson(formatreader.overwriteObjectFrom(fullRecord,record)).toString();
 				jsonMetadata.add(new RecordJSONMetadata(Format.JSON_WITH, json));
 			}
 			Document xmlResponse = getHttpConnector().getURLContentAsXML(

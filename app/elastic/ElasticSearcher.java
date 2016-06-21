@@ -27,6 +27,9 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import model.basicDataTypes.WithAccess.Access;
+import play.Logger;
+import play.Logger.ALogger;
+
 import org.bson.types.ObjectId;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
@@ -46,6 +49,8 @@ import org.elasticsearch.index.query.FilteredQueryBuilder;
 import org.elasticsearch.index.query.MatchAllQueryBuilder;
 import org.elasticsearch.index.query.MatchQueryBuilder;
 import org.elasticsearch.index.query.MoreLikeThisQueryBuilder;
+import org.elasticsearch.index.query.MultiMatchQueryBuilder;
+import org.elasticsearch.index.query.MultiMatchQueryBuilder.Type;
 import org.elasticsearch.index.query.NestedFilterBuilder;
 import org.elasticsearch.index.query.NotFilterBuilder;
 import org.elasticsearch.index.query.OrFilterBuilder;
@@ -62,10 +67,13 @@ import org.elasticsearch.search.suggest.SuggestBuilders;
 import org.elasticsearch.search.suggest.term.TermSuggestionBuilder;
 
 import com.fasterxml.jackson.databind.JsonNode;
+
+import controllers.SearchController;
 import utils.Tuple;
 
 public class ElasticSearcher {
 	public static final int DEFAULT_RESPONSE_COUNT = 10;
+	public static final ALogger log = Logger.of(ElasticSearcher.class);
 
 	private final String name;
 	private List<String> types = new ArrayList<String>();
@@ -86,6 +94,9 @@ public class ElasticSearcher {
 		public HashMap<String, ArrayList<String>> filters = new HashMap<String, ArrayList<String>>();
 		public int filterType = FILTER_AND;
 		public List<List<Tuple<ObjectId, Access>>> accessList = new ArrayList<List<Tuple<ObjectId, Access>>>();
+		public boolean isShared = false;
+		public String creatorUsername;
+		public boolean isPublic = true;
 		// used for method searchForCollections
 
 		public SearchOptions() {
@@ -256,6 +267,51 @@ public class ElasticSearcher {
 
 
 	/*
+	 * Search for user collections
+	 * Specify the type to search only for collecitonobject type
+	 */
+	public SearchResponse searchMycollections(String term, SearchOptions options) {
+		MultiMatchQueryBuilder multi_match_q = QueryBuilders.multiMatchQuery(term, Elastic.searchFieldsWin);
+		multi_match_q.type(Type.PHRASE);
+		multi_match_q.operator(org.elasticsearch.index.query.MatchQueryBuilder.Operator.OR);
+		multi_match_q.fuzziness("AUTO");
+
+		options.isPublic = false;
+
+		return this.execute(multi_match_q, options);
+	}
+
+	/*
+	 * Search for shared with user collections
+	 * Specify the type to search only for collecitonobject type
+	 */
+	public SearchResponse searchSharedCollections(String term, String exUsername,SearchOptions options) {
+		MultiMatchQueryBuilder multi_match_q = QueryBuilders.multiMatchQuery(term, Elastic.searchFieldsWin);
+		multi_match_q.type(Type.PHRASE);
+		multi_match_q.operator(org.elasticsearch.index.query.MatchQueryBuilder.Operator.OR);
+		multi_match_q.fuzziness("AUTO");
+
+		options.isShared = true;
+		options.creatorUsername = exUsername;
+		options.isPublic = false;
+
+		return this.execute(multi_match_q, options);
+	}
+
+
+	/*
+	 * Search for records within a user collection
+	 * Specify the type to search only for *resources types
+	 */
+	public SearchResponse searchForRecords(String term, SearchOptions options) {
+		MultiMatchQueryBuilder multi_match_q = QueryBuilders.multiMatchQuery(term, Elastic.searchFieldsWin);
+		multi_match_q.type(Type.PHRASE);
+		multi_match_q.operator(org.elasticsearch.index.query.MatchQueryBuilder.Operator.OR);
+		multi_match_q.fuzziness("AUTO");
+		return this.execute(multi_match_q, options);
+	}
+
+	/*
 	 * Search for related records
 	 */
 
@@ -323,7 +379,6 @@ public class ElasticSearcher {
 		this.populateBoolFromSet(bool, 1.2f, subjects);
 		this.populateBoolFromSet(bool, 1.0f, dataProviders);
 
-//		System.out.println(bool.toString());
 		return this.execute(bool);
 	}
 
@@ -340,7 +395,6 @@ public class ElasticSearcher {
 	/* Private utility methods */
 
 	private void populateBoolFromSet(BoolQueryBuilder bool, float boost, Set<String> set) {
-//		System.out.println(set);
 		if(set.size() > 0) {
 			String searchFor = "";
 			for(String item: set) {
@@ -369,7 +423,12 @@ public class ElasticSearcher {
 
 		OrFilterBuilder outer_or = FilterBuilders.orFilter();
 		NestedFilterBuilder nested_filter = FilterBuilders.nestedFilter("access", and_filter);
+		
 		//outer_or.add(nested_filter).add(this.filter("isPublic", "true"));
+		outer_or.add(nested_filter);
+		if(options.isPublic )
+			outer_or.add(this.filter("isPublic", "true"));
+		
 		if(options.filterType == FILTER_OR) {
 			((OrFilterBuilder) f).add(outer_or);
 		}
@@ -416,9 +475,20 @@ public class ElasticSearcher {
 		}
 
 		addQueryPermissions(filterBuilder, options);
+		if(options.isShared )
+			if(options.filterType == FILTER_OR) {
+				((OrFilterBuilder) filterBuilder).add(
+						FilterBuilders.notFilter(
+								this.filter("creatorUsername", options.creatorUsername))).cache(true);
+			}
+			else {
+				((AndFilterBuilder) filterBuilder).add(
+						FilterBuilders.notFilter(
+								this.filter("creatorUsername", options.creatorUsername))).cache(true);
+			}
+
 		QueryBuilder filtered = QueryBuilders.filteredQuery(query, filterBuilder);
 		search.setQuery(filtered);
-
 		return search;
 	}
 

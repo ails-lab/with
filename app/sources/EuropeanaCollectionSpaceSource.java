@@ -14,26 +14,18 @@
  */
 
 
+
 package sources;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
 import java.util.Arrays;
 import java.util.List;
 import java.util.function.Function;
 
-import com.fasterxml.jackson.databind.JsonNode;
-
-import sources.EuropeanaSpaceSource.EuroQB;
 import sources.core.ApacheHttpConnector;
 import sources.core.CommonFilter;
-import sources.core.CommonFilters;
 import sources.core.CommonQuery;
-import sources.core.FacetsModes;
 import sources.core.HttpConnector;
-import sources.core.QueryBuilder;
 import sources.core.SourceResponse;
-import sources.core.Utils;
 import sources.core.Utils.Pair;
 import sources.utils.FunctionsUtils;
 
@@ -44,6 +36,8 @@ public class EuropeanaCollectionSpaceSource extends EuropeanaSpaceSource {
 
 	public EuropeanaCollectionSpaceSource(String collectionName) {
 		super();
+		setProfile("rich");
+		setUsingCursor(true);
 		addDefaultWriter("europeana_collectionName", qfwriter("europeana_collectionName"));
 		this.collectionName = collectionName;
 	}
@@ -54,7 +48,6 @@ public class EuropeanaCollectionSpaceSource extends EuropeanaSpaceSource {
 	}
 
 	private Function<List<String>, Pair<String>> qfwriter(String parameter) {
-
 //		Function<String, String> function = (String s) -> {
 //			return "\"" + s + "\"";
 //		};
@@ -75,29 +68,6 @@ public class EuropeanaCollectionSpaceSource extends EuropeanaSpaceSource {
 		return super.getResults(q);
 	}
 
-	// public SourceResponse getMyResults(CommonQuery q) {
-	// SourceResponse res = new SourceResponse();
-	// res.source = getSourceName();
-	// String httpQuery = getHttpQuery(q);
-	// res.query = httpQuery;
-	// JsonNode response;
-	// if (checkFilters(q)) {
-	// try {
-	// response = getHttpConnector().getURLContent(httpQuery);
-	// res.totalCount = Utils.readIntAttr(response, "totalResults", true);
-	// res.count = Utils.readIntAttr(response, "itemsCount", true);
-	// res.items.setCulturalCHO(getItems(response));
-	// nextCursor = Utils.readAttr(response, "nextCursor", true);
-	// // res.facets = response.path("facets");
-	// res.filtersLogic = createFilters(response);
-	//
-	// } catch (Exception e) {
-	// // TODO Auto-generated catch block
-	// e.printStackTrace();
-	// }
-	// }
-	// return res;
-	// }
 
 	public String getCollectionName() {
 		return collectionName;
@@ -108,3 +78,4 @@ public class EuropeanaCollectionSpaceSource extends EuropeanaSpaceSource {
 	}
 
 }
+

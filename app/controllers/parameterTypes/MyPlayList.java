@@ -25,23 +25,25 @@ import java.util.Map;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
 
+import play.Logger;
+import play.Logger.ALogger;
 import play.libs.F.Option;
 import play.mvc.QueryStringBindable;
 
 public class MyPlayList implements QueryStringBindable<MyPlayList>{
-	
+
 	public List<StringTuple> list = new ArrayList<StringTuple>();
+	public static final ALogger log = Logger.of(MyPlayList.class);
 
 	// play framework requires the Bindable to provide a "no Argument" public constructor.
 	public MyPlayList() {
 	}
-	
+
 	@Override
 	public Option<MyPlayList> bind(String key, Map<String, String[]> data) {
 		String[] vs = data.get(key);
-	    if (vs != null && vs.length > 0) {
+	    if ((vs != null) && (vs.length > 0)) {
 	        String v = vs[0];
 			try {
 				JsonNode actualObj = new ObjectMapper().readTree(v);
@@ -60,11 +62,11 @@ public class MyPlayList implements QueryStringBindable<MyPlayList>{
 					return Option.Some(this);
 				}
 				else
-					return Option.None();
+					return Option.Some(null);
 			} catch (JsonProcessingException e) {
-				e.printStackTrace();
+				log.error( "Json problem.",e);
 			} catch (IOException e) {
-				e.printStackTrace();
+				log.error("IOProblem", e);
 			}
 	    }
 	    return Option.None();
@@ -80,7 +82,7 @@ public class MyPlayList implements QueryStringBindable<MyPlayList>{
 		for (int i=0; i <list.size(); i++){
 			StringTuple st = list.get(i);
 			listString+=st.unbind(key);
-			if (i < list.size() -1)
+			if (i < (list.size() -1))
 				listString+=",";
 		}
 		return listString+"]";

@@ -39,6 +39,7 @@ import model.basicDataTypes.Language;
 import model.basicDataTypes.MultiLiteral;
 import model.basicDataTypes.ProvenanceInfo;
 import model.basicDataTypes.ProvenanceInfo.Sources;
+import model.quality.RecordQuality;
 import model.resources.CulturalObject.CulturalObjectData;
 import model.resources.RecordResource;
 import model.resources.WithResource.WithResourceType;
@@ -49,14 +50,12 @@ import play.Logger;
 import play.Logger.ALogger;
 import play.libs.F.Option;
 import play.libs.Json;
-import play.mvc.Controller;
 import play.mvc.Result;
 import sources.core.ISpaceSource;
 import sources.core.ParallelAPICall;
 import sources.core.ParallelAPICall.Priority;
 import sources.core.RecordJSONMetadata;
-import utils.AccessManager;
-import utils.AccessManager.Action;
+import sources.utils.JsonContextRecord;
 import utils.Locks;
 
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -73,15 +72,14 @@ import db.WithResourceDAO;
  *
  */
 @SuppressWarnings({ "rawtypes", "unchecked" })
-public class WithResourceController extends Controller {
+public class WithResourceController extends WithController {
 
 	public static final ALogger log = Logger.of(WithResourceController.class);
 
 	public static Status errorIfNoAccessToWithResource(
 			WithResourceDAO resourceDAO, Action action, ObjectId id) {
+
 		ObjectNode result = Json.newObject();
-		List<String> effectiveUserIds = AccessManager
-				.effectiveUserIds(session().get("effectiveUserIds"));
 		if (!resourceDAO.existsEntity(id)) {
 			log.error("Cannot retrieve resource from database");
 			result.put("error", "Cannot retrieve resource " + id
@@ -89,9 +87,8 @@ public class WithResourceController extends Controller {
 			return internalServerError(result);
 			// TODO superuser
 		} else if (!resourceDAO.hasAccess(
-				AccessManager.effectiveUserDbIds(session().get(
-						"effectiveUserIds")), action, id)
-				&& !AccessManager.isSuperUser(effectiveUserIds.get(0))) {
+				effectiveUserDbIds(), action, id)
+				&& !isSuperUser()) {
 			result.put("error", "User does not have " + action
 					+ " access for resource " + id);
 			return forbidden(result);
@@ -170,8 +167,7 @@ public class WithResourceController extends Controller {
 			ObjectId collectionDbId, Option<Integer> position, Boolean noDouble) {
 		ObjectNode result = Json.newObject();
 		String resourceType = null;
-		ObjectId userId = AccessManager.effectiveUserDbIds(
-				session().get("effectiveUserIds")).get(0);
+		ObjectId userId = effectiveUserDbIds().get(0);
 		if (json.has("resourceType"))
 			resourceType = json.get("resourceType").asText();
 		if ((resourceType == null)
@@ -186,9 +182,9 @@ public class WithResourceController extends Controller {
 			// position.get());
 			RecordResource record = (RecordResource) Json.fromJson(json, clazz);
 			MultiLiteral label = record.getDescriptiveData().getLabel();
-			if (label == null || label.get(Language.DEFAULT) == null
+			if ((label == null) || (label.get(Language.DEFAULT) == null)
 					|| label.get(Language.DEFAULT).isEmpty()
-					|| label.get(Language.DEFAULT).get(0) == "")
+					|| (label.get(Language.DEFAULT).get(0) == ""))
 				return badRequest("A label for the record has to be provided");
 			int last = 0;
 			Sources source = Sources.UploadedByUser;
@@ -206,8 +202,7 @@ public class WithResourceController extends Controller {
 				externalId = record.getAdministrative().getExternalId();
 			ObjectId recordId = null;
 			boolean owns = DB.getRecordResourceDAO().hasAccess(
-					AccessManager.effectiveUserDbIds(session().get(
-							"effectiveUserIds")), Action.DELETE, recordId);
+					effectiveUserDbIds(), Action.DELETE, recordId);
 			if ((externalId != null)// get dbId of existring resource
 					&& DB.getRecordResourceDAO().existsWithExternalId(
 							externalId)) {
@@ -231,9 +226,7 @@ public class WithResourceController extends Controller {
 						}
 					}
 					if (DB.getRecordResourceDAO()
-							.hasAccess(
-									AccessManager.effectiveUserDbIds(session()
-											.get("effectiveUserIds")),
+							.hasAccess(effectiveUserDbIds(),
 									Action.EDIT, recordId)
 							&& (json.get("descriptiveData") != null))
 						DB.getRecordResourceDAO()
@@ -282,9 +275,7 @@ public class WithResourceController extends Controller {
 										boolean hasAccessToMedia = MediaController
 												.hasAccessToMedia(
 														mediaUrl,
-														AccessManager
-																.effectiveUserDbIds(session()
-																		.get("effectiveUserIds")),
+														effectiveUserDbIds(),
 														Action.EDIT);
 										if (!hasAccessToMedia)
 											media = new EmbeddedMediaObject(
@@ -387,7 +378,7 @@ public class WithResourceController extends Controller {
 			if (!response.toString().equals(ok().toString())) {
 				return response;
 			} else {
-				if (json == null || !json.isArray()) {
+				if ((json == null) || !json.isArray()) {
 					result.put("error", "Invalid JSON");
 					return badRequest(result);
 				} else {
@@ -501,7 +492,6 @@ public class WithResourceController extends Controller {
 								}
 							} else {
 								target = new ContextDataTarget();
-								target.setCollectionId(colId);
 								// target.setPosition(position);
 							}
 							if (c.has("body")) {
@@ -517,7 +507,7 @@ public class WithResourceController extends Controller {
 									contextData
 											.setContextDataType(contextDataType);
 								} catch (ClassNotFoundException e) {
-									e.printStackTrace();
+									log.error("",e);
 								}
 							}
 						}
@@ -645,7 +635,10 @@ public class WithResourceController extends Controller {
 						sourceId, fullRecord);
 				for (RecordJSONMetadata data : recordsData) {
 					if (data.getFormat().equals("JSON-WITH")) {
+						
+						DB.getWithResourceDAO().computeAndUpdateQuality(recordId);
 						log.info(data.getJsonContent());
+						
 						ObjectMapper mapper = new ObjectMapper();
 						JsonNode json = mapper.readTree(data.getJsonContent())
 								.get("descriptiveData");
@@ -653,6 +646,8 @@ public class WithResourceController extends Controller {
 								CulturalObjectData.class);
 						DB.getWithResourceDAO().updateDescriptiveData(recordId,
 								descriptiveData);
+						
+						
 						String mediaString = mapper
 								.readTree(data.getJsonContent()).get("media")
 								.toString();

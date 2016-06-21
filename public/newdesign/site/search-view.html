@@ -32,8 +32,8 @@
           <nav>
             <ul>
               <li><a href="index.html" title="home">HOME</a></li>
-              <li><a href="search-view.html" title="home">EXPLORE</a></li>
-              <li class="active"><a href="about.html" title="home">ABOUT</a></li>
+              <li class="active"><a href="search-view.html" title="home">EXPLORE</a></li>
+              <li><a href="about.html" title="home">ABOUT</a></li>
               <li class="mobile"><a href="login.html" class="login">SIGN IN</a><a href="register.html" class="register">REGISTER</a></li>
             </ul>
           </nav>
@@ -55,27 +55,23 @@
             <section class="searchbar">
               <div class="container-fluid">
                 <!-- wrap-->
-                <div class="wrap">
-                  <!-- settings bar-->
-                  <div class="settings"><a href="#" title="#"><img src="img/ui/ic-setting.png" alt="settings"></a></div>
-                  <!-- input-->
-                  <div class="searchbox"><img src="img/ui/ic-mag.png" alt="Search" class="icon">
-                    <input type="text" placeholder="Search media" class="searchinput">
-                  </div>
-                  <div class="provider">
-                    <!-- collection picker--><a id="picker" href="#" data-toggle="dropdown" class="picker"><span class="text">All Content Provider </span><span class="arrow"></span></a>
-                    <ul aria-labelledby="picker" class="dropdown-menu">
-                      <li><a href="#">All Content Provider</a></li>
-                      <li><a href="#">WITH Content</a></li>
-                    </ul>
-                  </div>
-                  <!-- view setting-->
-                  <ul class="view">
-                    <li class="active"><a href="#" title="Column View" data-view="column"><img src="img/ui/ic-list.png" alt="list"></a></li>
-                    <li><a href="#" title="Grid View" data-view="grid"><img src="img/ui/ic-grid.png" alt="grid"></a></li>
-                  </ul>
-                </div>
+                <!--.wrap-->
+                <!-- input
+                .searchbox
+                 img.icon( src="img/ui/ic-mag.png" alt="Search" )
+                 input.searchinput( type="text" placeholder="Search media" )
+                 
+                 
+                 
+                -->
                 <!-- close search--><a href="#" title="Close Search" class="close"><img src="img/ui/ic-close.png"></a>
+                <!-- view setting-->
+                <ul class="view">
+                  <li class="active"><a href="#" data-view="column" data-toggle="tooltip" data-placement="bottom" title="Column view" class="listview"><span class="icon"></span></a></li>
+                  <li><a href="#" data-view="grid" data-toggle="tooltip" data-placement="bottom" title="List view" class="gridview"><span class="icon"></span></a></li>
+                </ul>
+                <!-- settings bar-->
+                <div class="settings"><a href="#" data-view="column" data-toggle="tooltip" data-placement="bottom" title="Search filter"><img src="img/ui/ic-setting.png" alt="settings"></a></div>
               </div>
             </section>
             <!-- search filter-->
@@ -104,19 +100,22 @@
                         <div class="wrap">
                           <!-- anchor--><a href="#" title="Lorem ipsum" class="mediaviewer">
                             <!-- thumbnail-->
-                            <div class="thumb"><img src="img/content/thumb-media-1.png" alt="Lorem ipsum"></div>
-                            <!-- info-->
-                            <div class="info">
-                              <h1 class="title">The earth was small light blue and so touchingly alone ur home that must be defended like a relic</h1>
-                            </div></a>
+                            <div class="thumb"><img src="img/content/thumb-media-1.png" alt="Lorem ipsum"></div></a>
+                          <!-- info-->
+                          <div class="info">
+                            <!-- anchor--><a href="#" title="Lorem ipsum" class="mediaviewer">
+                              <h1 class="title">The earth was small light blue and so touchingly alone ur home that must be defended like a relic</h1><span class="source">National Library of Latvia</span></a><span class="provider"><a href="#" class="links">digitainz.org</a></span>
+                          </div>
                           <!-- metadata-->
                           <div class="action-group">
-                            <div class="wrap"><a href="#" class="links">digitainz.org</a>
+                            <div class="wrap">
                               <ul>
-                                <li><a href="#" data-toggle="tooltip" data-placement="top" title="Add to favorite" class="fa fa-heart"></a></li>
-                                <li><a href="#" data-toggle="tooltip" data-placement="top" title="Collect it" class="fa fa-download collectbutton"></a></li>
+                                <li><a href="#" data-toggle="tooltip" data-placement="bottom" title="Add to favorite" class="fa fa-heart"></a></li>
+                                <li><a href="#" data-toggle="tooltip" data-placement="bottom" title="Collect it" class="fa fa-download collectbutton"></a></li>
                                 <li>
-                                  <input type="checkbox" class="selectitem">
+                                  <div class="inputcheck">
+                                    <input type="checkbox" class="selectitem">
+                                  </div>
                                 </li>
                               </ul>
                             </div>
@@ -128,19 +127,20 @@
                         <div class="wrap">
                           <!-- anchor--><a href="#" title="Lorem ipsum" class="mediaviewer">
                             <!-- thumbnail-->
-                            <div class="thumb"><img src="img/content/thumb-media-2.png" alt="Lorem ipsum"></div>
-                            <!-- info-->
-                            <div class="info">
-                              <h1 class="title">The earth was small light blue and so touchingly alone.</h1>
-                            </div></a>
+                            <div class="thumb"><img src="img/content/thumb-media-2.png" alt="Lorem ipsum"></div></a>
+                          <!-- info-->
+                          <div class="info"><a href="#" title="Lorem ipsum" class="mediaviewer">
+                              <h1 class="title">The earth was small light blue and so touchingly alone.</h1><span class="source">National Library of Latvia</span></a><span class="provider"><a href="#" class="links">digitainz.org</a></span></div>
                           <!-- metadata-->
                           <div class="action-group">
-                            <div class="wrap"><a href="#" class="links">digitainz.org</a>
+                            <div class="wrap">
                               <ul>
-                                <li><a href="#" data-toggle="tooltip" data-placement="top" title="Add to favorite" class="fa fa-heart"></a></li>
-                                <li><a href="#" data-toggle="tooltip" data-placement="top" title="Collect it" class="fa fa-download collectbutton"></a></li>
+                                <li><a href="#" data-toggle="tooltip" data-placement="bottom" title="Add to favorite" class="fa fa-heart"></a></li>
+                                <li><a href="#" data-toggle="tooltip" data-placement="bottom" title="Collect it" class="fa fa-download collectbutton"></a></li>
                                 <li>
-                                  <input type="checkbox" class="selectitem">
+                                  <div class="inputcheck">
+                                    <input type="checkbox" class="selectitem">
+                                  </div>
                                 </li>
                               </ul>
                             </div>
@@ -152,19 +152,20 @@
                         <div class="wrap">
                           <!-- anchor--><a href="#" title="Lorem ipsum" class="mediaviewer">
                             <!-- thumbnail-->
-                            <div class="thumb"><img src="img/content/thumb-media-3.png" alt="Lorem ipsum"></div>
-                            <!-- info-->
-                            <div class="info">
-                              <h1 class="title">The earth was small light blue and so touchingly alone ur</h1>
-                            </div></a>
+                            <div class="thumb"><img src="img/content/thumb-media-3.png" alt="Lorem ipsum"></div></a>
+                          <!-- info-->
+                          <div class="info"><a href="#" title="Lorem ipsum" class="mediaviewer">
+                              <h1 class="title">The earth was small light blue and so touchingly alone ur</h1><span class="source">National Library of Latvia</span></a><span class="provider"><a href="#" class="links">digitainz.org</a></span></div>
                           <!-- metadata-->
                           <div class="action-group">
-                            <div class="wrap"><a href="#" class="links">digitainz.org</a>
+                            <div class="wrap">
                               <ul>
-                                <li><a href="#" data-toggle="tooltip" data-placement="top" title="Add to favorite" class="fa fa-heart"></a></li>
-                                <li><a href="#" data-toggle="tooltip" data-placement="top" title="Collect it" class="fa fa-download collectbutton"></a></li>
+                                <li><a href="#" data-toggle="tooltip" data-placement="bottom" title="Add to favorite" class="fa fa-heart"></a></li>
+                                <li><a href="#" data-toggle="tooltip" data-placement="bottom" title="Collect it" class="fa fa-download collectbutton"></a></li>
                                 <li>
-                                  <input type="checkbox" class="selectitem">
+                                  <div class="inputcheck">
+                                    <input type="checkbox" class="selectitem">
+                                  </div>
                                 </li>
                               </ul>
                             </div>
@@ -176,19 +177,20 @@
                         <div class="wrap">
                           <!-- anchor--><a href="#" title="Lorem ipsum" class="mediaviewer">
                             <!-- thumbnail-->
-                            <div class="thumb"><img src="img/content/thumb-media-4.png" alt="Lorem ipsum"></div>
-                            <!-- info-->
-                            <div class="info">
-                              <h1 class="title">The earth was small light blue </h1>
-                            </div></a>
+                            <div class="thumb"><img src="img/content/thumb-media-4.png" alt="Lorem ipsum"></div></a>
+                          <!-- info-->
+                          <div class="info"><a href="#" title="Lorem ipsum" class="mediaviewer">
+                              <h1 class="title">The earth was small light blue </h1><span class="source">National Library of Latvia</span></a><span class="provider"><a href="#" class="links">digitainz.org</a></span></div>
                           <!-- metadata-->
                           <div class="action-group">
-                            <div class="wrap"><a href="#" class="links">digitainz.org</a>
+                            <div class="wrap">
                               <ul>
-                                <li><a href="#" data-toggle="tooltip" data-placement="top" title="Add to favorite" class="fa fa-heart"></a></li>
-                                <li><a href="#" data-toggle="tooltip" data-placement="top" title="Collect it" class="fa fa-download collectbutton"></a></li>
+                                <li><a href="#" data-toggle="tooltip" data-placement="bottom" title="Add to favorite" class="fa fa-heart"></a></li>
+                                <li><a href="#" data-toggle="tooltip" data-placement="bottom" title="Collect it" class="fa fa-download collectbutton"></a></li>
                                 <li>
-                                  <input type="checkbox" class="selectitem">
+                                  <div class="inputcheck">
+                                    <input type="checkbox" class="selectitem">
+                                  </div>
                                 </li>
                               </ul>
                             </div>
@@ -200,19 +202,20 @@
                         <div class="wrap">
                           <!-- anchor--><a href="#" title="Lorem ipsum" class="mediaviewer">
                             <!-- thumbnail-->
-                            <div class="thumb"><img src="img/content/thumb-media-1.png" alt="Lorem ipsum"></div>
-                            <!-- info-->
-                            <div class="info">
-                              <h1 class="title">The earth was small light blue and so touchingly alone.</h1>
-                            </div></a>
+                            <div class="thumb"><img src="img/content/thumb-media-1.png" alt="Lorem ipsum"></div></a>
+                          <!-- info-->
+                          <div class="info"><a href="#" title="Lorem ipsum" class="mediaviewer">
+                              <h1 class="title">The earth was small light blue and so touchingly alone.</h1><span class="source">National Library of Latvia</span></a><span class="provider"><a href="#" class="links">digitainz.org</a></span></div>
                           <!-- metadata-->
                           <div class="action-group">
-                            <div class="wrap"><a href="#" class="links">digitainz.org</a>
+                            <div class="wrap">
                               <ul>
-                                <li><a href="#" data-toggle="tooltip" data-placement="top" title="Add to favorite" class="fa fa-heart"></a></li>
-                                <li><a href="#" data-toggle="tooltip" data-placement="top" title="Collect it" class="fa fa-download collectbutton"></a></li>
+                                <li><a href="#" data-toggle="tooltip" data-placement="bottom" title="Add to favorite" class="fa fa-heart"></a></li>
+                                <li><a href="#" data-toggle="tooltip" data-placement="bottom" title="Collect it" class="fa fa-download collectbutton"></a></li>
                                 <li>
-                                  <input type="checkbox" class="selectitem">
+                                  <div class="inputcheck">
+                                    <input type="checkbox" class="selectitem">
+                                  </div>
                                 </li>
                               </ul>
                             </div>
@@ -224,19 +227,20 @@
                         <div class="wrap">
                           <!-- anchor--><a href="#" title="Lorem ipsum" class="mediaviewer">
                             <!-- thumbnail-->
-                            <div class="thumb"><img src="img/content/thumb-media-2.png" alt="Lorem ipsum"></div>
-                            <!-- info-->
-                            <div class="info">
-                              <h1 class="title">The earth was small light blue and so touchingly alone.</h1>
-                            </div></a>
+                            <div class="thumb"><img src="img/content/thumb-media-2.png" alt="Lorem ipsum"></div></a>
+                          <!-- info-->
+                          <div class="info"><a href="#" title="Lorem ipsum" class="mediaviewer">
+                              <h1 class="title">The earth was small light blue and so touchingly alone.</h1><span class="source">National Library of Latvia</span></a><span class="provider"><a href="#" class="links">digitainz.org</a></span></div>
                           <!-- metadata-->
                           <div class="action-group">
-                            <div class="wrap"><a href="#" class="links">digitainz.org</a>
+                            <div class="wrap">
                               <ul>
-                                <li><a href="#" data-toggle="tooltip" data-placement="top" title="Add to favorite" class="fa fa-heart"></a></li>
-                                <li><a href="#" data-toggle="tooltip" data-placement="top" title="Collect it" class="fa fa-download collectbutton"></a></li>
+                                <li><a href="#" data-toggle="tooltip" data-placement="bottom" title="Add to favorite" class="fa fa-heart"></a></li>
+                                <li><a href="#" data-toggle="tooltip" data-placement="bottom" title="Collect it" class="fa fa-download collectbutton"></a></li>
                                 <li>
-                                  <input type="checkbox" class="selectitem">
+                                  <div class="inputcheck">
+                                    <input type="checkbox" class="selectitem">
+                                  </div>
                                 </li>
                               </ul>
                             </div>
@@ -248,19 +252,20 @@
                         <div class="wrap">
                           <!-- anchor--><a href="#" title="Lorem ipsum" class="mediaviewer">
                             <!-- thumbnail-->
-                            <div class="thumb"><img src="img/content/thumb-media-3.png" alt="Lorem ipsum"></div>
-                            <!-- info-->
-                            <div class="info">
-                              <h1 class="title">The earth was small light blue and so touchingly alone ur home that must be defended like a relic</h1>
-                            </div></a>
+                            <div class="thumb"><img src="img/content/thumb-media-3.png" alt="Lorem ipsum"></div></a>
+                          <!-- info-->
+                          <div class="info"><a href="#" title="Lorem ipsum" class="mediaviewer">
+                              <h1 class="title">The earth was small light blue and so touchingly alone ur home that must be defended like a relic</h1><span class="source">National Library of Latvia</span></a><span class="provider"><a href="#" class="links">digitainz.org</a></span></div>
                           <!-- metadata-->
                           <div class="action-group">
-                            <div class="wrap"><a href="#" class="links">digitainz.org</a>
+                            <div class="wrap">
                               <ul>
-                                <li><a href="#" data-toggle="tooltip" data-placement="top" title="Add to favorite" class="fa fa-heart"></a></li>
-                                <li><a href="#" data-toggle="tooltip" data-placement="top" title="Collect it" class="fa fa-download collectbutton"></a></li>
+                                <li><a href="#" data-toggle="tooltip" data-placement="bottom" title="Add to favorite" class="fa fa-heart"></a></li>
+                                <li><a href="#" data-toggle="tooltip" data-placement="bottom" title="Collect it" class="fa fa-download collectbutton"></a></li>
                                 <li>
-                                  <input type="checkbox" class="selectitem">
+                                  <div class="inputcheck">
+                                    <input type="checkbox" class="selectitem">
+                                  </div>
                                 </li>
                               </ul>
                             </div>
@@ -272,19 +277,20 @@
                         <div class="wrap">
                           <!-- anchor--><a href="#" title="Lorem ipsum" class="mediaviewer">
                             <!-- thumbnail-->
-                            <div class="thumb"><img src="img/content/thumb-media-4.png" alt="Lorem ipsum"></div>
-                            <!-- info-->
-                            <div class="info">
-                              <h1 class="title">The earth was small light blue and so touchingly alone ur home that must be defended like a relic</h1>
-                            </div></a>
+                            <div class="thumb"><img src="img/content/thumb-media-4.png" alt="Lorem ipsum"></div></a>
+                          <!-- info-->
+                          <div class="info"><a href="#" title="Lorem ipsum" class="mediaviewer">
+                              <h1 class="title">The earth was small light blue and so touchingly alone ur home that must be defended like a relic</h1><span class="source">National Library of Latvia</span></a><span class="provider"><a href="#" class="links">digitainz.org</a></span></div>
                           <!-- metadata-->
                           <div class="action-group">
-                            <div class="wrap"><a href="#" class="links">digitainz.org</a>
+                            <div class="wrap">
                               <ul>
-                                <li><a href="#" data-toggle="tooltip" data-placement="top" title="Add to favorite" class="fa fa-heart"></a></li>
-                                <li><a href="#" data-toggle="tooltip" data-placement="top" title="Collect it" class="fa fa-download collectbutton"></a></li>
+                                <li><a href="#" data-toggle="tooltip" data-placement="bottom" title="Add to favorite" class="fa fa-heart"></a></li>
+                                <li><a href="#" data-toggle="tooltip" data-placement="bottom" title="Collect it" class="fa fa-download collectbutton"></a></li>
                                 <li>
-                                  <input type="checkbox" class="selectitem">
+                                  <div class="inputcheck">
+                                    <input type="checkbox" class="selectitem">
+                                  </div>
                                 </li>
                               </ul>
                             </div>

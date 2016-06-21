@@ -132,7 +132,7 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
 			    self.isLike(likeval);
 			     if(!self.thumb){
 		   
-					   self.thumb="img/content/thumb-empty.png";
+					   self.thumb="img/ui/ic-noimage.png";
 			 }
 			};
 
@@ -562,7 +562,7 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
 									}
 							        var record = new Record({
 										//recordId: result.recordId || result.id,
-										thumb: media!=null &&  media[0] !=null  && media[0].Thumbnail!=null  && media[0].Thumbnail.url!="null" ? media[0].Thumbnail.url:"img/content/thumb-empty.png",
+										thumb: media!=null &&  media[0] !=null  && media[0].Thumbnail!=null  && media[0].Thumbnail.url!="null" ? media[0].Thumbnail.url:"img/ui/ic-noimage.png",
 										fullres: media!=null &&  media[0] !=null && media[0].Original!=null  && media[0].Original.url!="null"  ? media[0].Original.url : "",
 										title: findByLang(descdata.label),
 										description: findByLang(descdata.description),
@@ -641,9 +641,9 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
 
 		self.search = function(facetinit,facetrecacl) {
 			
-
+            
 			if($request!==undefined)$request.abort();
-
+			window.location.hash = '#search';
 			self.results.removeAll();
 			self.mixresults.removeAll();
 			if ($container.data('isotope')){
@@ -782,7 +782,7 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
 					}
 			        var record = new Record({
 						//recordId: result.recordId || result.id,
-						thumb: media!=null &&  media[0] !=null  && media[0].Thumbnail!=null  && media[0].Thumbnail.url!="null" ? media[0].Thumbnail.url:"img/content/thumb-empty.png",
+						thumb: media!=null &&  media[0] !=null  && media[0].Thumbnail!=null  && media[0].Thumbnail.url!="null" ? media[0].Thumbnail.url:"img/ui/ic-noimage.png",
 						fullres: media!=null &&  media[0] !=null && media[0].Original!=null  && media[0].Original.url!="null"  ? media[0].Original.url : "",
 						title: findByLang(descdata.label),
 						description: findByLang(descdata.description),
@@ -902,10 +902,23 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
         	var tile= '<div class="item media" id="'+record.externalId+'"> <div class="wrap">';
  		    
         	tile+='<a href="#" onclick="srecordSelect(\''+record.externalId+'\',event)" class="mediaviewer">'
-        			+'<div class="thumb"><img src="'+record.thumb+'" onError="this.src=\'img/content/thumb-empty.png\'"></div>'
-        			+' <div class="info"><h1 class="title">'+record.displayTitle()+'</h1></div>';
-            tile+='<div class="action-group"><div class="wrap"><a href="' + record.view_url + '" target="_new" class="links">'+ record.sourceCredits() +'</a><ul>';
+        			+'<div class="thumb"><img src="'+record.thumb+'" onError="this.src=\'img/ui/ic-noimage.png\'"></div>';
+        	
+        	tile += '<div class="info"><h2 class="title">' + record.title + '</h2>';
+			
+			var distitle = "";
+			if (record.creator && record.creator.length > 0) {
+				distitle = "by " + record.creator;
+			}
+			else if (record.dataProvider && record.dataProvider.length > 0 && record.dataProvider != record.creator) {
+				distitle = record.dataProvider;
+			}
+			tile+='<span class="source">'+distitle+'</source><a href="' + record.view_url + '" target="_new" class="links">' + record.sourceCredits() + '</a></div>';
+		
+        	
+            tile+='<div class="action-group"><div class="wrap">';
             if (isLogged()) {
+            	tile+="<ul>";
           	    if (record.isLiked()) {
               	  tile+='<li><a data-toggle="tooltip" data-placement="top" title="Add to favorites"  onclick="likeRecord(\'' + record.externalId + '\',event);" class="fa fa-heart" style="color: #ec5a62;"></a></li>'
                 }
@@ -913,9 +926,9 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
                 	  tile+='<li><a  data-toggle="tooltip" data-placement="top" title="Add to favorites" onclick="likeRecord(\'' + record.externalId + '\',event);" class="fa fa-heart"></a></li>'
               	  }
           	  tile+='<li><a data-toggle="tooltip" data-placement="top" title="Collect it" class="fa fa-download" onclick="collect(\'' + record.externalId + '\',event);" ></a></li>'
-          	  tile+='<li><input type="checkbox" class="selectitem" onclick="multipleSelect(\'' + record.externalId + '\',event);"></li>';
+          	  tile+='<li><div class="inputcheck"><input type="checkbox" class="selectitem" onclick="multipleSelect(\'' + record.externalId + '\',event);"></div></li></ul>';
             }
-        	tile+="</ul></div></div></a></div></div>";
+        	tile+="</div></div></a></div></div>";
         	
 			
 			return tile;
@@ -930,12 +943,7 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
       	  return $( items );
       	}
       
-        $("#withsearchid").keyup(function(event){
-            if(event.keyCode == 13){
-            	self.search(true,true);
-            }
-        });
-      
+        
         
         /*take care of special characters in id of item*/
         function jq( myid ) {

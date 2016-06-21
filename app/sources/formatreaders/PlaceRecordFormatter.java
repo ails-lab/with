@@ -23,11 +23,14 @@ import com.fasterxml.jackson.databind.JsonNode;
 import model.basicDataTypes.Language;
 import model.basicDataTypes.LiteralOrResource;
 import model.basicDataTypes.ProvenanceInfo;
+import model.resources.AgentObject;
 import model.resources.PlaceObject;
+import model.resources.RecordResource;
 import model.resources.PlaceObject.PlaceData;
 import model.resources.CulturalObject;
 import model.resources.CulturalObject.CulturalObjectData;
 import play.Logger;
+import play.Logger.ALogger;
 import sources.FilterValuesMap;
 import sources.core.JsonContextRecordFormatReader;
 import sources.core.Utils;
@@ -35,6 +38,7 @@ import sources.utils.JsonContextRecord;
 import sources.utils.StringUtils;
 
 public abstract class PlaceRecordFormatter extends JsonContextRecordFormatReader<PlaceObject> {
+	public static final ALogger log = Logger.of( PlaceRecordFormatter.class );
 
 	private FilterValuesMap valuesMap;
 
@@ -64,8 +68,11 @@ public abstract class PlaceRecordFormatter extends JsonContextRecordFormatReader
 		model.setMetadataRights(new LiteralOrResource("http://creativecommons.org/publicdomain/zero/1.0/"));
 		model.setRdfType("http://www.europeana.eu/schemas/edm/ProvidedCHO");
 
-		fillObjectFrom(text);
-
+		try {
+			fillObjectFrom(text);
+		} catch (Exception e) {
+			log.error("Error Importing object from source",e );
+		}
 		List<ProvenanceInfo> provenance = object.getProvenance();
 		int index = provenance.size() - 1;
 		String resourceId = provenance.get(index).getResourceId();
@@ -73,9 +80,28 @@ public abstract class PlaceRecordFormatter extends JsonContextRecordFormatReader
 
 		return object;
 	}
+	
+	private PlaceObject internalOverwriteObjectFrom(JsonContextRecord text) {
+		
+		try {
+			fillObjectFrom(text);
+		} catch (Exception e) {
+			log.error("Error Importing object from source",e);
+		}
+
+		return object;
+	}
 
 	public PlaceObject readObjectFrom(JsonNode text) {
 		return readObjectFrom(new JsonContextRecord(text));
+	}
+	
+	public PlaceObject overwriteObjectFrom(RecordResource object, JsonNode text) {
+		if (object==null){
+			return readObjectFrom(text);
+		} else
+		this.object = (PlaceObject)object;
+		return internalOverwriteObjectFrom(new JsonContextRecord(text));
 	}
 
 	public FilterValuesMap getValuesMap() {

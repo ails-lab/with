@@ -35,6 +35,7 @@ import model.resources.PlaceObject;
 import model.resources.PlaceObject.PlaceData;
 import model.resources.CulturalObject;
 import model.resources.CulturalObject.CulturalObjectData;
+import model.resources.RecordResource;
 import play.Logger;
 import sources.FilterValuesMap;
 import sources.core.Utils;
@@ -43,13 +44,12 @@ import sources.utils.StringUtils;
 
 public class DBPediaPlaceRecordFormatter extends PlaceRecordFormatter {
 
-	public DBPediaPlaceRecordFormatter(FilterValuesMap map) {
-		super(map);
+	public DBPediaPlaceRecordFormatter() {
+		super(FilterValuesMap.getMap(Sources.DBPedia));
 		object = new PlaceObject();
 	}
 
 	@Override
-
 	public PlaceObject fillObjectFrom(JsonContextRecord rec) {
 //		Language[] language = new Language[] {Language.EN };
 //		

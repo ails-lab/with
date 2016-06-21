@@ -1,0 +1,37 @@
+<item-view params="route: route"></item-view>
+
+ <!-- menu bar-->
+      <nav class="titlebar double">
+        <div class="container" id="withcollection" >
+          <!-- type-->
+          <div class="info">
+            <div class="type">Collection<span class="counter" data-bind="text: entryCount() + ' ITEMS'"></span></div>
+          </div>
+          <!-- meta-->
+          <div class="meta">
+            <!-- title-->
+            <div class="title"><a data-original-title="Back to previous page" href="void(0);" onclick="window.history.go(-1); return false;" data-placement="bottom" data-toggle="popover" data-trigger="focus" data-bind=" attr: { 'data-content': description() }"><i class="fa fa-arrow-left"></i></a><!-- ko text:title() --><!-- /ko --></div>
+            <!-- owner-->
+            <div class="owner"><a title="#"><span class="name" data-bind="text: creator()"></span><img src="img/user.png" alt="" class="profilepicture"></a></div>
+          
+   	  </div>
+        </div>
+      </nav>
+      <!-- wrap spacer-->
+      <div class="spacer double">
+        <!-- listing-->
+        <section class="listing">
+          <div class="container">
+            <!-- grid-->
+            <div class="grid" data-bind="attr: {id: id}">
+              <div class="sizer"></div>
+
+              
+            
+            </div>
+          </div>
+        </section>
+      </div>
+      
+      	<div id="more" data-bind="visible: loading ,scroll: citems(), scrollOptions: { loadFunc: loadNext, offset: 0 }"> <i class="fa fa-spinner fa-pulse"></i></div>
+      

@@ -331,7 +331,8 @@ define("app", ['knockout', 'facebook', 'imagesloaded', 'moment', './js/app/plugi
 		"collectionCount": ko.observable(0),
 		"exhibitionCount": ko.observable(0),
 		"sharedCollectionCount": ko.observable(0),
-		"sharedExhibitionCount": ko.observable(0)
+		"sharedExhibitionCount": ko.observable(0),
+		"annotationCount": ko.observable(0)
 	};
 	isLogged = ko.observable(false);
 
@@ -359,7 +360,7 @@ define("app", ['knockout', 'facebook', 'imagesloaded', 'moment', './js/app/plugi
 		self.currentUser.usergroups(data.usergroups);
 		self.currentUser.organizations(data.organizations);
 		self.currentUser.projects(data.projects);
-
+		self.currentUser.annotationCount(data.annotationCount);
 		self.loadNotifications(data.notifications);
 
 		$(".star").each(function () {
@@ -598,9 +599,9 @@ define("app", ['knockout', 'facebook', 'imagesloaded', 'moment', './js/app/plugi
 			type: "GET",
 			contentType: "application/json",
 			dataType: "json",
-			url: "/collection/list",
+			url: "/collection/listPublic",
 			processData: false,
-			data: "isPublic=true&offset=0&count=20" //&isExhibition=false"
+			data: "offset=0&count=20" //&isExhibition=false"
 		}).done(
 			//"filterByUser=" +  self.currentUser.username() + "&filterByUserId=" + self.currentUser._id() +
 			//"&filterByEmail=" + self.currentUser.email() + "&access=read&offset=0&count=20"}).done(
@@ -624,7 +625,7 @@ define("app", ['knockout', 'facebook', 'imagesloaded', 'moment', './js/app/plugi
 			dataType: "json",
 			url: "/collection/list",
 			processData: false,
-			data: "offset=0&count=500&directlyAccessedByUserOrGroup=" + JSON.stringify([{
+			data: "offset=0&count=50&directlyAccessedByUserOrGroup=" + JSON.stringify([{
 				user: self.currentUser.username(),
 				rights: "WRITE"
 			}]),
@@ -652,7 +653,7 @@ define("app", ['knockout', 'facebook', 'imagesloaded', 'moment', './js/app/plugi
 			dataType: "json",
 			url: "/collection/list",
 			processData: false,
-			data: "creator=" + self.currentUser.username() + "&offset="+offset+"&count="+count+"&isExhibition=" + isExhibition + "&totalHits=true"
+			data: "creator=" + self.currentUser.username() + "&offset="+offset+"&count="+count+"&isExhibition=" + isExhibition + "&collectionHits=true"
 		}).done(
 			function (data) {
 				return data;
@@ -669,7 +670,7 @@ define("app", ['knockout', 'facebook', 'imagesloaded', 'moment', './js/app/plugi
 			dataType: "json",
 			url: "/collection/list",
 			processData: false,
-			data: "creator=" + self.currentUser.username() + "&offset=0&count=1000&isExhibition=false&totalHits=true"
+			data: "creator=" + self.currentUser.username() + "&offset=0&count=1000&isExhibition=false&collectionHits=true"
 		}).done(
 			function (data) {
 				// console.log("User collections " + JSON.stringify(data));
@@ -789,16 +790,18 @@ define("app", ['knockout', 'facebook', 'imagesloaded', 'moment', './js/app/plugi
 	};
 
 	autoCompleteUserName = function (elem, valueAccessor, allBindingsAccessor, viewModel, context, callback) {
-		var category = allBindingsAccessor.get('category') || 0;
+		var onlyParents = allBindingsAccessor.get('onlyParents') || false;
+		var forUsers = allBindingsAccessor.get('forUsers') || false;
+		var paramsJSON = { "onlyParents": onlyParents, "forUsers" : forUsers};
+		if (allBindingsAccessor.has('forGroupType')) {
+			paramsJSON.forGroupType = allBindingsAccessor.get('forGroupType');
+		}
 		$(elem).devbridgeAutocomplete({
 			minChars: 3,
 			lookupLimit: 10,
 			serviceUrl: "/user/listNames",
 			paramName: "prefix",
-			params: {
-				onlyParents: false,
-				specifyCategory: category
-			},
+			params: paramsJSON,
 			ajaxSettings: {
 				dataType: "json"
 			},

@@ -37,6 +37,7 @@ define(['bridget', 'knockout', 'text!./_collection-view.html', 'isotope', 'image
 	function Record(data) {
 		var self = this;
 
+		self.annotations = [];
 		self.title = "";
 		self.description = "";
 		self.thumb = "";
@@ -59,16 +60,12 @@ define(['bridget', 'knockout', 'text!./_collection-view.html', 'isotope', 'image
 		self.position = 0;
 		self.dbId = "";
 		self.data = ko.observable('');
-//		self.video = false;
-		
-//		self.identifier = "";
-		
 		self.thumbnail = ko.pureComputed(function () {
 
 			if (self.thumb) {
 				return self.thumb;
 			} else {
-				return "img/content/thumb-empty.png";
+				return "img/ui/ic-noimage.png";
 			}
 		});
 
@@ -128,7 +125,6 @@ define(['bridget', 'knockout', 'text!./_collection-view.html', 'isotope', 'image
 		});
 
 		self.load = function (options) {
-			
 			var admindata = options.administrative;
 			var descdata = options.descriptiveData;
 			var media = options.media;
@@ -156,6 +152,7 @@ define(['bridget', 'knockout', 'text!./_collection-view.html', 'isotope', 'image
 				self.collected = usage.collected;
 			}
 
+			self.annotations = options.annotations;			
 			
 			
 			if(self.source=="Rijksmuseum" && media){
@@ -191,7 +188,7 @@ define(['bridget', 'knockout', 'text!./_collection-view.html', 'isotope', 'image
 			self.load(data);
 		}
 	}
-	
+
 	function CViewModel(params) {
 		
 		var self = this;
@@ -218,7 +215,7 @@ define(['bridget', 'knockout', 'text!./_collection-view.html', 'isotope', 'image
 		self.loggedUser = isLogged();
 		self.rightsmap = ko.mapping.fromJS([]);
 		self.isFavorites = ko.observable(false);
-	    
+		
 		$('#term_tags').tagsinput({
 	        allowDuplicates: false,
 	          itemValue: 'uri',  
@@ -377,11 +374,10 @@ define(['bridget', 'knockout', 'text!./_collection-view.html', 'isotope', 'image
 
 		self.fetchitemnum = 20;
 		self.isPublic = ko.observable(true);
-		
+		self.query = ko.observable('');
 		self.validationModel = ko.validatedObservable({
 			title: self.titleToEdit
 		});
-
 		self.displayTitle = ko.pureComputed(function () {
 			return self.isFavorites() ? 'Favorites' : self.title();
 		});
@@ -416,11 +412,19 @@ define(['bridget', 'knockout', 'text!./_collection-view.html', 'isotope', 'image
 				percentPosition: true
 			}
 		});
-
+		ko.bindingHandlers.filterItems = {
+				update: function (elem, valueAccessor, allBindingsAccessor, viewModel, context) {
+					var q = ko.utils.unwrapObservable(valueAccessor());
+					self.$container.isotope({ filter : function() {
+					    var title = $(this).find('.title').text();
+					     return title.toLowerCase().indexOf(q.toLowerCase()) == 0;
+					  }
+					});
+				}
+			};
 		self.revealItems = function (data) {
 			if ((data.length === 0 || data.length < self.fetchitemnum)) {
-				loading(false);
-				$(".loadmore").text("no more results");
+				loading(false);$(".loadmore").text("no more results");
 			} else {
 				$(".loadmore").text("Load more");
 			}
@@ -467,7 +471,6 @@ define(['bridget', 'knockout', 'text!./_collection-view.html', 'isotope', 'image
 							return;
 						}
 					}
-					
 					if (data.descriptiveData) {
 						self.title(findByLang(data.descriptiveData.label));
 						self.titleToEdit(findByLang(data.descriptiveData.label));
@@ -499,13 +502,11 @@ define(['bridget', 'knockout', 'text!./_collection-view.html', 'isotope', 'image
 					self.loadIndex();
 					
 					if (self.count() && self.count() > 0) {
-						self.loadInit();
 					} else {
 						loading(false);
 					}
 					
-			    	$("#term_tags").tagsinput('removeAll');
-
+					$("#term_tags").tagsinput('removeAll');
 				},
 				error: function (xhr, textStatus, errorThrown) {
 					loading(false);
@@ -522,8 +523,7 @@ define(['bridget', 'knockout', 'text!./_collection-view.html', 'isotope', 'image
 				}
 			});
 		};
-
-
+		
 		self.loadInit = function() {
 			if (self.terms().length == 0) {
 				$.ajax({
@@ -578,12 +578,10 @@ define(['bridget', 'knockout', 'text!./_collection-view.html', 'isotope', 'image
 				});
 			}
 		}
-		
 
+		
 		WITHApp.initTooltip();
-
 		self.loadCollection();
-		
 		self.isOwner = ko.pureComputed(function () {
 			if (app.currentUser._id() == self.withCreator) {
 				return true;
@@ -637,7 +635,7 @@ define(['bridget', 'knockout', 'text!./_collection-view.html', 'isotope', 'image
 					});
 				}
 		};
-		
+
 		function convertTerms(terms) {
 			var uitems = [];
 			var kitems = [];
@@ -654,7 +652,7 @@ define(['bridget', 'knockout', 'text!./_collection-view.html', 'isotope', 'image
 
 			return "{ \"terms\": " + JSON.stringify(uitems) + ", \"keywords\": " + JSON.stringify(kitems) +"}";
 		}
-
+		
 		self.addCollectionRecord = function (e) {
 			self.citems.push(e);
 		};
@@ -766,7 +764,7 @@ define(['bridget', 'knockout', 'text!./_collection-view.html', 'isotope', 'image
 			self.similarLoadInit(rec.dbId);
 
 		};
-
+		
 		self.similarLoadInit = function(rec) {
 //			if (self.terms().length == 0) {
 				$.ajax({
@@ -821,7 +819,6 @@ define(['bridget', 'knockout', 'text!./_collection-view.html', 'isotope', 'image
 //				});
 //			}
 		}
-
 		
 		self.deleteMyCollection = function () {
 			$.smkConfirm({
@@ -864,10 +861,19 @@ define(['bridget', 'knockout', 'text!./_collection-view.html', 'isotope', 'image
 		
 
 		function getItem(record) {
-			var tile = '<div class="item ' + record.dbId + '"><div class="wrap"><a href="#"  onclick="recordSelect(\'' + record.dbId + '\',event)"><div class="thumb"><img style="width:100%" src="' + record.thumbnail() + '" onError="this.src=\'img/content/thumb-empty.png\'"/></div>';
-			tile += '<div class="info"><h2 class="title">' + record.displayTitle() + '</h2></div></a>';
-			tile += '<div class="action-group"><div class="wrap"><a href="' + record.view_url + '" target="_new" class="links">' + record.sourceCredits() + '</a>';
-			tile+="<ul>"
+			var tile = '<div class="item ' + record.dbId + '"><div class="wrap"><a href="#"  onclick="recordSelect(\'' + record.dbId + '\',event)"><div class="thumb"><img style="width:100%" src="' + record.thumbnail() + '" onError="this.src=\'img/ui/ic-noimage.png\'"/></a></div>';
+			tile += '<div class="info"><h2 class="title">' + record.title + '</h2>';
+			
+			var distitle = "";
+			if (record.creator && record.creator.length > 0) {
+				distitle = "by " + record.creator;
+			}
+			else if (record.dataProvider && record.dataProvider.length > 0 && record.dataProvider != record.creator) {
+				distitle = record.dataProvider;
+			}
+			tile+='<span class="source">'+distitle+'</source><a href="' + record.view_url + '" target="_new" class="links">' + record.sourceCredits() + '</a></div>';
+			tile += '<div class="action-group"><div class="wrap">';
+			tile+="<ul>";
 			if (isLogged()) {
 				if ((self.access() == "WRITE" || self.access() == "OWN")) {
 					tile += '<li><a  data-toggle="tooltip" data-placement="top" title="Remove media" class="fa fa-trash-o"  onclick="removeRecord(\'' + record.dbId + '\',event)"></a></li>';
@@ -878,12 +884,16 @@ define(['bridget', 'knockout', 'text!./_collection-view.html', 'isotope', 'image
 				} else {
 					tile += '<li><a  data-toggle="tooltip" data-placement="top" title="Add to favorites" onclick="likeRecord(\'' + record.dbId + '\',event);" class="fa fa-heart"></a></li>';
 				}}
-				tile += '<li><a data-toggle="tooltip" data-placement="top" title="Collect it" class="fa fa-download collectbutton" onclick="collect(\'' + record.dbId + '\',event);" ></a></li></ul>';
+				tile += '<li><a data-toggle="tooltip" data-placement="top" title="Collect it" class="fa fa-download collectbutton" onclick="collect(\'' + record.dbId + '\',event);" ></a></li>';
+
 			}
 			tile += '<li><a data-toggle="tooltip" data-placement="top" title="Get similar" class="fa" onclick="similar(\'' + record.dbId + '\',event);" >S</a></li>';
 			tile += '</ul>';
 
 			tile += "</div></div></div></div>";
+			
+			
+			
 			
 			return tile;
 		}
@@ -981,7 +991,6 @@ define(['bridget', 'knockout', 'text!./_collection-view.html', 'isotope', 'image
 					}
 				});
 				iso = self.$container.data('isotope');
-
 				//itemSelector = iso.options.itemSelector;
 			}
 			// append to container
@@ -1026,22 +1035,8 @@ define(['bridget', 'knockout', 'text!./_collection-view.html', 'isotope', 'image
 
 			return this;
 		};
-		
-//		self.clearImages = function () {
-//			if (self.citems().length > 0) {
-//				self.$container = $(".grid#" + self.id());
-//				self.citems.removeAll();
-//				
-//				self.$container.isotope('remove', self.$container.isotope('getItemElements'));
-//				self.$container.isotope('destroy');
-//				
-//				self.revealItems([]);
-//			}
-//			return this;
-//		};
-
 	}
-
+	
 	return {
 		viewModel: CViewModel,
 		template: template

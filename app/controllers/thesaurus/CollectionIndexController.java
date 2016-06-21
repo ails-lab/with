@@ -17,7 +17,6 @@
 package controllers.thesaurus;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -31,7 +30,6 @@ import model.basicDataTypes.LiteralOrResource;
 import model.basicDataTypes.MultiLiteral;
 import model.basicDataTypes.MultiLiteralOrResource;
 import model.resources.CulturalObject.CulturalObjectData;
-import model.resources.RecordResource.RecordDescriptiveData;
 import model.resources.PlaceObject.PlaceData;
 import model.resources.AgentObject.AgentData;
 import model.resources.ThesaurusObject.SKOSTerm;
@@ -49,8 +47,6 @@ import play.Logger;
 import play.Logger.ALogger;
 import play.libs.Json;
 import play.mvc.Result;
-import utils.AccessManager.Action;
-import akka.japi.Util;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;

@@ -9,20 +9,21 @@
 			<!-- project-->
 			<section class="project">
 				<!-- head-->
+				 <!-- upload--><a href="#" class="uploadimage" data-bind="visible: isCreator"><span class="plus"></span><span class="text">Change cover image</span></a>
+             
 				<div class="list-head">
 					<!-- back-->
-					<a href="#" data-bind="click: goBack" class="back">Return to <!-- ko text: namePlural --><!-- /ko --> list</a>
+					<a href="#" data-bind="click: goBack" class="back"><i class="fa fa-angle-left"></i></a>
 					<!-- control-->
-					<div class="list-control">
-						<!-- upload-->
-						<a href="#" class="upload" data-bind="visible: isCreator"><span class="plus"></span><span class="text">Change cover image</span></a>
-						<a href="#" data-toggle="tooltip" data-placement="top" title="View Organization page" class="fa fa-eye" data-bind="click: showGroup"></a>
-						<a href="#" data-toggle="tooltip" data-placement="top" title="Edit Organization" class="fa fa-pencil editaction new" data-bind="visible: isCreator"></a>
-						<a href="#" data-toggle="tooltip" data-placement="top" title="Manage Members" class="fa fa-user members-access" 
-						data-bind="visible: isAdmin, click: getMembersInfo.bind($data, 'both')"></a>
-						<a href="#" data-toggle="tooltip" data-placement="top" title="Delete Organization" class="fa fa-trash" data-bind="visible: isCreator, click: deleteGroup"></a>
+					<ul class="organization-list-control">
+                      	<li><a href="#" data-toggle="tooltip" data-placement="top" title="View Organization page" class="fa fa-eye" data-bind="click: showGroup"></a></li>
+						<li><a href="#" data-toggle="tooltip" data-placement="top" title="Edit Organization" class="fa fa-pencil editaction new" data-bind="visible: isCreator"></a></li>
+						<li><a href="#" data-toggle="tooltip" data-placement="top" title="Manage Members" class="fa fa-user members-access" 
+						data-bind="visible: isAdmin, click: getMembersInfo.bind($data, 'both')"></a></li>
+						<li><a href="#" data-toggle="tooltip" data-placement="top" title="Delete Organization" class="fa fa-trash" data-bind="visible: isCreator, click: deleteGroup"></a></li>
+					</ul>
 					</div>
-				</div>
+				
 				<!-- hero section-->
 				<section class="hero" data-bind="style: { 'background-image': backgroundImage }">
 					<div class="meta">
@@ -78,76 +79,56 @@
 					</div>
 					<div class="action-body">
 						<div class="group">
-							<div class="title">Users access</div>
-							<input id="userName" type="text" placeholder="Start typing username" data-bind="autocompleteUsername: myUsername, category:1">
-
-
-							<ul class="access-list" data-bind="foreach: userMembers">
+							<div class="title">Manage users</div>
+							<input id="userName" type="text" placeholder="Start typing username" data-bind="autocompleteUsername: myUsername, forUsers:true">
+							<ul class="members-list" data-bind="foreach: userMembers">
 								<li>
 									<!-- ko if: $data.image -->
-									<div class="thumbnails"><img data-bind="attr: {src: image, id: 'image_' + userId()}"></div>
+									<div class="thumbnails"><img data-bind="attr: {src: image, id: 'image_' + userId()}">
 									<a href="#" data-toggle="tooltip" data-placement="top" data-bind="click: $parent.excecuteRemove.bind($data, userId(), 'user'),
 									attr: { title: username }"  class="trash">
 										<i class="fa fa-trash"></i>
-									</a>
-									<!-- <div class="toggle">
-										<input type="checkbox" id="u1">
-										<label for="u1"></label><span class="private">view</span><span class="public">co-edit</span>
-									</div> -->
-
-
+									</a></div>
+									<div class="toggle">
+			                          <input type="checkbox" data-bind="{checked: admin , click: $parent.isAdminToggle.bind($data, admin(), userId()), attr: {id: userId}} ">
+			                          <label data-bind="{attr: {for: userId}}" ></label>
+			                          <span class="member">member</span>
+			                          <span class="admin">admin</span>
+			                        </div>
+			                        <div class="username" data-bind="text: username"></div>
 									<!-- /ko -->
 									<!-- ko ifnot: $data.image -->
-									<div class="thumbnails"><img src="img/content/img-profile.jpg"></div>
+									<div class="thumbnails"><img src="images/user.png">
 									<a href="#" data-toggle="tooltip" data-placement="top" data-bind="click: $parent.excecuteRemove.bind($data, userId(), 'user'),
 									attr: { title: username }"
 									 class="trash">
 										<i class="fa fa-trash"></i>
-									</a>
-									<!-- <div class="toggle">
-										<input type="checkbox" id="u1">
-										<label for="u1"></label><span class="private">view</span><span class="public">co-edit</span>
-									</div> -->
-
-
+									</a></div>
+									<div class="toggle">
+			                            <input type="checkbox"   data-bind="{ checked: admin , click: $parent.isAdminToggle.bind($data, admin(),userId()),attr: {id: userId}}">
+			                          <label data-bind="{attr: {for: userId}}"></label>
+			                          <span class="member">member</span>
+			                          <span class="admin">admin</span>
+			                        </div>
+			                        <div class="username" data-bind="text: username"></div>
 									<!-- /ko -->
 								</li>
 							</ul>
 						</div>
+
 						<div class="group">
-							<div class="title">Groups access</div>
-							<input id="groupName" type="text" placeholder="Start typing group name" data-bind="autocompleteUsername: myUsername, category:2">
-							<ul class="access-list" data-bind="foreach: groupMembers">
-<!-- 								 <li data-bind="attr: { class: $parent.colors[$index]%4  }"> -->
-									<li class="blue">
- 									<!-- ko if: $data.image -->
-										<span class="text"  data-bind="text: username().substring(0,2).toUpperCase()"></span>
-										<a href="#" data-toggle="tooltip" data-placement="top" data-bind="click: $parent.excecuteRemove.bind($data, userId(), 'group'),
-										attr: { title: username }"
-										 class="trash">
-											<i class="fa fa-trash"></i>
-										</a>
-									<!-- <div class="toggle">
-										<input type="checkbox" id="g1">
-										<label for="g1"></label><span class="private">view</span><span class="public">co-edit</span>
-									</div> -->
-									<!-- /ko -->
-									<!-- ko ifnot: $data.image -->
-										<span class="text" data-bind="text: username().substring(0,2).toUpperCase()"></span>
-										<a href="#" data-toggle="tooltip" data-placement="top" data-bind="click: $parent.excecuteRemove.bind($data, userId(), 'group'),
-										attr: { title: username }"
-										 class="trash">
-											<i class="fa fa-trash"></i>
-										</a>
-									<!-- <div class="toggle">
-										<input type="checkbox" id="g1">
-										<label for="g1"></label><span class="private">view</span><span class="public">co-edit</span>
-									</div> -->
-									<!-- /ko -->
-								</li>
-							</ul>
-						</div>
-					</div>
+
+
+				  <div class="title">Manage groups</div>
+				  <input id="groupName" type="text" placeholder="Start typing group name" data-bind="autocompleteUsername: myUsername, onlyParents:false, forUsers:false, forGroupType:'UserGroup'">
+				  <ul class="access-list" data-bind="foreach: groupMembers">
+				  	<li class="blue">
+					    <span class="text" data-bind="text: username().substring(0,2).toUpperCase()"></span>
+						<a data-toggle="tooltip" data-placement="top" style="cursor:pointer;" data-bind="{attr: {title: username}, click: $parent.excecuteRemove.bind($data, userId(), 'group')}" class="trash">
+						  	<i class="fa fa-trash"></i></a>
+					</li>
+				  </ul>
+				</div>
 					<div class="button-group"><a href="#" class="btn-green cancel">Close</a></div>
 				</section>
 

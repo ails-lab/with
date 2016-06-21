@@ -69,12 +69,12 @@ import play.mvc.Http.MultipartFormData.FilePart;
 import play.mvc.Result;
 import sources.core.HttpConnector;
 import sources.core.ParallelAPICall;
-import utils.AccessManager;
-import utils.AccessManager.Action;
+import utils.MetricsUtils;
 import actors.MediaCheckerActor.MediaCheckMessage;
 import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
 
+import com.codahale.metrics.Timer;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -82,7 +82,7 @@ import com.google.common.net.MediaType;
 
 import db.DB;
 
-public class MediaController extends Controller {
+public class MediaController extends WithController {
 	public static final ALogger log = Logger.of(MediaController.class);
 
 	// Cache media based on url and media version
@@ -132,7 +132,7 @@ public class MediaController extends Controller {
 					.getByUrlAndVersion(url, version)) != null)
 				return media;
 			media = new MediaObject();
-			Logger.info("Downloading " + url);
+			log.info("Downloading " + url);
 			File img = HttpConnector.getWSHttpConnector().getURLContentAsFile(
 					url);
 			byte[] mediaBytes = IOUtils.toByteArray(new FileInputStream(img));
@@ -248,7 +248,7 @@ public class MediaController extends Controller {
 				return ok(result);
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
-				e.printStackTrace();
+				log.error("",e);
 				result.put("error", "error creating from url");
 				return badRequest(result);
 			}
@@ -326,6 +326,13 @@ public class MediaController extends Controller {
 	private static ObjectNode storeMedia(MediaObject med, File x)
 			throws IOException, Exception {
 
+		final Timer storeMedia_timer;
+		Timer.Context storeMedia_timeContext =  null;
+		if(DB.getConf().getBoolean("measures.mediaController.storeMedia.time")) {
+			storeMedia_timer = MetricsUtils.registry.timer(
+					MetricsUtils.registry.name(MediaController.class, "storeMedia", "time"));
+			storeMedia_timeContext = storeMedia_timer.time();
+		}
 		ObjectNode result = Json.newObject();
 		if (!x.isFile()) {
 			result.put("error", "uploaded file is not valid");
@@ -346,8 +353,15 @@ public class MediaController extends Controller {
 		DB.getMediaObjectDAO().makePermanent(med);
 		med.setUrl("/media/" + med.getDbId().toString() + "?file=true");
 		DB.getMediaObjectDAO().makePermanent(med);
+
 		result = makeThumbs(med, image);
-		return result;
+		try {
+			return result;
+		} finally {
+			if(DB.getConf().getBoolean("measures.mediaController.storeMedia.time") &&
+					(storeMedia_timeContext != null))
+				storeMedia_timeContext.stop();
+		}
 	}
 
 	private static boolean checkJsonArray(ArrayNode allRes, String string) {
@@ -417,6 +431,14 @@ public class MediaController extends Controller {
 	private static ObjectNode makeThumbs(MediaObject med, BufferedImage image)
 			throws Exception {
 
+		final Timer makeThumbs_timer;
+		Timer.Context makeThumbs_timeContext = null;
+		if(DB.getConf().getBoolean("measures.mediaController.makeThumbs.time")) {
+			makeThumbs_timer = MetricsUtils.registry.timer(
+				MetricsUtils.registry.name(MediaController.class, "makeThumbs", "time"));
+			makeThumbs_timeContext = makeThumbs_timer.time();
+		}
+
 		// makeThumb(med, image);
 		MediaObject tiny = new MediaObject();
 		MediaObject square = new MediaObject();
@@ -469,8 +491,12 @@ public class MediaController extends Controller {
 		// singleRes.put("isShownBy", "/media/"
 		// + med.getDbId().toString());
 
-		// Logger.info(results.asText());
-		return results;
+		try {
+			return results;
+		} finally {
+			if(DB.getConf().getBoolean("measures.mediaController.makeThumbs.time"))
+				makeThumbs_timeContext.stop();
+		}
 	}
 
 	// use the libraries we will use for video editing!
@@ -513,10 +539,10 @@ public class MediaController extends Controller {
 			cmd.run(op, image, outfile);
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			log.error("",e);
 		} catch (IM4JavaException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			log.error("",e);
 		}
 		File newFile = new File(outfile);
 		BufferedImage ithumb = ImageIO.read(newFile);
@@ -533,10 +559,10 @@ public class MediaController extends Controller {
 				cmd2.run(op, ithumb, outfile2);
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
-				e.printStackTrace();
+				log.error("",e);
 			} catch (IM4JavaException e) {
 				// TODO Auto-generated catch block
-				e.printStackTrace();
+				log.error("",e);
 			}
 			newFile = new File(outfile);
 			ithumb = ImageIO.read(newFile);
@@ -587,9 +613,8 @@ public class MediaController extends Controller {
 				// JsonPath.parse(jsonResponse).read("$['results'][0]['mediaId']");
 				resp = Json.parse(jsonResponse);
 
-				Logger.info(jsonResponse);
+				log.info(jsonResponse);
 
-				Logger.info("Called!");
 				aFile.releaseConnection();
 
 				response.close();
@@ -597,7 +622,7 @@ public class MediaController extends Controller {
 
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
-				e.printStackTrace();
+				log.error("",e);
 			}
 			return resp;
 		};
@@ -621,7 +646,7 @@ public class MediaController extends Controller {
 					mediaURL, "url");
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			log.error("",e);
 		}
 		editMediaAfterChecker(med, response);
 	}
@@ -727,7 +752,7 @@ public class MediaController extends Controller {
 			return true;
 	}
 
-	public static Result deleteOrphanMadia() {
+	public static Result deleteOrphanMedia() {
 		DB.getMediaObjectDAO().deleteOrphanMediaObjects();
 		return ok();
 	}
