@@ -164,7 +164,11 @@ define(['bootstrap', 'knockout', 'text!./myannotations.html', 'knockout-else','a
 		self.access = ko.observable("READ");
 		self.isFavorites = ko.observable(false);
 		//self.id = ko.observable(params.id);
-		self.id = ko.observable(app.currentUser._id())
+		self.id = ko.observable(app.currentUser._id());
+		if (self.id() == undefined) {
+			app.checkLogged();
+			self.id(app.currentUser._id());
+		}
 		self.$container = $(".grid#" + self.id()).isotope({
 			itemSelector: '.item',
 			transitionDuration: transDuration,
