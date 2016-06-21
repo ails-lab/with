@@ -165,11 +165,7 @@ define(['bootstrap', 'knockout', 'text!./myannotations.html', 'knockout-else','a
 		self.isFavorites = ko.observable(false);
 		//self.id = ko.observable(params.id);
 		self.id = ko.observable(app.currentUser._id());
-		if (self.id() == undefined) {
-			app.checkLogged();
-			self.id(app.currentUser._id());
-		}
-		self.$container = $(".grid#" + self.id()).isotope({
+		self.$container = $(".grid").isotope({
 			itemSelector: '.item',
 			transitionDuration: transDuration,
 			masonry: {
@@ -191,13 +187,13 @@ define(['bootstrap', 'knockout', 'text!./myannotations.html', 'knockout-else','a
 
 		
 		self.isotopeImagesReveal = function ($container, $items) {
-			self.$container = $(".grid#" + self.id());
+			self.$container = $(".grid");
 			var iso = self.$container.data('isotope');
 			var itemSelector = ".item";
 			if (iso) {
 				itemSelector = iso.options.itemSelector;
 			} else {
-				self.$container = $(".grid#" + self.id()).isotope({
+				self.$container = $(".grid").isotope({
 					itemSelector: '.item',
 					transitionDuration: transDuration,
 					masonry: {
