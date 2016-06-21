@@ -201,8 +201,9 @@ define(['bootstrap', 'knockout', 'text!./myannotations.html', 'knockout-else','a
 		self.annotatedRecordCount = ko.observable(5);
 		
 		self.annotationRecords = ko.observable();
-		self.annotationGoal = ko.observable();
+		self.totalAnnotations = ko.observable();
 		self.annotationPercentage = ko.observable();
+		self.goal = 1000;
 		//self.myAnnotatios = ko.mapping.fromJS([], mapping);
 		
 		self.img = ko.observable("img/ui/rookie.png");
@@ -354,13 +355,13 @@ define(['bootstrap', 'knockout', 'text!./myannotations.html', 'knockout-else','a
 		
 		self.percentageCall = function() {			
 			$.ajax({
-				"url": '/record/annotationPercentage?groupId=56e13d2e75fe2450755e553a' + '&goal=1000',
+				"url": '/record/annotationCount?groupId=56e13d2e75fe2450755e553a',
 				"method": "get",
 				"contentType": "application/json",
 				"success": function (data) {
 					self.annotationRecords(data.annotatedRecords);
-					self.annotationGoal(data.goal);
-					self.annotationPercentage(data.annotatedRecordsPercentage);
+					self.totalAnnotations(data.annotations);
+					self.annotationPercentage( Math.round((self.totalAnnotations() / self.goal ) * 100));
 					WITHApp.initChart(self.annotationPercentage());
 				},
 				"error": function (result) {
