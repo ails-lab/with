@@ -1,6 +1,10 @@
 define(['bootstrap', 'knockout', 'text!./myannotations.html', 'knockout-else','app', 'moment', 'isotope', 'knockout-validation', 'easypiechart'], function (bootstrap, ko, template, KnockoutElse, app, moment, Isotope) {
 	
-	
+	$.bridget('isotope', Isotope);
+	ko.bindingHandlers.annotationsIsotope = {
+			init: app.initOrUpdate('init'),
+			update: app.initOrUpdate('update')
+		};
 	function Record(data) {
 		var self = this;
 
