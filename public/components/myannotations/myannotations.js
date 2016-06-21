@@ -1,5 +1,6 @@
-define(['bootstrap', 'knockout', 'text!./myannotations.html', 'knockout-else','app', 'moment', 'knockout-validation', 'easypiechart'], function (bootstrap, ko, template, KnockoutElse, app, moment) {
+define(['bootstrap', 'knockout', 'text!./myannotations.html', 'knockout-else','app', 'moment', 'isotope', 'knockout-validation', 'easypiechart'], function (bootstrap, ko, template, KnockoutElse, app, moment, Isotope) {
 	
+	$.bridget('isotope', Isotope);
 	
 	function Record(data) {
 		var self = this;
@@ -165,7 +166,7 @@ define(['bootstrap', 'knockout', 'text!./myannotations.html', 'knockout-else','a
 		self.isFavorites = ko.observable(false);
 		//self.id = ko.observable(params.id);
 		self.id = ko.observable(app.currentUser._id());
-		window.setTimeout(500);
+		setTimeout(function(){ WITHApp.init(); }, 300);
 		self.$container = $(".grid").isotope({
 			itemSelector: '.item',
 			transitionDuration: transDuration,
