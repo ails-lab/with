@@ -490,14 +490,10 @@ define(['knockout', 'text!./item.html', 'app', 'knockout-else', 'smoke'], functi
 
 		self.open = function () {
 			if (window.location.href.indexOf('#item')>0) {
-				document.body.setAttribute("data-page","media");	
-				
+				document.body.setAttribute("data-page","media");		
 			}
-			document.body.setAttribute("data-page","item");
-			//e.preventDefault();
+			//document.body.setAttribute("data-page","item");
 			$( '.itemview' ).fadeIn();
-			//$('[role="main"]').addClass('itemopen');
-			//$("div[role='main']").addClass("itemopen");
 			$('body').css('overflow','hidden');
 			adjustHeight();
 			
