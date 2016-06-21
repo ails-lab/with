@@ -165,6 +165,7 @@ define(['bootstrap', 'knockout', 'text!./myannotations.html', 'knockout-else','a
 		self.isFavorites = ko.observable(false);
 		//self.id = ko.observable(params.id);
 		self.id = ko.observable(app.currentUser._id());
+		window.setTimeout(500);
 		self.$container = $(".grid").isotope({
 			itemSelector: '.item',
 			transitionDuration: transDuration,
@@ -224,22 +225,22 @@ define(['bootstrap', 'knockout', 'text!./myannotations.html', 'knockout-else','a
 				
 				self.$container.isotope('layout');
 				var scrollpos = sessionStorage.getItem("collection-viewscroll" + self.id());
-				if (scrollpos && $(".grid#" + self.id()).height() > scrollpos) {
+				if (scrollpos && $(".grid").height() > scrollpos) {
 					$(window).scrollTop(scrollpos);
 					sessionStorage.removeItem("collection-viewscroll" + self.id());
-				} else if (scrollpos && $(".grid#" + self.id()).height() < scrollpos) {
-					$(window).scrollTop($(".grid#" + self.id()).height());
+				} else if (scrollpos && $(".grid").height() < scrollpos) {
+					$(window).scrollTop($(".grid").height());
 
 				}
 
 			}).always(function () {
 				var scrollpos = sessionStorage.getItem("collection-viewscroll" + self.id());
-				if (scrollpos && $(".grid#" + self.id()).height() > scrollpos) {
+				if (scrollpos && $(".grid").height() > scrollpos) {
 					$(window).scrollTop(scrollpos);
 					sessionStorage.removeItem("collection-viewscroll" + self.id());
-				} else if (scrollpos && $(".grid#" + self.id()).height() < scrollpos) {
-					$(window).scrollTop($(".grid#" + self.id()).height());
-					if (scrollpos != null && $(".grid#" + self.id()).height() > scrollpos) {
+				} else if (scrollpos && $(".grid").height() < scrollpos) {
+					$(window).scrollTop($(".grid").height());
+					if (scrollpos != null && $(".grid").height() > scrollpos) {
 						sessionStorage.removeItem("collection-viewscroll" + self.id());
 					}
 				}
