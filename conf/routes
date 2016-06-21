@@ -32,7 +32,7 @@ GET 	/custom/:customName/					controllers.CustomAssets.redirect(customName)
 GET 	/custom/:customName/*file				controllers.CustomAssets.getFile(customName:String, file:String)
 
 GET     /record/randomRecords					controllers.RecordResourceController.getRandomRecords(groupId: String, batchCount: Integer)
-GET		/record/annotationPercentage			controllers.AnnotationController.getAnnotationPercentage(groupId: String, goal: Integer ?= 100)
+GET		/record/annotationCount					controllers.AnnotationController.getAnnotationCount(groupId: String)
 POST	/record/annotation						controllers.AnnotationController.addAnnotation()
 PUT		/record/contextData			            controllers.RecordResourceController.editContextData(collectionId)
 GET		/record/:id							    controllers.RecordResourceController.getRecordResource(id, format: play.libs.F.Option[String], profile: String ?="MEDIUM", locale: play.libs.F.Option[java.lang.String])
