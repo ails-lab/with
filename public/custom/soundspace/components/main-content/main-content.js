@@ -199,7 +199,7 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 				processData: false,
 				data: "groupId="+WITHApp.projectId
 			}).success (function(data) {
-				var percentage = Math.round(data.annotations/1000);
+				var percentage = Math.round(data.annotations/10);
 				self.annotationPercentage(percentage);
 		        WITHApp.initChart(self.annotationPercentage());
 			});
