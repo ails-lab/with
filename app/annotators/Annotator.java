@@ -28,6 +28,50 @@ import model.resources.RecordResource;
 
 public abstract class Annotator {
 
+	public enum Vocabulary {
+		AAT("aat"),
+		DBPEDIA_ONTOLOGY("dbo", "dbpedia"), 
+		DBPEDIA_RESOURCE("dbr"), 
+		GEMET("gemet"), 
+		EUSCREENXL("euscreenxl"),
+		FASHION("fashion"),
+		HORNBOSTEL_SACHS("hornbostel-sachs", "hornbostel_sachs"),
+		MIMO("mimo"),
+		NERD("nerd"),
+		PHOTOGRAPHY("photography"),
+		PARTAGE_PLUS("partage-plus", "partageplus"),
+		WORDNET30("wordnet30"),
+		WORDNET31("wordnet31");
+		
+		private String name;
+		private String[] alt;
+		
+		Vocabulary(String name,String... alt) {
+			this.name = name;
+			this.alt = alt;
+		}
+		
+		public String getName() {
+			return name;
+		}
+		
+		public static Vocabulary getVocabulary(String name){
+			for (Vocabulary voc : Vocabulary.values()) {
+				if (voc.name.equals(name)) {
+					return voc;
+				} else if (voc.alt != null) {
+					for (String s : voc.alt) {
+						if (s.equals(name)) {
+							return voc;
+						}
+					}
+				}
+			}
+			
+			return null;
+		}
+	}
+	
 	protected Language lang;
 	
 	public static String LANGUAGE = "lang";

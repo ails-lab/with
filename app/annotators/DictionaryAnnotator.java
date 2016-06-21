@@ -209,7 +209,7 @@ public class DictionaryAnnotator extends Annotator {
 	    		JsonNode node = iter.next();
 	    		
 //	    		System.out.println(start + " " + end  + " " + node.get("vocabulary").asText() + " " + node.get("label-en").asText());
-	    		res.add(new Annotation(this.getClass(), start, end, 1.0f, node.get("uri").asText(), node.get("label-en").asText(), node.get("vocabulary").asText()));
+	    		res.add(new Annotation(this.getClass(), start, end, 1.0f, node.get("uri").asText(), node.get("label-en").asText(), Annotator.Vocabulary.getVocabulary(node.get("vocabulary").asText())));
 	    	}
 	    }
 

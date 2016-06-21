@@ -370,6 +370,44 @@ define(['knockout', 'text!./_item.html', 'app','smoke'], function (ko, template,
 			$(".ann-value-" + self.annotationIndex[uri]).addClass("tag-selection");
 		};
 
+		self.hierarchy = ko.observable('');
+		
+		self.showHierarchy = function(uri) {
+			if (self.hierarchy.length == 0) {
+				$.ajax({
+					type    : "get",
+					url     : "/thesaurus/getTerm?uri=" + uri,
+					contentType: "application/json",
+					success : function(result) {
+						var s = "";
+						
+						var broader = result.semantic.broaderTransitive;
+						if (broader != null) {
+							for (c in broader) {
+								
+								var z = broader[c].prefLabel.default;
+								if (s.length > 0) {
+									z += ", ";
+								}
+								s = z + s;
+							}
+						}
+						
+						self.hierarchy(s);
+						
+						alert(s);
+					},
+					
+					error   : function(request, status, error) {
+						$.smkAlert({
+							text: 'An error has occured',
+							type: 'danger',
+							permanent: true
+						});
+					}
+				});
+			}
+		};
 		
 	   self.findsimilar=function(){
 		  if(self.related().length==0 && self.relatedsearch==false){

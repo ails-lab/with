@@ -203,12 +203,11 @@
                                   <!-- ko foreach: record().annotationsKeys -->
                                   <div class="term">
                                     <a target="_blank" data-bind="attr: {href: uri, title: uri}, css: {'glyphicon glyphicon-link': true}"></a>&nbsp;
+                                    <a title="Show hierarchy" data-bind="css: {'glyphicon glyphicon-leaf': true}, event: {click: function(){$parent.record().showHierarchy(uri);}} "></a>&nbsp;
                                   	<a class="ann-resource" href="#" data-bind="attr: {id: id}, text:$parent.record().getAnnotationLabel($data), event: {click: function(){$parent.record().annShow(uri);}}"></a>
                                   </div>
                                  <!-- /ko --> 
                                   </div>
-                                 
-                                
                               </div>
 							</div>
                           </div>

@@ -141,21 +141,21 @@ public class StanfordNLPAnnotator extends Annotator {
 		ArrayList<Span> locations = ai.getLocations("NE", new SimpleAnnotationValue("LOCATION"));
 		if (locations != null) {
 			for (Span span : locations) {
-				res.add(new annotators.Annotation(this.getClass(), span.start, span.end, -1.0f, "http://nerd.eurecom.fr/ontology#Location", "Location", "nerd"));
+				res.add(new annotators.Annotation(this.getClass(), span.start, span.end, -1.0f, "http://nerd.eurecom.fr/ontology#Location", "Location", Annotator.Vocabulary.NERD));
 			}
 		}
 		
 		ArrayList<Span> persons = ai.getLocations("NE", new SimpleAnnotationValue("PERSON"));
 		if (persons != null) {
 			for (Span span : persons) {
-				res.add(new annotators.Annotation(this.getClass(), span.start, span.end, -1.0f, "http://nerd.eurecom.fr/ontology#Person", "Person", "nerd"));
+				res.add(new annotators.Annotation(this.getClass(), span.start, span.end, -1.0f, "http://nerd.eurecom.fr/ontology#Person", "Person", Annotator.Vocabulary.NERD));
 			}
 		}
 
 		ArrayList<Span> orgs = ai.getLocations("NE", new SimpleAnnotationValue("ORGANIZATION"));
 		if (orgs != null) {
 			for (Span span : orgs ) {
-				res.add(new annotators.Annotation(this.getClass(), span.start, span.end, -1.0f, "http://nerd.eurecom.fr/ontology#Organization", "Organization", "nerd"));
+				res.add(new annotators.Annotation(this.getClass(), span.start, span.end, -1.0f, "http://nerd.eurecom.fr/ontology#Organization", "Organization", Annotator.Vocabulary.NERD));
 			}
 		}
 		

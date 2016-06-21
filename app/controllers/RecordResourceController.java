@@ -322,7 +322,7 @@ public class RecordResourceController extends WithResourceController {
 										}
 										
 										if (ann.getVocabulary() != null) {
-											body.put("vocabulary", ann.getVocabulary());
+											body.put("vocabulary", ann.getVocabulary().getName());
 										}
 										
 										annotation.put("body", body);

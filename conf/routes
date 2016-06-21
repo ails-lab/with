@@ -130,8 +130,9 @@ GET	/api/idxres										controllers.ReindexController.reindexAllResources()
 GET	/api/idxthes									controllers.ReindexController.reindexAllThesaurus()
 
 #Thesaurus management
-POST	/thesauri/addTerm	        			    controllers.ThesaurusController.addThesaurusTerm()
-DELETE  /thesauri/deleteThesaurus/:name	        controllers.ThesaurusController.deleteThesaurus(name)
+POST	/thesaurus/addTerm	        			    controllers.ThesaurusController.addThesaurusTerm()
+DELETE  /thesaurus/deleteThesaurus/:name	        controllers.ThesaurusController.deleteThesaurus(name)
+GET 	/thesaurus/getTerm		   					controllers.ThesaurusController.getThesaurusTerm(uri: String)
 
 #Thesaurus gui
 POST	/collection/:id/facets 	        			controllers.thesaurus.CollectionIndexController.getCollectionFacets(id)

@@ -150,19 +150,7 @@ public class ThesaurusController extends Controller {
 //				locks.release();
 		}
 	}
-
-//	public static Result internalAddRecordToCollection(String colId,
-//			RecordResource record, Option<Integer> position, ObjectNode result) {
-//		return addRecordToCollection(Json.toJson(record), new ObjectId(colId),
-//				position, false);
-//	}
-//
-//	public static Result internalAddRecordToCollection(String colId,
-//			RecordResource record, Option<Integer> position, ObjectNode result,
-//			boolean noRepeated) {
-//		return addRecordToCollection(Json.toJson(record), new ObjectId(colId),
-//				position, noRepeated);
-//	}
+	
 
 	public static Result addThesaurusTerm(JsonNode json) {
 		
@@ -264,6 +252,28 @@ public class ThesaurusController extends Controller {
 		} finally {
 //			if (locks != null)
 //				locks.release();
+		}
+	}
+	
+
+	public static Result getThesaurusTerm(String uri) {
+		ObjectNode result = Json.newObject();
+
+		try {
+			if (uri == null) {
+				result.put("error", "Invalid Request");
+				return badRequest(result);
+			} else {
+				ThesaurusObject to = DB.getThesaurusDAO().getByUri(uri);
+				if (to == null) {
+					result.put("error", "Term not found");
+				}
+				
+				return ok(Json.toJson(to));
+			}
+		} catch (Exception e) {
+			result.put("error", e.getMessage());
+			return internalServerError(result);
 		}
 	}
 

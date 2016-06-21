@@ -163,7 +163,7 @@ public class DBPediaSpotlightAnnotator extends Annotator {
 	    			label = literal.getString();
 	    		}
 	    		
-	    		res.add(new Annotation(this.getClass(), offset, offset + surfaceForm.length(), score, URI, label, "dbpedia"));
+	    		res.add(new Annotation(this.getClass(), offset, offset + surfaceForm.length(), score, URI, label, Annotator.Vocabulary.DBPEDIA_RESOURCE));
 	    	}
 	    }
 	    

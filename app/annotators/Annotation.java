@@ -16,6 +16,8 @@
 
 package annotators;
 
+import annotators.Annotator.Vocabulary;
+
 public class Annotation {
 
 	private Class<? extends Annotator> annotator;
@@ -29,9 +31,9 @@ public class Annotation {
 	private double confidence;
 	
 	private String label;
-	private String vocabulary;
+	private Vocabulary vocabulary;
 	
-	public Annotation(Class<? extends Annotator> annotator, int sp, int ep, double confidence, String URI, String label, String vocabulary) {
+	public Annotation(Class<? extends Annotator> annotator, int sp, int ep, double confidence, String URI, String label, Vocabulary vocabulary) {
 		this.setAnnotator(annotator);
 //		this.setBody(body);
 		this.setStartPosition(sp);
@@ -91,11 +93,11 @@ public class Annotation {
 		this.confidence = confidence;
 	}
 
-	public String getVocabulary() {
+	public Vocabulary getVocabulary() {
 		return vocabulary;
 	}
 
-	public void setVocabulary(String vocabulary) {
+	public void setVocabulary(Vocabulary vocabulary) {
 		this.vocabulary = vocabulary;
 	}
 
