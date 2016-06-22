@@ -297,15 +297,3 @@ body section.annotate .bottom .info .annotatebtn:hover {
   background: #007aaf;
   text-decoration: none;
 }
-.front-page-container-search {
-	height: 100%;
-  	width: 100%;
-    color: white;
-    text-align: center;
-    top: 75px;
-    background-color: rgba(0, 0, 0, 0.4);
-    border: 1px solid black;
-    opacity: 1.5;
-    margin: 0 auto;
-}
-
