@@ -384,7 +384,7 @@ define(['knockout', 'text!./item.html', 'app', 'knockout-else', 'smoke'], functi
 							var index = self.arrayFirstIndexOf(self.batchItemsAnnotated, function (item) {
 								return item.recordId === self.recordSimple.recordId;
 							});
-							if (index1 >= 0) 
+							if (index >= 0) 
 								self.batchItemsAnnotated.splice(index, 1);
 							self.batchItemsAnnotated.push(self.recordSimple);
 							updateRecordAnnotations(self.record().recordId, self.record().annotations());
