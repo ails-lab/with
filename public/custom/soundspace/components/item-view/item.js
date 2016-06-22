@@ -586,10 +586,12 @@ define(['knockout', 'text!./item.html', 'app', 'knockout-else', 'smoke'], functi
 		};
 		
 
-       self.login = function (data,event) {
+       self.loginFromItem = function (data,event) {
        		event.preventDefault();
        		$("#loginPopup").addClass("open");
-       		//$("#loginPopup").on("loginEvent", function(event) {itemShow(self.selrecord)});
+       		$("#loginPopup").on("loginEvent", function(event) {
+       			itemShow(self.record());
+       		});
 		}
 		
 		self.addDisqus= function(){
