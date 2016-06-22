@@ -106,12 +106,14 @@ import sources.EuropeanaCollectionSpaceSource;
 import sources.EuropeanaSpaceSource;
 import sources.OWLExporter.CulturalItemOWLExporter;
 import sources.core.CommonQuery;
+import sources.core.JsonContextRecordFormatReader;
 import sources.core.ParallelAPICall;
 import sources.core.ParallelAPICall.Priority;
 import sources.core.ResourcesListImporter;
 import sources.core.SourceResponse;
 import sources.core.Utils;
 import sources.formatreaders.DPLARecordFormatter;
+import sources.formatreaders.MuseumofModernArtRecordFormatter;
 import sources.utils.JsonContextRecord;
 import utils.ListUtils;
 import utils.Locks;
@@ -291,9 +293,12 @@ public class CollectionObjectController extends WithResourceController {
 	    if (picture != null) {
 	        File file = picture.getFile();
 	        // TODO pick the correct reader
-	        DPLARecordFormatter itemReader = new DPLARecordFormatter();
+	        JsonContextRecordFormatReader itemReader = new MuseumofModernArtRecordFormatter();
 			ResourcesListImporter rec = new ResourcesListImporter(itemReader);
-	        addResultToCollection(rec.process(file), ccid.getDbId().toString(), -1, null, true);
+	        addResultToCollection(rec.process(file), ccid.getDbId().toString(), -1, resultInfo, true);
+	        if (resultInfo.has("error")){
+	        	return internalServerError(resultInfo);
+	        }
 	        return ok("File uploaded");
 	    } else {
 	        flash("error", "Missing file");

@@ -34,8 +34,9 @@ public class ResourcesListImporter extends SourceImporter{
 	@Override
 	public List<WithResource<?,?>> process(JsonNode items) {
 		List<WithResource<?,?>> res = new ArrayList<>();
-		for (JsonNode jsonNode : items) {
-			WithResource object = itemReader.fillObjectFrom(jsonNode);
+		for (int i=0; i<items.size(); i++) {
+			JsonNode jsonNode = items.get(i);
+			WithResource object = itemReader.readObjectFrom(jsonNode);
 			throwResource(object);
 			res.add(object);
 		}
