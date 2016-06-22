@@ -153,6 +153,7 @@ public class AnnotationController extends Controller {
 			AnnotationAdmin administrative = new AnnotationAdmin();
 			administrative.setWithCreator(WithController.effectiveUserDbId());
 			administrative.setCreated(new Date());
+			administrative.setGenerated(new Date());
 			if (json.has("generator"))
 				administrative.setGenerator(json.get("generator").asText());
 			if (json.has("body") && json.get("body").has("confidence")) {
