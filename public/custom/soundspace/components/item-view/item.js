@@ -384,7 +384,7 @@ define(['knockout', 'text!./item.html', 'app', 'knockout-else', 'smoke'], functi
 							var index = self.arrayFirstIndexOf(self.batchItemsAnnotated, function (item) {
 								return item.recordId === self.recordSimple.recordId;
 							});
-							if (index1 >= 0) 
+							if (index >= 0) 
 								self.batchItemsAnnotated.splice(index, 1);
 							self.batchItemsAnnotated.push(self.recordSimple);
 							updateRecordAnnotations(self.record().recordId, self.record().annotations());
@@ -586,10 +586,12 @@ define(['knockout', 'text!./item.html', 'app', 'knockout-else', 'smoke'], functi
 		};
 		
 
-       self.login = function (data,event) {
+       self.loginFromItem = function (data,event) {
        		event.preventDefault();
        		$("#loginPopup").addClass("open");
-       		//$("#loginPopup").on("loginEvent", function(event) {itemShow(self.selrecord)});
+       		$("#loginPopup").on("loginEvent", function(event) {
+       			itemShow(self.record());
+       		});
 		}
 		
 		self.addDisqus= function(){
