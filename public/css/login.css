@@ -157,7 +157,7 @@ button.email:hover:enabled {
   margin-right: 15px;
   text-align: center;
   width: 550px;
-  padding: 30px 0;
+  padding: 0 0;
 }
 
 .emailLogin {

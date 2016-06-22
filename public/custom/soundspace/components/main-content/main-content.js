@@ -1,4 +1,4 @@
-define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded','app'], function(bridget,ko, template,Isotope,imagesLoaded,app) {
+define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded','app', 'knockout-else', 'easypiechart'], function(bridget,ko, template,Isotope,imagesLoaded,app,KnockoutElse) {
 	
 	
 	$.bridget('isotope', Isotope);
@@ -6,11 +6,15 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 	
 	self.loading=ko.observable(false);
 	
-					
+	var recmapping={
+			'dbId': {
+				key: function(data) {
+		            return ko.utils.unwrapObservable(data.dbId);
+		        }
+			 }};			
 		
 	function Collection(data) {
 		var self=this;
-		
 		var mapping = {
 				create: function(options) {
 			    	var self=this;
@@ -79,17 +83,9 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 			     }
 			  
 		};
-		
-		
-		var recmapping={
-				'dbId': {
-					key: function(data) {
-			            return ko.utils.unwrapObservable(data.dbId);
-			        }
-				 }};
+
 		self.isLoaded = ko.observable(false);
 		self.records=ko.mapping.fromJS([], recmapping);
-		
 		
 		self.data = ko.mapping.fromJS({"dbID":"","administrative":"","descriptiveData":""}, mapping);
 		
@@ -137,10 +133,9 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 	  var self = this;
 	  document.body.setAttribute("data-page","home");
 	  setTimeout(function(){ WITHApp.init(); }, 300);
-	 
-	 
+	  $(".annotatehero").show();
 	  self.hash=window.location.hash;
-	  
+	  KnockoutElse.init([spec = {}]);
 	  self.exhibitloaded=ko.observable(false);
 	  self.featuredExhibition=ko.observable(null);	
 	  self.homecollections=ko.observableArray();
@@ -148,20 +143,11 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 	  self.totalExhibitions=ko.observable(0);
 	  self.collections=ko.observableArray();
 	  self.fetchitemnum=20;
-	  
-	  var $container = $(".grid").isotope({
-			itemSelector: '.item',
-			transitionDuration: transDuration,
-			masonry: {
-				columnWidth		: '.sizer',
-				percentPosition	: true
-			
-			}
-		});	
-	  
-	  
+      self.annotationPercentage = ko.observable(50);
+
+
 	  self.loadAll = function () {
-		  //this should replaced with get space collections + exhibitions
+         //$('.chart').easyPieChart({});
 		 loading(true);
 		 var count=40;
 		 if(sessionStorage.getItem("homemasonrycount")){
@@ -191,13 +177,35 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
         	  self.exhibitloaded(true);
         	  WITHApp.initCharacterLimiter();
           });
-          
-		  
+          //cannot make data binding for data-percent work, so update within initCart
+    	  var $container = $(".grid").isotope({
+    			itemSelector: '.item',
+    			transitionDuration: transDuration,
+    			masonry: {
+    				columnWidth		: '.sizer',
+    				percentPosition	: true
+    			
+    			}
+    		});	
+    	  self.getAnnotationCount();
 		};
-		//TODO:get project from backend. Update hard-coded group name parameter in list collections call.
+		
+		self.getAnnotationCount = function() {
+			return $.ajax({
+				type: "GET",
+				contentType: "application/json",
+				dataType: "json",
+				url: "/record/annotationCount",
+				processData: false,
+				data: "groupId="+WITHApp.projectId
+			}).success (function(data) {
+				var percentage = Math.round(data.annotations/10);
+				self.annotationPercentage(percentage);
+		        WITHApp.initChart(self.annotationPercentage());
+			});
+		}
 		
 		self.getSpaceCollections = function () {
-			//call should be replaced with space collections+exhibitions
 			return $.ajax({
 				type: "GET",
 				contentType: "application/json",
@@ -251,7 +259,7 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 					url: "/collection/list",
 					processData: false,
 					//data: "isPublic=true&count="+self.fetchitemnum+"&offset=" + self.homecollections().length,
-					data: "count="+self.fetchitemnum+"&offset=" + self.homecollections().length+"&directlyAccessedByUserOrGroup="+JSON.stringify([{group:WITHApp.projectName,rights:"READ"}]),
+					data: "count="+self.fetchitemnum+"&isExhibition=false"+"&offset=" + self.homecollections().length+"&directlyAccessedByUserOrGroup="+JSON.stringify([{group:WITHApp.projectName,rights:"READ"}]),
 					
 				}).success (function(){
 				});
@@ -367,8 +375,63 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 					  $( settings.mSelector ).isotope({ filter: selector });
 					  return false;
 				}
-					  
-	 
+	
+	  
+	  startAnnotate = function() {
+		  //self.getTestRecords();
+		  self.randomRecords();
+	  };
+	  
+	  self.addNextAnnot = function(randomList, inner, number) {
+		  if (randomList.length > 0) {
+			  initRecord = randomList[0];
+			  initRecord.nextItemToAnnotate = inner;
+			  initRecord.number = number;
+			  randomList.splice(0, 1);
+			  return self.addNextAnnot(randomList, initRecord, number+1);
+		  }
+		  else {
+			  inner.number = number;
+			  return inner;
+		  }
+	  }
+	  
+	  self.randomRecords = function() {
+			$.ajax({
+		    	"url": "/record/randomRecords?groupId="+WITHApp.projectId+"&batchCount=10",
+		    	"method": "GET",
+		    	"success": function( data, textStatus, jQxhr ){
+		    		if (data.length > 0) {
+			    		recordToAnnotate = self.addNextAnnot(data, {}, 0);
+			    		itemShow(formatRecord(recordToAnnotate));
+		    		}
+				},
+				"error": function (result) {
+					$.smkAlert({ text: 'An error occured', type: 'danger', time: 10 });
+				}         
+		    });	
+		};
+		
+		self.getTestRecords = function() {
+			$.ajax({
+		    	"url": "/user/annotations",
+		    	"method": "GET",
+		    	"success": function( data, textStatus, jQxhr ){
+		    		if (data.records.length > 0) {
+			    		recordToAnnotate = self.addNextAnnot(data.records.slice(0, 3), {});
+			    		itemShow(formatRecord(recordToAnnotate));
+		    		}
+				},
+				"error": function (result) {
+					$.smkAlert({ text: 'An error occured', type: 'danger', time: 10 });
+				}         
+		    });	
+		}
+		
+		self.openLogin=function(event){
+			  event.preventDefault();
+			  $("#loginPopup").addClass("open");	 
+		  }
 	
   }
   

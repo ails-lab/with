@@ -153,9 +153,9 @@ public class CollectionObject<T extends CollectionObject.CollectionDescriptiveDa
 	public Map<String, Object> transform() {
 		Map<String, Object> idx_map =  this.transformWR();
 
-		idx_map.put("dccreator", this.getDescriptiveData().getDccreator());
-		idx_map.put("dctermsaudience", this.getDescriptiveData().getDctermsaudience());
-		idx_map.put("dclanguage", this.getDescriptiveData().getDclanguage());
+		idx_map.put("dccreator", ((CollectionDescriptiveData)this.getDescriptiveData()).getDccreator());
+		idx_map.put("dctermsaudience", ((CollectionDescriptiveData)this.getDescriptiveData()).getDctermsaudience());
+		idx_map.put("dclanguage", ((CollectionDescriptiveData)this.getDescriptiveData()).getDclanguage());
 
 		/*ArrayNode cd = (ArrayNode) Json.toJson(this.getCollectedResources());
 		ObjectMapper mapper = new ObjectMapper();

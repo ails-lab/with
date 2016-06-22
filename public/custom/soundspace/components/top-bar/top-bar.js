@@ -7,6 +7,8 @@ define(['knockout', 'text!./top-bar.html', 'app', 'autocomplete'], function(ko, 
 	  var self=this;
 	  self.route=params.route;
 	  self.openLogin=function(event){
+		  console.log(window.location.href);
+		  localStorage.setItem('withLoginPopup', window.location.href);
 		  event.preventDefault();
 		  $("#loginPopup").addClass("open");
 		  

@@ -12,10 +12,13 @@
           <!-- nav-->
           <ul class="menu">
             <li><a href="javascript:void(0)" data-bind="event :{ click: function(data,event){goToPage('#home',event);}}" title="Home">Home</a></li>
-            <li><a href="#providers" title="Content Provider">Content Providers</a></li>
-            <li><a href="#about" title="About">About</a></li>
-        <li><a href="#" data-bind="visible: isLogged()==true,event :{ click: function(data,event){gotoWith(event);}}" title="WITH Login" target="_blank"><img  alt="with logo" src="img/with_logo.png" style="width: 20px;vertical-align: top;">&nbsp;<!-- ko text:currentUser.username() --><!-- /ko --></a><a href="#" data-bind="visible: isLogged()==false,event :{ click: function(data,event){openLogin(event);}}"  title="WITH Login" target="_blank">WITH Login</a></li>
-                <li class="subnav">
+        	<li><a href="#" data-bind="visible: isLogged()==true,event :{ click: function(data,event){gotoWith(event);}}" 
+        		title="WITH Login" target="_blank"><img  alt="with logo" src="img/with_logo.png" style="width: 20px;vertical-align: top;">
+        		&nbsp;<!-- ko text:currentUser.username() --><!-- /ko --></a>
+        		<a href="#" data-bind="visible: isLogged()==false,event :{ click: function(data,event){openLogin(event);}}"  
+        		title="WITH Login" target="_blank">WITH Login</a>
+        	</li>                
+        	<li class="subnav">
               <ul>
                 <li><a href="#terms" title="Terms of Usage">Terms of Use</a></li>
                 <li><a href="#privacy" title="Privacy Policy">Privacy Policy</a></li>
@@ -26,19 +29,24 @@
           </ul>
         </div>
       </nav>
-       <!-- hero, only to be rendered in index page-->
-      <section class="hero">
-        <!-- the wrap-->
-        <div class="wrap">
-          <div class="hue">
+       <!-- hero, only to be rendered in index page => how? moved to index.html-->
+       <section class="annotatehero" id="annotatehero">
+        <!-- top-->
+        <div class="top">
+          <!-- wrap-->
+          <div class="wrap">
             <div class="container">
-              <!-- banner-->
-              <div class="banner">
-                <h1>This is the Europeana Sounds Space</h1>
-                <p>
-                  Express your creativity
-                </p><a href="#search" title="EXPLORE ESPACE" class="btn btn-blue">EXPLORE</a>
-              </div>
+              <!-- the wrap-->
+              <h1>Tag our archive</h1><span class="topic">Spot musical instruments</span>
+              <!-- description-->
+              <p>Have an ear for musical instruments? Use your talent to tag all the instruments you 
+              	hear in the music archives of Europeana Sounds! There are so many historical music recordings 
+              	in our archives that we just can not describe all the instruments by ourselves. So that’s 
+              	why we kindly ask your help to tag our beloved music collections with all the instruments that you can hear 
+              	in a song. The music in Europeana Sounds range from beautiful folk music from Greece to Scandinavian improvised 
+              	space rock all the way to the sounds coming from Tibetian monastries. </p>
+              <!-- action button-->
+              <div class="annotatebtn"><a> <span class="text">Start tagging now and earn your badge!</a></div>
             </div>
           </div>
         </div>

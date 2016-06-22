@@ -10,9 +10,9 @@ define(['jquery','knockout', './router', 'knockout-mapping', 'bootstrap', 'knock
 	// Components can be packaged as AMD modules, such as the following:
 	ko.components.register('top-bar', { require: 'components/top-bar/top-bar'});
 	ko.components.register('home-page', { require: 'components/home-page/home' });
+	ko.components.register('item-view', { require: 'components/item-view/item' });
 	ko.components.register('main-content', { require: 'components/main-content/main-content' });
 	ko.components.register('search-page', { require: 'components/search-page/search' });
-	ko.components.register('item-view', { require: 'components/item-view/item' });
 	ko.components.register('collection-popup', { require: 'components/collection-popup/collection-popup' });
 	ko.components.register('collection-view', { require: 'components/collection-view/collection-view' });
 	ko.components.register('exhibition-view', { require: 'components/exhibition-view/exhibition-view' });
@@ -24,7 +24,7 @@ define(['jquery','knockout', './router', 'knockout-mapping', 'bootstrap', 'knock
 	ko.components.register('privacy', { require: 'components/statichtml/statichtml' });
 	ko.components.register('terms', { require: 'components/statichtml/statichtml' });
 	ko.components.register('login-page', { require: 'components/login-register-page/login-register' });
-	
+	ko.components.register('annotations-end', { require: 'components/annotations-end/annotations-end' });
 	
 	ko.components.register('popup-login', {
 		viewModel: { require: 'components/login-register-page/login-register' },

@@ -57,8 +57,8 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 		self.position=0;
 		self.dbId = "";
 		self.data = ko.observable('');
+		self.annotations = [];
 		self.thumbnail = ko.pureComputed(function () {
-
 			if (self.thumb) {
 				return self.thumb;
 			} 
@@ -177,7 +177,8 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 			}
 			self.isLoaded = ko.observable(false);
 			self.fullrestype = media[0] != null && media[0].Original != null 
-			&& media[0].Original.type != "null" ? media[0].Original.type : null;			
+			&& media[0].Original.type != "null" ? media[0].Original.type : null;
+			self.annotations = data.annotations;
 		};
 
 		if (data !== undefined) self.load(data);
@@ -317,7 +318,6 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 				var result = data[i];
 				if (result != null) {
 					var record = new Record(result);
-
 					items.push(record);
 					self.citems.push(record);
 				}
@@ -376,9 +376,6 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 			
 			
 		};
-
-		
-
 	
 		likeRecord = function (id,event) {
         	event.preventDefault();
@@ -405,6 +402,23 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 			
 			collectionShow(rec);
 		};
+		
+		updateRecordAnnotations = function(id, annotations) {
+			var index = self.arrayFirstIndexOf(ko.toJS(self.citems()), function (item) {
+				return item.dbId === id;
+			});
+			self.citems()[index].annotations = annotations;
+		}
+		
+		self.arrayFirstIndexOf = function (array, predicate) {
+			for (var i = 0, j = array.length; i < j; i++) {
+				if (predicate.call(undefined, array[i])) {
+					return i;
+				}
+			}
+			return -1;
+		};
+
 		
 		
 		function getItem(record) {
@@ -448,16 +462,21 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
        
        
        recordSelect = function (data,event) {
-       	
-       	event.preventDefault();
-			var selrecord = ko.utils.arrayFirst(self.citems(), function(record) {
+	    self.selrecord = ko.utils.arrayFirst(self.citems(), function(record) {
 				   return record.dbId === data;
 				});
-			itemShow(selrecord);
+       	if (isLogged()) {
+	       	event.preventDefault();
+			itemShow(self.selrecord);
 			return false;
-
+       	}
+       	else { 
+       		event.preventDefault();
+       		$("#loginPopup").addClass("open");
+       		$("#loginPopup").on("loginEvent", function(event) {itemShow(self.selrecord)});
+       	}
 		}
-
+		
        self.refresh=function(){
     	   
     	   loading(true);

@@ -16,7 +16,11 @@
 
 package model.annotations;
 
+import java.util.ArrayList;
 import java.util.Date;
+
+import model.annotations.bodies.AnnotationBody;
+import model.annotations.targets.AnnotationTarget;
 
 import org.bson.types.ObjectId;
 import org.mongodb.morphia.annotations.Embedded;
@@ -30,48 +34,62 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
+@SuppressWarnings("unchecked")
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Entity("Annotation")
-public class Annotation<T1 extends Annotation.AnnotationBody, T2 extends Annotation.AnnotationTarget> {
-	
-	// marker base class for possible annotations
-	public static class AnnotationBody {
+public class Annotation<T extends AnnotationBody> {
+
+	public Annotation() {
+		this.target = new AnnotationTarget();
+		this.body = (T) new AnnotationBody();
 	}
-	
-	// base class what the annotation references
-	public static class AnnotationTarget {
-	}
-	
+
+	/**
+	 * The dbIdentfier for retrieving this annotation from Mongo.
+	 */
 	@Id
 	@JsonSerialize(using = Serializer.ObjectIdSerializer.class)
-	ObjectId dbId;
-	
-	//what is this, smth like annotation/id?
-	String withUrl;
-	
-	@JsonSerialize(using = Serializer.DateSerializer.class)
-	@JsonDeserialize(using = Deserializer.DateDeserializer.class)
-	Date created;
-	
-	@JsonSerialize(using = Serializer.DateSerializer.class)
-	@JsonDeserialize(using = Deserializer.DateDeserializer.class)
-	Date lastModified;
+	private ObjectId dbId;
 
-	@JsonSerialize(using = Serializer.ObjectIdSerializer.class)
-	ObjectId withCreator; // a with user
-	
-	public static enum AnnotationType {
-		ExhibitionAnnotation, TextAnnotation
+	/**
+	 * The URI of the annotation - this should normally result to the JSON
+	 * representation of the annotation.
+	 */
+	private String annotationWithURI;
+
+	/**
+	 * Administrative data about the annotation creation
+	 */
+	private ArrayList<AnnotationAdmin> annotators;
+
+	/**
+	 * This enumeration included the motivation types for an annotation. It
+	 * currently includes includes Tagging, Linking, Commenting, Editing
+	 */
+	public static enum MotivationType {
+		Tagging, Linking, Commenting, Editing
 	}
-	
-	AnnotationType annotationType;
-	// body and target depend on the annotation type
-	
+
+	/**
+	 * The motivation why this annotation has been created. This takes values
+	 * from an enumerated list that currently includes Tagging, Linking,
+	 * Commenting, Editing
+	 */
+	private MotivationType motivation;
+	private AnnotationScore score;
+
+	/**
+	 * The body that includes the annotation details.
+	 */
 	@Embedded
-	T1 body;
+	private T body;
+
+	/**
+	 * The target to which the body refer to.
+	 */
 	@Embedded
-	T2 target;
-	
+	private AnnotationTarget target;
+
 	public ObjectId getDbId() {
 		return dbId;
 	}
@@ -79,70 +97,181 @@ public class Annotation<T1 extends Annotation.AnnotationBody, T2 extends Annotat
 	public void setDbId(ObjectId dbId) {
 		this.dbId = dbId;
 	}
-	
-	public String getWithUrl() {
-		return withUrl;
-	}
 
-	public void setWithUrl(String withUrl) {
-		this.withUrl = withUrl;
-	}
-
-	public Date getCreated() {
-		return created;
-	}
-
-	public void setCreated(Date created) {
-		this.created = created;
-	}
-
-	public ObjectId getWithCreator() {
-		return withCreator;
-	}
-
-	public void setWithCreator(ObjectId withCreator) {
-		this.withCreator = withCreator;
-	}
-
-	public AnnotationType getAnnotationType() {
-		return annotationType;
-	}
-
-	public void setAnnotationType(AnnotationType annotationType) {
-		this.annotationType = annotationType;
-	}
-	
-	public Date getLastModified() {
-		return lastModified;
-	}
-
-	public void setLastModified(Date lastModified) {
-		this.lastModified = lastModified;
-	}
-	
-	public T1 getBody() {
+	public T getBody() {
 		return body;
 	}
 
-	public void setBody(T1 body) {
+	public void setBody(T body) {
 		this.body = body;
 	}
 
-	public T2 getTarget() {
+	public AnnotationTarget getTarget() {
 		return target;
 	}
 
-	public void setTarget(T2 target) {
+	public void setTarget(AnnotationTarget target) {
 		this.target = target;
 	}
 
-	
-	public Annotation() {
-		this.target = (T2) new AnnotationTarget();
-		this.body = (T1) new AnnotationBody();
+	public String getAnnotationWithURI() {
+		return annotationWithURI;
 	}
-	
-	public Annotation(Class<?> clazz) {
-		annotationType = AnnotationType.valueOf(clazz.getSimpleName());
+
+	public void setAnnotationWithURI(String annotationWithURI) {
+		this.annotationWithURI = annotationWithURI;
 	}
+
+	public MotivationType getMotivation() {
+		return motivation;
+	}
+
+	public void setMotivation(MotivationType motivation) {
+		this.motivation = motivation;
+	}
+
+	public AnnotationScore getScore() {
+		return score;
+	}
+
+	public void setScore(AnnotationScore score) {
+		this.score = score;
+	}
+
+	public ArrayList<AnnotationAdmin> getAnnotators() {
+		return annotators;
+	}
+
+	public void setAnnotators(ArrayList<AnnotationAdmin> annotators) {
+		this.annotators = annotators;
+	}
+
+	public static class AnnotationAdmin {
+		/**
+		 * The with user who created this annotation.
+		 */
+		@JsonSerialize(using = Serializer.ObjectIdSerializer.class)
+		private ObjectId withCreator; // a with user
+
+		/**
+		 * The tool used for generating this annotation
+		 */
+		private String generator;
+
+		/**
+		 * The date this annotation has been created.
+		 */
+		@JsonSerialize(using = Serializer.DateSerializer.class)
+		@JsonDeserialize(using = Deserializer.DateDeserializer.class)
+		private Date created;
+
+		/**
+		 * The date this annotation has been created.
+		 */
+		@JsonSerialize(using = Serializer.DateSerializer.class)
+		@JsonDeserialize(using = Deserializer.DateDeserializer.class)
+		private Date generated;
+
+		/**
+		 * The date this annotation has been last modified.
+		 */
+		@JsonSerialize(using = Serializer.DateSerializer.class)
+		@JsonDeserialize(using = Deserializer.DateDeserializer.class)
+		private Date lastModified;
+
+		private double confidence;
+
+		public ObjectId getWithCreator() {
+			return withCreator;
+		}
+
+		public void setWithCreator(ObjectId withCreator) {
+			this.withCreator = withCreator;
+		}
+
+		public String getGenerator() {
+			return generator;
+		}
+
+		public void setGenerator(String generator) {
+			this.generator = generator;
+		}
+
+		public Date getCreated() {
+			return created;
+		}
+
+		public void setCreated(Date created) {
+			this.created = created;
+		}
+
+		public Date getGenerated() {
+			return generated;
+		}
+
+		public void setGenerated(Date generated) {
+			this.generated = generated;
+		}
+
+		public Date getLastModified() {
+			return lastModified;
+		}
+
+		public void setLastModified(Date lastModified) {
+			this.lastModified = lastModified;
+		}
+
+		public double getConfidence() {
+			return confidence;
+		}
+
+		public void setConfidence(double confidence) {
+			this.confidence = confidence;
+		}
+
+	}
+
+	public static class AnnotationScore {
+
+		/**
+		 * An arrayList with the user ids who approved this annotation body.
+		 */
+		private ArrayList<ObjectId> approvedBy;
+
+		/**
+		 * An arrayList with the user ids who rejected this annotation body.
+		 */
+		private ArrayList<ObjectId> rejectedBy;
+
+		/**
+		 * An arrayList with the user ids who didn't comment on this annotation
+		 * body.
+		 */
+		private ArrayList<ObjectId> dontKnowBy;
+
+		public ArrayList<ObjectId> getApprovedBy() {
+			return approvedBy;
+		}
+
+		public void setApprovedBy(ArrayList<ObjectId> approvedBy) {
+			this.approvedBy = approvedBy;
+		}
+
+		public ArrayList<ObjectId> getRejectedBy() {
+			return rejectedBy;
+		}
+
+		public void setRejectedBy(ArrayList<ObjectId> rejectedBy) {
+			this.rejectedBy = rejectedBy;
+		}
+
+		public ArrayList<ObjectId> getDontKnowByBy() {
+			return dontKnowBy;
+		}
+
+		public void setDontKnowBy(ArrayList<ObjectId> dontKnowBy) {
+			this.dontKnowBy = dontKnowBy;
+		}
+	}
+
 }

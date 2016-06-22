@@ -310,7 +310,7 @@ public class UserManager extends WithController {
 		User u = null;
 		try {
 			URL url = new URL(
-					"https://www.googleapis.com/oauth2/v1/tokeninfo?access_token="
+					"https://www.googleapis.com/oauth2/v1/userinfo?alt=json&access_token="
 							+ accessToken);
 			HttpsURLConnection connection = (HttpsURLConnection) url
 					.openConnection();
@@ -319,12 +319,28 @@ public class UserManager extends WithController {
 			String email = res.get("email").asText();
 			u = DB.getUserDAO().getByEmail(email);
 			if (u == null) {
-				return badRequest(Json
-						.parse("{\"error\":\"User not registered\"}"));
+				u = new User();
+				u.setEmail(email);
+				if (res.has("given_name"))
+					u.setFirstName(res.get("given_name").asText());
+				if (res.has("family_name"))
+					u.setLastName(res.get("family_name").asText());
+				String[] split = email.split("@");
+				u.setUsername(split[0]);
+				DB.getUserDAO().makePermanent(u);
+				ObjectId fav = CollectionObjectController.createFavorites(u
+						.getDbId());
 			}
 			u.setGoogleId(googleId);
 			DB.getUserDAO().makePermanent(u);
 			//return ok(lightUserSerialization(u));
+			if (u != null) {
+				session().put("user", u.getDbId().toHexString());
+				session().put("username", u.getUsername());
+				session().put("sourceIp", request().remoteAddress());
+				session().put("lastAccessTime",
+						Long.toString(System.currentTimeMillis()));
+			}
 			return ok(Json.toJson(u));
 		} catch (Exception e) {
 			return badRequest(Json
@@ -337,7 +353,7 @@ public class UserManager extends WithController {
 		User u = null;
 		try {
 			URL url = new URL(
-					"https://graph.facebook.com/me?fields=email&format=json&access_token="
+					"https://graph.facebook.com/me?fields=email,first_name,last_name&format=json&access_token="
 							+ accessToken);
 			HttpsURLConnection connection = (HttpsURLConnection) url
 					.openConnection();
@@ -346,12 +362,28 @@ public class UserManager extends WithController {
 			String email = res.get("email").asText();
 			u = DB.getUserDAO().getByEmail(email);
 			if (u == null) {
-				return badRequest(Json
-						.parse("{\"error\":\"User not registered\"}"));
+				u = new User();
+				u.setEmail(email);
+				if (res.has("first_name"))
+					u.setFirstName(res.get("first_name").asText());
+				if (res.has("last_name"))
+					u.setLastName(res.get("last_name").asText());
+				String[] split = email.split("@");
+				u.setUsername(split[0]);
+				DB.getUserDAO().makePermanent(u);
+				ObjectId fav = CollectionObjectController.createFavorites(u
+						.getDbId());
 			}
 			u.setFacebookId(facebookId);
 			DB.getUserDAO().makePermanent(u);
 			//return ok(lightUserSerialization(u));
+			if (u != null) {
+				session().put("user", u.getDbId().toHexString());
+				session().put("username", u.getUsername());
+				session().put("sourceIp", request().remoteAddress());
+				session().put("lastAccessTime",
+						Long.toString(System.currentTimeMillis()));
+			}
 			return ok(Json.toJson(u));
 		} catch (Exception e) {
 			return badRequest(Json

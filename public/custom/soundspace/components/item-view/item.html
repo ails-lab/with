@@ -1,3 +1,4 @@
+ <annotations-end params="route: route"></annotations-end>
  <div class="itemview">
         <!-- menu bar-->
         <nav class="menubar media">
@@ -12,8 +13,8 @@
          
               <li class="close"> <span class="star" data-bind="visible: loggedUser()==true && record().externalId!=null, css: { active: isLiked(record().externalId) }">
 			 <span class="fa-stack fa-fw" data-bind="event: { click: function(data,event) { likeRecord(record(),event); } }">
-							<i class="fa fa-heart fa-stack-1x"></i><i class="fa fa-heart-o fa-stack-1x fa-inverse"></i>
-						</span>
+					<i class="fa fa-heart fa-stack-1x"></i><i class="fa fa-heart-o fa-stack-1x fa-inverse"></i>
+			 </span>
 					</span></li>
 			 <li class="close" title="collect"><span class="fa-stack fa-fw" data-bind="visible:loggedUser, event: { click: function(data,event) { collect(record(),event); } }"><i class="fa fa-download fa-stack-1x"></i>
 						</span></li>
@@ -25,7 +26,7 @@
           <div class="container">
             <div class="wrap">
               <!-- media itself-->
-              <div class="mediathumb"><img data-bind="attr: {src: record().fullres()}" onError="this.src=helper_thumb"> 
+              <div class="mediathumb"><img id="mediathumbid" data-bind="attr: {src: record().fullres()}" onError="this.src=helper_thumb"> 
               <div class="media" id="mediadiv">
              </div> 
              </div>
@@ -33,15 +34,49 @@
               <div class="mediainfo">
                 <div class="infowrap">
                   <!-- title-->
+                  <!-- ko if: record().nextItemToAnnotate() != null -->
+                  	<span>ITEM </span><span data-bind="text: indexInBatch"></span><span>/10</span>
+                  <!-- /ko -->
                   <h1><!-- ko text: record().title --><!-- /ko --> 
-                  <span 
-					 class="pnd-resource" onclick="dispatchDocumentEvent('Pundit.showBootstrap')">
-				  </span>
+                  <!-- ko if: isLogged -->
+                  	<span class="pnd-resource" onclick="dispatchDocumentEvent('Pundit.showBootstrap')"></span>
+				  <!-- /ko -->
 				  </h1>
                   <div class="owner" data-bind="text:record().dataProvider"></div>
+                   <!-- annotate box-->
+                  <div class="annotatebox">
+                  	<!-- ko if: record().annotations && record().annotations().length > 0 -->
+                    <div class="question">Which musical instruments do you hear in this item?</div>
+                    <div class="info">The item has been tagged with the following concepts. Add more using PUNDIT.</div>
+                    <!-- /ko -->
+                    <!-- ko else: -->
+                    <div class="question">Which musical instruments do you hear in this item?</div>
+                    <div class="info">Add tags using Pundit's ANNOTATE buttom above.</div>
+                    <!-- /ko -->
+                    <!-- answers-->
+                    <!-- ko if: record().myAnnotations-->
+                    <ul class="myanswers" data-bind="foreach: record().myAnnotations()">
+                      <li><a href="#" data-bind="click: $parent.deleteAnnotation"><i class="fa fa fa-times-circle"></i>  </a><a data-bind="{text: body.label.default[0], attr: {href: body.uri}}" style="color: inherit;text-decoration: none" target="_blank"></a></li>
+                    </ul>
+                    <!-- /ko -->
+                    <!-- ko if: record().otherAnnotations-->
+                    <ul class="answers" data-bind="foreach: record().otherAnnotations()">
+                      <li><a data-bind="{text: body.label.default[0], attr: {href: body.uri}}" style="color: inherit;text-decoration: none" target="_blank"></a></li>
+                    </ul>
+                    <!-- /ko -->
+                    <!-- answer action-->
+                    <!-- ko if: record().nextItemToAnnotate() != null && !jQuery.isEmptyObject(record().nextItemToAnnotate()) -->
+                    <ul class="answeraction">
+                      <li><a href="#" data-bind="click: nextItem">NEXT ITEM</a></li>
+                    </ul>
+                    <!-- /ko -->
+                     <!-- ko if: record().nextItemToAnnotate() != null && jQuery.isEmptyObject(record().nextItemToAnnotate()) -->
+                     <ul class="answeraction">
+                      <li><a href="#" data-bind="click: endBatch">NEXT ITEM</a></li>
+                    </ul>
+                     <!-- /ko -->
+                  </div>
                   <!-- metadata-->
-                  
-				
 				  <ul role="tablist" class="nav nav-tabs">
                     <li class="active"><a href="#information" title="" data-toggle="tab">Info</a></li>
                     <li><a href="#related" title="" data-toggle="tab" data-bind="event:{ click: function(){record().findsimilar()}}">Related</a></li>
@@ -115,13 +150,12 @@
                     </div>
                     <div id="share" class="tab-pane">
                       <!-- share-->
-                      <div class="sharetext" data-bind="text: record().title"></div>
-                      <ul class="social">
-                        <li><a data-bind="attr: {href:record().facebook}" title="share on facebook" onclick="javascript:window.open(this.href,'facebook-share-dialog','width=626,height=436'); return false;"><img src="img/ic-facebook.png" alt="facebook"></a></li>
-                        <li><a data-bind="attr: {href:record().twitter}" title="twitter share" onclick="javascript:window.open(this.href,'', 'menubar=no,toolbar=no,resizable=yes,scrollbars=yes,height=600,width=600');return false;""><img src="img/ic-twitter.png" alt="facebook"></a></li>
-                        <li data-bind="event: {click: function(){record().pinterest()}}"><a href="#" title="pin it"><img src="img/ic-pinterest.png" alt="facebook"></a></li>
-                        <li><a data-bind="attr: {href:record().mail}" title="email item"><img src="img/ic-mail.png" alt="facebook"></a></li>
-                      </ul>
+               		<ul class="social">
+                		<li><a data-bind="attr: {href:record().facebook}" title="share on facebook" onclick="javascript:window.open(this.href,'facebook-share-dialog','width=626,height=436'); return false;"><img src="img/ui/ic-facebook.png" alt="facebook"></a></li>
+                		<li><a data-bind="attr: {href:record().twitter}" title="twitter share" onclick="javascript:window.open(this.href,'', 'menubar=no,toolbar=no,resizable=yes,scrollbars=yes,height=600,width=600');return false;"><img src="img/ui/ic-twitter.png" alt="facebook"></a></li>
+                		<li data-bind="event: {click: function(){record().pinterest()}}"><a href="#" title="pin it"><img src="img/ui/ic-pinterest.png" alt="facebook"></a></li>
+                		<li><a data-bind="attr: {href:record().mail}" title="email item"><img src="img/ui/ic-mail.png" alt="facebook"></a></li>
+              		</ul>
                     </div>
                   </div>
                 </div>

@@ -22,6 +22,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import model.DescriptiveData;
 import model.EmbeddedMediaObject;
@@ -392,7 +393,9 @@ public class WithResource<T extends DescriptiveData, U extends WithResource.With
 	public void setQualityMeasure(double qualityMeasure) {
 		this.qualityMeasure = qualityMeasure;
 	}
-
+	
+	@JsonSerialize(using = Serializer.ObjectIdArraySerializer.class)
+	private Set<ObjectId> annotationIds;
 	private List<Annotation> annotations;
 
 	public WithResource() {
@@ -581,12 +584,21 @@ public class WithResource<T extends DescriptiveData, U extends WithResource.With
 		this.contextData = contextData;
 	}
 
+	public Set<ObjectId> getAnnotationIds() {
+		return annotationIds;
+	}
+
+	public void setAnnotationIds(Set<ObjectId> annotationIds) {
+		this.annotationIds = annotationIds;
+	}
+
 	public List<Annotation> getAnnotations() {
 		return annotations;
 	}
 
-	public void setAnnotations(ArrayList<Annotation> annotations) {
-		this.annotations = annotations;
+	public void fillAnnotations() {
+		//TODO: group further the annotations returned if needed
+		this.annotations = DB.getAnnotationDAO().getByIds(this.annotationIds);
 	}
 
 	public ObjectNode getWithCreatorInfo() {

@@ -17,6 +17,10 @@ define(['knockout', 'text!./side-bar.html', 'app'], function (ko, template, app)
 		self.favoritesCount = ko.pureComputed(function () {
 			return app.currentUser.favorites().length;
 		});
+		
+		self.annotationCount = ko.pureComputed(function () {
+			return app.currentUser.annotationCount();
+		});
 	}
 
 	return { viewModel: SideBarViewModel, template: template };

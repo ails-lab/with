@@ -1,0 +1,140 @@
+    <div role="main">
+      <div class="container-fluid">
+        <div class="wrapper">
+          <!-- ko if: isLogged() == true  -->
+			<side-bar params="route: route"></side-bar>
+			<!-- /ko -->
+          <main>
+            <section class="collection">
+              <section class="header">
+                <!-- new collection--><!-- <a href="#" class="new"><span class="plus"></span><span class="text">Annotate new collection</span></a> -->
+                <!-- picker wrap
+                .picker-wrap
+                 a#picker(href="#", data-toggle='dropdown').picker
+                  span.text My collection
+                  span.arrow
+                  
+                 ul.dropdown-menu(aria-labelledby='picker')
+                  li 
+                   a(href="#") My collection
+                  li 
+                   a(href="#") Collection shared with me
+                   
+                -->
+              </section>
+              <!-- message-->
+              <section class="message"><img src="img/ui/ic-annotate.png" class="hero">
+                <div class="message-body">
+                  <div class="header">Welcome to My Annotations</div>
+                  <div class="description">This is <b> My Annotations </b>, all of your annotation will be collected in here.</div>
+                  <a href="#" data-bind="click: hideMessage">
+                  <span class="cross">
+                  </span><span class="text">Hide welcome message</span></a>
+                </div>
+              </section>
+              <!-- achievements-->
+              <section class="achievement">
+                <!-- badge-->
+                <div class="badges">
+                
+                  
+                
+                  <!-- icon-->
+                  <div class="icon"><img data-bind="attr: {src: img() }"></div>
+                  <!-- info-->
+
+                  <div class="info" data-bind="visible: annotatedRecordCount() < 10" >
+                    <h2>
+                      Annotate your way to the golden badge ! 
+                    </h2>
+                    <p>
+                      Make annotations to get your next badge.
+                    </p>
+                    <!-- action button--><a href="../custom/soundspace/index.html" class="annotatebtn">Crowdsourcing Space</a>
+                  </div>
+                  
+                  <div class="info" data-bind="visible: annotatedRecordCount() >= 10" >
+                    <h2>You have earned the <!-- ko text: badgeName() --><!-- /ko --> badge!</h2>
+                    <p>Have an ear for musical instruments? Use your talent to tag all the instruments you hear in the musical recordings of the Europeana Sounds collections!</p>
+                    <!-- action button--><a href="../custom/soundspace/index.html" class="annotatebtn">Crowdsourcing Space</a>
+                  </div>
+                  
+                  
+                  
+                </div>
+                <!-- goal-->
+                <div class="goal">
+                  <!-- icon-->
+                  <div class="icon">
+                    <div class="chart">
+                      <div class="amount">&nbsp;&nbsp;&nbsp;<!-- ko text: annotationPercentage() --><!-- /ko --><span>%</span></div>
+                    </div>
+                  </div>
+                  <!-- info-->
+                  <div class="info">
+                    <h2>We are on <!-- ko text: annotationPercentage() --><!-- /ko -->% of our goal</h2>
+                    <p>There are so many historical music recordings in our archives that we just can 
+                    	not describe all the instruments by ourselves. So that’s why we kindly ask your help us tag our 
+                    	 music collections with all the instruments that you can hear in a song. 
+                    	The music in Europeana Sounds ranges from Greek folk music to Scandinavian 
+                    	improvised space rock, all the way to the sounds coming from Tibetian monastries. </p>
+                    <!-- action button-->
+                    <div class="currentannotation"> <!-- ko text: totalAnnotations() --><!-- /ko -->/ <!-- ko text: goal --><!-- /ko -->  Annotations</div>
+                  </div>
+                </div>
+              </section>
+              <!-- collection main-->
+              <section class="annotation-list">
+                <!-- collection main header-->
+                <div class="list-head">
+                  <!-- sort-->
+                  <!-- <div class="sort"><span>Sort by</span><a id="sorting" href="#" data-toggle="dropdown"><span class="text">Title</span><span class="arrow"></span></a>
+                    dropdown
+                    <ul aria-labelledby="sorting" class="dropdown-menu">
+				  	<li><a href="#" data-bind="click: sortByDate">Date</a></li>
+					<li><a href="#" data-bind="click: sortByTitle">Title</a></li>
+					<li><a href="#" >Date</a></li>
+					<li><a href="#" >Title</a></li>
+				  </ul>
+                  </div> -->
+                  <!-- search-->
+                  <!-- item count--><span class="item-count-info">You have  annotated <!-- ko text: annotatedRecordCount() --><!-- /ko -->  items with <!-- ko text: annotationCount() --><!-- /ko --> annotations</span>
+                  <!-- <div class="filtertype"><img src="img/ui/ic-mag.png" class="mag">
+                    <input type="text" placeholder="Search" class="filtertext" data-bind="value:query, filterItems:query, valueUpdate:'keyup'" autocomplete="off"">
+                  </div> -->
+                </div>
+                <!-- loader-->
+                <div class="loader hidden"><img src="img/ui/ic-loader.gif"></div>
+              </section>
+              
+              
+              <!-- isotope section-->
+              <section class="isotope">
+                <section class="listing">
+                  <div class="grid" data-bind="attr: {id: id}">
+                    <div class="sizer"></div>           
+                              
+                  </div>
+                </section>
+                <!-- load more -->
+							<a href="#" class="loadmore" data-bind="visible: citems().length>0 ,event: {click: loadNext}">
+								Load more
+								<div class="left"></div>
+								<div class="right"></div>
+								<div class="top"></div>
+								<div class="bot"></div>
+							</a>
+							<div class="more" data-bind="visible: loading"> <i class="fa fa-spinner fa-pulse"></i></div>
+              </section>
+
+              <!-- item view-->
+			  <item-view params="route: route"></item-view>
+			  <!-- collection give access-->
+			  <section class="action collect">
+				<collection params="route: route"></collection>
+			  </section>
+            </section>
+          </main>
+        </div>
+      </div>
+    </div>

@@ -1,8 +1,3 @@
-<div role="main">
-		<div class="container-fluid">
-<div class="wrapper">
-<main>
-
 <section class="itemview">
 <!-- header-->
                 <div class="header">
@@ -17,7 +12,7 @@
                     </li><li><a href="#" data-toggle="tooltip" data-placement="top" title="Collect it" class="fa fa-download collectbutton" data-bind="visible:loggedUser, event: { click: function(data,event) { collect(record(),event); } }"></a>
                     </li><li><a href="#" data-toggle="tooltip" data-placement="top" title="Visit item site" data-bind="attr: { href:record().view_url}" target="_blank" class="fa fa-external-link medialink"></a>
                     </li></ul>
-                   </div>
+                  </div>
                 </div>
                 <!-- media content-->
                 <div class="mediacontent">
@@ -25,11 +20,10 @@
                     <!-- wrap-->
                     <div class="wrap">
                       <!-- item-->
-                     <div class="media" id="mediadiv">
-                      <!-- ko if: record().vtype == "IMAGE" --> 
+                      <div class="media" id="mediadiv">
                       <img data-bind="attr: {src: record().fullres()},event: {error: function(){changeSource($data)}}"/>
-                      <!-- /ko --> 
-                      </div>  <!-- metadata-->
+                      </div> 
+                      <!-- metadata-->
                       <div class="metadata">
                       <div class="infowrap">
                         <!-- top-->
@@ -42,6 +36,31 @@
                            </div>
                             <!-- collect--><a href="#" title="collect" class="infocollect collectbutton" data-bind="visible:loggedUser, event: { click: function(data,event) { collect(record(),event); } }">COLLECT ITEM</a>
                           </div>
+                          <!-- annotate box-->
+		                  <!-- annotate box-->
+		                   <!-- ko if:  record().annotations -->
+		                  <div class="annotatebox">
+		                    <div class="question">What kind of musical instrument do you see in this item?</div>
+		                    <div class="info">Lorem ipsum dolor sit amet conceptuos</div>
+		                    <!-- answers-->
+		                    <!-- ko if: record().myAnnotations-->
+		                    <ul class="myanswers" data-bind="foreach: record().myAnnotations()">
+		                     <li><a href="#" data-bind="click: $parent.deleteAnnotation"><i class="fa fa fa-times-circle"></i> </a><a data-bind="{text: body.label.default[0], attr: {href: body.uri}}" style="color: inherit;text-decoration: none" target="_blank"></a></li>
+		                    </ul>
+		                    <!-- ko if: record().otherAnnotations-->
+                     		<ul class="answers" data-bind="foreach: record().otherAnnotations()">
+                       		  <li><a data-bind="{text: body.label.default[0], attr: {href: body.uri}}" style="color: inherit;text-decoration: none" target="_blank"></a></li>
+                     		</ul>
+<!-- /ko -->
+		                    <!-- /ko -->
+		                    <!-- answer action-->
+		                    <!-- ko if: record().nextItemToAnnotate && !jQuery.isEmptyObject(record().nextItemToAnnotate()) -->
+		                    <ul class="answeraction">
+		                      <li><a href="#" data-bind="click: nextItem">NEXT ITEM</a></li>
+		                    </ul>
+		                    <!-- /ko -->
+		                  </div>
+		                  <!-- /ko -->
                           <!-- metadata-->
                           <ul id="itemTabs" role="tablist" class="nav nav-tabs">
                             <li class="active"><a href="#information" title="" data-toggle="tab">Info</a></li>
@@ -85,12 +104,12 @@
                                   </div>
                                   <div class="field" data-bind="text:record().mediatype"></div>
                                 </div>
-                                <div class="list" data-bind="if: record().recordId!='-1'">
+                                 <div class="list" data-bind="if: record().recordId!='-1'">
                                   <div class="title">
                                     <div class="titlewrap">Item url</div>
                                   </div>
-                                 <div class="field"><a data-bind="text: record().loc() , attr: { href: record().loc()}"></a></div>
-                                       </div>
+                                  <div class="field"><a data-bind="text: record().loc() , attr: { href: record().loc()}"></a></div>
+                                </div>
                                 <div class="list">
                                   <div class="title">
                                     <div class="titlewrap">Record Source</div>
@@ -127,11 +146,11 @@
                             </div>
                             <div id="comment" class="tab-pane">
                               <!-- comment -->
-                               <div class="comments">
+                              <div class="comments">
                                 <div id="disqus_thread"></div>
 										<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
                               </div>
-                              </div>
+                            </div>
                             <div id="share" class="tab-pane">
                                <!-- share-->
                       <div class="sharetext" data-bind="text: record().title"></div>
@@ -150,9 +169,3 @@
         </div>        
 	</section>	
 
-
-
-</main>
-</div>
-</div>
-</div>
