@@ -179,8 +179,8 @@ define(['knockout', 'text!./item.html', 'app', 'knockout-else', 'smoke'], functi
 					if(data!=null) {
 						for (var i in data) {
 							var result = data[i];
-							 if(result !=null){		
-						        var record = new Record(formatRecord(result), true);
+							 if(result !=null){
+								var record = new Record(formatRecord(result), true);
 						        if(record.thumb && record.thumb.length>0 && record.externalId!=self.externalId)
 							       items.push(record);
 							}
@@ -219,7 +219,7 @@ define(['knockout', 'text!./item.html', 'app', 'knockout-else', 'smoke'], functi
 							for (var i in data) {
 								var result = data[i];
 								 if(result !=null){
-							        var record = new Record(formatRecord(result), true);
+									var record = new Record(formatRecord(result), true);
 							        if(record.thumb && record.thumb.length>0 && record.externalId!=self.externalId)
 								       items.push(record);
 								}
