@@ -178,7 +178,11 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
 		/*self.sources= ko.observableArray([ "Europeana", "DPLA","DigitalNZ","WITHin", "Rijksmuseum"]);
 		 * no WITHin until it's fully functional
 		 */
+<<<<<<< HEAD
 		self.sources= ko.observableArray([ "Europeana", "WITHin"]);
+=======
+		self.sources= ko.observableArray([ "WITHinASpace"]);
+>>>>>>> search within a space
 		self.mixresults=ko.observableArray();
 		self.selectedSource=ko.observable(self.sources()[0]);
 		self.results = ko.observableArray([]);
@@ -385,7 +389,15 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
 							ko.dataFor(searchfacets).recalcFacets();
 						}
 					}
-					
+					self.sourceview(false);
+					$("#gridlist").show();
+				   $container.isotope({
+						itemSelector: '.media',
+						masonry: {
+							columnWidth		: '.sizer',
+							percentPosition	: true
+						}
+					});
 				}
 			});
 
