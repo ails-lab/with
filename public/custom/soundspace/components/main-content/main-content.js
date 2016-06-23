@@ -19,9 +19,7 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 				create: function(options) {
 			    	var self=this;
 			        // use extend instead of map to avoid observables
-			    	
 			    	self=$.extend(self, options.data);
-			    	
 			    	self.title=findByLang(self.descriptiveData.label);
 			    	self.thumbnail = ko.computed(function() {
 			          if(self.media && self.media[0]){
@@ -78,7 +76,6 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 			        		return self.withCreatorInfo.username;
 			        	}
 			        });
-			        
 			        return self;
 			     }
 			  
@@ -90,8 +87,7 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 		self.data = ko.mapping.fromJS({"dbID":"","administrative":"","descriptiveData":""}, mapping);
 		
 		self.load = function(data) {
-			self.data=ko.mapping.fromJS(data, mapping);
-			
+			self.data=ko.mapping.fromJS(data, mapping);		
 		};
 
 		self.loadRecords= function(offset,count){
@@ -123,8 +119,7 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 		};
 		
 		if(data != undefined){ 
-			self.load(data);
-			
+			self.load(data);			
 		}
 	}
 	
@@ -169,14 +164,14 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 				   // self.revealItems(responseCollections['collectionsOrExhibitions']);
 					
 			});
-		  var promise2 = self.getFeaturedExhibition(WITHApp.featuredExhibition);
+		  /*var promise2 = self.getFeaturedExhibition(WITHApp.featuredExhibition);
           $.when(promise2).done(function (data) {
         	  
         	  self.featuredExhibition(new Collection(data));
         	  $("#featuredExhibit").css('background-image','url('+self.featuredExhibition().data.thumbnail()+')');    
         	  self.exhibitloaded(true);
         	  WITHApp.initCharacterLimiter();
-          });
+          });*/
           //cannot make data binding for data-percent work, so update within initCart
     	  var $container = $(".grid").isotope({
     			itemSelector: '.item',
@@ -281,33 +276,26 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 	  
 	  self.revealItems = function (data) {
 		var items=[];
-			
-		  
 		  if(data.length==0){ loading(false);}
-			
 			for (var i in data) {
 				var c=new Collection(
 						data[i]
 						);
 				items.push(c);
-				self.homecollections().push(c);
-				
-			
+				self.homecollections().push(c);	
 			}
 			self.homecollections.valueHasMutated();
-			sessionStorage.setItem("homemasonrycount", self.homecollections().length);
-				
+			sessionStorage.setItem("homemasonrycount", self.homecollections().length);	
 			return items;
-			
 		};
 		
 		
 		function getItem(collection) {
-			
-			  var tile= '<div class="'+collection.data.css()+'"> <div class="wrap">';
-			
+			  var tile= '<div class="'+collection.data.css()+'"> <div class="wrap">';		
                    tile+='<a href="#" onclick="loadUrl(\''+collection.data.url()+'\',event)">'
-                    +'<div class="thumb"><img src="'+collection.data.thumbnail()+'" onerror="this.src=\'img/content/thumb-empty.png\'"></div>'
+                    +'<div class="thumb"><img src="'+collection.data.thumbnail()+'" onerror="this.src=\'img/content/thumb-empty.png\'">' +
+                    '<div class="counter" style="background: #4f7979 none repeat scroll 0 0; color: #fff;' + 
+    				 'font-size: 1.1rem; font-weight: 500; left: 0; padding: 5px 15px; position: absolute; text-transform: uppercase; top: 0;">' + collection.data.annotationCount + '  Annotations</div></div>'
                     +' <div class="info"><span class="type">'+collection.data.type()+'</span><h1 class="title">'+collection.data.title+'</h1><span class="owner">'+ collection.data.owner()+'</span></div>'
                     +'</a></div></div>';
 			return tile;

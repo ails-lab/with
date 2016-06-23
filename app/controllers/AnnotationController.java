@@ -108,7 +108,7 @@ public class AnnotationController extends Controller {
 			return internalServerError();
 		}
 	}
-
+	
 	public static Result getAnnotationCount(String groupId) {
 		ObjectNode result = Json.newObject();
 		ObjectId group = new ObjectId(groupId);
