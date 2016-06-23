@@ -397,7 +397,6 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 		};
 
 		self.collect = function (item) {
-			alert("1");
 			if (!isLogged()) {
 				showLoginPopup(self.record());
 			} else {
