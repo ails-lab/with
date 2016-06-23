@@ -342,8 +342,12 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 				res.filtersLogic = createFilters(response);
 				if (usingCursor) {
 					nextCursor = Utils.readAttr(response, "nextCursor", true);
-					if (!Utils.hasInfo(nextCursor))
+					if (!Utils.hasInfo(nextCursor)){
 						Logger.error("cursor error!!");
+						Logger.error("response--->"+response.toString());
+						Logger.error("[again]response--->"+getHttpConnector().getURLContent(httpQuery));
+						res.error = true;
+					}
 				}
 				
 

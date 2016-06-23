@@ -252,10 +252,14 @@ public class CollectionObjectController extends WithResourceController {
 					page++;
 					q.page = page + "";
 					result = src.getResults(q);
-					int c = addResultToCollection(result, collection.getDbId()
-							.toString(), mylimit - itemsCount, resultInfo,
-							dontDuplicate);
-					itemsCount = itemsCount + c;
+					if (!result.error){
+						int c = addResultToCollection(result, collection.getDbId()
+								.toString(), mylimit - itemsCount, resultInfo,
+								dontDuplicate);
+						itemsCount = itemsCount + c;
+					} else {
+						break;
+					}
 				}
 				return ok(Json.toJson(collectionWithMyAccessData(
 						collection,

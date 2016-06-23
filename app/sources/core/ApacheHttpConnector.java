@@ -40,6 +40,8 @@ import play.Logger.ALogger;
 
 public class ApacheHttpConnector extends HttpConnector {
 	public static final ALogger log = Logger.of( ApacheHttpConnector.class );
+
+	private static final int TRIES = 3;
 	
 	private static ApacheHttpConnector instance;
 	
@@ -87,6 +89,11 @@ public class ApacheHttpConnector extends HttpConnector {
 	public <T> T getContent(String url) throws Exception {
 		log.debug("1 calling: " + url);
 		JsonNode response = getJsonContentResponse(buildGet(url));
+		int tries=0;
+		while (!response.isContainerNode() && tries<TRIES){
+			response = getJsonContentResponse(buildGet(url));
+			tries++;
+		}
 		return (T) response;
 	}
 

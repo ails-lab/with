@@ -47,10 +47,12 @@ public class SourceResponse {
 	public JsonNode facets;
 	private List<CommonFilterResponse> filters;
 	public List<CommonFilterLogic> filtersLogic;
+	public boolean error;
 
 	public SourceResponse() {
 		items = new ItemsGrouping();
 		filters = new ArrayList<>();
+		error = false;
 	}
 
 	public SourceResponse(int totalHits, int offset, int count) {
