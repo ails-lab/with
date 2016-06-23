@@ -90,19 +90,6 @@ define(['knockout', 'text!./item.html', 'app', 'knockout-else', 'smoke'], functi
 			self.mediatype=data.mediatype;
 			self.description=data.description;
 			self.source(data.source);
-			if(self.source() && self.source()=="Europeana"){
-				$("span.pnd-resource").show();
-				$("div.pnd-resource").show();
-				var pundit_url=self.view_url().replace('http://www.europeana.eu/portal/record/','http://data.europeana.eu/item/');
-				pundit_url=pundit_url.replace('.html','');
-				$("span.pnd-resource").attr('about',pundit_url);
-				$("div.pnd-resource").attr('about',pundit_url);
-				dispatchDocumentEvent('Pundit.loadAnnotations');
-				dispatchDocumentEvent('Pundit.forceCompileButton');				
-			}
-			else{$("span.pnd-resource").hide();
-				$("div.pnd-resource").hide();
-				}
 			self.creator=data.creator;
 			self.provider=data.provider;
 			self.dataProvider=data.dataProvider;
@@ -153,6 +140,19 @@ define(['knockout', 'text!./item.html', 'app', 'knockout-else', 'smoke'], functi
 			}
 			console.log(helper_thumb);
 			helper_thumb = self.calcOnErrorThumbnail();
+			if(self.source() && self.source()=="Europeana" && self.recordId != '-1'){
+				$("span.pnd-resource").show();
+				$("div.pnd-resource").show();
+				var pundit_url=self.view_url().replace('http://www.europeana.eu/portal/record/','http://data.europeana.eu/item/');
+				pundit_url=pundit_url.replace('.html','');
+				$("span.pnd-resource").attr('about',pundit_url);
+				$("div.pnd-resource").attr('about',pundit_url);
+				dispatchDocumentEvent('Pundit.loadAnnotations');
+				dispatchDocumentEvent('Pundit.forceCompileButton');				
+			}
+			else{$("span.pnd-resource").hide();
+				$("div.pnd-resource").hide();
+				}
 		};
 		
 		self.findsimilar=function(){
@@ -324,6 +324,7 @@ define(['knockout', 'text!./item.html', 'app', 'knockout-else', 'smoke'], functi
 		self.id = ko.observable(params.id);
 		self.indexInBatch = ko.observable(1);
 		document.addEventListener("Pundit.saveAnnotation", function(event) {
+			alert("save event");
 			var annotationId = event.detail;
 			$.ajax({
 		    	url: "http://thepund.it:8083/annotationserver/api/open/annotations/"+annotationId,

@@ -23,10 +23,10 @@ import model.resources.WithResource;
 
 public class ItemsGrouping {
 	
+	//TODO: When Within search is separated from external resources, 
+	//support all types of resources. Generic, for all entries of WithResourceType enum.
 	private List<WithResource<?, ?>> culturalCHO;
 	private List<WithResource<?, ?>> recordResource;
-	
-	
 
 	public ItemsGrouping() {
 		super();
