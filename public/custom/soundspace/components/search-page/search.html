@@ -35,7 +35,6 @@
         </select>
       </section>
       <!-- search result-->
-      
      <div id="gridlist" class="spacer search gridlist searchlist" data-bind="visible: sourceview()==false">
       <!-- ko if: noResults -->
 			<div>
@@ -45,7 +44,7 @@
         <section class="listing">
           <div class="container">
             <!-- grid-->
-            <div class="grid">
+            <div class="grid" id="searchgrid">
               <div class="sizer"></div>
             </div>
           </div>
@@ -57,7 +56,6 @@
 				</span>
 			</div>
       </div>
-      
       <!-- ko if: sourceview()==true -->
       <section class="searchresults" id="columnlist" class="searchresults searchlist">
         <div class="container-fluid">

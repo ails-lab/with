@@ -166,7 +166,7 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
 		var self = this;
 		document.body.setAttribute("data-page","search");
 		setTimeout(function(){ WITHApp.init(); }, 300);
-		var $container = $(".grid").isotope({
+		var $container = $("#searchgrid").isotope({
 			itemSelector: '.media',
 			masonry: {
 				columnWidth		: '.sizer',
@@ -222,7 +222,7 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
 			else{
 				
 				self.sourceview(false);
-				
+				$("#gridlist").show();
 			   $container.isotope({
 					itemSelector: '.media',
 					masonry: {
@@ -232,6 +232,7 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
 				});
 					
 			}
+			
 			$( '.searchbar .view li').removeClass( 'active' );
 			$(event.currentTarget).addClass( 'active' );
 
