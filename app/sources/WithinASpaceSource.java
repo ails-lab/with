@@ -19,6 +19,7 @@ package sources;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.bson.types.ObjectId;
 import org.elasticsearch.action.search.SearchResponse;
@@ -34,6 +35,8 @@ import play.Logger;
 import model.basicDataTypes.WithAccess;
 import model.basicDataTypes.ProvenanceInfo.Sources;
 import model.basicDataTypes.WithAccess.Access;
+import model.resources.RecordResource;
+import model.resources.WithResource;
 import model.resources.WithResource.WithResourceType;
 import sources.core.CommonQuery;
 import sources.core.ISpaceSource;
@@ -94,8 +97,8 @@ public class WithinASpaceSource extends ISpaceSource{
 			SourceResponse sourceRes = new SourceResponse((int)resp.getHits().getTotalHits(), offset, count);
 			sourceRes.source = getSourceName().toString();
 			sourceRes.setResourcesPerType(resourcesPerType);
-			sourceRes.transformResourcesToItems();
-
+			//sourceRes.transformResourcesToItems();
+			filterRecordsOnly(sourceRes);
 			return sourceRes;
 
 		} catch(Exception e) {
@@ -105,5 +108,28 @@ public class WithinASpaceSource extends ISpaceSource{
 		return null;
 
 	}
+	
+	//TODO: When WIthin search is separated from external resources, 
+		// and the response may contain resources of all types (not only CHO and RecordResource as defined in ItemsGrouping),
+		//this method becomes obsolete.
+		//Types should be passed from the API call, and handled at the within search controller level.
+		private void filterRecordsOnly(SourceResponse sourceResponse) {
+			List<WithResource<?, ?>> choItems = sourceResponse.items.getCulturalCHO();
+			List<WithResource<?, ?>> recordResources = sourceResponse.items.getRecordResource();
+			for (Entry<String, List<?>> e: sourceResponse.resourcesPerType.entrySet()) {
+				if (e.getKey().equals(WithResourceType.CulturalObject.toString().toLowerCase())) 
+					for (WithResource<?, ?>  record: (List<WithResource<?, ?>>) e.getValue()) {
+						RecordResource profiledRecord = ((RecordResource) record).getRecordProfile("MEDIUM");
+						choItems.add(profiledRecord);
+					}
+				if (e.getKey().equals(WithResourceType.RecordResource.toString().toLowerCase())) 
+					for (WithResource<?, ?>  record: (List<WithResource<?, ?>>) e.getValue()) {
+						RecordResource profiledRecord = ((RecordResource) record).getRecordProfile("MEDIUM");
+						recordResources.add(profiledRecord);
+					}
+			}
+			sourceResponse.items.setCulturalCHO(choItems);
+			sourceResponse.items.setRecordResource(recordResources);
+		}
 
 }
