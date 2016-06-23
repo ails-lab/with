@@ -408,6 +408,7 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 				return item.dbId === id;
 			});
 			self.citems()[index].annotations = annotations;
+			$("#"+ id + " .counter").text(annotations.length +" Annotations");
 		}
 		
 		self.arrayFirstIndexOf = function (array, predicate) {
@@ -422,6 +423,8 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 		
 		
 		function getItem(record) {
+			if (record.annotations == undefined)
+				record.annotations = [];
 			 var tile= '<div class="item media" id="'+record.dbId+'"> <div class="wrap">';
 			 if(isLogged()){
 				    if(record.isLiked()){
@@ -444,7 +447,9 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 					
 			 }
                     tile+='<a href="#" onclick="recordSelect(\''+record.dbId+'\',event)">'
-                     +'<div class="thumb"><img src="'+record.thumbnail()+'" onError="this.src=\'img/content/thumb-empty.png\';" ></div>'
+                     +'<div class="thumb"><img src="'+record.thumbnail()+'" onError="this.src=\'img/content/thumb-empty.png\';">' + 
+                     '<div class="counter" style="background: #4f7979 none repeat scroll 0 0; color: #fff;' + 
+     				 'font-size: 1.1rem; font-weight: 500; left: 0; padding: 5px 15px; position: absolute; text-transform: uppercase; top: 0;">' + record.annotations.length + '  Annotations</div></div>'
                      +' <div class="info"><h1 class="title">'+record.displayTitle()+'</h1><span class="owner">'+ record.dataProvider+'</span></div>'
                      +'<span class="rights">'+record.sourceCredits()+'</span>'
                     +'</a></div> </div>';
