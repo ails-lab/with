@@ -907,22 +907,16 @@ define("app", ['knockout', 'facebook', 'imagesloaded', 'moment', './js/app/plugi
 					return label;
 			}
 		return "";
-        /*selvalue="";
-        var uilang="";
-        if(self.lang().length==0){
-				uilang="default";
+     }
+	
+	arrayFirstIndexOf = function (array, predicate) {
+		for (var i = 0, j = array.length; i < j; i++) {
+			if (predicate.call(undefined, array[i])) {
+				return i;
 			}
-	      if(val){
-	       if (val[uilang]) {
-	    	   for(var i=0;i<val[uilang].length;i++){
-	                if(selvalue.length>0){selvalue+=",";}
-	                selvalue=val[uilang][i];
-	    	   }
-	       }
-           else{selvalue=val.default[0];}
-	      }
-         return selvalue;*/
-  }
+		}
+		return -1;
+	};
 
 	 self.findProvenanceValues=function(array, selection) {
 			selvalue="";
@@ -1056,6 +1050,7 @@ define("app", ['knockout', 'facebook', 'imagesloaded', 'moment', './js/app/plugi
 		loadCounters: loadCounters,
 		likeItem: likeItem,
 		initOrUpdate: initOrUpdate,
-		scroll: scroll
+		scroll: scroll,
+		arrayFirstIndexOf: arrayFirstIndexOf
 	};
 });

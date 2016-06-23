@@ -491,6 +491,7 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 					if (result !== "") {
 						self.record().annotations.push(result);
 					}
+					updateRecordAnnotations(self.record().recordId, self.record().annotations());
 				}
     		});
 		};
