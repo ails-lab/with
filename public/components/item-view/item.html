@@ -36,12 +36,11 @@
                            </div>
                             <!-- collect--><a href="#" title="collect" class="infocollect collectbutton" data-bind="visible:loggedUser, event: { click: function(data,event) { collect(record(),event); } }">COLLECT ITEM</a>
                           </div>
-                          <!-- annotate box-->
 		                  <!-- annotate box-->
 		                   <!-- ko if:  record().annotations -->
 		                  <div class="annotatebox">
-		                    <div class="question">What kind of musical instrument do you see in this item?</div>
-		                    <div class="info">Lorem ipsum dolor sit amet conceptuos</div>
+		                    <div class="question">What kind of musical instrument do you hear in this item?</div>
+		                    <div class="info">The item has been tagged with the following concepts.</div>
 		                    <!-- answers-->
 		                    <!-- ko if: record().myAnnotations-->
 		                    <ul class="myanswers" data-bind="foreach: record().myAnnotations()">
@@ -51,7 +50,7 @@
                      		<ul class="answers" data-bind="foreach: record().otherAnnotations()">
                        		  <li><a data-bind="{text: body.label.default[0], attr: {href: body.uri}}" style="color: inherit;text-decoration: none" target="_blank"></a></li>
                      		</ul>
-<!-- /ko -->
+							<!-- /ko -->
 		                    <!-- /ko -->
 		                    <!-- answer action-->
 		                    <!-- ko if: record().nextItemToAnnotate && !jQuery.isEmptyObject(record().nextItemToAnnotate()) -->
