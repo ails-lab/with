@@ -175,8 +175,8 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
 		self.route = params.route;
 		self.term = ko.observable("");
 		self.sourceview=ko.observable(true);
-		self.sources= ko.observableArray([ "Europeana", "WITHin"]);
-		//self.sources= ko.observableArray([ "WITHinASpace"]);
+		//self.sources= ko.observableArray([ "Europeana", "WITHin"]);
+		self.sources= ko.observableArray([ "WITHinASpace"]);
 		self.mixresults=ko.observableArray();
 		self.selectedSource=ko.observable(self.sources()[0]);
 		self.results = ko.observableArray([]);
