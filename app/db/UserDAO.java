@@ -17,6 +17,7 @@
 package db;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import model.usersAndGroups.User;
@@ -41,8 +42,12 @@ public class UserDAO extends DAO<User> {
 		return this.findOne("email", email);
 	}
 
-	public Key<User> getIdByUsername(String username) {
-		return this.findOneId("username", username);
+	public ObjectId getIdByUsername(String username) {
+		User user = this.getUniqueByFieldAndValue("username", username, Arrays.asList("_id"));
+		if (user != null)
+			return user.getDbId();
+		else 
+			return null;
 	}
 
 	public User getByUsername(String username, List<String> retrievedFields) {
