@@ -353,43 +353,47 @@ define(['knockout', 'text!./item.html', 'app', 'knockout-else', 'smoke'], functi
 		    		var graph = punditAnnotation.graph['http://purl.org/pundit/as/graph/body-'+annotationId];
 		    		var externalId = Object.keys(graph)[0];
 		    		var annotationInfo = graph[externalId];
-		    		var tagType = Object.keys(annotationInfo)[0];
-		    		var uriInfo = annotationInfo[tagType];
-		    		var uri = uriInfo[0].value;
-		    		var itemsInfo = punditAnnotation.items[uri];
-		    		var labelInfo = itemsInfo['http://www.w3.org/2000/01/rdf-schema#label'];
-		    		var label = labelInfo[0].value;
-		    		console.log(withAnnotation);
-		    		withAnnotation['target'].externalId = externalId;
-		    		withAnnotation['body'].uri = uri;
-		    		withAnnotation['body'].tagType = tagType;
-		    		withAnnotation['body'].label = {'default' : [ label ]};
-		    		console.log(JSON.stringify(withAnnotation));
-		    		$.ajax({
-		    			url : '/record/annotation',
-				    	method : "POST",
-				    	contentType : "application/json",
-				    	data     : JSON.stringify(withAnnotation),
-						success : function(result) {
-							//check if duplicate
-							var index1 = self.arrayFirstIndexOf(ko.toJS(self.record().annotations), function (annotation) {
-								return annotation.dbId === result.dbId;
-							});
-							if (index1 >= 0)
-								self.record().annotations.splice(index1, 1);
-							self.record().annotations.push(result);
-							self.batchAnnotationCount++;
-							self.recordSimple = ko.toJS(self.record);
-							self.recordSimple.nextItemToAnnotate = null;
-							var index = self.arrayFirstIndexOf(self.batchItemsAnnotated, function (item) {
-								return item.recordId === self.recordSimple.recordId;
-							});
-							if (index >= 0) 
-								self.batchItemsAnnotated.splice(index, 1);
-							self.batchItemsAnnotated.push(self.recordSimple);
-							updateRecordAnnotations(self.record().recordId, self.record().annotations());
-						}
-		    		});
+		    		var tagTypes = Object.keys(annotationInfo);
+		    		for (i in tagTypes) {
+			    		var tagType = tagTypes[i];
+			    		var uriInfo = annotationInfo[tagType];
+			    		for (j in uriInfo) {
+			    			var uri = uriInfo[j].value;
+			    			var itemsInfo = punditAnnotation.items[uri];
+				    		var labelInfo = itemsInfo['http://www.w3.org/2000/01/rdf-schema#label'];
+				    		var label = labelInfo[0].value;
+				    		withAnnotation['target'].externalId = externalId;
+				    		withAnnotation['body'].uri = uri;
+				    		withAnnotation['body'].tagType = tagType;
+				    		withAnnotation['body'].label = {'default' : [ label ]};
+				    		console.log(JSON.stringify(withAnnotation));
+				    		$.ajax({
+				    			url : '/record/annotation',
+						    	method : "POST",
+						    	contentType : "application/json",
+						    	data     : JSON.stringify(withAnnotation),
+								success : function(result) {
+									//check if duplicate
+									var index1 = self.arrayFirstIndexOf(ko.toJS(self.record().annotations), function (annotation) {
+										return annotation.dbId === result.dbId;
+									});
+									if (index1 >= 0)
+										self.record().annotations.splice(index1, 1);
+									self.record().annotations.push(result);
+									self.batchAnnotationCount++;
+									self.recordSimple = ko.toJS(self.record);
+									self.recordSimple.nextItemToAnnotate = null;
+									var index = self.arrayFirstIndexOf(self.batchItemsAnnotated, function (item) {
+										return item.recordId === self.recordSimple.recordId;
+									});
+									if (index >= 0) 
+										self.batchItemsAnnotated.splice(index, 1);
+									self.batchItemsAnnotated.push(self.recordSimple);
+									updateRecordAnnotations(self.record().recordId, self.record().annotations());
+								}
+				    		});
+			    		}
+		    		}
 			}
 		   });
 		});
