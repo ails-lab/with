@@ -17,6 +17,7 @@
 package db;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
@@ -49,6 +50,14 @@ public class UserGroupDAO extends DAO<UserGroup> {
 		super(UserGroup.class);
 	}
 
+	public ObjectId getIdByName(String username) {
+		UserGroup userGroup = this.getUniqueByFieldAndValue("username", username, Arrays.asList("_id"));
+		if (userGroup != null)
+			return userGroup.getDbId();
+		else 
+			return null;
+	}
+	
 	public UserGroup getByName(String name) {
 		return this.findOne("username", name);
 	}
