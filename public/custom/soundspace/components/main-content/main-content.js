@@ -365,40 +365,7 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 				}
 	
 	  
-	  startAnnotate = function() {
-		  //self.getTestRecords();
-		  self.randomRecords();
-	  };
 	  
-	  self.addNextAnnot = function(randomList, inner, number) {
-		  if (randomList.length > 0) {
-			  initRecord = randomList[0];
-			  initRecord.nextItemToAnnotate = inner;
-			  initRecord.number = number;
-			  randomList.splice(0, 1);
-			  return self.addNextAnnot(randomList, initRecord, number+1);
-		  }
-		  else {
-			  inner.number = number;
-			  return inner;
-		  }
-	  }
-	  
-	  self.randomRecords = function() {
-			$.ajax({
-		    	"url": "/record/randomRecords?groupId="+WITHApp.projectId+"&batchCount=10",
-		    	"method": "GET",
-		    	"success": function( data, textStatus, jQxhr ){
-		    		if (data.length > 0) {
-			    		recordToAnnotate = self.addNextAnnot(data, {}, 0);
-			    		itemShow(formatRecord(recordToAnnotate));
-		    		}
-				},
-				"error": function (result) {
-					$.smkAlert({ text: 'An error occured', type: 'danger', time: 10 });
-				}         
-		    });	
-		};
 		
 		self.getTestRecords = function() {
 			$.ajax({
