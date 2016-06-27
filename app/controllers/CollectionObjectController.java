@@ -156,7 +156,7 @@ public class CollectionObjectController extends WithResourceController {
 				src.setUsingCursor(true);
 
 				return internalImport(src, ccid, q, limit, resultInfo, true,
-						true);
+						false);
 
 			} catch (Exception e) {
 				log.error( "", e );
