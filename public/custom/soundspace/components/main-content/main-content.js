@@ -154,25 +154,13 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 			        self.totalCollections(responseCollections.totalCollections);
 			        self.totalExhibitions(responseCollections.totalExhibitions);
 			        var items=self.revealItems(responseCollections['collectionsOrExhibitions']);
-			       
-					if(items.length>0){
-						 var $newitems=getItems(items);
-					     
-						 homeisotopeImagesReveal( $container,$newitems );
-						
-						}
+					if (items.length>0) {
+						 var $newitems=getItems(items);		     
+						 homeisotopeImagesReveal($container, $newitems);		
+					}
 				    loading(false);
-				   // self.revealItems(responseCollections['collectionsOrExhibitions']);
 					
 			});
-		  /*var promise2 = self.getFeaturedExhibition(WITHApp.featuredExhibition);
-          $.when(promise2).done(function (data) {
-        	  
-        	  self.featuredExhibition(new Collection(data));
-        	  $("#featuredExhibit").css('background-image','url('+self.featuredExhibition().data.thumbnail()+')');    
-        	  self.exhibitloaded(true);
-        	  WITHApp.initCharacterLimiter();
-          });*/
           //cannot make data binding for data-percent work, so update within initCart
     	  var $container = $(".grid").isotope({
     			itemSelector: '.item',
@@ -293,11 +281,12 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 		
 		
 		function getItem(collection) {
+			var annotationCount = collection.data.annotationCount == undefined ? 0: collection.data.annotationCount;
 			  var tile= '<div class="'+collection.data.css()+'"> <div class="wrap">';		
                    tile+='<a href="#" onclick="loadUrl(\''+collection.data.url()+'\',event)">'
                     +'<div class="thumb"><img src="'+collection.data.thumbnail()+'" onerror="this.src=\'img/content/thumb-empty.png\'">' +
                     '<div class="counter" style="background: #4f7979 none repeat scroll 0 0; color: #fff;' + 
-    				 'font-size: 1.1rem; font-weight: 500; left: 0; padding: 5px 15px; position: absolute; text-transform: uppercase; top: 0;">' + collection.data.annotationCount + '  Annotations</div></div>'
+    				 'font-size: 1.1rem; font-weight: 500; left: 0; padding: 5px 15px; position: absolute; text-transform: uppercase; top: 0;">' + annotationCount + '  Annotations</div></div>'
                     +' <div class="info"><span class="type">'+collection.data.type()+'</span><h1 class="title">'+collection.data.title+'</h1><span class="owner">'+ collection.data.owner()+'</span></div>'
                     +'</a></div></div>';
 			return tile;

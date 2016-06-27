@@ -641,9 +641,7 @@ public class CollectionObjectController extends WithResourceController {
 			final Timer dao_timer = MetricsUtils.registry.timer(
 					MetricsUtils.registry.name(CollectionObjectController.class, "listCollection", "collectionsDBRetrival-time"));
 			final Timer.Context dao_timeContext = dao_timer.time();
-			/*
-			 *
-			 */
+
 			Tuple<List<CollectionObject>, Tuple<Integer, Integer>> info;
 			if (!isSuperUser())
 				info = DB.getCollectionObjectDAO().getByLoggedInUsersAndAcl(
