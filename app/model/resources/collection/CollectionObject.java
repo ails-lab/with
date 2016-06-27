@@ -29,6 +29,7 @@ import model.basicDataTypes.MultiLiteralOrResource;
 import model.resources.WithResource;
 import model.resources.collection.Exhibition.ExhibitionDescriptiveData;
 
+import org.bson.types.ObjectId;
 import org.mongodb.morphia.annotations.Embedded;
 import org.mongodb.morphia.annotations.Entity;
 import org.mongodb.morphia.annotations.Field;
@@ -90,9 +91,8 @@ public class CollectionObject<T extends CollectionObject.CollectionDescriptiveDa
 	}
 
 	public void fillAnnotationCount() {
-		//TODO: group further the annotations returned if needed
 		this.annotationCount = DB.getRecordResourceDAO()
-				.countAnnotatedRecords(this.getDbId());
+				.countAnnotations(this.getDbId());
 	}
 
 	@Embedded
