@@ -16,6 +16,8 @@
 
 package controllers;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -108,7 +110,7 @@ public class AnnotationController extends Controller {
 			return internalServerError();
 		}
 	}
-	
+
 	public static Result getAnnotationCount(String groupId) {
 		ObjectNode result = Json.newObject();
 		ObjectId group = new ObjectId(groupId);
@@ -163,8 +165,20 @@ public class AnnotationController extends Controller {
 			annotation.setBody(body);
 			AnnotationAdmin administrative = new AnnotationAdmin();
 			administrative.setWithCreator(WithController.effectiveUserDbId());
-			administrative.setCreated(new Date());
-			administrative.setGenerated(new Date());
+			if (json.has("generated")) {
+				SimpleDateFormat sdf = new SimpleDateFormat(
+						"yyyy-MM-dd'T'HH:mm:ss'Z'");
+				try {
+					administrative.setGenerated(sdf.parse(json.get("generated")
+							.asText()));
+				} catch (ParseException e) {
+					log.error(e.getMessage());
+					administrative.setGenerated(new Date());
+				}
+			} else {
+				administrative.setGenerated(new Date());
+			}
+			administrative.setCreated(administrative.getGenerated());
 			if (json.has("generator"))
 				administrative.setGenerator(json.get("generator").asText());
 			if (json.has("body") && json.get("body").has("confidence")) {
