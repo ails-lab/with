@@ -200,7 +200,7 @@ define(['bootstrap', 'knockout', 'text!./myannotations.html', 'knockout-else','a
 		self.annotationRecords = ko.observable();
 		self.totalAnnotations = ko.observable();
 		self.annotationPercentage = ko.observable();
-		self.goal = 1000;
+		self.goal = 2500;
 		//self.myAnnotatios = ko.mapping.fromJS([], mapping);
 		
 		self.img = ko.observable("img/ui/rookie.png");

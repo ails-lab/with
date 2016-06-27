@@ -139,7 +139,8 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 	  self.collections=ko.observableArray();
 	  self.fetchitemnum=20;
       self.annotationPercentage = ko.observable(50);
-
+      self.totalAnnotations = ko.observable();
+      self.goal = 2500;
 
 	  self.loadAll = function () {
          //$('.chart').easyPieChart({});
@@ -194,7 +195,8 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 				processData: false,
 				data: "groupId="+WITHApp.projectId
 			}).success (function(data) {
-				var percentage = Math.round(data.annotations/10);
+				self.totalAnnotations(data.annotations);
+				var percentage = Math.round(self.totalAnnotations()/self.goal*100);
 				self.annotationPercentage(percentage);
 		        WITHApp.initChart(self.annotationPercentage());
 			});
