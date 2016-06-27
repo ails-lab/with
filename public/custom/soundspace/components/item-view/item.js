@@ -483,7 +483,6 @@ define(['knockout', 'text!./item.html', 'app', 'knockout-else', 'smoke'], functi
 		
 		itemShow = function (e) {
 			data = ko.toJS(e);
-			data.data = e.data();
 			$('.nav-tabs a[href="#information"]').tab('show');
 			$(".mediathumb > img").attr("src","");
 			$("span.pnd-resource").attr('about','');
