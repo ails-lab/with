@@ -575,8 +575,8 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
 										collected: usage.collected,
 										collectedIn:result.collectedIn,
 										dbId: result.dbId,
-										annotations: result.annotations
-										//data: result
+										annotations: result.annotations,
+										data: result
 									  });
 							   items.push(record);
 							   self.mixresults().push(record);
@@ -796,8 +796,8 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
 						likes: usage.likes,
 						collected: usage.collected,
 						collectedIn:result.collectedIn,
-						annotations: result.annotations
-						//data: result
+						annotations: result.annotations,
+						data: result
 					  });
 				  items.push(record);
 				 }

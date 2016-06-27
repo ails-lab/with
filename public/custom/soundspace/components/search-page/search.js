@@ -482,7 +482,7 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
 									likes: usage.likes,
 									collected: usage.collected,
 									collectedIn:result.collectedIn,
-									//data: result,
+									data: result,
 									annotations: result.annotations,
 									dbId: result.dbId
 								  });
@@ -702,7 +702,7 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
 						collected: usage.collected,
 						collectedIn:result.collectedIn,
 						annotations: result.annotations,
-						//data: result,
+						data: result,
 						dbId: result.dbId
 					  });
 				  items.push(record);

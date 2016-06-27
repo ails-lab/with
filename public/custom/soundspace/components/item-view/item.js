@@ -475,13 +475,15 @@ define(['knockout', 'text!./item.html', 'app', 'knockout-else', 'smoke'], functi
 							fullrestype: media[0] != null && media[0].Original != null
 								&& media[0].Original.type != "null" ? media[0].Original.type : "",
 							nextItemToAnnotate: backendRecord.nextItemToAnnotate,
-							annotations: backendRecord.annotations
+							annotations: backendRecord.annotations,
+							data: backendRecord
 				  };
 			 return record;
 		};
 		
 		itemShow = function (e) {
 			data = ko.toJS(e);
+			data.data = e.data();
 			$('.nav-tabs a[href="#information"]').tab('show');
 			$(".mediathumb > img").attr("src","");
 			$("span.pnd-resource").attr('about','');

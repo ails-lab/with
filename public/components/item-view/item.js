@@ -357,13 +357,15 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 							fullrestype: media[0] != null && media[0].Original != null
 								&& media[0].Original.type != "null" ? media[0].Original.type : "",
 							nextItemToAnnotate: backendRecord.nextItemToAnnotate,
-							annotations: backendRecord.annotations
+							annotations: backendRecord.annotations,
+							data: backendRecord
 				  };
 			 return record;
 		};
 		
 		itemShow = function (e,showMeta) {
 			data = ko.toJS(e);
+			data.data = e.data();
 			self.record(new Record(data, showMeta));
 			self.open();
 			if(self.record().recordId!="-1"){
@@ -459,8 +461,8 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 		};
 		
 		self.collect = function (rec,event) {
-				event.preventDefault();
-				collectionShow(rec);
+		    event.preventDefault();
+			collectionShow(rec);
 		};
 		
 		
