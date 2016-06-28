@@ -113,6 +113,7 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 			self.nextItemToAnnotate(data.nextItemToAnnotate);
 			self.annotations(data.annotations);
 			self.loading(false);
+			$("audio").trigger("pause");
 			var vid = document.getElementById("mediaplayer");
 			if (vid != null && !isRelated) {
 				vid.parentNode.removeChild(vid);
@@ -392,6 +393,7 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 			//self.record(new Record());
 			$('body').css('overflow','visible');
 			$( '.itemview' ).fadeOut();
+			$("audio").trigger("pause");
 			var vid = document.getElementById("mediaplayer");
 			 if (vid != null) {
 				 vid.parentNode.removeChild(vid);

@@ -114,6 +114,7 @@ define(['knockout', 'text!./item.html', 'app', 'knockout-else', 'smoke'], functi
 			if (data.annotations !== undefined)
 				self.annotations(data.annotations);
 			self.loading(false);
+			$("audio").trigger("pause");
 			var vid = document.getElementById("mediaplayer");
 			if (vid != null) {
 				vid.parentNode.removeChild(vid);
@@ -408,6 +409,7 @@ define(['knockout', 'text!./item.html', 'app', 'knockout-else', 'smoke'], functi
 		};
 		
 		self.nextItem = function() {
+			$("audio").trigger("pause");
 			var vid = document.getElementById("mediaplayer");
 			if (vid != null) {
 				vid.parentNode.removeChild(vid);
@@ -419,6 +421,7 @@ define(['knockout', 'text!./item.html', 'app', 'knockout-else', 'smoke'], functi
 		};
 		
 		self.endBatch = function() {
+			$("audio").trigger("pause");
 			var vid = document.getElementById("mediaplayer");
 			if (vid != null) {
 				vid.parentNode.removeChild(vid);
@@ -505,6 +508,7 @@ define(['knockout', 'text!./item.html', 'app', 'knockout-else', 'smoke'], functi
 		};
 
 		self.close = function () {
+			$("audio").trigger("pause");
 			var vid = document.getElementById("mediaplayer");
 			if (vid != null) {
 				vid.parentNode.removeChild(vid);
