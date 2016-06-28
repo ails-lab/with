@@ -513,6 +513,7 @@ define(['knockout', 'text!./item.html', 'app', 'knockout-else', 'smoke'], functi
 			dispatchDocumentEvent('Pundit.hide');
 			$('body').css('overflow','visible');
 			$( '.itemview' ).fadeOut();
+			self.indexInBatch(1);
 		};
 
 		self.changeSource = function (item) {
