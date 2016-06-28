@@ -179,6 +179,7 @@ public class AnnotationController extends Controller {
 				administrative.setGenerated(new Date());
 			}
 			administrative.setCreated(administrative.getGenerated());
+			administrative.setLastModified(new Date());
 			if (json.has("generator"))
 				administrative.setGenerator(json.get("generator").asText());
 			if (json.has("body") && json.get("body").has("confidence")) {
