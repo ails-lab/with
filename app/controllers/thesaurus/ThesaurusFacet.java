@@ -319,8 +319,6 @@ public class ThesaurusFacet {
 				}
 			}
 		}
-		
-		
 	}
 	
 	public Collection<SKOSTerm> constructBroaderTransitive(SKOSSemantic skos) {

@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -37,21 +38,18 @@ import java.io.StringReader;
 import java.net.URLEncoder;
 import java.nio.charset.Charset;
 
+import model.annotations.Annotation;
+import model.annotations.Annotation.AnnotationAdmin;
+import model.annotations.Annotation.MotivationType;
+import model.annotations.bodies.AnnotationBodyTagging;
+import model.annotations.selectors.PropertyTextFragmentSelector;
+import model.annotations.targets.AnnotationTarget;
 import model.basicDataTypes.Language;
 
 
 
 
-
-
-
-
-
-
-
-
-
-
+import model.basicDataTypes.MultiLiteral;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
@@ -68,11 +66,17 @@ import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHitField;
 import org.elasticsearch.search.SearchHits;
 
+import annotators.struct.AnnotatedObject;
+import annotators.struct.AnnotationIndex;
+import annotators.struct.AnnotationValue;
+import annotators.struct.Span;
+
 import com.fasterxml.jackson.databind.JsonNode;
 
 import edu.stanford.nlp.dcoref.CorefChain;
 import edu.stanford.nlp.dcoref.CorefChain.CorefMention;
 import edu.stanford.nlp.dcoref.CorefCoreAnnotations.CorefChainAnnotation;
+import edu.stanford.nlp.ling.CoreAnnotations.TextAnnotation;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.IndexedWord;
 import edu.stanford.nlp.ling.Sentence;
@@ -84,7 +88,6 @@ import edu.stanford.nlp.ling.CoreAnnotations.TokensAnnotation;
 import edu.stanford.nlp.ling.tokensregex.TokenSequenceMatcher;
 import edu.stanford.nlp.ling.tokensregex.TokenSequencePattern;
 import edu.stanford.nlp.parser.lexparser.LexicalizedParser;
-import edu.stanford.nlp.pipeline.Annotation;
 //import edu.stanford.nlp.pipeline.CoreNLPProtos.IndexedWord;
 import edu.stanford.nlp.pipeline.StanfordCoreNLP;
 import edu.stanford.nlp.trees.GrammaticalStructure;
@@ -101,7 +104,7 @@ import elastic.ElasticSearcher;
 import elastic.ElasticSearcher.SearchOptions;
 import play.libs.Json;
 
-public class CopyOfStanfordNLPThesaurusAnnotator extends Annotator {
+public class NERAnnotator extends Annotator {
 
 	public String getName() {
 		return "StanfordNLP";
@@ -113,12 +116,12 @@ public class CopyOfStanfordNLPThesaurusAnnotator extends Annotator {
 	
     private SimpleAnnotationValue[] NERFinderTag;
 
-    protected static Map<Language, CopyOfStanfordNLPThesaurusAnnotator> annotators = new HashMap<>();
+    protected static Map<Language, NERAnnotator> annotators = new HashMap<>();
 
-    public static CopyOfStanfordNLPThesaurusAnnotator getThesaurusAnnotator(Language lang) throws Exception {
-    	CopyOfStanfordNLPThesaurusAnnotator ta = annotators.get(lang);
+    public static NERAnnotator getAnnotator(Language lang) {
+    	NERAnnotator ta = annotators.get(lang);
     	if (ta == null) {
-    		ta  = new CopyOfStanfordNLPThesaurusAnnotator(lang);
+    		ta  = new NERAnnotator(lang);
     		annotators.put(lang, ta);
     	}
     	
@@ -127,10 +130,11 @@ public class CopyOfStanfordNLPThesaurusAnnotator extends Annotator {
     	
     private StanfordCoreNLP pipeline;
     
-    private CopyOfStanfordNLPThesaurusAnnotator(Language language) throws Exception {
+    private NERAnnotator(Language language) {
     	Properties props = new Properties();
-    	props.put("annotators", "tokenize, ssplit, pos, lemma, ner, parse, dcoref");
-//    	props.put("annotators", "tokenize, ssplit, pos, lemma, ner");
+//    	props.put("annotators", "tokenize, ssplit, pos, lemma, ner, parse, dcoref");
+//    	props.put("annotators", "tokenize, ssplit, pos, lemma, ner, parse");
+    	props.put("annotators", "tokenize, ssplit, pos, lemma, ner");
 //    	props.put("annotators", "tokenize, ssplit, pos, lemma");
 //    	props.put("annotators", "tokenize, ssplit, pos");
 //    	props.put("annotators", "tokenize, ssplit");
@@ -139,42 +143,183 @@ public class CopyOfStanfordNLPThesaurusAnnotator extends Annotator {
     }
 
 	@Override
-	public List<annotators.Annotation> annotate(String text, Map<String, Object> properties) throws Exception {
-		return null;
+	public List<Annotation> annotate(String text, ObjectId withCreator, AnnotationTarget target, Map<String, Object> properties) throws Exception {
+		text = strip(text);
+		
+		List<Annotation> res = new ArrayList<>();
+		
+		AnnotationIndex ai = analyze(text);
+		
+//		System.out.println(ai.getClassValueMap());
+//		for (AnnotationValue av : ai.getValuesForClass("NE")) {
+//			System.out.println(av);
+		ArrayList<Span> locations = ai.getLocations("NE", new SimpleAnnotationValue("LOCATION"));
+		if (locations != null) {
+			for (Span span : locations) {
+	    		Annotation<AnnotationBodyTagging> ann = new Annotation<>();
+	    		
+	    		AnnotationBodyTagging annBody = new AnnotationBodyTagging();
+	    		annBody.setUri("http://nerd.eurecom.fr/ontology#Location");
+	    		annBody.setUriVocabulary(AnnotationBodyTagging.Vocabulary.NERD);
+	    		MultiLiteral ml = new MultiLiteral(Language.EN, "Location");
+	    		ml.fillDEF();
+    			annBody.setLabel(ml);
+
+	    		AnnotationTarget annTarget = (AnnotationTarget) target.clone();
+	    		
+	    		PropertyTextFragmentSelector selector = (PropertyTextFragmentSelector)annTarget.getSelector();
+	    		selector.setStart(span.start);
+	    		selector.setEnd(span.end);
+	    		
+	    		annTarget.setSelector(selector);
+
+	    		ArrayList<AnnotationAdmin> admins  = new ArrayList<>();
+	    		AnnotationAdmin admin = new Annotation.AnnotationAdmin();
+	    		admin.setGenerator(getName());
+	    		admin.setGenerated(new Date());
+	    		admin.setConfidence(-1.0f);
+	    		admin.setWithCreator(withCreator);
+	    		admin.setCreated(new Date());
+	    		
+	    		admins.add(admin);
+	    		
+	    		ann.setBody(annBody);
+	    		ann.setTarget(annTarget);
+	    		ann.setAnnotators(admins);
+	    		ann.setMotivation(MotivationType.Tagging);
+	    		
+	    		res.add(ann);
+			}
+		}
+		
+		ArrayList<Span> persons = ai.getLocations("NE", new SimpleAnnotationValue("PERSON"));
+		if (persons != null) {
+			for (Span span : persons) {
+	    		Annotation<AnnotationBodyTagging> ann = new Annotation<>();
+	    		
+	    		AnnotationBodyTagging annBody = new AnnotationBodyTagging();
+	    		annBody.setUri("http://nerd.eurecom.fr/ontology#Person");
+	    		annBody.setUriVocabulary(AnnotationBodyTagging.Vocabulary.NERD);
+	    		MultiLiteral ml = new MultiLiteral(Language.EN, "Person");
+	    		ml.fillDEF();
+    			annBody.setLabel(ml);
+
+	    		AnnotationTarget annTarget = (AnnotationTarget) target.clone();
+	    		
+	    		PropertyTextFragmentSelector selector = (PropertyTextFragmentSelector)annTarget.getSelector();
+	    		selector.setStart(span.start);
+	    		selector.setEnd(span.end);
+	    		
+	    		annTarget.setSelector(selector);
+
+	    		ArrayList<AnnotationAdmin> admins  = new ArrayList<>();
+	    		AnnotationAdmin admin = new Annotation.AnnotationAdmin();
+	    		admin.setGenerator(getName());
+	    		admin.setGenerated(new Date());
+	    		admin.setConfidence(-1.0f);
+	    		admin.setWithCreator(withCreator);
+	    		admin.setCreated(new Date());
+
+	    		admins.add(admin);
+	    		
+	    		ann.setBody(annBody);
+	    		ann.setTarget(annTarget);
+	    		ann.setAnnotators(admins);
+	    		ann.setMotivation(MotivationType.Tagging);
+	    		
+	    		res.add(ann);
+			}
+		}
+
+		ArrayList<Span> orgs = ai.getLocations("NE", new SimpleAnnotationValue("ORGANIZATION"));
+		if (orgs != null) {
+			for (Span span : orgs ) {
+	    		Annotation<AnnotationBodyTagging> ann = new Annotation<>();
+	    		
+	    		AnnotationBodyTagging annBody = new AnnotationBodyTagging();
+	    		annBody.setUri("http://nerd.eurecom.fr/ontology#Organization");
+	    		annBody.setUriVocabulary(AnnotationBodyTagging.Vocabulary.NERD);
+	    		MultiLiteral ml = new MultiLiteral(Language.EN, "Organization");
+	    		ml.fillDEF();
+    			annBody.setLabel(ml);
+
+	    		AnnotationTarget annTarget = (AnnotationTarget) target.clone();
+	    		
+	    		PropertyTextFragmentSelector selector = (PropertyTextFragmentSelector)annTarget.getSelector();
+	    		selector.setStart(span.start);
+	    		selector.setEnd(span.end);
+	    		
+	    		annTarget.setSelector(selector);
+
+	    		ArrayList<AnnotationAdmin> admins  = new ArrayList<>();
+	    		AnnotationAdmin admin = new Annotation.AnnotationAdmin();
+	    		admin.setGenerator(getName());
+	    		admin.setGenerated(new Date());
+	    		admin.setConfidence(-1.0f);
+	    		admin.setWithCreator(withCreator);
+	    		admin.setCreated(new Date());
+
+	    		admins.add(admin);
+	    		
+	    		ann.setBody(annBody);
+	    		ann.setTarget(annTarget);
+	    		ann.setAnnotators(admins);
+	    		ann.setMotivation(MotivationType.Tagging);
+	    		
+	    		res.add(ann);
+			}
+		}
+		
+		return res;
 	}
 	
 	public AnnotationIndex analyze(String text) throws Exception {
 		AnnotationIndex ta = new AnnotationIndex(text);
 		
-		Annotation document = new Annotation(text);
+		edu.stanford.nlp.pipeline.Annotation document = new edu.stanford.nlp.pipeline.Annotation(text);
 
 		pipeline.annotate(document);
 
        	for(CoreMap sentence: document.get(SentencesAnnotation.class)) {
        		
+//       		List<CoreLabel> tokens = sentence.get(TokensAnnotation.class);
+////       	(Adjective | Noun)* (Noun Preposition)? (Adjective | Noun)* Noun 
+//
+//       		TokenSequencePattern pattern = TokenSequencePattern.compile("[tag:/JJ.*|NN.*/]* ([tag:/NN.*/] [tag:\"IN\"])? [tag:/JJ.*|NN.*/]* [tag:/NN.*/] ");
+//       		TokenSequenceMatcher matcher = pattern.getMatcher(tokens);
+//       	   
+//       		while (matcher.find()) {
+//       			String matchedString = matcher.group();
+//       			List<CoreMap> matchedTokens = matcher.groupNodes();
+//       			
+//       			String token1 = matchedString;
+//       			String token2 = "";
+//       			for (int i = 0; i < matchedTokens.size(); i++) {
+//       				if (i > 0) {
+//       					token2 += " ";
+//       				}
+//       				CoreMap token = matchedTokens.get(i);
+//       				if (i == matchedTokens.size() - 1) {
+//       					token2 += token.get(LemmaAnnotation.class);
+//       				} else {
+//       					token2 += token.get(TextAnnotation.class);
+//       				}
+//       				
+//       				
+//       			}
+//       			System.out.println("<<<<<<<<<<<<<<<<< " + token1);
+//       			System.out.println("<<<<<<<<<<<<<<<   " + token2);
+//       		}
+       	   
        		int ss = Integer.MAX_VALUE;
        		int se = Integer.MIN_VALUE;
     	   
        		int nerStart = -1;
        		int nerEnd= -1;
        		String nerType = "";
-    	   
-       		List<CoreLabel> tokens = sentence.get(TokensAnnotation.class);
-       		TokenSequencePattern pattern = TokenSequencePattern.compile("[tag:/JJ.*|NN.*/]* ([tag:/NN.*/] [tag:\"IN\"])? [tag:/JJ.*|NN.*/]* [tag:/NN.*/] ");
-//       		TokenSequencePattern pattern = TokenSequencePattern.compile("[tag:/NN.*/] ");
-       	   
-//       	(Adjective | Noun)* (Noun Preposition)? (Adjective | Noun)* Noun 
-       	   TokenSequenceMatcher matcher = pattern.getMatcher(tokens);
-       	   
-       	   while (matcher.find()) {
-       	     String matchedString = matcher.group();
-       	     System.out.println("<<<<<<<<<<<<<<<<< " + matchedString);
-//       	     List<CoreMap> matchedTokens = matcher.groupNodes();
-//       	     ...
-       	   }
-       	   
+
        		for (CoreLabel token: sentence.get(TokensAnnotation.class)) {
-       			
+
        			int s = token.beginPosition();
        			int e = token.endPosition();
         	   
@@ -192,8 +337,6 @@ public class CopyOfStanfordNLPThesaurusAnnotator extends Annotator {
 
        			String n = token.get(NamedEntityTagAnnotation.class);
        			
-//       			System.out.println("NEEE " + token.get(NamedEntityTagAnnotation.class));
-
        			if (n.equals("O") || !nerType.equals(n)) {
        				if (nerStart != -1) {
        					ta.add("NE", new SimpleAnnotationValue(nerType), nerStart, nerEnd);
@@ -208,6 +351,12 @@ public class CopyOfStanfordNLPThesaurusAnnotator extends Annotator {
        					nerEnd = e;
        					nerType = n;
        				}
+       			} else {
+       				if (nerStart == -1) {
+   						nerStart = s;
+   					}
+   					nerEnd = e;
+   					nerType = n;
        			}
        		}
            
@@ -219,30 +368,10 @@ public class CopyOfStanfordNLPThesaurusAnnotator extends Annotator {
        	}
        
        
-//	   if (corefTag != null) {
-//		   for (Map.Entry<Integer, CorefChain> entry : document.get(CorefChainAnnotation.class).entrySet()) {
-//			   int k = entry.getKey();
-//			   CorefChain cc = entry.getValue();
-//			   
-//			   System.out.println("E1 " + k + " " + cc + " ||| " + cc.getRepresentativeMention());
-//			   
-//			   for (Entry<IntPair, Set<CorefMention>> entry2 : cc.getMentionMap().entrySet()) {
-//				   IntPair ip = entry2.getKey();
-//				   System.out.println("E------ ");
-//				   for (CorefMention cm : entry2.getValue()) {
-//					   System.out.println("E2 " + ip + " " + cm.startIndex + "-" + cm.endIndex + " " + cm.headIndex + "  " + cm.sentNum);
-//				   }
-//			   }
-//			   
-//		   }
-//		   
-//	   }
+//		LexicalizedParser lp = LexicalizedParser.loadModel("edu/stanford/nlp/models/lexparser/englishPCFG.ser.gz");
 
-
-		LexicalizedParser lp = LexicalizedParser.loadModel("edu/stanford/nlp/models/lexparser/englishPCFG.ser.gz");
-
-		TreebankLanguagePack tlp = new PennTreebankLanguagePack();
-	    GrammaticalStructureFactory gsf = tlp.grammaticalStructureFactory();
+//		TreebankLanguagePack tlp = new PennTreebankLanguagePack();
+//	    GrammaticalStructureFactory gsf = tlp.grammaticalStructureFactory();
 
 		Comparator<Span> ssc = new Span.StartSpanComparator();
 		Comparator<Span> esc = new Span.EndSpanComparator();
@@ -277,42 +406,33 @@ public class CopyOfStanfordNLPThesaurusAnnotator extends Annotator {
 				}
 			}
 				
-//				System.out.println("** " + tokens + "** " + pos1 + " " + pos2);
+//			System.out.println("** " + tokens + "** " + pos1 + " " + pos2);
 			
-			List<CoreLabel> rawWords = Sentence.toCoreLabelList(tokens.toArray(new String[] {}));
-		    Tree parse = lp.apply(rawWords);
-//			    parse.pennPrint();
-		    
-		    GrammaticalStructure gs = gsf.newGrammaticalStructure(parse);
-		    
-
-		    for (TypedDependency  tdl : gs.typedDependenciesCCprocessed()) {
-		    	IndexedWord tgn = tdl.dep();
-		    	int i = tgn.index();
-		    	Span s = annTokens.get(i - 1);
-		    	
-//			    	if (used.add(i)) {
-//			    		nai.add(id, new SimpleAnnotationValue(i), s.start, s.end);
-//			    	}
-		    	
-		    	if (tdl.gov().index() > 0) {
-		    		Span ss = spanList.get(tdl.gov().index() - 1);
-		    		ta.add("REF_ID", new ComplexAnnotationValue(tdl.reln().toString(), ta.getAnnotations(ss)), s.start, s.end);
-
-		    		AnnotatedObject ano = ta.getAnnotations(ss);
-					ta.add("IREF_ID", new ComplexAnnotationValue(tdl.reln().toString(), ta.getAnnotations(new Span(s.start, s.end))), ano.getSpan().start, ano.getSpan().end);
-		    	
-					System.out.println("** " + new ComplexAnnotationValue(tdl.reln().toString(), ta.getAnnotations(ss)) + "** " + text.substring(s.start, s.end) + " -- " + ta.getAnnotations(new Span(s.start, s.end)));
-					
-		    	} else {
-	    			ta.add("REF_ID", new ComplexAnnotationValue(tdl.reln().toString(), ""), s.start, s.end);
-	    			
-	    			System.out.println("** " + new ComplexAnnotationValue(tdl.reln().toString(), "") + "** " + text.substring(s.start, s.end) + " -- " + ta.getAnnotations(new Span(s.start, s.end)) );
-		    	}
-		    	
-//					nai.add(type, new SimpleAnnotationValue(tdl.reln().toString()), s.start, s.end);
-		    	
-		    }
+//			List<CoreLabel> rawWords = Sentence.toCoreLabelList(tokens.toArray(new String[] {}));
+//		    Tree parse = lp.apply(rawWords);
+//		    
+//		    GrammaticalStructure gs = gsf.newGrammaticalStructure(parse);
+//		    
+//		    for (TypedDependency  tdl : gs.typedDependenciesCCprocessed()) {
+//		    	IndexedWord tgn = tdl.dep();
+//		    	int i = tgn.index();
+//		    	Span s = annTokens.get(i - 1);
+//		    	
+//		    	if (tdl.gov().index() > 0) {
+//		    		Span ss = spanList.get(tdl.gov().index() - 1);
+//		    		ta.add("REF_ID", new ComplexAnnotationValue(tdl.reln().toString(), ta.getAnnotations(ss)), s.start, s.end);
+//
+//		    		AnnotatedObject ano = ta.getAnnotations(ss);
+//					ta.add("IREF_ID", new ComplexAnnotationValue(tdl.reln().toString(), ta.getAnnotations(new Span(s.start, s.end))), ano.getSpan().start, ano.getSpan().end);
+//		    	
+////					System.out.println("** " + new ComplexAnnotationValue(tdl.reln().toString(), ta.getAnnotations(ss)) + "** " + text.substring(s.start, s.end) + " -- " + ta.getAnnotations(new Span(s.start, s.end)));
+//					
+//		    	} else {
+//	    			ta.add("REF_ID", new ComplexAnnotationValue(tdl.reln().toString(), ""), s.start, s.end);
+//	    			
+////	    			System.out.println("** " + new ComplexAnnotationValue(tdl.reln().toString(), "") + "** " + text.substring(s.start, s.end) + " -- " + ta.getAnnotations(new Span(s.start, s.end)) );
+//		    	}
+//		    }
 		}
 		
 		
@@ -391,13 +511,16 @@ public class CopyOfStanfordNLPThesaurusAnnotator extends Annotator {
 	
 	public static void main(String[] args) throws Exception {
 //		String text = "The 'Hop Bine' was built in 1870 ready for later development in the eastern side of Biggleswade. Its description in 1898 was - \"A brick and slated house containing Tap Room, Parlour, Kitchen, Cellar and four upper rooms. Yard with boarded and tiled Shed, enclosed at either end as Stable and Coal-house; w.c.&c; also a piece of Garden Ground at side and back. The first owners were Frederick Archdale and Charles Robert Lindsell (namely Wells and Co). The first licensee was George Chesham from 1870 to 1877. Until recently it was a thriving little pub then Greene King changed to half pub half Indian restaurant. That killed it off! Now (February 2012) it is closed; the shutters are on and all signs have been removed; Greene King have applied for it to be changed to residential and to develop another two houses on the car park - pack 'em in tight!";
-		String text = "Have a look at these books and that book. This is a nice mother of pearl. I felt especially proud to receive my commission as an officer in front of my grandmother, The Queen. She has been an incredible role model to me over the years, so it was very special to have her present for my graduation. I know it was also a memorable moment for my fellow officers to take part in the Parade in front of The Queen as Head of the Armed Forces."; 
+//		String text = "Have a look at these books and that book. I received a big nice mother of pearl. I felt especially proud to receive my commission as an officer in front of my grandmother, The Queen. She has been an incredible role model to me over the years, so it was very special to have her present for my graduation. I know it was also a memorable moment for my fellow officers to take part in the Parade in front of The Queen as Head of the Armed Forces."; 
+//		String text = "Car salesman Tony Wilkins gives a helping hand to receptionist Linda Edser, aged 21. He carried her through the flood water in Cowbridge Road East, Cardiff.";
+		String text = "The 'Hop Bine' was built in 1870 ready for later development in the eastern side of Biggleswade. Its description in 1898 was - A brick and slated house containing Tap Room, Parlour, Kitchen, Cellar and four upper rooms. Yard with boarded and tiled Shed, enclosed at either end as Stable and Coal-house; w.c.&c; also a piece of Garden Ground at side and back. The first owners were Frederick Archdale and Charles Robert Lindsell (namely Wells and Co). The first licensee was George Chesham from 1870 to 1877.  Until recently it was a thriving little pub then Greene King changed to half pub half Indian restaurant. That killed it off! Now (February 2012) it is closed; the shutters are on and all signs have been removed; Greene King have applied for it to be changed to residential and to develop another two houses on the car park - pack 'em in tight!";
 		
-		CopyOfStanfordNLPThesaurusAnnotator ta = CopyOfStanfordNLPThesaurusAnnotator.getThesaurusAnnotator(Language.EN);
-		
-		AnnotationIndex ai = ta.analyze(text);
-		
-		System.out.println(ai.getValuesForClass("NE"));
+		NERAnnotator ta = NERAnnotator.getAnnotator(Language.EN);
+
+		ta.annotate(text, null, null, new HashMap<String, Object>());
+//		AnnotationIndex ai = ta.analyze(text);
+//		
+//		System.out.println(ai.getValuesForClass("NE"));
 		
 //		System.out.println(ai.getValuesForClass("POS"));
 //		

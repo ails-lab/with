@@ -23,54 +23,15 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.bson.types.ObjectId;
+
+import model.annotations.Annotation;
+import model.annotations.targets.AnnotationTarget;
 import model.basicDataTypes.Language;
 import model.resources.RecordResource;
 
 public abstract class Annotator {
 
-	public enum Vocabulary {
-		AAT("aat"),
-		DBPEDIA_ONTOLOGY("dbo", "dbpedia"), 
-		DBPEDIA_RESOURCE("dbr"), 
-		GEMET("gemet"), 
-		EUSCREENXL("euscreenxl"),
-		FASHION("fashion"),
-		HORNBOSTEL_SACHS("hornbostel-sachs", "hornbostel_sachs"),
-		MIMO("mimo"),
-		NERD("nerd"),
-		PHOTOGRAPHY("photography"),
-		PARTAGE_PLUS("partage-plus", "partageplus"),
-		WORDNET30("wordnet30"),
-		WORDNET31("wordnet31");
-		
-		private String name;
-		private String[] alt;
-		
-		Vocabulary(String name,String... alt) {
-			this.name = name;
-			this.alt = alt;
-		}
-		
-		public String getName() {
-			return name;
-		}
-		
-		public static Vocabulary getVocabulary(String name){
-			for (Vocabulary voc : Vocabulary.values()) {
-				if (voc.name.equals(name)) {
-					return voc;
-				} else if (voc.alt != null) {
-					for (String s : voc.alt) {
-						if (s.equals(name)) {
-							return voc;
-						}
-					}
-				}
-			}
-			
-			return null;
-		}
-	}
 	
 	protected Language lang;
 	
@@ -80,9 +41,7 @@ public abstract class Annotator {
 	
 	public abstract String getService();
 	
-	public abstract List<Annotation> annotate(String text, Map<String, Object> properties) throws Exception;
-	
-	public void annotate(RecordResource rr) {	}
+	public abstract List<Annotation> annotate(String text, ObjectId withCreator, AnnotationTarget target, Map<String, Object> properties) throws Exception;
 	
 	private Pattern p = Pattern.compile("(<.*?>)");
 	
@@ -123,7 +82,7 @@ public abstract class Annotator {
 		List<Annotator> res = new ArrayList<>();
 		
 		Annotator ann;
-		ann = DBPediaSpotlightAnnotator.getAnnotator(lang);
+		ann = DBPediaAnnotator.getAnnotator(lang);
 		if (ann != null) {
 			res.add(ann);
 		}
@@ -133,7 +92,7 @@ public abstract class Annotator {
 			res.add(ann);
 		}
 
-		ann = StanfordNLPAnnotator.getAnnotator(lang);
+		ann = NERAnnotator.getAnnotator(lang);
 		if (ann != null) {
 			res.add(ann);
 		}

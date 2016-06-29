@@ -398,6 +398,17 @@ WITHApp.ui = function( custom ){
 
 		}
 
+		// open annotate collection
+		if ( $( 'a.annotate-col' ).length !== 0 ) {
+
+			$( 'a.annotate-col' ).on("click", function( e ) {
+
+				e.preventDefault();
+				$( '.action' ).removeClass( 'active' );
+				$( '.action.annotate-col' ).addClass( 'active' );				
+			});
+
+		}
 
 		// open detail area
 		if ( $( 'a.detail-control' ).length !== 0 ) {

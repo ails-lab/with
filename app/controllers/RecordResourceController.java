@@ -27,8 +27,11 @@ import java.util.Set;
 import javax.validation.ConstraintViolation;
 
 import model.DescriptiveData;
+import model.annotations.Annotation;
 import model.annotations.ContextData;
 import model.annotations.ContextData.ContextDataType;
+import model.annotations.selectors.PropertyTextFragmentSelector;
+import model.annotations.targets.AnnotationTarget;
 import model.basicDataTypes.Language;
 import model.basicDataTypes.MultiLiteral;
 import model.resources.RecordResource;
@@ -44,7 +47,6 @@ import play.libs.F.Option;
 import play.libs.Json;
 import play.mvc.Result;
 import utils.Tuple;
-import annotators.Annotation;
 import annotators.Annotator;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -279,10 +281,13 @@ public class RecordResourceController extends WithResourceController {
 				
 				DescriptiveData dd = record.getDescriptiveData();
 				
-				ObjectNode annotations = Json.newObject();
+//				ObjectNode annotations = Json.newObject();
 				ArrayNode array = Json.newObject().arrayNode();
 
+				ObjectId user = WithController.effectiveUserDbId();
+				
 				for (String p : fields) {
+
 					Method method = dd.getClass().getMethod("get" + p.substring(0,1).toUpperCase() + p.substring(1));
 				
 					Object res = method.invoke(dd);
@@ -298,38 +303,21 @@ public class RecordResourceController extends WithResourceController {
 //							props.put(Annotator.LANGUAGE, lang);
 							
 							for (String text : value.get(lang)) {
+								AnnotationTarget target = new AnnotationTarget();
+								target.setRecordId(new ObjectId(id));
+								
+								PropertyTextFragmentSelector selector = new PropertyTextFragmentSelector();
+								selector.setOrigValue(text);
+								selector.setOrigLang(lang);
+								selector.setProperty(p);
+								
+								target.setSelector(selector);
+								
+								int k = 0;
 								for (Annotator annotator : Annotator.getAnnotators(lang)) {
-									for (Annotation ann : annotator.annotate(text, props)) {
-										
-										ObjectNode annotation = Json.newObject();
-										annotation.put("generator", annotator.getName());
-		
-										ObjectNode body = Json.newObject();
-										body.put("@id", ann.getURI());
-										if (ann.getLabel() != null) {
-											body.put("label", ann.getLabel());
-										}
-										
-										if (ann.getVocabulary() != null) {
-											body.put("vocabulary", ann.getVocabulary().getName());
-										}
-										
-										annotation.put("body", body);
-		
-										ObjectNode target = Json.newObject();
-										
-										target.put("source", "record/" + id);
-										
-										ObjectNode targetSelector = Json.newObject();
-										targetSelector.put("@type", "FragmentSelector");
-										targetSelector.put("value", "r=" + p + "&t=" +ann.getStartPosition() + "," + ann.getEndPosition());
-										
-										target.put("selector", targetSelector);
-		
-										annotation.put("target", target);
-		
-										array.add(annotation);
-	
+									for (Annotation ann : annotator.annotate(text, user, target, props)) {
+										AnnotationController.addAnnotation(ann);
+										array.add(Json.toJson(ann));
 									}
 								}
 							}
@@ -337,9 +325,9 @@ public class RecordResourceController extends WithResourceController {
 					}
 				}
 				
-				annotations.put("annotations", array);
+//				annotations.put("annotations", array);
 				
-				return ok(annotations);
+				return ok(array);
 			}				
 		} catch (Exception e) {
 			result.put("error", e.getMessage());
@@ -400,5 +388,30 @@ public class RecordResourceController extends WithResourceController {
 	public static class CollectionAndRecordsCounts {
 		List<Tuple<ObjectId, Integer>> collectionsRecordCount = new ArrayList<Tuple<ObjectId, Integer>>();
 		int totalRecordsCount = 0;
+	}
+	
+	public static Result getAnnotations(String id) {
+		ObjectNode result = Json.newObject();
+		try {
+			RecordResource record = DB.getRecordResourceDAO().get(new ObjectId(id));
+			Result response = errorIfNoAccessToRecord(Action.READ,
+					new ObjectId(id));
+			if (!response.toString().equals(ok().toString()))
+				return response;
+			else {
+				ArrayNode array = result.arrayNode();
+				record.fillAnnotations();
+				
+				List<Annotation> anns = record.getAnnotations();
+				
+				for (Annotation ann : anns) {
+					array.add(Json.toJson(ann));
+				}
+				return ok(array);
+			}				
+		} catch (Exception e) {
+			result.put("error", e.getMessage());
+			return internalServerError(result);
+		}
 	}
 }

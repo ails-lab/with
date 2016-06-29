@@ -1,4 +1,4 @@
-define(['bridget', 'knockout', 'text!./_collection-view.html', 'isotope', 'imagesloaded', 'app', 'inputtags', 'smoke','knockout-validation'], function (bridget, ko, template, Isotope, imagesLoaded, app, inputtags) {
+define(['bridget', 'knockout', 'text!./_collection-view.html', 'isotope', 'imagesloaded', 'app', 'inputtags', 'liveFilter', 'smoke','knockout-validation'], function (bridget, ko, template, Isotope, imagesLoaded, app, inputtags, liveFilter) {
 
 	$.bridget('isotope', Isotope);
 	self.loading = ko.observable(false);
@@ -42,7 +42,7 @@ define(['bridget', 'knockout', 'text!./_collection-view.html', 'isotope', 'image
 		self.description = "";
 		self.thumb = "";
 		self.fullres = "";
-		self.fullrestype = "";
+//		self.fullrestype = "";
 		self.view_url = "";
 		self.source = "";
 		self.creator = "";
@@ -160,7 +160,7 @@ define(['bridget', 'knockout', 'text!./_collection-view.html', 'isotope', 'image
 			}
 			self.thumb = media[0] != null && media[0].Thumbnail != null && media[0].Thumbnail.withUrl != "null" ? media[0].Thumbnail.withUrl : null;
 			self.fullres = media[0] != null && media[0].Original != null && media[0].Original.url != "null" ? media[0].Original.url : null;
-			self.fullrestype = media[0] != null && media[0].Original != null && media[0].Original.type != "null" ? media[0].Original.type : null;
+//			self.fullrestype = media[0] != null && media[0].Original != null && media[0].Original.type != "null" ? media[0].Original.type : null;
 			
 			if(self.fullres){
 				self.rights=findResOrLit(media[0].Original.originalRights);
@@ -187,6 +187,8 @@ define(['bridget', 'knockout', 'text!./_collection-view.html', 'isotope', 'image
 		if (data !== undefined) {
 			self.load(data);
 		}
+		
+
 	}
 
 	function CViewModel(params) {
@@ -236,7 +238,71 @@ define(['bridget', 'knockout', 'text!./_collection-view.html', 'isotope', 'image
 			$('.action').removeClass('active');
 		};
 
+		self.vocabularies = ko.observableArray();
+		self.selvocabularies = ko.observableArray();
+		self.ner = ko.observableArray();
 		
+		$.ajax({
+         	"url": "/thesaurus/listThesauri",
+			"method": "get",
+			"contentType": "application/json",
+        	"success": function (data){
+           		for (x in data) {
+           			if (data[x].annotator != "null") {
+           				if (data[x].type === "thesaurus") {
+           					self.vocabularies.push(data[x]);
+           					self.selvocabularies.push(data[x].vocabulary);
+           				} else if (data[x].type === "ner") {
+           					self.ner.push(data[x]);
+           					self.selvocabularies.push(data[x].vocabulary);
+           					
+           				}
+           			}
+           		}
+        	}
+     	});
+		
+	    self.selectVocabulary = function(data, event){
+	    	if(event.target.checked){
+	    		var id = $(event.target).attr('value');
+	    		
+				for (var i = 0; i < self.selvocabularies().length; i++) {
+					if (self.selvocabularies()[i] === id) {
+						return true;
+					}
+				}
+				
+				self.selvocabularies.push(id);
+	    		
+	    	}
+	    	
+	    	if(!event.target.checked){
+	    		var id = $(event.target).attr('value');
+	    		
+				for (var i = 0; i < self.selvocabularies().length; i++) {
+					if (self.selvocabularies()[i] === id) {
+						self.selvocabularies.splice(i,1);
+						return true;
+					}
+				}
+	    		
+	    	}
+	    	
+//			for (var i = 0; i < self.selvocabularies().length; i++) {
+//				alert(self.selvocabularies()[i]);
+//			}
+	    	
+	    	return true;
+	    }
+
+	    self.sourceBind=function(e){
+	    	$("ul.list>li").css('display','block');
+	    	$('#vocsources').liveFilter('#f_search', 'li', {
+	    		  filterChildSelector: 'span'
+	    		});
+	    	
+	    }
+
 		var Term = function(data) {
 			var selfx = this;
 			
@@ -502,6 +568,7 @@ define(['bridget', 'knockout', 'text!./_collection-view.html', 'isotope', 'image
 					self.loadIndex();
 					
 					if (self.count() && self.count() > 0) {
+						self.loadInit();
 					} else {
 						loading(false);
 					}
@@ -887,7 +954,7 @@ define(['bridget', 'knockout', 'text!./_collection-view.html', 'isotope', 'image
 				tile += '<li><a data-toggle="tooltip" data-placement="top" title="Collect it" class="fa fa-download collectbutton" onclick="collect(\'' + record.dbId + '\',event);" ></a></li>';
 
 			}
-			tile += '<li><a data-toggle="tooltip" data-placement="top" title="Get similar" class="fa" onclick="similar(\'' + record.dbId + '\',event);" >S</a></li>';
+			tile += '<li><a data-toggle="tooltip" data-placement="top" title="Sort by similarity" class="fa fa-sort" onclick="similar(\'' + record.dbId + '\',event);" ></a></li>';
 			tile += '</ul>';
 
 			tile += "</div></div></div></div>";

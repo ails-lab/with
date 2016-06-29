@@ -84,6 +84,33 @@ public class AnnotationController extends Controller {
 		}
 		return ok(Json.toJson(annotation));
 	}
+	
+	public static Annotation addAnnotation(Annotation annotation) {
+		Annotation existingAnnotation = DB.getAnnotationDAO()
+				.getExistingAnnotation(annotation);
+
+		if (existingAnnotation == null) {
+			DB.getAnnotationDAO().makePermanent(annotation);
+			annotation.setAnnotationWithURI("/annotation/"
+					+ annotation.getDbId());
+			DB.getAnnotationDAO().makePermanent(annotation);
+			DB.getRecordResourceDAO().addAnnotation(
+					annotation.getTarget().getRecordId(), annotation.getDbId());
+		} else {
+			ArrayList<AnnotationAdmin> annotators = existingAnnotation.getAnnotators();
+			for (AnnotationAdmin a : annotators) {
+				if (a.getWithCreator().equals(WithController.effectiveUserDbId())) {
+					return existingAnnotation;
+				}
+			}
+			DB.getAnnotationDAO().addAnnotators(existingAnnotation.getDbId(),
+					annotation.getAnnotators());
+			annotation = DB.getAnnotationDAO()
+					.get(existingAnnotation.getDbId());
+		}
+		return annotation;
+	}
+	
 
 	public static Result getAnnotation(String id) {
 		try {

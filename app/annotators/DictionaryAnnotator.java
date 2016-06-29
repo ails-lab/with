@@ -17,12 +17,13 @@
 package annotators;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
+import org.bson.types.ObjectId;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
@@ -31,7 +32,18 @@ import org.elasticsearch.search.SearchHitField;
 import org.elasticsearch.search.SearchHits;
 
 import play.libs.Json;
+import model.annotations.Annotation;
+import model.annotations.Annotation.AnnotationAdmin;
+import model.annotations.Annotation.MotivationType;
+import model.annotations.bodies.AnnotationBodyTagging;
+import model.annotations.selectors.PropertyTextFragmentSelector;
+import model.annotations.targets.AnnotationTarget;
 import model.basicDataTypes.Language;
+import model.basicDataTypes.MultiLiteral;
+import annotators.struct.AnnotatedObject;
+import annotators.struct.AnnotationIndex;
+import annotators.struct.AnnotationValue;
+import annotators.struct.Span;
 
 import com.aliasi.chunk.Chunk;
 import com.aliasi.chunk.Chunking;
@@ -77,7 +89,10 @@ public class DictionaryAnnotator extends Annotator {
 		BoolQueryBuilder query = QueryBuilders.boolQuery();
 		query.must(QueryBuilders.termQuery("_type", Elastic.thesaurusResource));
 
-		SearchResponse res = es.execute(query, new SearchOptions(0, Integer.MAX_VALUE), new String[] {langField, altLangField, uriField, thesaurusField, enField} );
+		SearchOptions so = new SearchOptions(0, Integer.MAX_VALUE);
+		so.isPublic = false;
+		
+		SearchResponse res = es.execute(query, so, new String[] {langField, altLangField, uriField, thesaurusField, enField} );
 		SearchHits sh = res.getHits();
 
 		Map<String, ArrayList<ObjectNode>> map = new HashMap<>();
@@ -101,8 +116,8 @@ public class DictionaryAnnotator extends Annotator {
 
 				if (enLabel != null) {
 					cc.put("label-en", enLabel.getValue().toString());
-				} else {
-					cc.put("label-en", label.getValue().toString());
+//				} else {
+//					cc.put("label-en", label.getValue().toString());
 				}
 				
 				ArrayList<ObjectNode> list = map.get(labelx);
@@ -124,8 +139,8 @@ public class DictionaryAnnotator extends Annotator {
 
 					if (enLabel != null) {
 						cc.put("label-en", enLabel.getValue().toString());
-					} else {
-						cc.put("label-en", label.getValue().toString());
+//					} else {
+//						cc.put("label-en", label.getValue().toString());
 					}
 					
 					ArrayList<ObjectNode> list = map.get(labelx);
@@ -153,12 +168,12 @@ public class DictionaryAnnotator extends Annotator {
 
 	}
 	
-	public static void main(String[] args) throws Exception {
-		String text = "Have a look at these books and that book. This is a nice mother of pearl. I felt especially proud to receive my commission as an officer in front of my grandmother, The Queen. She has been an incredible role model to me over the years, so it was very special to have her present for my graduation. I know it was also a memorable moment for my fellow officers to take part in the Parade in front of The Queen as Head of the Armed Forces."; 
-		
-		DictionaryAnnotator ta = DictionaryAnnotator.getAnnotator(Language.EN, true);
-		ta.annotate(text, new HashMap<String, Object>());
-	}
+//	public static void main(String[] args) throws Exception {
+//		String text = "Have a look at these books and that book. This is a nice mother of pearl. I felt especially proud to receive my commission as an officer in front of my grandmother, The Queen. She has been an incredible role model to me over the years, so it was very special to have her present for my graduation. I know it was also a memorable moment for my fellow officers to take part in the Parade in front of The Queen as Head of the Armed Forces."; 
+//		
+//		DictionaryAnnotator ta = DictionaryAnnotator.getAnnotator(Language.EN, true);
+//		ta.annotate(text, new HashMap<String, Object>());
+//	}
 	
 	
 	@Override
@@ -172,14 +187,14 @@ public class DictionaryAnnotator extends Annotator {
 	}
 	
 	@Override
-	public List<Annotation> annotate(String text, Map<String, Object> properties) throws Exception {
+	public List<Annotation> annotate(String text, ObjectId withCreator, AnnotationTarget target, Map<String, Object> properties) throws Exception {
 		text = strip(text);
 		
 		List<Annotation> res = new ArrayList<>();
 		
 		Chunking chunking = tt.chunk(text);
 		
-		StanfordNLPAnnotator sann = StanfordNLPAnnotator.getAnnotator(lang);
+		NERAnnotator sann = NERAnnotator.getAnnotator(lang);
 		AnnotationIndex ai = sann.analyze(text);
 		
 	    for (Chunk chunk : chunking.chunkSet()) {
@@ -208,8 +223,46 @@ public class DictionaryAnnotator extends Annotator {
 	    	for (Iterator<JsonNode> iter = array.elements(); iter.hasNext();) {
 	    		JsonNode node = iter.next();
 	    		
-//	    		System.out.println(start + " " + end  + " " + node.get("vocabulary").asText() + " " + node.get("label-en").asText());
-	    		res.add(new Annotation(this.getClass(), start, end, 1.0f, node.get("uri").asText(), node.get("label-en").asText(), Annotator.Vocabulary.getVocabulary(node.get("vocabulary").asText())));
+	    		Annotation<AnnotationBodyTagging> ann = new Annotation<>();
+	    		
+	    		AnnotationBodyTagging annBody = new AnnotationBodyTagging();
+	    		annBody.setUri(node.get("uri").asText());
+	    		annBody.setUriVocabulary(AnnotationBodyTagging.Vocabulary.getVocabulary(node.get("vocabulary").asText()));
+	    		
+	    		MultiLiteral ml;
+	    		JsonNode enLabel = node.get("label-en");
+	    		if (enLabel != null) {
+	    			ml = new MultiLiteral(Language.EN, enLabel.asText());
+	    		} else {
+	    			ml = new MultiLiteral(lang, node.get("label").asText());
+	    		}
+	    		ml.fillDEF();
+	    		annBody.setLabel(ml);
+
+	    		AnnotationTarget annTarget = (AnnotationTarget) target.clone();
+	    		
+	    		PropertyTextFragmentSelector selector = (PropertyTextFragmentSelector)annTarget.getSelector();
+	    		selector.setStart(start);
+	    		selector.setEnd(end);
+
+	    		annTarget.setSelector(selector);
+
+	    		ArrayList<AnnotationAdmin> admins  = new ArrayList<>();
+	    		AnnotationAdmin admin = new Annotation.AnnotationAdmin();
+	    		admin.setGenerator(getName());
+	    		admin.setGenerated(new Date());
+	    		admin.setConfidence(-1.0f);
+	    		admin.setWithCreator(withCreator);
+	    		admin.setCreated(new Date());
+
+	    		admins.add(admin);
+	    		
+	    		ann.setBody(annBody);
+	    		ann.setTarget(annTarget);
+	    		ann.setAnnotators(admins);
+	    		ann.setMotivation(MotivationType.Tagging);
+
+	    		res.add(ann);
 	    	}
 	    }
 

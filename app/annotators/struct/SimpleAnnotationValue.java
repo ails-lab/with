@@ -14,7 +14,7 @@
  */
 
 
-package annotators;
+package annotators.struct;
 
 import annotators.struct.AnnotationValue;
 

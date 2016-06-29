@@ -14,23 +14,11 @@
  */
 
 
-package annotators;
+package annotators.struct;
 
-import java.util.ArrayList;
+import java.io.Serializable;
 
-public interface AnnotationRegexExpression {
+public abstract class AnnotationValue implements Serializable {
 
-	public boolean satisfies(AnnotatedObject ano);
-	
-	public boolean satisfies(AnnotatedObject ano, ArrayList<AnnotationRegexResult> result);
-	
-	public boolean satisfies2(AnnotatedObject ano, AnnotationResult result);
-	
-	public ArrayList<String> getReturnElements();
-	
-	public boolean isStart();
-	
-	public boolean isEnd();
-
-
+	public abstract Object getValue();
 }

@@ -41,6 +41,7 @@ PUT		/record/:id								controllers.RecordResourceController.editRecordResource(
 GET		/annotation/:id							controllers.AnnotationController.getAnnotation(id)
 DELETE	/annotation/:id							controllers.AnnotationController.deleteAnnotation(id)
 
+
 # Collection Controller
 #GET 	 /collection/list 						controllers.CollectionObjectController.list(directlyAccessedByUserOrGroup: play.libs.F.Option[controllers.parameterTypes.MyPlayList], recursivelyAccessedByUserOrGroup: play.libs.F.Option[controllers.parameterTypes.MyPlayList], creator: play.libs.F.Option[String], isPublic: play.libs.F.Option[java.lang.Boolean], isExhibition: play.libs.F.Option[java.lang.Boolean], collectionHits:Boolean ?= false, offset: Integer ?=0, count: Integer ?=10)
 GET      /collection/list						controllers.CollectionObjectController.list(directlyAccessedByUserOrGroup: play.libs.F.Option[controllers.parameterTypes.MyPlayList], creator: play.libs.F.Option[String],  isExhibition: play.libs.F.Option[java.lang.Boolean], collectionHits:Boolean ?= false, offset: Integer ?=0, count: Integer ?=10, profile: String ?="BASIC", locale: play.libs.F.Option[java.lang.String])
@@ -151,6 +152,7 @@ GET	/api/idxthes									controllers.ReindexController.reindexAllThesaurus()
 POST	/thesaurus/addTerm	        			    controllers.ThesaurusController.addThesaurusTerm()
 DELETE  /thesaurus/deleteThesaurus/:name	        controllers.ThesaurusController.deleteThesaurus(name)
 GET 	/thesaurus/getTerm		   					controllers.ThesaurusController.getThesaurusTerm(uri: String)
+GET 	/thesaurus/listThesauri		   				controllers.ThesaurusController.listThesauri()
 
 #Thesaurus gui
 POST	/collection/:id/facets 	        			controllers.thesaurus.CollectionIndexController.getCollectionFacets(id)
@@ -158,9 +160,10 @@ POST	/collection/:id/selectionlist		   			controllers.CollectionObjectController
 GET 	/collection/:id/similarlist		   			controllers.CollectionObjectController.similarListRecordResources(id, itemid: java.lang.String, format: String ?="noContent", start: Integer ?=0, count: Integer ?=10)
 POST	/collection/:id/keywords 	        			controllers.thesaurus.CollectionIndexController.getCollectionKeywords(id)
 
-GET /source/dbpedia/lookup	controllers.DBPediaController.dbpediaLookup(type: java.lang.String, query: java.lang.String, start: Integer ?=0, count: Integer ?=10)
+GET     /source/dbpedia/lookup						controllers.DBPediaController.dbpediaLookup(type: java.lang.String, query: java.lang.String, start: Integer ?=0, count: Integer ?=10)
 
 #Annotations
-GET		/annotate/:id								controllers.RecordResourceController.annotateRecordResource(id)
+GET		/record/:id/listAnnotations				    controllers.RecordResourceController.getAnnotations(id)
+GET		/record/:id/annotate						controllers.RecordResourceController.annotateRecordResource(id)
 
 

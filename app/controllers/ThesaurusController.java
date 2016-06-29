@@ -35,6 +35,7 @@ import model.annotations.ContextData;
 import model.annotations.ContextData.ContextDataBody;
 import model.annotations.ContextData.ContextDataTarget;
 import model.annotations.ContextData.ContextDataType;
+import model.annotations.bodies.AnnotationBodyTagging;
 import model.basicDataTypes.Language;
 import model.basicDataTypes.MultiLiteral;
 import model.basicDataTypes.ProvenanceInfo;
@@ -70,6 +71,7 @@ import com.aliasi.dict.MapDictionary;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
@@ -241,4 +243,28 @@ public class ThesaurusController extends Controller {
 		}
 	}
 
+	public static Result listThesauri() {
+		ObjectNode result = Json.newObject();
+
+		try {
+			ArrayNode aresult = Json.newObject().arrayNode();
+
+			for (AnnotationBodyTagging.Vocabulary voc : AnnotationBodyTagging.Vocabulary.values()) {
+				
+				ObjectNode json = Json.newObject();
+				json.put("vocabulary", voc.getName());
+				json.put("label", voc.getLabel());
+				json.put("annotator", voc.getAnnotator() != null ? "true" : "false");
+				json.put("type", voc.getType() != null ? voc.getType().toString().toLowerCase() : "null");
+				
+				aresult.add(json);
+			}
+			
+			return ok(Json.toJson(aresult));
+
+		} catch (Exception e) {
+			result.put("error", e.getMessage());
+			return internalServerError(result);
+		}
+	}
 }

@@ -126,33 +126,34 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 				var id = data.view_url.split("_")[2];
 				$('#mediadiv').html('<div><iframe id="mediaplayer" src="http://archives.crem-cnrs.fr/archives/items/'+id+'/player/346x130/"height="250px scrolling="no"" width="361px"></iframe></div>');
 			} else {
-			if (data.mediatype != null) {
-				//if (data.fullrestype == "VIDEO") {
-				if (data.mediatype == "VIDEO") {
-					self.vtype = "MEDIA";
-					if(!isRelated) {
-						$('#mediadiv').append('<video id="mediaplayer" autoplay="true" controls width="576" height="324"><source src="' + self.fullres() + '" type="video/mp4">Your browser does not support HTML5</video>');
-					}
-				//} else if (data.fullrestype == "AUDIO") {
-				} else if (data.mediatype == "AUDIO") {
-					self.vtype = "MEDIA";
-					if(!isRelated) {
-						$('#mediadiv').append('<div><audio id="mediaplayer" autoplay="true" controls width="576" height="324"><source src="' + self.fullres() + '" type="audio/mpeg">Your browser does not support HTML5</audio></div>');
+				if (data.mediatype != null) {
+					//if (data.fullrestype == "VIDEO") {
+					if (data.mediatype == "VIDEO") {
+						self.vtype = "MEDIA";
+						if(!isRelated) {
+							$('#mediadiv').append('<video id="mediaplayer" autoplay="true" controls width="576" height="324"><source src="' + self.fullres() + '" type="video/mp4">Your browser does not support HTML5</video>');
+						}
+					//} else if (data.fullrestype == "AUDIO") {
+					} else if (data.mediatype == "AUDIO") {
+						self.vtype = "MEDIA";
+						if(!isRelated) {
+							$('#mediadiv').append('<div><audio id="mediaplayer" autoplay="true" controls width="576" height="324"><source src="' + self.fullres() + '" type="audio/mpeg">Your browser does not support HTML5</audio></div>');
+						}
 					}
 				}
+				
+				if (data.mediatype == null || (data.mediatype != null && data.mediatype == "IMAGE")) {
+					var img = new Image();
+					img.onload = function() {
+						$('#mediadiv').html("<svg style='height:100%;width:100%;max-height:" + img.height + "px; max-width:" + img.width + "px;' viewBox='0 0 " + img.width + " " + img.height + "' preserveAspectRatio='xMidYMin meet' version='1.1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink'>" +
+							                    "<image width='" + img.width + "' height='" + img.height + "' xlink:href='" + self.fullres() + "'/>" +
+				         		  	        "</svg>");
+						self.vtype = "IMAGE";
+					};
+					img.src = self.fullres();
+	
+				} 			
 			}
-			
-			if (data.fullrestype == null || (data.fullrestype != null && data.fullrestype == "IMAGE")) {
-				var img = new Image();
-				img.onload = function() {
-					$('#mediadiv').html("<svg style='height:100%;width:100%;max-height:" + img.height + "px; max-width:" + img.width + "px;' viewBox='0 0 " + img.width + " " + img.height + "' preserveAspectRatio='xMidYMin meet' version='1.1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink'>" +
-						                    "<image width='" + img.width + "' height='" + img.height + "' xlink:href='" + self.fullres() + "'/>" +
-			         		  	        "</svg>");
-					self.vtype = "IMAGE";
-				};
-				img.src = self.fullres();
-
-			} 			
 			
 			helper_thumb = self.calcOnErrorThumbnail();
 		};
@@ -174,7 +175,8 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 				self.loading(true);
 		           $.ajax({
 						type    : "get",
-						url     : "/annotate/" + self.recordId,
+						//url     : "/annotate/" + self.recordId,
+						url     : "/record/" + self.recordId + "/listAnnotations",
 						contentType: "application/json",
 						dataType: "json",
 						success : function(result) {
@@ -191,23 +193,56 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 		
 		self.getAnnotationLabel = function (data) {
 			if (data.label == undefined) {
-				return data.vocabulary + " : " + data.uri;
+				return self.beautifyVocabulary(data.vocabulary) + " : " + data.uri;
 			} else {
-				return data.vocabulary + " : " + data.label;
+				for (x in data.label) {
+					return self.beautifyVocabulary(data.vocabulary) + " : " + data.label[x];
+					break;
+				}
 			}
 		}
 
+		self.beautifyVocabulary = function(voc) {
+			switch (voc) {
+			case "DBPEDIA_RESOURCE" : 
+				return "dbr";
+			case "DBPEDIA_ONTOLOGY" : 
+				return "dbo";
+			case "GEMET" : 
+				return "gemet";
+			case "AAT" : 
+				return "aat";
+			case "EUSCREENXL" : 
+				return "euscreenxl";
+			case "FASHION" : 
+				return "fashion";
+			case "HORNBOSTEL_SACHS" : 
+				return "hs";
+			case "MIMO" : 
+				return "mimo";
+			case "PHOTOGRAPHY" : 
+				return "photography";
+			case "PARTAGE_PLUS" : 
+				return "partageplus";
+			case "WORDNET30" : 
+				return "wordnet";
+			case "WORDNET31" : 
+				return "wordnet";
+			case "NERD" : 
+				return "nerd";
+			default:
+				return voc
+			}
+		}
+		
 		var fieldMap = { label: "title"};
 		
-		self.parseAnnotations = function(data){
-			
-			var anns = data.annotations;
+		self.parseAnnotations = function(anns){
 			
 			var annotations = new Object();
 			
-			for (x in anns) {
-				var location = anns[x].target.selector.value;
-				var property = location.substring(2,location.indexOf("&t="));
+			for (var i = 1; i < anns.length; i++) {
+				var property = anns[i].target.selector.property;
 				if (fieldMap[property] != undefined) {
 					property = fieldMap[property];
 				}
@@ -216,11 +251,7 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 					annotations[property] = [];
 				}
 				
-				for (z in anns[x].body) {
-					if (z == "@id") {
-						annotations[property].push(anns[x].body[z]);
-					}
-				}
+				annotations[property].push(anns[i].body.uri);
 			}
 			
 			for (property in annotations) {
@@ -232,21 +263,14 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 			
 			var count = 0;
 			
-			for (x in anns) {
-				var uri = "";
-
-				for (z in anns[x].body) {
-					if (z == "@id") {
-						uri = anns[x].body[z];
-					}
-				}
-				
-				var label = anns[x].body.label;
-				var vocabulary = anns[x].body.vocabulary;
+			for (var i = 1; i < anns.length; i++) {
+				var uri = anns[i].body.uri;
+				var label = anns[i].body.label;
+				var vocabulary = anns[i].body.uriVocabulary;
 				
 				var found = false; 
-				for (var i = 0; i < self.annotationsKeys().length; i++) {
-					if (self.annotationsKeys()[i].uri == uri) {
+				for (var j = 0; j < self.annotationsKeys().length; j++) {
+					if (self.annotationsKeys()[j].uri == uri) {
 						found = true;
 						break;
 					}
@@ -254,23 +278,24 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 				
 				if (!found) {
 					self.annotationsKeys.push({uri: uri, label: label, vocabulary: vocabulary, id: "ann-key-" + count});
-
 					self.annotationIndex[uri] = count++;
 				}
 
-				var location = anns[x].target.selector.value;
-				var property = location.substring(2,location.indexOf("&t="));
+//				alert(x);
+//				alert(uri);
+				var property = anns[i].target.selector.property;
+//				var property = location.substring(2,location.indexOf("&t="));
 				if (fieldMap[property] != undefined) {
 					property = fieldMap[property];
 				}
 
-				var position = location.substring(location.indexOf("&t=") + 3);
-				var sp = parseInt(position.substring(0, position.indexOf(",")));
-				var ep = parseInt(position.substring(position.indexOf(",") + 1));
+//				var position = location.substring(location.indexOf("&t=") + 3);
+				var sp = anns[i].target.selector.start;
+				var ep = anns[i].target.selector.end;
 				
 				found = false;
-				for (var i = 0; i < properties.length; i++) {
-					if (properties[i] == property) {
+				for (var j = 0; j < properties.length; j++) {
+					if (properties[j] == property) {
 						found = true;
 						break;
 					}
@@ -662,8 +687,7 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 							likes: usage.likes,
 							collected: usage.collected,
 							collectedIn:backendRecord.collectedIn,
-							fullrestype: media[0] != null && media[0].Original != null
-								&& media[0].Original.type != "null" ? media[0].Original.type : "",
+							//fullrestype: media[0] != null && media[0].Original != null && media[0].Original.type != "null" ? media[0].Original.type : "",
 							nextItemToAnnotate: backendRecord.nextItemToAnnotate,
 							annotations: backendRecord.annotations
 				  };

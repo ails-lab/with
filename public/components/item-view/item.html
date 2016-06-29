@@ -67,6 +67,7 @@
                             <li><a href="#related" title="related" data-toggle="tab" data-bind="click: record().findsimilar, clickBubble: true">Related</a></li>
                             <li data-bind="visible: record().recordId!='-1'"><a href="#comment" title="comments" data-toggle="tab">Comments</a></li>
                             <li data-bind="visible: record().recordId!='-1'"><a href="#share" title="" data-toggle="tab">Share</a></li>
+                            <li data-bind="visible: record().recordId!='-1'"><a href="#annotations" title="annotations" data-toggle="tab" data-bind="click: record().annotate, clickBubble: true">Annotations</a></li>
                           </ul>
                           <!-- panes-->
                           <div class="tab-content">
@@ -161,6 +162,81 @@
                         		<li><a data-bind="attr: {href:record().mail}" title="email item"><img src="img/ui/ic-mail.png" alt="facebook"></a></li>
                       		</ul>
                             </div>
+                            
+                            							<div id="annotations" class="tab-pane">
+                                <!-- title-->
+                              <div class="meta">
+                                <div class="list" data-bind="if: record().title">
+                                  <div class="title">
+                                    <div class="titlewrap">Title</div>
+                                  </div>
+                                  <div class="field newlines" id="ann-title" data-bind="html:record().title">
+                                  </div>
+                                </div>
+
+                                <!-- description-->
+                              <div class="meta">
+                                <div class="list" data-bind="if: record().description">
+                                  <div class="title">
+                                    <div class="titlewrap">Description</div>
+                                  </div>
+                                  <div class="field newlines" id="ann-description" data-bind="html:record().description">
+                                  </div>
+                                </div>
+                                <!-- 
+                                <div class="list"  data-bind="if: record().dataProvider">
+                                  <div class="title">
+                                    <div class="titlewrap">Provider</div>
+                                  </div>
+                                  <div class="field" data-bind="text:record().dataProvider"></div>
+                                </div>
+                                
+                                <div class="list" data-bind="if: record().creator">
+                                  <div class="title">
+                                    <div class="titlewrap">Creator</div>
+                                  </div>
+                                  <div class="field" data-bind="text:record().creator"></div>
+                                </div>
+                                <div class="list" data-bind="if: record().rights">
+                                  <div class="title">
+                                    <div class="titlewrap">Rights</div>
+                                  </div>
+                                  <div class="field" data-bind="text:record().rights"></div>
+                                </div>
+                                 <div class="list" data-bind="if: record().mediatype && record().mediatype!=''">
+                                  <div class="title">
+                                    <div class="titlewrap">Media Type</div>
+                                  </div>
+                                  <div class="field" data-bind="text:record().mediatype"></div>
+                                </div>
+                                 <div class="list" data-bind="if: record().recordId!='-1'">
+                                  <div class="title">
+                                    <div class="titlewrap">Item url</div>
+                                  </div>
+                                  <div class="field"><a data-bind="text: record().loc() , attr: { href: record().loc()}"></a></div>
+                                </div>
+                                <div class="list">
+                                  <div class="title">
+                                    <div class="titlewrap">Record Source</div>
+                                  </div>
+                                  <div class="field" data-bind="text:record().source"></div>
+                                </div> -->
+                                
+                                <div class="list">
+                                  <div class="title">
+                                    <div class="titlewrap">Tags</div>
+                                  </div>
+                                  <!-- ko foreach: record().annotationsKeys -->
+                                  <div class="term">
+                                    <a target="_blank" data-bind="attr: {href: uri, title: uri}, css: {'glyphicon glyphicon-link': true}"></a>&nbsp;
+                                    <a title="Show hierarchy" data-bind="css: {'glyphicon glyphicon-leaf': true}, event: {click: function(){$parent.record().showHierarchy(uri);}} "></a>&nbsp;
+                                  	<a class="ann-resource" href="#" data-bind="attr: {id: id}, text:$parent.record().getAnnotationLabel($data), event: {click: function(){$parent.record().annShow(uri);}}"></a>
+                                  </div>
+                                 <!-- /ko --> 
+                                  </div>
+                              </div>
+							</div>
+                            
                           </div>
                         </div>
                       </div>

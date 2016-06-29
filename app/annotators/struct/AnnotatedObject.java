@@ -14,7 +14,7 @@
  */
 
 
-package annotators;
+package annotators.struct;
 
 import java.io.Serializable;
 import java.util.HashMap;

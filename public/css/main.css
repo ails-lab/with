@@ -2741,6 +2741,32 @@ body div[role='main'] .wrapper main section.project .list-head .list-control .de
 body div[role='main'] .wrapper main section.favorite .list-head .list-control .detail-control.single {
   border-radius: 20px !important;
 }
+body div[role='main'] .wrapper main section.collection .list-head .list-control .thesaurus,
+body div[role='main'] .wrapper main section.exhibition .list-head .list-control .thesaurus,
+body div[role='main'] .wrapper main section.project .list-head .list-control .thesaurus,
+body div[role='main'] .wrapper main section.favorite .list-head .list-control .thesaurus {
+  padding: 5px 15px 5px 15px !important;
+  border-radius: 0 !important;
+}
+body div[role='main'] .wrapper main section.collection .list-head .list-control .thesaurus.single,
+body div[role='main'] .wrapper main section.exhibition .list-head .list-control .thesaurus.single,
+body div[role='main'] .wrapper main section.project .list-head .list-control .thesaurus.single,
+body div[role='main'] .wrapper main section.favorite .list-head .list-control .thesaurus.single {
+  border-radius: 20px !important;
+}
+body div[role='main'] .wrapper main section.collection .list-head .list-control .annotate-col,
+body div[role='main'] .wrapper main section.exhibition .list-head .list-control .annotate-col,
+body div[role='main'] .wrapper main section.project .list-head .list-control .annotate-col,
+body div[role='main'] .wrapper main section.favorite .list-head .list-control .annotate-col {
+  padding: 5px 15px 5px 15px !important;
+  border-radius: 0 !important;
+}
+body div[role='main'] .wrapper main section.collection .list-head .list-control .annotate-col.single,
+body div[role='main'] .wrapper main section.exhibition .list-head .list-control .annotate-col.single,
+body div[role='main'] .wrapper main section.project .list-head .list-control .annotate-col.single,
+body div[role='main'] .wrapper main section.favorite .list-head .list-control .annotate-col.single {
+  border-radius: 20px !important;
+}
 body div[role='main'] .wrapper main section.collection .list-head .list-control .deleteaction,
 body div[role='main'] .wrapper main section.exhibition .list-head .list-control .deleteaction,
 body div[role='main'] .wrapper main section.project .list-head .list-control .deleteaction,
@@ -5076,6 +5102,7 @@ body div[role='main'] .wrapper .search .searchbar .settings.active a {
 body div[role='main'] .wrapper .search .searchbar .settings.active .searchsetting {
   display: block;
 }
+
 body div[role='main'] .wrapper .search .searchbar a.close {
   opacity: 1;
   filter: alpha(opacity=100);
@@ -7161,6 +7188,75 @@ body div[role='main'] section.action.searchfilter .wraps .tab-content ul li inpu
 body div[role='main'] section.action.searchfilter .wraps .tab-content ul li a {
   color: #4f7979;
 }
+
+
+
+body div[role='main'] section.action.annotate-col .wraps {
+  border-top: 1px solid #ccc;
+  margin-top: 10px;
+}
+body div[role='main'] section.action.annotate-col .wraps:before,
+body div[role='main'] section.action.annotate-col .wraps:after {
+  content: " ";
+  display: table;
+}
+body div[role='main'] section.action.annotate-col .wraps:after {
+  clear: both;
+}
+body div[role='main'] section.action.annotate-col .wraps .nav-tabs {
+  width: 33%;
+  float: left;
+  border-right: 1px solid #ccc;
+  border-bottom: 0px;
+  padding: 20px 0 20px 0;
+}
+body div[role='main'] section.action.annotate-col .wraps .nav-tabs li {
+  display: block;
+  width: 100%;
+}
+body div[role='main'] section.action.annotate-col .wraps .nav-tabs li a {
+  display: block;
+  color: #888;
+  padding-left: 10px;
+  font-size: 1.3rem;
+  margin: 0;
+}
+body div[role='main'] section.action.annotate-col .wraps .nav-tabs li.active a {
+  background: #dedede;
+  color: #555;
+}
+body div[role='main'] section.action.annotate-col .wraps .tab-content {
+  width: 67%;
+  float: left;
+}
+body div[role='main'] section.action.annotate-col .wraps .tab-content .tab-pane {
+  padding: 20px 0 0 20px;
+}
+body div[role='main'] section.action.annotate-col .wraps .tab-content ul {
+  margin: 0;
+  padding: 0;
+}
+body div[role='main'] section.action.annotate-col .wraps .tab-content ul li {
+  list-style-type: none;
+  margin-bottom: 5px;
+}
+body div[role='main'] section.action.annotate-col .wraps .tab-content ul li label {
+  display: block;
+  cursor: pointer;
+}
+body div[role='main'] section.action.annotate-col .wraps .tab-content ul li label span {
+  font-weight: normal;
+  color: #777;
+}
+body div[role='main'] section.action.annotate-col .wraps .tab-content ul li input {
+  float: right;
+}
+body div[role='main'] section.action.annotate-col .wraps .tab-content ul li a {
+  color: #4f7979;
+}
+
+
+
 body div[role='main'] section.action.editsection .sectionside {
   position: relative;
 }

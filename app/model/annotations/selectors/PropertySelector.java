@@ -14,11 +14,27 @@
  */
 
 
-package annotators;
+package model.annotations.selectors;
 
-import java.io.Serializable;
 
-public abstract class AnnotationValue implements Serializable {
+public class PropertySelector extends SelectorType {
+	
+	private String property;
 
-	public abstract Object getValue();
+	public String getProperty() {
+		return property;
+	}
+
+	public void setProperty(String property) {
+		this.property = property;
+	} 
+	
+	@Override
+    public Object clone() throws CloneNotSupportedException {
+		PropertySelector c = (PropertySelector)super.clone();
+		c.property = property;
+		
+		return c;
+    }
+
 }

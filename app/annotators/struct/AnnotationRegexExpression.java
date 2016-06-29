@@ -14,11 +14,23 @@
  */
 
 
-package model.annotations.selectors;
+package annotators.struct;
 
-public abstract class SelectorType implements Cloneable {
+import java.util.ArrayList;
 
-	public Object clone() throws CloneNotSupportedException {
-		return super.clone();
-	}
+public interface AnnotationRegexExpression {
+
+	public boolean satisfies(AnnotatedObject ano);
+	
+	public boolean satisfies(AnnotatedObject ano, ArrayList<AnnotationRegexResult> result);
+	
+	public boolean satisfies2(AnnotatedObject ano, AnnotationResult result);
+	
+	public ArrayList<String> getReturnElements();
+	
+	public boolean isStart();
+	
+	public boolean isEnd();
+
+
 }

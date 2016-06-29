@@ -88,8 +88,9 @@ public class CollectionIndexController extends WithResourceController	{
 			
 //			MatchQueryBuilder query = QueryBuilders.matchQuery("collectedIn.collectionId", id);
 			QueryBuilder query = getIndexCollectionQuery(new ObjectId(id), json);
-
-			SearchResponse res = es.execute(query, new SearchOptions(0, Integer.MAX_VALUE), indexFacetFields);
+			
+			SearchOptions so = new SearchOptions(0, Integer.MAX_VALUE);
+			SearchResponse res = es.execute(query, so, indexFacetFields);
 			SearchHits sh = res.getHits();
 
 			List<String[]> list = new ArrayList<>();
@@ -125,9 +126,10 @@ public class CollectionIndexController extends WithResourceController	{
 			ObjectId collectionDbId = new ObjectId(id);
 			Result response = errorIfNoAccessToCollection(Action.READ, collectionDbId);
 			
-			if (!response.toString().equals(ok().toString()))
+			System.out.println("************************D   ");
+			if (!response.toString().equals(ok().toString())) {
 				return response;
-			else {
+			} else {
 				return ok(tf.toJSON(Language.EN));
 			}
 		} catch (Exception e) {

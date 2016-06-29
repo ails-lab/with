@@ -37,8 +37,10 @@
 				                </div>
 								<!-- control-->
 								<div class="list-control">
-									<a class="fa thesaurus" data-toggle="tooltip" data-placement="top" title="Show Thesauri"><span class="text"><img src="img/ui/ic-setting.png" alt="thesaurus"></span></a>
 									<a data-bind="visible: isLogged() && !isFavorites() && (access() == 'WRITE' || access() == 'OWN')" data-toggle="tooltip" data-placement="top" title="Edit Collection" class="fa fa-pencil editaction"></a>
+									<!-- <a data-bind="visible: isLogged() && !isFavorites() && (access() == 'WRITE' || access() == 'OWN')" data-toggle="tooltip" data-placement="top" title="Annotate" class="fa fa-tag annotate-col" ></a>-->
+									<a data-toggle="tooltip" data-placement="top" title="Annotate" class="fa fa-tag annotate-col" ></a>
+									<a data-toggle="tooltip" data-placement="top" title="Show Thesauri" class="fa fa-cog thesaurus" ></a>
 									<a data-toggle="tooltip" data-placement="top" title="API Calls" class="fa fa-rss detail-control"></a>
 									<a data-bind="visible: isLogged() && !isFavorites() && (access() == 'WRITE' || access() == 'OWN'), click: deleteMyCollection"  data-toggle="tooltip" data-placement="top" title="Delete Collection" class="fa fa-trash deleteaction"></a>
 								</div>
@@ -206,13 +208,55 @@
 	        	<input id="term_tags" type="text" data-role="tagsinput">
 	            <span data-bind="text: indexCount"></span>
 	        </div>
-
+<!--
 			<div class="searchbox">
                  <input autocomplete="off" data-bind="value: keyword, event: {change: addKeyword}" placeholder="Keywords" class="searchinput" type="text">
             </div>
-
+-->
 			<div class="button-group"><a class="btn-green cancel" data-bind="click: closeThesaurus">Close</a></div>			
 			</div>
+</section>
+
+
+<section class="action annotate-col">
+	<div class="action-header">
+		<div class="title">Annotate</div>
+	</div>
+	<div class="action-body">
+	<!-- wrap-->
+    <div class="wraps">
+    	<!-- tabs-->
+        <!-- tabs-->
+        <ul role="tablist" class="nav nav-tabs">
+  			 <li class="active"><a href="#vocsources" data-toggle="tab" data-bind="event:{click: sourceBind}">Vocabulary Lookup</a></li>
+  			 <li><a href="#nersources" data-toggle="tab" data-bind="event:{click: sourceBind}">Named Entity Extraction</a></li>
+		</ul>
+        <!-- panes-->
+        <div class="tab-content">
+        	<div class="tab-pane active" id="vocsources">
+				<ul class="vocabularies list">
+					<!-- ko foreach: vocabularies -->
+					<li><label>
+				    	<input type="checkbox" data-bind="checked: true, value: $data.vocabulary, click: $parent.selectVocabulary"/>
+				    	<span data-bind ="text: $data.label"></span>
+				    </label></li>
+				    <!--  /ko -->
+				</ul>
+			</div>
+			<div class="tab-pane active" id="nersources">
+				<ul class="vocabularies list">
+					<!-- ko foreach: ner -->
+					<li><label>
+				    	<input type="checkbox" data-bind="checked: true, value: $data.vocabulary, click: $parent.selectVocabulary"/>
+				    	<span data-bind ="text: $data.label"></span>
+				    </label></li>
+				    <!--  /ko -->
+				</ul>
+			</div>
+		</div>
+	</div>
+	<div class="button-group"><a class="btn-green ok" data-bind="click: annotate">Annotate</a><a class="btn-green cancel" data-bind="click: closeVocabularies">Close</a></div>
+</div>
 </section>
 						
 					</section>
