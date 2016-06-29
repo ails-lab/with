@@ -38,7 +38,7 @@ public class ProvenanceInfo {
 		NLA("NLA","National Library of Australia"),
 		WITHin("WITHin"),
 		DBPedia("DBPedia", "DBPedia"),
-		Rijksmuseum("Rijksmuseum","Rijksmuseum"), Historypin("Historypin");
+		Rijksmuseum("Rijksmuseum","Rijksmuseum"), Historypin("Historypin"), WITHinASpace("WITHinASpace");
 
 
 		private final String text;

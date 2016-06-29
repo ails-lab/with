@@ -50,7 +50,7 @@ define(['knockout', 'text!./item.html', 'app', 'knockout-else', 'smoke'], functi
 		};
 		self.nextItemToAnnotate = ko.observable(null);
 		self.annotations = ko.observableArray([]);
-		self.myAnnotations = ko.pureComputed(function () {
+		self.myAnnotations = ko.computed(function () {
 			return self.annotations.filter(function(i) {
 				for (j = 0, len = i.annotators.length; j < len; j++) { 
 					if (i.annotators[j].withCreator == app.currentUser._id()) {
@@ -60,7 +60,7 @@ define(['knockout', 'text!./item.html', 'app', 'knockout-else', 'smoke'], functi
 				return false;
 		    });
 		});
-		self.otherAnnotations = ko.pureComputed(function () {
+		self.otherAnnotations = ko.computed(function () {
 			return self.annotations.filter(function(i) {
 				var my = false;
 				for (j = 0, len = i.annotators.length; j < len; j++) { 
@@ -90,19 +90,6 @@ define(['knockout', 'text!./item.html', 'app', 'knockout-else', 'smoke'], functi
 			self.mediatype=data.mediatype;
 			self.description=data.description;
 			self.source(data.source);
-			if(self.source() && self.source()=="Europeana"){
-				$("span.pnd-resource").show();
-				$("div.pnd-resource").show();
-				var pundit_url=self.view_url().replace('http://www.europeana.eu/portal/record/','http://data.europeana.eu/item/');
-				pundit_url=pundit_url.replace('.html','');
-				$("span.pnd-resource").attr('about',pundit_url);
-				$("div.pnd-resource").attr('about',pundit_url);
-				dispatchDocumentEvent('Pundit.loadAnnotations');
-				dispatchDocumentEvent('Pundit.forceCompileButton');				
-			}
-			else{$("span.pnd-resource").hide();
-				$("div.pnd-resource").hide();
-				}
 			self.creator=data.creator;
 			self.provider=data.provider;
 			self.dataProvider=data.dataProvider;
@@ -127,6 +114,7 @@ define(['knockout', 'text!./item.html', 'app', 'knockout-else', 'smoke'], functi
 			if (data.annotations !== undefined)
 				self.annotations(data.annotations);
 			self.loading(false);
+			$("audio").trigger("pause");
 			var vid = document.getElementById("mediaplayer");
 			if (vid != null) {
 				vid.parentNode.removeChild(vid);
@@ -153,6 +141,19 @@ define(['knockout', 'text!./item.html', 'app', 'knockout-else', 'smoke'], functi
 			}
 			console.log(helper_thumb);
 			helper_thumb = self.calcOnErrorThumbnail();
+			if(self.source() && self.source()=="Europeana" && self.recordId != '-1'){
+				$("span.pnd-resource").show();
+				$("div.pnd-resource").show();
+				var pundit_url=self.view_url().replace('http://www.europeana.eu/portal/record/','http://data.europeana.eu/item/');
+				pundit_url=pundit_url.replace('.html','');
+				$("span.pnd-resource").attr('about',pundit_url);
+				$("div.pnd-resource").attr('about',pundit_url);
+				dispatchDocumentEvent('Pundit.loadAnnotations');
+				dispatchDocumentEvent('Pundit.forceCompileButton');				
+			}
+			else{$("span.pnd-resource").hide();
+				$("div.pnd-resource").hide();
+				}
 		};
 		
 		self.findsimilar=function(){
@@ -179,8 +180,8 @@ define(['knockout', 'text!./item.html', 'app', 'knockout-else', 'smoke'], functi
 					if(data!=null) {
 						for (var i in data) {
 							var result = data[i];
-							 if(result !=null){		
-						        var record = new Record(formatRecord(result), true);
+							 if(result !=null){
+								var record = new Record(formatRecord(result), true);
 						        if(record.thumb && record.thumb.length>0 && record.externalId!=self.externalId)
 							       items.push(record);
 							}
@@ -219,7 +220,7 @@ define(['knockout', 'text!./item.html', 'app', 'knockout-else', 'smoke'], functi
 							for (var i in data) {
 								var result = data[i];
 								 if(result !=null){
-							        var record = new Record(formatRecord(result), true);
+									var record = new Record(formatRecord(result), true);
 							        if(record.thumb && record.thumb.length>0 && record.externalId!=self.externalId)
 								       items.push(record);
 								}
@@ -353,43 +354,47 @@ define(['knockout', 'text!./item.html', 'app', 'knockout-else', 'smoke'], functi
 		    		var graph = punditAnnotation.graph['http://purl.org/pundit/as/graph/body-'+annotationId];
 		    		var externalId = Object.keys(graph)[0];
 		    		var annotationInfo = graph[externalId];
-		    		var tagType = Object.keys(annotationInfo)[0];
-		    		var uriInfo = annotationInfo[tagType];
-		    		var uri = uriInfo[0].value;
-		    		var itemsInfo = punditAnnotation.items[uri];
-		    		var labelInfo = itemsInfo['http://www.w3.org/2000/01/rdf-schema#label'];
-		    		var label = labelInfo[0].value;
-		    		console.log(withAnnotation);
-		    		withAnnotation['target'].externalId = externalId;
-		    		withAnnotation['body'].uri = uri;
-		    		withAnnotation['body'].tagType = tagType;
-		    		withAnnotation['body'].label = {'default' : [ label ]};
-		    		console.log(JSON.stringify(withAnnotation));
-		    		$.ajax({
-		    			url : '/record/annotation',
-				    	method : "POST",
-				    	contentType : "application/json",
-				    	data     : JSON.stringify(withAnnotation),
-						success : function(result) {
-							//check if duplicate
-							var index1 = self.arrayFirstIndexOf(ko.toJS(self.record().annotations), function (annotation) {
-								return annotation.dbId === result.dbId;
-							});
-							if (index1 >= 0)
-								self.record().annotations.splice(index1, 1);
-							self.record().annotations.push(result);
-							self.batchAnnotationCount++;
-							self.recordSimple = ko.toJS(self.record);
-							self.recordSimple.nextItemToAnnotate = null;
-							var index = self.arrayFirstIndexOf(self.batchItemsAnnotated, function (item) {
-								return item.recordId === self.recordSimple.recordId;
-							});
-							if (index1 >= 0) 
-								self.batchItemsAnnotated.splice(index, 1);
-							self.batchItemsAnnotated.push(self.recordSimple);
-							updateRecordAnnotations(self.record().recordId, self.record().annotations());
-						}
-		    		});
+		    		var tagTypes = Object.keys(annotationInfo);
+		    		for (i in tagTypes) {
+			    		var tagType = tagTypes[i];
+			    		var uriInfo = annotationInfo[tagType];
+			    		for (j in uriInfo) {
+			    			var uri = uriInfo[j].value;
+			    			var itemsInfo = punditAnnotation.items[uri];
+				    		var labelInfo = itemsInfo['http://www.w3.org/2000/01/rdf-schema#label'];
+				    		var label = labelInfo[0].value;
+				    		withAnnotation['target'].externalId = externalId;
+				    		withAnnotation['body'].uri = uri;
+				    		withAnnotation['body'].tagType = tagType;
+				    		withAnnotation['body'].label = {'default' : [ label ]};
+				    		console.log(JSON.stringify(withAnnotation));
+				    		$.ajax({
+				    			url : '/record/annotation',
+						    	method : "POST",
+						    	contentType : "application/json",
+						    	data     : JSON.stringify(withAnnotation),
+								success : function(result) {
+									//check if duplicate
+									var index1 = self.arrayFirstIndexOf(ko.toJS(self.record().annotations), function (annotation) {
+										return annotation.dbId === result.dbId;
+									});
+									if (index1 >= 0)
+										self.record().annotations.splice(index1, 1);
+									self.record().annotations.push(result);
+									self.batchAnnotationCount++;
+									self.recordSimple = ko.toJS(self.record);
+									self.recordSimple.nextItemToAnnotate = null;
+									var index = self.arrayFirstIndexOf(self.batchItemsAnnotated, function (item) {
+										return item.recordId === self.recordSimple.recordId;
+									});
+									if (index >= 0) 
+										self.batchItemsAnnotated.splice(index, 1);
+									self.batchItemsAnnotated.push(self.recordSimple);
+									updateRecordAnnotations(self.record().recordId, self.record().annotations());
+								}
+				    		});
+			    		}
+		    		}
 			}
 		   });
 		});
@@ -404,6 +409,7 @@ define(['knockout', 'text!./item.html', 'app', 'knockout-else', 'smoke'], functi
 		};
 		
 		self.nextItem = function() {
+			$("audio").trigger("pause");
 			var vid = document.getElementById("mediaplayer");
 			if (vid != null) {
 				vid.parentNode.removeChild(vid);
@@ -415,6 +421,7 @@ define(['knockout', 'text!./item.html', 'app', 'knockout-else', 'smoke'], functi
 		};
 		
 		self.endBatch = function() {
+			$("audio").trigger("pause");
 			var vid = document.getElementById("mediaplayer");
 			if (vid != null) {
 				vid.parentNode.removeChild(vid);
@@ -471,7 +478,8 @@ define(['knockout', 'text!./item.html', 'app', 'knockout-else', 'smoke'], functi
 							fullrestype: media[0] != null && media[0].Original != null
 								&& media[0].Original.type != "null" ? media[0].Original.type : "",
 							nextItemToAnnotate: backendRecord.nextItemToAnnotate,
-							annotations: backendRecord.annotations
+							annotations: backendRecord.annotations,
+							data: backendRecord
 				  };
 			 return record;
 		};
@@ -490,20 +498,17 @@ define(['knockout', 'text!./item.html', 'app', 'knockout-else', 'smoke'], functi
 
 		self.open = function () {
 			if (window.location.href.indexOf('#item')>0) {
-				document.body.setAttribute("data-page","media");	
-				
+				document.body.setAttribute("data-page","media");		
 			}
-			document.body.setAttribute("data-page","item");
-			//e.preventDefault();
+			//document.body.setAttribute("data-page","item");
 			$( '.itemview' ).fadeIn();
-			//$('[role="main"]').addClass('itemopen');
-			//$("div[role='main']").addClass("itemopen");
 			$('body').css('overflow','hidden');
 			adjustHeight();
 			
 		};
 
 		self.close = function () {
+			$("audio").trigger("pause");
 			var vid = document.getElementById("mediaplayer");
 			if (vid != null) {
 				vid.parentNode.removeChild(vid);
@@ -512,6 +517,7 @@ define(['knockout', 'text!./item.html', 'app', 'knockout-else', 'smoke'], functi
 			dispatchDocumentEvent('Pundit.hide');
 			$('body').css('overflow','visible');
 			$( '.itemview' ).fadeOut();
+			self.indexInBatch(1);
 		};
 
 		self.changeSource = function (item) {
@@ -585,9 +591,19 @@ define(['knockout', 'text!./item.html', 'app', 'knockout-else', 'smoke'], functi
 					if (result !== "") {
 						self.record().annotations.push(result);
 					}
+					updateRecordAnnotations(self.record().recordId, self.record().annotations());
 				}
     		});
 		};
+		
+
+       self.loginFromItem = function (data,event) {
+       		event.preventDefault();
+       		$("#loginPopup").addClass("open");
+       		$("#loginPopup").on("loginEvent", function(event) {
+       			itemShow(self.record());
+       		});
+		}
 		
 		self.addDisqus= function(){
 			$("#disqus_thread").hide();

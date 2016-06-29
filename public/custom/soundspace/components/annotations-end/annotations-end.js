@@ -34,8 +34,6 @@ define(['bridget','knockout', 'text!./annotations-end.html','isotope','imagesloa
 	  showEndOfAnnotations = function (batchItemsAnnotated, batchAnnotationCount) {
 		  self.batchItemsAnnotated(batchItemsAnnotated);
 		  self.batchAnnotationCount(batchAnnotationCount);
-		  //window.location.href = "#annotations-end";
-		  //$(".itemview").hide();
 		  $("#main-content").hide();
 		  document.body.setAttribute("data-page","home");
 		  $("#annotatehero").hide();

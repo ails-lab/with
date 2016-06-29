@@ -81,7 +81,8 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
 	 
 		function Record(data) {
 			var self = this;
-		    self.recordId = "";
+		    self.dbId = "";
+		    self.annotations = data.annotations;
 			self.title = "";
 			self.description="";
 			self.thumb = "";
@@ -122,7 +123,7 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
 				self.dataProvider=data.dataProvider;
 				self.dataProvider_uri=data.dataProvider_uri;
 				self.rights=data.rights;
-				self.recordId=data.recordId;
+				self.dbId=data.dbId;
 				self.externalId=data.externalId;
 				self.likes=data.likes;
 				self.collected=data.collected;
@@ -131,9 +132,9 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
 				var likeval=app.isLiked(self.externalId);
 			    self.isLike(likeval);
 			     if(!self.thumb){
-		   
 					   self.thumb="img/ui/ic-noimage.png";
-			 }
+			     }
+			     self.annotations = data.annotations;	
 			};
 
 			self.doLike=function(){
@@ -578,6 +579,8 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
 										likes: usage.likes,
 										collected: usage.collected,
 										collectedIn:result.collectedIn,
+										dbId: result.dbId,
+										annotations: result.annotations,
 										data: result
 									  });
 							   items.push(record);
@@ -798,6 +801,7 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
 						likes: usage.likes,
 						collected: usage.collected,
 						collectedIn:result.collectedIn,
+						annotations: result.annotations,
 						data: result
 					  });
 				  items.push(record);

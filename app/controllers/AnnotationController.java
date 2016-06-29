@@ -16,6 +16,8 @@
 
 package controllers;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -25,7 +27,10 @@ import model.annotations.Annotation;
 import model.annotations.Annotation.AnnotationAdmin;
 import model.annotations.bodies.AnnotationBody;
 import model.basicDataTypes.Language;
+import model.basicDataTypes.WithAccess;
+import model.basicDataTypes.WithAccess.Access;
 import model.resources.RecordResource;
+import model.resources.WithResource.WithResourceType;
 
 import org.bson.types.ObjectId;
 import org.elasticsearch.action.search.SearchResponse;
@@ -45,6 +50,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import controllers.RecordResourceController.CollectionAndRecordsCounts;
 import controllers.WithController.Profile;
 import db.DB;
+import elastic.Elastic;
 import elastic.ElasticSearcher;
 import elastic.ElasticSearcher.SearchOptions;
 
@@ -61,6 +67,14 @@ public class AnnotationController extends Controller {
 			return badRequest();
 		}
 		Annotation annotation = getAnnotationFromJson(json);
+		if (annotation.getTarget().getRecordId() == null) {
+			RecordResource record = DB.getRecordResourceDAO().getByExternalId(
+					annotation.getTarget().getExternalId());
+			if (record == null)
+				return badRequest();
+			annotation.getTarget().setRecordId(record.getDbId());
+			annotation.getTarget().setWithURI("/record/" + record.getDbId());
+		}
 		Annotation existingAnnotation = DB.getAnnotationDAO()
 				.getExistingAnnotation(annotation);
 		if (existingAnnotation == null) {
@@ -71,9 +85,11 @@ public class AnnotationController extends Controller {
 			DB.getRecordResourceDAO().addAnnotation(
 					annotation.getTarget().getRecordId(), annotation.getDbId());
 		} else {
-			ArrayList<AnnotationAdmin> annotators = existingAnnotation.getAnnotators();
+			ArrayList<AnnotationAdmin> annotators = existingAnnotation
+					.getAnnotators();
 			for (AnnotationAdmin a : annotators) {
-				if (a.getWithCreator().equals(WithController.effectiveUserDbId())) {
+				if (a.getWithCreator().equals(
+						WithController.effectiveUserDbId())) {
 					return ok(Json.toJson(existingAnnotation));
 				}
 			}
@@ -122,24 +138,23 @@ public class AnnotationController extends Controller {
 		}
 	}
 
-	public static Result getAnnotationPercentage(String groupId, int goal) {
+	public static Result getAnnotationCount(String groupId) {
 		ObjectNode result = Json.newObject();
 		ObjectId group = new ObjectId(groupId);
-		int totalRecords = goal;
 		CollectionAndRecordsCounts collectionsAndCount = RecordResourceController
 				.getCollsAndCountAccessiblebyGroup(group);
 		// int totalRecords = collectionsAndCount.totalRecordsCount;
 		long annotatedRecords = 0;
+		long annotations = 0;
 		for (Tuple<ObjectId, Integer> collectionWithCount : collectionsAndCount.collectionsRecordCount) {
 			ObjectId collectionId = collectionWithCount.x;
 			annotatedRecords += DB.getRecordResourceDAO()
 					.countAnnotatedRecords(collectionId);
+			annotations += DB.getRecordResourceDAO().countAnnotations(
+					collectionId);
 		}
-		float percentage = Math.round(Math.min(
-				((float) annotatedRecords / totalRecords) * 100, 100));
-		result.put("annotatedRecordsPercentage", percentage);
-		result.put("goal", totalRecords);
 		result.put("annotatedRecords", annotatedRecords);
+		result.put("annotations", annotations);
 		return ok(result);
 	}
 
@@ -177,7 +192,21 @@ public class AnnotationController extends Controller {
 			annotation.setBody(body);
 			AnnotationAdmin administrative = new AnnotationAdmin();
 			administrative.setWithCreator(WithController.effectiveUserDbId());
-			administrative.setCreated(new Date());
+			if (json.has("generated")) {
+				SimpleDateFormat sdf = new SimpleDateFormat(
+						"yyyy-MM-dd'T'HH:mm:ss'Z'");
+				try {
+					administrative.setGenerated(sdf.parse(json.get("generated")
+							.asText()));
+				} catch (ParseException e) {
+					log.error(e.getMessage());
+					administrative.setGenerated(new Date());
+				}
+			} else {
+				administrative.setGenerated(new Date());
+			}
+			administrative.setCreated(administrative.getGenerated());
+			administrative.setLastModified(new Date());
 			if (json.has("generator"))
 				administrative.setGenerator(json.get("generator").asText());
 			if (json.has("body") && json.get("body").has("confidence")) {
@@ -226,20 +255,67 @@ public class AnnotationController extends Controller {
 		ObjectNode result = Json.newObject();
 
 		try {
+			List<List<Tuple<ObjectId, Access>>> access = new ArrayList<List<Tuple<ObjectId, Access>>>();
+			access.add(new ArrayList<Tuple<ObjectId, Access>>() {
+				{
+					add(new Tuple<ObjectId, WithAccess.Access>(new ObjectId(
+							groupId), Access.READ));
+				}
+			});
 			SearchOptions options = new SearchOptions();
+			options.accessList = access;
+			options.setCount(20);
+			options.isPublic = false;
 
+			/*
+			 * Search for space collections
+			 */
 			ElasticSearcher recordSearcher = new ElasticSearcher();
+			recordSearcher.setTypes(new ArrayList<String>() {
+				{
+					add(WithResourceType.SimpleCollection.toString()
+							.toLowerCase());
+					add(WithResourceType.Exhibition.toString().toLowerCase());
+				}
+			});
 			SearchResponse resp = recordSearcher
-					.searchForRecords(term, options);
+					.searchAccessibleCollections(options);
+			List<String> colIds = new ArrayList<String>();
+			resp.getHits().forEach((h) -> {
+				colIds.add(h.getId());
+				return;
+			});
 
+			/*
+			 * Search for records of this space
+			 */
+			options.accessList.clear();
+			options.setFilterType("or");
+			// options.addFilter("_all", term);
+			// options.addFilter("description", term);
+			// options.addFilter("keywords", term);
+			recordSearcher.setTypes(new ArrayList<String>() {
+				{
+					addAll(Elastic.allTypes);
+					remove(WithResourceType.SimpleCollection.toString()
+							.toLowerCase());
+					remove(WithResourceType.Exhibition.toString().toLowerCase());
+				}
+			});
+			resp = recordSearcher.searchInSpecificCollections(
+					term.toLowerCase(), colIds, options);
 			List<ObjectId> recordIds = new ArrayList<ObjectId>();
 			resp.getHits().forEach((h) -> {
 				recordIds.add(new ObjectId(h.getId()));
 				return;
 			});
-
-			List<RecordResource> hits = DB.getRecordResourceDAO().getByIds(
-					recordIds);
+			if (recordIds.size() > 0) {
+				List<RecordResource> hits = DB.getRecordResourceDAO().getByIds(
+						recordIds);
+				result.put("hits", Json.toJson(hits));
+			} else {
+				result.put("hits", Json.newObject().arrayNode());
+			}
 
 		} catch (Exception e) {
 			log.error("Search encountered a problem", e);

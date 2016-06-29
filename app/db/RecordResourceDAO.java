@@ -466,6 +466,19 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 
 	}
 
+	public long countAnnotations(ObjectId collectionId) {
+		int count = 0;
+		Query<RecordResource> q = this.createQuery().disableValidation()
+				.field("collectedIn").equal(collectionId)
+				.field("annotationIds").exists().field("annotationIds").not()
+				.sizeEq(0).retrievedFields(true, "annotationIds");
+		List<RecordResource> records = this.find(q).asList();
+		for (RecordResource record : records) {
+			count += record.getAnnotationIds().size();
+		}
+		return count;
+	}
+
 	public List<RecordResource> getByMedia(String mediaUrl) {
 		Query<RecordResource> q = this.createQuery().disableValidation()
 				.field("media.Original.url").equal(mediaUrl);

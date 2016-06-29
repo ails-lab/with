@@ -56,7 +56,7 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 		
 		self.nextItemToAnnotate = ko.observable({});
 		self.annotations = ko.observableArray([]);
-		self.myAnnotations = ko.pureComputed(function () {
+		self.myAnnotations = ko.computed(function () {
 			return self.annotations.filter(function(i) {
 				for (j = 0, len = i.annotators.length; j < len; j++) { 
 					if (i.annotators[j].withCreator == app.currentUser._id()) {
@@ -66,7 +66,7 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 				return false;
 		   	});
 		});
-		self.otherAnnotations = ko.pureComputed(function () {
+		self.otherAnnotations = ko.computed(function () {
 			return self.annotations.filter(function(i) {
 				var my = false;
 				for (j = 0, len = i.annotators.length; j < len; j++) { 
@@ -121,7 +121,12 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 			self.nextItemToAnnotate(data.nextItemToAnnotate);
 			self.annotations(data.annotations);
 			self.loading(false);
-			//if (data.fullrestype != null) {
+			$("audio").trigger("pause");
+			var vid = document.getElementById("mediaplayer");
+			if (vid != null && !isRelated) {
+				vid.parentNode.removeChild(vid);
+			}
+			$('#mediathumbid').show();
 			if (data.view_url.indexOf('archives_items_') > -1) {
 				var id = data.view_url.split("_")[2];
 				$('#mediadiv').html('<div><iframe id="mediaplayer" src="http://archives.crem-cnrs.fr/archives/items/'+id+'/player/346x130/"height="250px scrolling="no"" width="361px"></iframe></div>');
@@ -499,7 +504,7 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 						for (var i in data) {
 							var result = data[i];
 							 if(result !=null){
-								var record = new Record(formatRecord(result), true);
+								var record = new Record(formatRecord(result), undefined, true);
 						        if(record.thumb && record.thumb.length>0 && record.externalId!=self.externalId)
 							       items.push(record);
 							}
@@ -538,7 +543,7 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 							for (var i in data) {
 								var result = data[i];
 								 if(result !=null){
-									 var record = new Record(formatRecord(result), true);
+									var record = new Record(formatRecord(result), undefined, true);
 							        if(record.thumb && record.thumb.length>0 && record.externalId!=self.externalId)
 								       items.push(record);
 								}
@@ -689,13 +694,15 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 							collectedIn:backendRecord.collectedIn,
 							//fullrestype: media[0] != null && media[0].Original != null && media[0].Original.type != "null" ? media[0].Original.type : "",
 							nextItemToAnnotate: backendRecord.nextItemToAnnotate,
-							annotations: backendRecord.annotations
+							annotations: backendRecord.annotations,
+							data: backendRecord
 				  };
 			 return record;
 		};
 		
 		itemShow = function (e,showMeta) {
 			data = ko.toJS(e);
+			data.data = e.data();
 			self.record(new Record(data, showMeta));
 			self.open();
 			if(self.record().recordId!="-1"){
@@ -722,6 +729,7 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 			//self.record(new Record());
 			$('body').css('overflow','visible');
 			$( '.itemview' ).fadeOut();
+			$("audio").trigger("pause");
 			var vid = document.getElementById("mediaplayer");
 			 if (vid != null) {
 				 vid.parentNode.removeChild(vid);
@@ -792,8 +800,8 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 		};
 		
 		self.collect = function (rec,event) {
-				event.preventDefault();
-				collectionShow(rec);
+		    event.preventDefault();
+			collectionShow(rec);
 		};
 		
 		
@@ -828,6 +836,7 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 					if (result !== "") {
 						self.record().annotations.push(result);
 					}
+					updateRecordAnnotations(self.record().recordId, self.record().annotations());
 				}
     		});
 		};

@@ -1,5 +1,10 @@
-define(['bootstrap', 'knockout', 'text!./myannotations.html', 'knockout-else','app', 'moment', 'knockout-validation', 'easypiechart'], function (bootstrap, ko, template, KnockoutElse, app, moment) {
+define(['bootstrap', 'knockout', 'text!./myannotations.html', 'knockout-else','app', 'moment', 'isotope', 'knockout-validation', 'easypiechart'], function (bootstrap, ko, template, KnockoutElse, app, moment, Isotope) {
 	
+	$.bridget('isotope', Isotope);
+	ko.bindingHandlers.annotationsIsotope = {
+			init: app.initOrUpdate('init'),
+			update: app.initOrUpdate('update')
+		};
 	
 	function Record(data) {
 		var self = this;
@@ -156,6 +161,21 @@ define(['bootstrap', 'knockout', 'text!./myannotations.html', 'knockout-else','a
 	
 	
 	function MyAnnotationsModel(params) {
+		
+		ko.bindingHandlers.filterItems = {		
+				update: function (elem, valueAccessor, allBindingsAccessor, viewModel, context) {
+					var q = ko.utils.unwrapObservable(valueAccessor());
+					$(elem).keypress(function (event) {
+						var keyCode = (event.which ? event.which : event.keyCode);
+			            if (keyCode === 13) {
+							self.searchAnnotations();
+			                //allBindings.executeOnEnter.call(viewModel);
+			                return false;
+			            }
+			            return true;
+					});
+				}
+			};
 		KnockoutElse.init([spec = {}]);
 		var self = this;
 		self.route = params.route;
@@ -164,9 +184,8 @@ define(['bootstrap', 'knockout', 'text!./myannotations.html', 'knockout-else','a
 		self.access = ko.observable("READ");
 		self.isFavorites = ko.observable(false);
 		//self.id = ko.observable(params.id);
-		self.id = ko.observable(app.currentUser._id());
-		window.setTimeout(500);
-		self.$container = $(".grid").isotope({
+		self.id = ko.observable(app.currentUser._id())
+		self.$container = $(".grid#" + self.id()).isotope({
 			itemSelector: '.item',
 			transitionDuration: transDuration,
 			masonry: {
@@ -179,22 +198,26 @@ define(['bootstrap', 'knockout', 'text!./myannotations.html', 'knockout-else','a
 		self.annotatedRecordCount = ko.observable(5);
 		
 		self.annotationRecords = ko.observable();
-		self.annotationGoal = ko.observable();
+		self.totalAnnotations = ko.observable();
 		self.annotationPercentage = ko.observable();
+		self.goal = 2500;
 		//self.myAnnotatios = ko.mapping.fromJS([], mapping);
 		
 		self.img = ko.observable("img/ui/rookie.png");
 		self.badgeName = ko.observable('Rookie');
 
 		
+		self.query = ko.observable("");
+
+		
 		self.isotopeImagesReveal = function ($container, $items) {
-			self.$container = $(".grid");
+			self.$container = $(".grid#" + self.id());
 			var iso = self.$container.data('isotope');
 			var itemSelector = ".item";
 			if (iso) {
 				itemSelector = iso.options.itemSelector;
 			} else {
-				self.$container = $(".grid").isotope({
+				self.$container = $(".grid#" + self.id()).isotope({
 					itemSelector: '.item',
 					transitionDuration: transDuration,
 					masonry: {
@@ -225,22 +248,22 @@ define(['bootstrap', 'knockout', 'text!./myannotations.html', 'knockout-else','a
 				
 				self.$container.isotope('layout');
 				var scrollpos = sessionStorage.getItem("collection-viewscroll" + self.id());
-				if (scrollpos && $(".grid").height() > scrollpos) {
+				if (scrollpos && $(".grid#" + self.id()).height() > scrollpos) {
 					$(window).scrollTop(scrollpos);
 					sessionStorage.removeItem("collection-viewscroll" + self.id());
-				} else if (scrollpos && $(".grid").height() < scrollpos) {
-					$(window).scrollTop($(".grid").height());
+				} else if (scrollpos && $(".grid#" + self.id()).height() < scrollpos) {
+					$(window).scrollTop($(".grid#" + self.id()).height());
 
 				}
 
 			}).always(function () {
 				var scrollpos = sessionStorage.getItem("collection-viewscroll" + self.id());
-				if (scrollpos && $(".grid").height() > scrollpos) {
+				if (scrollpos && $(".grid#" + self.id()).height() > scrollpos) {
 					$(window).scrollTop(scrollpos);
 					sessionStorage.removeItem("collection-viewscroll" + self.id());
-				} else if (scrollpos && $(".grid").height() < scrollpos) {
-					$(window).scrollTop($(".grid").height());
-					if (scrollpos != null && $(".grid").height() > scrollpos) {
+				} else if (scrollpos && $(".grid#" + self.id()).height() < scrollpos) {
+					$(window).scrollTop($(".grid#" + self.id()).height());
+					if (scrollpos != null && $(".grid#" + self.id()).height() > scrollpos) {
 						sessionStorage.removeItem("collection-viewscroll" + self.id());
 					}
 				}
@@ -254,8 +277,11 @@ define(['bootstrap', 'knockout', 'text!./myannotations.html', 'knockout-else','a
 		};
 		
 		function getItem(record) {
+			if (record.annotations == undefined)
+				record.annotations = [];
 			var tile = '<div class="item ' + record.dbId + '"><div class="wrap"><a href="#"  onclick="recordSelect(\'' + record.dbId + '\',event)">' +
-			'<div class="thumb"><img style="width:100%" src="' + record.thumbnail() + '" onError="this.src=\'img/ui/ic-noimage.png\'"/><div class="counter">' + record.annotations.length + '  Annotations</div></div>';
+			'<div class="thumb"><img style="width:100%" src="' + record.thumbnail() + '" onError="this.src=\'img/ui/ic-noimage.png\'"/>' +
+			'<div class="counter">' + record.annotations.length + '  Annotations</div></div>';
 			tile += '<div class="info"><h2 class="title truncate">' + record.title + '</h2></a>';
 			
 			var distitle = "";
@@ -327,13 +353,13 @@ define(['bootstrap', 'knockout', 'text!./myannotations.html', 'knockout-else','a
 		
 		self.percentageCall = function() {			
 			$.ajax({
-				"url": '/record/annotationPercentage?groupId=56e13d2e75fe2450755e553a' + '&goal=1000',
+				"url": '/record/annotationCount?groupId=56e13d2e75fe2450755e553a',
 				"method": "get",
 				"contentType": "application/json",
 				"success": function (data) {
 					self.annotationRecords(data.annotatedRecords);
-					self.annotationGoal(data.goal);
-					self.annotationPercentage(data.annotatedRecordsPercentage);
+					self.totalAnnotations(data.annotations);
+					self.annotationPercentage( Math.round((self.totalAnnotations() / self.goal ) * 100));
 					WITHApp.initChart(self.annotationPercentage());
 				},
 				"error": function (result) {
@@ -346,9 +372,15 @@ define(['bootstrap', 'knockout', 'text!./myannotations.html', 'knockout-else','a
 			});
 		}
 		
+		updateRecordAnnotations = function(id, annotations) {
+			var index = app.arrayFirstIndexOf(ko.toJS(self.citems()), function (item) {
+				return item.dbId === id;
+			});
+			self.citems()[index].annotations = annotations;
+			$("."+ id + " .counter").text(annotations.length +" Annotations");
+		}
 		
-		self.percentage = function() {
-		
+		self.percentage = function() {		
 			var promise = self.percentageCall();
 			$.when(promise).done(function (data) {
 				self.loading(false);
@@ -379,7 +411,6 @@ define(['bootstrap', 'knockout', 'text!./myannotations.html', 'knockout-else','a
 					var items = self.revealItems(data.records);
 					if (items.length > 0) {
 						var $newitems = getItems(items);
-
 						self.isotopeImagesReveal(self.$container, $newitems);
 					}
 					self.loading(false);
@@ -417,6 +448,42 @@ define(['bootstrap', 'knockout', 'text!./myannotations.html', 'knockout-else','a
 				});
 			}
 		};
+		
+		self.searchAnnotations = function() {
+			self.loading(true);
+
+			if(self.query() == null || self.query() == undefined 
+					|| self.query() == "") {
+				$( ".item" ).remove();
+				self.isotopeImagesReveal(self.$container, getItems(self.citems()));
+				return;
+			}
+			
+			
+			$.ajax({
+				"url": '/api/annotationsSearch?groupId=56e13d2e75fe2450755e553a&term=' + self.query(),
+				"method": "get",
+				"contentType": "application/json",
+				"success": function (data) {
+					$( ".item" ).remove();
+					var items = self.revealItems(data.hits);
+					if (items.length > 0) {
+						var $newitems = getItems(items);
+
+						self.isotopeImagesReveal(self.$container, $newitems);
+					}
+					self.loading(false);
+				},
+				"error": function (result) {
+					self.loading(false);
+					$.smkAlert({
+						text: 'An error has occured',
+						type: 'danger',
+						permanent: true
+					});
+				}
+			});
+		}
 		
 		self.moreItems = function () {
 			return $.ajax({

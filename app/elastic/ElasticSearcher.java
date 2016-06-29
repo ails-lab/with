@@ -59,6 +59,8 @@ import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.QueryStringQueryBuilder;
 import org.elasticsearch.index.query.QueryStringQueryBuilder.Operator;
 import org.elasticsearch.index.query.RangeFilterBuilder;
+import org.elasticsearch.index.query.TermsQueryBuilder;
+import org.elasticsearch.index.query.WildcardQueryBuilder;
 import org.elasticsearch.index.query.functionscore.FunctionScoreQueryBuilder;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
 import org.elasticsearch.search.aggregations.bucket.terms.TermsBuilder;
@@ -80,6 +82,7 @@ public class ElasticSearcher {
 	private final Map<String, Float> fedSearchFieldsWithBoosts;
 	private List<String> fieldsForSimilarity;
 	private final List<String> aggregatedFields;
+	private String filterQueryType = "term";
 
 	private final Client client = null;
 	public static final int DEFAULT_COUNT = 10;
@@ -311,6 +314,34 @@ public class ElasticSearcher {
 		return this.execute(multi_match_q, options);
 	}
 
+
+	public SearchResponse searchInSpecificCollections(String term, List<String> ids, SearchOptions options) {
+		TermsQueryBuilder terms_q = QueryBuilders.termsQuery("collectedId", ids);
+		QueryStringQueryBuilder qstr = QueryBuilders.queryStringQuery(term);
+		for(Entry<String, Float> e: fedSearchFieldsWithBoosts.entrySet()) {
+			qstr.field(e.getKey()+"_all", e.getValue());
+		}
+		qstr.useDisMax(true);
+		qstr.tieBreaker(0);
+		qstr.defaultOperator(Operator.AND);
+		qstr.defaultField("_all");
+		qstr.analyzer("standard");
+		qstr.analyzeWildcard(false);
+		//
+		qstr.fuzzyMaxExpansions(50);
+		qstr.fuzziness(Fuzziness.AUTO);
+		qstr.fuzzyPrefixLength(0);
+		//
+		qstr.phraseSlop(0);
+		qstr.autoGeneratePhraseQueries(false);
+		qstr.maxDeterminizedStates(10000);
+		//qstr.minimumShouldMatch(minimumShouldMatch);
+		qstr.lenient(true);
+		BoolQueryBuilder bool_q = QueryBuilders.boolQuery();
+		bool_q.must(terms_q).must(qstr);
+
+		return this.execute(bool_q, options);
+	}
 	/*
 	 * Search for related records
 	 */
@@ -523,6 +554,10 @@ public class ElasticSearcher {
 			types = new ArrayList<String>();
 			types.add(type);
 		}
+	}
+
+	public void setFilterQueryType(String type) {
+		this.filterQueryType = type;
 	}
 
 }

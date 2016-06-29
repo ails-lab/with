@@ -26,10 +26,18 @@
           <div class="container">
             <div class="wrap">
               <!-- media itself-->
+              <!-- ko if: record().data.mediatype != "AUDIO"-->
               <div class="mediathumb"><img id="mediathumbid" data-bind="attr: {src: record().fullres()}" onError="this.src=helper_thumb"> 
               <div class="media" id="mediadiv">
              </div> 
              </div>
+             <!-- /ko -->
+             <!-- ko else: -->
+             <div class="mediathumb"><img id="mediathumbid" data-bind="attr: {src: record.calcThumbnail }"> 
+             <div class="media" id="mediadiv">
+             </div> 
+             </div>
+             <!-- /ko -->
               <!-- media information-->
               <div class="mediainfo">
                 <div class="infowrap">
@@ -41,17 +49,21 @@
                   <!-- ko if: isLogged -->
                   	<span class="pnd-resource" onclick="dispatchDocumentEvent('Pundit.showBootstrap')"></span>
 				  <!-- /ko -->
+				  <!-- ko else: -->
+                      <button style="padding-left: 5px" type="button" class="btn btn-primary" data-bind="click: loginFromItem">Login to start tagging</button>
+				  <!-- /ko -->
 				  </h1>
                   <div class="owner" data-bind="text:record().dataProvider"></div>
                    <!-- annotate box-->
+                   <!-- ko if: record().recordId!='-1' -->
                   <div class="annotatebox">
                   	<!-- ko if: record().annotations && record().annotations().length > 0 -->
                     <div class="question">Which musical instruments do you hear in this item?</div>
                     <div class="info">The item has been tagged with the following concepts. Add more using PUNDIT.</div>
                     <!-- /ko -->
                     <!-- ko else: -->
-                    <div class="question">Which musical instruments do you hear in this item?</div>
-                    <div class="info">Add tags using Pundit's ANNOTATE buttom above.</div>
+	                    <div class="question">Which musical instruments do you hear in this item?</div>
+	                    <div class="info">Add tags using Pundit's ANNOTATE buttom above.</div>
                     <!-- /ko -->
                     <!-- answers-->
                     <!-- ko if: record().myAnnotations-->
@@ -76,6 +88,7 @@
                     </ul>
                      <!-- /ko -->
                   </div>
+                  <!-- /ko -->
                   <!-- metadata-->
 				  <ul role="tablist" class="nav nav-tabs">
                     <li class="active"><a href="#information" title="" data-toggle="tab">Info</a></li>
