@@ -89,7 +89,20 @@ class EffektiveUserFilter extends Filter {
 
 		  if( ignoreRequest ) next( rh )
 		  else {
-			  val userId = rh.session.get("user")
+		    
+			      var userId = rh.session.get("user")
+			      val suUserId = rh.getQueryString("asUser")
+			      userId = userId.flatMap{ 
+			        id => {
+			          val user = DB.getUserDAO.get(new ObjectId(id))
+			          val res = suUserId.flatMap { suId => {
+			              if( user.isSuperUser()) { Option( suId ) }
+			              else { userId }
+			            }
+			          }
+			          if( res.isDefined) res else userId
+			        }			        
+			      }
 					  val proxyId = rh.session.get("proxy")
 
 					  val userIds = effectiveUserIds(userId, proxyId).mkString(",")

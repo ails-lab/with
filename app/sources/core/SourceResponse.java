@@ -56,7 +56,6 @@ public class SourceResponse {
 	}
 
 	public SourceResponse(int totalHits, int offset, int count) {
-
 		items = new ItemsGrouping();
 		filters = new ArrayList<>();
 		this.totalCount = totalHits;
@@ -66,12 +65,10 @@ public class SourceResponse {
 	//source refers to the external APIs and the WITH db
 	//comesFrom in each record in the WITH db indicates where it was imported from, i.e. external APIs, Mint or UploadedByUser
 	public SourceResponse(SearchResponse resp, int offset) {
-
 		this.totalCount = (int) resp.getHits().getTotalHits();
 		this.source = "WITHin";
 		this.startIndex = offset;
 		List<WithResource<?, ?>> items = new ArrayList<WithResource<?, ?>>();
-
 
 //		TODO make it using the new model...
 //for (CollectionRecord er : elasticrecords) {
@@ -116,7 +113,6 @@ public class SourceResponse {
 		}
 	}
 
-
 	public List<CommonFilterResponse> getFilters() {
 		return filters;
 	}
@@ -142,7 +138,6 @@ public class SourceResponse {
 			res.setFilters(ListUtils.transform(res.filtersLogic, (CommonFilterLogic x) -> {
 				return x.export();
 			}));
-
 		}
 		return res;
 	}
@@ -163,8 +158,8 @@ public class SourceResponse {
 
 	public void transformResourcesToItems() {
 		List<WithResource<?, ?>> resources = new ArrayList<WithResource<?, ?>>();
-		for(Entry<String, List<?>> e: resourcesPerType.entrySet())
-			if(!e.getKey().equals("collection"))
+		for (Entry<String, List<?>> e: resourcesPerType.entrySet())
+			if (!e.getKey().equals("collectionobject"))
 				resources.addAll((List<WithResource<?, ?>>) e.getValue());
 		items.setCulturalCHO(resources);
 	}

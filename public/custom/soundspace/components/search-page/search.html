@@ -15,8 +15,8 @@
            
             
             <ul class="view">
-              <li class="active" data-bind="event: {click: toggleSourceview}, enable: searching()==false"><a href="#" title="Column View" data-view="column"><img src="img/ic-list.png" alt="list"></a></li>
-              <li data-bind="event: {click: toggleSourceview}, enable: searching()==false"><a href="#" title="Grid View" data-view="grid"><img src="img/ic-grid.png" alt="grid"></a></li>
+              <li  data-bind="event: {click: toggleSourceview}, enable: searching()==false"><a href="#" title="Column View" data-view="column"><img src="img/ic-list.png" alt="list"></a></li>
+              <li class="active" data-bind="event: {click: toggleSourceview}, enable: searching()==false"><a href="#" title="Grid View" data-view="grid"><img src="img/ic-grid.png" alt="grid"></a></li>
             </ul>
           </div>
           <!-- close search--><a href="#" title="Close Search" class="close"><img src="img/ic-close-white.png" alt=""></a>
@@ -35,7 +35,6 @@
         </select>
       </section>
       <!-- search result-->
-      
      <div id="gridlist" class="spacer search gridlist searchlist" data-bind="visible: sourceview()==false">
       <!-- ko if: noResults -->
 			<div>
@@ -45,7 +44,7 @@
         <section class="listing">
           <div class="container">
             <!-- grid-->
-            <div class="grid">
+            <div class="grid" id="searchgrid">
               <div class="sizer"></div>
             </div>
           </div>
@@ -57,7 +56,6 @@
 				</span>
 			</div>
       </div>
-      
       <!-- ko if: sourceview()==true -->
       <section class="searchresults" id="columnlist" class="searchresults searchlist">
         <div class="container-fluid">

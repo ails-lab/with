@@ -28,6 +28,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import db.DB;
+import elastic.Elastic;
 import model.basicDataTypes.WithAccess.Access;
 import model.usersAndGroups.User;
 import model.usersAndGroups.UserGroup;
@@ -55,7 +56,7 @@ public class CommonQuery implements Cloneable , QueryStringBindable<CommonQuery>
 	private List<String> effectiveUserIds;//not set in JSON
 
 	public List<CommonFilter> filters;
-	private List<String> types;
+	private List<String> types =Elastic.allTypes; //if not specified, default is search in all resource types
 
 	public CommonQuery(String generalQueryBody) {
 		this.searchTerm = generalQueryBody;

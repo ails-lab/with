@@ -683,7 +683,6 @@ public class CollectionObjectController extends WithResourceController {
 			int count, String profile, Option<String> locale) {
 		ObjectNode result = Json.newObject().objectNode();
 		ArrayNode collArray = Json.newObject().arrayNode();
-
 		/*
 		 * Metrics helper code
 		 */
@@ -692,10 +691,6 @@ public class CollectionObjectController extends WithResourceController {
 		final Timer call_timer = MetricsUtils.registry.timer(
 				MetricsUtils.registry.name(CollectionObjectController.class, "listCollection", "time"));
 		final Timer.Context call_timeContext = call_timer.time();
-		/*
-		 *
-		 */
-
 
 		List<CollectionObject> userCollections;
 		List<String> effectiveUserIds = effectiveUserIds();
@@ -708,7 +703,7 @@ public class CollectionObjectController extends WithResourceController {
 			result.put("collectionsOrExhibitions", Json.newObject().arrayNode());
 			return ok(result);
 		} else if (creator.isDefined() && !creator.get().equals("undefined")) {
-			creatorId = (ObjectId) DB.getUserDAO().getIdByUsername(creator.get()).getId();
+			creatorId = DB.getUserDAO().getIdByUsername(creator.get());
 			if (creatorId == null)
 				return badRequest("User with username " + creator.get() + " does not exist.");
 		}
@@ -751,9 +746,7 @@ public class CollectionObjectController extends WithResourceController {
 			final Timer dao_timer = MetricsUtils.registry.timer(
 					MetricsUtils.registry.name(CollectionObjectController.class, "listCollection", "collectionsDBRetrival-time"));
 			final Timer.Context dao_timeContext = dao_timer.time();
-			/*
-			 *
-			 */
+
 			Tuple<List<CollectionObject>, Tuple<Integer, Integer>> info;
 			if (!isSuperUser())
 				info = DB.getCollectionObjectDAO().getByLoggedInUsersAndAcl(
@@ -870,10 +863,10 @@ public class CollectionObjectController extends WithResourceController {
 					.get();
 			for (StringTuple userAccess : directlyUserNameList.list) {
 				List<Tuple<ObjectId, Access>> directlyAccessedByUser = new ArrayList<Tuple<ObjectId, Access>>();
-				UserOrGroup userOrGroup = getUserOrGroup(userAccess.x);
+				ObjectId userOrGroup = getUserOrGroup(userAccess.x);
 				if (userOrGroup != null) {
 					directlyAccessedByUser.add(new Tuple<ObjectId, Access>(
-							userOrGroup.getDbId(), Access.valueOf(userAccess.y
+							userOrGroup, Access.valueOf(userAccess.y
 									.toUpperCase())));
 					accessedByUserOrGroup.add(directlyAccessedByUser);
 				}
@@ -901,18 +894,22 @@ public class CollectionObjectController extends WithResourceController {
 		return accessedByUserOrGroup;
 	}
 
-	private static UserOrGroup getUserOrGroup(String username) {
-		User user = DB.getUserDAO().getByUsername(username);
-		UserOrGroup userOrGroup = null;
-		if (user != null) {
-			userOrGroup = user;
-		} else {
-			UserGroup userGroup = DB.getUserGroupDAO().getByName(username);
-			if (userGroup != null) {
-				userOrGroup = userGroup;
-			}
+	private static ObjectId getUserOrGroup(String usernameOrDbId) {
+		try {
+			ObjectId dbId = new ObjectId(usernameOrDbId);
+			if (DB.getUserDAO().existsEntity(dbId))
+				return dbId;
+			else if (DB.getUserGroupDAO().existsEntity(dbId))
+				return dbId;
+			else 
+				return null;
+		} catch(IllegalArgumentException e) {
+			ObjectId dbId = DB.getUserDAO().getIdByUsername(usernameOrDbId);
+			if (dbId != null)
+				return dbId;
+			else 
+				return DB.getUserGroupDAO().getIdByName(usernameOrDbId);
 		}
-		return userOrGroup;
 	}
 
 	private static List<ObjectNode> collectionsWithMyAccessData(

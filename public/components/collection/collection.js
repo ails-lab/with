@@ -212,10 +212,12 @@ define(['knockout', 'text!./collection.html', 'selectize', 'app', 'knockout-vali
 		}
 
 		collectionShow = function (record) {
-			if(!ko.isObservable(record)){
+			/*if(!ko.isObservable(record)){
 				self.record(ko.mapping.fromJS(record));
 			}
-			else{self.record(record);}
+			else{*/
+				self.record(record);
+			//}
 			var promise=self.findEditableCollections();
 			$.when(promise).done(function(){
 				if (self.collectionlist().length == 0) {
@@ -397,8 +399,8 @@ define(['knockout', 'text!./collection.html', 'selectize', 'app', 'knockout-vali
 		self.addRecord = function (collid, noDouble) {
 			saving(true);
 			 var jsondata = JSON.stringify({ 
-				    provenance : [{ provider : self.record().source(), 
-					resourceId: self.record().externalId()}]
+				    provenance : [{ provider : self.record().source, 
+					resourceId: self.record().externalId}]
 					});
 			if(self.record().data()){
 				jsondata=JSON.stringify(self.record().data());
@@ -517,7 +519,7 @@ define(['knockout', 'text!./collection.html', 'selectize', 'app', 'knockout-vali
 			self.description('');
 			self.isPublic(true);
 			self.id(-1);
-			self.record(false);
+			self.record();
 			self.validationModel.errors.showAllMessages(false);
 			self.selected_items2([]);
 			$('textarea').hide();

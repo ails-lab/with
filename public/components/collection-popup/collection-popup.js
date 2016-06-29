@@ -176,10 +176,12 @@ define(['knockout', 'text!./collection-popup.html', 'selectize', 'app', 'knockou
 		};
 
 		collectionShow = function (record) {
-			if(!ko.isObservable(record)){
-				self.record(ko.mapping.fromJS(record));
-			}
-			else{self.record(record);}
+			/*if(!ko.isObservable(record)){
+			self.record(ko.mapping.fromJS(record));
+		}
+		else{*/
+			self.record(record);
+		//}
 			var promise=self.findEditableCollections();
 			$.when(promise).done(function(){
 				if (self.collectionlist().length == 0) {
@@ -322,8 +324,8 @@ define(['knockout', 'text!./collection-popup.html', 'selectize', 'app', 'knockou
 
 		self.addRecord = function (collid, noDouble) {
 			 var jsondata = JSON.stringify({ 
-				    provenance : [{ provider : self.record().source(), 
-					resourceId: self.record().externalId()}]
+				    provenance : [{ provider : self.record().source, 
+					resourceId: self.record().externalId}]
 					});
 			if(self.record().data()){
 				jsondata=JSON.stringify(self.record().data());

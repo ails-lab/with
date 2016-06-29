@@ -176,9 +176,6 @@ define(['bootstrap', 'knockout', 'text!./myannotations.html', 'knockout-else','a
 					});
 				}
 			};
-		
-		
-		
 		KnockoutElse.init([spec = {}]);
 		var self = this;
 		self.route = params.route;
@@ -203,7 +200,7 @@ define(['bootstrap', 'knockout', 'text!./myannotations.html', 'knockout-else','a
 		self.annotationRecords = ko.observable();
 		self.totalAnnotations = ko.observable();
 		self.annotationPercentage = ko.observable();
-		self.goal = 1000;
+		self.goal = 2500;
 		//self.myAnnotatios = ko.mapping.fromJS([], mapping);
 		
 		self.img = ko.observable("img/ui/rookie.png");
@@ -280,10 +277,11 @@ define(['bootstrap', 'knockout', 'text!./myannotations.html', 'knockout-else','a
 		};
 		
 		function getItem(record) {
-			if(record.annotations == undefined)
+			if (record.annotations == undefined)
 				record.annotations = [];
 			var tile = '<div class="item ' + record.dbId + '"><div class="wrap"><a href="#"  onclick="recordSelect(\'' + record.dbId + '\',event)">' +
-			'<div class="thumb"><img style="width:100%" src="' + record.thumbnail() + '" onError="this.src=\'img/ui/ic-noimage.png\'"/><div class="counter">' + record.annotations.length + '  Annotations</div></div>';
+			'<div class="thumb"><img style="width:100%" src="' + record.thumbnail() + '" onError="this.src=\'img/ui/ic-noimage.png\'"/>' +
+			'<div class="counter">' + record.annotations.length + '  Annotations</div></div>';
 			tile += '<div class="info"><h2 class="title truncate">' + record.title + '</h2></a>';
 			
 			var distitle = "";
@@ -374,9 +372,15 @@ define(['bootstrap', 'knockout', 'text!./myannotations.html', 'knockout-else','a
 			});
 		}
 		
+		updateRecordAnnotations = function(id, annotations) {
+			var index = app.arrayFirstIndexOf(ko.toJS(self.citems()), function (item) {
+				return item.dbId === id;
+			});
+			self.citems()[index].annotations = annotations;
+			$("."+ id + " .counter").text(annotations.length +" Annotations");
+		}
 		
-		self.percentage = function() {
-		
+		self.percentage = function() {		
 			var promise = self.percentageCall();
 			$.when(promise).done(function (data) {
 				self.loading(false);
@@ -407,7 +411,6 @@ define(['bootstrap', 'knockout', 'text!./myannotations.html', 'knockout-else','a
 					var items = self.revealItems(data.records);
 					if (items.length > 0) {
 						var $newitems = getItems(items);
-
 						self.isotopeImagesReveal(self.$container, $newitems);
 					}
 					self.loading(false);

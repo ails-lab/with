@@ -22,12 +22,14 @@ import java.util.Map;
 
 import model.DescriptiveData;
 import model.EmbeddedMediaObject.MediaVersion;
+import model.annotations.Annotation;
 import model.annotations.ContextData;
 import model.annotations.ContextData.ContextDataBody;
 import model.basicDataTypes.MultiLiteralOrResource;
 import model.resources.WithResource;
 import model.resources.collection.Exhibition.ExhibitionDescriptiveData;
 
+import org.bson.types.ObjectId;
 import org.mongodb.morphia.annotations.Embedded;
 import org.mongodb.morphia.annotations.Entity;
 import org.mongodb.morphia.annotations.Field;
@@ -45,6 +47,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 
 import controllers.WithController.Profile;
+import db.DB;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
@@ -72,7 +75,7 @@ public class CollectionObject<T extends CollectionObject.CollectionDescriptiveDa
 
 	@Embedded
 	private List<ContextData<ContextDataBody>> collectedResources;
-
+	private long annotationCount = 0;
 
 	public List<ContextData<ContextDataBody>> getCollectedResources() {
 		return collectedResources;
@@ -83,6 +86,14 @@ public class CollectionObject<T extends CollectionObject.CollectionDescriptiveDa
 		this.collectedResources = collectedResources;
 	}
 
+	public long getAnnotationCount() {
+		return annotationCount;
+	}
+
+	public void fillAnnotationCount() {
+		this.annotationCount = DB.getRecordResourceDAO()
+				.countAnnotations(this.getDbId());
+	}
 
 	@Embedded
 	public static class CollectionAdmin extends WithResource.WithAdmin {
@@ -204,6 +215,7 @@ public class CollectionObject<T extends CollectionObject.CollectionDescriptiveDa
 		else
 			output.setMedia(getMedia());
 		output.setResourceType(getResourceType());
+		output.fillAnnotationCount();
 		//output.setUsage(input.getUsage());
 	}
 

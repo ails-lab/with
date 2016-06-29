@@ -18,8 +18,9 @@
               <!-- info-->
               <div class="info">
                 <h2>Help us reach our goal</h2>
-                <p>The objective is to have musical instruments identified in at least 1000 recordings from our archives by the end of 
+                <p>The objective is to have musical instruments identified in at least 2500 recordings from our archives by the end of 
                 	the crowdsourcing campaign (30th of June). The tags are all controlled and available in many languages.</p>
+                <div class="currentannotation"> <!-- ko text: totalAnnotations() --><!-- /ko --> / <!-- ko text: goal --><!-- /ko --> Annotations</div>
                 <!-- action button-->
                 <!-- ko if: isLogged -->
                 	<a href="#" data-bind="click: startAnnotate" class="annotatebtn">Start tagging</a>

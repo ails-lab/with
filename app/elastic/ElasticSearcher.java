@@ -311,10 +311,28 @@ public class ElasticSearcher {
 
 	public SearchResponse searchInSpecificCollections(String term, List<String> ids, SearchOptions options) {
 		TermsQueryBuilder terms_q = QueryBuilders.termsQuery("collectedId", ids);
-		WildcardQueryBuilder wildcard_q = QueryBuilders.wildcardQuery("_all", term+"*");
-		//MatchQueryBuilder match_q = QueryBuilders.matchQuery("_all", term).fuzziness(1);
+		QueryStringQueryBuilder qstr = QueryBuilders.queryStringQuery(term);
+		for(Entry<String, Float> e: fedSearchFieldsWithBoosts.entrySet()) {
+			qstr.field(e.getKey()+"_all", e.getValue());
+		}
+		qstr.useDisMax(true);
+		qstr.tieBreaker(0);
+		qstr.defaultOperator(Operator.AND);
+		qstr.defaultField("_all");
+		qstr.analyzer("standard");
+		qstr.analyzeWildcard(false);
+		//
+		qstr.fuzzyMaxExpansions(50);
+		qstr.fuzziness(Fuzziness.AUTO);
+		qstr.fuzzyPrefixLength(0);
+		//
+		qstr.phraseSlop(0);
+		qstr.autoGeneratePhraseQueries(false);
+		qstr.maxDeterminizedStates(10000);
+		//qstr.minimumShouldMatch(minimumShouldMatch);
+		qstr.lenient(true);
 		BoolQueryBuilder bool_q = QueryBuilders.boolQuery();
-		bool_q.must(terms_q).must(wildcard_q);
+		bool_q.must(terms_q).must(qstr);
 
 		return this.execute(bool_q, options);
 	}

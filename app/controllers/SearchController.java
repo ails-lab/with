@@ -115,7 +115,7 @@ public class SearchController extends WithController {
 			// Parse the query.
 			try {
 				final CommonQuery q = Utils.parseJson(json);
-				q.setTypes(Elastic.allTypes);
+				q.setTypes(q.getTypes());
 				q.setEffectiveUserIds(effectiveUserIds());
 				Promise<SearchResponse> myResults = getMyResutlsPromise(q);
 				play.libs.F.Function<SearchResponse, Result> function = 
@@ -276,7 +276,7 @@ public class SearchController extends WithController {
 			try{
 				SourceResponse res = src
 						.getResults(cq);
-					if (res.source==null){
+					if (res.source == null){
 						log.info("Error "+src.getSourceName());
 					}
 					return res;
