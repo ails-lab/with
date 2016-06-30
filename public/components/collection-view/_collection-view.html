@@ -37,9 +37,9 @@
 				                </div>
 								<!-- control-->
 								<div class="list-control">
-									<!-- <a data-bind="visible: isLogged() && !isFavorites() && (access() == 'WRITE' || access() == 'OWN')" data-toggle="tooltip" data-placement="top" title="Edit Collection" class="fa fa-pencil editaction"></a> -->
+									<a data-bind="visible: isLogged() && !isFavorites() && (access() == 'WRITE' || access() == 'OWN')" data-toggle="tooltip" data-placement="top" title="Edit Collection" class="fa fa-pencil editaction"></a>
 									<a data-bind="visible: isLogged() && !isFavorites() && (access() == 'WRITE' || access() == 'OWN')" data-toggle="tooltip" data-placement="top" title="Annotate" class="fa fa-tag annotate-col" ></a>
-									<a data-toggle="tooltip" data-placement="top" title="Annotate" class="fa fa-tag annotate-col" ></a>
+									<!-- <a data-toggle="tooltip" data-placement="top" title="Annotate" class="fa fa-tag annotate-col" ></a>-->
 									<a data-toggle="tooltip" data-placement="top" title="Show Thesauri" class="fa fa-cog thesaurus" ></a>
 									<a data-toggle="tooltip" data-placement="top" title="API Calls" class="fa fa-rss detail-control"></a>
 									<a data-bind="visible: isLogged() && !isFavorites() && (access() == 'WRITE' || access() == 'OWN'), click: deleteMyCollection"  data-toggle="tooltip" data-placement="top" title="Delete Collection" class="fa fa-trash deleteaction"></a>
