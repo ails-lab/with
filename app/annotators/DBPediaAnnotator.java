@@ -111,7 +111,7 @@ public class DBPediaAnnotator extends Annotator {
 		return service;
 	}
 	
-	public List<Annotation> annotate(String text, ObjectId withCreator, AnnotationTarget target, Map<String, Object> props) throws Exception {
+	public List<Annotation> annotate(String text, AnnotationTarget target, Map<String, Object> props) throws Exception {
 		text = strip(text);
 		
 		List<Annotation> res = new ArrayList<>();
@@ -200,8 +200,8 @@ public class DBPediaAnnotator extends Annotator {
 	    		admin.setGenerator(service);
 	    		admin.setGenerated(new Date());
 	    		admin.setConfidence(score);
-	    		admin.setWithCreator(withCreator);
-	    		admin.setCreated(new Date());
+//	    		admin.setWithCreator(withCreator);
+//	    		admin.setCreated(new Date());
 	    		
 	    		admins.add(admin);
 	    		

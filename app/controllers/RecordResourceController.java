@@ -281,8 +281,8 @@ public class RecordResourceController extends WithResourceController {
 			} else {
 				JsonNode json = request().body().asJson();
 				
-				ObjectId user = WithController.effectiveUserDbId();
 				List<AnnotatorConfig> annConfigs = AnnotatorConfig.createAnnotationConfigs(json);
+				ObjectId user = WithController.effectiveUserDbId();
 				
 				annotateRecord(recordId, user, annConfigs);
 				
@@ -300,8 +300,6 @@ public class RecordResourceController extends WithResourceController {
 		RecordResource record = DB.getRecordResourceDAO().get(new ObjectId(recordId));
 		DescriptiveData dd = record.getDescriptiveData();
 		
-//		List<Annotation> result = new ArrayList<>();
-
 		for (String p : fields) {
 			Method method = dd.getClass().getMethod("get" + p.substring(0,1).toUpperCase() + p.substring(1));
 		
@@ -328,10 +326,8 @@ public class RecordResourceController extends WithResourceController {
 						for (AnnotatorConfig annConfig : annConfigs) {
 							Annotator annotator = Annotator.getAnnotator(annConfig.getAnnotatorClass(), lang);
 							if (annotator != null) {
-								for (Annotation ann : annotator.annotate(text, user, target, annConfig.getProps())) {
-//									AnnotationController.addAnnotation(ann);
-//									System.out.println("ANNOTATION" + ann);
-//									result.add(ann);
+								for (Annotation ann : annotator.annotate(text, target, annConfig.getProps())) {
+									AnnotationController.addAnnotation(ann, user);
 								}
 							}
 						}
@@ -339,8 +335,6 @@ public class RecordResourceController extends WithResourceController {
 				}
 			}
 		}
-		
-//		return result;
 	}
 	
 	public static Result getRandomRecords(String groupId, int batchCount) {

@@ -40,7 +40,7 @@ public abstract class Annotator {
 	
 	public abstract String getService();
 	
-	public abstract List<Annotation> annotate(String text, ObjectId withCreator, AnnotationTarget target, Map<String, Object> properties) throws Exception;
+	public abstract List<Annotation> annotate(String text, AnnotationTarget target, Map<String, Object> properties) throws Exception;
 	
 	private Pattern p = Pattern.compile("(<.*?>)");
 	

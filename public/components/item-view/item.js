@@ -180,7 +180,6 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 				self.loading(true);
 		           $.ajax({
 						type    : "get",
-						//url     : "/annotate/" + self.recordId,
 						url     : "/record/" + self.recordId + "/listAnnotations",
 						contentType: "application/json",
 						dataType: "json",
@@ -246,7 +245,7 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 			
 			var annotations = new Object();
 			
-			for (var i = 1; i < anns.length; i++) {
+			for (var i = 0; i < anns.length; i++) {
 				var property = anns[i].target.selector.property;
 				if (fieldMap[property] != undefined) {
 					property = fieldMap[property];
@@ -268,7 +267,7 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 			
 			var count = 0;
 			
-			for (var i = 1; i < anns.length; i++) {
+			for (var i = 0; i < anns.length; i++) {
 				var uri = anns[i].body.uri;
 				var label = anns[i].body.label;
 				var vocabulary = anns[i].body.uriVocabulary;

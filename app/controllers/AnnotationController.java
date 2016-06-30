@@ -101,9 +101,11 @@ public class AnnotationController extends Controller {
 		return ok(Json.toJson(annotation));
 	}
 	
-	public static Annotation addAnnotation(Annotation annotation) {
-		Annotation existingAnnotation = DB.getAnnotationDAO()
-				.getExistingAnnotation(annotation);
+	public static Annotation addAnnotation(Annotation annotation, ObjectId user) {
+		
+		annotation = updateAnnotationAdmin(annotation, user);
+		
+		Annotation existingAnnotation = DB.getAnnotationDAO().getExistingAnnotation(annotation);
 
 		if (existingAnnotation == null) {
 			DB.getAnnotationDAO().makePermanent(annotation);
@@ -115,7 +117,7 @@ public class AnnotationController extends Controller {
 		} else {
 			ArrayList<AnnotationAdmin> annotators = existingAnnotation.getAnnotators();
 			for (AnnotationAdmin a : annotators) {
-				if (a.getWithCreator().equals(WithController.effectiveUserDbId())) {
+				if (a.getWithCreator().equals(user)) {
 					return existingAnnotation;
 				}
 			}
@@ -181,6 +183,7 @@ public class AnnotationController extends Controller {
 		return ok(recordsWithCount);
 	}
 
+	
 	private static Annotation getAnnotationFromJson(JsonNode json) {
 		try {
 			Annotation annotation = Json.fromJson(json, Annotation.class);
@@ -219,6 +222,28 @@ public class AnnotationController extends Controller {
 		} catch (ClassNotFoundException e) {
 			return new Annotation();
 		}
+	}
+	
+	private static Annotation updateAnnotationAdmin(Annotation annotation, ObjectId user) {
+		ArrayList<AnnotationAdmin> admins = annotation.getAnnotators();
+		
+		if (admins == null || admins.size() == 0) {
+			AnnotationAdmin administrative = new AnnotationAdmin();
+			administrative.setWithCreator(user);
+			administrative.setCreated(administrative.getGenerated());
+			administrative.setLastModified(new Date());
+
+			annotation.setAnnotators(new ArrayList(Arrays.asList(administrative)));
+
+		} else {
+			for (AnnotationAdmin administrative : admins) {
+				administrative.setWithCreator(user);
+				administrative.setCreated(administrative.getGenerated());
+				administrative.setLastModified(new Date());
+			}
+		}
+			
+		return annotation;
 	}
 
 	public static Result deleteAnnotation(String id) {

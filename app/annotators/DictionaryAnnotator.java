@@ -187,7 +187,7 @@ public class DictionaryAnnotator extends Annotator {
 	}
 	
 	@Override
-	public List<Annotation> annotate(String text, ObjectId withCreator, AnnotationTarget target, Map<String, Object> props) throws Exception {
+	public List<Annotation> annotate(String text, AnnotationTarget target, Map<String, Object> props) throws Exception {
 		text = strip(text);
 		
 		List<Annotation> res = new ArrayList<>();
@@ -264,8 +264,8 @@ public class DictionaryAnnotator extends Annotator {
 	    		admin.setGenerator(getName());
 	    		admin.setGenerated(new Date());
 	    		admin.setConfidence(-1.0f);
-	    		admin.setWithCreator(withCreator);
-	    		admin.setCreated(new Date());
+//	    		admin.setWithCreator(withCreator);
+//	    		admin.setCreated(new Date());
 
 	    		admins.add(admin);
 	    		

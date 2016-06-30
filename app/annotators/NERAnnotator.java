@@ -101,7 +101,7 @@ public class NERAnnotator extends Annotator {
     }
 
 	@Override
-	public List<Annotation> annotate(String text, ObjectId withCreator, AnnotationTarget target, Map<String, Object> properties) throws Exception {
+	public List<Annotation> annotate(String text, AnnotationTarget target, Map<String, Object> properties) throws Exception {
 		text = strip(text);
 		
 		List<Annotation> res = new ArrayList<>();
@@ -133,8 +133,8 @@ public class NERAnnotator extends Annotator {
 	    		admin.setGenerator(getName());
 	    		admin.setGenerated(new Date());
 	    		admin.setConfidence(-1.0f);
-	    		admin.setWithCreator(withCreator);
-	    		admin.setCreated(new Date());
+//	    		admin.setWithCreator(withCreator);
+//	    		admin.setCreated(new Date());
 	    		
 	    		admins.add(admin);
 	    		
@@ -172,8 +172,8 @@ public class NERAnnotator extends Annotator {
 	    		admin.setGenerator(getName());
 	    		admin.setGenerated(new Date());
 	    		admin.setConfidence(-1.0f);
-	    		admin.setWithCreator(withCreator);
-	    		admin.setCreated(new Date());
+//	    		admin.setWithCreator(withCreator);
+//	    		admin.setCreated(new Date());
 
 	    		admins.add(admin);
 	    		
@@ -211,8 +211,8 @@ public class NERAnnotator extends Annotator {
 	    		admin.setGenerator(getName());
 	    		admin.setGenerated(new Date());
 	    		admin.setConfidence(-1.0f);
-	    		admin.setWithCreator(withCreator);
-	    		admin.setCreated(new Date());
+//	    		admin.setWithCreator(withCreator);
+//	    		admin.setCreated(new Date());
 
 	    		admins.add(admin);
 	    		

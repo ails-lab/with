@@ -1449,10 +1449,10 @@ public class CollectionObjectController extends WithResourceController {
 					for (ContextData<ContextDataBody> cd : rr) {
 						try {
 							String recordId = cd.getTarget().getRecordId().toHexString();
-							Status status = errorIfNoAccessToRecord(Action.EDIT, new ObjectId(recordId));
-							if (status.toString().equals(ok().toString())) {
+							
+//							if (DB.getRecordResourceDAO().hasAccess(uid, Action.EDIT, new ObjectId(recordId))  || isSuperUser()) {
 								RecordResourceController.annotateRecord(recordId, user, annConfigs);
-							}
+//							}
 						} catch (Exception e) {
 							e.printStackTrace();
 							log.error(e.getMessage());
