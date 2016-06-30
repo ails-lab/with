@@ -37,8 +37,8 @@
 				                </div>
 								<!-- control-->
 								<div class="list-control">
-									<a data-bind="visible: isLogged() && !isFavorites() && (access() == 'WRITE' || access() == 'OWN')" data-toggle="tooltip" data-placement="top" title="Edit Collection" class="fa fa-pencil editaction"></a>
-									<!-- <a data-bind="visible: isLogged() && !isFavorites() && (access() == 'WRITE' || access() == 'OWN')" data-toggle="tooltip" data-placement="top" title="Annotate" class="fa fa-tag annotate-col" ></a>-->
+									<!-- <a data-bind="visible: isLogged() && !isFavorites() && (access() == 'WRITE' || access() == 'OWN')" data-toggle="tooltip" data-placement="top" title="Edit Collection" class="fa fa-pencil editaction"></a> -->
+									<a data-bind="visible: isLogged() && !isFavorites() && (access() == 'WRITE' || access() == 'OWN')" data-toggle="tooltip" data-placement="top" title="Annotate" class="fa fa-tag annotate-col" ></a>
 									<a data-toggle="tooltip" data-placement="top" title="Annotate" class="fa fa-tag annotate-col" ></a>
 									<a data-toggle="tooltip" data-placement="top" title="Show Thesauri" class="fa fa-cog thesaurus" ></a>
 									<a data-toggle="tooltip" data-placement="top" title="API Calls" class="fa fa-rss detail-control"></a>
@@ -116,7 +116,7 @@
 						
 <section class="action thesaurus">
 	<div class="action-header">
-		<div class="title">Thesauri</div>
+		<div class="title">Vocabularies</div>
 		</div>
 			<div class="action-body">
 				<div id="nav-bar" data-bind="template: { name: 'scheme-template', data: index }"></div>

@@ -1434,10 +1434,10 @@ public class CollectionObjectController extends WithResourceController {
 		
 		try {
 			locks = Locks.create().read("Collection #" + id).acquire();
-//			Result response = errorIfNoAccessToCollection(Action.EDIT, colId);
-//			if (!response.toString().equals(ok().toString())) {
-//				return response;
-//			} else {
+			Result response = errorIfNoAccessToCollection(Action.EDIT, colId);
+			if (!response.toString().equals(ok().toString())) {
+				return response;
+			} else {
 				JsonNode json = request().body().asJson();
 				
 				ObjectId user = WithController.effectiveUserDbId();
@@ -1449,7 +1449,10 @@ public class CollectionObjectController extends WithResourceController {
 					for (ContextData<ContextDataBody> cd : rr) {
 						try {
 							String recordId = cd.getTarget().getRecordId().toHexString();
-							RecordResourceController.annotateRecord(recordId, user, annConfigs);
+							Status status = errorIfNoAccessToRecord(Action.EDIT, new ObjectId(recordId));
+							if (status.toString().equals(ok().toString())) {
+								RecordResourceController.annotateRecord(recordId, user, annConfigs);
+							}
 						} catch (Exception e) {
 							e.printStackTrace();
 							log.error(e.getMessage());
@@ -1472,7 +1475,7 @@ public class CollectionObjectController extends WithResourceController {
 				ParallelAPICall.createPromise(methodQuery, colId, user, Priority.BACKEND);
 
 				return ok(result);
-//			}
+			}
 				
 		} catch (Exception e1) {
 			result.put("error", e1.getMessage());

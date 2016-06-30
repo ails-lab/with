@@ -295,8 +295,6 @@ public class RecordResourceController extends WithResourceController {
 	}
 
 	public static void annotateRecord(String recordId, ObjectId user, List<AnnotatorConfig> annConfigs) throws Exception {
-		System.out.println("ANNOTATE " + recordId);
-		
 		String[] fields = new String[] {"description", "label"};
 		
 		RecordResource record = DB.getRecordResourceDAO().get(new ObjectId(recordId));
