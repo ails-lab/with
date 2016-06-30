@@ -83,10 +83,8 @@ public class CollectionIndexController extends WithResourceController	{
 		try {
 			JsonNode json = request().body().asJson();
 
-//			System.out.println("QUERYING FOR TREE CONSTUCTION");
 			ElasticSearcher es = new ElasticSearcher();
 			
-//			MatchQueryBuilder query = QueryBuilders.matchQuery("collectedIn.collectionId", id);
 			QueryBuilder query = getIndexCollectionQuery(new ObjectId(id), json);
 			
 			SearchOptions so = new SearchOptions(0, Integer.MAX_VALUE);
@@ -126,14 +124,12 @@ public class CollectionIndexController extends WithResourceController	{
 			ObjectId collectionDbId = new ObjectId(id);
 			Result response = errorIfNoAccessToCollection(Action.READ, collectionDbId);
 			
-			System.out.println("************************D   ");
 			if (!response.toString().equals(ok().toString())) {
 				return response;
 			} else {
 				return ok(tf.toJSON(Language.EN));
 			}
 		} catch (Exception e) {
-//			e.printStackTrace();
 			result.put("error", e.getMessage());
 			return internalServerError(result);
 		}
@@ -145,10 +141,8 @@ public class CollectionIndexController extends WithResourceController	{
 		try {
 			JsonNode json = request().body().asJson();
 
-//			System.out.println("QUERYING FOR TREE CONSTUCTION");
 			ElasticSearcher es = new ElasticSearcher();
 			
-//			MatchQueryBuilder query = QueryBuilders.matchQuery("collectedIn.collectionId", id);
 			QueryBuilder query = getIndexCollectionQuery(new ObjectId(id), json);
 
 			SearchResponse res = es.execute(query, new SearchOptions(0, Integer.MAX_VALUE), indexAutocompleteFields);
@@ -214,32 +208,38 @@ public class CollectionIndexController extends WithResourceController	{
 		query.must(QueryBuilders.termQuery("collectedId", colId));
 
 		if (json != null) {
-			for (Iterator<JsonNode> iter = json.get("terms").elements(); iter.hasNext();) {
-				BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
-	
-				JsonNode inode = iter.next();
-				for (Iterator<JsonNode> iter2 = inode.get("sub").elements(); iter2.hasNext();) {
-					String s = iter2.next().asText();
-	
-					for (String f : indexFacetFields) {
-						boolQuery = boolQuery.should(QueryBuilders.termQuery(f, s));
+			JsonNode terms = json.get("terms");
+			
+			if (terms != null) {
+				for (Iterator<JsonNode> iter = terms.elements(); iter.hasNext();) {
+					BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
+		
+					JsonNode inode = iter.next();
+					for (Iterator<JsonNode> iter2 = inode.get("sub").elements(); iter2.hasNext();) {
+						String s = iter2.next().asText();
+		
+						for (String f : indexFacetFields) {
+							boolQuery = boolQuery.should(QueryBuilders.termQuery(f, s));
+						}
 					}
+					
+					query.must(boolQuery);
 				}
-				
-				query.must(boolQuery);
 			}
 			
-			for (Iterator<JsonNode> iter = json.get("keywords").elements(); iter.hasNext();) {
-				BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
-	
-				String s = iter.next().asText();
-				for (String f : indexAutocompleteFields) {
-					boolQuery = boolQuery.should(QueryBuilders.termQuery(f, s));
+			JsonNode keywords = json.get("keywords");
+			if (keywords != null) {
+				for (Iterator<JsonNode> iter = keywords.elements(); iter.hasNext();) {
+					BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
+		
+					String s = iter.next().asText();
+					for (String f : indexAutocompleteFields) {
+						boolQuery = boolQuery.should(QueryBuilders.termQuery(f, s));
+					}
+					
+					query.must(boolQuery);
 				}
-				
-				query.must(boolQuery);
 			}
-
 		}
 
 		return query;

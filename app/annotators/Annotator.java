@@ -32,7 +32,6 @@ import model.resources.RecordResource;
 
 public abstract class Annotator {
 
-	
 	protected Language lang;
 	
 	public static String LANGUAGE = "lang";
@@ -99,4 +98,24 @@ public abstract class Annotator {
 		
 		return res;
 	}
+	
+	public static Annotator getAnnotator(Class<? extends Annotator> clazz, Language lang) {
+
+		if (clazz.equals(DBPediaAnnotator.class)) {
+			return DBPediaAnnotator.getAnnotator(lang);
+		}
+		
+		if (clazz.equals(DictionaryAnnotator.class)) {
+			return DictionaryAnnotator.getAnnotator(lang, true);
+		}
+
+		if (clazz.equals(NERAnnotator.class)) {
+			return NERAnnotator.getAnnotator(lang);
+		}
+		
+		return null;
+	}
+	
+
+	
 }

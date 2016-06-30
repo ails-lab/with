@@ -147,17 +147,17 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 					}
 				}
 				
-				if (data.mediatype == null || (data.mediatype != null && data.mediatype == "IMAGE")) {
-					var img = new Image();
-					img.onload = function() {
-						$('#mediadiv').html("<svg style='height:100%;width:100%;max-height:" + img.height + "px; max-width:" + img.width + "px;' viewBox='0 0 " + img.width + " " + img.height + "' preserveAspectRatio='xMidYMin meet' version='1.1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink'>" +
-							                    "<image width='" + img.width + "' height='" + img.height + "' xlink:href='" + self.fullres() + "'/>" +
-				         		  	        "</svg>");
-						self.vtype = "IMAGE";
-					};
-					img.src = self.fullres();
-	
-				} 			
+//				if (data.mediatype == null || (data.mediatype != null && data.mediatype == "IMAGE")) {
+//					var img = new Image();
+//					img.onload = function() {
+//						$('#mediadiv').html("<svg style='height:100%;width:100%;max-height:" + img.height + "px; max-width:" + img.width + "px;' viewBox='0 0 " + img.width + " " + img.height + "' preserveAspectRatio='xMidYMin meet' version='1.1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink'>" +
+//							                    "<image width='" + img.width + "' height='" + img.height + "' xlink:href='" + self.fullres() + "'/>" +
+//				         		  	        "</svg>");
+//						self.vtype = "IMAGE";
+//					};
+//					img.src = self.fullres();
+//	
+//				} 			
 			}
 			
 			helper_thumb = self.calcOnErrorThumbnail();

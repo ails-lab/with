@@ -81,22 +81,26 @@ public class DBPediaAnnotator extends Annotator {
 	private String service;
 	
     public static DBPediaAnnotator getAnnotator(Language lang) {
+		if (!serverMap.containsKey(lang)) {
+			return null;
+		}
+
     	DBPediaAnnotator ta = annotators.get(lang);
     	if (ta == null) {
-    		if (serverMap.containsKey(lang)) {
-    			ta = new DBPediaAnnotator(lang);
-    			annotators.put(lang, ta);
-    		} else {
-    			return null;
+    		synchronized (DBPediaAnnotator.class) {
+	    		if (ta == null) {
+	    			ta = new DBPediaAnnotator(lang);
+	    			annotators.put(lang, ta);
+	    		}
     		}
     	}
     	
     	return ta;
     }  
     
-    private DBPediaAnnotator(Language language) {
+    private DBPediaAnnotator(Language lang) {
     	this.lang = lang;
-    	service = serverMap.get(language);
+    	service = serverMap.get(lang);
     }
 
 	public String getName() {
@@ -159,8 +163,8 @@ public class DBPediaAnnotator extends Annotator {
 	    	    QueryExecution qe = QueryExecutionFactory.sparqlService(DPBEDIA_ENDPOINT, QueryFactory.create(query, Syntax.syntaxSPARQL));
 	    		ResultSet rs = qe.execSelect();
 
-	    		String label = null;
-	    		Language lang = null;
+	    		String label = "";
+	    		Language lang = Language.UNKNOWN;
 	    		if (rs.hasNext()) {
 	    			QuerySolution sol = rs.next();
 	    			

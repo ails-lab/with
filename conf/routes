@@ -165,6 +165,7 @@ GET     /source/dbpedia/lookup						controllers.DBPediaController.dbpediaLookup(
 
 #Annotations
 GET		/record/:id/listAnnotations				    controllers.RecordResourceController.getAnnotations(id)
-GET		/record/:id/annotate						controllers.RecordResourceController.annotateRecordResource(id)
+POST		/record/:id/annotate						controllers.RecordResourceController.annotateRecord(id)
+POST		/collection/:id/annotate						controllers.CollectionObjectController.annotateCollection(id)
 
 

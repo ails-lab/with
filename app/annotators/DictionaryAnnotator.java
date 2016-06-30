@@ -22,6 +22,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.bson.types.ObjectId;
 import org.elasticsearch.action.search.SearchResponse;
@@ -65,11 +66,18 @@ public class DictionaryAnnotator extends Annotator {
 
 	private ExactDictionaryChunker tt;
 	
+	public static String VOCABULARIES = "VOCABULARIES";
+	
     public static DictionaryAnnotator getAnnotator(Language lang, boolean cs) {
     	DictionaryAnnotator ta = annotators.get(lang);
+    	
     	if (ta == null) {
-   			ta = new DictionaryAnnotator(lang, cs);
-   			annotators.put(lang, ta);
+    		synchronized (DictionaryAnnotator.class) {
+	    		if (ta == null) {
+		   			ta = new DictionaryAnnotator(lang, cs);
+		   			annotators.put(lang, ta);
+	    		}
+    		}
    		} 
     	
     	return ta;
@@ -168,14 +176,6 @@ public class DictionaryAnnotator extends Annotator {
 
 	}
 	
-//	public static void main(String[] args) throws Exception {
-//		String text = "Have a look at these books and that book. This is a nice mother of pearl. I felt especially proud to receive my commission as an officer in front of my grandmother, The Queen. She has been an incredible role model to me over the years, so it was very special to have her present for my graduation. I know it was also a memorable moment for my fellow officers to take part in the Parade in front of The Queen as Head of the Armed Forces."; 
-//		
-//		DictionaryAnnotator ta = DictionaryAnnotator.getAnnotator(Language.EN, true);
-//		ta.annotate(text, new HashMap<String, Object>());
-//	}
-	
-	
 	@Override
 	public String getName() {
 		return "Dictionary Annotator";
@@ -187,7 +187,7 @@ public class DictionaryAnnotator extends Annotator {
 	}
 	
 	@Override
-	public List<Annotation> annotate(String text, ObjectId withCreator, AnnotationTarget target, Map<String, Object> properties) throws Exception {
+	public List<Annotation> annotate(String text, ObjectId withCreator, AnnotationTarget target, Map<String, Object> props) throws Exception {
 		text = strip(text);
 		
 		List<Annotation> res = new ArrayList<>();
@@ -195,7 +195,12 @@ public class DictionaryAnnotator extends Annotator {
 		Chunking chunking = tt.chunk(text);
 		
 		NERAnnotator sann = NERAnnotator.getAnnotator(lang);
-		AnnotationIndex ai = sann.analyze(text);
+		AnnotationIndex ai = null;
+		if (sann != null) {
+			ai = sann.analyze(text);
+		}
+		
+		Set<AnnotationBodyTagging.Vocabulary> vocs = (Set<AnnotationBodyTagging.Vocabulary>)props.get(VOCABULARIES);
 		
 	    for (Chunk chunk : chunking.chunkSet()) {
 	    	JsonNode array = Json.parse(chunk.type());
@@ -204,30 +209,37 @@ public class DictionaryAnnotator extends Annotator {
 	    	int end = chunk.end();
 	    	
 //	    	Reject annotations not containing a noun
-	    	ArrayList<AnnotatedObject> aos = ai.getAnnotationsInSpan(new Span(start, end));
-	    	boolean accept = false; 
-	    	loop:
-	    	for (AnnotatedObject ao : aos) {
-	    		for (AnnotationValue value : ao.get("POS")) {
-	    			if (value.getValue().toString().startsWith("NN")) {
-	    				accept = true;
-	    				break loop;
-	    			}
-	    		}
-	    	}
-	    	
-	    	if (!accept) {
-	    		continue;
+	    	if (ai != null) {
+		    	ArrayList<AnnotatedObject> aos = ai.getAnnotationsInSpan(new Span(start, end));
+		    	boolean accept = false; 
+		    	loop:
+		    	for (AnnotatedObject ao : aos) {
+		    		for (AnnotationValue value : ao.get("POS")) {
+		    			if (value.getValue().toString().startsWith("NN")) {
+		    				accept = true;
+		    				break loop;
+		    			}
+		    		}
+		    	}
+		    	
+		    	if (!accept) {
+		    		continue;
+		    	}
 	    	}
 	    	
 	    	for (Iterator<JsonNode> iter = array.elements(); iter.hasNext();) {
 	    		JsonNode node = iter.next();
 	    		
+	    		AnnotationBodyTagging.Vocabulary voc = AnnotationBodyTagging.Vocabulary.getVocabulary(node.get("vocabulary").asText());
+	    		if (vocs != null && !vocs.contains(voc)) {
+	    			continue;
+	    		}
+
 	    		Annotation<AnnotationBodyTagging> ann = new Annotation<>();
-	    		
+
 	    		AnnotationBodyTagging annBody = new AnnotationBodyTagging();
 	    		annBody.setUri(node.get("uri").asText());
-	    		annBody.setUriVocabulary(AnnotationBodyTagging.Vocabulary.getVocabulary(node.get("vocabulary").asText()));
+	    		annBody.setUriVocabulary(voc);
 	    		
 	    		MultiLiteral ml;
 	    		JsonNode enLabel = node.get("label-en");

@@ -213,7 +213,7 @@
                  <input autocomplete="off" data-bind="value: keyword, event: {change: addKeyword}" placeholder="Keywords" class="searchinput" type="text">
             </div>
 -->
-			<div class="button-group"><a class="btn-green cancel" data-bind="click: closeThesaurus">Close</a></div>			
+			<div class="button-group"><a class="btn-green cancel" data-bind="click: closeSide">Close</a></div>			
 			</div>
 </section>
 
@@ -243,8 +243,8 @@
 				    <!--  /ko -->
 				</ul>
 			</div>
-			<div class="tab-pane active" id="nersources">
-				<ul class="vocabularies list">
+			<div class="tab-pane" id="nersources">
+				<ul class="ner list">
 					<!-- ko foreach: ner -->
 					<li><label>
 				    	<input type="checkbox" data-bind="checked: true, value: $data.vocabulary, click: $parent.selectVocabulary"/>
@@ -255,7 +255,7 @@
 			</div>
 		</div>
 	</div>
-	<div class="button-group"><a class="btn-green ok" data-bind="click: annotate">Annotate</a><a class="btn-green cancel" data-bind="click: closeVocabularies">Close</a></div>
+	<div class="button-group"><a class="btn-green ok" data-bind="click: annotateCollection">Annotate</a><a class="btn-green cancel" data-bind="click: closeSide">Close</a></div>
 </div>
 </section>
 						

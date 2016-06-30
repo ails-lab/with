@@ -72,18 +72,18 @@ public class AnnotationBodyTagging extends AnnotationBody {
 	
 	public static enum Vocabulary {
 		AAT("aat", "Art & Architecture Thesaurus", VocabularyType.THESAURUS, DictionaryAnnotator.class),
-		DBPEDIA_ONTOLOGY("dbo", "DBPedia Ontology", VocabularyType.THESAURUS, DictionaryAnnotator.class, "dbpedia"), 
+		DBPEDIA_ONTOLOGY("dbpedia", "DBPedia Ontology", VocabularyType.THESAURUS, DictionaryAnnotator.class), 
 		DBPEDIA_RESOURCE("dbr", "DBPedia Linking", VocabularyType.NER, DBPediaAnnotator.class), 
 		GEMET("gemet", "GEMET Thesaurus", VocabularyType.THESAURUS, DictionaryAnnotator.class), 
 		EUSCREENXL("euscreenxl", "EuscreenXL Thesaurus", VocabularyType.THESAURUS, DictionaryAnnotator.class),
 		FASHION("fashion", "Fashion Thesaurus", VocabularyType.THESAURUS, DictionaryAnnotator.class),
-		HORNBOSTEL_SACHS("hornbostel-sachs", "Hornbostel Sachs Thesaurus", VocabularyType.THESAURUS, DictionaryAnnotator.class, "hornbostel_sachs"),
+		HORNBOSTEL_SACHS("hornbostelsachs", "Hornbostel Sachs Thesaurus", VocabularyType.THESAURUS, DictionaryAnnotator.class),
 		MIMO("mimo", "MIMO Thesaurus", VocabularyType.THESAURUS, DictionaryAnnotator.class),
 		NERD("nerd", "Named Entity Tagging", VocabularyType.NER, NERAnnotator.class),
 		PHOTOGRAPHY("photography", "Photography Thesaurus", VocabularyType.THESAURUS, DictionaryAnnotator.class),
-		PARTAGE_PLUS("partage-plus", "Partage Plus Thesaurus", VocabularyType.THESAURUS, DictionaryAnnotator.class, "partageplus"),
+		PARTAGE_PLUS("partageplus", "Partage Plus Thesaurus", VocabularyType.THESAURUS, DictionaryAnnotator.class),
 		WORDNET30("wordnet30", "Wordnet 3.0", null, null),
-		WORDNET31("wordnet31", "Wordnet 3.0", null, null);
+		WORDNET31("wordnet31", "Wordnet 3.1", null, null);
 		
 		private String name;
 		private String label;

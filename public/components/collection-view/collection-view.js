@@ -234,10 +234,11 @@ define(['bridget', 'knockout', 'text!./_collection-view.html', 'isotope', 'image
 			}
 		});
 	    
-		self.closeThesaurus = function () {
+		self.closeSide = function () {
 			$('.action').removeClass('active');
 		};
 
+		self.vocabularyIndex = [];
 		self.vocabularies = ko.observableArray();
 		self.selvocabularies = ko.observableArray();
 		self.ner = ko.observableArray();
@@ -250,9 +251,11 @@ define(['bridget', 'knockout', 'text!./_collection-view.html', 'isotope', 'image
            		for (x in data) {
            			if (data[x].annotator != "null") {
            				if (data[x].type === "thesaurus") {
+           					self.vocabularyIndex[data[x].vocabulary] = data[x];
            					self.vocabularies.push(data[x]);
            					self.selvocabularies.push(data[x].vocabulary);
            				} else if (data[x].type === "ner") {
+           					self.vocabularyIndex[data[x].vocabulary] = data[x];
            					self.ner.push(data[x]);
            					self.selvocabularies.push(data[x].vocabulary);
            					
@@ -295,12 +298,49 @@ define(['bridget', 'knockout', 'text!./_collection-view.html', 'isotope', 'image
 	    	return true;
 	    }
 
+	    self.createAnnotateRequest = function(data) {
+			var vocitems = [];
+			var neritems = [];
+	    	
+	    	for (var i = 0; i < data.length; i++) {
+	    		var voc = self.vocabularyIndex[data[i]];
+	    		
+	    		if (voc.type == "thesaurus") {
+	    			vocitems.push(data[i]);
+	    		} else {
+	    			neritems.push(data[i])
+	    		}
+	    	}
+	    	
+			return "{ \"vocabulary\": " + JSON.stringify(vocitems) + ", \"ner\": " + JSON.stringify(neritems) +"}";
+	    }
+	    
+		self.annotateCollection = function() {
+			$.ajax({
+				"url": "/collection/" + self.id() + "/annotate",
+				"method": "post",
+				"data" : self.createAnnotateRequest(self.selvocabularies()),
+				"contentType": "application/json",
+				"success": function (data) {
+					$.smkAlert({
+						text: 'Annotating started',
+						type: 'success',
+						permanent: false
+					});
+				},
+				"error": function (result) {
+					$.smkAlert({
+						text: 'An error has occured',
+						type: 'danger',
+						permanent: true
+					});
+				}
+			});
+			$('.action').removeClass('active');
+		}
+
 	    self.sourceBind=function(e){
 	    	$("ul.list>li").css('display','block');
-	    	$('#vocsources').liveFilter('#f_search', 'li', {
-	    		  filterChildSelector: 'span'
-	    		});
-	    	
 	    }
 
 		var Term = function(data) {

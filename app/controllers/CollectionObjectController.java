@@ -17,17 +17,29 @@
 package controllers;
 
 import java.io.IOException;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 
 import javax.validation.ConstraintViolation;
 
+import notifications.Notification;
+import notifications.Notification.Activity;
+
 import org.bson.types.ObjectId;
+
+import annotators.Annotator;
+import annotators.AnnotatorConfig;
+import annotators.DictionaryAnnotator;
 
 import com.codahale.metrics.Counter;
 import com.codahale.metrics.Histogram;
@@ -48,6 +60,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
+import controllers.WithController.Action;
 import controllers.parameterTypes.MyPlayList;
 import controllers.parameterTypes.StringTuple;
 import controllers.thesaurus.CollectionIndexController;
@@ -57,6 +70,8 @@ import elastic.ElasticSearcher;
 import elastic.ElasticSearcher.SearchOptions;
 import model.annotations.ContextData;
 import model.annotations.ContextData.ContextDataBody;
+import model.annotations.bodies.AnnotationBodyTagging;
+import model.annotations.bodies.AnnotationBodyTagging.Vocabulary;
 import model.basicDataTypes.Language;
 import model.basicDataTypes.MultiLiteral;
 import model.basicDataTypes.ProvenanceInfo;
@@ -90,11 +105,14 @@ import sources.EuropeanaCollectionSpaceSource;
 import sources.EuropeanaSpaceSource;
 import sources.OWLExporter.CulturalItemOWLExporter;
 import sources.core.CommonQuery;
+import sources.core.ParallelAPICall;
 import sources.core.SourceResponse;
 import sources.core.Utils;
+import sources.core.ParallelAPICall.Priority;
 import utils.ListUtils;
 import utils.Locks;
 import utils.MetricsUtils;
+import utils.NotificationCenter;
 import utils.Tuple;
 
 
@@ -1193,7 +1211,6 @@ public class CollectionObjectController extends WithResourceController {
 		Locks locks = null;
 		
 		JsonNode json = request().body().asJson();
-//		log.info("JSON " + json.toString());
 		try {
 			
 			locks = Locks.create().read("Collection #" + collectionId).acquire();
@@ -1407,6 +1424,64 @@ public class CollectionObjectController extends WithResourceController {
 			}
 		}
 		return 0;
+	}
+
+
+	public static Result annotateCollection(String id) {
+		ObjectNode result = Json.newObject();
+		ObjectId colId = new ObjectId(id);
+		Locks locks = null;
+		
+		try {
+			locks = Locks.create().read("Collection #" + id).acquire();
+//			Result response = errorIfNoAccessToCollection(Action.EDIT, colId);
+//			if (!response.toString().equals(ok().toString())) {
+//				return response;
+//			} else {
+				JsonNode json = request().body().asJson();
+				
+				ObjectId user = WithController.effectiveUserDbId();
+				List<AnnotatorConfig> annConfigs = AnnotatorConfig.createAnnotationConfigs(json);
+				
+				BiFunction<ObjectId, ObjectId, Boolean> methodQuery = (ObjectId cid, ObjectId uid) -> {
+					List<ContextData<ContextDataBody>> rr = DB.getCollectionObjectDAO().getById(cid).getCollectedResources();
+					
+					for (ContextData<ContextDataBody> cd : rr) {
+						try {
+							String recordId = cd.getTarget().getRecordId().toHexString();
+							RecordResourceController.annotateRecord(recordId, user, annConfigs);
+						} catch (Exception e) {
+							e.printStackTrace();
+							log.error(e.getMessage());
+						}
+					}
+					
+//					Notification notification = new Notification();
+//					notification.setActivity(Activity.MESSAGE);
+//					notification.setMessage("Annotating of collection '" + DB.getCollectionObjectDAO().getById(cid).getDescriptiveData().getLabel().get(Language.DEFAULT) + "' has finished");
+////					notification.setSender(sender);
+//					notification.setReceiver(uid);
+//					Date now = new Date();
+//					notification.setOpenedAt(new Timestamp(now.getTime()));
+//					DB.getNotificationDAO().makePermanent(notification);
+//					NotificationCenter.sendNotification(notification);
+
+					return true;
+				};
+				
+				ParallelAPICall.createPromise(methodQuery, colId, user, Priority.BACKEND);
+
+				return ok(result);
+//			}
+				
+		} catch (Exception e1) {
+			result.put("error", e1.getMessage());
+			return internalServerError(result);
+		} finally {
+			if (locks != null) {
+				locks.release();
+			}
+		}
 	}
 
 }
