@@ -22,8 +22,10 @@ import org.bson.types.ObjectId;
 
 import utils.Serializer;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
+@JsonInclude(value = JsonInclude.Include.NON_NULL)
 public class AnnotationTarget implements Cloneable {
 
 	@JsonSerialize(using = Serializer.ObjectIdSerializer.class)

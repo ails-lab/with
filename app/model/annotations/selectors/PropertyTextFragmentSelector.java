@@ -16,6 +16,9 @@
 
 package model.annotations.selectors;
 
+import org.mongodb.morphia.query.Query;
+
+import model.annotations.Annotation;
 import model.basicDataTypes.Language;
 
 public class PropertyTextFragmentSelector extends PropertySelector {
@@ -66,6 +69,23 @@ public class PropertyTextFragmentSelector extends PropertySelector {
 
 		return c;
     }
+	
+	@Override
+	public void addToQuery(Query<Annotation> q) {
+		super.addToQuery(q);
+		
+		q.field("target.selector.start").equal(start);
+		q.field("target.selector.end").equal(end);
+		
+		if (origValue != null) {
+			q.field("target.selector.origValue").equal(origValue);
+		}
+		
+		if (origLang != null) {
+			q.field("target.selector.origLang").equal(origLang);
+		}
+	}
+
 
 
 }

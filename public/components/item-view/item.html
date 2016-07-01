@@ -38,7 +38,7 @@
                           </div>
 		                  <!-- annotate box-->
 		                   <!-- ko if:  record().annotations -->
-		                  <div class="annotatebox">
+		                  <div class="annotatebox" style="	display: none;">
 		                    <div class="question">What kind of musical instrument do you hear in this item?</div>
 		                    <div class="info">The item has been tagged with the following concepts.</div>
 		                    <!-- answers-->
@@ -60,6 +60,7 @@
 		                    <!-- /ko -->
 		                  </div>
 		                  <!-- /ko -->
+		                   
                           <!-- metadata-->
                           <ul id="itemTabs" role="tablist" class="nav nav-tabs">
                             <li class="active"><a href="#information" title="" data-toggle="tab">Info</a></li>
@@ -162,9 +163,9 @@
                       		</ul>
                             </div>
                             
-                            							<div id="annotations" class="tab-pane">
-                                <!-- title-->
+							<div id="annotations" class="tab-pane">
                               <div class="meta">
+                              <!-- 
                                 <div class="list" data-bind="if: record().title">
                                   <div class="title">
                                     <div class="titlewrap">Title</div>
@@ -173,8 +174,6 @@
                                   </div>
                                 </div>
 
-                                <!-- description-->
-                              <div class="meta">
                                 <div class="list" data-bind="if: record().description">
                                   <div class="title">
                                     <div class="titlewrap">Description</div>
@@ -182,6 +181,7 @@
                                   <div class="field newlines" id="ann-description" data-bind="html:record().description">
                                   </div>
                                 </div>
+                                 -->
                                 <!-- 
                                 <div class="list"  data-bind="if: record().dataProvider">
                                   <div class="title">
@@ -222,14 +222,32 @@
                                 </div> -->
                                 
                                 <div class="list">
-                                  <div class="title">
+                                 <!--  <div class="title">
                                     <div class="titlewrap">Tags</div>
-                                  </div>
+                                  </div> -->
                                   <!-- ko foreach: record().annotationsKeys -->
                                   <div class="term">
                                     <a target="_blank" data-bind="attr: {href: uri, title: uri}, css: {'glyphicon glyphicon-link': true}"></a>&nbsp;
-                                    <a title="Show hierarchy" data-bind="css: {'glyphicon glyphicon-leaf': true}, event: {click: function(){$parent.record().showHierarchy(uri);}} "></a>&nbsp;
+                                    <!-- <a title="Show hierarchy" data-bind="css: {'glyphicon glyphicon-leaf': true}, event: {click: function(){$parent.record().showHierarchy(uri);}} "></a>&nbsp;-->
                                   	<a class="ann-resource" href="#" data-bind="attr: {id: id}, text:$parent.record().getAnnotationLabel($data), event: {click: function(){$parent.record().annShow(uri);}}"></a>
+                                  	&nbsp;&nbsp;<a href="#" class="fa" title="Expand" data-bind="css: {'fa-sort-down' :!isExpanded(), 'fa-sort-up' :isExpanded()}, click: toggleVisibility"></a>&nbsp;&nbsp;&nbsp;&nbsp;
+                                  	<span data-bind="visible: isLogged()" style="float: right;">
+                                  	    <a href="#" class="fa fa-check" title="Approve" data-bind="css: {'ann-approve' : approved()}, click:approveAnnotation"></a>&nbsp;&nbsp;
+                                  	    <a href="#" class="fa fa-times" title="Reject" data-bind="css: {'ann-reject' : rejected()}, click:rejectAnnotation"></a>
+                                  	 </span>
+                                  	 <div class="term-support" data-bind="visible: isExpanded()">
+	                                  	 <!-- ko foreach: $data.instances -->
+	                                  	 	<div class="term-instance" >
+	                                  	 	<span class="ann-target-prop" data-bind="attr: {id: id}, text: property"></span>
+	                                  	 	<span class="ann-target-text" data-bind="html: showExtract()"></span>
+	                                  	 	                                  	<span data-bind="visible: isLogged()" style="float: right;">
+                                  	    <a href="#" class="fa fa-check" title="Approve" data-bind="css: {'ann-approve' : approved()}, click:approveAnnotation"></a>&nbsp;&nbsp;
+                                  	    <a href="#" class="fa fa-times" title="Reject" data-bind="css: {'ann-reject' : rejected()}, click:rejectAnnotation"></a>
+                                  	 </span></div>
+	                                  	 	
+	                                  	 	
+	                                  	 <!-- /ko -->
+	                                  </div>
                                   </div>
                                  <!-- /ko --> 
                                   </div>

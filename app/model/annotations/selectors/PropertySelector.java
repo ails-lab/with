@@ -16,6 +16,10 @@
 
 package model.annotations.selectors;
 
+import model.annotations.Annotation;
+
+import org.mongodb.morphia.query.Query;
+
 
 public class PropertySelector extends SelectorType {
 	
@@ -36,5 +40,10 @@ public class PropertySelector extends SelectorType {
 		
 		return c;
     }
+	
+	@Override
+	public void addToQuery(Query<Annotation> q) {
+		q.field("target.selector.property").equal(property);
+	}
 
 }

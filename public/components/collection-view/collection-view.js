@@ -243,6 +243,11 @@ define(['bridget', 'knockout', 'text!./_collection-view.html', 'isotope', 'image
 		self.selvocabularies = ko.observableArray();
 		self.ner = ko.observableArray();
 		
+	    self.sourceBind=function(e){
+	    	$("ul.list>li").css('display','block');
+	    }
+
+	    
 		$.ajax({
          	"url": "/thesaurus/listThesauri",
 			"method": "get",

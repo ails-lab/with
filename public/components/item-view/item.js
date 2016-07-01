@@ -170,8 +170,112 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 			selfx.values = ko.observableArray([]);
 			
 			ko.mapping.fromJS(data, {}, selfx);
+
 		}
 
+		var AnnotationInstance = function(data) {
+			var selfx = this;
+			
+			selfx.id = ko.observable();
+			selfx.property = ko.observable();
+			selfx.text = ko.observable();
+			selfx.start = ko.observable();
+			selfx.end = ko.observable();		
+			
+			selfx.approved = ko.observable(false);
+			selfx.rejected = ko.observable(false);
+
+			selfx.approveAnnotation = function() {
+	           $.ajax({
+					type    : "get",
+					url     : "/annotation/" + selfx.id() + "/approve",
+					success : function(result) {
+						selfx.approved(true);							
+						selfx.rejected(false);
+					}
+	           });
+			} 
+			
+			selfx.rejectAnnotation = function() {
+	           $.ajax({
+					type    : "get",
+					url     : "/annotation/" + selfx.id() + "/reject",
+					success : function(result) {
+						selfx.approved(false);
+						selfx.rejected(true);							
+					}
+	           });
+			} 
+			
+			ko.mapping.fromJS(data, {}, selfx);
+
+			selfx.showExtract = function() {
+				var s = Math.max(0, selfx.start() - 50);
+				var e = Math.min(selfx.text().length, selfx.end() + 50);
+				
+				if (s > 0)
+					while (selfx.text().substr(s, 1) != " " && s < selfx.start()) 
+						s++;
+
+				if (e < selfx.text().length)
+					while (selfx.text().substr(e - 1, 1) != " " && e > selfx.end())
+						e--;
+
+				return (s > 0?"... ":"") + selfx.text().substring(s, selfx.start()) + "<span class='tag-selection'>" + selfx.text().substring(selfx.start(),selfx.end()) + "</span>" + selfx.text().substring(selfx.end(),e) + (e < selfx.text().length?" ...":"");
+			}
+		}
+			
+		
+		var AnnotationKey = function(data) {
+			var selfx = this;
+			
+			selfx.uri = ko.observable();
+			selfx.label = ko.observable();
+			selfx.vocabulary = ko.observable();
+			selfx.id = ko.observable();
+			selfx.dbids = ko.observableArray([]);
+			selfx.instances = ko.observableArray([]);
+			
+			selfx.isExpanded = ko.observable(false);
+			
+			ko.mapping.fromJS(data, {}, selfx);
+
+			selfx.approved = ko.computed(function() {
+				for (var j = 0; j < selfx.instances().length; j++)
+					if (selfx.instances()[j].approved())
+						return true;
+				return false;
+			});
+
+			selfx.rejected = ko.computed(function() {
+				var count = 0;
+				for (var j = 0; j < selfx.instances().length; j++)
+					if (selfx.instances()[j].rejected())
+						count++;
+				
+				if (count == selfx.instances().length) {
+					return true;
+				} else {
+					return false;
+				}
+			});
+			
+			
+			selfx.approveAnnotation = function() {
+				for (var j = 0; j < selfx.instances().length; j++)
+					selfx.instances()[j].approveAnnotation();
+			} 
+			
+			selfx.rejectAnnotation = function() {
+				for (var j = 0; j < selfx.instances().length; j++)
+					selfx.instances()[j].rejectAnnotation();
+			} 
+			
+			selfx.toggleVisibility = function() {
+				selfx.isExpanded(!selfx.isExpanded());
+			};
+		}
+		
 		self.annotationIndex = [];
 		self.annotatedTexts = ko.observableArray([]);
 		
@@ -196,13 +300,10 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 		}
 		
 		self.getAnnotationLabel = function (data) {
-			if (data.label == undefined) {
-				return self.beautifyVocabulary(data.vocabulary) + " : " + data.uri;
+			if (data.label() == null) {
+				return self.beautifyVocabulary(data.vocabulary()) + " : " + data.uri();
 			} else {
-				for (x in data.label) {
-					return self.beautifyVocabulary(data.vocabulary) + " : " + data.label[x];
-					break;
-				}
+				return self.beautifyVocabulary(data.vocabulary()) + " : " + data.label();
 			}
 		}
 
@@ -241,6 +342,7 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 		
 		var fieldMap = { label: "title"};
 		
+		
 		self.parseAnnotations = function(anns){
 			
 			var annotations = new Object();
@@ -268,35 +370,66 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 			var count = 0;
 			
 			for (var i = 0; i < anns.length; i++) {
+				var annid = anns[i].dbId;
 				var uri = anns[i].body.uri;
-				var label = anns[i].body.label;
 				var vocabulary = anns[i].body.uriVocabulary;
+				var label = "";
+				if (anns[i].body.label.default != null && anns[i].body.label.default.length > 0) {
+					label = anns[i].body.label.default[0];
+				} 
 				
-				var found = false; 
-				for (var j = 0; j < self.annotationsKeys().length; j++) {
-					if (self.annotationsKeys()[j].uri == uri) {
+				var found = false;
+				var aj;
+				for (aj = 0; aj < self.annotationsKeys().length; aj++) {
+					if (self.annotationsKeys()[aj].uri() == uri) {
+						self.annotationsKeys()[aj].dbids.push(annid);
 						found = true;
 						break;
 					}
 				}
+
+				var approved = false;
+				var rejected = false;
+				if (anns[i].score != null) {
+					if (anns[i].score.approvedBy != null) {
+						var approvedBy = anns[i].score.approvedBy;
+						for (var j = 0; j < approvedBy.length; j++) {
+							if (approvedBy[j] == app.currentUser._id()) {
+								approved = true;
+								break;
+							}
+						}
+					}
+					if (anns[i].score.rejectedBy != null) {
+						var rejectedBy = anns[i].score.rejectedBy;
+						for (var j = 0; j < rejectedBy.length; j++) {
+							if (rejectedBy[j] == app.currentUser._id()) {
+								rejected = true;
+								break;
+							}
+						}
+					}
+				}
 				
 				if (!found) {
-					self.annotationsKeys.push({uri: uri, label: label, vocabulary: vocabulary, id: "ann-key-" + count});
+					aj = self.annotationsKeys().length; 
+					self.annotationsKeys.push(new AnnotationKey({uri: uri, label: label, vocabulary: vocabulary, id: "ann-key-" + count, dbids: [ annid ]}));
 					self.annotationIndex[uri] = count++;
-				}
-
-//				alert(x);
-//				alert(uri);
+				} 
+				
+//				self.annotationsKeys()[aj].approved(self.annotationsKeys()[aj].approved() || approved); 
+//				self.annotationsKeys()[aj].rejected(self.annotationsKeys()[aj].rejected() || rejected);
+				
 				var property = anns[i].target.selector.property;
-//				var property = location.substring(2,location.indexOf("&t="));
 				if (fieldMap[property] != undefined) {
 					property = fieldMap[property];
 				}
 
-//				var position = location.substring(location.indexOf("&t=") + 3);
 				var sp = anns[i].target.selector.start;
 				var ep = anns[i].target.selector.end;
-				
+
+				self.annotationsKeys()[aj].instances.push(new AnnotationInstance({id: annid, property: property, text: anns[i].target.selector.origValue, start: sp, end: ep, approved: approved, rejected: rejected}));
+
 				found = false;
 				for (var j = 0; j < properties.length; j++) {
 					if (properties[j] == property) {
@@ -318,14 +451,14 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 			}
 			
 			self.annotationsKeys.sort(function(a, b) {
-				if (a.vocabulary < b.vocabulary) {
+				if (a.vocabulary() < b.vocabulary()) {
 					return -1;
-				} else if (a.vocabulary > b.vocabulary) {
+				} else if (a.vocabulary() > b.vocabulary()) {
 					return 1;
 				} else {
-					if (a.label < b.label) {
+					if (a.label() < b.label()) {
 						return -1;
-					} else if (a.label < b.label) {
+					} else if (a.label() < b.label()) {
 						return 1;
 					} else {
 						return 0;
@@ -350,7 +483,6 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 					}
 				});
 			}
-			
 			
 			for (v in properties) {
 				var ppos = -1;
@@ -427,16 +559,16 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 		var selectedAnnotations = [];
 		
 		self.annShow = function(uri) {
-			$(".ann-resource").removeClass("tag-selection");
 			
-			$("#ann-key-" + self.annotationIndex[uri]).addClass("tag-selection");
+			$(".ann-resource").removeClass("tag-selection");
+			$("#ann-key-" + self.annotationIndex[uri()]).addClass("tag-selection");
 			
 			for (v in selectedAnnotations) {
 				$(".ann-value-" + selectedAnnotations[v]).removeClass("tag-selection");
 			}
-			selectedAnnotations.push(self.annotationIndex[uri]);
+			selectedAnnotations.push(self.annotationIndex[uri()]);
 			
-			$(".ann-value-" + self.annotationIndex[uri]).addClass("tag-selection");
+			$(".ann-value-" + self.annotationIndex[uri()]).addClass("tag-selection");
 		};
 
 		self.hierarchy = ko.observable('');
@@ -445,7 +577,7 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 			if (self.hierarchy.length == 0) {
 				$.ajax({
 					type    : "get",
-					url     : "/thesaurus/getTerm?uri=" + uri,
+					url     : "/thesaurus/getTerm?uri=" + uri(),
 					contentType: "application/json",
 					success : function(result) {
 						var s = "";
@@ -466,12 +598,9 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 						
 						alert(s);
 					},
-					
 					error   : function(request, status, error) {
 						$.smkAlert({
-							text: 'An error has occured',
-							type: 'danger',
-							permanent: true
+							text: 'An error has occured', type: 'danger', permanent: true
 						});
 					}
 				});
@@ -770,7 +899,7 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 		};
 		
 		
-			self.likeRecord = function (rec,event) {
+		self.likeRecord = function (rec,event) {
         	event.preventDefault();
         	var $heart=$(event.target);
         	if(!app.currentUser._id()) {
@@ -819,7 +948,6 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 					self.addDisqus();
 				},
 				error: function (xhr, textStatus, errorThrown) {
-					
 					$.smkAlert({text:'An error has occured', type:'danger', permanent: true});
 				}
 			});

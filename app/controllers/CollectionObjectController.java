@@ -1454,20 +1454,20 @@ public class CollectionObjectController extends WithResourceController {
 								RecordResourceController.annotateRecord(recordId, user, annConfigs);
 //							}
 						} catch (Exception e) {
-							e.printStackTrace();
+//							e.printStackTrace();
 							log.error(e.getMessage());
 						}
 					}
 					
-//					Notification notification = new Notification();
-//					notification.setActivity(Activity.MESSAGE);
-//					notification.setMessage("Annotating of collection '" + DB.getCollectionObjectDAO().getById(cid).getDescriptiveData().getLabel().get(Language.DEFAULT) + "' has finished");
-////					notification.setSender(sender);
-//					notification.setReceiver(uid);
-//					Date now = new Date();
-//					notification.setOpenedAt(new Timestamp(now.getTime()));
-//					DB.getNotificationDAO().makePermanent(notification);
-//					NotificationCenter.sendNotification(notification);
+					Notification notification = new Notification();
+					notification.setActivity(Activity.MESSAGE);
+					notification.setMessage("Annotating of collection '" + DB.getCollectionObjectDAO().getById(cid).getDescriptiveData().getLabel().get(Language.DEFAULT).get(0) + "' has finished");
+//					notification.setSender(sender);
+					notification.setReceiver(uid);
+					Date now = new Date();
+					notification.setOpenedAt(new Timestamp(now.getTime()));
+					DB.getNotificationDAO().makePermanent(notification);
+					NotificationCenter.sendNotification(notification);
 
 					return true;
 				};

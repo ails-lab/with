@@ -101,6 +101,25 @@ public class AnnotationController extends Controller {
 		return ok(Json.toJson(annotation));
 	}
 	
+	public static Result approveAnnotation(String id) {
+		try {			
+			DB.getAnnotationDAO().addApprove(new ObjectId(id), WithController.effectiveUserDbId());
+			return ok();
+		} catch (Exception e) {
+			return internalServerError();
+		}
+	}
+
+	public static Result rejectAnnotation(String id) {
+		try {			
+			DB.getAnnotationDAO().addReject(new ObjectId(id), WithController.effectiveUserDbId());
+			return ok();
+		} catch (Exception e) {
+			return internalServerError();
+		}
+	}
+
+	
 	public static Annotation addAnnotation(Annotation annotation, ObjectId user) {
 		
 		annotation = updateAnnotationAdmin(annotation, user);
@@ -160,6 +179,7 @@ public class AnnotationController extends Controller {
 		return ok(result);
 	}
 
+	
 	public static Result getUserAnnotations(int offset, int count) {
 		ObjectId withUser = WithController.effectiveUserDbId();
 		List<RecordResource> records = DB.getRecordResourceDAO()
