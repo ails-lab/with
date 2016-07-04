@@ -839,7 +839,7 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 							likes: usage.likes,
 							collected: usage.collected,
 							collectedIn:backendRecord.collectedIn,
-							//fullrestype: media[0] != null && media[0].Original != null && media[0].Original.type != "null" ? media[0].Original.type : "",
+							fullrestype: media[0] != null && media[0].Original != null && media[0].Original.type != "null" ? media[0].Original.type : "",
 							nextItemToAnnotate: backendRecord.nextItemToAnnotate,
 							annotations: backendRecord.annotations,
 							data: backendRecord
@@ -881,7 +881,7 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 			 if (vid != null) {
 				 vid.parentNode.removeChild(vid);
 			}
-			 $('#mediadiv').html("");
+//			 $('#mediadiv').html("");
 		};
 
 		self.changeSource = function (item) {
