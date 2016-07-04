@@ -29,4 +29,21 @@ public class Query {
 	 * This is the CNF of the query. The inner array filters a meant to be ORed together, the outer  
 	 */
 	public Filter[][] filters;
+	
+	
+	/**
+	 * How many we request from each source and at what offset. start is zero based.
+	 */
+	public int start, count;
+	
+	/**
+	 * Alternative to say the same. page is one based! 
+	 */
+	public int page, pageSize;
+	
+	
+	/**
+	 * If you specify a continuationId, the backend will continue a search 
+	 */
+	public String continuationId;
 }

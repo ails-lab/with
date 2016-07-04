@@ -16,20 +16,7 @@
 
 package search;
 
-/**
- * All potential query sources need an enum entry here. The class that executes the query and 
- * translates Filter fieldnames and values, and prepares WITH model results from the backend results
- * is specified here as Backend. 
- * @author Arne Stabenau
- *
- */
-public enum Source {
-	WITHin, Europeana, BritishLibrary
-	
-	private Backend backendClass;
-	
-	private Source( Backend be ){
-		backendClass = be;
-	}
+public class Response {
+	public static Response EMPTY = new Response();
 	
 }
