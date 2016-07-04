@@ -241,12 +241,31 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 			ko.mapping.fromJS(data, {}, selfx);
 
 			selfx.approved = ko.computed(function() {
+				var count = 0;
 				for (var j = 0; j < selfx.instances().length; j++)
 					if (selfx.instances()[j].approved())
-						return true;
-				return false;
+						count++;
+				
+				if (count == selfx.instances().length) {
+					return true;
+				} else {
+					return false;
+				}
 			});
 
+			selfx.papproved = ko.computed(function() {
+				var count = 0;
+				for (var j = 0; j < selfx.instances().length; j++)
+					if (selfx.instances()[j].approved())
+						count++;
+				
+				if (count == 0 || count == selfx.instances().length) {
+					return false;
+				} else {
+					return true;
+				}
+			});
+			
 			selfx.rejected = ko.computed(function() {
 				var count = 0;
 				for (var j = 0; j < selfx.instances().length; j++)
