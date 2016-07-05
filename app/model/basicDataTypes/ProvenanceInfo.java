@@ -37,6 +37,7 @@ public class ProvenanceInfo {
 		YouTube("Youtube"),
 		NLA("NLA","National Library of Australia"),
 		WITHin("WITHin"),
+		DBPedia("DBPedia", "DBPedia"),
 		Rijksmuseum("Rijksmuseum","Rijksmuseum"), Historypin("Historypin"), WITHinASpace("WITHinASpace");
 
 

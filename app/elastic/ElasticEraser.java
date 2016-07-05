@@ -112,4 +112,32 @@ public class ElasticEraser {
 		return true;
 	}
 
+	public static boolean deleteManyTermsFromThesaurus(List<ObjectId> ids) {
+
+		try {
+			if( ids.size() == 0 ) {
+				log.debug("No records within the collection to index!");
+			} else if( ids.size() == 1 ) {
+					Elastic.getTransportClient().prepareDelete(
+									Elastic.index,
+									Elastic.thesaurusResource,
+									ids.get(0).toString())
+						 	.execute()
+						 	.actionGet();
+			} else {
+					for(ObjectId id: ids) {
+						Elastic.getBulkProcessor().add(new DeleteRequest(
+								Elastic.index,
+								Elastic.thesaurusResource,
+								id.toString()));
+					}
+					Elastic.getBulkProcessor().flush();
+			}
+		} catch (Exception e) {
+			log.error("Error in Bulk delete all terms of a thesaurus", e);
+			return false;
+		}
+		return true;
+	}
+
 }

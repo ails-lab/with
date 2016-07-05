@@ -195,6 +195,12 @@ public class ElasticSearcher {
 		//System.out.println(search.toString());
 		return search.execute().actionGet();
 	}
+	
+	public SearchResponse execute(QueryBuilder query, SearchOptions options, String... fields) {
+		SearchRequestBuilder search = this.getSearchRequestBuilder(query, options);
+		search.addFields(fields);
+		return search.execute().actionGet();
+	}
 
 	public SuggestResponse executeSuggestion(SuggestionBuilder suggestion, SearchOptions options) {
 		SuggestRequestBuilder sugg = this.getSuggestRequestBuilder(suggestion, options);
@@ -448,9 +454,12 @@ public class ElasticSearcher {
 
 		OrFilterBuilder outer_or = FilterBuilders.orFilter();
 		NestedFilterBuilder nested_filter = FilterBuilders.nestedFilter("access", and_filter);
+		
+		//outer_or.add(nested_filter).add(this.filter("isPublic", "true"));
 		outer_or.add(nested_filter);
 		if(options.isPublic )
 			outer_or.add(this.filter("isPublic", "true"));
+		
 		if(options.filterType == FILTER_OR) {
 			((OrFilterBuilder) f).add(outer_or);
 		}
@@ -552,3 +561,4 @@ public class ElasticSearcher {
 	}
 
 }
+

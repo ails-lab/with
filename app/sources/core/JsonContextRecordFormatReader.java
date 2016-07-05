@@ -38,7 +38,7 @@ public abstract class JsonContextRecordFormatReader<T extends WithResource> {
 	}
 
 	protected abstract T fillObjectFrom(JsonContextRecord text);
-	public abstract CulturalObject overwriteObjectFrom(RecordResource object, JsonNode text);
+	public abstract T overwriteObjectFrom(RecordResource object, JsonNode text);
 
 	public T readObjectFrom(JsonNode text) {
 		return readObjectFrom(new JsonContextRecord(text));

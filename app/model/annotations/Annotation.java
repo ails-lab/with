@@ -31,10 +31,12 @@ import utils.Deserializer;
 import utils.Serializer;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 @SuppressWarnings("unchecked")
+@JsonInclude(value = JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Entity("Annotation")
 public class Annotation<T extends AnnotationBody> {
@@ -76,6 +78,8 @@ public class Annotation<T extends AnnotationBody> {
 	 * Commenting, Editing
 	 */
 	private MotivationType motivation;
+	
+	@Embedded
 	private AnnotationScore score;
 
 	/**
@@ -146,6 +150,7 @@ public class Annotation<T extends AnnotationBody> {
 		this.annotators = annotators;
 	}
 
+	@JsonInclude(value = JsonInclude.Include.NON_NULL)
 	public static class AnnotationAdmin {
 		/**
 		 * The with user who created this annotation.
@@ -231,22 +236,27 @@ public class Annotation<T extends AnnotationBody> {
 
 	}
 
+	@JsonInclude(value = JsonInclude.Include.NON_NULL)
+	@Embedded
 	public static class AnnotationScore {
 
 		/**
 		 * An arrayList with the user ids who approved this annotation body.
 		 */
+		@JsonSerialize(using = Serializer.ObjectIdArraySerializer.class)
 		private ArrayList<ObjectId> approvedBy;
 
 		/**
 		 * An arrayList with the user ids who rejected this annotation body.
 		 */
+		@JsonSerialize(using = Serializer.ObjectIdArraySerializer.class)
 		private ArrayList<ObjectId> rejectedBy;
 
 		/**
 		 * An arrayList with the user ids who didn't comment on this annotation
 		 * body.
 		 */
+		@JsonSerialize(using = Serializer.ObjectIdArraySerializer.class)
 		private ArrayList<ObjectId> dontKnowBy;
 
 		public ArrayList<ObjectId> getApprovedBy() {

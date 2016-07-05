@@ -78,10 +78,6 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
 		  return this;
 		};
 
-
-
-	 
-	
 	 
 		function Record(data) {
 			var self = this;
@@ -167,6 +163,8 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
 						return "www.rijksmuseum.nl";
 				    case "DDB":
 				        return "deutsche-digitale-bibliothek.de";
+				    case "DBPedia":
+				    	return "dbpedia.org";
 				    default: return "";
 				 }
 				});
@@ -252,6 +250,7 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
 		
 		self.mixresults=ko.observableArray();
 		self.selectedSource=ko.observable(self.sources()[0]);
+
 		self.results = ko.observableArray([]);
 		self.selectedRecord=ko.observable(false);
 		//self.results.extend({ rateLimit: 50 });
@@ -364,6 +363,9 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
 		 self.currentTerm($(".searchinput").val());
 		 if(self.searching()==false && self.currentTerm()!=""){
 			self.searching(true);
+
+
+			
 			$request=$.ajax({
 				"url": "/api/advancedsearch",
 				"method": "post",
@@ -402,7 +404,6 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
 						
 						items=self.revealItems(data[i].items.culturalCHO);
 						
-						
 						if(items.length>0){
 							 var $newitems=getItems(items);
 							 $container.isotope({
@@ -430,7 +431,11 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
 						else if(source=="DigitalNZ"){
 							api_console="http://api.digitalnz.org/"
 						}
+						else if(source=="DBPedia"){
+							api_console="http://dbpedia.org";
+						}
 						else{api_console="http://www.europeanafashion.eu/api/search/"+self.term();}
+
 						var srcCat=new SourceCategory({
 							source:source,
 							items:items,

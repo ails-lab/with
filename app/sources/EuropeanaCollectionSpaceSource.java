@@ -14,6 +14,7 @@
  */
 
 
+
 package sources;
 
 import java.util.Arrays;
@@ -77,3 +78,4 @@ public class EuropeanaCollectionSpaceSource extends EuropeanaSpaceSource {
 	}
 
 }
+
