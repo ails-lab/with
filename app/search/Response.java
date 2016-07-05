@@ -16,6 +16,12 @@
 
 package search;
 
+/**
+ * A Response encapsulates all information that is needed to answer a Query
+ * 
+ * @author Arne Stabenau
+ *
+ */
 public class Response {
 	public static Response EMPTY = new Response();
 	
