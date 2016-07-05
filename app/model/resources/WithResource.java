@@ -29,6 +29,7 @@ import model.EmbeddedMediaObject;
 import model.EmbeddedMediaObject.MediaVersion;
 import model.annotations.Annotation;
 import model.annotations.ContextData;
+import model.basicDataTypes.CollectedByAccess;
 import model.basicDataTypes.CollectionInfo;
 import model.basicDataTypes.ProvenanceInfo;
 import model.basicDataTypes.WithAccess;
@@ -87,6 +88,8 @@ public class WithResource<T extends DescriptiveData, U extends WithResource.With
 		@JsonSerialize(using = Serializer.WithAccessSerializer.class)
 		@JsonDeserialize(using = Deserializer.WithAccessDeserializer.class)
 		private WithAccess access = new WithAccess();
+		
+		private CollectedByAccess collectedBy = new CollectedByAccess();
 
 		/*
 		 * withCreator is empty in cases of records imported from external
@@ -182,6 +185,14 @@ public class WithResource<T extends DescriptiveData, U extends WithResource.With
 
 		public void setExternalId(String externalId) {
 			this.externalId = externalId;
+		}
+
+		public CollectedByAccess getCollectedBy() {
+			return collectedBy;
+		}
+
+		public void setCollectedBy(CollectedByAccess collectedBy) {
+			this.collectedBy = collectedBy;
 		}
 
 	}

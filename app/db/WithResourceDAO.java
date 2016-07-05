@@ -26,12 +26,14 @@ import model.EmbeddedMediaObject;
 import model.EmbeddedMediaObject.MediaVersion;
 import model.annotations.ContextData;
 import model.annotations.ContextData.ContextDataBody;
+import model.basicDataTypes.CollectedByAccess;
 import model.basicDataTypes.Language;
 import model.basicDataTypes.ProvenanceInfo;
 import model.basicDataTypes.WithAccess;
 import model.basicDataTypes.WithAccess.Access;
 import model.basicDataTypes.WithAccess.AccessEntry;
 import model.resources.collection.CollectionObject;
+import model.resources.RecordResource;
 import model.resources.WithResource;
 import model.usersAndGroups.User;
 
@@ -333,6 +335,22 @@ public class WithResourceDAO<T extends WithResource> extends DAO<T> {
 				.disableValidation();
 		updateOps.set("administrative.withURI", uri);
 		this.update(q, updateOps);
+	}
+	
+	public void updateCollectedBy(ObjectId resourceId, ObjectId userId, Access oldAccess, Access newAccess) {
+		//TODO: get collectedBy.oldAccess of resourceId, remove first occurrence of userId, reset collectedBy.oldAccess
+		//add userId to collectedBy.newAccess
+		UpdateOperations<T> updateOps = this.createUpdateOperations()
+				.disableValidation();
+		ArrayList<String> retrievedFields = new ArrayList<String>();
+		retrievedFields.add("administrative.access");
+		WithResource resource = getById(resourceId, new ArrayList<String>(Arrays.asList("administrative.collectedBy")));
+		List<ObjectId> collectedByOld = resource.getAdministrative().getCollectedBy().get(oldAccess);
+		collectedByOld.remove(userId);
+		updateOps.set("administrative.collectedBy." + oldAccess, collectedByOld);
+		updateOps.add("administrative.collectedBy." + newAccess, userId, true);
+		this.update(this.createQuery().field("_id").equal(resourceId),
+				updateOps);
 	}
 
 	public void changeAccess(ObjectId resourceId, ObjectId userId,

@@ -177,9 +177,6 @@ public class WithResourceController extends WithController {
 			if (json.has("contextData"))
 				((ObjectNode) json).remove("contextData");
 			Class<?> clazz = Class.forName("model.resources." + resourceType);
-			// if (position.isDefined())
-			// fillInContextTarget(json, collectionDbId.toString(),
-			// position.get());
 			RecordResource record = (RecordResource) Json.fromJson(json, clazz);
 			MultiLiteral label = record.getDescriptiveData().getLabel();
 			if ((label == null) || (label.get(Language.DEFAULT) == null)
@@ -234,16 +231,6 @@ public class WithResourceController extends WithController {
 										resource.getDbId(),
 										json.get("descriptiveData"));
 					addToCollection(position, recordId, collectionDbId, owns);
-					// TODO: if record has annotations, update/add
-					// annotations (already filtered so that they refer to
-					// colId)
-					// if (record.getContextData() != null
-					// && !record.getContextData().isEmpty()) {
-					// ContextData contextData = (ContextData) record
-					// .getContextData().get(0);
-					// DB.getRecordResourceDAO()
-					// .updateContextData(contextData);
-					// }
 				}
 			} else { // create new record in db
 				ObjectNode errors;

@@ -114,8 +114,6 @@ public class CollectionObjectDAO extends WithResourceDAO<CollectionObject> {
 		projections.put("media", 0);
 		projections.put("usage", 0);
 		projections.put("collectedResources", new BasicDBObject("$slice", new int[] { startIdx, slice }));
-
-
 		return DB.getMorphia().fromDBObject(CollectionObject.class,
 				this.getCollection().findOne(query, projections));
 	}

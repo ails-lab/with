@@ -65,33 +65,15 @@ public class RightsController extends WithResourceController {
 			if (oldIsPublic != isPublic) {
 				List<ObjectId> effectiveIds = effectiveUserDbIds();
 				DB.getCollectionObjectDAO().updateField(colDbId, "administrative.access.isPublic", isPublic);
-				if (!isPublic) //downgrade
-					if (membersDowngrade) {
-						changePublicity(colDbId, isPublic, effectiveIds, true, membersDowngrade);
-					}
-					else {
-						changePublicity(colDbId, isPublic, effectiveIds, false, membersDowngrade);
-					}
-				else {
+				if (isPublic) //upgrade
 					DB.getRecordResourceDAO().updateMembersToNewPublicity(colDbId, isPublic, effectiveIds);
-				}
+				else
+					changePublicity(colDbId, isPublic, effectiveIds, isPublic == false, membersDowngrade);			
 			}
 			return ok(result);
 		}
 	}
-
-	/**
-	 * Set access rights for object for user.
-	 *
-	 * @param colId
-	 *            the internal Id of the object you wish to share (or unshare)
-	 * @param right
-	 *            the right to give ("none" to withdraw previously given right)
-	 * @param username
-	 *            the username of user to give rights to (or take away from)
-	 * @return OK or Error with JSON detailing the problem
-	 *
-	 */
+	
 	public static Result editCollectionRights(String colId, String right, String username, boolean membersDowngrade) {
 		ObjectNode result = Json.newObject();
 		ObjectId colDbId = new ObjectId(colId);
@@ -172,7 +154,7 @@ public class RightsController extends WithResourceController {
 		if (downgrade && membersDowngrade) {//the publicity of all records that belong to the collection is downgraded
 			DB.getRecordResourceDAO().updateMembersToNewPublicity(colId, isPublic, effectiveIds);
 		}
-		else {//if upgrade, or downgrade but !membersDowngrade the new rights of the collection are merged to all records that belong to the record. 
+		else {//if upgrade, or downgrade but !membersDowngrade the new rights of the collection are merged to all records that belong to the collection. 
 			DB.getRecordResourceDAO().updateMembersToMergedPublicity(colId, isPublic, effectiveIds);
 		}	
 	}
@@ -183,7 +165,7 @@ public class RightsController extends WithResourceController {
 		if (downgrade && membersDowngrade) {//the rights of all records that belong to the collection are downgraded
 			DB.getRecordResourceDAO().updateMembersToNewAccess(colId, userOrGroupId, newAccess, effectiveIds);
 		}
-		else {//if upgrade, or downgrade but !membersDowngrade the new rights of the collection are merged to all records that belong to the record. 
+		else {//if upgrade, or downgrade but !membersDowngrade the new rights of the collection are merged to all records that belong to the collection. 
 			DB.getRecordResourceDAO().updateMembersToMergedRights(colId, new AccessEntry(userOrGroupId, newAccess), effectiveIds);
 		}		
 	}

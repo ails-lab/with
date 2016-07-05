@@ -31,6 +31,7 @@ import model.EmbeddedMediaObject.MediaVersion;
 import model.annotations.Annotation;
 import model.annotations.ContextData;
 import model.annotations.ContextData.ContextDataBody;
+import model.basicDataTypes.CollectedByAccess;
 import model.basicDataTypes.WithAccess;
 import model.basicDataTypes.WithAccess.Access;
 import model.basicDataTypes.WithAccess.AccessEntry;
@@ -207,7 +208,7 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 	}
 
 	public void updateRecordUsageCollectedAndRights(ObjectId collectionId,
-			WithAccess access, ObjectId recordId, boolean isPublic) {
+			WithAccess access, ObjectId recordId, boolean isPublic, CollectedByAccess newCollectedBy) {
 		Query<RecordResource> q = this.createQuery().field("_id")
 				.equal(recordId);
 		UpdateOperations<RecordResource> recordUpdate = this
@@ -223,6 +224,10 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 			recordUpdate.inc("usage.likes");
 		else
 			recordUpdate.inc("usage.collected");
+		for (Access level: newCollectedBy.keySet()) {
+			//adds duplicate userIds as desired
+			recordUpdate.addAll("administrative.collectedBy." + level, newCollectedBy.get(level), true);
+		}
 		this.update(q, recordUpdate);
 	}
 
@@ -236,10 +241,19 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 		if (changeRecRights)
 			newAccess = mergeParentCollectionRights(recordId, collectionId,
 					collection.getAdministrative().getAccess());
+		//get collectionId rights and copy them to collectedBy
+		CollectedByAccess newCollectedBy = newCollectedBy(collectionId);			
 		updateRecordUsageCollectedAndRights(collectionId, newAccess, recordId,
-				collection.getAdministrative().getAccess().getIsPublic());
+				collection.getAdministrative().getAccess().getIsPublic(), newCollectedBy);
 		DB.getCollectionObjectDAO().addCollectionMedia(collectionId, recordId,
 				position);
+	}
+	
+	public CollectedByAccess newCollectedBy(ObjectId colId) {
+		CollectionObject collection = DB.getCollectionObjectDAO()
+			.getById(colId, new ArrayList<String>(Arrays
+				.asList("administrative.access")));
+		return new CollectedByAccess(collection.getAdministrative().getAccess().getAcl());
 	}
 
 	public void appendToCollection(ObjectId recordId, ObjectId collectionId,
@@ -250,8 +264,9 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 		if (changeRecRights)
 			newAccess = mergeParentCollectionRights(recordId, collectionId,
 					collection.getAdministrative().getAccess());
+		CollectedByAccess newCollectedBy = newCollectedBy(collectionId);			
 		updateRecordUsageCollectedAndRights(collectionId, newAccess, recordId,
-				collection.getAdministrative().getAccess().getIsPublic());
+				collection.getAdministrative().getAccess().getIsPublic(), newCollectedBy);
 		DB.getCollectionObjectDAO().addCollectionMedia(collectionId, recordId,
 				collection.getCollectedResources().size());
 	}
@@ -375,8 +390,16 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 			if (DB.getRecordResourceDAO().hasAccess(effectiveIds,
 					Action.DELETE, r.getDbId()))
 				changeAccess(r.getDbId(), userId, newAccess);
+			//TODO: update collectedBy: 
+			retrievedFields = new ArrayList<String>(Arrays.asList("administrative.access"));
+			CollectionObject collection = DB.getCollectionObjectDAO().getById(collectionId, retrievedFields);
+			WithAccess collectionAccess = collection.getAdministrative().getAccess();
+			Access oldAccess = collectionAccess.getAcl().stream().
+				filter(x -> x.getUser().equals(userId)).findFirst().get().getLevel();
+			updateCollectedBy(r.getDbId(), userId, oldAccess, newAccess);
 		}
 	}
+	
 
 	public void updateMembersToNewPublicity(ObjectId colId, boolean isPublic,
 			List<ObjectId> effectiveIds) {
