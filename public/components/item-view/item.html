@@ -232,7 +232,7 @@
                                   	<a class="ann-resource" href="#" data-bind="attr: {id: id}, text:$parent.record().getAnnotationLabel($data), event: {click: function(){$parent.record().annShow(uri);}}"></a>
                                   	&nbsp;&nbsp;<a href="#" class="fa" title="Expand" data-bind="css: {'fa-sort-down' :!isExpanded(), 'fa-sort-up' :isExpanded()}, click: toggleVisibility"></a>&nbsp;&nbsp;&nbsp;&nbsp;
                                   	<span data-bind="visible: isLogged()" style="float: right;">
-                                  	    <a href="#" class="fa fa-check" title="Approve" data-bind="css: {'ann-approve' : approved()}, click:approveAnnotation"></a>&nbsp;&nbsp;
+                                  	    <a href="#" class="fa fa-check" title="Approve" data-bind="css: {'ann-approve' : approved(), 'ann-papprove' : papproved()}, click:approveAnnotation"></a>&nbsp;&nbsp;
                                   	    <a href="#" class="fa fa-times" title="Reject" data-bind="css: {'ann-reject' : rejected()}, click:rejectAnnotation"></a>
                                   	 </span>
                                   	 <div class="term-support" data-bind="visible: isExpanded()">
@@ -241,7 +241,7 @@
 	                                  	 	<span class="ann-target-prop" data-bind="attr: {id: id}, text: property"></span>
 	                                  	 	<span class="ann-target-text" data-bind="html: showExtract()"></span>
 	                                  	 	                                  	<span data-bind="visible: isLogged()" style="float: right;">
-                                  	    <a href="#" class="fa fa-check" title="Approve" data-bind="css: {'ann-approve' : approved()}, click:approveAnnotation"></a>&nbsp;&nbsp;
+                                  	    <a href="#" class="fa fa-check" title="Approve" data-bind="css: {'ann-approve' : approved() }, click:approveAnnotation"></a>&nbsp;&nbsp;
                                   	    <a href="#" class="fa fa-times" title="Reject" data-bind="css: {'ann-reject' : rejected()}, click:rejectAnnotation"></a>
                                   	 </span></div>
 	                                  	 	

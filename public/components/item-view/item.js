@@ -241,12 +241,31 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 			ko.mapping.fromJS(data, {}, selfx);
 
 			selfx.approved = ko.computed(function() {
+				var count = 0;
 				for (var j = 0; j < selfx.instances().length; j++)
 					if (selfx.instances()[j].approved())
-						return true;
-				return false;
+						count++;
+				
+				if (count == selfx.instances().length) {
+					return true;
+				} else {
+					return false;
+				}
 			});
 
+			selfx.papproved = ko.computed(function() {
+				var count = 0;
+				for (var j = 0; j < selfx.instances().length; j++)
+					if (selfx.instances()[j].approved())
+						count++;
+				
+				if (count == 0 || count == selfx.instances().length) {
+					return false;
+				} else {
+					return true;
+				}
+			});
+			
 			selfx.rejected = ko.computed(function() {
 				var count = 0;
 				for (var j = 0; j < selfx.instances().length; j++)
@@ -820,7 +839,7 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 							likes: usage.likes,
 							collected: usage.collected,
 							collectedIn:backendRecord.collectedIn,
-							//fullrestype: media[0] != null && media[0].Original != null && media[0].Original.type != "null" ? media[0].Original.type : "",
+							fullrestype: media[0] != null && media[0].Original != null && media[0].Original.type != "null" ? media[0].Original.type : "",
 							nextItemToAnnotate: backendRecord.nextItemToAnnotate,
 							annotations: backendRecord.annotations,
 							data: backendRecord
@@ -862,7 +881,7 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 			 if (vid != null) {
 				 vid.parentNode.removeChild(vid);
 			}
-			 $('#mediadiv').html("");
+//			 $('#mediadiv').html("");
 		};
 
 		self.changeSource = function (item) {
