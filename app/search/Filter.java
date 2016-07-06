@@ -36,6 +36,12 @@ public class Filter {
 	 */
 	// public boolean not;
 
+	/**
+	 * If the semantics of this filter is to look for an exact match of the field, this should be set to true.
+	 * This is usually the case if the user can select something in the UI.
+	 */
+	public boolean exact = false;
+	
 	public Filter( String fieldname, String value ) {
 		this.fieldname = fieldname;
 		this.value = value;
