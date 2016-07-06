@@ -334,6 +334,12 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 				WithAccess mergedAccess = mergeParentCollectionRights(
 						r.getDbId(), collectionId, colAccess);
 				updateField(r.getDbId(), "administrative.access", mergedAccess);
+				CollectionObject collection = DB.getCollectionObjectDAO().getById(collectionId, retrievedFields);
+				WithAccess collectionAccess = collection.getAdministrative().getAccess();
+				ObjectId userId = newAccess.getUser();
+				Access oldAccess = collectionAccess.getAcl().stream().
+					filter(x -> x.getUser().equals(userId)).findFirst().get().getLevel();
+				updateCollectedBy(r.getDbId(), userId, oldAccess, newAccess.getLevel());
 			}
 		}
 	}
@@ -390,7 +396,6 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 			if (DB.getRecordResourceDAO().hasAccess(effectiveIds,
 					Action.DELETE, r.getDbId()))
 				changeAccess(r.getDbId(), userId, newAccess);
-			//TODO: update collectedBy: 
 			retrievedFields = new ArrayList<String>(Arrays.asList("administrative.access"));
 			CollectionObject collection = DB.getCollectionObjectDAO().getById(collectionId, retrievedFields);
 			WithAccess collectionAccess = collection.getAdministrative().getAccess();
