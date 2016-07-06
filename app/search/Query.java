@@ -59,6 +59,15 @@ public class Query {
 	
 	
 	/**
+	 * If a source can deliver results in multiple languages, it can be asked to limit its output to
+	 * this language. Records should not be suppressed by this, but massive multilingual responses can be reduced to
+	 * the responseLanguage. This does not affect the filtering, language selection is available via fieldnames.
+	 * 
+	 * We might consider a comma separated list of more than one here?
+	 */
+	public String responseLanguage;
+	
+	/**
 	 * If you specify a continuationId, the backend will continue a search 
 	 */
 	public String continuationId;
@@ -69,14 +78,21 @@ public class Query {
 	public boolean continuation = false;
 
 	
-	
 	public static class Term {
 		List<Filter> filters = new ArrayList<Filter>();
-		public Term( String fieldname, String value ) {
+		public static Term create() {
+			return new Term();
+		}
+		
+		public Term add(String fieldname, String value ) {
 			filters.add( new Filter( fieldname, value ));
-			
+			return this;
+		}
+		public List<Filter> filters() {
+			return filters;
 		}
 	}
+	
 	/**
 	 * Convenience Method to create a Query that just has the filters that are supported.
 	 * If there are no filters left or if the source is not requested, return null.
@@ -128,12 +144,22 @@ public class Query {
 	// Convenience builder functions
  	//
 	
+	/**
+	 * The given filters are assumed to be or-ed and are and-ed to this query
+	 * @param filters
+	 * @return
+	 */
 	public final Query addTerm( Filter... filters ) {
 		List<Filter> newTerm = new ArrayList<Filter>();
 		newTerm.addAll( Arrays.asList( filters ));
 		return this;
 	}
 	
+	/**
+	 * The given filters are assumed to be or-ed and are and-ed to this query
+	 * @param filters
+	 * @return
+	 */
 	public final Query addTerm( List<Filter> filters ) {
 		this.filters.add( filters );
 		return this;
