@@ -18,7 +18,9 @@ package search;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -67,9 +69,19 @@ public class Query {
 	public boolean continuation = false;
 
 	
+	
+	public static class Term {
+		List<Filter> filters = new ArrayList<Filter>();
+		public Term( String fieldname, String value ) {
+			filters.add( new Filter( fieldname, value ));
+			
+		}
+	}
 	/**
 	 * Convenience Method to create a Query that just has the filters that are supported.
-	 * If there are no filters left or if the source is not requested, return null. 
+	 * If there are no filters left or if the source is not requested, return null.
+	 * 
+	 *  If there are no supportedFieldnames, return a clone.
 	 * @param supportedFieldnames
 	 * @return
 	 */
@@ -92,7 +104,7 @@ public class Query {
 						// iterate over the contained Filters and only return the ones that 
 						// have supported fieldnames
 				   term.stream()
-					 .filter( f -> supportedFieldnames.contains(f.fieldname ) )
+					 .filter( f -> (supportedFieldnames == null )? true : supportedFieldnames.contains(f.fieldname ) )
 					 .collect( Collectors.toList());	
 				})
 			// throw out terms with no conditions
@@ -133,7 +145,7 @@ public class Query {
 	 * @param allowedValues
 	 * @return
 	 */
-	public Query andFielvalues( String fieldname, String... allowedValues )  {
+	public Query andFieldvalues( String fieldname, String... allowedValues )  {
 		List<Filter> term = Arrays.stream( allowedValues )
 		.map( val -> new Filter( fieldname, val ))
 		.collect( Collectors.toCollection(()->new ArrayList<Filter>()));
@@ -147,4 +159,20 @@ public class Query {
 		return this;
 	}
 	
+	public boolean containsSource( Sources findSource ) {
+		for( Sources source: sources ) {
+			if( findSource == source ) return true;
+		}
+		return false;
+	}
+	
+	public Map<Sources, Query> splitBySource() {
+		Map<Sources, Query> res = new HashMap<Sources, Query>();
+		for( Sources source: sources ) {
+			Set<String> supportedFieldnames = source.getDriver().supportedFieldnames();
+			Query newQuery = this.pruneFilters(source, supportedFieldnames);
+			res.put( source, newQuery );
+		}
+		return res;
+	}
 }
