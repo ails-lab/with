@@ -24,13 +24,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.BiFunction;
-import java.util.function.Function;
 
+import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.action.suggest.SuggestResponse;
 
-import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -41,14 +39,13 @@ import elastic.Elastic;
 import elastic.ElasticSearcher;
 import elastic.ElasticSearcher.SearchOptions;
 import elastic.ElasticUtils;
-import model.basicDataTypes.ProvenanceInfo.Sources;
 import play.Logger;
 import play.Logger.ALogger;
 import play.data.Form;
 import play.libs.F.Promise;
 import play.libs.Json;
-import play.mvc.Controller;
 import play.mvc.Result;
+import search.Sources;
 import sources.core.CommonFilterLogic;
 import sources.core.CommonFilterResponse;
 import sources.core.CommonQuery;
@@ -97,6 +94,50 @@ public class SearchController extends WithController {
 				return Promise.pure((Result) badRequest(e.getMessage()));
 			}
 		}
+	}
+	
+	/**
+	 * read the JSON Query structure, send to the correct backends, merge the results or make continuation
+	 * add readability filters for within sources.
+	 * @return
+	 */
+	public static Promise<Result> search2() {
+		JsonNode json = request().body().asJson();
+		if (log.isDebugEnabled()) {
+			StringBuilder sb = new StringBuilder();
+			for (Map.Entry<String, String> e : session().entrySet()) {
+				sb.append(e.getKey() + " = " + "'" + e.getValue() + "'\n");
+			}
+			log.debug(sb.toString());
+		}
+
+		if (json == null) {
+			return Promise.pure((Result) badRequest("Expecting Json query"));
+		} else {
+			// Parse the query.
+			try {
+				final search.Query q = Json.fromJson(json, search.Query.class );
+				// check if the query needs readability additions for WITHin
+				if( q.containsSource( Sources.WITHin)) {
+					// add conditions for visibility in WITH
+					
+				}
+				if( q.continuation ) {
+					// initiate a continuation
+				} else if( StringUtils.isNotBlank( q.continuationId)) {
+					// try to respond with continuation
+				} else {
+					// normal query
+				}
+				
+				// bad request
+			} catch (Exception e) {
+				log.error("",e);
+				return Promise.pure((Result) badRequest(e.getMessage()));
+			}
+		}	
+		
+		return Promise.pure( badRequest( "Not implemented yet"));
 	}
 	
 	public static Result searchSources() {
@@ -212,7 +253,7 @@ public class SearchController extends WithController {
 	static Promise<SearchResponse> getMyResutlsPromise(final CommonQuery q) {
 		Iterable<Promise<SourceResponse>> promises = callSources(q);
 		// compose all futures, blocks until all futures finish
-		Function<CommonFilterLogic, CommonFilterResponse> f = (CommonFilterLogic o) -> {
+		java.util.function.Function<CommonFilterLogic, CommonFilterResponse> f = (CommonFilterLogic o) -> {
 			return o.export();
 		};
 
