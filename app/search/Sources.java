@@ -17,12 +17,19 @@
 package search;
 
 /**
- * A Response encapsulates all information that is needed to answer a Query
+ * All potential query sources need an enum entry here.
  * 
+ * The class that extends from Source and responsible for this Source is listed as parameter.
  * @author Arne Stabenau
  *
  */
-public class Response {
-	public static Response EMPTY = new Response();
+public enum Sources {
+	WITHin( EmptySource.class ), Europeana( EmptySource.class ), BritishLibrary( EmptySource.class );
+
+	//....
+	private Class<? extends EmptySource> driver;
+	private Sources( Class<? extends EmptySource> driver ) {
+		this.driver = driver;
+	}
 	
 }
