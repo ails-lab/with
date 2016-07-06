@@ -59,7 +59,12 @@ public class Query {
 	 */
 	public String continuationId;
 
+	/**
+	 * If you want quick answers, request continuation
+	 */
+	public boolean continuation = false;
 
+	
 	/**
 	 * Convenience Method to create a Query that just has the filters that are supported.
 	 * If there are no filters left or if the source is not requested, return null. 
@@ -101,7 +106,14 @@ public class Query {
 		if( newFilters.length == 0 ) return null;
 		
 		res.filters = newFilters;
+		res.continuation = continuation;
+		res.continuationId = continuationId;
+		res.start = start;
+		res.count = count;
+		res.page = page;
+		res.pageSize = pageSize;
 		
+		res.facets = facets;
 		return res;
 	}
 }

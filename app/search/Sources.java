@@ -24,11 +24,11 @@ package search;
  *
  */
 public enum Sources {
-	WITHin( Source.class ), Europeana( Source.class ), BritishLibrary( Source.class );
+	WITHin( EmptySource.class ), Europeana( EmptySource.class ), BritishLibrary( EmptySource.class );
 
 	//....
-	private Class<? extends Source> driver;
-	private Sources( Class<? extends Source> driver ) {
+	private Class<? extends EmptySource> driver;
+	private Sources( Class<? extends EmptySource> driver ) {
 		this.driver = driver;
 	}
 	

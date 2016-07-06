@@ -22,31 +22,20 @@ import java.util.Set;
 import play.libs.F.Promise;
 
 /**
- * Source have the following functionality
- *  - execute Querys to the backend search API
- *  - return results in WITH format (translate native response to WITH type)
- *  - optionally retrieve a complete record based on a search result
- *  Unclear whether this functionalities have to be exposed
- *  - translate filter fieldnames to native fieldnames
- *  - translate filter values to native values
- *  
- *  
- * Problematic is, that some of these functionalities will be executed in varying execution Contexts, sometimes the result
- * is needed asap and sometimes queuing is requested or required. Lastly, some of the functionalities may need to be executed
- * on different machines.
- *  
- *  
- * To create a specific Source, extend this source or a suitable other source. Add it to the enumeration Sources.
+ * This is an empty implementation of Source, it will collect some usefull methods while the design is going on.
+ * 
  * @author Arne Stabenau
  *
  */
-public interface Source {
+public class EmptySource implements Source {
 	
 	/**
-	 * Return the Sources entry that you represent.
+	 * Overwrite this and return the Sources entry that you represent.
 	 * @return
 	 */
-	public Sources thisSource();
+	public Sources thisSource() {
+		return Sources.Europeana;
+	}
 	
 	/**
 	 * Execute this query. Apply some form of load limiting to the backend used. All this requests are
@@ -54,7 +43,9 @@ public interface Source {
 	 * @param query
 	 * @return
 	 */
-	public Promise<Response> execute( Query query );
+	public Promise<Response> execute( Query query ) {
+		return Promise.pure( Response.EMPTY ); 
+	}
 	
 	/**
 	 * Take the incompleteRecord, which is some WITH Record and try to complete it.
@@ -62,12 +53,16 @@ public interface Source {
 	 * @param incompleteRecord
 	 * @return
 	 */
-	public Promise<Object> completeRecord( final Object incompleteRecord );
+	public Promise<Object> completeRecord( final Object incompleteRecord ) {
+		return Promise.pure( incompleteRecord );
+	}
 	
 	/**
 	 * Retrieve by Id. Every backend source should be able to get a record by ids that is supplies to its records.
 	 */
-	public Promise<Object> getById( String id );
+	public Promise<Object> getById( String id ) {
+		return null;
+	}
 	
 	/**
 	 * If you supply this set, you can use the pruneQuery method to have just the filters that
@@ -75,11 +70,23 @@ public interface Source {
 	 * If no filters remain after pruning, the Query should not be executed.
 	 * @return
 	 */
-	public Set<String> supportedFieldnames();
-	
+	public Set<String> supportedFieldnames() {
+		return new HashSet<String>();
+	}
 	
 	/**
 	 * If a source supports autocompleting a query, here it can do it. Return null if you don't autocomplete.
 	 */
-	public Promise<String[]> autocomplete( String partialQueryString );
+	public Promise<String[]> autocomplete( String partialQueryString ) {
+		return null;
+	}
+
+	//
+	//  Convenience methods
+	//
+	
+	public Query pruneFilters( Query inputQuery ) {
+		return inputQuery.pruneFilters( thisSource(), supportedFieldnames());
+	}
+	
 }
