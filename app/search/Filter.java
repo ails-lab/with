@@ -17,6 +17,7 @@
 package search;
 
 public class Filter {
+	
 	/**
 	 * Fieldnames will be the path expressions into the json represeantation of the resource you are querying.
 	 * Some rules about shortening may apply for labels nad other very deep fieldnames. Arrays are probably not part of this 
@@ -34,4 +35,24 @@ public class Filter {
 	 * Optionally, at some point a Filter should allow to be true/valid if the value is not part of the field.
 	 */
 	// public boolean not;
+
+	/**
+	 * If the semantics of this filter is to look for an exact match of the field, this should be set to true.
+	 * This is usually the case if the user can select something in the UI.
+	 */
+	public boolean exact = false;
+	
+	public Filter( String fieldname, String value ) {
+		this.fieldname = fieldname;
+		this.value = value;
+	}
 }
+
+/*
+    Fieldnames: in the API we use the canonical fieldnames, the JSON path into the database representation of the object.
+    Some exceptions apply to arrays and labels
+    
+    
+    
+  
+ */

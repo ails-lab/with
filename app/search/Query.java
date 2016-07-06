@@ -16,7 +16,11 @@
 
 package search;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -30,18 +34,18 @@ public class Query {
 	/**
 	 * Which sources need to be queried.
 	 */
-	public Sources[] sources;
+	public List<Sources> sources = new ArrayList<Sources>();
 	
 	/**
 	 * This is the CNF of the query. The inner array filters a meant to be ORed together, the outer array ANDs the inner terms.  
 	 */
-	public Filter[][] filters;
+	public List<List<Filter>> filters = new ArrayList<List<Filter>>();
 	
 	/**
 	 * An array of fieldnames where you want to get either a facet (value and count ovver the whole query result) or at least a 
 	 * summary of value and counts for the returned subset. 
 	 */
-	public String[] facets;
+	public List<String> facets = new ArrayList<String>();
 	
 	/**
 	 * How many we request from each source and at what offset. start is zero based.
@@ -65,9 +69,19 @@ public class Query {
 	public boolean continuation = false;
 
 	
+	
+	public static class Term {
+		List<Filter> filters = new ArrayList<Filter>();
+		public Term( String fieldname, String value ) {
+			filters.add( new Filter( fieldname, value ));
+			
+		}
+	}
 	/**
 	 * Convenience Method to create a Query that just has the filters that are supported.
-	 * If there are no filters left or if the source is not requested, return null. 
+	 * If there are no filters left or if the source is not requested, return null.
+	 * 
+	 *  If there are no supportedFieldnames, return a clone.
 	 * @param supportedFieldnames
 	 * @return
 	 */
@@ -75,37 +89,30 @@ public class Query {
 		Query res = new Query();
 		
 		// put the source we are filtering for in the sources array
-		if( Arrays.stream(sources)
+		if( sources.stream()
 				.filter(elem-> elem==source )
 				.findAny()
 				.isPresent()) {
-			res.sources = new Sources[1];
-			res.sources[0]  = source;
+			res.sources.add( source );
 		} else {
 			return null;
 		}
 		
-		Filter[][] newFilters = 
-		Arrays.stream( filters )
+		res.filters.addAll( filters.stream()
 			.map( term -> {
 				return 
 						// iterate over the contained Filters and only return the ones that 
 						// have supported fieldnames
-				    Arrays.stream( term )
-					 .filter( f -> supportedFieldnames.contains(f.fieldname ) )
+				   term.stream()
+					 .filter( f -> (supportedFieldnames == null )? true : supportedFieldnames.contains(f.fieldname ) )
 					 .collect( Collectors.toList());	
 				})
 			// throw out terms with no conditions
 			.filter( newTerm -> (newTerm.size() > 0 ))
-			// back to Arrays
-			.map( newTerm -> newTerm.toArray( new Filter[0]) )
-			.collect( Collectors.toList())
-			// back to Array of Array
-			.toArray( new Filter[0][0] );
+			.collect( Collectors.toList()));
 		
-		if( newFilters.length == 0 ) return null;
+		if( res.filters.size() == 0 ) return null;
 		
-		res.filters = newFilters;
 		res.continuation = continuation;
 		res.continuationId = continuationId;
 		res.start = start;
@@ -114,6 +121,58 @@ public class Query {
 		res.pageSize = pageSize;
 		
 		res.facets = facets;
+		return res;
+	}
+	
+	// 
+	// Convenience builder functions
+ 	//
+	
+	public final Query addTerm( Filter... filters ) {
+		List<Filter> newTerm = new ArrayList<Filter>();
+		newTerm.addAll( Arrays.asList( filters ));
+		return this;
+	}
+	
+	public final Query addTerm( List<Filter> filters ) {
+		this.filters.add( filters );
+		return this;
+	}
+	
+	/**
+	 * Specify one fieldname and multiple possible values. They are added as being ored together and anded to existing Filters.
+	 * @param fieldname
+	 * @param allowedValues
+	 * @return
+	 */
+	public Query andFieldvalues( String fieldname, String... allowedValues )  {
+		List<Filter> term = Arrays.stream( allowedValues )
+		.map( val -> new Filter( fieldname, val ))
+		.collect( Collectors.toCollection(()->new ArrayList<Filter>()));
+		addTerm( term );
+		return this;
+	}
+	
+	
+	public Query addSource( Sources source ) {
+		sources.add( source );
+		return this;
+	}
+	
+	public boolean containsSource( Sources findSource ) {
+		for( Sources source: sources ) {
+			if( findSource == source ) return true;
+		}
+		return false;
+	}
+	
+	public Map<Sources, Query> splitBySource() {
+		Map<Sources, Query> res = new HashMap<Sources, Query>();
+		for( Sources source: sources ) {
+			Set<String> supportedFieldnames = source.getDriver().supportedFieldnames();
+			Query newQuery = this.pruneFilters(source, supportedFieldnames);
+			res.put( source, newQuery );
+		}
 		return res;
 	}
 }

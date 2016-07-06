@@ -16,6 +16,8 @@
 
 package search;
 
+import play.Logger;
+
 /**
  * All potential query sources need an enum entry here.
  * 
@@ -24,12 +26,22 @@ package search;
  *
  */
 public enum Sources {
+	
 	WITHin( EmptySource.class ), Europeana( EmptySource.class ), BritishLibrary( EmptySource.class );
 
 	//....
-	private Class<? extends EmptySource> driver;
-	private Sources( Class<? extends EmptySource> driver ) {
+	private Class<? extends Source> driver;
+	private Sources( Class<? extends Source> driver ) {
 		this.driver = driver;
 	}
 	
+	public Source getDriver() {
+		try {
+			return (Source) driver.newInstance();
+		} catch( Exception e ) {
+			Logger.of( Sources.class )
+				.error( "Fatal error, source instance cannot be created" );
+			throw new RuntimeException( e );
+		}
+	}
 }
