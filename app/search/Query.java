@@ -84,8 +84,8 @@ public class Query {
 			return new Term();
 		}
 		
-		public Term add(String fieldname, String value ) {
-			filters.add( new Filter( fieldname, value ));
+		public Term add(String fieldId, String value ) {
+			filters.add( new Filter( fieldId, value ));
 			return this;
 		}
 		public List<Filter> filters() {
@@ -101,7 +101,7 @@ public class Query {
 	 * @param supportedFieldnames
 	 * @return
 	 */
-	public Query pruneFilters(Sources source, Set<String> supportedFieldnames) {
+	public Query pruneFilters(Sources source, Set<String> supportedFieldIds) {
 		Query res = new Query();
 		
 		// put the source we are filtering for in the sources array
@@ -120,7 +120,7 @@ public class Query {
 						// iterate over the contained Filters and only return the ones that 
 						// have supported fieldnames
 				   term.stream()
-					 .filter( f -> (supportedFieldnames == null )? true : supportedFieldnames.contains(f.fieldname ) )
+					 .filter( f -> (supportedFieldIds == null )? true : supportedFieldIds.contains(f.fieldId ) )
 					 .collect( Collectors.toList());	
 				})
 			// throw out terms with no conditions
@@ -171,9 +171,9 @@ public class Query {
 	 * @param allowedValues
 	 * @return
 	 */
-	public Query andFieldvalues( String fieldname, String... allowedValues )  {
+	public Query andFieldvalues( String fieldId, String... allowedValues )  {
 		List<Filter> term = Arrays.stream( allowedValues )
-		.map( val -> new Filter( fieldname, val ))
+		.map( val -> new Filter( fieldId, val ))
 		.collect( Collectors.toCollection(()->new ArrayList<Filter>()));
 		addTerm( term );
 		return this;
@@ -195,8 +195,8 @@ public class Query {
 	public Map<Sources, Query> splitBySource() {
 		Map<Sources, Query> res = new HashMap<Sources, Query>();
 		for( Sources source: sources ) {
-			Set<String> supportedFieldnames = source.getDriver().supportedFieldnames();
-			Query newQuery = this.pruneFilters(source, supportedFieldnames);
+			Set<String> supportedFieldIds = source.getDriver().supportedFieldIds();
+			Query newQuery = this.pruneFilters(source, supportedFieldIds);
 			res.put( source, newQuery );
 		}
 		return res;

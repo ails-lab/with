@@ -70,7 +70,7 @@ public class EmptySource implements Source {
 	 * If no filters remain after pruning, the Query should not be executed.
 	 * @return
 	 */
-	public Set<String> supportedFieldnames() {
+	public Set<String> supportedFieldIds() {
 		return new HashSet<String>();
 	}
 	
@@ -86,7 +86,7 @@ public class EmptySource implements Source {
 	//
 	
 	public Query pruneFilters( Query inputQuery ) {
-		return inputQuery.pruneFilters( thisSource(), supportedFieldnames());
+		return inputQuery.pruneFilters( thisSource(), supportedFieldIds());
 	}
 	
 }

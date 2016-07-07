@@ -83,7 +83,7 @@ public interface Source {
 	 * 
 	 * @return
 	 */
-	public Set<String> supportedFieldnames();
+	public Set<String> supportedFieldIds();
 
 	/**
 	 * If a source supports autocompleting a query, here it can do it. Return
