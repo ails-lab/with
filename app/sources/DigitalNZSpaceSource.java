@@ -31,8 +31,8 @@ import model.resources.RecordResource;
 import play.Logger;
 import play.Logger.ALogger;
 import play.libs.Json;
+import search.FiltersFields;
 import sources.core.CommonFilterLogic;
-import sources.core.CommonFilters;
 import sources.core.CommonQuery;
 import sources.core.ISpaceSource;
 import sources.core.QueryBuilder;
@@ -56,10 +56,10 @@ public class DigitalNZSpaceSource extends ISpaceSource {
 	public DigitalNZSpaceSource() {
 		super(Sources.DigitalNZ);
 		apiKey = "SECRET_KEY";
-		addDefaultWriter(CommonFilters.TYPE.getId(), fwriter("and[category][]"));
-		addDefaultWriter(CommonFilters.CREATOR.getId(), fwriter("and[creator][]"));
-		addDefaultWriter(CommonFilters.YEAR.getId(), qfwriterYEAR());
-		addDefaultWriter(CommonFilters.RIGHTS.getId(), fwriter("and[usage][]"));
+		addDefaultWriter(FiltersFields.TYPE.getId(), fwriter("and[category][]"));
+		addDefaultWriter(FiltersFields.CREATOR.getId(), fwriter("and[creator][]"));
+		addDefaultWriter(FiltersFields.YEAR.getId(), qfwriterYEAR());
+		addDefaultWriter(FiltersFields.RIGHTS.getId(), fwriter("and[usage][]"));
 
 		// TODO: rights_url shows the license in the search
 
@@ -108,10 +108,10 @@ public class DigitalNZSpaceSource extends ISpaceSource {
 		String httpQuery = getHttpQuery(q);
 		res.query = httpQuery;
 		JsonNode response;
-		CommonFilterLogic type = new CommonFilterLogic(CommonFilters.TYPE);
-		CommonFilterLogic creator = new CommonFilterLogic(CommonFilters.CREATOR);
-		CommonFilterLogic rights = new CommonFilterLogic(CommonFilters.RIGHTS);
-		CommonFilterLogic year = new CommonFilterLogic(CommonFilters.YEAR);
+		CommonFilterLogic type = new CommonFilterLogic(FiltersFields.TYPE);
+		CommonFilterLogic creator = new CommonFilterLogic(FiltersFields.CREATOR);
+		CommonFilterLogic rights = new CommonFilterLogic(FiltersFields.RIGHTS);
+		CommonFilterLogic year = new CommonFilterLogic(FiltersFields.YEAR);
 		;
 
 		if (checkFilters(q)) {

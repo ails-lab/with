@@ -30,8 +30,8 @@ import model.basicDataTypes.ProvenanceInfo.Sources;
 import model.resources.CulturalObject;
 import model.resources.RecordResource;
 import play.libs.Json;
+import search.FiltersFields;
 import sources.core.CommonFilterLogic;
-import sources.core.CommonFilters;
 import sources.core.CommonQuery;
 import sources.core.HttpConnector;
 import sources.core.ISpaceSource;
@@ -99,9 +99,9 @@ public class RijksmuseumSpaceSource extends ISpaceSource {
 	
 	public List<CommonFilterLogic> createFilters(JsonNode response) {
 		List<CommonFilterLogic> filters = new ArrayList<CommonFilterLogic>();
-		CommonFilterLogic type = new CommonFilterLogic(CommonFilters.TYPE).addTo(filters);
-		CommonFilterLogic creator = new CommonFilterLogic(CommonFilters.CREATOR).addTo(filters);
-		CommonFilterLogic country = new CommonFilterLogic(CommonFilters.COUNTRY).addTo(filters);
+		CommonFilterLogic type = new CommonFilterLogic(FiltersFields.TYPE).addTo(filters);
+		CommonFilterLogic creator = new CommonFilterLogic(FiltersFields.CREATOR).addTo(filters);
+		CommonFilterLogic country = new CommonFilterLogic(FiltersFields.COUNTRY).addTo(filters);
 				
 		for (JsonNode facet : response.path("facets")) {
 			String filterType = facet.path("name").asText();

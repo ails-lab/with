@@ -24,6 +24,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import utils.ListUtils;
+
 /**
  * The Query class encapsulates all possible Queries that the system supports within and externally.
  * 
@@ -177,6 +179,38 @@ public class Query {
 		.collect( Collectors.toCollection(()->new ArrayList<Filter>()));
 		addTerm( term );
 		return this;
+	}
+	
+	/**
+	 * in the CNF expression, the values of the filters with the same filed name inside the same clause 
+	 * are grouped in a map where the key is the filed name and the value is the list of values that have the same
+	 * filter name in the original CNF.
+	 * @return a List of the filters grouping values that share the same filed name.
+	 */
+	public List<HashMap<String,List<String>>> buildFactorizeFilters()  {
+		List<HashMap<String,List<String>>> result = new ArrayList<>(filters.size());
+		for (List<Filter> clause : filters) {
+			HashMap<String,List<String>> map = new HashMap<>();
+			result.add(map);
+			for (Filter filter : clause) {
+				ListUtils.getOrSet(filter.fieldname, map).add(filter.value);
+			}
+		}
+		return result;
+	}
+	/**
+	 * returns the filter with the specified filter name.
+	 * @param filterName
+	 * @return
+	 */
+	public Filter findFilter(String filterName){
+		for (List<Filter> clause : filters) {
+			for (Filter filter : clause) {
+				if (filterName.equals(filter.fieldname))
+					return filter;
+			}
+		}
+		return null;
 	}
 	
 	

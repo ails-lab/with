@@ -20,9 +20,11 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 
+import model.basicDataTypes.Language;
 import model.basicDataTypes.ProvenanceInfo.Sources;
 import play.Logger;
 import play.Logger.ALogger;
+import search.FiltersFields;
 import utils.SortedList;
 
 public class CommonFilterLogic implements Cloneable {
@@ -32,9 +34,9 @@ public class CommonFilterLogic implements Cloneable {
 
 	public CommonFilterResponse data = new CommonFilterResponse();
 
-	public CommonFilterLogic(CommonFilters filter) {
-		this.data.filterID = filter.getId();
-		this.data.filterName = filter.getText();
+	public CommonFilterLogic(FiltersFields filter) {
+		this.data.filterID = filter.getFilterId();
+		this.data.filterName = filter.getFilterName().get(Language.DEFAULT).get(0);
 	}
 	
 	public CommonFilterLogic(CommonFilterResponse filter) {

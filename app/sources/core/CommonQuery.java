@@ -36,6 +36,7 @@ import play.Logger;
 import play.Logger.ALogger;
 import play.libs.F.Option;
 import play.mvc.QueryStringBindable;
+import search.Query;
 import utils.Tuple;
 
 public class CommonQuery implements Cloneable , QueryStringBindable<CommonQuery>{
@@ -63,6 +64,11 @@ public class CommonQuery implements Cloneable , QueryStringBindable<CommonQuery>
 	}
 
 	public CommonQuery() {
+	}
+
+	public CommonQuery(Query query) {
+		this.page = ""+query.page;
+		this.pageSize = ""+query.pageSize;
 	}
 
 	private List<Tuple<ObjectId, Access>> transformList(ObjectNode[] inputList, boolean group) {

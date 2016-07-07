@@ -27,7 +27,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import model.basicDataTypes.ProvenanceInfo.Sources;
 import play.Logger;
 import play.Logger.ALogger;
-import sources.core.CommonFilters;
+import search.FiltersFields;
 import sources.core.CommonQuery;
 import sources.core.ISpaceSource;
 import sources.core.QueryBuilder;
@@ -81,9 +81,9 @@ public abstract class FlickrSpaceSource extends ISpaceSource {
 		setLicences();
 //		this.vmap = FilterValuesMap.getFlickrMap();
 		this.userID = userID;
-		addDefaultWriter(CommonFilters.TYPE.getId(), fwriter("media"));
-		addDefaultWriter(CommonFilters.RIGHTS.getId(), frwriter());
-		addDefaultComplexWriter(CommonFilters.YEAR.getId(), qfwriterYEAR());
+		addDefaultWriter(FiltersFields.TYPE.getId(), fwriter("media"));
+		addDefaultWriter(FiltersFields.RIGHTS.getId(), frwriter());
+		addDefaultComplexWriter(FiltersFields.YEAR.getId(), qfwriterYEAR());
 		// addDefaultWriter(CommonFilters.COUNTRY.name(),
 		// fwriter("sourceResource.spatial.country"));
 

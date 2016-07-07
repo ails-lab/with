@@ -33,8 +33,8 @@ import model.basicDataTypes.ProvenanceInfo;
 import model.resources.CulturalObject;
 import model.resources.CulturalObject.CulturalObjectData;
 import play.Logger;
+import search.FiltersFields;
 import sources.FilterValuesMap;
-import sources.core.CommonFilters;
 import sources.core.Utils;
 import sources.utils.JsonContextRecord;
 import sources.utils.StringUtils;
@@ -92,7 +92,7 @@ public class DNZBasicRecordFormatter extends CulturalRecordFormatter {
 		String stringValue = rec.getStringValue("category");
 		WithMediaType type = null;
 		if (Utils.hasAny(stringValue)){
-			List<Object> translateToCommon = getValuesMap().translateToCommon(CommonFilters.TYPE.getId(), stringValue);
+			List<Object> translateToCommon = getValuesMap().translateToCommon(FiltersFields.TYPE.getId(), stringValue);
 			for (Object object : translateToCommon) {
 				WithMediaType type2 = WithMediaType.getType(object.toString());
 				if (type2!=null){
@@ -102,7 +102,7 @@ public class DNZBasicRecordFormatter extends CulturalRecordFormatter {
 				}
 			}
 		}
-		WithMediaRights withRights = (rights==null || rights.size()==0)?null:(WithMediaRights.getRights(getValuesMap().translateToCommon(CommonFilters.RIGHTS.getId(), rights.get(0)).get(0).toString())) ;
+		WithMediaRights withRights = (rights==null || rights.size()==0)?null:(WithMediaRights.getRights(getValuesMap().translateToCommon(FiltersFields.RIGHTS.getId(), rights.get(0)).get(0).toString())) ;
 		
 		
 		

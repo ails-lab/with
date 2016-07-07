@@ -28,8 +28,8 @@ import model.basicDataTypes.ProvenanceInfo;
 import model.basicDataTypes.ProvenanceInfo.Sources;
 import model.resources.CulturalObject;
 import model.resources.CulturalObject.CulturalObjectData;
+import search.FiltersFields;
 import sources.FilterValuesMap;
-import sources.core.CommonFilters;
 import sources.core.Utils;
 import sources.utils.JsonContextRecord;
 import sources.utils.StringUtils;
@@ -81,10 +81,10 @@ public class DPLARecordFormatter extends CulturalRecordFormatter {
 				new ProvenanceInfo(Sources.DPLA.toString(), uri, recID));
 		List<String> rights = rec.getStringArrayValue("sourceResource.rights");
 		String stringValue = rec.getStringValue("sourceResource.type","originalRecord.type");
-		List<Object> translateToCommon = getValuesMap().translateToCommon(CommonFilters.TYPE.getId(), stringValue);
+		List<Object> translateToCommon = getValuesMap().translateToCommon(FiltersFields.TYPE.getId(), stringValue);
 		WithMediaType type = translateToCommon==null?null:(WithMediaType.getType(translateToCommon.get(0).toString())) ;
 		WithMediaRights withRights = ((rights==null) || (rights.size()==0))?WithMediaRights.UNKNOWN
-				:WithMediaRights.getRights(getValuesMap().translateToCommon(CommonFilters.RIGHTS.getId(), rights.get(0)).get(0).toString());
+				:WithMediaRights.getRights(getValuesMap().translateToCommon(FiltersFields.RIGHTS.getId(), rights.get(0)).get(0).toString());
 		String uri3 = rec.getStringValue("object");
 		String uri2 = model.getIsShownBy()==null?null:model.getIsShownBy().getURI();
 		if (Utils.hasInfo(uri3)){

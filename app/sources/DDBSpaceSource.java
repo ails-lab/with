@@ -28,8 +28,8 @@ import model.resources.WithResource;
 import play.Logger;
 import play.Logger.ALogger;
 import play.libs.Json;
+import search.FiltersFields;
 import sources.core.CommonFilterLogic;
-import sources.core.CommonFilters;
 import sources.core.CommonQuery;
 import sources.core.HttpConnector;
 import sources.core.ISpaceSource;
@@ -51,10 +51,10 @@ public class DDBSpaceSource extends ISpaceSource {
 		apiKey = "SECRET_KEY";
 		formatreader = new DDBRecordFormatter();
 		
-		addDefaultWriter(CommonFilters.TYPE.getId(), fwriter("type_fct"));
-		addDefaultWriter(CommonFilters.PROVIDER.getId(), fwriter("provider_fct"));
-		addDefaultWriter(CommonFilters.RIGHTS.getId(), fwriter("license_group"));
-		addDefaultWriter(CommonFilters.COUNTRY.getId(), fwriter("place_fct"));
+		addDefaultWriter(FiltersFields.TYPE.getId(), fwriter("type_fct"));
+		addDefaultWriter(FiltersFields.PROVIDER.getId(), fwriter("provider_fct"));
+		addDefaultWriter(FiltersFields.RIGHTS.getId(), fwriter("license_group"));
+		addDefaultWriter(FiltersFields.COUNTRY.getId(), fwriter("place_fct"));
 		
 	}
 	
@@ -122,11 +122,11 @@ public class DDBSpaceSource extends ISpaceSource {
 	
 	public List<CommonFilterLogic> createFilters(JsonNode response) {
 		List<CommonFilterLogic> filters = new ArrayList<CommonFilterLogic>();
-		CommonFilterLogic type = new CommonFilterLogic(CommonFilters.TYPE).addTo(filters);
-		CommonFilterLogic provider = new CommonFilterLogic(CommonFilters.PROVIDER).addTo(filters);
-		CommonFilterLogic rights = new CommonFilterLogic(CommonFilters.RIGHTS).addTo(filters);
-		CommonFilterLogic country = new CommonFilterLogic(CommonFilters.COUNTRY).addTo(filters);
-		CommonFilterLogic year = new CommonFilterLogic(CommonFilters.YEAR).addTo(filters);
+		CommonFilterLogic type = new CommonFilterLogic(FiltersFields.TYPE).addTo(filters);
+		CommonFilterLogic provider = new CommonFilterLogic(FiltersFields.PROVIDER).addTo(filters);
+		CommonFilterLogic rights = new CommonFilterLogic(FiltersFields.RIGHTS).addTo(filters);
+		CommonFilterLogic country = new CommonFilterLogic(FiltersFields.COUNTRY).addTo(filters);
+		CommonFilterLogic year = new CommonFilterLogic(FiltersFields.YEAR).addTo(filters);
 				
 		for (JsonNode facet : response.path("facets")) {
 			String filterType = facet.path("field").asText();

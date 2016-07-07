@@ -21,7 +21,6 @@ import java.util.List;
 import java.util.function.Function;
 
 import sources.core.CommonFilterLogic;
-import sources.core.CommonFilters;
 import sources.core.CommonQuery;
 import sources.core.HttpConnector;
 import sources.core.ISpaceSource;
@@ -32,6 +31,7 @@ import sources.core.SourceResponse;
 import sources.core.RecordJSONMetadata.Format;
 import model.basicDataTypes.ProvenanceInfo.Sources;
 import model.resources.RecordResource;
+import search.FiltersFields;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
@@ -42,7 +42,7 @@ public class EuropeanaFashionSpaceSource extends ISpaceSource {
 		// addDefaultWriter(CommonFilters.TYPE_ID, qfwriter("TYPE"));
 		// addDefaultQueryModifier(CommonFilters.TYPE_ID, getFunction("219",
 		// "objectType"));
-		addDefaultQueryModifier(CommonFilters.DATA_PROVIDER.name(), getFunction("302", "dataProviders"));
+		addDefaultQueryModifier(FiltersFields.DATA_PROVIDER.name(), getFunction("302", "dataProviders"));
 
 		// addMapping(CommonFilters.TYPE_ID, TypeValues.IMAGE, getURI("10303"));
 		// addMapping(CommonFilters.TYPE_ID, TypeValues.IMAGE, getURI("10460"));

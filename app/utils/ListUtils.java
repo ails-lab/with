@@ -19,6 +19,7 @@ package utils;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -85,6 +86,14 @@ public class ListUtils {
 			}
 		}
 		return res;
+	}
+	
+	public static <K,T> List<T> getOrSet(K key, HashMap<K,List<T>>  map){
+		List<T> result = map.get(key);
+		if (result==null){
+			map.put(key, result = new ArrayList<>());
+		}
+		return result;	
 	}
 
 }

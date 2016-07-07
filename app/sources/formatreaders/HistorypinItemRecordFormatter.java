@@ -35,8 +35,8 @@ import model.basicDataTypes.ProvenanceInfo;
 import model.basicDataTypes.ProvenanceInfo.Sources;
 import model.resources.CulturalObject;
 import model.resources.CulturalObject.CulturalObjectData;
+import search.FiltersFields;
 import sources.FilterValuesMap;
-import sources.core.CommonFilters;
 import sources.core.Utils;
 import sources.utils.JsonContextRecord;
 import sources.utils.StringUtils;
@@ -89,11 +89,11 @@ public class HistorypinItemRecordFormatter extends CulturalRecordFormatter {
 		object.addToProvenance(
 				new ProvenanceInfo(Sources.Historypin.toString(), uri, recID));
 		List<String> rights = rec.getStringArrayValue("license");
-		List<Object> translateToCommon = getValuesMap().translateToCommon(CommonFilters.TYPE.getId(), rec.getStringValue("type"));
+		List<Object> translateToCommon = getValuesMap().translateToCommon(FiltersFields.TYPE.getId(), rec.getStringValue("type"));
 		WithMediaType type = (WithMediaType.getType(translateToCommon.get(0).toString())) ;
 		WithMediaRights withRights = (!Utils.hasInfo(rights))?null:WithMediaRights.getRights(
-				getValuesMap().translateToCommon(CommonFilters.RIGHTS.getId(), rights.get(0)).get(0).toString());
-		System.out.println(getValuesMap().translateToCommon(CommonFilters.RIGHTS.getId(), rights.get(0)).get(0).toString());
+				getValuesMap().translateToCommon(FiltersFields.RIGHTS.getId(), rights.get(0)).get(0).toString());
+		System.out.println(getValuesMap().translateToCommon(FiltersFields.RIGHTS.getId(), rights.get(0)).get(0).toString());
 		
 		String uri3 = "http://www.historypin.org"+rec.getStringValue("display.content");
 		String uri2 = model.getIsShownBy()==null?null:model.getIsShownBy().getURI();

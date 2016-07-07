@@ -35,10 +35,10 @@ import model.resources.RecordResource.RecordDescriptiveData;
 import play.Logger;
 import play.Logger.ALogger;
 import play.libs.Json;
+import search.FiltersFields;
 import sources.core.AutocompleteResponse;
 import sources.core.AutocompleteResponse.DataJSON;
 import sources.core.AutocompleteResponse.Suggestion;
-import sources.core.CommonFilters;
 import sources.core.CommonQuery;
 import sources.core.ISpaceSource;
 import sources.core.RecordJSONMetadata;
@@ -97,7 +97,7 @@ public class YouTubeSpaceSource extends ISpaceSource {
 		
 		if (q.filters==null || q.filters.size()==0 ||
 				(q.filters.size()==1 && 
-				q.filters.get(0).filterID.equals(CommonFilters.TYPE.getId()) &&
+				q.filters.get(0).filterID.equals(FiltersFields.TYPE.getId()) &&
 				q.filters.get(0).values.contains(WithMediaType.VIDEO)
 				)){
 			try {
