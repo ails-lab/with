@@ -19,6 +19,7 @@ package db;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -213,9 +214,9 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 				.equal(recordId);
 		UpdateOperations<RecordResource> recordUpdate = this
 				.createUpdateOperations();
-		// TODO: what if already entry with the same colId-position? have to
-		// remove first to avoid duplicates.
-		recordUpdate.add("collectedIn", collectionId);
+		//adds collectionId even if duplicate! 
+		//TODO: Have to write script to update existing records in db accordingly
+		recordUpdate.add("collectedIn", collectionId, true);
 		if (access != null)
 			recordUpdate.set("administrative.access", access);
 		if (isPublic)
@@ -234,7 +235,7 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 	// TODO: has to be atomic as a whole
 	// uses findAndModify for entryCount of respective collection
 	public void addToCollection(ObjectId recordId, ObjectId collectionId,
-			int position, boolean changeRecRights) {
+			int position, boolean changeRecRights, boolean existsInSameCollection) {
 		CollectionObject collection = DB.getCollectionObjectDAO()
 				.addToCollection(collectionId, recordId, position, false);
 		WithAccess newAccess = null;
@@ -242,7 +243,10 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 			newAccess = mergeParentCollectionRights(recordId, collectionId,
 					collection.getAdministrative().getAccess());
 		//get collectionId rights and copy them to collectedBy
-		CollectedByAccess newCollectedBy = newCollectedBy(collectionId);			
+		//if a record is collected n times in collectionId, keep one entry in collectedBy
+		CollectedByAccess newCollectedBy = new CollectedByAccess();
+		if (!existsInSameCollection)
+			newCollectedBy = newCollectedBy(collectionId);			
 		updateRecordUsageCollectedAndRights(collectionId, newAccess, recordId,
 				collection.getAdministrative().getAccess().getIsPublic(), newCollectedBy);
 		DB.getCollectionObjectDAO().addCollectionMedia(collectionId, recordId,
@@ -257,14 +261,16 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 	}
 
 	public void appendToCollection(ObjectId recordId, ObjectId collectionId,
-			boolean changeRecRights) {
+			boolean changeRecRights, boolean existsInSameCollection) {
 		CollectionObject collection = DB.getCollectionObjectDAO()
 				.addToCollection(collectionId, recordId, -1, true);
 		WithAccess newAccess = null;
 		if (changeRecRights)
 			newAccess = mergeParentCollectionRights(recordId, collectionId,
 					collection.getAdministrative().getAccess());
-		CollectedByAccess newCollectedBy = newCollectedBy(collectionId);			
+		CollectedByAccess newCollectedBy = new CollectedByAccess();
+		if (!existsInSameCollection)			
+			newCollectedBy = newCollectedBy(collectionId);
 		updateRecordUsageCollectedAndRights(collectionId, newAccess, recordId,
 				collection.getAdministrative().getAccess().getIsPublic(), newCollectedBy);
 		DB.getCollectionObjectDAO().addCollectionMedia(collectionId, recordId,
@@ -422,13 +428,27 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 
 	public void removeFromCollection(ObjectId recordId, ObjectId collectionId,
 			int position, boolean first, boolean all) throws Exception {
-		DB.getCollectionObjectDAO().removeFromCollection(collectionId,
+		CollectionObject collection = DB.getCollectionObjectDAO().removeFromCollection(collectionId,
 				recordId, position, first, all);
 		UpdateOperations<RecordResource> recordUpdate = this
 				.createUpdateOperations();
 		Query<RecordResource> q = this.createQuery().field("_id")
 				.equal(recordId);
-		recordUpdate.removeAll("collectedIn", Arrays.asList(collectionId));
+		RecordResource record = this.getById(collectionId, new ArrayList<String>(Arrays.asList("collectedIn, administrative.collectedBy")));
+		List<ObjectId>  collectedIn = record.getCollectedIn();
+		int occurencesOfRecordInCollection = Collections.frequency(collectedIn, collectionId);
+		CollectedByAccess collectionRights = new CollectedByAccess(collection.getAdministrative().getAccess().getAcl());
+		//collectedIn contains duplicates
+		if (all) {//removeAll only if the record exists once in the collection
+			removeFromCollectedBy(recordUpdate, record.getAdministrative().getCollectedBy(), collectionRights);
+			recordUpdate.removeAll("collectedIn", Arrays.asList(collectionId));
+		}
+		else {
+			if (occurencesOfRecordInCollection == 1)
+				removeFromCollectedBy(recordUpdate, record.getAdministrative().getCollectedBy(), collectionRights);
+			collectedIn.remove(collectionId);
+			recordUpdate.set("collectedIn", collectedIn);
+		}
 		if (DB.getCollectionObjectDAO().isFavorites(collectionId))
 			recordUpdate.dec("usage.likes");
 		else
@@ -436,6 +456,16 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 		this.update(q, recordUpdate);
 		updateRecordRightsUponRemovalFromCollection(recordId, collectionId);
 		removeRecordIfNotCollected(recordId);
+	}
+	
+	private void removeFromCollectedBy(UpdateOperations<RecordResource> recordUpdate, CollectedByAccess currentCollectedBy, CollectedByAccess collectionRights) {
+		for (Access level: collectionRights.keySet()) {
+			List<ObjectId> userIds = collectionRights.get(level);
+			List<ObjectId> currentRecordUserIds = currentCollectedBy.get(level);
+			for (ObjectId userId: userIds)
+				currentRecordUserIds.remove(userId);
+			recordUpdate.set("administrative.collectedBy." + level, currentRecordUserIds);
+		}
 	}
 
 	private void removeRecordIfNotCollected(ObjectId recordId) {
@@ -492,7 +522,7 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 		Query<RecordResource> q = this.createQuery().disableValidation()
 				.field("collectedIn").equal(collectionId);
 		q.field("administrative.externalId").equal(externalId);
-		return this.find(q.limit(1)).asList().size() == 0 ? false : true;
+		return this.find(q.limit(1)).countAll() == 0 ? false : true;
 	}
 
 	public void editRecord(String root, ObjectId dbId, JsonNode json) {

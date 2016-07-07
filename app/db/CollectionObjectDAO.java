@@ -408,11 +408,10 @@ public class CollectionObjectDAO extends WithResourceDAO<CollectionObject> {
 		return DB.getDs().findAndModify(q, collectionUpdate, true);
 	}
 
-	public void removeFromCollection(ObjectId collectionId, ObjectId recordId,
+	public CollectionObject removeFromCollection(ObjectId collectionId, ObjectId recordId,
 			int position, boolean first, boolean all) throws Exception {
-
 		CollectionObject collection = this.getById(collectionId,
-				Arrays.asList("collectedResources"));
+				Arrays.asList("collectedResources, administrative.access"));
 		int i = 0;
 		List<ContextData> newCollectedResources = new ArrayList<ContextData>(
 				collection.getCollectedResources());
@@ -459,6 +458,7 @@ public class CollectionObjectDAO extends WithResourceDAO<CollectionObject> {
 						positions.get(--resourcesRemoved));
 			} while (resourcesRemoved > 0);
 		}
+		return collection;
 	}
 
 	public void moveInCollection(ObjectId collectionId, ObjectId recordId,

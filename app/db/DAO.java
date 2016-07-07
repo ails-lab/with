@@ -273,6 +273,7 @@ public class DAO<E> extends BasicDAO<E, ObjectId> {
 							.invoke(doc));
 				}
 			} catch (Exception e) {
+				System.out.println(e.getMessage());
 				log.error(e.getMessage(), e);
 				return null;
 			}
@@ -370,7 +371,7 @@ public class DAO<E> extends BasicDAO<E, ObjectId> {
 	 * @return
 	 */
 	public E getById(ObjectId id, List<String> retrievedFields) {
-		Query<E> q = this.createQuery().field("_id").equal(id);
+		Query<E> q = this.createQuery().field("_id").equal(id).disableValidation();
 		if (retrievedFields != null)
 			q.retrievedFields(true,
 					retrievedFields.toArray(new String[retrievedFields.size()]));

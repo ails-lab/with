@@ -338,7 +338,7 @@ public class WithResourceDAO<T extends WithResource> extends DAO<T> {
 	}
 	
 	public void updateCollectedBy(ObjectId resourceId, ObjectId userId, Access oldAccess, Access newAccess) {
-		//TODO: get collectedBy.oldAccess of resourceId, remove first occurrence of userId, reset collectedBy.oldAccess
+		//get collectedBy.oldAccess of resourceId, remove first occurrence of userId, reset collectedBy.oldAccess
 		//add userId to collectedBy.newAccess
 		UpdateOperations<T> updateOps = this.createUpdateOperations()
 				.disableValidation();
