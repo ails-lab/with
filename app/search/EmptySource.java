@@ -43,8 +43,8 @@ public class EmptySource implements Source {
 	 * @param query
 	 * @return
 	 */
-	public Promise<Response> execute( Query query ) {
-		return Promise.pure( Response.EMPTY ); 
+	public Promise<Response.SingleResponse> execute( Query query ) {
+		return Promise.pure( Response.SingleResponse.EMPTY ); 
 	}
 	
 	/**

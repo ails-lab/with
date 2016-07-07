@@ -57,7 +57,7 @@ public interface Source {
 	 * @param query
 	 * @return
 	 */
-	public Promise<Response> execute(Query query);
+	public Promise<Response.SingleResponse> execute(Query query);
 
 	/**
 	 * Take the incompleteRecord, which is some WITH Record and try to complete
