@@ -24,9 +24,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.function.Function;
 
-import model.basicDataTypes.ProvenanceInfo.Sources;
 import model.resources.RecordResource;
 import search.FiltersFields;
+import search.Sources;
 import sources.FilterValuesMap;
 import sources.core.Utils.Pair;
 import utils.ListUtils;

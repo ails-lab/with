@@ -29,9 +29,9 @@ import sources.core.QueryModifier;
 import sources.core.RecordJSONMetadata;
 import sources.core.SourceResponse;
 import sources.core.RecordJSONMetadata.Format;
-import model.basicDataTypes.ProvenanceInfo.Sources;
 import model.resources.RecordResource;
 import search.FiltersFields;
+import search.Sources;
 
 import com.fasterxml.jackson.databind.JsonNode;
 

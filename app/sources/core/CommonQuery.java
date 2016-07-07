@@ -36,7 +36,9 @@ import play.Logger;
 import play.Logger.ALogger;
 import play.libs.F.Option;
 import play.mvc.QueryStringBindable;
+import search.FiltersFields;
 import search.Query;
+import utils.ListUtils;
 import utils.Tuple;
 
 public class CommonQuery implements Cloneable , QueryStringBindable<CommonQuery>{
@@ -69,6 +71,8 @@ public class CommonQuery implements Cloneable , QueryStringBindable<CommonQuery>
 	public CommonQuery(Query query) {
 		this.page = ""+query.page;
 		this.pageSize = ""+query.pageSize;
+		this.searchTerm = query.findFilter(FiltersFields.ANYWHERE.getFilterId()).value;
+		this.source = ListUtils.transform(query.sources, (x)->x.)  
 	}
 
 	private List<Tuple<ObjectId, Access>> transformList(ObjectNode[] inputList, boolean group) {

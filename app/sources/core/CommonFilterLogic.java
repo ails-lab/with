@@ -21,10 +21,10 @@ import java.util.HashMap;
 import java.util.List;
 
 import model.basicDataTypes.Language;
-import model.basicDataTypes.ProvenanceInfo.Sources;
 import play.Logger;
 import play.Logger.ALogger;
 import search.FiltersFields;
+import search.Sources;
 import utils.SortedList;
 
 public class CommonFilterLogic implements Cloneable {

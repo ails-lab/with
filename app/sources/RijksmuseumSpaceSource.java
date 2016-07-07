@@ -26,11 +26,11 @@ import com.fasterxml.jackson.databind.JsonNode;
 
 import model.EmbeddedMediaObject.MediaVersion;
 import model.EmbeddedMediaObject;
-import model.basicDataTypes.ProvenanceInfo.Sources;
 import model.resources.CulturalObject;
 import model.resources.RecordResource;
 import play.libs.Json;
 import search.FiltersFields;
+import search.Sources;
 import sources.core.CommonFilterLogic;
 import sources.core.CommonQuery;
 import sources.core.HttpConnector;

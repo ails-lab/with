@@ -24,8 +24,8 @@ import java.util.function.Function;
 
 import model.EmbeddedMediaObject.WithMediaRights;
 import model.EmbeddedMediaObject.WithMediaType;
-import model.basicDataTypes.ProvenanceInfo.Sources;
 import search.FiltersFields;
+import search.Sources;
 import sources.core.ESpaceSources;
 import sources.core.MapsConfig;
 import sources.core.QueryModifier;

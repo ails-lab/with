@@ -45,7 +45,7 @@ import play.data.Form;
 import play.libs.F.Promise;
 import play.libs.Json;
 import play.mvc.Result;
-import search.Sources;
+import search.Temp;
 import sources.core.CommonFilterLogic;
 import sources.core.CommonFilterResponse;
 import sources.core.CommonQuery;
@@ -118,7 +118,7 @@ public class SearchController extends WithController {
 			try {
 				final search.Query q = Json.fromJson(json, search.Query.class );
 				// check if the query needs readability additions for WITHin
-				if( q.containsSource( Sources.WITHin)) {
+				if( q.containsSource( Temp.WITHin)) {
 					// add conditions for visibility in WITH
 					
 				}

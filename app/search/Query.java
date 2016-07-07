@@ -36,7 +36,7 @@ public class Query {
 	/**
 	 * Which sources need to be queried.
 	 */
-	public List<Sources> sources = new ArrayList<Sources>();
+	public List<Sources> sources = new ArrayList<>();
 	
 	/**
 	 * This is the CNF of the query. The inner array filters a meant to be ORed together, the outer array ANDs the inner terms.  
@@ -193,7 +193,7 @@ public class Query {
 			HashMap<String,List<String>> map = new HashMap<>();
 			result.add(map);
 			for (Filter filter : clause) {
-				ListUtils.getOrSet(filter.fieldname, map).add(filter.value);
+				ListUtils.getOrSet(filter.fieldId, map).add(filter.value);
 			}
 		}
 		return result;
@@ -206,7 +206,7 @@ public class Query {
 	public Filter findFilter(String filterName){
 		for (List<Filter> clause : filters) {
 			for (Filter filter : clause) {
-				if (filterName.equals(filter.fieldname))
+				if (filterName.equals(filter.fieldId))
 					return filter;
 			}
 		}
@@ -227,7 +227,7 @@ public class Query {
 	}
 	
 	public Map<Sources, Query> splitBySource() {
-		Map<Sources, Query> res = new HashMap<Sources, Query>();
+		Map<Sources, Query> res = new HashMap<>();
 		for( Sources source: sources ) {
 			Set<String> supportedFieldIds = source.getDriver().supportedFieldIds();
 			Query newQuery = this.pruneFilters(source, supportedFieldIds);

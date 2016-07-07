@@ -96,4 +96,8 @@ public class ListUtils {
 		return result;	
 	}
 
+	public static<T> T last(List<T> list) {
+		return list.get(list.size()-1);
+	}
+
 }

@@ -24,10 +24,10 @@ import java.util.function.Function;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
-import model.basicDataTypes.ProvenanceInfo.Sources;
 import play.Logger;
 import play.Logger.ALogger;
 import search.FiltersFields;
+import search.Sources;
 import sources.core.CommonQuery;
 import sources.core.ISpaceSource;
 import sources.core.QueryBuilder;

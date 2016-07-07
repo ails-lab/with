@@ -23,12 +23,12 @@ import java.util.function.Function;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
-import model.basicDataTypes.ProvenanceInfo.Sources;
 import model.resources.RecordResource;
 import play.Logger;
 import play.Logger.ALogger;
 import play.libs.Json;
 import search.FiltersFields;
+import search.Sources;
 import sources.core.CommonFilterLogic;
 import sources.core.CommonQuery;
 import sources.core.ISpaceSource;

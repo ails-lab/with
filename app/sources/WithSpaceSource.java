@@ -25,7 +25,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import model.basicDataTypes.ProvenanceInfo.Sources;
 import model.basicDataTypes.WithAccess;
 import model.basicDataTypes.WithAccess.Access;
 import model.resources.RecordResource;
@@ -52,6 +51,7 @@ import db.DB;
 import play.Logger;
 import play.libs.Json;
 import search.FiltersFields;
+import search.Sources;
 import sources.core.CommonFilter;
 import sources.core.CommonFilterLogic;
 import sources.core.CommonQuery;

@@ -19,6 +19,10 @@ package search;
 import model.basicDataTypes.MultiLiteral;
 
 public enum FiltersFields {
+		/**
+		 * also known as search term
+		 */
+		ANYWHERE("anywhere","Anywhere"),
 		TYPE("media.type","Media Type"),
 		PROVIDER("provider","Provider"),
 		CREATOR("dccreator.default","Creator"),
