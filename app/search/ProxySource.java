@@ -37,7 +37,7 @@ public class ProxySource extends EmptySource {
 	}
 	
 	@Override
-	public Promise<Response> execute(Query query) {
+	public Promise<Response.SingleResponse>  execute(Query query) {
 		// TODO Translate to a CommonQuery
 		CommonQuery q = new CommonQuery(query);
 		// TODO execute in spaceSource
