@@ -27,24 +27,25 @@ import search.ProxySource.InternetArchiveProxySource;
 import search.ProxySource.NLAProxySource;
 import search.ProxySource.RijksProxySource;
 import search.ProxySource.YoutubeProxySource;
+import sources.ElasticSource;
 
 public enum Sources {
 	// TODO implement it the right way
-	Mint(EmptySource.class,"Mint"), 
-	Europeana(EuropeanaProxySource.class, "Europeana"), 
+	Mint(EmptySource.class,"Mint"),
+	Europeana(EuropeanaProxySource.class, "Europeana"),
 	UploadedByUser(EmptySource.class,"UploadedByUser"),
 	BritishLibrary(BritishLibProxySource.class,"BritishLibrary", "The British Library"),
-	InternetArchive(InternetArchiveProxySource.class,"InternetArchive","Internet Archive"), 
+	InternetArchive(InternetArchiveProxySource.class,"InternetArchive","Internet Archive"),
 	DDB(DDBProxySource.class,"DDB","Deutsche Digitale Bibliothek"),
-	DigitalNZ(DigitalNZProxySource.class,"DigitalNZ"), 
+	DigitalNZ(DigitalNZProxySource.class,"DigitalNZ"),
 	DPLA(DPLAProxySource.class,"DPLA","Digital Public Library of America"),
 	// TODO implement it the right way
 	EFashion(EmptySource.class,"EFashion"),
 	YouTube(YoutubeProxySource.class,"Youtube"),
 	NLA(NLAProxySource.class,"NLA","National Library of Australia"),
 	// TODO implement it the right way
-	WITHin(EmptySource.class,"WITHin"),
-	Rijksmuseum(RijksProxySource.class,"Rijksmuseum","Rijksmuseum"), 
+	WITHin(ElasticSource.class,"WITHin"),
+	Rijksmuseum(RijksProxySource.class,"Rijksmuseum","Rijksmuseum"),
 	Historypin(HistoryPinProxySource.class,"Historypin"),
 	// TODO implement it the right way
 	WITHinASpace(EmptySource.class,"WITHinASpace")
@@ -53,21 +54,21 @@ public enum Sources {
 
 	private final String sourceName;
 	private final String sourceID;
-	
+
 	private Class<? extends Source> driver;
 	private Sources( Class<? extends Source> driver, String id, String text) {
 		this.driver = driver;
 		this.sourceName = text;
 		this.sourceID = id;
 	}
-	
+
 	private Sources( Class<? extends Source> driver, String id) {
 		this(driver,id,id);
 	}
-	
+
 	public Source getDriver() {
 		try {
-			return (Source) driver.newInstance();
+			return driver.newInstance();
 		} catch( Exception e ) {
 			Logger.of( Sources.class )
 				.error( "Fatal error, source instance cannot be created" );

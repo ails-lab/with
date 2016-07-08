@@ -459,6 +459,34 @@ public class ElasticSearcher {
 		}
 	}
 
+	private SearchRequestBuilder getBoolSearchRequestBuilder(List<QueryBuilder> must_qs, List<QueryBuilder> must_not_qs, SearchOptions options) {
+		SearchRequestBuilder search = Elastic.getTransportClient()
+				.prepareSearch(name)
+				.setTypes(types.toArray(new String[types.size()]))
+				.setFetchSource(false);
+
+		if(!options.isScroll()) {
+			search.setFrom(options.offset)
+				  .setSearchType(SearchType.DFS_QUERY_THEN_FETCH)
+				  .setSize(options.count);
+		} else {
+			search.setSearchType(SearchType.SCAN)
+				  .setScroll(new TimeValue(60000))
+				  .setSize(100);
+		}
+
+		BoolQueryBuilder outer_bool = QueryBuilders.boolQuery();
+		if(must_qs!=null)
+			for(QueryBuilder q: must_qs)
+				outer_bool.must(q);
+		if(must_not_qs!=null)
+			for(QueryBuilder q: must_not_qs)
+				outer_bool.mustNot(q);
+
+		search.setQuery(outer_bool);
+		return search;
+	}
+
 	private SearchRequestBuilder getSearchRequestBuilder(QueryBuilder query, SearchOptions options) {
 
 		SearchRequestBuilder search = Elastic.getTransportClient()
