@@ -26,7 +26,9 @@ import java.util.Map.Entry;
 
 import play.Logger;
 import play.Logger.ALogger;
+import search.Filter;
 import utils.Tuple;
+
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.search.SearchType;
@@ -168,12 +170,26 @@ public class ElasticSearcher2 {
 
 	/* Query Constractors */
 
-	/* Function Score query */
-	public QueryBuilder funcScoreQuery(String term) {
-		QueryStringQueryBuilder qstr = QueryBuilders.queryStringQuery(term);
-		for(Entry<String, Float> e: fedSearchFieldsWithBoosts.entrySet()) {
-			qstr.field(e.getKey()+"_all", e.getValue());
+	/* Bool query */
+	public QueryBuilder boolShouldQuery(List<Filter> filters) {
+
+		BoolQueryBuilder bool = QueryBuilders.boolQuery();
+		for(Filter f: filters) {
+			if(f.exact)
+				bool.should(funcScoreQuery(f.fieldId, f.value));
+			else
+				bool.should(termsQuery(f.fieldId, f.value));
 		}
+		return bool;
+		}
+
+
+	/* Function Score query */
+	public QueryBuilder funcScoreQuery(String field, String term) {
+		QueryStringQueryBuilder qstr = QueryBuilders.queryStringQuery(term);
+		//for(String field: fields) {
+			qstr.field(field+"_all");
+		//}
 		qstr.useDisMax(true);
 		qstr.tieBreaker(0);
 		qstr.defaultOperator(Operator.OR);
@@ -203,8 +219,8 @@ public class ElasticSearcher2 {
 	}
 
 	/* Terms query */
-	public QueryBuilder termsQuery(String field, List<String> terms) {
-		TermsQueryBuilder terms_q = QueryBuilders.termsQuery(field, terms);
+	public QueryBuilder termsQuery(String field, String term) {
+		TermQueryBuilder terms_q = QueryBuilders.termQuery(field, term);
 		return terms_q;
 	}
 
@@ -372,7 +388,8 @@ public class ElasticSearcher2 {
 	/*
 	 * Build search query build on bool query
 	 */
-	private SearchRequestBuilder getBoolSearchRequestBuilder(List<QueryBuilder> must_qs, List<QueryBuilder> must_not_qs, SearchOptions options) {
+	public SearchRequestBuilder getBoolSearchRequestBuilder(List<QueryBuilder> must_qs, List<QueryBuilder> should_qs,
+															List<QueryBuilder> must_not_qs, SearchOptions options) {
 		SearchRequestBuilder search = Elastic.getTransportClient()
 				.prepareSearch(name)
 				.setTypes(types.toArray(new String[types.size()]))
@@ -392,6 +409,9 @@ public class ElasticSearcher2 {
 		if(must_qs!=null)
 			for(QueryBuilder q: must_qs)
 				outer_bool.must(q);
+		if(should_qs!=null)
+			for(QueryBuilder q: should_qs)
+				outer_bool.should(q);
 		if(must_not_qs!=null)
 			for(QueryBuilder q: must_not_qs)
 				outer_bool.mustNot(q);

@@ -16,10 +16,17 @@
 
 package elastic;
 
+import java.util.ArrayList;
 import java.util.List;
 
+import org.bson.types.ObjectId;
+import org.elasticsearch.action.search.SearchResponse;
+import org.elasticsearch.index.query.QueryBuilder;
+import org.elasticsearch.search.SearchHit;
+
+import db.DB;
 import search.Filter;
-import sources.core.SearchResponse;
+import search.Response.SingleResponse;
 import elastic.ElasticSearcher2.SearchOptions;
 
 public class ElasticCoordinator {
@@ -31,8 +38,25 @@ public class ElasticCoordinator {
 	}
 
 
-	public SearchResponse federatedSearch(List<List<Filter>> filters) {
-		F
+	public SingleResponse federatedSearch(List<List<Filter>> filters) {
+		ElasticSearcher2 searcher = new ElasticSearcher2();
+		List<QueryBuilder> musts = new ArrayList<QueryBuilder>();
+		for(List<Filter> ors: filters) {
+			musts.add(searcher.boolShouldQuery(ors));
+		}
+		SearchResponse elasticresp =
+				searcher.getBoolSearchRequestBuilder(musts, null, null, options)
+				.execute().actionGet();
 
+
+		SingleResponse sresp = new SingleResponse();
+		List<ObjectId> ids = new ArrayList<ObjectId>();
+		for(SearchHit h: elasticresp.getHits()) {
+			ids.add(new ObjectId(h.getId()));
+		}
+		sresp.items = DB.getRecordResourceDAO().getByIds(ids);
+		sresp.totalCount = (int) elasticresp.getHits().getTotalHits();
+
+		return sresp;
 	}
 }
