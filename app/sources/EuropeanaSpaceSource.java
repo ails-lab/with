@@ -76,26 +76,26 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 //		profile = "rich";
 		apiKey = "SECRET_KEY";
 		
-		addDefaultWriter(FiltersFields.MIME_TYPE.getId(), qfwriter("MIME_TYPE"));
-		addDefaultWriter(FiltersFields.IMAGE_SIZE.getId(), qfwriter("IMAGE_SIZE"));
-		addDefaultWriter(FiltersFields.IMAGE_COLOUR.getId(), qfwriter("IMAGE_COLOUR"));
-		addDefaultWriter(FiltersFields.COLOURPALETE.getId(), qfwriter("COLOURPALETE"));
+		addDefaultWriter(FiltersFields.MIME_TYPE.getFilterId(), qfwriter("MIME_TYPE"));
+		addDefaultWriter(FiltersFields.IMAGE_SIZE.getFilterId(), qfwriter("IMAGE_SIZE"));
+		addDefaultWriter(FiltersFields.IMAGE_COLOUR.getFilterId(), qfwriter("IMAGE_COLOUR"));
+		addDefaultWriter(FiltersFields.COLOURPALETE.getFilterId(), qfwriter("COLOURPALETE"));
 		
 		
-		addDefaultQueryModifier(FiltersFields.PROVIDER.getId(), qwriter("PROVIDER"));
-		addDefaultQueryModifier(FiltersFields.DATA_PROVIDER.getId(), qwriter("DATA_PROVIDER"));
-		addDefaultQueryModifier(FiltersFields.COUNTRY.getId(), qwriter("COUNTRY"));
+		addDefaultQueryModifier(FiltersFields.PROVIDER.getFilterId(), qwriter("PROVIDER"));
+		addDefaultQueryModifier(FiltersFields.DATA_PROVIDER.getFilterId(), qwriter("DATA_PROVIDER"));
+		addDefaultQueryModifier(FiltersFields.COUNTRY.getFilterId(), qwriter("COUNTRY"));
 
-		addDefaultQueryModifier(FiltersFields.YEAR.getId(), qDatewriter());
+		addDefaultQueryModifier(FiltersFields.YEAR.getFilterId(), qDatewriter());
 
-		addDefaultQueryModifier(FiltersFields.CREATOR.getId(), qwriter("CREATOR"));
+		addDefaultQueryModifier(FiltersFields.CREATOR.getFilterId(), qwriter("CREATOR"));
 
 		// addDefaultWriter(CommonFilters.CONTRIBUTOR_ID,
 		// qfwriter("proxy_dc_contributor"));
 
-		addDefaultQueryModifier(FiltersFields.RIGHTS.getId(), qrightwriter());
+		addDefaultQueryModifier(FiltersFields.RIGHTS.getFilterId(), qrightwriter());
 
-		addDefaultQueryModifier(FiltersFields.TYPE.getId(), qwriter("TYPE"));
+		addDefaultQueryModifier(FiltersFields.TYPE.getFilterId(), qwriter("TYPE"));
 
 		
 		formatreader = new EuropeanaRecordFormatter();

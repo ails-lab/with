@@ -172,39 +172,39 @@ public class FilterValuesMap {
 
 
 	private void fillFlickr() {
-		addMapping(FiltersFields.TYPE.getId(), WithMediaType.IMAGE, "photo");
-		addMapping(FiltersFields.TYPE.getId(), WithMediaType.VIDEO, "video");
+		addMapping(FiltersFields.TYPE.getFilterId(), WithMediaType.IMAGE, "photo");
+		addMapping(FiltersFields.TYPE.getFilterId(), WithMediaType.VIDEO, "video");
 
-		addMapping(FiltersFields.RIGHTS.getId(), WithMediaRights.RR, FlickrSpaceSource.getLicence("0"));
-		addMapping(FiltersFields.RIGHTS.getId(), WithMediaRights.Creative_Not_Commercial, FlickrSpaceSource.getLicence("3"),
+		addMapping(FiltersFields.RIGHTS.getFilterId(), WithMediaRights.RR, FlickrSpaceSource.getLicence("0"));
+		addMapping(FiltersFields.RIGHTS.getFilterId(), WithMediaRights.Creative_Not_Commercial, FlickrSpaceSource.getLicence("3"),
 				BritishLibrarySpaceSource.getLicence("2"), FlickrSpaceSource.getLicence("1"));
-		addMapping(FiltersFields.RIGHTS.getId(), WithMediaRights.Modify, FlickrSpaceSource.getLicence("6"));
-		addMapping(FiltersFields.RIGHTS.getId(), WithMediaRights.Creative, FlickrSpaceSource.getLicence("1"), FlickrSpaceSource.getLicence("2"),
+		addMapping(FiltersFields.RIGHTS.getFilterId(), WithMediaRights.Modify, FlickrSpaceSource.getLicence("6"));
+		addMapping(FiltersFields.RIGHTS.getFilterId(), WithMediaRights.Creative, FlickrSpaceSource.getLicence("1"), FlickrSpaceSource.getLicence("2"),
 				BritishLibrarySpaceSource.getLicence("3"), FlickrSpaceSource.getLicence("4"), FlickrSpaceSource.getLicence("5"), FlickrSpaceSource.getLicence("6"));
-		addMapping(FiltersFields.RIGHTS.getId(), WithMediaRights.UNKNOWN, FlickrSpaceSource.getLicence("7"));
-		addMapping(FiltersFields.RIGHTS.getId(), WithMediaRights.Public, FlickrSpaceSource.getLicence("9"), FlickrSpaceSource.getLicence("10"));
+		addMapping(FiltersFields.RIGHTS.getFilterId(), WithMediaRights.UNKNOWN, FlickrSpaceSource.getLicence("7"));
+		addMapping(FiltersFields.RIGHTS.getFilterId(), WithMediaRights.Public, FlickrSpaceSource.getLicence("9"), FlickrSpaceSource.getLicence("10"));
 
 	}
 	private void fillNLA() {
-		addMapping(FiltersFields.TYPE.getId(), WithMediaType.IMAGE, "Image", "Photograph",
+		addMapping(FiltersFields.TYPE.getFilterId(), WithMediaType.IMAGE, "Image", "Photograph",
 				"Poster, chart, other");
-		addMapping(FiltersFields.TYPE.getId(), WithMediaType.VIDEO, "Video");
-		addMapping(FiltersFields.TYPE.getId(), WithMediaType.AUDIO, "Sound", "Sheet music");
-		addMapping(FiltersFields.TYPE.getId(), WithMediaType.TEXT, "Books", "Article");
+		addMapping(FiltersFields.TYPE.getFilterId(), WithMediaType.VIDEO, "Video");
+		addMapping(FiltersFields.TYPE.getFilterId(), WithMediaType.AUDIO, "Sound", "Sheet music");
+		addMapping(FiltersFields.TYPE.getFilterId(), WithMediaType.TEXT, "Books", "Article");
 	}
 
 	private void fillDDB() {
-		addMapping(FiltersFields.TYPE.getId(), WithMediaType.IMAGE, "mediatype_002");
-		addMapping(FiltersFields.TYPE.getId(), WithMediaType.AUDIO, "mediatype_001");
-		addMapping(FiltersFields.TYPE.getId(), WithMediaType.TEXT, "mediatype_003", "mediatype_004");		
-		addMapping(FiltersFields.TYPE.getId(), WithMediaType.VIDEO, "mediatype_005");
-		addMapping(FiltersFields.TYPE.getId(), WithMediaType.OTHER, "mediatype_006","mediatype_007","mediatype_008");
+		addMapping(FiltersFields.TYPE.getFilterId(), WithMediaType.IMAGE, "mediatype_002");
+		addMapping(FiltersFields.TYPE.getFilterId(), WithMediaType.AUDIO, "mediatype_001");
+		addMapping(FiltersFields.TYPE.getFilterId(), WithMediaType.TEXT, "mediatype_003", "mediatype_004");		
+		addMapping(FiltersFields.TYPE.getFilterId(), WithMediaType.VIDEO, "mediatype_005");
+		addMapping(FiltersFields.TYPE.getFilterId(), WithMediaType.OTHER, "mediatype_006","mediatype_007","mediatype_008");
 		
-		addMapping(FiltersFields.RIGHTS.getId(), WithMediaRights.Creative, ".*creative.*");
-		addMapping(FiltersFields.RIGHTS.getId(), WithMediaRights.Creative_Not_Commercial, ".*creative(?!.*nc).*");
-		addMapping(FiltersFields.RIGHTS.getId(), WithMediaRights.Modify, ".*creative(?!.*nd).*");
-		addMapping(FiltersFields.RIGHTS.getId(), WithMediaRights.RR, ".*rr-.*",".*rv-fz.*");
-		addMapping(FiltersFields.RIGHTS.getId(), WithMediaRights.UNKNOWN, ".*unknown.*");
+		addMapping(FiltersFields.RIGHTS.getFilterId(), WithMediaRights.Creative, ".*creative.*");
+		addMapping(FiltersFields.RIGHTS.getFilterId(), WithMediaRights.Creative_Not_Commercial, ".*creative(?!.*nc).*");
+		addMapping(FiltersFields.RIGHTS.getFilterId(), WithMediaRights.Modify, ".*creative(?!.*nd).*");
+		addMapping(FiltersFields.RIGHTS.getFilterId(), WithMediaRights.RR, ".*rr-.*",".*rv-fz.*");
+		addMapping(FiltersFields.RIGHTS.getFilterId(), WithMediaRights.UNKNOWN, ".*unknown.*");
 		
 	}
 	
@@ -231,18 +231,18 @@ public class FilterValuesMap {
 //
 //		addMapping(CommonFilters.RIGHTS.getId(), WithMediaRights.Creative, ".*(creative).*");
 
-		addMapping(FiltersFields.TYPE.getId(), WithMediaType.IMAGE, "image");
-		addMapping(FiltersFields.TYPE.getId(), WithMediaType.VIDEO, "moving image");
-		addMapping(FiltersFields.TYPE.getId(), WithMediaType.AUDIO, "sound");
-		addMapping(FiltersFields.TYPE.getId(), WithMediaType.TEXT, "text");
+		addMapping(FiltersFields.TYPE.getFilterId(), WithMediaType.IMAGE, "image");
+		addMapping(FiltersFields.TYPE.getFilterId(), WithMediaType.VIDEO, "moving image");
+		addMapping(FiltersFields.TYPE.getFilterId(), WithMediaType.AUDIO, "sound");
+		addMapping(FiltersFields.TYPE.getFilterId(), WithMediaType.TEXT, "text");
 	}
 	
 	private void fillDNZ() {
 
-		addMapping(FiltersFields.TYPE.getId(), WithMediaType.IMAGE, "Images");
-		addMapping(FiltersFields.TYPE.getId(), WithMediaType.AUDIO, "Audio");
-		addMapping(FiltersFields.TYPE.getId(), WithMediaType.VIDEO, "Videos");
-		addMapping(FiltersFields.TYPE.getId(), WithMediaType.TEXT, "Books",
+		addMapping(FiltersFields.TYPE.getFilterId(), WithMediaType.IMAGE, "Images");
+		addMapping(FiltersFields.TYPE.getFilterId(), WithMediaType.AUDIO, "Audio");
+		addMapping(FiltersFields.TYPE.getFilterId(), WithMediaType.VIDEO, "Videos");
+		addMapping(FiltersFields.TYPE.getFilterId(), WithMediaType.TEXT, "Books",
 				"Articles","Newspapers",
 				"Research papers",
 				"Manuscripts");
@@ -268,19 +268,19 @@ public class FilterValuesMap {
 		// addMapping(CommonFilters.RIGHTS.name(), RightsValues.RR, "All rights
 		// reserved");
 
-		addMapping(FiltersFields.RIGHTS.getId(), WithMediaRights.Creative, "Share");
-		addMapping(FiltersFields.RIGHTS.getId(), WithMediaRights.Modify, "Modify");
-		addMapping(FiltersFields.RIGHTS.getId(), WithMediaRights.Commercial, "Use commercially");
-		addMapping(FiltersFields.RIGHTS.getId(), WithMediaRights.UNKNOWN, "Unknown");
-		addMapping(FiltersFields.RIGHTS.getId(), WithMediaRights.RR, "All rights reserved");
+		addMapping(FiltersFields.RIGHTS.getFilterId(), WithMediaRights.Creative, "Share");
+		addMapping(FiltersFields.RIGHTS.getFilterId(), WithMediaRights.Modify, "Modify");
+		addMapping(FiltersFields.RIGHTS.getFilterId(), WithMediaRights.Commercial, "Use commercially");
+		addMapping(FiltersFields.RIGHTS.getFilterId(), WithMediaRights.UNKNOWN, "Unknown");
+		addMapping(FiltersFields.RIGHTS.getFilterId(), WithMediaRights.RR, "All rights reserved");
 	}
 
 	
 
 	private void fillRijks() {
-		addMapping(FiltersFields.TYPE.getId(), WithMediaType.IMAGE, 
+		addMapping(FiltersFields.TYPE.getFilterId(), WithMediaType.IMAGE, 
 				"drawing","painting","photograph","documentary photographs");
-		addMapping(FiltersFields.TYPE.getId(), WithMediaType.TEXT, 
+		addMapping(FiltersFields.TYPE.getFilterId(), WithMediaType.TEXT, 
 				"book","poem","text sheet","print","manuscript");
 	}
 

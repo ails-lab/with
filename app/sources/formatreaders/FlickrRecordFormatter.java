@@ -80,8 +80,8 @@ public abstract class FlickrRecordFormatter extends CulturalRecordFormatter {
 					"https://www.flickr.com/photos/"+user+"/" + id + "/", id));
 					
 			String rights = BritishLibrarySpaceSource.getLicence(rec.getStringValue("license"));
-			WithMediaType type = (WithMediaType.getType(getValuesMap().translateToCommon(FiltersFields.TYPE.getId(), rec.getStringValue("media")).get(0).toString())) ;
-			Object r = getValuesMap().translateToCommon(FiltersFields.RIGHTS.getId(),rights).get(0);
+			WithMediaType type = (WithMediaType.getType(getValuesMap().translateToCommon(FiltersFields.TYPE.getFilterId(), rec.getStringValue("media")).get(0).toString())) ;
+			Object r = getValuesMap().translateToCommon(FiltersFields.RIGHTS.getFilterId(),rights).get(0);
 			WithMediaRights withRights = (Utils.hasInfo(rights))?null:(WithMediaRights) r;
 			String uri3 = rec.getStringValue("url_s");
 			String uri2 = rec.getStringValue("url_o");

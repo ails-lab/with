@@ -56,10 +56,10 @@ public class DigitalNZSpaceSource extends ISpaceSource {
 	public DigitalNZSpaceSource() {
 		super(Sources.DigitalNZ);
 		apiKey = "SECRET_KEY";
-		addDefaultWriter(FiltersFields.TYPE.getId(), fwriter("and[category][]"));
-		addDefaultWriter(FiltersFields.CREATOR.getId(), fwriter("and[creator][]"));
-		addDefaultWriter(FiltersFields.YEAR.getId(), qfwriterYEAR());
-		addDefaultWriter(FiltersFields.RIGHTS.getId(), fwriter("and[usage][]"));
+		addDefaultWriter(FiltersFields.TYPE.getFilterId(), fwriter("and[category][]"));
+		addDefaultWriter(FiltersFields.CREATOR.getFilterId(), fwriter("and[creator][]"));
+		addDefaultWriter(FiltersFields.YEAR.getFilterId(), qfwriterYEAR());
+		addDefaultWriter(FiltersFields.RIGHTS.getFilterId(), fwriter("and[usage][]"));
 
 		// TODO: rights_url shows the license in the search
 

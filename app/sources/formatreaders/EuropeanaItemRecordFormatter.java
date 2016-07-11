@@ -48,7 +48,7 @@ public class EuropeanaItemRecordFormatter extends CulturalRecordFormatter {
 		CulturalObjectData model = (CulturalObjectData) object.getDescriptiveData();
 		
 		String stringValue = rec.getStringValue("type");
-		List<Object> vals = getValuesMap().translateToCommon(FiltersFields.TYPE.getId(), stringValue);
+		List<Object> vals = getValuesMap().translateToCommon(FiltersFields.TYPE.getFilterId(), stringValue);
 		WithMediaType type = (WithMediaType.getType(vals.get(0).toString())) ;
 		
 
@@ -107,7 +107,7 @@ public class EuropeanaItemRecordFormatter extends CulturalRecordFormatter {
 		LiteralOrResource rights = rightsLiteral;
 		String rightsString = rec.getStringValue("edmRights");
 		WithMediaRights withMediaRights = (!Utils.hasInfo(rightsString))?null:
-			(WithMediaRights.getRights(getValuesMap().translateToCommon(FiltersFields.RIGHTS.getId(),
+			(WithMediaRights.getRights(getValuesMap().translateToCommon(FiltersFields.RIGHTS.getFilterId(),
 					rightsString).get(0).toString()));
 		
 		model.setIsShownAt(rec.getLiteralOrResourceValue("edmIsShownAt"));

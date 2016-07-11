@@ -91,7 +91,7 @@ public class HistorypinRecordFormatter extends CulturalRecordFormatter {
 		object.addToProvenance(
 				new ProvenanceInfo(Sources.Historypin.toString(), uri, recID));
 //		List<String> rights = rec.getStringArrayValue("rights");
-		List<Object> translateToCommon = getValuesMap().translateToCommon(FiltersFields.TYPE.getId(), rec.getStringValue("type"));
+		List<Object> translateToCommon = getValuesMap().translateToCommon(FiltersFields.TYPE.getFilterId(), rec.getStringValue("type"));
 		WithMediaType type = (WithMediaType.getType(translateToCommon.get(0).toString())) ;
 		WithMediaRights withRights = WithMediaRights.UNKNOWN;
 		String uri3 = "http:"+rec.getStringValue("image");

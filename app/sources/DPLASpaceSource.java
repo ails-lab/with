@@ -60,14 +60,14 @@ public class DPLASpaceSource extends ISpaceSource {
 		super(Sources.DPLA);
 		apiKey = "SECRET_KEY";
 
-		addDefaultWriter(FiltersFields.TYPE.getId(), fwriter("sourceResource.type"));
-		addDefaultWriter(FiltersFields.COUNTRY.getId(), fwriter("sourceResource.spatial.country"));
-		addDefaultWriter(FiltersFields.CREATOR.getId(), fwriter("sourceResource.creator"));
-		addDefaultWriter(FiltersFields.CONTRIBUTOR.getId(), fwriter("sourceResource.contributor"));
-		addDefaultWriter(FiltersFields.PROVIDER.getId(), fwriter("provider.name"));
-		addDefaultWriter(FiltersFields.TYPE.getId(), fwriter("sourceResource.type"));
-		addDefaultComplexWriter(FiltersFields.YEAR.getId(), qfwriterYEAR());
-		addDefaultWriter(FiltersFields.RIGHTS.getId(), fwriter("sourceResource.rights"));
+		addDefaultWriter(FiltersFields.TYPE.getFilterId(), fwriter("sourceResource.type"));
+		addDefaultWriter(FiltersFields.COUNTRY.getFilterId(), fwriter("sourceResource.spatial.country"));
+		addDefaultWriter(FiltersFields.CREATOR.getFilterId(), fwriter("sourceResource.creator"));
+		addDefaultWriter(FiltersFields.CONTRIBUTOR.getFilterId(), fwriter("sourceResource.contributor"));
+		addDefaultWriter(FiltersFields.PROVIDER.getFilterId(), fwriter("provider.name"));
+		addDefaultWriter(FiltersFields.TYPE.getFilterId(), fwriter("sourceResource.type"));
+		addDefaultComplexWriter(FiltersFields.YEAR.getFilterId(), qfwriterYEAR());
+		addDefaultWriter(FiltersFields.RIGHTS.getFilterId(), fwriter("sourceResource.rights"));
 		
 		
 		formatreader = new DPLARecordFormatter();

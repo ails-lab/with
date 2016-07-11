@@ -99,7 +99,7 @@ public class RijksmuseumItemRecordFormatter extends CulturalRecordFormatter {
 		List<String> types = rec.getStringArrayValue("objectTypes");
 		WithMediaType type = null;
 		for (String string : types) {
-			type = WithMediaType.getType(getValuesMap().translateToCommon(FiltersFields.TYPE.getId(), string).get(0).toString());
+			type = WithMediaType.getType(getValuesMap().translateToCommon(FiltersFields.TYPE.getFilterId(), string).get(0).toString());
 			if (type.isKnown()){
 				break;
 			}

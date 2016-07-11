@@ -45,7 +45,7 @@ public class DDBItemRecordFormatter extends CulturalRecordFormatter {
 	public CulturalObject fillObjectFrom(JsonContextRecord rec) {
 		CulturalObjectData model = (CulturalObjectData) object.getDescriptiveData();
 		rec.enterContext("RDF");
-		List<Object> vals = getValuesMap().translateToCommon(FiltersFields.TYPE.getId(), rec.getStringValue("ProvidedCHO.type"));
+		List<Object> vals = getValuesMap().translateToCommon(FiltersFields.TYPE.getFilterId(), rec.getStringValue("ProvidedCHO.type"));
 		WithMediaType type = (Utils.hasInfo(vals))? WithMediaType.getType(vals.get(0).toString()):WithMediaType.OTHER;
 		
 		// TODO read the language
@@ -87,7 +87,7 @@ public class DDBItemRecordFormatter extends CulturalRecordFormatter {
 		
 		LiteralOrResource rights = rec.getLiteralOrResourceValue("WebResource.rights");
 		List<Object> translateToCommon = !Utils.hasInfo(rights)?null: 
-			getValuesMap().translateToCommon(FiltersFields.RIGHTS.getId(),
+			getValuesMap().translateToCommon(FiltersFields.RIGHTS.getFilterId(),
 		 rights.getURI());
 		WithMediaRights withMediaRights = !Utils.hasInfo(rights)?null:
 			(WithMediaRights.getRights((String) translateToCommon.get(0)));

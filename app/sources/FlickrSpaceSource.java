@@ -81,9 +81,9 @@ public abstract class FlickrSpaceSource extends ISpaceSource {
 		setLicences();
 //		this.vmap = FilterValuesMap.getFlickrMap();
 		this.userID = userID;
-		addDefaultWriter(FiltersFields.TYPE.getId(), fwriter("media"));
-		addDefaultWriter(FiltersFields.RIGHTS.getId(), frwriter());
-		addDefaultComplexWriter(FiltersFields.YEAR.getId(), qfwriterYEAR());
+		addDefaultWriter(FiltersFields.TYPE.getFilterId(), fwriter("media"));
+		addDefaultWriter(FiltersFields.RIGHTS.getFilterId(), frwriter());
+		addDefaultComplexWriter(FiltersFields.YEAR.getFilterId(), qfwriterYEAR());
 		// addDefaultWriter(CommonFilters.COUNTRY.name(),
 		// fwriter("sourceResource.spatial.country"));
 

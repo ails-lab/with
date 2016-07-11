@@ -72,7 +72,7 @@ public class CommonQuery implements Cloneable , QueryStringBindable<CommonQuery>
 		this.page = ""+query.page;
 		this.pageSize = ""+query.pageSize;
 		this.searchTerm = query.findFilter(FiltersFields.ANYWHERE.getFilterId()).value;
-		this.source = ListUtils.transform(query.sources, (x)->x.)  
+		this.source = ListUtils.transform(query.sources, (x)->x.toString());  
 	}
 
 	private List<Tuple<ObjectId, Access>> transformList(ObjectNode[] inputList, boolean group) {

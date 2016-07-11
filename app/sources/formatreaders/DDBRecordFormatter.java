@@ -59,9 +59,9 @@ public class DDBRecordFormatter extends CulturalRecordFormatter {
 		
 		List<String> rights = rec.getStringArrayValue("license.@resource");
 		String stringValue = rec.getStringValue("media");
-		List<Object> translateToCommon = getValuesMap().translateToCommon(FiltersFields.TYPE.getId(), stringValue);
+		List<Object> translateToCommon = getValuesMap().translateToCommon(FiltersFields.TYPE.getFilterId(), stringValue);
 		WithMediaType type = WithMediaType.getType(translateToCommon.get(0).toString());
-		WithMediaRights withRights = (rights==null || rights.size()==0)?null:(WithMediaRights) getValuesMap().translateToCommon(FiltersFields.RIGHTS.getId(), rights.get(0)).get(0);
+		WithMediaRights withRights = (rights==null || rights.size()==0)?null:(WithMediaRights) getValuesMap().translateToCommon(FiltersFields.RIGHTS.getFilterId(), rights.get(0)).get(0);
 		String uri3 = "https://www.deutsche-digitale-bibliothek.de/" + rec.getStringValue("thumbnail");
 		
 		if (Utils.hasInfo(uri3)){

@@ -51,8 +51,8 @@ public class NLASpaceSource extends ISpaceSource {
 	public NLASpaceSource() {
 		super(Sources.NLA);
 		apiKey = "SECRET_KEY";
-		addDefaultQueryModifier(FiltersFields.TYPE.getId(), qfwriter("format"));
-		addDefaultQueryModifier(FiltersFields.YEAR.getId(), qfwriterYEAR());
+		addDefaultQueryModifier(FiltersFields.TYPE.getFilterId(), qfwriter("format"));
+		addDefaultQueryModifier(FiltersFields.YEAR.getFilterId(), qfwriterYEAR());
 
 		formatreader = new NLARecordFormatter();
 

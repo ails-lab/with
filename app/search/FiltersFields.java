@@ -53,6 +53,8 @@ public enum FiltersFields {
 		public MultiLiteral getFilterName() {
 			return filterName;
 		}
+		
+		
 		public String getFilterId() {
 			return filterId;
 		}

@@ -51,10 +51,10 @@ public class DDBSpaceSource extends ISpaceSource {
 		apiKey = "SECRET_KEY";
 		formatreader = new DDBRecordFormatter();
 		
-		addDefaultWriter(FiltersFields.TYPE.getId(), fwriter("type_fct"));
-		addDefaultWriter(FiltersFields.PROVIDER.getId(), fwriter("provider_fct"));
-		addDefaultWriter(FiltersFields.RIGHTS.getId(), fwriter("license_group"));
-		addDefaultWriter(FiltersFields.COUNTRY.getId(), fwriter("place_fct"));
+		addDefaultWriter(FiltersFields.TYPE.getFilterId(), fwriter("type_fct"));
+		addDefaultWriter(FiltersFields.PROVIDER.getFilterId(), fwriter("provider_fct"));
+		addDefaultWriter(FiltersFields.RIGHTS.getFilterId(), fwriter("license_group"));
+		addDefaultWriter(FiltersFields.COUNTRY.getFilterId(), fwriter("place_fct"));
 		
 	}
 	

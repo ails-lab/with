@@ -97,7 +97,7 @@ public class YouTubeSpaceSource extends ISpaceSource {
 		
 		if (q.filters==null || q.filters.size()==0 ||
 				(q.filters.size()==1 && 
-				q.filters.get(0).filterID.equals(FiltersFields.TYPE.getId()) &&
+				q.filters.get(0).filterID.equals(FiltersFields.TYPE.getFilterId()) &&
 				q.filters.get(0).values.contains(WithMediaType.VIDEO)
 				)){
 			try {
