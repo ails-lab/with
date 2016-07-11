@@ -151,11 +151,14 @@ public class SearchController extends WithController {
 							Promise.sequence(promises, ParallelAPICall.Priority.FRONTEND.getExcecutionContext());
 					Promise<Result> res = allResponses.map( singleResponses -> {
 						Response r = new Response();
+						r.query = q;
 						for(Response.SingleResponse sr: singleResponses ) {
-							
+							r.addSingleResponse(sr);
 						}
-						return ok();
+						r.createAccumulated();
+						return ok(Json.toJson(r));
 					});
+					return res;
 				}
 				
 				// bad request
@@ -165,7 +168,7 @@ public class SearchController extends WithController {
 			}
 		}	
 		
-		return Promise.pure( badRequest( "Not implemented yet"));
+		// return Promise.pure( badRequest( "Not implemented yet"));
 	}
 	
 	public static Promise<Result> continuedSearch( String continuationId ) {
