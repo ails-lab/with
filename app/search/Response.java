@@ -225,7 +225,7 @@ public class Response {
 	}
 	
 	/**
-	 * Merge another Response accumulatedValues into into this. This will make it impossible to keep count sorted values in accumulated, 
+	 * Merge another Response accumulatedValues into this. This will make it impossible to keep count sorted values in accumulated, 
 	 * we will just append the values for the same fields (-duplicates).
 	 * @param sr
 	 */
@@ -242,7 +242,10 @@ public class Response {
 		);
 	}
 	
-	
+	/**
+	 * This call does update the sources, but not the accumulatedValues.
+	 * @param sr
+	 */
 	public void addSingleResponse( SingleResponse sr ) {
 		results.add( sr );
 		sources.add( sr.source );
