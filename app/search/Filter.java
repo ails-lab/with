@@ -46,6 +46,9 @@ public class Filter {
 		this.fieldId = fieldId;
 		this.value = value;
 	}
+	public Filter() {
+		
+	}
 }
 
 /*
