@@ -47,6 +47,13 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 		    "&description="+desc,'','height=500,width=750');
 		    return false;
 		};
+		
+		
+		self.Xannotations = ko.observableArray([]);
+		self.annotationsKeys = ko.observableArray([]);		
+		self.referenceMap = ko.observableArray([]);
+		 
+		
 		self.nextItemToAnnotate = ko.observable({});
 		self.annotations = ko.observableArray([]);
 		self.myAnnotations = ko.computed(function () {
@@ -70,6 +77,7 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 				return (!my);
 			});
 		});
+
 		self.isLiked = ko.pureComputed(function () {
 			return app.isLiked(self.externalId);
 		});
@@ -123,25 +131,501 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 				var id = data.view_url.split("_")[2];
 				$('#mediadiv').html('<div><iframe id="mediaplayer" src="http://archives.crem-cnrs.fr/archives/items/'+id+'/player/346x130/"height="250px scrolling="no"" width="361px"></iframe></div>');
 			} else {
-			if (data.mediatype != null) {
-				//if (data.fullrestype == "VIDEO") {
-				if (data.mediatype == "VIDEO") {
-					self.vtype = "MEDIA";
-					if(!isRelated){
-						$('#mediadiv').append('<video id="mediaplayer" autoplay="true" controls width="576" height="324"><source src="' + self.fullres() + '" type="video/mp4">Your browser does not support HTML5</video>');
-					}
-				//} else if (data.fullrestype == "AUDIO") {
-				} else if (data.mediatype == "AUDIO") {
-					self.vtype = "MEDIA";
-					if(!isRelated) {
-						$('#mediadiv').append('<div><audio id="mediaplayer" autoplay="true" controls width="576" height="324"><source src="' + self.fullres() + '" type="audio/mpeg">Your browser does not support HTML5</audio></div>');
+				if (data.mediatype != null) {
+					//if (data.fullrestype == "VIDEO") {
+					if (data.mediatype == "VIDEO") {
+						self.vtype = "MEDIA";
+						if(!isRelated) {
+							$('#mediadiv').append('<video id="mediaplayer" autoplay="true" controls width="576" height="324"><source src="' + self.fullres() + '" type="video/mp4">Your browser does not support HTML5</video>');
+						}
+					//} else if (data.fullrestype == "AUDIO") {
+					} else if (data.mediatype == "AUDIO") {
+						self.vtype = "MEDIA";
+						if(!isRelated) {
+							$('#mediadiv').append('<div><audio id="mediaplayer" autoplay="true" controls width="576" height="324"><source src="' + self.fullres() + '" type="audio/mpeg">Your browser does not support HTML5</audio></div>');
+						}
 					}
 				}
-			} 
+				
+//				if (data.mediatype == null || (data.mediatype != null && data.mediatype == "IMAGE")) {
+//					var img = new Image();
+//					img.onload = function() {
+//						$('#mediadiv').html("<svg style='height:100%;width:100%;max-height:" + img.height + "px; max-width:" + img.width + "px;' viewBox='0 0 " + img.width + " " + img.height + "' preserveAspectRatio='xMidYMin meet' version='1.1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink'>" +
+//							                    "<image width='" + img.width + "' height='" + img.height + "' xlink:href='" + self.fullres() + "'/>" +
+//				         		  	        "</svg>");
+//						self.vtype = "IMAGE";
+//					};
+//					img.src = self.fullres();
+//	
+//				} 			
 			}
+			
 			helper_thumb = self.calcOnErrorThumbnail();
 		};
 
+		var Annotations = function(data) {
+			var selfx = this;
+			
+			selfx.field = ko.observable();
+			selfx.values = ko.observableArray([]);
+			
+			ko.mapping.fromJS(data, {}, selfx);
+
+		}
+
+		var AnnotationInstance = function(data) {
+			var selfx = this;
+			
+			selfx.id = ko.observable();
+			selfx.property = ko.observable();
+			selfx.text = ko.observable();
+			selfx.start = ko.observable();
+			selfx.end = ko.observable();		
+			
+			selfx.approved = ko.observable(false);
+			selfx.rejected = ko.observable(false);
+
+			selfx.approveAnnotation = function() {
+	           $.ajax({
+					type    : "get",
+					url     : "/annotation/" + selfx.id() + "/approve",
+					success : function(result) {
+						selfx.approved(true);							
+						selfx.rejected(false);
+					}
+	           });
+			} 
+			
+			selfx.rejectAnnotation = function() {
+	           $.ajax({
+					type    : "get",
+					url     : "/annotation/" + selfx.id() + "/reject",
+					success : function(result) {
+						selfx.approved(false);
+						selfx.rejected(true);							
+					}
+	           });
+			} 
+			
+			ko.mapping.fromJS(data, {}, selfx);
+
+			selfx.showExtract = function() {
+				var s = Math.max(0, selfx.start() - 50);
+				var e = Math.min(selfx.text().length, selfx.end() + 50);
+				
+				if (s > 0)
+					while (selfx.text().substr(s, 1) != " " && s < selfx.start()) 
+						s++;
+
+				if (e < selfx.text().length)
+					while (selfx.text().substr(e - 1, 1) != " " && e > selfx.end())
+						e--;
+
+				return (s > 0?"... ":"") + selfx.text().substring(s, selfx.start()) + "<span class='tag-selection'>" + selfx.text().substring(selfx.start(),selfx.end()) + "</span>" + selfx.text().substring(selfx.end(),e) + (e < selfx.text().length?" ...":"");
+			}
+		}
+			
+		
+		var AnnotationKey = function(data) {
+			var selfx = this;
+			
+			selfx.uri = ko.observable();
+			selfx.label = ko.observable();
+			selfx.vocabulary = ko.observable();
+			selfx.id = ko.observable();
+			selfx.dbids = ko.observableArray([]);
+			selfx.instances = ko.observableArray([]);
+			
+			selfx.isExpanded = ko.observable(false);
+			
+			ko.mapping.fromJS(data, {}, selfx);
+
+			selfx.approved = ko.computed(function() {
+				var count = 0;
+				for (var j = 0; j < selfx.instances().length; j++)
+					if (selfx.instances()[j].approved())
+						count++;
+				
+				if (count == selfx.instances().length) {
+					return true;
+				} else {
+					return false;
+				}
+			});
+
+			selfx.papproved = ko.computed(function() {
+				var count = 0;
+				for (var j = 0; j < selfx.instances().length; j++)
+					if (selfx.instances()[j].approved())
+						count++;
+				
+				if (count == 0 || count == selfx.instances().length) {
+					return false;
+				} else {
+					return true;
+				}
+			});
+			
+			selfx.rejected = ko.computed(function() {
+				var count = 0;
+				for (var j = 0; j < selfx.instances().length; j++)
+					if (selfx.instances()[j].rejected())
+						count++;
+				
+				if (count == selfx.instances().length) {
+					return true;
+				} else {
+					return false;
+				}
+			});
+			
+			
+			selfx.approveAnnotation = function() {
+				for (var j = 0; j < selfx.instances().length; j++)
+					selfx.instances()[j].approveAnnotation();
+			} 
+			
+			selfx.rejectAnnotation = function() {
+				for (var j = 0; j < selfx.instances().length; j++)
+					selfx.instances()[j].rejectAnnotation();
+			} 
+			
+			selfx.toggleVisibility = function() {
+				selfx.isExpanded(!selfx.isExpanded());
+			};
+		}
+		
+		self.annotationIndex = [];
+		self.annotatedTexts = ko.observableArray([]);
+		
+		self.annotate = function(){
+			if(self.Xannotations().length==0) {
+				self.loading(true);
+		           $.ajax({
+						type    : "get",
+						url     : "/record/" + self.recordId + "/listAnnotations",
+						contentType: "application/json",
+						dataType: "json",
+						success : function(result) {
+							self.parseAnnotations(result);
+							self.loading(false);
+						},
+						error   : function(request, status, error) {
+							self.loading(false);
+							
+						}
+		           });
+			}
+		}
+		
+		self.getAnnotationLabel = function (data) {
+			if (data.label() == null) {
+				return self.beautifyVocabulary(data.vocabulary()) + " : " + data.uri();
+			} else {
+				return self.beautifyVocabulary(data.vocabulary()) + " : " + data.label();
+			}
+		}
+
+		self.beautifyVocabulary = function(voc) {
+			switch (voc) {
+			case "DBPEDIA_RESOURCE" : 
+				return "dbr";
+			case "DBPEDIA_ONTOLOGY" : 
+				return "dbo";
+			case "GEMET" : 
+				return "gemet";
+			case "AAT" : 
+				return "aat";
+			case "EUSCREENXL" : 
+				return "euscreenxl";
+			case "FASHION" : 
+				return "fashion";
+			case "HORNBOSTEL_SACHS" : 
+				return "hs";
+			case "MIMO" : 
+				return "mimo";
+			case "PHOTOGRAPHY" : 
+				return "photography";
+			case "PARTAGE_PLUS" : 
+				return "partageplus";
+			case "WORDNET30" : 
+				return "wordnet";
+			case "WORDNET31" : 
+				return "wordnet";
+			case "NERD" : 
+				return "nerd";
+			default:
+				return voc
+			}
+		}
+		
+		var fieldMap = { label: "title"};
+		
+		
+		self.parseAnnotations = function(anns){
+			
+			var annotations = new Object();
+			
+			for (var i = 0; i < anns.length; i++) {
+				var property = anns[i].target.selector.property;
+				if (fieldMap[property] != undefined) {
+					property = fieldMap[property];
+				}
+				
+				if (annotations[property] == undefined) {
+					annotations[property] = [];
+				}
+				
+				annotations[property].push(anns[i].body.uri);
+			}
+			
+			for (property in annotations) {
+				self.Xannotations.push(new Annotations({ field:property, values: annotations[property] }));
+			}
+			
+			var properties = [];
+			var positionsArray = [];
+			
+			var count = 0;
+			
+			for (var i = 0; i < anns.length; i++) {
+				var annid = anns[i].dbId;
+				var uri = anns[i].body.uri;
+				var vocabulary = anns[i].body.uriVocabulary;
+				var label = "";
+				if (anns[i].body.label.default != null && anns[i].body.label.default.length > 0) {
+					label = anns[i].body.label.default[0];
+				} 
+				
+				var found = false;
+				var aj;
+				for (aj = 0; aj < self.annotationsKeys().length; aj++) {
+					if (self.annotationsKeys()[aj].uri() == uri) {
+						self.annotationsKeys()[aj].dbids.push(annid);
+						found = true;
+						break;
+					}
+				}
+
+				var approved = false;
+				var rejected = false;
+				if (anns[i].score != null) {
+					if (anns[i].score.approvedBy != null) {
+						var approvedBy = anns[i].score.approvedBy;
+						for (var j = 0; j < approvedBy.length; j++) {
+							if (approvedBy[j] == app.currentUser._id()) {
+								approved = true;
+								break;
+							}
+						}
+					}
+					if (anns[i].score.rejectedBy != null) {
+						var rejectedBy = anns[i].score.rejectedBy;
+						for (var j = 0; j < rejectedBy.length; j++) {
+							if (rejectedBy[j] == app.currentUser._id()) {
+								rejected = true;
+								break;
+							}
+						}
+					}
+				}
+				
+				if (!found) {
+					aj = self.annotationsKeys().length; 
+					self.annotationsKeys.push(new AnnotationKey({uri: uri, label: label, vocabulary: vocabulary, id: "ann-key-" + count, dbids: [ annid ]}));
+					self.annotationIndex[uri] = count++;
+				} 
+				
+//				self.annotationsKeys()[aj].approved(self.annotationsKeys()[aj].approved() || approved); 
+//				self.annotationsKeys()[aj].rejected(self.annotationsKeys()[aj].rejected() || rejected);
+				
+				var property = anns[i].target.selector.property;
+				if (fieldMap[property] != undefined) {
+					property = fieldMap[property];
+				}
+
+				var sp = anns[i].target.selector.start;
+				var ep = anns[i].target.selector.end;
+
+				self.annotationsKeys()[aj].instances.push(new AnnotationInstance({id: annid, property: property, text: anns[i].target.selector.origValue, start: sp, end: ep, approved: approved, rejected: rejected}));
+
+				found = false;
+				for (var j = 0; j < properties.length; j++) {
+					if (properties[j] == property) {
+						found = true;
+						break;
+					}
+				}
+				
+				if (!found) {
+					properties.push(property);
+				}
+				
+				if (positionsArray[property] == undefined) {
+					positionsArray[property] = [];
+				}
+				
+				positionsArray[property].push({uri:uri, pos:sp, type:0, index:self.annotationIndex[uri]});
+				positionsArray[property].push({uri:uri, pos:ep, type:1, index:self.annotationIndex[uri]});
+			}
+			
+			self.annotationsKeys.sort(function(a, b) {
+				if (a.vocabulary() < b.vocabulary()) {
+					return -1;
+				} else if (a.vocabulary() > b.vocabulary()) {
+					return 1;
+				} else {
+					if (a.label() < b.label()) {
+						return -1;
+					} else if (a.label() < b.label()) {
+						return 1;
+					} else {
+						return 0;
+					}
+				}
+			});
+			
+			for (v in positionsArray) {
+				positionsArray[v].sort(function(a, b) {
+					if (a.pos < b.pos) {
+						return -1;
+					} else if (a.pos > b.pos) {
+						return 1;
+					} else {
+						if (a.type > b.type) {
+							return -1;
+						} else if (a.type < b.type) {
+							return 1;
+						} else {
+							return 0;
+						}
+					}
+				});
+			}
+			
+			for (v in properties) {
+				var ppos = -1;
+				var text = this[properties[v]];
+				var rtext = "";
+				var current = [];
+				var array = positionsArray[properties[v]];
+				var i;
+				
+				for (i = 0; i < array.length;) {
+					var s = i;
+					var e = i;
+					while (e < array.length - 1) {
+						if (array[e + 1].pos == array[s].pos) {
+							e++;
+						} else {
+							break;
+						}
+					}
+					
+					var close = false;
+					var t;
+					for (t = s; t <= e; t++) {
+						if (array[t].type == 0) {
+							if (current.length > 0) {
+								close = true;
+							}
+							current.push(array[t].uri);
+						} else if (array[t].type == 1) {
+							for (var j = 0; j < current.length; j++) {
+								if (current[j] == array[t].uri) {
+									close = true;
+									current.splice(j, 1);
+								}
+							}
+						}
+					}
+					
+					if (ppos == -1) {
+						rtext += text.substring(0, array[s].pos)
+					} else {
+						rtext += text.substring(ppos, array[s].pos)
+					}
+					
+					ppos = array[s].pos;
+
+					if (close) {
+						rtext += "</span>";
+					}
+
+					if (current.length > 0) {
+						rtext += "<span class='";
+						for (var j = 0; j < current.length; j++) {
+							if (j > 0) {
+								rtext += " ";
+							}
+							rtext += "ann-value-" + self.annotationIndex[current[j]];
+						}
+						
+						rtext += "'>";
+					}
+					
+					i = e + 1;
+				}
+				
+				rtext += text.substring(ppos);
+				
+				$("#ann-" + properties[v]).html(rtext);
+			}
+			
+			
+		};
+		
+		var selectedAnnotations = [];
+		
+		self.annShow = function(uri) {
+			
+			$(".ann-resource").removeClass("tag-selection");
+			$("#ann-key-" + self.annotationIndex[uri()]).addClass("tag-selection");
+			
+			for (v in selectedAnnotations) {
+				$(".ann-value-" + selectedAnnotations[v]).removeClass("tag-selection");
+			}
+			selectedAnnotations.push(self.annotationIndex[uri()]);
+			
+			$(".ann-value-" + self.annotationIndex[uri()]).addClass("tag-selection");
+		};
+
+		self.hierarchy = ko.observable('');
+		
+		self.showHierarchy = function(uri) {
+			if (self.hierarchy.length == 0) {
+				$.ajax({
+					type    : "get",
+					url     : "/thesaurus/getTerm?uri=" + uri(),
+					contentType: "application/json",
+					success : function(result) {
+						var s = "";
+						
+						var broader = result.semantic.broaderTransitive;
+						if (broader != null) {
+							for (c in broader) {
+								
+								var z = broader[c].prefLabel.default;
+								if (s.length > 0) {
+									z += ", ";
+								}
+								s = z + s;
+							}
+						}
+						
+						self.hierarchy(s);
+						
+						alert(s);
+					},
+					error   : function(request, status, error) {
+						$.smkAlert({
+							text: 'An error has occured', type: 'danger', permanent: true
+						});
+					}
+				});
+			}
+		};
+		
 	   self.findsimilar=function(){
 		  if(self.related().length==0 && self.relatedsearch==false){
 			self.relatedsearch=true;  
@@ -355,8 +839,7 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 							likes: usage.likes,
 							collected: usage.collected,
 							collectedIn:backendRecord.collectedIn,
-							fullrestype: media[0] != null && media[0].Original != null
-								&& media[0].Original.type != "null" ? media[0].Original.type : "",
+							fullrestype: media[0] != null && media[0].Original != null && media[0].Original.type != "null" ? media[0].Original.type : "",
 							nextItemToAnnotate: backendRecord.nextItemToAnnotate,
 							annotations: backendRecord.annotations,
 							data: backendRecord
@@ -398,6 +881,7 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 			 if (vid != null) {
 				 vid.parentNode.removeChild(vid);
 			}
+//			 $('#mediadiv').html("");
 		};
 
 		self.changeSource = function (item) {
@@ -434,7 +918,7 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 		};
 		
 		
-			self.likeRecord = function (rec,event) {
+		self.likeRecord = function (rec,event) {
         	event.preventDefault();
         	var $heart=$(event.target);
         	if(!app.currentUser._id()) {
@@ -483,7 +967,6 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 					self.addDisqus();
 				},
 				error: function (xhr, textStatus, errorThrown) {
-					
 					$.smkAlert({text:'An error has occured', type:'danger', permanent: true});
 				}
 			});

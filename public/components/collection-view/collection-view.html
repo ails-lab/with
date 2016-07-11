@@ -1,0 +1,139 @@
+<div class="container-fluid">
+	<div id="withcollection" data-bind="visible: !isFavorites()">
+		<span class="withmain">
+			<h2>
+				<!-- ko text:title() --><!-- /ko -->
+				<span data-bind="visible: entryCount() > -1  " style="text-transform:lowercase">
+					&nbsp;&nbsp;(<!-- ko text:entryCount() --><!-- /ko -->  items)
+				</span>
+			</h2>
+		</span>
+		<div data-bind="visible: creator().length>0" style="text-transform:lowercase">
+			<i>
+				by
+				<a href="/collectionbyuser">
+					<!-- ko text:creator() --><!-- /ko -->
+				</a>
+			</i>
+		</div>
+		<span data-bind="text:desc.display"></span>
+		<span><a data-bind="visible: desc.showButton, text: desc.showAll() ? '  show less' : '...show more', click: desc.toggleShowAll" href="#"></a></span>
+		<br>
+		<button type="button" class="btn btn-primary" data-bind="click: uploadItem, visible: isLogged()" style="margin-top: 10px;"><span class="glyphicon glyphicon-cloud-upload" aria-hidden="true" style="vertical-align: top;"></span> Upload</button>
+		<button type="button" class="btn btn-info" data-bind="click: presentAPICalls" style="margin-left: 30px; margin-top: 10px;" title="Show API Calls">API Calls</button>
+		<div class="well" data-bind="visible: showAPICalls" style="margin-top: 10px;">
+			<span class="label label-success">Get</span><code data-bind="text: getAPIUrlCollection() "></code>
+			<br>
+			<span class="label label-success">Get</span><code data-bind="text: getAPIUrlRecords()"></code>
+			<br>
+		</div>
+	</div>
+</div>
+
+
+<div id="nav-bar" data-bind="template: { name: 'scheme-template', data: index }"></div>
+<div>
+
+<div>
+<ul data-bind="foreach: terms">
+    <li style="display:inline;"><span data-bind="text: label"></span><button data-bind="click:removeTerm"><span class="tree-item glyphicon glyphicon-remove"></span></button>&nbsp;&nbsp;</li>
+</ul>
+<span data-bind="text: indexCount"></span>
+</div>
+
+<script type="text/html" id="scheme-template">
+ 
+    <ul data-bind="foreach: schemes">
+	
+		<!-- ko if: children().length !== 0 -->
+        
+		<li><div data-bind="template: { name: 'scheme-name-template', data: $data }, visible: true"></div>
+            <div data-bind="template: { name: 'tree-template', data: $data }, visible: true"></div>
+        </li>
+
+		<!-- /ko -->
+    
+	</ul>
+ 
+</script>
+
+<script type="text/html" id="scheme-name-template">
+ 
+    <span data-bind="
+    text: label, 
+    attr: { 'title': uri }, 
+    tooltip: { delay: { show: 500, hide: 10 } }"></span>
+ 
+</script>
+
+<script type="text/html" id="tree-template">
+    <ul data-bind="foreach: children">
+        <li>
+            <span data-bind="
+                template: { name: 'node-name-template', data: $data },
+                css: { 'pointer-icon': children().length > 0 }"></span>
+            <div data-bind="template: { name: 'folder-template', data: $data }, visible: isExpanded"></div>
+        </li>
+    </ul>
+ 
+</script>
+ 
+<script type="text/html" id="folder-template">
+ 
+    <ul data-bind="foreach: children">
+        <li>
+            <div data-bind="template: { name: 'node-template', data: $data }"></div>
+        </li>
+    </ul>
+ 
+</script>
+ 
+<script type="text/html" id="node-template">
+ 
+    <span data-bind="
+        template: { name: 'node-name-template', data: $data },
+        css: { 'pointer-icon': children().length > 0 }"></span>
+ 
+    <!-- ko if: children().length !== 0 -->
+ 
+        <div data-bind="template: { name: 'folder-template', data: $data }, visible: isExpanded"></div>
+ 
+    <!-- /ko -->
+ 
+</script>
+ 
+<script type="text/html" id="node-name-template">
+
+    <span class="tree-item" data-bind="
+    css: { 
+        'glyphicon glyphicon-minus-sign': isExpanded() && children().length > 0, 
+        'glyphicon glyphicon-plus-sign': !isExpanded() && children().length > 0,
+        'glyphicon glyphicon-stop': children().length === 0,
+		'invisible-icon': children().length === 0
+    },
+    click: toggleVisibility
+    "></span>
+ 
+    <span data-bind="
+    text: label, 
+	css: { 'pointer-icon': true },
+    attr: { 'title': uri }, 
+    tooltip: { delay: { show: 500, hide: 10 } },
+    click: addTerm"></span>
+ 
+</script>
+
+<!-- wrap spacer-->
+<div class="spacer double">
+	<!-- listing-->
+	<section class="listing">
+		<div class="container">
+			<div class="grid" data-bind="attr: {id: id}">
+				<div class="sizer"></div>
+			</div>
+		</div>
+	</section>
+</div>
+
+<div id="more" data-bind="visible: loading, scroll: citems(), scrollOptions: { loadFunc: loadNext, offset: 0 }"> <i class="fa fa-spinner fa-pulse"></i></div>
+

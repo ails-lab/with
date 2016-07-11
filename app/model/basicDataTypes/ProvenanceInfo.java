@@ -28,6 +28,7 @@ import db.converters.ProvenanceInfoConverter;
 @Converters(ProvenanceInfoConverter.class)
 public class ProvenanceInfo {
 
+
 	private String provider;
 	private String uri;
 	private String resourceId;

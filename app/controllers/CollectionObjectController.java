@@ -17,17 +17,29 @@
 package controllers;
 
 import java.io.IOException;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 
 import javax.validation.ConstraintViolation;
 
+import notifications.Notification;
+import notifications.Notification.Activity;
+
 import org.bson.types.ObjectId;
+
+import annotators.Annotator;
+import annotators.AnnotatorConfig;
+import annotators.DictionaryAnnotator;
 
 import com.codahale.metrics.Counter;
 import com.codahale.metrics.Histogram;
@@ -35,7 +47,9 @@ import com.codahale.metrics.Meter;
 import com.codahale.metrics.Timer;
 
 import org.elasticsearch.action.search.SearchResponse;
+import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.search.SearchHit;
+import org.elasticsearch.search.SearchHits;
 import org.bson.Document;
 import org.bson.types.ObjectId;
 import org.mongodb.morphia.query.Query;
@@ -45,14 +59,19 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+
+import controllers.WithController.Action;
 import controllers.parameterTypes.MyPlayList;
 import controllers.parameterTypes.StringTuple;
+import controllers.thesaurus.CollectionIndexController;
 import db.DB;
 import elastic.Elastic;
 import elastic.ElasticSearcher;
 import elastic.ElasticSearcher.SearchOptions;
 import model.annotations.ContextData;
 import model.annotations.ContextData.ContextDataBody;
+import model.annotations.bodies.AnnotationBodyTagging;
+import model.annotations.bodies.AnnotationBodyTagging.Vocabulary;
 import model.basicDataTypes.Language;
 import model.basicDataTypes.MultiLiteral;
 import model.basicDataTypes.ProvenanceInfo;
@@ -86,11 +105,14 @@ import sources.EuropeanaCollectionSpaceSource;
 import sources.EuropeanaSpaceSource;
 import sources.OWLExporter.CulturalItemOWLExporter;
 import sources.core.CommonQuery;
+import sources.core.ParallelAPICall;
 import sources.core.SourceResponse;
 import sources.core.Utils;
+import sources.core.ParallelAPICall.Priority;
 import utils.ListUtils;
 import utils.Locks;
 import utils.MetricsUtils;
+import utils.NotificationCenter;
 import utils.Tuple;
 
 
@@ -1157,6 +1179,214 @@ public class CollectionObjectController extends WithResourceController {
 
 	}
 
+	public static Result getCollectionIndex(String id) {
+		ObjectNode result = Json.newObject();
+		try {
+			ObjectId collectionDbId = new ObjectId(id);
+			Result response = errorIfNoAccessToCollection(Action.READ,
+					collectionDbId);
+			if (!response.toString().equals(ok().toString()))
+				return response;
+			else {
+				CollectionObject collection = DB.getCollectionObjectDAO().get(
+						new ObjectId(id));
+				/*
+				 * List<RecordResource> firstEntries =
+				 * DB.getCollectionObjectDAO() .getFirstEntries(collectionDbId,
+				 * 3); result = (ObjectNode) Json.toJson(collection);
+				 * result.put("firstEntries", Json.toJson(firstEntries));
+				 */
+				return ok(Json.toJson(collection));
+			}
+		} catch (Exception e) {
+			result.put("error", e.getMessage());
+			return internalServerError(result);
+		}
+	}
+	
+	/**
+	 * List all Records from a Collection that have certain thesaurus terms using a start item and a page size
+	 */
+	public static Result facetedListRecordResources(String collectionId, String contentFormat, int start, int count) {
+		ObjectNode result = Json.newObject();
+		ObjectId colId = new ObjectId(collectionId);
+		Locks locks = null;
+		
+		JsonNode json = request().body().asJson();
+		try {
+			
+			locks = Locks.create().read("Collection #" + collectionId).acquire();
+
+			Result response = errorIfNoAccessToCollection(Action.READ, colId);
+
+			if (!response.toString().equals(ok().toString())) {
+				return response;
+			} else {
+				ElasticSearcher es = new ElasticSearcher();
+				
+				QueryBuilder query = CollectionIndexController.getIndexCollectionQuery(colId, json);
+				
+				SearchOptions so = new SearchOptions(start, start + count);
+				
+				SearchResponse res = es.execute(query, so);
+				SearchHits sh = res.getHits();
+				
+				long totalHits = sh.getTotalHits();
+				
+				List<String> ids = new ArrayList<>();
+				for (Iterator<SearchHit> iter = sh.iterator(); iter.hasNext();) {
+					SearchHit hit = iter.next();
+					ids.add(hit.getId());
+				}
+				
+				List<RecordResource> records = DB.getRecordResourceDAO().getByCollectionIds(colId, ids);
+
+				if (records == null) {
+					result.put("message",
+							"Cannot retrieve records from database!");
+					return internalServerError(result);
+				}
+				ArrayNode recordsList = Json.newObject().arrayNode();
+				for (RecordResource r : records) {
+					// filter out records to which the user has no read access
+					response = errorIfNoAccessToRecord(Action.READ, r.getDbId());
+					if (!response.toString().equals(ok().toString())) {
+						continue;
+					}
+					if (contentFormat.equals("contentOnly")) {
+						if (r.getContent() != null) {
+							recordsList.add(Json.toJson(r.getContent()));
+						}
+						continue;
+					}
+					if (contentFormat.equals("noContent")
+							&& r.getContent() != null) {
+						r.getContent().clear();
+						recordsList.add(Json.toJson(r));
+						fillContextData(
+								DB.getCollectionObjectDAO()
+										.getById(
+												colId,
+												Arrays.asList("collectedResources"))
+										.getCollectedResources(), recordsList);
+						continue;
+					}
+					if (r.getContent() != null
+							&& r.getContent().containsKey(contentFormat)) {
+						HashMap<String, String> newContent = new HashMap<String, String>(
+								1);
+						newContent.put(contentFormat, (String) r.getContent()
+								.get(contentFormat));
+						recordsList.add(Json.toJson(newContent));
+						continue;
+					}
+					recordsList.add(Json.toJson(r));
+				}
+
+				result.put("entryCount", totalHits);
+				result.put("records", recordsList);
+				return ok(result);
+			}
+		} catch (Exception e1) {
+			result.put("error", e1.getMessage());
+			return internalServerError(result);
+		} finally {
+			if (locks != null)
+				locks.release();
+		}
+	}
+	
+	public static Result similarListRecordResources(String collectionId, String itemid, String contentFormat, int start, int count) {
+		ObjectNode result = Json.newObject();
+		ObjectId colId = new ObjectId(collectionId);
+		Locks locks = null;
+		
+		try {
+			
+			locks = Locks.create().read("Collection #" + collectionId).acquire();
+
+			Result response = errorIfNoAccessToCollection(Action.READ, colId);
+
+			if (!response.toString().equals(ok().toString())) {
+				return response;
+			} else {
+				RecordResource rr = DB.getRecordResourceDAO().getById(new ObjectId(itemid));
+				
+				ElasticSearcher es = new ElasticSearcher();
+				
+				QueryBuilder query = CollectionIndexController.getSimilarItemsIndexCollectionQuery(colId, rr.getDescriptiveData());
+				
+				SearchOptions so = new SearchOptions(start, start + count);
+				
+				SearchResponse res = es.execute(query, so);
+				SearchHits sh = res.getHits();
+				
+				long totalHits = sh.getTotalHits();
+				
+				List<String> ids = new ArrayList<>();
+				for (Iterator<SearchHit> iter = sh.iterator(); iter.hasNext();) {
+					SearchHit hit = iter.next();
+					ids.add(hit.getId());
+				}
+				
+				List<RecordResource> records = DB.getRecordResourceDAO().getByCollectionIds(colId, ids);
+
+				if (records == null) {
+					result.put("message",
+							"Cannot retrieve records from database!");
+					return internalServerError(result);
+				}
+				ArrayNode recordsList = Json.newObject().arrayNode();
+				
+				for (RecordResource r : records) {
+					// filter out records to which the user has no read access
+					response = errorIfNoAccessToRecord(Action.READ, r.getDbId());
+					if (!response.toString().equals(ok().toString())) {
+						continue;
+					}
+					if (contentFormat.equals("contentOnly")) {
+						if (r.getContent() != null) {
+							recordsList.add(Json.toJson(r.getContent()));
+						}
+						continue;
+					}
+					if (contentFormat.equals("noContent")
+							&& r.getContent() != null) {
+						r.getContent().clear();
+						recordsList.add(Json.toJson(r));
+						fillContextData(
+								DB.getCollectionObjectDAO()
+										.getById(
+												colId,
+												Arrays.asList("collectedResources"))
+										.getCollectedResources(), recordsList);
+						continue;
+					}
+					if (r.getContent() != null
+							&& r.getContent().containsKey(contentFormat)) {
+						HashMap<String, String> newContent = new HashMap<String, String>(
+								1);
+						newContent.put(contentFormat, (String) r.getContent()
+								.get(contentFormat));
+						recordsList.add(Json.toJson(newContent));
+						continue;
+					}
+					recordsList.add(Json.toJson(r));
+				}
+
+				result.put("entryCount", totalHits);
+				result.put("records", recordsList);
+				return ok(result);
+			}
+		} catch (Exception e1) {
+			result.put("error", e1.getMessage());
+			return internalServerError(result);
+		} finally {
+			if (locks != null)
+				locks.release();
+		}
+	}
+
 
 	private static ObjectNode userOrGroupJson(UserOrGroup user,
 			Access accessRights) {
@@ -1198,4 +1428,66 @@ public class CollectionObjectController extends WithResourceController {
 		return 0;
 	}
 
+
+	public static Result annotateCollection(String id) {
+		ObjectNode result = Json.newObject();
+		ObjectId colId = new ObjectId(id);
+		Locks locks = null;
+		
+		try {
+			locks = Locks.create().read("Collection #" + id).acquire();
+			Result response = errorIfNoAccessToCollection(Action.EDIT, colId);
+			if (!response.toString().equals(ok().toString())) {
+				return response;
+			} else {
+				JsonNode json = request().body().asJson();
+				
+				ObjectId user = WithController.effectiveUserDbId();
+				List<AnnotatorConfig> annConfigs = AnnotatorConfig.createAnnotationConfigs(json);
+				
+				BiFunction<ObjectId, ObjectId, Boolean> methodQuery = (ObjectId cid, ObjectId uid) -> {
+					List<ContextData<ContextDataBody>> rr = DB.getCollectionObjectDAO().getById(cid).getCollectedResources();
+					
+					for (ContextData<ContextDataBody> cd : rr) {
+						try {
+							String recordId = cd.getTarget().getRecordId().toHexString();
+							
+//							if (DB.getRecordResourceDAO().hasAccess(uid, Action.EDIT, new ObjectId(recordId))  || isSuperUser()) {
+								RecordResourceController.annotateRecord(recordId, user, annConfigs);
+//							}
+						} catch (Exception e) {
+//							e.printStackTrace();
+							log.error(e.getMessage());
+						}
+					}
+					
+					Notification notification = new Notification();
+					notification.setActivity(Activity.MESSAGE);
+					notification.setMessage("Annotating of collection '" + DB.getCollectionObjectDAO().getById(cid).getDescriptiveData().getLabel().get(Language.DEFAULT).get(0) + "' has finished");
+//					notification.setSender(sender);
+					notification.setReceiver(uid);
+					Date now = new Date();
+					notification.setOpenedAt(new Timestamp(now.getTime()));
+					DB.getNotificationDAO().makePermanent(notification);
+					NotificationCenter.sendNotification(notification);
+
+					return true;
+				};
+				
+				ParallelAPICall.createPromise(methodQuery, colId, user, Priority.BACKEND);
+
+				return ok(result);
+			}
+				
+		} catch (Exception e1) {
+			result.put("error", e1.getMessage());
+			return internalServerError(result);
+		} finally {
+			if (locks != null) {
+				locks.release();
+			}
+		}
+	}
+
 }
+

@@ -1,0 +1,220 @@
+<section class="itemview">
+<!-- header-->
+                <div class="header">
+                  <div class="container-fluid">
+                    <!-- head-->
+                    <h3>Media Viewer</h3>
+                    <!-- actions-->
+                    <div class="actions"><a href="#" data-toggle="tooltip" data-placement="top" title="Add to favorites" class="fa fa-heart favorite" data-bind="visible:loggedUser && record().externalId!=null, css: { redheart: record().isLike()==true }, event: { click: function(data,event) { likeRecord(record(),event); } }"></a>
+                    <a href="#" data-toggle="tooltip" data-placement="top" title="Collect it" class="fa fa-download collectbutton" data-bind="visible:loggedUser, event: { click: function(data,event) { collect(record(),event); } }"></a>
+                    <a href="#" data-toggle="tooltip" data-placement="bottom" title="Visit item site" class="medialink" data-bind="attr: { href:record().view_url}" target="_blank"><i class="fa fa-external-link"></i></a>
+                    <a  data-toggle="tooltip" data-placement="bottom" title="Close media viewer" class="closemedia" data-bind="visible: window.location.href.indexOf('#item')==-1,click: close"><img src="img/ui/ic-close.png"></a></div>
+                  </div>
+                </div>
+                <!-- media content-->
+                <div class="mediacontent">
+                  <div class="container-fluid">
+                    <!-- wrap-->
+                    <div class="wrap">
+                      <!-- item-->
+                      <div class="media" id="mediadiv" style="vertical-align:top;">
+                      <!-- ko if: record().vtype == "IMAGE" --> 
+                      <!--  <img data-bind="attr: {src: record().fullres()},event: {error: function(){changeSource($data)}}"/> --> 
+                      <!-- /ko --> 
+                      </div> 
+                      <!-- metadata-->
+                      <div class="metadata">
+                      <div class="infowrap">
+                        <!-- top-->
+                          <div class="top">
+                            <!-- title-->
+                            <div class="infotitle">
+                          <!-- title-->
+                          <h1><!-- ko text: record().title --><!-- /ko --> </h1>
+                          <div class="owner"  data-bind="text:record().dataProvider"></div>
+                           </div>
+                            <!-- collect--><a href="#" title="collect" class="infocollect collectbutton" data-bind="visible:loggedUser, event: { click: function(data,event) { collect(record(),event); } }">COLLECT ITEM</a>
+                          </div>
+                          <!-- metadata-->
+                          <ul id="itemTabs" role="tablist" class="nav nav-tabs">
+                            <li class="active"><a href="#information" title="" data-toggle="tab">Info</a></li>
+                            <li><a href="#related" title="related" data-toggle="tab" data-bind="click: record().findsimilar, clickBubble: true">Related</a></li>
+                            <li data-bind="visible: record().recordId!='-1'"><a href="#comment" title="comments" data-toggle="tab">Comments</a></li>
+                            <li data-bind="visible: record().recordId!='-1'"><a href="#share" title="" data-toggle="tab">Share</a></li>
+                            <li data-bind="visible: record().recordId!='-1'"><a href="#annotations" title="annotations" data-toggle="tab" data-bind="click: record().annotate, clickBubble: true">Annotations</a></li>
+                          </ul>
+                          <!-- panes-->
+                          <div class="tab-content">
+                            <div id="information" class="tab-pane active">
+                              <!-- description-->
+                              <div class="meta">
+                                <div class="list" data-bind="if: record().description">
+                                  <div class="title">
+                                    <div class="titlewrap">Description</div>
+                                  </div>
+                                  <div class="field newlines" data-bind="html:record().description">
+                                  </div>
+                                </div>
+                                <div class="list"  data-bind="if: record().dataProvider">
+                                  <div class="title">
+                                    <div class="titlewrap">Provider</div>
+                                  </div>
+                                  <div class="field" data-bind="text:record().dataProvider"></div>
+                                </div>
+                                <div class="list" data-bind="if: record().creator">
+                                  <div class="title">
+                                    <div class="titlewrap">Creator</div>
+                                  </div>
+                                  <div class="field" data-bind="text:record().creator"></div>
+                                </div>
+                                <div class="list" data-bind="if: record().rights">
+                                  <div class="title">
+                                    <div class="titlewrap">Rights</div>
+                                  </div>
+                                  <div class="field" data-bind="text:record().rights"></div>
+                                </div>
+                                 <div class="list" data-bind="if: record().mediatype && record().mediatype!=''">
+                                  <div class="title">
+                                    <div class="titlewrap">Media Type</div>
+                                  </div>
+                                  <div class="field" data-bind="text:record().mediatype"></div>
+                                </div>
+                                 <div class="list" data-bind="if: record().recordId!='-1'">
+                                  <div class="title">
+                                    <div class="titlewrap">Item url</div>
+                                  </div>
+                                  <div class="field"><a data-bind="text: record().loc() , attr: { href: record().loc()}"></a></div>
+                                </div>
+                                <div class="list">
+                                  <div class="title">
+                                    <div class="titlewrap">Record Source</div>
+                                  </div>
+                                  <div class="field" data-bind="text:record().source"></div>
+                                </div>
+                              </div>
+                            </div>
+                            <div id="related" class="tab-pane">
+                              <!-- related media-->
+                              <div style="text-align: center;" data-bind="visible: record().loading()==true"><img src="img/ic-loading.gif"></div>
+                      		  <!-- ko if: record().related().length > 0 -->
+                      
+                              <div class="title">
+                                <div class="titlewrap" data-bind="text: 'Other media items by '+record().forrelated()"></div>
+                              </div>
+                              <ul class="related">
+                      			<!-- ko foreach: record().related -->
+                        		<li><a data-bind="event: {click: function(){itemShow($data);}}" data-toggle="tooltip" data-placement="top"><img data-bind="attr:{src:thumb}" alt="media"></a></li>
+                     		 <!-- /ko -->
+                       		  </ul>
+                       		<!-- /ko -->
+                      		<!-- related media-->
+                       		<!-- ko if: record().similar().length > 0 -->
+                              <div class="title">
+                                <div class="titlewrap">Similar media items</div>
+                              </div>
+                            <ul class="related">
+                       		<!-- ko foreach: record().similar -->
+                        	<li><a data-bind="event: {click: function(){itemShow($data);}}" data-toggle="tooltip" data-placement="top"><img data-bind="attr:{src:thumb}" alt="media"></a></li>
+                     		<!-- /ko -->
+                      		</ul>
+                       	   <!-- /ko -->
+                            </div>
+                            <div id="comment" class="tab-pane">
+                              <!-- comment -->
+                              <div class="comments">
+                                <div id="disqus_thread"></div>
+										<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+                              </div>
+                            </div>
+                            <div id="share" class="tab-pane">
+                               <!-- share-->
+                      <div class="sharetext" data-bind="text: record().title"></div>
+                      		<ul class="social">
+                        		<li><a data-bind="attr: {href:record().facebook}" title="share on facebook" onclick="javascript:window.open(this.href,'facebook-share-dialog','width=626,height=436'); return false;"><img src="img/ui/ic-facebook.png" alt="facebook"></a></li>
+                        		<li><a data-bind="attr: {href:record().twitter}" title="twitter share" onclick="javascript:window.open(this.href,'', 'menubar=no,toolbar=no,resizable=yes,scrollbars=yes,height=600,width=600');return false;"><img src="img/ui/ic-twitter.png" alt="facebook"></a></li>
+                        		<li data-bind="event: {click: function(){record().pinterest()}}"><a href="#" title="pin it"><img src="img/ui/ic-pinterest.png" alt="facebook"></a></li>
+                        		<li><a data-bind="attr: {href:record().mail}" title="email item"><img src="img/ui/ic-mail.png" alt="facebook"></a></li>
+                      		</ul>
+                            </div>
+                            
+							<div id="annotations" class="tab-pane">
+                                <!-- title-->
+                              <div class="meta">
+                                <div class="list" data-bind="if: record().title">
+                                  <div class="title">
+                                    <div class="titlewrap">Title</div>
+                                  </div>
+                                  <div class="field newlines" id="ann-title" data-bind="html:record().title">
+                                  </div>
+                                </div>
+
+                                <!-- description-->
+                              <div class="meta">
+                                <div class="list" data-bind="if: record().description">
+                                  <div class="title">
+                                    <div class="titlewrap">Description</div>
+                                  </div>
+                                  <div class="field newlines" id="ann-description" data-bind="html:record().description">
+                                  </div>
+                                </div>
+                                <!-- 
+                                <div class="list"  data-bind="if: record().dataProvider">
+                                  <div class="title">
+                                    <div class="titlewrap">Provider</div>
+                                  </div>
+                                  <div class="field" data-bind="text:record().dataProvider"></div>
+                                </div>
+                                
+                                <div class="list" data-bind="if: record().creator">
+                                  <div class="title">
+                                    <div class="titlewrap">Creator</div>
+                                  </div>
+                                  <div class="field" data-bind="text:record().creator"></div>
+                                </div>
+                                <div class="list" data-bind="if: record().rights">
+                                  <div class="title">
+                                    <div class="titlewrap">Rights</div>
+                                  </div>
+                                  <div class="field" data-bind="text:record().rights"></div>
+                                </div>
+                                 <div class="list" data-bind="if: record().mediatype && record().mediatype!=''">
+                                  <div class="title">
+                                    <div class="titlewrap">Media Type</div>
+                                  </div>
+                                  <div class="field" data-bind="text:record().mediatype"></div>
+                                </div>
+                                 <div class="list" data-bind="if: record().recordId!='-1'">
+                                  <div class="title">
+                                    <div class="titlewrap">Item url</div>
+                                  </div>
+                                  <div class="field"><a data-bind="text: record().loc() , attr: { href: record().loc()}"></a></div>
+                                </div>
+                                <div class="list">
+                                  <div class="title">
+                                    <div class="titlewrap">Record Source</div>
+                                  </div>
+                                  <div class="field" data-bind="text:record().source"></div>
+                                </div> -->
+                                
+                                <div class="list">
+                                  <div class="title">
+                                    <div class="titlewrap">Tags</div>
+                                  </div>
+                                  <!-- ko foreach: record().annotationsKeys -->
+                                  <div class="term">
+                                    <a target="_blank" data-bind="attr: {href: uri, title: uri}, css: {'glyphicon glyphicon-link': true}"></a>&nbsp;
+                                    <!-- <a title="Show hierarchy" data-bind="css: {'glyphicon glyphicon-leaf': true}, event: {click: function(){$parent.record().showHierarchy(uri);}} "></a>&nbsp; -->
+                                  	<a class="ann-resource" href="#" data-bind="attr: {id: id}, text:$parent.record().getAnnotationLabel($data), event: {click: function(){$parent.record().annShow(uri);}}"></a>
+                                  </div>
+                                 <!-- /ko --> 
+                                  </div>
+                              </div>
+							</div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+        </div>        
+	</section>	
+

@@ -33,7 +33,6 @@ import utils.ListUtils;
 
 public class FilterValuesMap {
 
-	
 	private static HashMap<Sources, FilterValuesMap> map;
 	private HashMap<String, List<Object>> specificvalues;
 	// private HashMap<String, List<Pair<String>>> queryTexts;
@@ -171,6 +170,14 @@ public class FilterValuesMap {
 	
 
 
+	private void fillDBPedia() {
+//		addMapping(CommonFilters.TYPE.getId(), WithMediaType.IMAGE, "Image", "Photograph",
+//				"Poster, chart, other");
+//		addMapping(CommonFilters.TYPE.getId(), WithMediaType.VIDEO, "Video");
+//		addMapping(CommonFilters.TYPE.getId(), WithMediaType.AUDIO, "Sound", "Sheet music");
+//		addMapping(CommonFilters.TYPE.getId(), WithMediaType.TEXT, "Books", "Article");
+	}
+	
 	private void fillFlickr() {
 		addMapping(FiltersFields.TYPE.getFilterId(), WithMediaType.IMAGE, "photo");
 		addMapping(FiltersFields.TYPE.getFilterId(), WithMediaType.VIDEO, "video");

@@ -27,10 +27,15 @@ import org.bson.types.ObjectId;
 import org.mongodb.morphia.annotations.Embedded;
 import org.mongodb.morphia.annotations.Entity;
 import org.mongodb.morphia.annotations.Id;
+import org.mongodb.morphia.query.Query;
+import org.mongodb.morphia.query.UpdateOperations;
 
+import utils.Deserializer;
 import utils.Serializer;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 import model.basicDataTypes.Language;
@@ -49,14 +54,21 @@ public class ThesaurusObject {
 
 		protected Literal prefLabel;
 		protected MultiLiteral altLabel;
+		
+		protected String thesaurus;
+		protected String version;
 
-		public SKOSTerm() {}
+		public SKOSTerm() {	}
 
-		public SKOSTerm(String uri, String type, Literal prefLabel, MultiLiteral altLabel) {
+		public SKOSTerm(String uri, String type, Literal prefLabel, MultiLiteral altLabel, String thesaurus, String version) {
 			this.uri = uri;
 			this.type = type;
 			this.prefLabel = prefLabel;
 			this.altLabel = altLabel;
+			
+			this.thesaurus = thesaurus;
+			this.version = version;
+
 		}
 
 		public String getUri() {
@@ -73,6 +85,22 @@ public class ThesaurusObject {
 
 		public void setType(String type) {
 			this.type = type;
+		}
+		
+		public String getThesaurus() {
+			return thesaurus;
+		}
+
+		public void setThesaurus(String thesaurus) {
+			this.thesaurus = thesaurus;
+		}
+
+		public String getVersion() {
+			return version;
+		}
+
+		public void setVersion(String version) {
+			this.version = version;
 		}
 
 		public Literal getPrefLabel() {
@@ -104,13 +132,17 @@ public class ThesaurusObject {
 		}
 
 		public String toString() {
-			return prefLabel.get("en");
+			if (prefLabel != null) {
+				return prefLabel.get("en");
+			} else {
+				return "";
+			}
 		}
 	}
 
 	@JsonInclude(value = JsonInclude.Include.NON_NULL)
 	@Embedded
-	public static class SKOSSemantic extends SKOSTerm{
+	public static class SKOSSemantic extends SKOSTerm {
 
 		private Literal scopeNote;
 		private List<SKOSTerm> broader;
@@ -241,12 +273,17 @@ public class ThesaurusObject {
 
 	@Embedded
 	public static class SKOSAdmin {
+
+		@JsonSerialize(using = Serializer.DateSerializer.class)
+		@JsonDeserialize(using = Deserializer.DateDeserializer.class)
 		private Date created;
 
+		@JsonSerialize(using = Serializer.DateSerializer.class)
+		@JsonDeserialize(using = Deserializer.DateDeserializer.class)
 		private Date lastModified;
 
 		private String externalId;
-
+		
 		public SKOSAdmin() {}
 
 		public SKOSAdmin(Date created, Date lastModified, String externalId) {
@@ -261,6 +298,9 @@ public class ThesaurusObject {
 
 		public void setCreated(Date created) {
 			this.created = created;
+			if (this.lastModified == null) {
+				this.lastModified = created;
+			}
 		}
 
 		public Date getLastModified() {
@@ -283,25 +323,30 @@ public class ThesaurusObject {
 
 	@Id
 	@JsonSerialize(using = Serializer.ObjectIdSerializer.class)
-	private ObjectId dbid;
+	private ObjectId dbId;
 
 	private SKOSAdmin administrative;
 	private SKOSSemantic semantic;
-
 
 	public ThesaurusObject() {
 		super();
 		this.administrative = new SKOSAdmin();
 		this.semantic = new SKOSSemantic();
-
+	}
+	
+	public ThesaurusObject(ObjectId id) {
+		super();
+		this.administrative = new SKOSAdmin();
+		this.semantic = new SKOSSemantic();
+		this.setDbId(id);
 	}
 
-	public ObjectId getDbid() {
-		return dbid;
+	public ObjectId getDbId() {
+		return dbId;
 	}
 
-	public void setDbid(ObjectId dbid) {
-		this.dbid = dbid;
+	public void setDbId(ObjectId dbid) {
+		this.dbId = dbid;
 	}
 
 	public SKOSAdmin getAdministrative() {
@@ -327,6 +372,10 @@ public class ThesaurusObject {
 		Map<String, List<String>> langAcc = new HashMap<>();
 
 		map.put("uri", semantic.uri);
+		
+		if (semantic.thesaurus != null) {
+			map.put("thesaurus", semantic.thesaurus);
+		}
 
 		if (semantic.prefLabel != null) {
 			List<String> allPrefLabels = new ArrayList<>();
@@ -482,5 +531,5 @@ public class ThesaurusObject {
 
 		array.add(value);
 	}
-
+	
 }

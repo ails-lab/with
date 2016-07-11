@@ -485,6 +485,4 @@ public class SearchController extends WithController {
 
 		return ok(result);
 	}
-
-
 }
