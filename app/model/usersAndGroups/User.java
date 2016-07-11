@@ -22,6 +22,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import model.resources.RecordResource;
 import model.resources.collection.CollectionObject;
 import model.resources.collection.CollectionObject.CollectionDescriptiveData;
 import notifications.Notification;
@@ -49,6 +50,7 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import controllers.CollectionObjectController;
+import controllers.RecordResourceController;
 import db.DB;
 
 @Entity
@@ -348,6 +350,8 @@ public class User extends UserOrGroup {
 			return groups;
 		}
 	}
+	
+
 
 	public ArrayNode getUsergroups() {
 		ArrayNode groups = Json.newObject().arrayNode();
@@ -371,6 +375,8 @@ public class User extends UserOrGroup {
 		}
 	}
 	
+	
+	
 	public ObjectNode getCount(){
 		ObjectNode json = DB.getCollectionObjectDAO().countMyAndSharedCollections(
 				new ArrayList<ObjectId>() {{ add(getDbId()); addAll(getUserGroupsIds()); }});
@@ -384,7 +390,7 @@ public class User extends UserOrGroup {
 		json.remove("my");
 		json.remove("sharedWithMe");
 		
-		json.put("myfavorites", favoritesCount());
+		json.put("myFavorites", favoritesCount());
 		
 		long pendingNots =0 ;
 		if(getNotifications()!=null) {
