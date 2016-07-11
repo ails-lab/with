@@ -32,7 +32,6 @@ import model.EmbeddedMediaObject.MediaVersion;
 import model.annotations.Annotation;
 import model.annotations.ContextData;
 import model.annotations.ContextData.ContextDataBody;
-import model.basicDataTypes.CollectedByAccess;
 import model.basicDataTypes.WithAccess;
 import model.basicDataTypes.WithAccess.Access;
 import model.basicDataTypes.WithAccess.AccessEntry;
@@ -209,7 +208,7 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 	}
 
 	public void updateRecordUsageCollectedAndRights(ObjectId collectionId,
-			WithAccess access, ObjectId recordId, boolean isPublic, CollectedByAccess newCollectedBy) {
+			WithAccess access, ObjectId recordId, boolean isPublic, List<AccessEntry> newCollectedBy) {
 		Query<RecordResource> q = this.createQuery().field("_id")
 				.equal(recordId);
 		UpdateOperations<RecordResource> recordUpdate = this
@@ -223,11 +222,11 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 			recordUpdate.set("administrative.access.isPublic", true);
 		if (DB.getCollectionObjectDAO().isFavorites(collectionId))
 			recordUpdate.inc("usage.likes");
-		else
+		else {
 			recordUpdate.inc("usage.collected");
-		for (Access level: newCollectedBy.keySet()) {
-			//adds duplicate userIds as desired
-			recordUpdate.addAll("administrative.collectedBy." + level, newCollectedBy.get(level), true);
+			//adds duplicate (access, userIds) as desired
+			if (!newCollectedBy.isEmpty())
+				recordUpdate.addAll("administrative.collectedBy", newCollectedBy, true);
 		}
 		this.update(q, recordUpdate);
 	}
@@ -244,7 +243,7 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 					collection.getAdministrative().getAccess());
 		//get collectionId rights and copy them to collectedBy
 		//if a record is collected n times in collectionId, keep one entry in collectedBy
-		CollectedByAccess newCollectedBy = new CollectedByAccess();
+		List<AccessEntry> newCollectedBy = new ArrayList<AccessEntry>();
 		if (!existsInSameCollection)
 			newCollectedBy = newCollectedBy(collectionId);			
 		updateRecordUsageCollectedAndRights(collectionId, newAccess, recordId,
@@ -253,11 +252,11 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 				position);
 	}
 	
-	public CollectedByAccess newCollectedBy(ObjectId colId) {
+	public List<AccessEntry> newCollectedBy(ObjectId colId) {
 		CollectionObject collection = DB.getCollectionObjectDAO()
 			.getById(colId, new ArrayList<String>(Arrays
 				.asList("administrative.access")));
-		return new CollectedByAccess(collection.getAdministrative().getAccess().getAcl());
+		return collection.getAdministrative().getAccess().getAcl();
 	}
 
 	public void appendToCollection(ObjectId recordId, ObjectId collectionId,
@@ -268,7 +267,7 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 		if (changeRecRights)
 			newAccess = mergeParentCollectionRights(recordId, collectionId,
 					collection.getAdministrative().getAccess());
-		CollectedByAccess newCollectedBy = new CollectedByAccess();
+		List<AccessEntry> newCollectedBy = new ArrayList<AccessEntry>();
 		if (!existsInSameCollection)			
 			newCollectedBy = newCollectedBy(collectionId);
 		updateRecordUsageCollectedAndRights(collectionId, newAccess, recordId,
@@ -437,7 +436,7 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 		RecordResource record = this.getById(collectionId, new ArrayList<String>(Arrays.asList("collectedIn, administrative.collectedBy")));
 		List<ObjectId>  collectedIn = record.getCollectedIn();
 		int occurencesOfRecordInCollection = Collections.frequency(collectedIn, collectionId);
-		CollectedByAccess collectionRights = new CollectedByAccess(collection.getAdministrative().getAccess().getAcl());
+		List<AccessEntry> collectionRights = collection.getAdministrative().getAccess().getAcl();
 		//collectedIn contains duplicates
 		if (all) {//removeAll only if the record exists once in the collection
 			removeFromCollectedBy(recordUpdate, record.getAdministrative().getCollectedBy(), collectionRights);
@@ -458,14 +457,12 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 		removeRecordIfNotCollected(recordId);
 	}
 	
-	private void removeFromCollectedBy(UpdateOperations<RecordResource> recordUpdate, CollectedByAccess currentCollectedBy, CollectedByAccess collectionRights) {
-		for (Access level: collectionRights.keySet()) {
-			List<ObjectId> userIds = collectionRights.get(level);
-			List<ObjectId> currentRecordUserIds = currentCollectedBy.get(level);
-			for (ObjectId userId: userIds)
-				currentRecordUserIds.remove(userId);
-			recordUpdate.set("administrative.collectedBy." + level, currentRecordUserIds);
+	private void removeFromCollectedBy(UpdateOperations<RecordResource> recordUpdate, List<AccessEntry> currentCollectedBy, List<AccessEntry> collectionRights) {
+		currentCollectedBy.remove(collectionRights);
+		for (AccessEntry ae: collectionRights) {
+			currentCollectedBy.remove(ae);
 		}
+		recordUpdate.set("administrative.collectedBy", currentCollectedBy);
 	}
 
 	private void removeRecordIfNotCollected(ObjectId recordId) {

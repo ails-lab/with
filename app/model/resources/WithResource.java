@@ -29,11 +29,11 @@ import model.EmbeddedMediaObject;
 import model.EmbeddedMediaObject.MediaVersion;
 import model.annotations.Annotation;
 import model.annotations.ContextData;
-import model.basicDataTypes.CollectedByAccess;
 import model.basicDataTypes.CollectionInfo;
 import model.basicDataTypes.ProvenanceInfo;
 import model.basicDataTypes.WithAccess;
 import model.basicDataTypes.WithAccess.Access;
+import model.basicDataTypes.WithAccess.AccessEntry;
 import model.usersAndGroups.User;
 
 import org.bson.types.ObjectId;
@@ -89,7 +89,7 @@ public class WithResource<T extends DescriptiveData, U extends WithResource.With
 		@JsonDeserialize(using = Deserializer.WithAccessDeserializer.class)
 		private WithAccess access = new WithAccess();
 		
-		private CollectedByAccess collectedBy = new CollectedByAccess();
+		private List<AccessEntry> collectedBy = new ArrayList<AccessEntry>();
 
 		/*
 		 * withCreator is empty in cases of records imported from external
@@ -187,11 +187,11 @@ public class WithResource<T extends DescriptiveData, U extends WithResource.With
 			this.externalId = externalId;
 		}
 
-		public CollectedByAccess getCollectedBy() {
+		public List<AccessEntry> getCollectedBy() {
 			return collectedBy;
 		}
 
-		public void setCollectedBy(CollectedByAccess collectedBy) {
+		public void setCollectedBy(List<AccessEntry> collectedBy) {
 			this.collectedBy = collectedBy;
 		}
 
