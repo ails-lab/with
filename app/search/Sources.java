@@ -48,7 +48,7 @@ public enum Sources {
 	Rijksmuseum(RijksProxySource.class,"Rijksmuseum","Rijksmuseum"),
 	Historypin(HistoryPinProxySource.class,"Historypin"),
 	// TODO implement it the right way
-	WITHinASpace(EmptySource.class,"WITHinASpace")
+	WITHinASpace(EmptySource.class,"WITHinASpace"), DBPedia(EmptySource.class,"DBPedia")
 	;
 
 
