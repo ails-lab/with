@@ -411,7 +411,7 @@ public class CollectionObjectDAO extends WithResourceDAO<CollectionObject> {
 	public CollectionObject removeFromCollection(ObjectId collectionId, ObjectId recordId,
 			int position, boolean first, boolean all) throws Exception {
 		CollectionObject collection = this.getById(collectionId,
-				Arrays.asList("collectedResources, administrative.access"));
+				Arrays.asList("collectedResources", "administrative.access"));
 		int i = 0;
 		List<ContextData> newCollectedResources = new ArrayList<ContextData>(
 				collection.getCollectedResources());
