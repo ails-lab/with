@@ -18,6 +18,7 @@ package model.usersAndGroups;
 
 import java.security.MessageDigest;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -442,6 +443,28 @@ public class User extends UserOrGroup {
 	public String getAnnotationCount() {
 		String annotationCount = ""+ DB.getAnnotationDAO().countUserAnnotations(this.getDbId());
 		return annotationCount;
+	}
+	
+	public ArrayNode getFavoriteIds() {
+		ArrayNode favoriteRecords = Json.newObject().arrayNode();
+
+		if (favorites == null){
+			CollectionObject favoriteCol = DB.getCollectionObjectDAO().getByOwnerAndLabel(this.getDbId(), null,
+					"_favorites");
+			favorites = favoriteCol.getDbId();
+		}
+
+		
+		List<RecordResource> records  = DB.getRecordResourceDAO().getByCollection(favorites, Arrays.asList("administrative.externalId"));
+		try {
+			for (RecordResource record : records) {
+				favoriteRecords.add(record.getAdministrative().getExternalId());
+			}
+			return favoriteRecords;
+		} catch (Exception e) {
+			return favoriteRecords;
+		
+		}
 	}
 	
 	public ObjectId getFavorites() {
