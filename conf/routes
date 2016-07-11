@@ -20,6 +20,7 @@ POST     /api/initialfilters        controllers.SearchController.getfilters()
 GET      /api/searchsources        	controllers.SearchController.searchSources()
 POST     /api/mergefilters         	controllers.SearchController.mergeFilters()
 POST     /api/search            	controllers.SearchController.search()
+POST 	 /api/search2				controllers.SearchController.search2()
 GET      /api/annotationsSearch    	controllers.AnnotationController.searchRecordsOfGroup(groupId: String, term: String)
 
 #Autocomplete
