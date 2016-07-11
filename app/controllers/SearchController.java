@@ -24,6 +24,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.BiFunction;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.action.suggest.SuggestResponse;
@@ -45,7 +46,9 @@ import play.data.Form;
 import play.libs.F.Promise;
 import play.libs.Json;
 import play.mvc.Result;
-import search.Temp;
+import search.Query;
+import search.Response;
+import search.Sources;
 import sources.core.CommonFilterLogic;
 import sources.core.CommonFilterResponse;
 import sources.core.CommonQuery;
@@ -57,6 +60,7 @@ import sources.core.ParallelAPICall.Priority;
 import sources.core.SearchResponse;
 import sources.core.SourceResponse;
 import sources.core.Utils;
+import utils.ChainedSearchResult;
 import utils.ListUtils;
 
 public class SearchController extends WithController {
@@ -118,16 +122,40 @@ public class SearchController extends WithController {
 			try {
 				final search.Query q = Json.fromJson(json, search.Query.class );
 				// check if the query needs readability additions for WITHin
-				if( q.containsSource( Temp.WITHin)) {
+				if( q.containsSource( Sources.WITHin)) {
 					// add conditions for visibility in WITH
-					
+					Query.Term visible = Query.Term.create()
+							.add( "is public", "true" );
+					for( String userId: effectiveUserIds()) {
+						visible.add( "collectedBy", userId );
+					}
+					q.addTerm( visible.filters());
 				}
+				// split the query
+				Map<Sources, Query> queries = q.splitBySource();
+				// create promises
+				Iterable<Promise<Response.SingleResponse>> promises = 
+						queries.entrySet().stream()
+						.map( entry -> entry.getKey().getDriver().execute(entry.getValue()))
+						.collect( Collectors.toList());
+				
 				if( q.continuation ) {
 					// initiate a continuation
+					return ChainedSearchResult.create(promises, q );
 				} else if( StringUtils.isNotBlank( q.continuationId)) {
 					// try to respond with continuation
+					return continuedSearch( q.continuationId );
 				} else {
 					// normal query
+					Promise<List<Response.SingleResponse>> allResponses  = 
+							Promise.sequence(promises, ParallelAPICall.Priority.FRONTEND.getExcecutionContext());
+					Promise<Result> res = allResponses.map( singleResponses -> {
+						Response r = new Response();
+						for(Response.SingleResponse sr: singleResponses ) {
+							
+						}
+						return ok();
+					});
 				}
 				
 				// bad request
@@ -138,6 +166,10 @@ public class SearchController extends WithController {
 		}	
 		
 		return Promise.pure( badRequest( "Not implemented yet"));
+	}
+	
+	public static Promise<Result> continuedSearch( String continuationId ) {
+		return ChainedSearchResult.search(continuationId);
 	}
 	
 	public static Result searchSources() {
