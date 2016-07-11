@@ -63,7 +63,7 @@ import db.DB;
 		@Index(fields = @Field(value = "googleId", type = IndexType.ASC), options = @IndexOptions()),
 		@Index(fields = @Field(value = "userGroupsIds", type = IndexType.ASC), options = @IndexOptions()),
 		@Index(fields = @Field(value = "page.coordinates", type = IndexType.GEO2DSPHERE), options = @IndexOptions(background = true)) })
-@JsonInclude(value = JsonInclude.Include.NON_EMPTY)
+//@JsonInclude(value = JsonInclude.Include.NON_EMPTY)
 public class User extends UserOrGroup {
 
 	public static final ALogger log = Logger.of(User.class);
@@ -118,8 +118,7 @@ public class User extends UserOrGroup {
 
 	// @JsonIgnore
 	// private int exhibitionsCreated;
-
-	@JsonSerialize(using = Serializer.ObjectIdArraySerializer.class)
+	@JsonIgnore
 	private final Set<ObjectId> userGroupsIds = new HashSet<ObjectId>();
 
 	@JsonSerialize(using = Serializer.ObjectIdArraySerializer.class)
@@ -352,8 +351,7 @@ public class User extends UserOrGroup {
 		}
 	}
 	
-
-
+	@JsonIgnore
 	public ArrayNode getUsergroups() {
 		ArrayNode groups = Json.newObject().arrayNode();
 		try {
@@ -415,6 +413,7 @@ public class User extends UserOrGroup {
 		}
 		return json;				
 	}
+	
 	@JsonIgnore
 	public Set<Notification> getNotifications() {
 		try {
@@ -445,16 +444,12 @@ public class User extends UserOrGroup {
 		return annotationCount;
 	}
 	
-	public ArrayNode getFavoriteIds() {
-		ArrayNode favoriteRecords = Json.newObject().arrayNode();
-
+	public ArrayList<String> getFavoriteIds() {
+		ArrayList<String> favoriteRecords = new ArrayList<String>();
 		if (favorites == null){
-			CollectionObject favoriteCol = DB.getCollectionObjectDAO().getByOwnerAndLabel(this.getDbId(), null,
-					"_favorites");
-			favorites = favoriteCol.getDbId();
+			favorites = DB.getCollectionObjectDAO().getByOwnerAndLabel(this.getDbId(), null,
+					"_favorites").getDbId();
 		}
-
-		
 		List<RecordResource> records  = DB.getRecordResourceDAO().getByCollection(favorites, Arrays.asList("administrative.externalId"));
 		try {
 			for (RecordResource record : records) {
@@ -463,7 +458,7 @@ public class User extends UserOrGroup {
 			return favoriteRecords;
 		} catch (Exception e) {
 			return favoriteRecords;
-		
+
 		}
 	}
 	
