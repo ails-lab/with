@@ -44,7 +44,7 @@ import utils.Tuple;
 public class CommonQuery implements Cloneable , QueryStringBindable<CommonQuery>{
 
 	public static final ALogger log = Logger.of( CommonQuery.class );
-	
+
 	@JsonIgnoreProperties(ignoreUnknown=true)
 	public String page = "1";
 	public String facetsMode = FacetsModes.DEFAULT;
@@ -72,7 +72,6 @@ public class CommonQuery implements Cloneable , QueryStringBindable<CommonQuery>
 		this.page = ""+query.page;
 		this.pageSize = ""+query.pageSize;
 		this.searchTerm = query.findFilter(FiltersFields.ANYWHERE.getFilterId()).value;
-		this.source = ListUtils.transform(query.sources, (x)->x.toString());  
 	}
 
 	private List<Tuple<ObjectId, Access>> transformList(ObjectNode[] inputList, boolean group) {
@@ -194,7 +193,7 @@ public class CommonQuery implements Cloneable , QueryStringBindable<CommonQuery>
 		}
 
 	}
-	
+
 	@Override
 	public CommonQuery clone() {
 		try {
@@ -223,7 +222,7 @@ public class CommonQuery implements Cloneable , QueryStringBindable<CommonQuery>
 		if(Utils.hasInfo(srcs)){
 			q.source = Utils.parseArray(srcs);
 		}
-		
+
 		q.filters = new ArrayList<>();
 		for (String key : arg1.keySet()) {
 			if (key.startsWith("filter.")){
@@ -234,7 +233,7 @@ public class CommonQuery implements Cloneable , QueryStringBindable<CommonQuery>
 				q.filters.add(f);
 			}
 		}
-		
+
 		return Option.Some(q);
 	}
 

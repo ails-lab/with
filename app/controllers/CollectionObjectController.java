@@ -796,13 +796,13 @@ public class CollectionObjectController extends WithResourceController {
 				return dbId;
 			else if (DB.getUserGroupDAO().existsEntity(dbId))
 				return dbId;
-			else 
+			else
 				return null;
 		} catch(IllegalArgumentException e) {
 			ObjectId dbId = DB.getUserDAO().getIdByUsername(usernameOrDbId);
 			if (dbId != null)
 				return dbId;
-			else 
+			else
 				return DB.getUserGroupDAO().getIdByName(usernameOrDbId);
 		}
 	}
@@ -1101,7 +1101,7 @@ public class CollectionObjectController extends WithResourceController {
 			searcher.addType(WithResourceType.Exhibition.toString().toLowerCase());
 
 		SearchOptions options =  new SearchOptions();
-		options.accessList = accessedByUserOrGroup;
+		/*options.accessList = accessedByUserOrGroup;
 
 		SearchResponse resp = null;
 		if((creator != null) && creator.isDefined())
@@ -1119,7 +1119,8 @@ public class CollectionObjectController extends WithResourceController {
 			filteredCols.add(Json.toJson(DB.getCollectionObjectDAO().getById(new ObjectId(h.getId()))));
 
 		result.put("filteredCols", filteredCols);
-		return ok(filteredCols);
+		return ok(filteredCols); */
+		return ok();
 
 	}
 
@@ -1143,7 +1144,7 @@ public class CollectionObjectController extends WithResourceController {
 		searcher.setTypes(recordTypes);
 
 		SearchOptions options = new SearchOptions();
-		options.addFilter("collectedId", collectionId);
+		/*options.addFilter("collectedId", collectionId);
 
 		SearchResponse resp = searcher.searchForRecords(term, options);
 		ArrayNode filteredRecs = Json.newObject().arrayNode();
@@ -1151,7 +1152,8 @@ public class CollectionObjectController extends WithResourceController {
 			filteredRecs.add(Json.toJson(DB.getWithResourceDAO().getById(new ObjectId(h.getId()))));
 
 		result.put("filteredRecs", filteredRecs);
-		return ok(filteredRecs);
+		return ok(filteredRecs);*/
+		return ok();
 
 	}
 

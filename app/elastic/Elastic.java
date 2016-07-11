@@ -19,6 +19,8 @@ package elastic;
 import static org.elasticsearch.node.NodeBuilder.nodeBuilder;
 
 import java.io.IOException;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -30,20 +32,22 @@ import model.resources.RecordResource;
 import model.resources.WithResource.WithResourceType;
 
 import org.elasticsearch.action.admin.indices.create.CreateIndexRequestBuilder;
+import org.elasticsearch.action.admin.indices.get.GetIndexRequest;
+import org.elasticsearch.action.admin.indices.get.GetIndexRequestBuilder;
 import org.elasticsearch.action.bulk.BulkProcessor;
 import org.elasticsearch.action.bulk.BulkRequest;
 import org.elasticsearch.action.bulk.BulkResponse;
 import org.elasticsearch.client.Client;
+import org.elasticsearch.client.IndicesAdminClient;
 import org.elasticsearch.client.node.NodeClient;
 import org.elasticsearch.client.transport.TransportClient;
 import org.elasticsearch.cluster.metadata.IndexMetaData;
 import org.elasticsearch.common.collect.ImmutableOpenMap;
-import org.elasticsearch.common.settings.ImmutableSettings;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.transport.InetSocketTransportAddress;
 import org.elasticsearch.common.unit.ByteSizeValue;
 import org.elasticsearch.common.unit.TimeValue;
-import org.elasticsearch.indices.IndexMissingException;
+import org.elasticsearch.index.IndexNotFoundException;
 import org.elasticsearch.node.Node;
 
 import play.Logger;
@@ -97,7 +101,7 @@ public class Elastic {
 
 	public static Settings getSettings() {
 		if(settings == null) {
-			settings = ImmutableSettings
+			settings = Settings
 				.settingsBuilder()
 				.put("cluster.name",
 						cluster).build();
@@ -107,7 +111,7 @@ public class Elastic {
 
 	private static Settings getIndexSettings() {
 		if(indexSettings == null) {
-			indexSettings = ImmutableSettings
+			indexSettings = Settings
 					.settingsBuilder()
 					.put("number_of_shards", shards)
 					.put("number_of_replicas", replicas)
@@ -121,7 +125,7 @@ public class Elastic {
 			transportClient.close();
 		else if( (transportClient == null) && (nodeClient != null)) {
 			nodeClient.close();
-			node.stop();
+			node.close();;
 		}
 		else if( (transportClient != null) && (nodeClient != null)) {
 			nodeClient.close();
@@ -162,10 +166,16 @@ public class Elastic {
 	 */
 	public static TransportClient getTransportClient() {
 		if (transportClient == null) {
-			transportClient = new TransportClient(getSettings())
-					.addTransportAddress(new InetSocketTransportAddress(
-							host,
-							port));
+			try {
+				transportClient = TransportClient.builder()
+						.settings(getSettings())
+						.build()
+						.addTransportAddress(new InetSocketTransportAddress(
+								InetAddress.getByName(host),
+								port));
+			} catch (UnknownHostException e) {
+				log.error("", e.getMessage());
+			}
 		}
 		return transportClient;
 	}
@@ -211,9 +221,11 @@ public class Elastic {
 		indices = Elastic.getTransportClient().admin().cluster()
 					.prepareState().execute().actionGet()
 					.getState().getMetaData().indices();
+		IndicesAdminClient inds = Elastic.getTransportClient().admin().indices();
 		if(indices.containsKey(index)) {
 			return;
 		}
+
 
 
 		// take custom mappings
@@ -243,7 +255,7 @@ public class Elastic {
 				Elastic.getTransportClient().admin().indices().prepareAliases()
 						.removeAlias("old_index", alias)
 						.execute().actionGet();
-		} catch(IndexMissingException e) {
+		} catch(IndexNotFoundException e) {
 			log.debug(e.getDetailedMessage());
 		} catch(Exception e) {
 			log.debug(e.getMessage());

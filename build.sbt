@@ -32,7 +32,7 @@ libraryDependencies ++= Seq(
  "org.apache.httpcomponents" % "httpclient" % "4.5.2",
  "org.apache.httpcomponents" % "httpasyncclient" % "4.1.1",
   "org.apache.httpcomponents" % "httpmime" % "4.3.1",
-  "org.elasticsearch" % "elasticsearch" % "1.5.1",
+  "org.elasticsearch" % "elasticsearch" % "2.3.3",
   "net.sourceforge.owlapi" % "owlapi-distribution" % "5.0.1",
 // "com.yakaz.elasticsearch.plugins" % "elasticsearch-action-updatebyquery" % "2.5.1",
  // validate the token from the login on web browser

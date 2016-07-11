@@ -236,7 +236,6 @@ public class AnnotationController extends Controller {
 				}
 			});
 			SearchOptions options = new SearchOptions();
-			options.accessList = access;
 			options.setCount(20);
 			options.isPublic = false;
 
@@ -251,7 +250,7 @@ public class AnnotationController extends Controller {
 					add(WithResourceType.Exhibition.toString().toLowerCase());
 				}
 			});
-			SearchResponse resp = recordSearcher
+			/*SearchResponse resp = recordSearcher
 					.searchAccessibleCollections(options);
 			List<String> colIds = new ArrayList<String>();
 			resp.getHits().forEach((h) -> {
@@ -259,9 +258,9 @@ public class AnnotationController extends Controller {
 				return;
 			});
 
-			/*
+
 			 * Search for records of this space
-			 */
+
 			options.accessList.clear();
 			options.setFilterType("or");
 			// options.addFilter("_all", term);
@@ -288,7 +287,7 @@ public class AnnotationController extends Controller {
 				result.put("hits", Json.toJson(hits));
 			} else {
 				result.put("hits", Json.newObject().arrayNode());
-			}
+			}*/
 
 		} catch (Exception e) {
 			log.error("Search encountered a problem", e);

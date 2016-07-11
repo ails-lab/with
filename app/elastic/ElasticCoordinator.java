@@ -27,7 +27,7 @@ import org.elasticsearch.search.SearchHit;
 import db.DB;
 import search.Filter;
 import search.Response.SingleResponse;
-import elastic.ElasticSearcher2.SearchOptions;
+import elastic.ElasticSearcher.SearchOptions;
 
 public class ElasticCoordinator {
 
@@ -39,7 +39,7 @@ public class ElasticCoordinator {
 
 
 	public SingleResponse federatedSearch(List<List<Filter>> filters) {
-		ElasticSearcher2 searcher = new ElasticSearcher2();
+		ElasticSearcher searcher = new ElasticSearcher();
 		List<QueryBuilder> musts = new ArrayList<QueryBuilder>();
 		for(List<Filter> ors: filters) {
 			musts.add(searcher.boolShouldQuery(ors));

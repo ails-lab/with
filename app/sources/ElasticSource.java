@@ -29,7 +29,7 @@ import search.Sources;
 import search.Filter;
 import sources.core.ParallelAPICall;
 import elastic.ElasticCoordinator;
-import elastic.ElasticSearcher2.SearchOptions;
+import elastic.ElasticSearcher.SearchOptions;
 
 /*
  * This source is for internal search to WITH collections
@@ -45,6 +45,9 @@ public class ElasticSource implements Source {
 	@Override
 	public Promise<SingleResponse> execute(Query query) {
 		SearchOptions elasticoptions = new SearchOptions();
+		elasticoptions.count = query.count;
+		elasticoptions.offset = query.start;
+		elasticoptions.getAggregatedFields().addAll(query.facets);
 
 
 		ElasticCoordinator coord = new ElasticCoordinator(elasticoptions);
