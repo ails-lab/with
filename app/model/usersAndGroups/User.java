@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Set;
 
 import model.resources.collection.CollectionObject;
+import model.resources.collection.CollectionObject.CollectionDescriptiveData;
 import notifications.Notification;
 
 import org.apache.commons.codec.binary.Hex;
@@ -42,6 +43,7 @@ import utils.Serializer;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -300,7 +302,7 @@ public class User extends UserOrGroup {
 	 *
 	 * public void addExhibitionsCreated() { this.exhibitionsCreated++; }
 	 */
-
+	@JsonIgnore
 	public ArrayNode getOrganizations() {
 		ArrayNode groups = Json.newObject().arrayNode();
 		try {
@@ -323,7 +325,8 @@ public class User extends UserOrGroup {
 		}
 
 	}
-
+	
+	@JsonIgnore
 	public ArrayNode getProjects() {
 		ArrayNode groups = Json.newObject().arrayNode();
 		try {
@@ -371,11 +374,23 @@ public class User extends UserOrGroup {
 	public ObjectNode getCount(){
 		ObjectNode json = DB.getCollectionObjectDAO().countMyAndSharedCollections(
 				new ArrayList<ObjectId>() {{ add(getDbId()); addAll(getUserGroupsIds()); }});
+		
+		JsonNode my =  json.get("my");
+		JsonNode shared =  json.get("sharedWithMe");
+		json.put("myCollections",my.get("SimpleCollection") );
+		json.put("myExhibitions", my.get("Exhibition"));
+		json.put("mySharedCollections", shared.get("SimpleCollection") );
+		json.put("mySharedExhibitions", shared.get("Exhibition") );
+		json.remove("my");
+		json.remove("sharedWithMe");
+		
+		json.put("myfavorites", favoritesCount());
+		
 		long pendingNots =0 ;
 		if(getNotifications()!=null) {
 			 pendingNots = getNotifications().stream().filter(n -> n.isPendingResponse()).count();
 		}
-		json.put("pendingnotifications", pendingNots);
+		json.put("myPendingNotifications", pendingNots);
 		Integer projects = 0;
 		Integer orgs  = 0;
 		if (!userGroupsIds.isEmpty()){
@@ -388,14 +403,12 @@ public class User extends UserOrGroup {
 					orgs++;
 				}
 			}
-			json.put("organizations", orgs);
-			json.put("projects", projects);
+			json.put("myOrganizations", orgs);
+			json.put("myProjects", projects);
 		}
-		return json;
-		
-		
+		return json;				
 	}
-
+	@JsonIgnore
 	public Set<Notification> getNotifications() {
 		try {
 			Set<ObjectId> userOrGroupIds = new HashSet<ObjectId>();
@@ -433,6 +446,18 @@ public class User extends UserOrGroup {
 		if (favoriteCol != null)
 			return favoriteCol.getDbId();
 		return CollectionObjectController.createFavorites(this.getDbId());
+	}
+	
+	public Integer favoritesCount() {
+		if (favorites != null){
+			CollectionObject<CollectionDescriptiveData> favoriteCol  = DB.getCollectionObjectDAO().get(favorites);
+			return favoriteCol.getCollectedResources().size();
+		}
+		CollectionObject favoriteCol = DB.getCollectionObjectDAO()
+				.getByOwnerAndLabel(this.getDbId(), null, "_favorites");
+		if (favoriteCol != null)
+			return favoriteCol.getCollectedResources().size();
+		return 0;
 	}
 
 	public void setFavorites(ObjectId favorites) {
