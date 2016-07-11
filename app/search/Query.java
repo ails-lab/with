@@ -231,7 +231,8 @@ public class Query {
 		for( Sources source: sources ) {
 			Set<String> supportedFieldIds = source.getDriver().supportedFieldIds();
 			Query newQuery = this.pruneFilters(source, supportedFieldIds);
-			res.put( source, newQuery );
+			if( newQuery != null )
+				res.put( source, newQuery );
 		}
 		return res;
 	}
