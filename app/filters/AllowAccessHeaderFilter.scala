@@ -57,7 +57,7 @@ class AllowAccessHeaderFilter extends Filter {
       // check if origin is whitelisted
       // if yes return it
        result
-      .withHeaders(HeaderNames.ACCESS_CONTROL_ALLOW_ORIGIN -> rh.headers.get(HeaderNames.ORIGIN).get, 
+      .withHeaders(HeaderNames.ACCESS_CONTROL_ALLOW_ORIGIN -> rh.headers.get(HeaderNames.ORIGIN).getOrElse( "*" ), 
           //it seems that more than one ALLOW_ORIGIN values cannot be supported (?)
           //HeaderNames.ACCESS_CONTROL_ALLOW_ORIGIN -> "http://localhost:1337", 
           HeaderNames.ACCESS_CONTROL_ALLOW_METHODS -> HttpMethods.mkString(", "), 
