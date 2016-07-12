@@ -31,8 +31,10 @@ import elastic.ElasticSearcher.SearchOptions;
 
 public class ElasticCoordinator {
 
-	private final SearchOptions options;
+	private SearchOptions options;
 
+	public ElasticCoordinator() {}
+	
 	public ElasticCoordinator(SearchOptions options) {
 		this.options = options;
 	}
@@ -72,6 +74,12 @@ public class ElasticCoordinator {
 		return null;
 	}
 
+	
+	public SearchResponse queryExcecution(QueryBuilder q, SearchOptions options) {
+		ElasticSearcher searcher = new ElasticSearcher();
+		return searcher.getSearchRequestBuilder(q, options).execute().actionGet();
+	}
+	
 	public SingleResponse relatedDisMaxSearch(List<List<Filter>> filters) {
 		ElasticSearcher relator = new ElasticSearcher();
 

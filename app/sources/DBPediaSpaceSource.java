@@ -17,24 +17,13 @@
 package sources;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-
-import org.w3c.dom.Document;
-
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 
-import model.EmbeddedMediaObject.MediaVersion;
-import model.EmbeddedMediaObject;
 import model.resources.AgentObject;
-import model.resources.CulturalObject;
 import model.resources.PlaceObject;
 import model.resources.RecordResource;
-import play.libs.Json;
 import search.Sources;
 import sources.core.CommonQuery;
-import sources.core.HttpConnector;
 import sources.core.ISpaceSource;
 import sources.core.JsonContextRecordFormatReader;
 import sources.core.QueryBuilder;
@@ -42,12 +31,8 @@ import sources.core.RecordJSONMetadata;
 import sources.core.RecordJSONMetadata.Format;
 import sources.core.SourceResponse;
 import sources.core.Utils;
-import sources.formatreaders.CulturalRecordFormatter;
 import sources.formatreaders.DBPediaAgentRecordFormatter;
 import sources.formatreaders.DBPediaPlaceRecordFormatter;
-import sources.formatreaders.RijksmuseumItemRecordFormatter;
-import sources.formatreaders.RijksmuseumRecordFormatter;
-import utils.Serializer;
 
 public class DBPediaSpaceSource extends ISpaceSource {
 

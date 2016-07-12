@@ -57,6 +57,7 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import elastic.Elastic;
+import elastic.ElasticCoordinator;
 import elastic.ElasticSearcher;
 import elastic.ElasticSearcher.SearchOptions;
 
@@ -91,16 +92,16 @@ public class DictionaryAnnotator extends Annotator {
 		String enField = "prefLabel.en";
 		String uriField = "uri";
 		String thesaurusField = "thesaurus";
-		
-		ElasticSearcher es = new ElasticSearcher();
-		
+				
 		BoolQueryBuilder query = QueryBuilders.boolQuery();
 		query.must(QueryBuilders.termQuery("_type", Elastic.thesaurusResource));
 
 		SearchOptions so = new SearchOptions(0, Integer.MAX_VALUE);
 		so.isPublic = false;
+		so.searchFields = new String[] {langField, altLangField, uriField, thesaurusField, enField};
+		ElasticCoordinator es = new ElasticCoordinator();
 		
-		SearchResponse res = null;//es.execute(query, so, new String[] {langField, altLangField, uriField, thesaurusField, enField} );
+		SearchResponse res = es.queryExcecution(query, so);
 		SearchHits sh = res.getHits();
 
 		Map<String, ArrayList<ObjectNode>> map = new HashMap<>();

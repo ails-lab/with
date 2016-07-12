@@ -56,6 +56,7 @@ import controllers.CollectionObjectController;
 import controllers.WithResourceController;
 import db.DB;
 import db.ThesaurusObjectDAO;
+import elastic.ElasticCoordinator;
 import elastic.ElasticSearcher;
 import elastic.ElasticSearcher.SearchOptions;
 
@@ -82,13 +83,13 @@ public class CollectionIndexController extends WithResourceController	{
 		
 		try {
 			JsonNode json = request().body().asJson();
-
-			ElasticSearcher es = new ElasticSearcher();
 			
 			QueryBuilder query = getIndexCollectionQuery(new ObjectId(id), json);
 			
 			SearchOptions so = new SearchOptions(0, Integer.MAX_VALUE);
-			SearchResponse res = null;//es.execute(query, so, indexFacetFields);
+			so.searchFields = indexFacetFields;
+			ElasticCoordinator es = new ElasticCoordinator();
+			SearchResponse res = es.queryExcecution(query, so);
 			SearchHits sh = res.getHits();
 
 			List<String[]> list = new ArrayList<>();
@@ -140,12 +141,12 @@ public class CollectionIndexController extends WithResourceController	{
 		
 		try {
 			JsonNode json = request().body().asJson();
-
-			ElasticSearcher es = new ElasticSearcher();
 			
 			QueryBuilder query = getIndexCollectionQuery(new ObjectId(id), json);
-
-			SearchResponse res = null;//es.execute(query, new SearchOptions(0, Integer.MAX_VALUE), indexAutocompleteFields);
+			SearchOptions so = new SearchOptions(0, Integer.MAX_VALUE);
+			so.searchFields = indexAutocompleteFields;
+			ElasticCoordinator es = new ElasticCoordinator();
+			SearchResponse res = es.queryExcecution(query, so);
 			SearchHits sh = res.getHits();
 
 			Map<Object, Counter> list = new HashMap<>();
