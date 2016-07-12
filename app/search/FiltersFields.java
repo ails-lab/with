@@ -48,7 +48,7 @@ public enum FiltersFields {
 		}
 		
 		private FiltersFields(String filterId, String filterName) {
-			this(filterId,new MultiLiteral(filterName));
+			this(filterId,new MultiLiteral(filterName).fillDEF());
 		}
 		public MultiLiteral getFilterName() {
 			return filterName;
