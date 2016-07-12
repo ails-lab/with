@@ -71,7 +71,7 @@ public class EmptySource implements Source {
 	 * @return
 	 */
 	public Set<String> supportedFieldIds() {
-		return new HashSet<String>();
+		return null;
 	}
 	
 	/**
