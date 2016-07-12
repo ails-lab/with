@@ -146,6 +146,19 @@ public class Query {
 	// Convenience builder functions
  	//
 	
+	public int getPage() {
+		if( page == 0 ) {
+			int calcPage = start / count;
+			return calcPage + 1;
+		} else return page;
+	}
+	
+	public int getPageSize() {
+		if( page == 0 ) return count; 
+		else return pageSize;
+	}
+	
+	
 	/**
 	 * The given filters are assumed to be or-ed and are and-ed to this query
 	 * @param filters
