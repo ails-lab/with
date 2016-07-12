@@ -1228,7 +1228,7 @@ public class CollectionObjectController extends WithResourceController {
 				
 				SearchOptions so = new SearchOptions(start, start + count);
 				
-				SearchResponse res = es.execute(query, so);
+				SearchResponse res = null;//es.execute(query, so);
 				SearchHits sh = res.getHits();
 				
 				long totalHits = sh.getTotalHits();
@@ -1318,7 +1318,7 @@ public class CollectionObjectController extends WithResourceController {
 				
 				SearchOptions so = new SearchOptions(start, start + count);
 				
-				SearchResponse res = es.execute(query, so);
+				SearchResponse res = null;//es.execute(query, so);
 				SearchHits sh = res.getHits();
 				
 				long totalHits = sh.getTotalHits();

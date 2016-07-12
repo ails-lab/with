@@ -100,7 +100,7 @@ public class DictionaryAnnotator extends Annotator {
 		SearchOptions so = new SearchOptions(0, Integer.MAX_VALUE);
 		so.isPublic = false;
 		
-		SearchResponse res = es.execute(query, so, new String[] {langField, altLangField, uriField, thesaurusField, enField} );
+		SearchResponse res = null;//es.execute(query, so, new String[] {langField, altLangField, uriField, thesaurusField, enField} );
 		SearchHits sh = res.getHits();
 
 		Map<String, ArrayList<ObjectNode>> map = new HashMap<>();

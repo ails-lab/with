@@ -88,7 +88,7 @@ public class CollectionIndexController extends WithResourceController	{
 			QueryBuilder query = getIndexCollectionQuery(new ObjectId(id), json);
 			
 			SearchOptions so = new SearchOptions(0, Integer.MAX_VALUE);
-			SearchResponse res = es.execute(query, so, indexFacetFields);
+			SearchResponse res = null;//es.execute(query, so, indexFacetFields);
 			SearchHits sh = res.getHits();
 
 			List<String[]> list = new ArrayList<>();
@@ -145,7 +145,7 @@ public class CollectionIndexController extends WithResourceController	{
 			
 			QueryBuilder query = getIndexCollectionQuery(new ObjectId(id), json);
 
-			SearchResponse res = es.execute(query, new SearchOptions(0, Integer.MAX_VALUE), indexAutocompleteFields);
+			SearchResponse res = null;//es.execute(query, new SearchOptions(0, Integer.MAX_VALUE), indexAutocompleteFields);
 			SearchHits sh = res.getHits();
 
 			Map<Object, Counter> list = new HashMap<>();

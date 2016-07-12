@@ -27,12 +27,12 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import model.EmbeddedMediaObject.MediaVersion;
 import model.EmbeddedMediaObject;
-import model.basicDataTypes.ProvenanceInfo.Sources;
 import model.resources.AgentObject;
 import model.resources.CulturalObject;
 import model.resources.PlaceObject;
 import model.resources.RecordResource;
 import play.libs.Json;
+import search.Sources;
 import sources.core.CommonQuery;
 import sources.core.HttpConnector;
 import sources.core.ISpaceSource;

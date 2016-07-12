@@ -39,7 +39,6 @@ import model.annotations.bodies.AnnotationBodyTagging;
 import model.basicDataTypes.Language;
 import model.basicDataTypes.MultiLiteral;
 import model.basicDataTypes.ProvenanceInfo;
-import model.basicDataTypes.ProvenanceInfo.Sources;
 import model.resources.CulturalObject.CulturalObjectData;
 import model.resources.RecordResource;
 import model.resources.ThesaurusObject;
