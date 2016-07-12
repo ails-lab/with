@@ -69,8 +69,8 @@ public class CommonQuery implements Cloneable , QueryStringBindable<CommonQuery>
 	}
 
 	public CommonQuery(Query query) {
-		this.page = ""+query.page;
-		this.pageSize = ""+query.pageSize;
+		this.page = ""+query.getPage();
+		this.pageSize = ""+query.getPageSize();
 		this.searchTerm = query.findFilter(FiltersFields.ANYWHERE.getFilterId()).value;
 	}
 
