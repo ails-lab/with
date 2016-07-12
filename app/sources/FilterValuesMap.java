@@ -20,6 +20,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.function.Function;
 
 import model.EmbeddedMediaObject.WithMediaRights;
@@ -289,6 +291,10 @@ public class FilterValuesMap {
 				"drawing","painting","photograph","documentary photographs");
 		addMapping(FiltersFields.TYPE.getFilterId(), WithMediaType.TEXT, 
 				"book","poem","text sheet","print","manuscript");
+	}
+
+	public Set<String> getFilters() {
+		return new TreeSet<>(writters.keySet());
 	}
 
 }

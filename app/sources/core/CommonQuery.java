@@ -18,9 +18,11 @@ package sources.core;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.bson.types.ObjectId;
 
@@ -36,6 +38,7 @@ import play.Logger;
 import play.Logger.ALogger;
 import play.libs.F.Option;
 import play.mvc.QueryStringBindable;
+import search.Filter;
 import search.FiltersFields;
 import search.Query;
 import utils.ListUtils;
@@ -71,7 +74,17 @@ public class CommonQuery implements Cloneable , QueryStringBindable<CommonQuery>
 	public CommonQuery(Query query) {
 		this.page = ""+query.getPage();
 		this.pageSize = ""+query.getPageSize();
-		this.searchTerm = query.findFilter(FiltersFields.ANYWHERE.getFilterId()).value;
+		filters = new ArrayList<>();
+		for (HashMap<String, List<String>> f : query.buildFactorizeFilters()) {
+			for (Entry<String, List<String>> e : f.entrySet()) {
+				if (e.getKey().equals(FiltersFields.ANYWHERE.getFilterId())){
+					this.searchTerm = e.getValue().get(0);
+				} else {
+					filters.add(new CommonFilter(e.getKey(),e.getValue()));
+				}
+				
+			}
+		}
 	}
 
 	private List<Tuple<ObjectId, Access>> transformList(ObjectNode[] inputList, boolean group) {

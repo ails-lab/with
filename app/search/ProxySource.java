@@ -16,6 +16,7 @@
 
 package search;
 
+import java.util.Set;
 import java.util.function.Function;
 
 import model.basicDataTypes.ProvenanceInfo;
@@ -88,6 +89,13 @@ public class ProxySource extends EmptySource {
 	public Promise<Object> getById(String id) {
 		return ParallelAPICall.createPromise((myid) -> 
 			spaceSource.getRecordFromSource(myid,null) , id);
+	}
+	
+	@Override
+	public Set<String> supportedFieldIds() {
+		Set<String> filters = spaceSource.getVmap().getFilters();
+		filters.add(FiltersFields.ANYWHERE.getFilterId());
+		return filters;
 	}
 	
 	public static class EuropeanaProxySource extends ProxySource{
