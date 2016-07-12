@@ -38,8 +38,16 @@ public class ElasticCoordinator {
 	}
 
 
+	/*
+	 * This method will be used for records, collections, whatever type 'normal' search.
+	 * The type will be specified in the filter with 'type' field.
+	 * And the rights will specify the group of resources we are searching for
+	 * e.g. public, resources I have read access, resources I own, resources shared with me,
+	 * resource of a group ...
+	 */
 	public SingleResponse federatedSearch(List<List<Filter>> filters) {
 		ElasticSearcher searcher = new ElasticSearcher();
+
 		List<QueryBuilder> musts = new ArrayList<QueryBuilder>();
 		for(List<Filter> ors: filters) {
 			musts.add(searcher.boolShouldQuery(ors));
@@ -59,4 +67,61 @@ public class ElasticCoordinator {
 
 		return sresp;
 	}
+
+	public SingleResponse annotationSearch() {
+		return null;
+	}
+
+	public SingleResponse relatedDisMaxSearch(List<List<Filter>> filters) {
+		ElasticSearcher relator = new ElasticSearcher();
+
+		//SearchResponse elasticresp = relator.getSearchRequestBuilder(relator.relatedWithDisMax(terms, provider, excludeId)
+		SearchResponse elasticresp = null;
+
+		SingleResponse sresp = new SingleResponse();
+		List<ObjectId> ids = new ArrayList<ObjectId>();
+		for(SearchHit h: elasticresp.getHits()) {
+			ids.add(new ObjectId(h.getId()));
+		}
+		sresp.items = DB.getRecordResourceDAO().getByIds(ids);
+		sresp.totalCount = (int) elasticresp.getHits().getTotalHits();
+
+		return sresp;
+	}
+
+	public SingleResponse relatedMLTSearch(List<List<Filter>> filters) {
+		ElasticSearcher relator = new ElasticSearcher();
+
+		//SearchResponse elasticresp = relator.getSearchRequestBuilder(relator.relatedWithDisMax(terms, provider, excludeId)
+		SearchResponse elasticresp = null;
+
+		SingleResponse sresp = new SingleResponse();
+		List<ObjectId> ids = new ArrayList<ObjectId>();
+		for(SearchHit h: elasticresp.getHits()) {
+			ids.add(new ObjectId(h.getId()));
+		}
+		sresp.items = DB.getRecordResourceDAO().getByIds(ids);
+		sresp.totalCount = (int) elasticresp.getHits().getTotalHits();
+
+		return sresp;
+	}
+
+	public SingleResponse relatedBoolShouldSearch(List<List<Filter>> filters) {
+		ElasticSearcher relator = new ElasticSearcher();
+
+		//SearchResponse elasticresp = relator.getSearchRequestBuilder(relator.relatedWithDisMax(terms, provider, excludeId)
+		SearchResponse elasticresp = null;
+
+		SingleResponse sresp = new SingleResponse();
+		List<ObjectId> ids = new ArrayList<ObjectId>();
+		for(SearchHit h: elasticresp.getHits()) {
+			ids.add(new ObjectId(h.getId()));
+		}
+		sresp.items = DB.getRecordResourceDAO().getByIds(ids);
+		sresp.totalCount = (int) elasticresp.getHits().getTotalHits();
+
+		return sresp;
+	}
+
+
 }

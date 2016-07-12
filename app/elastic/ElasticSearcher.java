@@ -404,6 +404,25 @@ public class ElasticSearcher {
 	}
 
 
+	public SearchRequestBuilder getSearchRequestBuilder(QueryBuilder q, SearchOptions options) {
+		SearchRequestBuilder search = Elastic.getTransportClient()
+				.prepareSearch(name)
+				.setTypes(types.toArray(new String[types.size()]))
+				.setFetchSource(false);
+
+		if(!options.scroll) {
+			search.setFrom(options.offset)
+				  .setSearchType(SearchType.DFS_QUERY_THEN_FETCH)
+				  .setSize(options.count);
+		} else {
+			search.setSearchType(SearchType.SCAN)
+				  .setScroll(new TimeValue(60000))
+				  .setSize(100);
+		}
+
+		search.setQuery(q);
+		return search;
+	}
 
 	/*
 	 * Build suggestion query
