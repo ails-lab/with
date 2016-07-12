@@ -168,7 +168,7 @@ public class SourceResponse {
 		r.count = this.count;
 		r.totalCount = this.totalCount;
 		r.items = this.items.getAll();
-;		return null;
+		return r;
 	}
 
 }
