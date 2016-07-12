@@ -83,6 +83,7 @@ public class ElasticSearcher {
 		public int count = DEFAULT_COUNT;
 		public boolean isPublic = true;
 		public boolean fetchSource = false;
+		public String[] searchFields;
 		private final List<String> aggregatedFields = new ArrayList<String>();
 
 		public SearchOptions() {
@@ -420,6 +421,9 @@ public class ElasticSearcher {
 				  .setSize(100);
 		}
 
+		if(options.searchFields!=null && options.searchFields.length > 0) {
+			search.addFields(options.searchFields);
+		}
 		search.setQuery(q);
 		return search;
 	}

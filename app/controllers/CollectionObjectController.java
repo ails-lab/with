@@ -66,6 +66,7 @@ import controllers.parameterTypes.StringTuple;
 import controllers.thesaurus.CollectionIndexController;
 import db.DB;
 import elastic.Elastic;
+import elastic.ElasticCoordinator;
 import elastic.ElasticSearcher;
 import elastic.ElasticSearcher.SearchOptions;
 import model.annotations.ContextData;
@@ -1221,14 +1222,13 @@ public class CollectionObjectController extends WithResourceController {
 
 			if (!response.toString().equals(ok().toString())) {
 				return response;
-			} else {
-				ElasticSearcher es = new ElasticSearcher();
-				
+			} else {				
 				QueryBuilder query = CollectionIndexController.getIndexCollectionQuery(colId, json);
 				
 				SearchOptions so = new SearchOptions(start, start + count);
+				ElasticCoordinator es = new ElasticCoordinator();
 				
-				SearchResponse res = null;//es.execute(query, so);
+				SearchResponse res = es.queryExcecution(query, so);
 				SearchHits sh = res.getHits();
 				
 				long totalHits = sh.getTotalHits();
@@ -1311,14 +1311,12 @@ public class CollectionObjectController extends WithResourceController {
 				return response;
 			} else {
 				RecordResource rr = DB.getRecordResourceDAO().getById(new ObjectId(itemid));
-				
-				ElasticSearcher es = new ElasticSearcher();
-				
+								
 				QueryBuilder query = CollectionIndexController.getSimilarItemsIndexCollectionQuery(colId, rr.getDescriptiveData());
 				
 				SearchOptions so = new SearchOptions(start, start + count);
-				
-				SearchResponse res = null;//es.execute(query, so);
+				ElasticCoordinator es = new ElasticCoordinator();
+				SearchResponse res = es.queryExcecution(query, so);
 				SearchHits sh = res.getHits();
 				
 				long totalHits = sh.getTotalHits();
