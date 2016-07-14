@@ -24,6 +24,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import utils.ListUtils;
+
 /**
  * The Query class encapsulates all possible Queries that the system supports within and externally.
  * 
@@ -34,7 +36,7 @@ public class Query {
 	/**
 	 * Which sources need to be queried.
 	 */
-	public List<Sources> sources = new ArrayList<Sources>();
+	public List<Sources> sources = new ArrayList<>();
 	
 	/**
 	 * This is the CNF of the query. The inner array filters a meant to be ORed together, the outer array ANDs the inner terms.  
@@ -59,6 +61,15 @@ public class Query {
 	
 	
 	/**
+	 * If a source can deliver results in multiple languages, it can be asked to limit its output to
+	 * this language. Records should not be suppressed by this, but massive multilingual responses can be reduced to
+	 * the responseLanguage. This does not affect the filtering, language selection is available via fieldnames.
+	 * 
+	 * We might consider a comma separated list of more than one here?
+	 */
+	public String responseLanguage;
+	
+	/**
 	 * If you specify a continuationId, the backend will continue a search 
 	 */
 	public String continuationId;
@@ -69,14 +80,21 @@ public class Query {
 	public boolean continuation = false;
 
 	
-	
-	public static class Term {
+	public static class Clause {
 		List<Filter> filters = new ArrayList<Filter>();
-		public Term( String fieldname, String value ) {
-			filters.add( new Filter( fieldname, value ));
-			
+		public static Clause create() {
+			return new Clause();
+		}
+		
+		public Clause add(String fieldId, String value ) {
+			filters.add( new Filter( fieldId, value ));
+			return this;
+		}
+		public List<Filter> filters() {
+			return filters;
 		}
 	}
+	
 	/**
 	 * Convenience Method to create a Query that just has the filters that are supported.
 	 * If there are no filters left or if the source is not requested, return null.
@@ -85,7 +103,7 @@ public class Query {
 	 * @param supportedFieldnames
 	 * @return
 	 */
-	public Query pruneFilters(Sources source, Set<String> supportedFieldnames) {
+	public Query pruneFilters(Sources source, Set<String> supportedFieldIds) {
 		Query res = new Query();
 		
 		// put the source we are filtering for in the sources array
@@ -104,7 +122,7 @@ public class Query {
 						// iterate over the contained Filters and only return the ones that 
 						// have supported fieldnames
 				   term.stream()
-					 .filter( f -> (supportedFieldnames == null )? true : supportedFieldnames.contains(f.fieldname ) )
+					 .filter( f -> (supportedFieldIds == null )? true : supportedFieldIds.contains(f.fieldId ) )
 					 .collect( Collectors.toList());	
 				})
 			// throw out terms with no conditions
@@ -128,13 +146,36 @@ public class Query {
 	// Convenience builder functions
  	//
 	
-	public final Query addTerm( Filter... filters ) {
+	public int getPage() {
+		if( page == 0 ) {
+			int calcPage = start / count;
+			return calcPage + 1;
+		} else return page;
+	}
+	
+	public int getPageSize() {
+		if( page == 0 ) return count; 
+		else return pageSize;
+	}
+	
+	
+	/**
+	 * The given filters are assumed to be or-ed and are and-ed to this query
+	 * @param filters
+	 * @return
+	 */
+	public final Query addClause( Filter... filters ) {
 		List<Filter> newTerm = new ArrayList<Filter>();
 		newTerm.addAll( Arrays.asList( filters ));
 		return this;
 	}
 	
-	public final Query addTerm( List<Filter> filters ) {
+	/**
+	 * The given filters are assumed to be or-ed and are and-ed to this query
+	 * @param filters
+	 * @return
+	 */
+	public final Query addClause( List<Filter> filters ) {
 		this.filters.add( filters );
 		return this;
 	}
@@ -145,12 +186,44 @@ public class Query {
 	 * @param allowedValues
 	 * @return
 	 */
-	public Query andFieldvalues( String fieldname, String... allowedValues )  {
-		List<Filter> term = Arrays.stream( allowedValues )
-		.map( val -> new Filter( fieldname, val ))
+	public Query andFieldvalues( String fieldId, String... allowedValues )  {
+		List<Filter> clause = Arrays.stream( allowedValues )
+		.map( val -> new Filter( fieldId, val ))
 		.collect( Collectors.toCollection(()->new ArrayList<Filter>()));
-		addTerm( term );
+		addClause( clause );
 		return this;
+	}
+	
+	/**
+	 * in the CNF expression, the values of the filters with the same filed name inside the same clause 
+	 * are grouped in a map where the key is the filed name and the value is the list of values that have the same
+	 * filter name in the original CNF.
+	 * @return a List of the filters grouping values that share the same filed name.
+	 */
+	public List<HashMap<String,List<String>>> buildFactorizeFilters()  {
+		List<HashMap<String,List<String>>> result = new ArrayList<>(filters.size());
+		for (List<Filter> clause : filters) {
+			HashMap<String,List<String>> map = new HashMap<>();
+			result.add(map);
+			for (Filter filter : clause) {
+				ListUtils.getOrSet(filter.fieldId, map).add(filter.value);
+			}
+		}
+		return result;
+	}
+	/**
+	 * returns the filter with the specified filter name.
+	 * @param filterName
+	 * @return
+	 */
+	public Filter findFilter(String filterName){
+		for (List<Filter> clause : filters) {
+			for (Filter filter : clause) {
+				if (filterName.equals(filter.fieldId))
+					return filter;
+			}
+		}
+		return null;
 	}
 	
 	
@@ -166,12 +239,18 @@ public class Query {
 		return false;
 	}
 	
+	public Query or( List<List<Filter>> cnf ) {
+		return new Query();
+	}
+	
+	
 	public Map<Sources, Query> splitBySource() {
-		Map<Sources, Query> res = new HashMap<Sources, Query>();
+		Map<Sources, Query> res = new HashMap<>();
 		for( Sources source: sources ) {
-			Set<String> supportedFieldnames = source.getDriver().supportedFieldnames();
-			Query newQuery = this.pruneFilters(source, supportedFieldnames);
-			res.put( source, newQuery );
+			Set<String> supportedFieldIds = source.getDriver().supportedFieldIds();
+			Query newQuery = this.pruneFilters(source, supportedFieldIds);
+			if( newQuery != null )
+				res.put( source, newQuery );
 		}
 		return res;
 	}

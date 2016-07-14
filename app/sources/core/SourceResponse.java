@@ -22,10 +22,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import model.basicDataTypes.ProvenanceInfo.Sources;
 import model.resources.CulturalObject;
 import model.resources.RecordResource;
 import model.resources.WithResource;
+import search.Sources;
+import search.Response.SingleResponse;
 
 import org.elasticsearch.action.search.SearchResponse;
 
@@ -162,4 +163,13 @@ public class SourceResponse {
 		items.setCulturalCHO(resources);
 	}
 
+	public SingleResponse exportToSingleSource() {
+		SingleResponse r = new SingleResponse();
+		r.count = this.count;
+		r.totalCount = this.totalCount;
+		r.items = this.items.getAll();
+		return r;
+	}
+
 }
+

@@ -49,6 +49,7 @@ import play.Logger.ALogger;
 import sources.core.ParallelAPICall;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.mongodb.BasicDBObject;
 
 import controllers.WithController.Action;
 import elastic.ElasticEraser;
@@ -129,6 +130,31 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 			}
 		}
 		return orderedRecords;
+	}
+	
+	public List<RecordResource> getByCollectionIds(ObjectId colId, List<String> ids) {
+		Query<RecordResource> q = this.createQuery();
+		return getByCollectionIds(colId, ids, q);
+	}
+
+	public List<RecordResource> getByCollectionIds(ObjectId colId,
+			List<String> ids, Query<RecordResource> q) {
+		
+		List<ObjectId> oids = new ArrayList<>();
+		for (String s : ids) {
+			oids.add(new ObjectId(s));
+		}
+		
+		BasicDBObject geq = new BasicDBObject();
+		geq.put("$in", oids);
+
+		q.filter("collectedIn", colId);
+		q.filter("_id", geq);
+		
+		List<RecordResource> resources = this.find(q).asList();
+		
+		return resources;
+				
 	}
 
 	public List<RecordResource> getByCollection(ObjectId collectionId) {

@@ -18,15 +18,6 @@ package model;
 
 import java.util.List;
 
-import org.mongodb.morphia.annotations.Field;
-import org.mongodb.morphia.annotations.Index;
-import org.mongodb.morphia.annotations.IndexOptions;
-import org.mongodb.morphia.annotations.Indexes;
-import org.mongodb.morphia.utils.IndexType;
-
-import utils.Deserializer.PointDeserializer;
-import utils.Serializer.PointSerializer;
-
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
@@ -35,7 +26,10 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import model.basicDataTypes.LiteralOrResource;
 import model.basicDataTypes.MultiLiteral;
 import model.basicDataTypes.MultiLiteralOrResource;
+import model.basicDataTypes.Resource;
 import model.basicDataTypes.WithDate;
+import utils.Deserializer.PointDeserializer;
+import utils.Serializer.PointSerializer;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(value = JsonInclude.Include.NON_NULL)
@@ -67,16 +61,16 @@ public class DescriptiveData {
 	private MultiLiteralOrResource keywords;
 
 	// This are reachable URLs
-	private LiteralOrResource isShownAt, isShownBy;
+	private Resource isShownAt, isShownBy;
 
 	// The whole legal bla, unedited, from the source, mostly cc0
 	private LiteralOrResource metadataRights;
 
 	// rdf .. Agent, Artist, Painter, Painting, Series
-	private String rdfType;
+	private Resource rdfType;
 
 	// URIs how this Resource is known elsewhere
-	private MultiLiteralOrResource sameAs;
+	private List<Resource> sameAs;
 
 	// in a timeline where would this resource appear
 	private List<WithDate> dates;
@@ -123,19 +117,19 @@ public class DescriptiveData {
 		this.keywords = keywords;
 	}
 
-	public LiteralOrResource getIsShownAt() {
+	public Resource getIsShownAt() {
 		return isShownAt;
 	}
 
-	public void setIsShownAt(LiteralOrResource isShownAt) {
+	public void setIsShownAt(Resource isShownAt) {
 		this.isShownAt = isShownAt;
 	}
 
-	public LiteralOrResource getIsShownBy() {
+	public Resource getIsShownBy() {
 		return isShownBy;
 	}
 
-	public void setIsShownBy(LiteralOrResource isShownBy) {
+	public void setIsShownBy(Resource isShownBy) {
 		this.isShownBy = isShownBy;
 	}
 
@@ -147,19 +141,19 @@ public class DescriptiveData {
 		this.metadataRights = metadataRights;
 	}
 
-	public String getRdfType() {
+	public Resource getRdfType() {
 		return rdfType;
 	}
 
-	public void setRdfType(String rdfType) {
+	public void setRdfType(Resource rdfType) {
 		this.rdfType = rdfType;
 	}
 
-	public MultiLiteralOrResource getSameAs() {
+	public List<Resource> getSameAs() {
 		return sameAs;
 	}
 
-	public void setSameAs(MultiLiteralOrResource sameAs) {
+	public void setSameAs(List<Resource> sameAs) {
 		this.sameAs = sameAs;
 	}
 

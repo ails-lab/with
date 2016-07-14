@@ -36,8 +36,8 @@ import model.resources.RecordResource;
 import model.resources.WithResource;
 import model.usersAndGroups.User;
 
+import org.apache.commons.lang3.ArrayUtils;
 import org.bson.types.ObjectId;
-import org.elasticsearch.common.lang3.ArrayUtils;
 import org.mongodb.morphia.Key;
 import org.mongodb.morphia.query.Criteria;
 import org.mongodb.morphia.query.CriteriaContainer;

@@ -24,16 +24,17 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.function.Function;
 
-import model.basicDataTypes.ProvenanceInfo.Sources;
 import model.resources.RecordResource;
+import search.FiltersFields;
+import search.Sources;
 import sources.FilterValuesMap;
 import sources.core.Utils.Pair;
 import utils.ListUtils;
 
 public abstract class ISpaceSource {
-	protected List<CommonFilters> filtersSupportedBySource = new ArrayList<CommonFilters>();
-	protected HashMap<String, CommonFilters> sourceToFiltersMappings = new HashMap<String, CommonFilters>();
-	protected HashMap<CommonFilters, String> filtersToSourceMappings = new HashMap<CommonFilters, String>();
+	protected List<FiltersFields> filtersSupportedBySource = new ArrayList<FiltersFields>();
+	protected HashMap<String, FiltersFields> sourceToFiltersMappings = new HashMap<String, FiltersFields>();
+	protected HashMap<FiltersFields, String> filtersToSourceMappings = new HashMap<FiltersFields, String>();
 	protected FilterValuesMap vmap = new FilterValuesMap();
 	protected Sources sourceLABEL = null;
 	protected String apiKey="";

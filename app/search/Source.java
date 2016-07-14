@@ -57,7 +57,7 @@ public interface Source {
 	 * @param query
 	 * @return
 	 */
-	public Promise<Response> execute(Query query);
+	public Promise<Response.SingleResponse> execute(Query query);
 
 	/**
 	 * Take the incompleteRecord, which is some WITH Record and try to complete
@@ -83,7 +83,7 @@ public interface Source {
 	 * 
 	 * @return
 	 */
-	public Set<String> supportedFieldnames();
+	public Set<String> supportedFieldIds();
 
 	/**
 	 * If a source supports autocompleting a query, here it can do it. Return

@@ -61,12 +61,12 @@ public class CollectionDAOTest {
 		// save the new created collection
 		Key<Collection> colKey = DB.getCollectionDAO()
 				.makePermanent(collection);
-		System.out.println(colKey.getId());
+		System.out.println(colKey.getFilterId());
 		assertThat(colKey).isNotNull();
 
 		// get by id
 		Collection a = DB.getCollectionDAO().getById(
-				new ObjectId(colKey.getId().toString()));
+				new ObjectId(colKey.getFilterId().toString()));
 		assertThat(a).isNotNull().overridingErrorMessage(
 				"Test collection not found using db id.");
 
@@ -78,7 +78,7 @@ public class CollectionDAOTest {
 
 		// get collection owner
 		User u = DB.getCollectionDAO().getCollectionOwner(
-				new ObjectId(colKey.getId().toString()));
+				new ObjectId(colKey.getFilterId().toString()));
 		assertThat(u).isNotNull().overridingErrorMessage(
 				"User not found using db id.");
 
@@ -91,19 +91,19 @@ public class CollectionDAOTest {
 
 		// get, modify, save again
 		Collection e = DB.getCollectionDAO().getById(
-				new ObjectId(colKey.getId().toString()));
+				new ObjectId(colKey.getFilterId().toString()));
 		e.setTitle("DbId test");
 		colKey = DB.getCollectionDAO().makePermanent(e);
-		System.out.println(colKey.getId());
+		System.out.println(colKey.getFilterId());
 
 		// remove from db
 		DB.getCollectionDAO().makeTransient(b);
 		DB.getCollectionDAO().deleteById(
-				new ObjectId(colKey.getId().toString()));
+				new ObjectId(colKey.getFilterId().toString()));
 
 		// check its gone
 		Collection d = DB.getCollectionDAO().getById(
-				new ObjectId(colKey.getId().toString()));
+				new ObjectId(colKey.getFilterId().toString()));
 		assertThat(d).overridingErrorMessage("User not deleted!").isNull();
 	}
 

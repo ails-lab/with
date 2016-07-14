@@ -100,6 +100,54 @@ public class AnnotationController extends Controller {
 		}
 		return ok(Json.toJson(annotation));
 	}
+	
+	public static Result approveAnnotation(String id) {
+		try {			
+			DB.getAnnotationDAO().addApprove(new ObjectId(id), WithController.effectiveUserDbId());
+			return ok();
+		} catch (Exception e) {
+			return internalServerError();
+		}
+	}
+
+	public static Result rejectAnnotation(String id) {
+		try {			
+			DB.getAnnotationDAO().addReject(new ObjectId(id), WithController.effectiveUserDbId());
+			return ok();
+		} catch (Exception e) {
+			return internalServerError();
+		}
+	}
+
+	
+	public static Annotation addAnnotation(Annotation annotation, ObjectId user) {
+		
+		annotation = updateAnnotationAdmin(annotation, user);
+		
+		Annotation existingAnnotation = DB.getAnnotationDAO().getExistingAnnotation(annotation);
+
+		if (existingAnnotation == null) {
+			DB.getAnnotationDAO().makePermanent(annotation);
+			annotation.setAnnotationWithURI("/annotation/"
+					+ annotation.getDbId());
+			DB.getAnnotationDAO().makePermanent(annotation);
+			DB.getRecordResourceDAO().addAnnotation(
+					annotation.getTarget().getRecordId(), annotation.getDbId());
+		} else {
+			ArrayList<AnnotationAdmin> annotators = existingAnnotation.getAnnotators();
+			for (AnnotationAdmin a : annotators) {
+				if (a.getWithCreator().equals(user)) {
+					return existingAnnotation;
+				}
+			}
+			DB.getAnnotationDAO().addAnnotators(existingAnnotation.getDbId(),
+					annotation.getAnnotators());
+			annotation = DB.getAnnotationDAO()
+					.get(existingAnnotation.getDbId());
+		}
+		return annotation;
+	}
+	
 
 	public static Result getAnnotation(String id) {
 		try {
@@ -131,6 +179,7 @@ public class AnnotationController extends Controller {
 		return ok(result);
 	}
 
+	
 	public static Result getUserAnnotations(int offset, int count) {
 		ObjectId withUser = WithController.effectiveUserDbId();
 		List<RecordResource> records = DB.getRecordResourceDAO()
@@ -154,6 +203,7 @@ public class AnnotationController extends Controller {
 		return ok(recordsWithCount);
 	}
 
+	
 	private static Annotation getAnnotationFromJson(JsonNode json) {
 		try {
 			Annotation annotation = Json.fromJson(json, Annotation.class);
@@ -192,6 +242,28 @@ public class AnnotationController extends Controller {
 		} catch (ClassNotFoundException e) {
 			return new Annotation();
 		}
+	}
+	
+	private static Annotation updateAnnotationAdmin(Annotation annotation, ObjectId user) {
+		ArrayList<AnnotationAdmin> admins = annotation.getAnnotators();
+		
+		if (admins == null || admins.size() == 0) {
+			AnnotationAdmin administrative = new AnnotationAdmin();
+			administrative.setWithCreator(user);
+			administrative.setCreated(administrative.getGenerated());
+			administrative.setLastModified(new Date());
+
+			annotation.setAnnotators(new ArrayList(Arrays.asList(administrative)));
+
+		} else {
+			for (AnnotationAdmin administrative : admins) {
+				administrative.setWithCreator(user);
+				administrative.setCreated(administrative.getGenerated());
+				administrative.setLastModified(new Date());
+			}
+		}
+			
+		return annotation;
 	}
 
 	public static Result deleteAnnotation(String id) {
@@ -236,7 +308,6 @@ public class AnnotationController extends Controller {
 				}
 			});
 			SearchOptions options = new SearchOptions();
-			options.accessList = access;
 			options.setCount(20);
 			options.isPublic = false;
 
@@ -251,7 +322,7 @@ public class AnnotationController extends Controller {
 					add(WithResourceType.Exhibition.toString().toLowerCase());
 				}
 			});
-			SearchResponse resp = recordSearcher
+			/*SearchResponse resp = recordSearcher
 					.searchAccessibleCollections(options);
 			List<String> colIds = new ArrayList<String>();
 			resp.getHits().forEach((h) -> {
@@ -259,9 +330,9 @@ public class AnnotationController extends Controller {
 				return;
 			});
 
-			/*
+
 			 * Search for records of this space
-			 */
+
 			options.accessList.clear();
 			options.setFilterType("or");
 			// options.addFilter("_all", term);
@@ -288,7 +359,7 @@ public class AnnotationController extends Controller {
 				result.put("hits", Json.toJson(hits));
 			} else {
 				result.put("hits", Json.newObject().arrayNode());
-			}
+			}*/
 
 		} catch (Exception e) {
 			log.error("Search encountered a problem", e);

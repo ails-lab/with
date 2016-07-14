@@ -27,13 +27,13 @@ import model.EmbeddedMediaObject.WithMediaType;
 import model.basicDataTypes.Language;
 import model.basicDataTypes.LiteralOrResource;
 import model.basicDataTypes.ProvenanceInfo;
-import model.basicDataTypes.ProvenanceInfo.Sources;
 import model.resources.CulturalObject;
 import model.resources.CulturalObject.CulturalObjectData;
 import play.Logger;
 import play.Logger.ALogger;
+import search.FiltersFields;
+import search.Sources;
 import sources.FilterValuesMap;
-import sources.core.CommonFilters;
 import sources.core.Utils;
 import sources.utils.JsonContextRecord;
 import sources.utils.StringUtils;
@@ -74,25 +74,25 @@ public class EuropeanaRecordFormatter extends CulturalRecordFormatter {
 		model.setLabel(rec.getMultiLiteralValue(false,"dcTitleLangAware","title"));
 		model.setDescription(rec.getMultiLiteralValue(false,"dcDescriptionLangAware","dcDescription"));
 		model.setAltLabels(rec.getMultiLiteralValue("altLabel"));
-		model.setIsShownBy(rec.getLiteralOrResourceValue("edmIsShownBy"));
-		model.setIsShownAt(rec.getLiteralOrResourceValue("edmIsShownAt"));
+		model.setIsShownBy(rec.getResource("edmIsShownBy"));
+		model.setIsShownAt(rec.getResource("edmIsShownAt"));
 		model.setDates(rec.getWithDateArrayValue("year"));
 		model.setDccreator(rec.getMultiLiteralOrResourceValue(false,"dcCreatorLangAware","dcCreator"));
 		model.setDccontributor(rec.getMultiLiteralOrResourceValue("dcContributor"));
 		model.setKeywords(rec.getMultiLiteralOrResourceValue("dcSubjectLangAware"));
-		object.addToProvenance(new ProvenanceInfo(rec.getStringValue("dataProvider"), model.getIsShownAt()==null?null:model.getIsShownAt().getURI(),null));
+		object.addToProvenance(new ProvenanceInfo(rec.getStringValue("dataProvider"), model.getIsShownAt()==null?null:model.getIsShownAt().toString(),null));
 		object.addToProvenance(new ProvenanceInfo(rec.getStringValue("provider")));
 		String recID = rec.getStringValue("id");
 		String uri = "http://www.europeana.eu/portal/record"+recID+".html";
 		object.addToProvenance(
 				new ProvenanceInfo(Sources.Europeana.toString(), uri, recID));
 		List<String> rights = rec.getStringArrayValue("rights");
-		List<Object> translateToCommon = getValuesMap().translateToCommon(CommonFilters.TYPE.getId(), rec.getStringValue("type"));
+		List<Object> translateToCommon = getValuesMap().translateToCommon(FiltersFields.TYPE.getFilterId(), rec.getStringValue("type"));
 		WithMediaType type = (WithMediaType.getType(translateToCommon.get(0).toString())) ;
 		WithMediaRights withRights = (!Utils.hasInfo(rights))?null:WithMediaRights.getRights(
-				getValuesMap().translateToCommon(CommonFilters.RIGHTS.getId(), rights.get(0)).get(0).toString());
+				getValuesMap().translateToCommon(FiltersFields.RIGHTS.getFilterId(), rights.get(0)).get(0).toString());
 		String uri3 = rec.getStringValue("edmPreview");
-		String uri2 = model.getIsShownBy()==null?null:model.getIsShownBy().getURI();
+		String uri2 = model.getIsShownBy()==null?null:model.getIsShownBy().toString();
 		if (Utils.hasInfo(uri3)){
 			EmbeddedMediaObject medThumb = new EmbeddedMediaObject();
 			

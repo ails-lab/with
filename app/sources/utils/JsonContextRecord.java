@@ -35,6 +35,7 @@ import model.basicDataTypes.Literal;
 import model.basicDataTypes.LiteralOrResource;
 import model.basicDataTypes.MultiLiteral;
 import model.basicDataTypes.MultiLiteralOrResource;
+import model.basicDataTypes.Resource;
 import model.basicDataTypes.WithDate;
 import play.Logger;
 import play.Logger.ALogger;
@@ -413,6 +414,15 @@ public class JsonContextRecord {
 		return null;
 	}
 
+	public Resource getResource( String... path ) {
+		for (String spath : path) {
+			String uri = getStringValue( path );
+			if( org.apache.commons.lang3.StringUtils.isNotBlank(uri))
+				return new Resource( uri );
+		}
+		return null;		
+	}
+	
 	public List<String> getStringArrayValue(String... path) {
 		return getStringArrayValue(true,path);
 	}

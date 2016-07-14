@@ -40,8 +40,12 @@ import org.junit.Test;
 import com.sun.org.apache.xalan.internal.xsltc.compiler.sym;
 
 import db.DB;
+import search.Filter;
+import search.Query;
+import search.Response.SingleResponse;
 import utils.Tuple;
 import elastic.Elastic;
+import elastic.ElasticCoordinator;
 import elastic.ElasticSearcher;
 import elastic.ElasticSearcher.SearchOptions;
 
@@ -49,30 +53,28 @@ public class SearchTest {
 
 	@Test
 	public void testFederatedSearch() {
+
 		ElasticSearcher searcher = new ElasticSearcher();
 		searcher.addType(Elastic.typeResource);
 
 		SearchOptions options = new SearchOptions(0, 10);
 		options.setScroll(false);
-		options.setFilterType("and");
-		options.addFilter("dataProvider", "");
-		options.addFilter("dataProvider", "");
-		options.addFilter("provider", "");
-
-		//Access Rights
-		List<Tuple<ObjectId, Access>> userAccess = new ArrayList<Tuple<ObjectId, Access>>();
-		userAccess.add(new Tuple<ObjectId, WithAccess.Access>(new ObjectId("55b637a7e4b0cbaeed931c95"), Access.READ));
-		/*userAccess.add(new Tuple<ObjectId, WithAccess.Access>(new ObjectId(""), Access.READ));
-		userAccess.add(new Tuple<ObjectId, WithAccess.Access>(new ObjectId(""), Access.READ));
-		userAccess.add(new Tuple<ObjectId, WithAccess.Access>(new ObjectId(""), Access.READ));*/
-
-		List<List<Tuple<ObjectId, Access>>> accessCriteria = new ArrayList<List<Tuple<ObjectId,Access>>>();
-		accessCriteria.add(userAccess);
-		options.accessList = accessCriteria;
 
 
-		SearchResponse resp = searcher.search("dance", options);
-		System.out.println(resp.getHits().getTotalHits());
+		Query q = new Query();
+		q.count = 20;
+		q.start = 0;
+		List<List<Filter>> filters = new ArrayList<List<Filter>>();
+		List<Filter> ors = new ArrayList<Filter>();
+		Filter f1 = new Filter("label", "dance");
+		ors.add(f1);
+		options.count = q.count;
+		options.offset = q.start;
+
+
+		ElasticCoordinator proxy = new ElasticCoordinator(options);
+		SingleResponse sr = proxy.federatedSearch(filters);
+		System.out.println(sr.items);
 	}
 
 	@Test
@@ -82,15 +84,14 @@ public class SearchTest {
 
 		SearchOptions options = new SearchOptions(0, 10);
 		options.setScroll(false);
-		options.setFilterType("and");
 		/*options.addFilter("dataProvider", "");
 		options.addFilter("dataProvider", "");
 		options.addFilter("provider", "");*/
 
-		SearchResponse resp = searcher.relatedWithDisMax("eirinirecord1", "mint", null, options);
+		/*SearchResponse resp = searcher.relatedWithDisMax("eirinirecord1", "mint", null, options);
 		for(SearchHit h: resp.getHits().getHits()) {
 			System.out.println(h.getSourceAsString());
-		}
+		}*/
 
 	}
 
@@ -102,18 +103,16 @@ public class SearchTest {
 
 		SearchOptions options = new SearchOptions(0, 10);
 		options.setScroll(false);
-		options.setFilterType("or");
-		options.addFilter("isPublic", "false");
 
 		/*options.addFilter("dataProvider", "");
 		options.addFilter("dataProvider", "");
 		options.addFilter("provider", "");*/
 
 		List<String> fields = new ArrayList<String>() {{ add("label_all");add("description_all");add("provider"); }};
-		SearchResponse resp = searcher.relatedWithMLT("title Mint", null, fields, options);
+		/*SearchResponse resp = searcher.relatedWithMLT("title Mint", null, fields, options);
 		for(SearchHit h: resp.getHits().getHits()) {
 			System.out.println(h.getSourceAsString());
-		}
+		}*/
 	}
 
 	@Test
@@ -154,16 +153,16 @@ public class SearchTest {
 		SearchOptions options = new SearchOptions();
 		List<Tuple<ObjectId, Access>> user_acl = new ArrayList<Tuple<ObjectId,Access>>();
 		user_acl.add(new Tuple<ObjectId, WithAccess.Access>(u.getDbId(), Access.OWN));
-		options.accessList.add(user_acl);
 
-		SearchResponse resp = searcher.searchAccessibleCollections(options);
+
+		/*SearchResponse resp = searcher.searchAccessibleCollections(options);
 
 
 		Tuple<List<CollectionObject>, Tuple<Integer, Integer>> tree =
 				DB.getCollectionObjectDAO().getByAcl(options.accessList, u.getDbId(), false, true, 0, 200);
 
 		assertEquals((int)resp.getHits().getTotalHits(), (int)tree.y.x);
-
+*/
 	}
 
 	@Test

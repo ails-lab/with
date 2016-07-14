@@ -18,22 +18,27 @@ package elastic;
 
 import static org.elasticsearch.common.xcontent.XContentFactory.jsonBuilder;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import model.basicDataTypes.CollectionInfo;
+
 import org.bson.types.ObjectId;
 import org.elasticsearch.ElasticsearchException;
 import org.elasticsearch.action.get.GetRequest;
 import org.elasticsearch.action.get.GetResponse;
 import org.elasticsearch.action.update.UpdateRequest;
 import org.elasticsearch.common.xcontent.XContentBuilder;
+import org.elasticsearch.script.Script;
 import org.elasticsearch.script.ScriptService.ScriptType;
 import org.elasticsearch.search.fetch.source.FetchSourceContext;
 
 import com.fasterxml.jackson.databind.node.ArrayNode;
+
 import play.Logger;
 import play.libs.Json;
 
@@ -194,12 +199,17 @@ public class ElasticUpdater {
 					.fetchSourceContext(FetchSourceContext.DO_NOT_FETCH_SOURCE))
 					.actionGet();
 
+					Map<String, Object> params = new HashMap<String, Object>();
+					params.put("param", docs.get(0));
+					Script script2 = new Script(script, ScriptType.INLINE, null, params);
+
+
+
 					Elastic.getTransportClient().prepareUpdate(
 							Elastic.index,
 							resp.getType(),
 							ids.get(0).toString())
-							.addScriptParam("param", docs.get(0))
-							.setScript(script, ScriptType.INLINE)
+							.setScript(script2)
 			.setRetryOnConflict(5)
 			.execute().actionGet();
 					return true;
@@ -258,20 +268,24 @@ public class ElasticUpdater {
 
 	public static void removeResourceFromCollection(String id, ObjectId colId, int position) {
 		try {
-			Elastic.getTransportClient().prepareUpdate()
-				.setIndex(Elastic.index)
-				.setType(Elastic.typeResource)
-				.setId(id)
-			.addScriptParam("colId", colId.toString())
-			.addScriptParam("pos", position)
-			.setScript("info = null;"
+			Map<String, Object> params = new HashMap<String, Object>();
+			params.put("colId", colId.toString());
+			params.put("pos", position);
+			Script script = new Script("info = null;"
 					+ "for(el in ctx._source.collectedIn) {"
 					+ " if(el.collectionId.equals(colId) &&"
 					+ "    el.position == pos) { "
 					+ "      info = el; "
 					+ "  } "
 					+ "};"
-					+ "ctx._source.collectedIn.remove(info) ", ScriptType.INLINE)
+					+ "ctx._source.collectedIn.remove(info) ", ScriptType.INLINE, null, params);
+
+
+			Elastic.getTransportClient().prepareUpdate()
+				.setIndex(Elastic.index)
+				.setType(Elastic.typeResource)
+				.setId(id)
+			.setScript(script)
 			.setRetryOnConflict(5)
 			.execute().actionGet();
 		} catch (ElasticsearchException  e) {
@@ -282,19 +296,24 @@ public class ElasticUpdater {
 
 	public static void updatePositionInCollection(String id, ObjectId colId, int old_position, int new_position) {
 		try {
-			Elastic.getTransportClient().prepareUpdate()
-				.setIndex(Elastic.index)
-				.setType(Elastic.typeResource)
-				.setId(id)
-			.addScriptParam("colId", colId.toString())
-			.addScriptParam("old_pos", old_position)
-			.addScriptParam("new_pos", new_position)
-			.setScript("for(el in ctx._source.collectedIn) {"
+
+			Map<String, Object> params = new HashMap<String, Object>();
+			params.put("colId", colId.toString());
+			params.put("old_pos", old_position);
+			params.put("new_pos", new_position);
+			Script script = new Script("for(el in ctx._source.collectedIn) {"
 					+ "   if( el.collectionId.equals(colId) &&"
 					+ "    el.position == old_pos) { "
 					+ "      el.position = new_pos; "
 					+ " } "
-					+ "  };", ScriptType.INLINE)
+					+ "  };", ScriptType.INLINE, null, params);
+
+
+			Elastic.getTransportClient().prepareUpdate()
+				.setIndex(Elastic.index)
+				.setType(Elastic.typeResource)
+				.setId(id)
+			.setScript(script)
 			.setRetryOnConflict(5)
 			.execute().actionGet();
 		} catch (ElasticsearchException  e) {
@@ -345,7 +364,7 @@ public class ElasticUpdater {
 				}
 				array.add(right);
 			}*/
-			doc.rawField("rights", array.toString().getBytes());
+			doc.rawField("rights", new ByteArrayInputStream(array.toString().getBytes()));
 			doc.endObject();
 
 		} catch(IOException io) {
@@ -422,7 +441,7 @@ public class ElasticUpdater {
 						Elastic.index,
 						type,
 						id.toString())
-				.setScript("ctx._source.usage.likes++;", ScriptType.INLINE)
+				.setScript(new Script("ctx._source.usage.likes++;", ScriptType.INLINE, null, null))
 				.execute().actionGet();
 			} catch (Exception e) {
 			log.error("Cannot update collection likes!", e);
@@ -438,7 +457,7 @@ public class ElasticUpdater {
 						Elastic.index,
 						type,
 						id.toString())
-				.setScript("ctx._source.usage.likes--;", ScriptType.INLINE)
+				.setScript(new Script("ctx._source.usage.likes--;", ScriptType.INLINE, null, null))
 				.execute().actionGet();
 			} catch (Exception e) {
 			log.error("Cannot update collection likes!", e);

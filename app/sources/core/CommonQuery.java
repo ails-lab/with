@@ -18,9 +18,11 @@ package sources.core;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.bson.types.ObjectId;
 
@@ -36,12 +38,16 @@ import play.Logger;
 import play.Logger.ALogger;
 import play.libs.F.Option;
 import play.mvc.QueryStringBindable;
+import search.Filter;
+import search.FiltersFields;
+import search.Query;
+import utils.ListUtils;
 import utils.Tuple;
 
 public class CommonQuery implements Cloneable , QueryStringBindable<CommonQuery>{
 
 	public static final ALogger log = Logger.of( CommonQuery.class );
-	
+
 	@JsonIgnoreProperties(ignoreUnknown=true)
 	public String page = "1";
 	public String facetsMode = FacetsModes.DEFAULT;
@@ -63,6 +69,22 @@ public class CommonQuery implements Cloneable , QueryStringBindable<CommonQuery>
 	}
 
 	public CommonQuery() {
+	}
+
+	public CommonQuery(Query query) {
+		this.page = ""+query.getPage();
+		this.pageSize = ""+query.getPageSize();
+		filters = new ArrayList<>();
+		for (HashMap<String, List<String>> f : query.buildFactorizeFilters()) {
+			for (Entry<String, List<String>> e : f.entrySet()) {
+				if (e.getKey().equals(FiltersFields.ANYWHERE.getFilterId())){
+					this.searchTerm = e.getValue().get(0);
+				} else {
+					filters.add(new CommonFilter(e.getKey(),e.getValue()));
+				}
+				
+			}
+		}
 	}
 
 	private List<Tuple<ObjectId, Access>> transformList(ObjectNode[] inputList, boolean group) {
@@ -184,7 +206,7 @@ public class CommonQuery implements Cloneable , QueryStringBindable<CommonQuery>
 		}
 
 	}
-	
+
 	@Override
 	public CommonQuery clone() {
 		try {
@@ -213,7 +235,7 @@ public class CommonQuery implements Cloneable , QueryStringBindable<CommonQuery>
 		if(Utils.hasInfo(srcs)){
 			q.source = Utils.parseArray(srcs);
 		}
-		
+
 		q.filters = new ArrayList<>();
 		for (String key : arg1.keySet()) {
 			if (key.startsWith("filter.")){
@@ -224,7 +246,7 @@ public class CommonQuery implements Cloneable , QueryStringBindable<CommonQuery>
 				q.filters.add(f);
 			}
 		}
-		
+
 		return Option.Some(q);
 	}
 

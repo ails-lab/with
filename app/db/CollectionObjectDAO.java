@@ -38,7 +38,6 @@ import model.resources.WithResource;
 import model.resources.WithResource.WithResourceType;
 
 import org.bson.types.ObjectId;
-import org.elasticsearch.common.lang3.ArrayUtils;
 import org.mongodb.morphia.query.Criteria;
 import org.mongodb.morphia.query.CriteriaContainer;
 import org.mongodb.morphia.query.Query;
@@ -276,7 +275,7 @@ public class CollectionObjectDAO extends WithResourceDAO<CollectionObject> {
 		return getByAcl(criteria, accessedByUserOrGroup, creator, isExhibition,
 				totalHits, offset, count);
 	}
-	
+
 	public List<CollectionObject> getAccessibleByGroupAndPublic(ObjectId groupId) {
 		Query<CollectionObject> q = this.createQuery().disableValidation()
 				.retrievedFields(true, "_id", "administrative.entryCount")
@@ -335,7 +334,7 @@ public class CollectionObjectDAO extends WithResourceDAO<CollectionObject> {
 					this.find(q).asList(), null);
 		}
 	}
-	
+
 	public ObjectNode countMyAndSharedCollections(
 			List<ObjectId> loggedInEffIds) {
 		ObjectNode result = Json.newObject().objectNode();

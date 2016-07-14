@@ -367,6 +367,34 @@ public class User extends UserOrGroup {
 			return groups;
 		}
 	}
+	
+	public ObjectNode getCount(){
+		ObjectNode json = DB.getCollectionObjectDAO().countMyAndSharedCollections(
+				new ArrayList<ObjectId>() {{ add(getDbId()); addAll(getUserGroupsIds()); }});
+		long pendingNots =0 ;
+		if(getNotifications()!=null) {
+			 pendingNots = getNotifications().stream().filter(n -> n.isPendingResponse()).count();
+		}
+		json.put("pendingnotifications", pendingNots);
+		Integer projects = 0;
+		Integer orgs  = 0;
+		if (!userGroupsIds.isEmpty()){
+			for (ObjectId groupId : userGroupsIds) {
+				UserGroup group = DB.getUserGroupDAO().get(groupId);
+				if (group instanceof Project) {
+					projects++;
+				}
+				if (group instanceof Organization) {
+					orgs++;
+				}
+			}
+			json.put("organizations", orgs);
+			json.put("projects", projects);
+		}
+		return json;
+		
+		
+	}
 
 	public Set<Notification> getNotifications() {
 		try {

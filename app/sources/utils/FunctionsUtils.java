@@ -19,7 +19,7 @@ package sources.utils;
 import java.util.List;
 import java.util.function.Function;
 
-import sources.core.CommonFilters;
+import search.FiltersFields;
 import sources.core.Utils;
 import sources.core.Utils.Pair;
 import utils.ListUtils;

@@ -59,4 +59,11 @@ public class ItemsGrouping {
 		return culturalCHO.size()+recordResource.size();
 	}
 
+	public List<?> getAll() {
+		ArrayList<WithResource<?, ?>> r = new ArrayList<>();
+		r.addAll(culturalCHO);
+		r.addAll(recordResource);
+		return r;
+	}
+
 }

@@ -19,6 +19,7 @@ package utils;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -54,12 +55,24 @@ public class ListUtils {
 		return !containsAny(a, b);
 	}
 
+	/**
+	 * tells if all the elements of a collection fulfill a condition.
+	 * @param c
+	 * @param condition
+	 * @return
+	 */
 	public static <T> boolean allof(Collection<T> c, Function<T, Boolean> condition) {
 		return !anyof(c, (T t) -> {
 			return !condition.apply(t);
 		});
 	}
 
+	/**
+	 * tells if at least one element of a collection fulfills a condition
+	 * @param c
+	 * @param condition
+	 * @return
+	 */
 	public static <T> boolean anyof(Collection<T> c, Function<T, Boolean> condition) {
 		for (T t : c) {
 			if (condition.apply(t))
@@ -68,15 +81,34 @@ public class ListUtils {
 		return false;
 	}
 	
+	/**
+	 * tells if at least one element of a collection fulfills a condition
+	 * @param c
+	 * @param condition
+	 * @return
+	 */
 	public static <T> boolean anyof(T[] c, Function<T, Boolean> condition) {
 		return anyof(Arrays.asList(c), condition);
 	}
 	
+	/**
+	 * tells if all the elements of a collection fulfill a condition.
+	 * @param c
+	 * @param condition
+	 * @return
+	 */
 	public static <T> boolean allof(T[] c, Function<T, Boolean> condition) {
 		return allof(Arrays.asList(c), condition);
 	}
 
 
+	/**
+	 * transforms the elements of a collection of type T to a collection of elements of type R using
+	 * a functions that does the transformation.
+	 * @param objects
+	 * @param function
+	 * @return
+	 */
 	public static <T, R> List<R> transform(Collection<T> objects, Function<T, R> function) {
 		List<R> res = new ArrayList<>();
 		if (objects!=null){
@@ -85,6 +117,30 @@ public class ListUtils {
 			}
 		}
 		return res;
+	}
+	
+	/**
+	 * gets the list associated to a key in a map of Key-List structure. If the key is not present it is
+	 * added to the map with an empty list associated. 
+	 * @param key
+	 * @param map
+	 * @return
+	 */
+	public static <K,T> List<T> getOrSet(K key, HashMap<K,List<T>>  map){
+		List<T> result = map.get(key);
+		if (result==null){
+			map.put(key, result = new ArrayList<>());
+		}
+		return result;	
+	}
+
+	/**
+	 * gets the last element of a list.
+	 * @param list
+	 * @return
+	 */
+	public static<T> T last(List<T> list) {
+		return list.get(list.size()-1);
 	}
 
 }

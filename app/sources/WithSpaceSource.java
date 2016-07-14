@@ -25,7 +25,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import model.basicDataTypes.ProvenanceInfo.Sources;
 import model.basicDataTypes.WithAccess;
 import model.basicDataTypes.WithAccess.Access;
 import model.resources.RecordResource;
@@ -51,9 +50,10 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import db.DB;
 import play.Logger;
 import play.libs.Json;
+import search.FiltersFields;
+import search.Sources;
 import sources.core.CommonFilter;
 import sources.core.CommonFilterLogic;
-import sources.core.CommonFilters;
 import sources.core.CommonQuery;
 import sources.core.ISpaceSource;
 import sources.core.RecordJSONMetadata;
@@ -122,11 +122,10 @@ public class WithSpaceSource extends ISpaceSource {
 		elasticoptions.setCount(count);
 		elasticoptions.setOffset(offset);
 		elasticoptions.setScroll(false);
-		elasticoptions.accessList = accessFilters;
 
 		/* Filters */
 		//elasticoptions.addFilter("isPublic", "true");
-		List<CommonFilter> filters = q.filters;
+		/*List<CommonFilter> filters = q.filters;
 		if (filters!=null){
 			for (CommonFilter f: filters) {
 				for (String filterValue: f.values) {
@@ -134,16 +133,16 @@ public class WithSpaceSource extends ISpaceSource {
 				}
 			}
 
-		}
-		
+		}*/
+
 		/*
 		 * Search index for accessible resources
 		 */
-		SearchResponse elasticResponse = searcher
+		/*SearchResponse elasticResponse = searcher
 				.searchResourceWithWeights(term, elasticoptions);
 		Map<String, List<?>> resourcesPerType = ElasticUtils.getResourcesPerType(elasticResponse);
 
-		/* Finalize the searcher client and create the SourceResponse */
+		 Finalize the searcher client and create the SourceResponse
 		searcher.closeClient();
 		SourceResponse sourceResponse =
 				new SourceResponse((int) elasticResponse.getHits().getTotalHits(), offset, count);
@@ -151,7 +150,7 @@ public class WithSpaceSource extends ISpaceSource {
 		sourceResponse.setResourcesPerType(resourcesPerType);
 		//sourceResponse.transformResourcesToItems();
 		filterRecordsOnly(sourceResponse);
-		/* Check whether we need the aggregated values or not */
+		 Check whether we need the aggregated values or not
 		if (checkFilters(q)) {
 			sourceResponse.filtersLogic = new ArrayList<CommonFilterLogic>();
 			if(elasticResponse.getAggregations() != null)
@@ -168,7 +167,8 @@ public class WithSpaceSource extends ISpaceSource {
 					}
 				}
 		}
-		return sourceResponse;
+		return sourceResponse;*/
+		return null;
 	}
 
 	public WithSpaceSource() {
@@ -210,8 +210,8 @@ public class WithSpaceSource extends ISpaceSource {
 		return outputList;
 	}
 
-	
-	//TODO: When WIthin search is separated from external resources, 
+
+	//TODO: When WIthin search is separated from external resources,
 	// and the response may contain resources of all types (not only CHO and RecordResource as defined in ItemsGrouping),
 	//this method becomes obsolete.
 	//Types should be passed from the API call, and handled at the within search controller level.
@@ -219,12 +219,12 @@ public class WithSpaceSource extends ISpaceSource {
 		List<WithResource<?, ?>> choItems = sourceResponse.items.getCulturalCHO();
 		List<WithResource<?, ?>> recordResources = sourceResponse.items.getRecordResource();
 		for (Entry<String, List<?>> e: sourceResponse.resourcesPerType.entrySet()) {
-			if (e.getKey().equals(WithResourceType.CulturalObject.toString().toLowerCase())) 
+			if (e.getKey().equals(WithResourceType.CulturalObject.toString().toLowerCase()))
 				for (WithResource<?, ?>  record: (List<WithResource<?, ?>>) e.getValue()) {
 					RecordResource profiledRecord = ((RecordResource) record).getRecordProfile("MEDIUM");
 					choItems.add(profiledRecord);
 				}
-			if (e.getKey().equals(WithResourceType.RecordResource.toString().toLowerCase())) 
+			if (e.getKey().equals(WithResourceType.RecordResource.toString().toLowerCase()))
 				for (WithResource<?, ?>  record: (List<WithResource<?, ?>>) e.getValue()) {
 					RecordResource profiledRecord = ((RecordResource) record).getRecordProfile("MEDIUM");
 					recordResources.add(profiledRecord);

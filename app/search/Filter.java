@@ -19,11 +19,11 @@ package search;
 public class Filter {
 	
 	/**
-	 * Fieldnames will be the path expressions into the json represeantation of the resource you are querying.
-	 * Some rules about shortening may apply for labels nad other very deep fieldnames. Arrays are probably not part of this 
-	 * fieldname, meaning the filter applies to any element of the array and is true if any value is found in the array.
+	 * FieldIdswill be the path expressions into the json represeantation of the resource you are querying.
+	 * Some rules about shortening may apply for labels and other very deep fieldIds. Arrays are probably not part of this 
+	 * fieldId meaning the filter applies to any element of the array and is true if any value is found in the array.
 	 */
-	public String fieldname;
+	public String fieldId;
 	
 	/**
 	 * A literal value we are looking for. Possibly we might allow for some wildcarding here in the future. Some sources may 
@@ -42,17 +42,26 @@ public class Filter {
 	 */
 	public boolean exact = false;
 	
-	public Filter( String fieldname, String value ) {
-		this.fieldname = fieldname;
+	/**
+	 * If you need to be specific about the language you are searching, you can specify it here, the deafult is, that 
+	 * language is ignored. If a source doesn't support language specific search, it may choose to ignore this.
+	 */
+	
+	public String lang = "";
+	
+	public Filter( String fieldId, String value ) {
+		this.fieldId = fieldId;
 		this.value = value;
+	}
+	public Filter() {
+		
 	}
 }
 
 /*
-    Fieldnames: in the API we use the canonical fieldnames, the JSON path into the database representation of the object.
+    FieldIds: in the API we use the canonical fieldids, the JSON path into the database representation of the object.
     Some exceptions apply to arrays and labels
     
-    
-    
-  
+    The search.Fields enum contains all Fields that are allowed. 
+    TODO: use Fields enum in the code to agree on spelling??  
  */

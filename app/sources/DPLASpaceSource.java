@@ -23,13 +23,13 @@ import java.util.function.Function;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
-import model.basicDataTypes.ProvenanceInfo.Sources;
 import model.resources.RecordResource;
 import play.Logger;
 import play.Logger.ALogger;
 import play.libs.Json;
+import search.FiltersFields;
+import search.Sources;
 import sources.core.CommonFilterLogic;
-import sources.core.CommonFilters;
 import sources.core.CommonQuery;
 import sources.core.ISpaceSource;
 import sources.core.QueryBuilder;
@@ -60,14 +60,14 @@ public class DPLASpaceSource extends ISpaceSource {
 		super(Sources.DPLA);
 		apiKey = "SECRET_KEY";
 
-		addDefaultWriter(CommonFilters.TYPE.getId(), fwriter("sourceResource.type"));
-		addDefaultWriter(CommonFilters.COUNTRY.getId(), fwriter("sourceResource.spatial.country"));
-		addDefaultWriter(CommonFilters.CREATOR.getId(), fwriter("sourceResource.creator"));
-		addDefaultWriter(CommonFilters.CONTRIBUTOR.getId(), fwriter("sourceResource.contributor"));
-		addDefaultWriter(CommonFilters.PROVIDER.getId(), fwriter("provider.name"));
-		addDefaultWriter(CommonFilters.TYPE.getId(), fwriter("sourceResource.type"));
-		addDefaultComplexWriter(CommonFilters.YEAR.getId(), qfwriterYEAR());
-		addDefaultWriter(CommonFilters.RIGHTS.getId(), fwriter("sourceResource.rights"));
+		addDefaultWriter(FiltersFields.TYPE.getFilterId(), fwriter("sourceResource.type"));
+		addDefaultWriter(FiltersFields.COUNTRY.getFilterId(), fwriter("sourceResource.spatial.country"));
+		addDefaultWriter(FiltersFields.CREATOR.getFilterId(), fwriter("sourceResource.creator"));
+		addDefaultWriter(FiltersFields.CONTRIBUTOR.getFilterId(), fwriter("sourceResource.contributor"));
+		addDefaultWriter(FiltersFields.PROVIDER.getFilterId(), fwriter("provider.name"));
+		addDefaultWriter(FiltersFields.TYPE.getFilterId(), fwriter("sourceResource.type"));
+		addDefaultComplexWriter(FiltersFields.YEAR.getFilterId(), qfwriterYEAR());
+		addDefaultWriter(FiltersFields.RIGHTS.getFilterId(), fwriter("sourceResource.rights"));
 		
 		
 		formatreader = new DPLARecordFormatter();
@@ -113,12 +113,12 @@ public class DPLASpaceSource extends ISpaceSource {
 		String httpQuery = getHttpQuery(q);
 		res.query = httpQuery;
 		JsonNode response;
-		CommonFilterLogic type = new CommonFilterLogic(CommonFilters.TYPE);
-		CommonFilterLogic provider = new CommonFilterLogic(CommonFilters.PROVIDER);
-		CommonFilterLogic dataProvider = new CommonFilterLogic(CommonFilters.DATA_PROVIDER);
-		CommonFilterLogic creator = new CommonFilterLogic(CommonFilters.CREATOR);
-		CommonFilterLogic country = new CommonFilterLogic(CommonFilters.COUNTRY);
-		CommonFilterLogic contributor = new CommonFilterLogic(CommonFilters.CONTRIBUTOR);
+		CommonFilterLogic type = new CommonFilterLogic(FiltersFields.TYPE);
+		CommonFilterLogic provider = new CommonFilterLogic(FiltersFields.PROVIDER);
+		CommonFilterLogic dataProvider = new CommonFilterLogic(FiltersFields.DATA_PROVIDER);
+		CommonFilterLogic creator = new CommonFilterLogic(FiltersFields.CREATOR);
+		CommonFilterLogic country = new CommonFilterLogic(FiltersFields.COUNTRY);
+		CommonFilterLogic contributor = new CommonFilterLogic(FiltersFields.CONTRIBUTOR);
 		if (checkFilters(q)) {
 			try {
 				response = getHttpConnector().getURLContent(httpQuery);

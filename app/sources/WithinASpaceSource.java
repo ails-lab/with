@@ -32,8 +32,8 @@ import elastic.ElasticSearcher;
 import elastic.ElasticUtils;
 import elastic.ElasticSearcher.SearchOptions;
 import play.Logger;
+import search.Sources;
 import model.basicDataTypes.WithAccess;
-import model.basicDataTypes.ProvenanceInfo.Sources;
 import model.basicDataTypes.WithAccess.Access;
 import model.resources.RecordResource;
 import model.resources.WithResource;
@@ -62,7 +62,6 @@ public class WithinASpaceSource extends ISpaceSource{
 			List<List<Tuple<ObjectId, Access>>> access = new ArrayList<List<Tuple<ObjectId,Access>>>();
 			access.add(new ArrayList<Tuple<ObjectId,Access>>() {{ add(new Tuple<ObjectId, WithAccess.Access>(new ObjectId("56e13d2e75fe2450755e553a"), Access.READ)); }} );
 			SearchOptions options = new SearchOptions();
-			options.accessList = access;
 			options.setCount(count);
 			options.isPublic = false;
 
@@ -73,15 +72,13 @@ public class WithinASpaceSource extends ISpaceSource{
 			ElasticSearcher recordSearcher = new ElasticSearcher();
 			recordSearcher.setTypes(new ArrayList<String>() {{ add(WithResourceType.SimpleCollection.toString().toLowerCase());
 																add(WithResourceType.Exhibition.toString().toLowerCase());}});
-			SearchResponse resp = recordSearcher.searchAccessibleCollections(options);
+			/*SearchResponse resp = recordSearcher.searchAccessibleCollections(options);
 			List<String> colIds = new ArrayList<String>();
 			resp.getHits().forEach( (h) -> {colIds.add(h.getId());return;} );
 
-			/*
+
 			 * Search for records of this space
-			 */
-			options.accessList.clear();
-			options.setFilterType("or");
+
 			//options.addFilter("_all", term);
 			//options.addFilter("description", term);
 			//options.addFilter("keywords", term);
@@ -99,7 +96,7 @@ public class WithinASpaceSource extends ISpaceSource{
 			sourceRes.setResourcesPerType(resourcesPerType);
 			//sourceRes.transformResourcesToItems();
 			filterRecordsOnly(sourceRes);
-			return sourceRes;
+			return sourceRes;*/
 
 		} catch(Exception e) {
 			log.error("Search encountered a problem", e);
@@ -108,8 +105,8 @@ public class WithinASpaceSource extends ISpaceSource{
 		return null;
 
 	}
-	
-	//TODO: When WIthin search is separated from external resources, 
+
+	//TODO: When WIthin search is separated from external resources,
 		// and the response may contain resources of all types (not only CHO and RecordResource as defined in ItemsGrouping),
 		//this method becomes obsolete.
 		//Types should be passed from the API call, and handled at the within search controller level.
@@ -117,12 +114,12 @@ public class WithinASpaceSource extends ISpaceSource{
 			List<WithResource<?, ?>> choItems = sourceResponse.items.getCulturalCHO();
 			List<WithResource<?, ?>> recordResources = sourceResponse.items.getRecordResource();
 			for (Entry<String, List<?>> e: sourceResponse.resourcesPerType.entrySet()) {
-				if (e.getKey().equals(WithResourceType.CulturalObject.toString().toLowerCase())) 
+				if (e.getKey().equals(WithResourceType.CulturalObject.toString().toLowerCase()))
 					for (WithResource<?, ?>  record: (List<WithResource<?, ?>>) e.getValue()) {
 						RecordResource profiledRecord = ((RecordResource) record).getRecordProfile("MEDIUM");
 						choItems.add(profiledRecord);
 					}
-				if (e.getKey().equals(WithResourceType.RecordResource.toString().toLowerCase())) 
+				if (e.getKey().equals(WithResourceType.RecordResource.toString().toLowerCase()))
 					for (WithResource<?, ?>  record: (List<WithResource<?, ?>>) e.getValue()) {
 						RecordResource profiledRecord = ((RecordResource) record).getRecordProfile("MEDIUM");
 						recordResources.add(profiledRecord);

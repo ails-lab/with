@@ -19,21 +19,8 @@ package db;
 import java.util.HashMap;
 import java.util.Map;
 
-import model.ApiKey;
-import model.annotations.Annotation;
-import model.resources.RecordResource;
-import model.resources.ThesaurusObject;
-import model.resources.WithResource;
-import model.resources.collection.CollectionObject;
-import model.usersAndGroups.User;
-import model.usersAndGroups.UserGroup;
-import model.usersAndGroups.UserOrGroup;
-import notifications.Notification;
-
 import org.mongodb.morphia.Datastore;
 import org.mongodb.morphia.Morphia;
-
-import play.Logger;
 
 import com.mongodb.MongoClient;
 import com.mongodb.WriteConcern;
@@ -42,8 +29,19 @@ import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 
 import db.converters.AccessEnumConverter;
-import db.converters.MultiLiteralOrResourceConverter;
 import db.converters.MultiLiteralConverter;
+import db.converters.MultiLiteralOrResourceConverter;
+import db.converters.ResourceConverter;
+import model.ApiKey;
+import model.annotations.Annotation;
+import model.resources.RecordResource;
+import model.resources.ThesaurusObject;
+import model.resources.WithResource;
+import model.resources.collection.CollectionObject;
+import model.usersAndGroups.User;
+import model.usersAndGroups.UserGroup;
+import notifications.Notification;
+import play.Logger;
 
 
 // get the DAOs from here
@@ -110,6 +108,8 @@ public class DB {
 			.addConverter(new MultiLiteralConverter());
 			morphia.getMapper().getConverters()
 				.addConverter(new AccessEnumConverter());
+			morphia.getMapper().getConverters()
+			.addConverter(new ResourceConverter());
 			//Mapper mapper = morphia.getMapper();
 		    //mapper.getOptions().setObjectFactory(new CustomMorphiaObjectFactory());
 		}

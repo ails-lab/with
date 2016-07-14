@@ -16,10 +16,7 @@
 
 package sources.formatreaders;
 
-import java.util.Arrays;
 import java.util.List;
-
-import com.fasterxml.jackson.databind.JsonNode;
 
 import model.EmbeddedMediaObject;
 import model.EmbeddedMediaObject.MediaVersion;
@@ -29,12 +26,12 @@ import model.basicDataTypes.Language;
 import model.basicDataTypes.LiteralOrResource;
 import model.basicDataTypes.MultiLiteralOrResource;
 import model.basicDataTypes.ProvenanceInfo;
-import model.basicDataTypes.ProvenanceInfo.Sources;
+import model.basicDataTypes.Resource;
 import model.resources.CulturalObject;
 import model.resources.CulturalObject.CulturalObjectData;
-import play.Logger;
+import search.FiltersFields;
+import search.Sources;
 import sources.FilterValuesMap;
-import sources.core.CommonFilters;
 import sources.core.Utils;
 import sources.utils.JsonContextRecord;
 import sources.utils.StringUtils;
@@ -99,7 +96,7 @@ public class RijksmuseumItemRecordFormatter extends CulturalRecordFormatter {
 		List<String> types = rec.getStringArrayValue("objectTypes");
 		WithMediaType type = null;
 		for (String string : types) {
-			type = WithMediaType.getType(getValuesMap().translateToCommon(CommonFilters.TYPE.getId(), string).get(0).toString());
+			type = WithMediaType.getType(getValuesMap().translateToCommon(FiltersFields.TYPE.getFilterId(), string).get(0).toString());
 			if (type.isKnown()){
 				break;
 			}
@@ -124,8 +121,8 @@ public class RijksmuseumItemRecordFormatter extends CulturalRecordFormatter {
 		// List<String> theViews = rec.getStringArrayValue("hasView");
 
 		// model.getDates().addAll(rec.getWithDateArrayValue("year"));
-		LiteralOrResource isShownBy = model.getIsShownBy();
-		String uri2 = isShownBy == null ? null : isShownBy.getURI();
+		Resource isShownBy = model.getIsShownBy();
+		String uri2 = isShownBy == null ? null : isShownBy.toString();
 		String uri3 = rec.getStringValue("webImage.url");
 		if (Utils.hasInfo(uri3)) {
 			EmbeddedMediaObject medThumb = new EmbeddedMediaObject();

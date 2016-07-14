@@ -27,10 +27,10 @@ import model.basicDataTypes.Language;
 import model.basicDataTypes.LiteralOrResource;
 import model.basicDataTypes.MultiLiteralOrResource;
 import model.basicDataTypes.ProvenanceInfo;
-import model.basicDataTypes.ProvenanceInfo.Sources;
 import model.resources.CulturalObject;
 import model.resources.CulturalObject.CulturalObjectData;
 import play.Logger;
+import search.Sources;
 import sources.FilterValuesMap;
 import sources.core.Utils;
 import sources.utils.JsonContextRecord;
@@ -60,8 +60,8 @@ public class RijksmuseumRecordFormatter extends CulturalRecordFormatter {
 		
 		model.setLabel(rec.getMultiLiteralValue("title"));
 		model.setDescription(rec.getMultiLiteralValue("longTitle"));
-		model.setIsShownBy(rec.getLiteralOrResourceValue("edmIsShownBy"));
-		model.setIsShownAt(rec.getLiteralOrResourceValue("edmIsShownAt"));
+		model.setIsShownBy(rec.getResource("edmIsShownBy"));
+		model.setIsShownAt(rec.getResource("edmIsShownAt"));
 		// model.setYear(Integer.parseInt(rec.getStringValue("year")));
 		model.setDccreator(rec.getMultiLiteralOrResourceValue("principalOrFirstMaker"));
 

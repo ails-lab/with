@@ -43,8 +43,8 @@ public class EmptySource implements Source {
 	 * @param query
 	 * @return
 	 */
-	public Promise<Response> execute( Query query ) {
-		return Promise.pure( Response.EMPTY ); 
+	public Promise<Response.SingleResponse> execute( Query query ) {
+		return Promise.pure( Response.SingleResponse.EMPTY ); 
 	}
 	
 	/**
@@ -70,8 +70,8 @@ public class EmptySource implements Source {
 	 * If no filters remain after pruning, the Query should not be executed.
 	 * @return
 	 */
-	public Set<String> supportedFieldnames() {
-		return new HashSet<String>();
+	public Set<String> supportedFieldIds() {
+		return null;
 	}
 	
 	/**
@@ -86,7 +86,7 @@ public class EmptySource implements Source {
 	//
 	
 	public Query pruneFilters( Query inputQuery ) {
-		return inputQuery.pruneFilters( thisSource(), supportedFieldnames());
+		return inputQuery.pruneFilters( thisSource(), supportedFieldIds());
 	}
 	
 }

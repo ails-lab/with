@@ -20,7 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-import model.basicDataTypes.ProvenanceInfo.Sources;
+import search.Sources;
 
 public class CommonFilterResponse {
 	public String filterName;

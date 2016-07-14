@@ -1,4 +1,4 @@
-define(['bridget', 'knockout', 'text!./_collection-view.html', 'isotope', 'imagesloaded', 'app', 'smoke','knockout-validation'], function (bridget, ko, template, Isotope, imagesLoaded, app) {
+define(['bridget', 'knockout', 'text!./_collection-view.html', 'isotope', 'imagesloaded', 'app', 'inputtags', 'liveFilter', 'smoke','knockout-validation'], function (bridget, ko, template, Isotope, imagesLoaded, app, inputtags, liveFilter) {
 
 	$.bridget('isotope', Isotope);
 	self.loading = ko.observable(false);
@@ -42,6 +42,7 @@ define(['bridget', 'knockout', 'text!./_collection-view.html', 'isotope', 'image
 		self.description = "";
 		self.thumb = "";
 		self.fullres = "";
+//		self.fullrestype = "";
 		self.view_url = "";
 		self.source = "";
 		self.creator = "";
@@ -100,6 +101,8 @@ define(['bridget', 'knockout', 'text!./_collection-view.html', 'isotope', 'image
 				return "www.rijksmuseum.nl";
 			case "DDB":
 				return "deutsche-digitale-bibliothek.de";
+			case "DBPedia":
+				return "dbpedia.org";
 			default:
 				return "";
 			}
@@ -157,6 +160,8 @@ define(['bridget', 'knockout', 'text!./_collection-view.html', 'isotope', 'image
 			}
 			self.thumb = media[0] != null && media[0].Thumbnail != null && media[0].Thumbnail.withUrl != "null" ? media[0].Thumbnail.withUrl : null;
 			self.fullres = media[0] != null && media[0].Original != null && media[0].Original.url != "null" ? media[0].Original.url : null;
+//			self.fullrestype = media[0] != null && media[0].Original != null && media[0].Original.type != "null" ? media[0].Original.type : null;
+			
 			if(self.fullres){
 				self.rights=findResOrLit(media[0].Original.originalRights);
 				
@@ -182,6 +187,8 @@ define(['bridget', 'knockout', 'text!./_collection-view.html', 'isotope', 'image
 		if (data !== undefined) {
 			self.load(data);
 		}
+		
+
 	}
 
 	function CViewModel(params) {
@@ -189,6 +196,12 @@ define(['bridget', 'knockout', 'text!./_collection-view.html', 'isotope', 'image
 		var self = this;
 		self.route = params.route;
 		var counter = 1;
+		
+		self.indexCount = ko.observable("");
+		self.terms = ko.observableArray([]);
+		self.keywords = ko.observableArray([]);
+		self.keyword = ko.observable('');
+		
 		self.title = ko.observable('');
 		self.titleToEdit = ko.observable('').extend({ required: true });
 		self.description = ko.observable('');
@@ -204,6 +217,272 @@ define(['bridget', 'knockout', 'text!./_collection-view.html', 'isotope', 'image
 		self.loggedUser = isLogged();
 		self.rightsmap = ko.mapping.fromJS([]);
 		self.isFavorites = ko.observable(false);
+		
+		$('#term_tags').tagsinput({
+	        allowDuplicates: false,
+	          itemValue: 'uri',  
+	          itemText: 'label' 
+	      });
+		
+	    $('#term_tags').on('itemRemoved', function(event) {
+			for (var i = 0; i < self.terms().length; i++) {
+				if (self.terms()[i].uri() === event.item.uri) {
+					self.terms.splice(i,1);
+					self.reload();
+					break;
+				}
+			}
+		});
+	    
+		self.closeSide = function () {
+			$('.action').removeClass('active');
+		};
+
+		self.vocabularyIndex = [];
+		self.vocabularies = ko.observableArray();
+		self.selvocabularies = ko.observableArray();
+		self.ner = ko.observableArray();
+		
+	    self.sourceBind=function(e){
+	    	$("ul.list>li").css('display','block');
+	    }
+
+	    
+		$.ajax({
+         	"url": "/thesaurus/listThesauri",
+			"method": "get",
+			"contentType": "application/json",
+        	"success": function (data){
+           		for (x in data) {
+           			if (data[x].annotator != "null") {
+           				if (data[x].type === "thesaurus") {
+           					self.vocabularyIndex[data[x].vocabulary] = data[x];
+           					self.vocabularies.push(data[x]);
+           					self.selvocabularies.push(data[x].vocabulary);
+           				} else if (data[x].type === "ner") {
+           					self.vocabularyIndex[data[x].vocabulary] = data[x];
+           					self.ner.push(data[x]);
+           					self.selvocabularies.push(data[x].vocabulary);
+           					
+           				}
+           			}
+           		}
+        	}
+     	});
+		
+	    self.selectVocabulary = function(data, event){
+	    	if(event.target.checked){
+	    		var id = $(event.target).attr('value');
+	    		
+				for (var i = 0; i < self.selvocabularies().length; i++) {
+					if (self.selvocabularies()[i] === id) {
+						return true;
+					}
+				}
+				
+				self.selvocabularies.push(id);
+	    		
+	    	}
+	    	
+	    	if(!event.target.checked){
+	    		var id = $(event.target).attr('value');
+	    		
+				for (var i = 0; i < self.selvocabularies().length; i++) {
+					if (self.selvocabularies()[i] === id) {
+						self.selvocabularies.splice(i,1);
+						return true;
+					}
+				}
+	    		
+	    	}
+	    	
+//			for (var i = 0; i < self.selvocabularies().length; i++) {
+//				alert(self.selvocabularies()[i]);
+//			}
+	    	
+	    	return true;
+	    }
+
+	    self.createAnnotateRequest = function(data) {
+			var vocitems = [];
+			var neritems = [];
+	    	
+	    	for (var i = 0; i < data.length; i++) {
+	    		var voc = self.vocabularyIndex[data[i]];
+	    		
+	    		if (voc.type == "thesaurus") {
+	    			vocitems.push(data[i]);
+	    		} else {
+	    			neritems.push(data[i])
+	    		}
+	    	}
+	    	
+			return "{ \"vocabulary\": " + JSON.stringify(vocitems) + ", \"ner\": " + JSON.stringify(neritems) +"}";
+	    }
+	    
+		self.annotateCollection = function() {
+			$.ajax({
+				"url": "/collection/" + self.id() + "/annotate",
+				"method": "post",
+				"data" : self.createAnnotateRequest(self.selvocabularies()),
+				"contentType": "application/json",
+				"success": function (data) {
+					$.smkAlert({
+						text: 'Annotating started',
+						type: 'success',
+						permanent: false
+					});
+				},
+				"error": function (result) {
+					$.smkAlert({
+						text: 'An error has occured',
+						type: 'danger',
+						permanent: true
+					});
+				}
+			});
+			$('.action').removeClass('active');
+		}
+
+	    self.sourceBind=function(e){
+	    	$("ul.list>li").css('display','block');
+	    }
+
+		var Term = function(data) {
+			var selfx = this;
+			
+			selfx.uri = ko.observable();
+			selfx.label = ko.observable();
+			selfx.subterms = ko.observableArray([]);
+			
+			ko.mapping.fromJS(data, {}, selfx);
+		}
+
+		self.onEnter = function(data,event){
+		    event.keyCode === 13 && self.addKeyword(data);  
+		    return true;
+		};
+		
+		self.addKeyword = function(data) {
+			
+			for (var i = 0; i < self.terms().length; i++) {
+				if (self.terms()[i].uri() == self.keyword()) {
+					return;
+				}
+			}
+
+			self.terms.push(new Term({ uri: self.keyword(), label: self.keyword() }));
+    	    $("#term_tags").tagsinput('add',{ uri: self.keyword(), label: self.keyword() });
+
+    	    self.keyword('');
+			self.reload();
+		};
+
+		var NodeModel = function(data) {
+			var selfx = this;
+			
+			selfx.isExpanded = ko.observable(false);
+			selfx.uri = ko.observable();
+			selfx.label = ko.observable();
+			selfx.children = ko.observableArray();
+			selfx.id = ko.observable(); 
+			selfx.size = ko.observable();
+		 
+			selfx.sizelabel = ko.pureComputed(function () {
+				return selfx.label + "(" + selfx.size + ")";
+			});
+			
+			selfx.toggleVisibility = function() {
+				selfx.isExpanded(!selfx.isExpanded());
+			};
+		
+			ko.mapping.fromJS(data, selfx.mapOptions, selfx);
+
+			selfx.addTerm = function() {
+				for (var i = 0; i < self.terms().length; i++) {
+					if (self.terms()[i].uri() === data.uri) {
+						return;
+					}
+				}
+
+//				$('#' + selfx.id()).hide();
+				self.terms.push(new Term({ uri: data.uri, label: data.label, subterms: selfx.collect() }));
+	    	    $("#term_tags").tagsinput('add',{ uri: data.uri, label: data.label });
+
+				self.reload();
+			};
+			
+			selfx.collect = function() {
+				var result = [];
+				result.push(selfx.uri());
+				for (var i in selfx.children()) {
+					var cc = selfx.children()[i].collect();
+					for (j in cc) {
+						result.push(cc[j]);
+					}
+				}
+				return result;
+			}
+			
+			selfx.isSelected =  ko.computed(function() {
+				for (var i in self.terms()) {
+					if (self.terms()[i].uri() === data.uri) {
+						return true;
+					}
+				}
+				
+				return false;
+			});
+		};
+		
+		NodeModel.prototype.mapOptions = {
+				children: {
+					create: function(args) {
+						return new NodeModel(args.data);
+					}
+				}
+			};
+		
+		self.loadIndex = function() {
+			$.ajax({
+				"url": "/collection/" + self.id() + "/facets",
+				"method": "post",
+				"data" : convertTerms(self.terms()),
+				"contentType": "application/json",
+				"success": function (data) {
+					self.index(new NodeModel(data));
+				},
+				"error": function (result) {
+					$.smkAlert({
+						text: 'An error has occured',
+						type: 'danger',
+						permanent: true
+					});
+				}
+			});
+		}
+
+		self.reload = function() {
+			loading(true);
+
+			self.index(new NodeModel({ schemes: [] }));
+			
+			if (self.citems().length > 0) {
+				
+				self.citems.removeAll();
+				
+				var $elements = self.$container.isotope('getItemElements')
+				self.$container.isotope('remove', $elements).isotope('layout');
+//				self.revealItems([]);
+
+			}
+			
+			self.loadIndex();
+			self.loadInit();
+		}
+		
+		self.index = ko.observable(new NodeModel({ schemes: [] }));
+
 		self.fetchitemnum = 20;
 		self.isPublic = ko.observable(true);
 		self.query = ko.observable('');
@@ -257,6 +536,8 @@ define(['bridget', 'knockout', 'text!./_collection-view.html', 'isotope', 'image
 		self.revealItems = function (data) {
 			if ((data.length === 0 || data.length < self.fetchitemnum)) {
 				loading(false);$(".loadmore").text("no more results");
+			} else {
+				$(".loadmore").text("Load more");
 			}
 
 			var items = [];
@@ -328,34 +609,16 @@ define(['bridget', 'knockout', 'text!./_collection-view.html', 'isotope', 'image
 							self.access(rightsrec.level());
 						}
 					}
+					
+					self.loadIndex();
+					
 					if (self.count() && self.count() > 0) {
-						$.ajax({
-							"url": "/collection/" + self.id() + "/list?count=" + self.count() + "&start=0",
-							"method": "get",
-							"contentType": "application/json",
-							"success": function (data) {
-
-								var items = self.revealItems(data.records);
-								if (items.length > 0) {
-									var $newitems = getItems(items);
-
-									self.isotopeImagesReveal(self.$container, $newitems);
-								}
-
-								loading(false);
-							},
-							"error": function (result) {
-								loading(false);
-								$.smkAlert({
-									text: 'An error has occured',
-									type: 'danger',
-									permanent: true
-								});
-							}
-						});
+						self.loadInit();
 					} else {
 						loading(false);
 					}
+					
+					$("#term_tags").tagsinput('removeAll');
 				},
 				error: function (xhr, textStatus, errorThrown) {
 					loading(false);
@@ -372,6 +635,63 @@ define(['bridget', 'knockout', 'text!./_collection-view.html', 'isotope', 'image
 				}
 			});
 		};
+		
+		self.loadInit = function() {
+			if (self.terms().length == 0) {
+				$.ajax({
+					"url": "/collection/" + self.id() + "/list?count=" + self.count() + "&start=0",
+					"method": "get",
+					"contentType": "application/json",
+					"success": function (data) {
+						self.indexCount("");
+
+						var items = self.revealItems(data.records);
+						if (items.length > 0) {
+							var $newitems = getItems(items);
+
+							self.isotopeImagesReveal(self.$container, $newitems);
+						}
+						loading(false);
+					},
+					"error": function (result) {
+						loading(false);
+						$.smkAlert({
+							text: 'An error has occured',
+							type: 'danger',
+							permanent: true
+						});
+					}
+				});
+			} else {
+				$.ajax({
+					"url": "/collection/" + self.id() + "/selectionlist?count=" + self.count() + "&start=0",
+					"method": "post",
+					"contentType": "application/json",
+					"data" : convertTerms(self.terms()),
+					"success": function (data) {
+						self.indexCount("(" + data.entryCount + " matches)");
+
+						var items = self.revealItems(data.records);
+						if (items.length > 0) {
+							var $newitems = getItems(items);
+
+							self.isotopeImagesReveal(self.$container, $newitems);
+						}
+						loading(false);
+					},
+					"error": function (result) {
+						loading(false);
+						$.smkAlert({
+							text: 'An error has occured',
+							type: 'danger',
+							permanent: true
+						});
+					}
+				});
+			}
+		}
+
+		
 		WITHApp.initTooltip();
 		self.loadCollection();
 		self.isOwner = ko.pureComputed(function () {
@@ -403,18 +723,48 @@ define(['bridget', 'knockout', 'text!./_collection-view.html', 'isotope', 'image
 		};
 
 		self.moreItems = function () {
-			return $.ajax({
-				type: "GET",
-				contentType: "application/json",
-				dataType: "json",
-				url: "/collection/" + self.id() + "/list",
-				processData: false,
-				data: "count=" + self.fetchitemnum + "&start=" + self.citems().length
-			}).success (function () {
-			});
-
+			if (self.terms().length == 0) {
+				return $.ajax({
+					type: "GET",
+					contentType: "application/json",
+					dataType: "json",
+					url: "/collection/" + self.id() + "/list",
+					processData: false,
+					data: "count=" + self.fetchitemnum + "&start=" + self.citems().length
+				}).success (function () {
+					self.indexCount("");
+				});
+				} else {
+					return $.ajax({
+						type: "POST",
+						contentType: "application/json",
+						dataType: "json",
+						url: "/collection/" + self.id() + "/selectionlist?count=" + self.fetchitemnum + "&start=" + self.citems().length,
+						processData: false,
+						data : convertTerms(self.terms()) 
+					}).success (function (data) {
+						self.indexCount("(" + data.entryCount + " matches)");
+					});
+				}
 		};
 
+		function convertTerms(terms) {
+			var uitems = [];
+			var kitems = [];
+			
+			for (i in terms) {
+				var str = terms[i].uri();
+				
+				if (str.substring(0, 7) === "http://") {
+					uitems.push({ top: str, sub: terms[i].subterms() });
+				} else {
+					kitems.push(str);
+				}
+			}
+
+			return "{ \"terms\": " + JSON.stringify(uitems) + ", \"keywords\": " + JSON.stringify(kitems) +"}";
+		}
+		
 		self.addCollectionRecord = function (e) {
 			self.citems.push(e);
 		};
@@ -503,6 +853,84 @@ define(['bridget', 'knockout', 'text!./_collection-view.html', 'isotope', 'image
 			collectionShow(rec);
 		};
 		
+		similar = function (id, event) {
+			event.preventDefault();
+			var rec = ko.utils.arrayFirst(self.citems(), function (record) {
+				return record.dbId === id;
+			});
+
+			loading(true);
+
+			self.index(new NodeModel({ schemes: [] }));
+			
+			if (self.citems().length > 0) {
+				
+				self.citems.removeAll();
+				
+				var $elements = self.$container.isotope('getItemElements')
+				self.$container.isotope('remove', $elements).isotope('layout');
+//				self.revealItems([]);
+			}
+			
+			self.loadIndex();
+			self.similarLoadInit(rec.dbId);
+
+		};
+		
+		self.similarLoadInit = function(rec) {
+//			if (self.terms().length == 0) {
+				$.ajax({
+					"url": "/collection/" + self.id() + "/similarlist?itemid=" + rec + "&count=" + self.count() + "&start=0",
+					"method": "get",
+					"contentType": "application/json",
+					"success": function (data) {
+						self.indexCount("");
+
+						var items = self.revealItems(data.records);
+						if (items.length > 0) {
+							var $newitems = getItems(items);
+
+							self.isotopeImagesReveal(self.$container, $newitems);
+						}
+						loading(false);
+					},
+					"error": function (result) {
+						loading(false);
+						$.smkAlert({
+							text: 'An error has occured',
+							type: 'danger',
+							permanent: true
+						});
+					}
+				});
+//			} else {
+//				$.ajax({
+//					"url": "/collection/" + self.id() + "/indexedlist?count=" + self.count() + "&start=0",
+//					"method": "post",
+//					"contentType": "application/json",
+//					"data" : convertTerms(self.terms()),
+//					"success": function (data) {
+//						self.indexCount("(" + data.entryCount + " matches)");
+//
+//						var items = self.revealItems(data.records);
+//						if (items.length > 0) {
+//							var $newitems = getItems(items);
+//
+//							self.isotopeImagesReveal(self.$container, $newitems);
+//						}
+//						loading(false);
+//					},
+//					"error": function (result) {
+//						loading(false);
+//						$.smkAlert({
+//							text: 'An error has occured',
+//							type: 'danger',
+//							permanent: true
+//						});
+//					}
+//				});
+//			}
+		}
 		
 		self.deleteMyCollection = function () {
 			$.smkConfirm({
@@ -557,8 +985,8 @@ define(['bridget', 'knockout', 'text!./_collection-view.html', 'isotope', 'image
 			}
 			tile+='<span class="source">'+distitle+'</source><a href="' + record.view_url + '" target="_new" class="links">' + record.sourceCredits() + '</a></div>';
 			tile += '<div class="action-group"><div class="wrap">';
+			tile+="<ul>";
 			if (isLogged()) {
-				tile+="<ul>";
 				if ((self.access() == "WRITE" || self.access() == "OWN")) {
 					tile += '<li><a  data-toggle="tooltip" data-placement="top" title="Remove media" class="fa fa-trash-o"  onclick="removeRecord(\'' + record.dbId + '\',event)"></a></li>';
 				}
@@ -568,9 +996,11 @@ define(['bridget', 'knockout', 'text!./_collection-view.html', 'isotope', 'image
 				} else {
 					tile += '<li><a  data-toggle="tooltip" data-placement="top" title="Add to favorites" onclick="likeRecord(\'' + record.dbId + '\',event);" class="fa fa-heart"></a></li>';
 				}}
-				tile += '<li><a data-toggle="tooltip" data-placement="top" title="Collect it" class="fa fa-download collectbutton" onclick="collect(\'' + record.dbId + '\',event);" ></a></li></ul>';
+				tile += '<li><a data-toggle="tooltip" data-placement="top" title="Collect it" class="fa fa-download collectbutton" onclick="collect(\'' + record.dbId + '\',event);" ></a></li>';
 
 			}
+			tile += '<li><a data-toggle="tooltip" data-placement="top" title="Sort by similarity" class="fa fa-sort" onclick="similar(\'' + record.dbId + '\',event);" ></a></li>';
+			tile += '</ul>';
 
 			tile += "</div></div></div></div>";
 			
