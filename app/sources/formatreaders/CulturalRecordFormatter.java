@@ -23,6 +23,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import model.basicDataTypes.Language;
 import model.basicDataTypes.LiteralOrResource;
 import model.basicDataTypes.ProvenanceInfo;
+import model.basicDataTypes.Resource;
 import model.resources.CulturalObject;
 import model.resources.CulturalObject.CulturalObjectData;
 import model.resources.RecordResource;
@@ -63,7 +64,7 @@ public abstract class CulturalRecordFormatter extends JsonContextRecordFormatRea
 		CulturalObjectData model = new CulturalObjectData();
 		object.setDescriptiveData(model);
 		model.setMetadataRights(new LiteralOrResource("http://creativecommons.org/publicdomain/zero/1.0/"));
-		model.setRdfType("http://www.europeana.eu/schemas/edm/ProvidedCHO");
+		model.setRdfType(new Resource( "http://www.europeana.eu/schemas/edm/ProvidedCHO"));
 
 		try {
 			fillObjectFrom(text);

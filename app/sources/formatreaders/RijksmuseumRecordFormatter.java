@@ -60,8 +60,8 @@ public class RijksmuseumRecordFormatter extends CulturalRecordFormatter {
 		
 		model.setLabel(rec.getMultiLiteralValue("title"));
 		model.setDescription(rec.getMultiLiteralValue("longTitle"));
-		model.setIsShownBy(rec.getLiteralOrResourceValue("edmIsShownBy"));
-		model.setIsShownAt(rec.getLiteralOrResourceValue("edmIsShownAt"));
+		model.setIsShownBy(rec.getResource("edmIsShownBy"));
+		model.setIsShownAt(rec.getResource("edmIsShownAt"));
 		// model.setYear(Integer.parseInt(rec.getStringValue("year")));
 		model.setDccreator(rec.getMultiLiteralOrResourceValue("principalOrFirstMaker"));
 

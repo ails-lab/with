@@ -74,13 +74,13 @@ public class EuropeanaRecordFormatter extends CulturalRecordFormatter {
 		model.setLabel(rec.getMultiLiteralValue(false,"dcTitleLangAware","title"));
 		model.setDescription(rec.getMultiLiteralValue(false,"dcDescriptionLangAware","dcDescription"));
 		model.setAltLabels(rec.getMultiLiteralValue("altLabel"));
-		model.setIsShownBy(rec.getLiteralOrResourceValue("edmIsShownBy"));
-		model.setIsShownAt(rec.getLiteralOrResourceValue("edmIsShownAt"));
+		model.setIsShownBy(rec.getResource("edmIsShownBy"));
+		model.setIsShownAt(rec.getResource("edmIsShownAt"));
 		model.setDates(rec.getWithDateArrayValue("year"));
 		model.setDccreator(rec.getMultiLiteralOrResourceValue(false,"dcCreatorLangAware","dcCreator"));
 		model.setDccontributor(rec.getMultiLiteralOrResourceValue("dcContributor"));
 		model.setKeywords(rec.getMultiLiteralOrResourceValue("dcSubjectLangAware"));
-		object.addToProvenance(new ProvenanceInfo(rec.getStringValue("dataProvider"), model.getIsShownAt()==null?null:model.getIsShownAt().getURI(),null));
+		object.addToProvenance(new ProvenanceInfo(rec.getStringValue("dataProvider"), model.getIsShownAt()==null?null:model.getIsShownAt().toString(),null));
 		object.addToProvenance(new ProvenanceInfo(rec.getStringValue("provider")));
 		String recID = rec.getStringValue("id");
 		String uri = "http://www.europeana.eu/portal/record"+recID+".html";
@@ -92,7 +92,7 @@ public class EuropeanaRecordFormatter extends CulturalRecordFormatter {
 		WithMediaRights withRights = (!Utils.hasInfo(rights))?null:WithMediaRights.getRights(
 				getValuesMap().translateToCommon(FiltersFields.RIGHTS.getFilterId(), rights.get(0)).get(0).toString());
 		String uri3 = rec.getStringValue("edmPreview");
-		String uri2 = model.getIsShownBy()==null?null:model.getIsShownBy().getURI();
+		String uri2 = model.getIsShownBy()==null?null:model.getIsShownBy().toString();
 		if (Utils.hasInfo(uri3)){
 			EmbeddedMediaObject medThumb = new EmbeddedMediaObject();
 			

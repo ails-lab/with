@@ -23,12 +23,10 @@ import com.fasterxml.jackson.databind.JsonNode;
 import model.basicDataTypes.Language;
 import model.basicDataTypes.LiteralOrResource;
 import model.basicDataTypes.ProvenanceInfo;
-import model.resources.AgentObject;
+import model.basicDataTypes.Resource;
 import model.resources.PlaceObject;
-import model.resources.RecordResource;
 import model.resources.PlaceObject.PlaceData;
-import model.resources.CulturalObject;
-import model.resources.CulturalObject.CulturalObjectData;
+import model.resources.RecordResource;
 import play.Logger;
 import play.Logger.ALogger;
 import sources.FilterValuesMap;
@@ -66,7 +64,7 @@ public abstract class PlaceRecordFormatter extends JsonContextRecordFormatReader
 		PlaceData model = new PlaceData();
 		object.setDescriptiveData(model);
 		model.setMetadataRights(new LiteralOrResource("http://creativecommons.org/publicdomain/zero/1.0/"));
-		model.setRdfType("http://www.europeana.eu/schemas/edm/ProvidedCHO");
+		model.setRdfType(new Resource( "http://www.europeana.eu/schemas/edm/ProvidedCHO"));
 
 		try {
 			fillObjectFrom(text);

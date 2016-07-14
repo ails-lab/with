@@ -75,7 +75,7 @@ public class HistorypinItemRecordFormatter extends CulturalRecordFormatter {
 		model.setLabel(rec.getMultiLiteralValue("caption"));
 		model.setDescription(rec.getMultiLiteralValue("description"));
 //		model.setAltLabels(rec.getMultiLiteralValue("altLabel"));
-		model.setIsShownBy(rec.getLiteralOrResourceValue("media_url"));
+		model.setIsShownBy(rec.getResource("media_url"));
 //		model.setIsShownAt(rec.getLiteralOrResourceValue("media_url"));
 		model.setDates(rec.getWithDateArrayValue("date"));
 		model.setDccreator(rec.getMultiLiteralOrResourceValue("user_name"));
@@ -96,7 +96,7 @@ public class HistorypinItemRecordFormatter extends CulturalRecordFormatter {
 		System.out.println(getValuesMap().translateToCommon(FiltersFields.RIGHTS.getFilterId(), rights.get(0)).get(0).toString());
 		
 		String uri3 = "http://www.historypin.org"+rec.getStringValue("display.content");
-		String uri2 = model.getIsShownBy()==null?null:model.getIsShownBy().getURI();
+		String uri2 = model.getIsShownBy()==null?null:model.getIsShownBy().toString();
 		if (Utils.hasInfo(uri3)){
 			EmbeddedMediaObject medThumb = new EmbeddedMediaObject();
 			uri3 = Utils.decodeURL(uri3);

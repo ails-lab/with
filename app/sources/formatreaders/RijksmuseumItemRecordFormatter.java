@@ -16,10 +16,7 @@
 
 package sources.formatreaders;
 
-import java.util.Arrays;
 import java.util.List;
-
-import com.fasterxml.jackson.databind.JsonNode;
 
 import model.EmbeddedMediaObject;
 import model.EmbeddedMediaObject.MediaVersion;
@@ -29,9 +26,9 @@ import model.basicDataTypes.Language;
 import model.basicDataTypes.LiteralOrResource;
 import model.basicDataTypes.MultiLiteralOrResource;
 import model.basicDataTypes.ProvenanceInfo;
+import model.basicDataTypes.Resource;
 import model.resources.CulturalObject;
 import model.resources.CulturalObject.CulturalObjectData;
-import play.Logger;
 import search.FiltersFields;
 import search.Sources;
 import sources.FilterValuesMap;
@@ -124,8 +121,8 @@ public class RijksmuseumItemRecordFormatter extends CulturalRecordFormatter {
 		// List<String> theViews = rec.getStringArrayValue("hasView");
 
 		// model.getDates().addAll(rec.getWithDateArrayValue("year"));
-		LiteralOrResource isShownBy = model.getIsShownBy();
-		String uri2 = isShownBy == null ? null : isShownBy.getURI();
+		Resource isShownBy = model.getIsShownBy();
+		String uri2 = isShownBy == null ? null : isShownBy.toString();
 		String uri3 = rec.getStringValue("webImage.url");
 		if (Utils.hasInfo(uri3)) {
 			EmbeddedMediaObject medThumb = new EmbeddedMediaObject();

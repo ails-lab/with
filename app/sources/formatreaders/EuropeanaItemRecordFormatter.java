@@ -27,6 +27,7 @@ import model.EmbeddedMediaObject.WithMediaType;
 import model.basicDataTypes.Language;
 import model.basicDataTypes.LiteralOrResource;
 import model.basicDataTypes.ProvenanceInfo;
+import model.basicDataTypes.Resource;
 import model.resources.CulturalObject;
 import model.resources.CulturalObject.CulturalObjectData;
 import search.FiltersFields;
@@ -110,9 +111,9 @@ public class EuropeanaItemRecordFormatter extends CulturalRecordFormatter {
 			(WithMediaRights.getRights(getValuesMap().translateToCommon(FiltersFields.RIGHTS.getFilterId(),
 					rightsString).get(0).toString()));
 		
-		model.setIsShownAt(rec.getLiteralOrResourceValue("edmIsShownAt"));
-		model.setIsShownBy(rec.getLiteralOrResourceValue("edmIsShownBy"));
-		String uriAt = model.getIsShownAt()==null?null:model.getIsShownAt().getURI();
+		model.setIsShownAt(rec.getResource("edmIsShownAt"));
+		model.setIsShownBy(rec.getResource("edmIsShownBy"));
+		String uriAt = model.getIsShownAt()==null?null:model.getIsShownAt().toString();
 		ProvenanceInfo provInfo = new ProvenanceInfo(rec.getStringValue("edmDataProvider.def[0]"),uriAt,null);
 		object.addToProvenance(provInfo);
 		
@@ -130,8 +131,8 @@ public class EuropeanaItemRecordFormatter extends CulturalRecordFormatter {
 		rec.exitContext();
 
 		model.getDates().addAll(rec.getWithDateArrayValue("year"));
-		LiteralOrResource isShownBy = model.getIsShownBy();
-		String uri2 = isShownBy==null?null:isShownBy.getURI();
+		Resource isShownBy = model.getIsShownBy();
+		String uri2 = isShownBy==null?null:isShownBy.toString();
 		LiteralOrResource ro = rec.getLiteralOrResourceValue("edmObject","aggregations[0].edmObject");
 		String uriThumbnail = ro==null?null:ro.getURI();
 		if (Utils.hasInfo(uriThumbnail)){

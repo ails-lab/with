@@ -73,7 +73,7 @@ public class NLARecordFormatter extends CulturalRecordFormatter {
 		model.getDates().addAll(rec.getWithDateArrayValue("date"));
 		model.setKeywords(rec.getMultiLiteralOrResourceValue("subject"));
 		model.setDcdate(rec.getWithDateArrayValue("date"));
-		model.setIsShownBy(rec.getLiteralOrResourceValue("identifier[type=url,linktype=fulltext|restricted|unknown].value"));
+		model.setIsShownBy(rec.getResource("identifier[type=url,linktype=fulltext|restricted|unknown].value"));
 		
 		
 		object.addToProvenance(new ProvenanceInfo(Sources.NLA.toString(), rec.getStringValue("troveUrl"), id));
@@ -84,7 +84,7 @@ public class NLARecordFormatter extends CulturalRecordFormatter {
 		WithMediaType type = (Utils.hasInfo(translateToCommon))?WithMediaType.getType(translateToCommon.get(0).toString()):WithMediaType.OTHER;
 		WithMediaRights withRights = (rights==null || rights.size()==0)?null:(WithMediaRights) getValuesMap().translateToCommon(FiltersFields.RIGHTS.getFilterId(), rights.get(0)).get(0);
 		String uri3 = rec.getStringValue("identifier[type=url,linktype=thumbnail].value");
-		String uri2 = model.getIsShownBy()==null?null:model.getIsShownBy().getURI();
+		String uri2 = model.getIsShownBy()==null?null:model.getIsShownBy().toString();
 		
 		if (Utils.hasInfo(uri3)){
 			EmbeddedMediaObject medThumb = new EmbeddedMediaObject();
