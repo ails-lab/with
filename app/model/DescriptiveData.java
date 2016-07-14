@@ -70,7 +70,7 @@ public class DescriptiveData {
 	private Resource rdfType;
 
 	// URIs how this Resource is known elsewhere
-	private MultiLiteralOrResource sameAs;
+	private List<Resource> sameAs;
 
 	// in a timeline where would this resource appear
 	private List<WithDate> dates;
@@ -149,11 +149,11 @@ public class DescriptiveData {
 		this.rdfType = rdfType;
 	}
 
-	public MultiLiteralOrResource getSameAs() {
+	public List<Resource> getSameAs() {
 		return sameAs;
 	}
 
-	public void setSameAs(MultiLiteralOrResource sameAs) {
+	public void setSameAs(List<Resource> sameAs) {
 		this.sameAs = sameAs;
 	}
 
