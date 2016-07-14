@@ -124,12 +124,14 @@ public class SearchController extends WithController {
 				// check if the query needs readability additions for WITHin
 				if( q.containsSource( Sources.WITHin)) {
 					// add conditions for visibility in WITH
-					Query.Term visible = Query.Term.create()
-							.add( "is public", "true" );
+					Query.Clause visible = Query.Clause.create()
+							.add( "administrative.isPublic", "true" );
 					for( String userId: effectiveUserIds()) {
-						visible.add( "collectedBy", userId );
+						visible.add( "collectedBy_READ", userId );
+						visible.add( "collectedBy_WRITE", userId );
+						visible.add( "collectedBy_OWN", userId );						
 					}
-					q.addTerm( visible.filters());
+					q.addClause( visible.filters());
 				}
 				// split the query
 				Map<Sources, Query> queries = q.splitBySource();

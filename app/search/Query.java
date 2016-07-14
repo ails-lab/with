@@ -80,13 +80,13 @@ public class Query {
 	public boolean continuation = false;
 
 	
-	public static class Term {
+	public static class Clause {
 		List<Filter> filters = new ArrayList<Filter>();
-		public static Term create() {
-			return new Term();
+		public static Clause create() {
+			return new Clause();
 		}
 		
-		public Term add(String fieldId, String value ) {
+		public Clause add(String fieldId, String value ) {
 			filters.add( new Filter( fieldId, value ));
 			return this;
 		}
@@ -164,7 +164,7 @@ public class Query {
 	 * @param filters
 	 * @return
 	 */
-	public final Query addTerm( Filter... filters ) {
+	public final Query addClause( Filter... filters ) {
 		List<Filter> newTerm = new ArrayList<Filter>();
 		newTerm.addAll( Arrays.asList( filters ));
 		return this;
@@ -175,7 +175,7 @@ public class Query {
 	 * @param filters
 	 * @return
 	 */
-	public final Query addTerm( List<Filter> filters ) {
+	public final Query addClause( List<Filter> filters ) {
 		this.filters.add( filters );
 		return this;
 	}
@@ -187,10 +187,10 @@ public class Query {
 	 * @return
 	 */
 	public Query andFieldvalues( String fieldId, String... allowedValues )  {
-		List<Filter> term = Arrays.stream( allowedValues )
+		List<Filter> clause = Arrays.stream( allowedValues )
 		.map( val -> new Filter( fieldId, val ))
 		.collect( Collectors.toCollection(()->new ArrayList<Filter>()));
-		addTerm( term );
+		addClause( clause );
 		return this;
 	}
 	
@@ -238,6 +238,11 @@ public class Query {
 		}
 		return false;
 	}
+	
+	public Query or( List<List<Filter>> cnf ) {
+		return new Query();
+	}
+	
 	
 	public Map<Sources, Query> splitBySource() {
 		Map<Sources, Query> res = new HashMap<>();
