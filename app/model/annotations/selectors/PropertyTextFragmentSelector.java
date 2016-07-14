@@ -18,9 +18,12 @@ package model.annotations.selectors;
 
 import org.mongodb.morphia.query.Query;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+
 import model.annotations.Annotation;
 import model.basicDataTypes.Language;
 
+@JsonInclude(value = JsonInclude.Include.NON_NULL)
 public class PropertyTextFragmentSelector extends PropertySelector {
 	
 	private String origValue;

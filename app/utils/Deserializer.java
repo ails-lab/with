@@ -37,13 +37,19 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.BooleanNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.node.TextNode;
 import com.google.common.net.MediaType;
 
 import db.DB;
 import model.annotations.ContextData;
 import model.annotations.ContextData.ContextDataType;
+import model.annotations.selectors.ImageSVGSelector;
+import model.annotations.selectors.PropertySelector;
+import model.annotations.selectors.PropertyTextFragmentSelector;
+import model.annotations.selectors.SelectorType;
 import model.basicDataTypes.Language;
 import model.basicDataTypes.Literal;
 import model.basicDataTypes.LiteralOrResource;
@@ -318,7 +324,7 @@ public class Deserializer {
 			}
 		}
 	}
-
+	
 	public static class PointDeserializer extends JsonDeserializer<Point> {
 
 		@Override
@@ -337,4 +343,50 @@ public class Deserializer {
 			return point;
 		}
 	}
+
+	public static class SelectorTypeDeserializer extends JsonDeserializer<SelectorType> {
+
+		@Override
+		public SelectorType deserialize(JsonParser jp, DeserializationContext arg1) {
+			SelectorType st = null;
+			try {
+				Map<String, Object> map = jp.readValueAs(new TypeReference<Map<String, Object>>() {});
+
+				Object property = map.get("property");
+				Object imageURL = map.get("imageWithURL");
+				
+				if (property != null) {
+					
+					Object start = map.get("start");
+					Object end = map.get("end");
+					Object origValue = map.get("origValue");
+					Object origLang = map.get("origLang");
+
+					if (start != null || end != null || origValue != null || origLang != null) {
+						st = new PropertyTextFragmentSelector();
+						((PropertyTextFragmentSelector)st).setProperty((String)property);
+						((PropertyTextFragmentSelector)st).setStart((Integer)start);
+						((PropertyTextFragmentSelector)st).setEnd((Integer)end);
+						((PropertyTextFragmentSelector)st).setOrigValue((String)origValue);
+						((PropertyTextFragmentSelector)st).setOrigLang(Language.getLanguage((String)origLang));
+					} else {
+						st = new PropertySelector();
+						((PropertySelector)st).setProperty((String)property);
+					}
+				} else if (imageURL != null) {
+					st = new PropertyTextFragmentSelector();
+					((ImageSVGSelector)st).setImageWithURL((String)imageURL);
+					((ImageSVGSelector)st).setFormat((String)map.get("format"));
+					((ImageSVGSelector)st).setSvg((String)map.get("svg"));
+				}
+			} catch (Exception e) {
+				e.printStackTrace();
+				return null;
+			}
+			return st;
+		}
+	}
+
+	
+
 }
