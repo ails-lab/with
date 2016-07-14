@@ -408,9 +408,9 @@ public class User extends UserOrGroup {
 					orgs++;
 				}
 			}
-			json.put("myOrganizations", orgs);
-			json.put("myProjects", projects);
 		}
+		json.put("myOrganizations", orgs);
+		json.put("myProjects", projects);
 		return json;				
 	}
 	
