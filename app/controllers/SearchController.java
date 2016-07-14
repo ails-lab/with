@@ -127,9 +127,9 @@ public class SearchController extends WithController {
 					Query.Clause visible = Query.Clause.create()
 							.add( "administrative.isPublic", "true" );
 					for( String userId: effectiveUserIds()) {
-						visible.add( "collectedBy_READ", userId );
-						visible.add( "collectedBy_WRITE", userId );
-						visible.add( "collectedBy_OWN", userId );						
+						visible.add( "administrative.access.READ", userId );
+						visible.add( "administrative.access.WRITE", userId );
+						visible.add( "administrative.access.OWN", userId );						
 					}
 					q.addClause( visible.filters());
 				}
