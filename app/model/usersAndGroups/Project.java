@@ -32,6 +32,9 @@ public class Project extends UserGroup {
 	public void setPage(Page page) {
 		this.page = page;
 	}
-
+	
+	public String getType() {
+		return "Project";
+	}
 
 }
