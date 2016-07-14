@@ -29,6 +29,7 @@ public enum Fields {
 	resourceType, // the WITH resource type 
 	// for the within search, this might be useful
 	administrative_isPublic,
+	administrative_access, // shortcut field for an entry in any other access field
 	administrative_access_READ, // userids are in here
 	administrative_access_WRITE,
 	administrative_access_OWN,
@@ -43,6 +44,7 @@ public enum Fields {
 	
 	// this should allow to search for records inside a persons collections, a usergroups collection a space
 	// access cannot do this, since public records don't have access for user ids
+	collectedBy, // shortcut field for any other field
 	collectedBy_READ, // which users have this record in READ collections
 	collectedBy_WRITE, // in WRITE collections   
 	collectedBy_OWN, //  in OWN collections
