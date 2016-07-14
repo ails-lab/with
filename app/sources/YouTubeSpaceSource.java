@@ -29,6 +29,7 @@ import model.EmbeddedMediaObject.MediaVersion;
 import model.EmbeddedMediaObject.WithMediaType;
 import model.basicDataTypes.LiteralOrResource;
 import model.basicDataTypes.ProvenanceInfo;
+import model.basicDataTypes.Resource;
 import model.resources.RecordResource;
 import model.resources.RecordResource.RecordDescriptiveData;
 import play.Logger;
@@ -149,7 +150,7 @@ public class YouTubeSpaceSource extends ISpaceSource {
 		
 		RecordDescriptiveData model;
 		it.setDescriptiveData(model=new RecordDescriptiveData());
-		model.setIsShownAt(new LiteralOrResource(isAt).fillDEF());
+		model.setIsShownAt(new Resource( isAt));
 		model.setLabel(item.getMultiLiteralValue("snippet.title"));
 		model.setDescription(item.getMultiLiteralValue("snippet.title"));
 
@@ -178,7 +179,7 @@ public class YouTubeSpaceSource extends ISpaceSource {
 		addOtherThumbs(item, it);
 		RecordDescriptiveData model;
 		it.setDescriptiveData(model=new RecordDescriptiveData());
-		model.setIsShownAt(new LiteralOrResource(isAt).fillDEF());
+		model.setIsShownAt(new Resource(isAt));
 		model.setLabel(item.getMultiLiteralValue("snippet.title"));
 		model.setDescription(item.getMultiLiteralValue("snippet.title"));
 		model.setKeywords(item.getMultiLiteralOrResourceValue("snippet.tags"));
