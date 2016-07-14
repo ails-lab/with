@@ -42,6 +42,13 @@ public class Filter {
 	 */
 	public boolean exact = false;
 	
+	/**
+	 * If you need to be specific about the language you are searching, you can specify it here, the deafult is, that 
+	 * language is ignored. If a source doesn't support language specific search, it may choose to ignore this.
+	 */
+	
+	public String lang = "";
+	
 	public Filter( String fieldId, String value ) {
 		this.fieldId = fieldId;
 		this.value = value;
@@ -55,7 +62,6 @@ public class Filter {
     FieldIds: in the API we use the canonical fieldids, the JSON path into the database representation of the object.
     Some exceptions apply to arrays and labels
     
-    
-    
-  
+    The search.Fields enum contains all Fields that are allowed. 
+    TODO: use Fields enum in the code to agree on spelling??  
  */
