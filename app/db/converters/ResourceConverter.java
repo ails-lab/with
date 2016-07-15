@@ -17,16 +17,19 @@
 package db.converters;
 
 import org.mongodb.morphia.annotations.Converters;
+import org.mongodb.morphia.converters.SimpleValueConverter;
 import org.mongodb.morphia.converters.TypeConverter;
 import org.mongodb.morphia.mapping.MappedField;
 
 import model.basicDataTypes.Resource;
 
 @Converters(ResourceConverter.class)
-public class ResourceConverter extends TypeConverter {
+public class ResourceConverter extends TypeConverter implements SimpleValueConverter  {
+	
 	public ResourceConverter() {
-		super( Resource.class );
+		super(Resource.class);
 	}
+	
 	public Object decode(Class targetClass, Object fromDBObject,
 			MappedField optionalExtraInfo) {
 		if (fromDBObject == null) 
@@ -34,5 +37,10 @@ public class ResourceConverter extends TypeConverter {
 		else {
 			return new Resource( fromDBObject.toString());
 		}
+	}
+	
+	public Object encode( Object resource,  MappedField optionalExtraInfo) {
+		String s = resource.toString();
+		return s;
 	}
 }

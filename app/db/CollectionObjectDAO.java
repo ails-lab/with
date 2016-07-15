@@ -21,21 +21,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
-import java.util.function.BiFunction;
-
-import model.EmbeddedMediaObject;
-import model.EmbeddedMediaObject.MediaVersion;
-import model.EmbeddedMediaObject.WithMediaType;
-import model.MediaObject;
-import model.annotations.ContextData;
-import model.annotations.ContextData.ContextDataBody;
-import model.basicDataTypes.WithAccess.Access;
-import model.resources.collection.CollectionObject;
-import model.resources.RecordResource;
-import model.resources.WithResource;
-import model.resources.WithResource.WithResourceType;
 
 import org.bson.types.ObjectId;
 import org.mongodb.morphia.query.Criteria;
@@ -44,20 +30,24 @@ import org.mongodb.morphia.query.Query;
 import org.mongodb.morphia.query.QueryResults;
 import org.mongodb.morphia.query.UpdateOperations;
 
-import play.libs.Json;
-import sources.core.ParallelAPICall;
-import utils.Tuple;
-
-import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.mongodb.BasicDBObject;
 
 import controllers.MediaController;
 import db.DAO.QueryOperator;
-import elastic.Elastic;
-import elastic.ElasticUpdater;
+import model.EmbeddedMediaObject;
+import model.EmbeddedMediaObject.MediaVersion;
+import model.EmbeddedMediaObject.WithMediaType;
+import model.MediaObject;
+import model.annotations.ContextData;
+import model.annotations.ContextData.ContextDataBody;
+import model.basicDataTypes.WithAccess.Access;
+import model.resources.RecordResource;
+import model.resources.WithResourceType;
+import model.resources.collection.CollectionObject;
+import play.libs.Json;
+import utils.Tuple;
 
 @SuppressWarnings({ "rawtypes", "unchecked", "serial" })
 public class CollectionObjectDAO extends WithResourceDAO<CollectionObject> {

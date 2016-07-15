@@ -29,7 +29,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import model.resources.RecordResource;
-import model.resources.WithResource.WithResourceType;
+import model.resources.WithResourceType;
 
 import org.elasticsearch.action.admin.indices.create.CreateIndexRequestBuilder;
 import org.elasticsearch.action.admin.indices.get.GetIndexRequest;

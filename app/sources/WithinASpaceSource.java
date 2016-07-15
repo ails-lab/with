@@ -37,7 +37,7 @@ import model.basicDataTypes.WithAccess;
 import model.basicDataTypes.WithAccess.Access;
 import model.resources.RecordResource;
 import model.resources.WithResource;
-import model.resources.WithResource.WithResourceType;
+import model.resources.WithResourceType;
 import sources.core.CommonQuery;
 import sources.core.ISpaceSource;
 import sources.core.SourceResponse;

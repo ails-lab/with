@@ -42,7 +42,7 @@ import model.basicDataTypes.ProvenanceInfo;
 import model.resources.CulturalObject.CulturalObjectData;
 import model.resources.RecordResource;
 import model.resources.ThesaurusObject;
-import model.resources.WithResource.WithResourceType;
+import model.resources.WithResourceType;
 import model.resources.collection.CollectionObject;
 
 import org.bson.types.ObjectId;

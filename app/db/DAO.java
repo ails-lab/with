@@ -28,7 +28,7 @@ import java.util.function.Function;
 import play.libs.F.Promise;
 import play.libs.Json;
 import model.quality.RecordQuality;
-import model.resources.WithResource.WithResourceType;
+import model.resources.WithResourceType;
 
 import org.bson.types.ObjectId;
 import org.elasticsearch.action.get.GetRequest;

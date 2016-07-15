@@ -25,6 +25,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 
 import model.EmbeddedMediaObject;
 import model.EmbeddedMediaObject.MediaVersion;
+import model.resources.WithResourceType;
 import model.resources.collection.CollectionObject.CollectionDescriptiveData;
 
 @JsonIgnoreProperties(ignoreUnknown = true)

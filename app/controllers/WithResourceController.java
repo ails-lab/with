@@ -41,7 +41,7 @@ import model.basicDataTypes.ProvenanceInfo;
 import model.quality.RecordQuality;
 import model.resources.CulturalObject.CulturalObjectData;
 import model.resources.RecordResource;
-import model.resources.WithResource.WithResourceType;
+import model.resources.WithResourceType;
 
 import org.bson.types.ObjectId;
 

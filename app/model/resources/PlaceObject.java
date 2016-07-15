@@ -23,7 +23,6 @@ import org.mongodb.morphia.annotations.Entity;
 import model.DescriptiveData;
 import model.basicDataTypes.MultiLiteralOrResource;
 import model.resources.RecordResource.RecordDescriptiveData;
-import model.resources.WithResource.WithResourceType;
 
 @Entity("RecordResource")
 public class PlaceObject extends RecordResource<PlaceObject.PlaceData> {
