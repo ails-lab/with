@@ -17,23 +17,23 @@
 package sources.core;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import model.resources.CulturalObject;
-import model.resources.RecordResource;
-import model.resources.WithResource;
-import search.Sources;
-import search.Response.SingleResponse;
-
 import org.elasticsearch.action.search.SearchResponse;
-
-import utils.ListUtils;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.JsonNode;
+
+import model.resources.CulturalObject;
+import model.resources.RecordResource;
+import model.resources.WithResource;
+import search.Response;
+import search.Response.SingleResponse;
+import search.Response.ValueCounts;
+import search.Sources;
+import utils.ListUtils;
 
 @JsonIgnoreProperties({"filtersLogic","resourcesPerType", "facets"})
 public class SourceResponse {
@@ -168,6 +168,15 @@ public class SourceResponse {
 		r.count = this.count;
 		r.totalCount = this.totalCount;
 		r.items = this.items.getAll();
+		r.facets =new ArrayList<>();
+		for (CommonFilterLogic f : filtersLogic) {
+			CommonFilterResponse ff = f.export();
+			ValueCounts vc = new ValueCounts();
+			vc.fieldId = ff.filterID;
+			vc.valueCounts = ListUtils.transform(ff.suggestedValues, (ValueCount x)-> 
+			new Response.ValueCount(x.value, x.count));
+			r.facets.add(vc);
+		}
 		return r;
 	}
 

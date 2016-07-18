@@ -37,6 +37,13 @@ public class Response {
 		
 		// how often this happens in the query result
 		public int count;
+
+		public ValueCount(String value, int count) {
+			super();
+			this.value = value;
+			this.count = count;
+		}
+		
 	}
 	
 	public static class ValueCounts {
