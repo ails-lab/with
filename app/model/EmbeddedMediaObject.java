@@ -171,7 +171,31 @@ public class EmbeddedMediaObject {
 	private MediaType mimeType = MediaType.ANY_IMAGE_TYPE;
 
 	public static enum Quality {
-		UNKNOWN, IMAGE_SMALL, IMAGE_500k, IMAGE_1, IMAGE_4, VIDEO_SD, VIDEO_HD, AUDIO_8k, AUDIO_32k, AUDIO_256k, TEXT_IMAGE, TEXT_TEXT
+		/**
+		 * Unknown media quality.
+		 */
+		UNKNOWN,
+		/**
+		 * Poor media quality. </br>
+		 * Images: small images, 1 MP or less. 
+		 * Videos: 360p or less.
+		 * Audio: 8 kHz or less.
+		 */
+		POOR,
+		/**
+		 * Medium media quality. </br>
+		 * Images: 1 MP or less
+		 * Videos: 480p.
+		 * Audio: 44.1 kHz or less.
+		 */
+		MEDIUM,
+		/**High media quality. </br>
+		 * Images: 4 MP or more.
+		 * Videos: 720p or 1080p.
+		 * Audio: More than 44.1 kHz.
+		 */
+		HIGH;
+		//UNKNOWN, IMAGE_SMALL, IMAGE_500k, IMAGE_1, IMAGE_4, VIDEO_SD, VIDEO_HD, AUDIO_8k, AUDIO_32k, AUDIO_256k, TEXT_IMAGE, TEXT_TEXT
 	}
 
 	// in KB
