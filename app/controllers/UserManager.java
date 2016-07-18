@@ -69,6 +69,15 @@ import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.ByteArrayEntity;
+import org.apache.http.entity.ContentType;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.util.EntityUtils;
+
 import db.DB;
 
 public class UserManager extends WithController {
@@ -78,7 +87,10 @@ public class UserManager extends WithController {
 	private static final String facebookAccessTokenUrl = "https://graph.facebook.com/v2.3/oauth/access_token";
 	private static final String graphApiUrl = "https://graph.facebook.com/v2.3/me";
 	private static final String facebookSecret = "818572771c2f350e80790b264399cc81";
-
+	private static final String googleAccessTokenUrl = "https://accounts.google.com/o/oauth2/token";
+	private static final String peopleApiUrl = "https://www.googleapis.com/plus/v1/people/me/openIdConnect";
+	private static final String googleSecret = "aGOCP6xGZ_ylm389OAf15mTy";
+	
 	/**
 	 * Propose new username when it is already in use.
 	 *
@@ -411,6 +423,41 @@ public class UserManager extends WithController {
 			// facebookId, String accessToken) becomes obsolete
 			String id = Json.parse(is).get("id").asText();
 			return facebookLogin(id, accessToken);
+		} catch (Exception e) {
+			return badRequest(Json.parse("{\"error\":\"Invalid credentials\"}"));
+		}
+	}
+
+	public static Result googleLogin() {
+		try {			
+			JsonNode json = request().body().asJson();
+			final HttpClient  hc = new DefaultHttpClient();
+			HttpPost httpPost = new HttpPost( googleAccessTokenUrl );
+			httpPost.setHeader( "Content-Type", "application/json");
+			ObjectMapper om = new ObjectMapper();
+			ObjectNode params = (ObjectNode) om.createObjectNode()
+			.put( "code", json.get("code").asText())
+			.put( "client_id", json.get("clientId").asText())			
+			.put("redirect_uri", json.get("redirectUri").asText())
+			.put("client_secret", googleSecret )
+			.put("grand_type", "authorization_code");
+			HttpEntity ent = new ByteArrayEntity(
+					params.toString().getBytes("UTF8"),
+					ContentType.APPLICATION_JSON);
+			httpPost.setEntity(ent);
+			HttpResponse response = hc.execute(httpPost );
+            String jsonResponse = EntityUtils.toString(response.getEntity(), "UTF-8");
+            String accessToken = Json.parse(jsonResponse).get("access_token").asText();
+			// Exchange authorization code for access token.
+//			String accessToken = response.getEntity()
+//					. .get("access_token").asText();
+			// Retrieve profile information about the current user.
+			URL url = new URL(peopleApiUrl + "?access_token=" + accessToken);
+			InputStream is = ((HttpsURLConnection) url.openConnection()).getInputStream();
+			// TODO: Get email from answer when the method facebookLogin(String
+			// facebookId, String accessToken) becomes obsolete
+			String id = Json.parse(is).get("id").asText();
+			return googleLogin(id, accessToken);
 		} catch (Exception e) {
 			return badRequest(Json.parse("{\"error\":\"Invalid credentials\"}"));
 		}
