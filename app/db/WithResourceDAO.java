@@ -87,8 +87,11 @@ public class WithResourceDAO<T extends WithResource> extends DAO<T> {
 	 * @return
 	 */
 	public List<T> getByIds(List<ObjectId> ids) {
-		Query<T> colQuery = this.createQuery().field("_id").hasAnyOf(ids);
-		return find(colQuery).asList();
+		if((ids!=null) && (ids.size() > 0)) {
+			Query<T> colQuery = this.createQuery().field("_id").hasAnyOf(ids);
+			return find(colQuery).asList();
+		} else
+			return null;
 	}
 
 	/**
@@ -335,7 +338,7 @@ public class WithResourceDAO<T extends WithResource> extends DAO<T> {
 		updateOps.set("administrative.withURI", uri);
 		this.update(q, updateOps);
 	}
-	
+
 	public void updateCollectedBy(ObjectId resourceId, ObjectId userId, Access oldAccess, Access newAccess) {
 		//get collectedBy of resourceId, remove first occurrence of (oldAccess,userId), reset collectedBy
 		//so that it contains (newAccess, userId)
