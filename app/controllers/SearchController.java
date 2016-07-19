@@ -37,6 +37,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import elastic.Elastic;
+import elastic.ElasticCoordinator;
 import elastic.ElasticSearcher;
 import elastic.ElasticSearcher.SearchOptions;
 import elastic.ElasticUtils;
@@ -48,6 +49,7 @@ import play.libs.Json;
 import play.mvc.Result;
 import search.Query;
 import search.Response;
+import search.Response.SingleResponse;
 import search.Sources;
 import sources.core.CommonFilterLogic;
 import sources.core.CommonFilterResponse;
@@ -125,11 +127,11 @@ public class SearchController extends WithController {
 				if( q.containsSource( Sources.WITHin)) {
 					// add conditions for visibility in WITH
 					Query.Clause visible = Query.Clause.create()
-							.add( "administrative.isPublic", "true" );
+							.add( "administrative.isPublic", "true", true );
 					for( String userId: effectiveUserIds()) {
-						visible.add( "administrative.access.READ", userId );
-						visible.add( "administrative.access.WRITE", userId );
-						visible.add( "administrative.access.OWN", userId );						
+						visible.add( "administrative.access.READ", userId, true );
+						visible.add( "administrative.access.WRITE", userId, true );
+						visible.add( "administrative.access.OWN", userId, true );
 					}
 					q.addClause( visible.filters());
 				}
@@ -397,24 +399,17 @@ public class SearchController extends WithController {
 
 	public static Promise<Result> searchForMLTRelatedItems() {
 		JsonNode json = request().body().asJson();
-
+		final search.Query q = Json.fromJson(json, search.Query.class );
 		try {
-			List<String> ids = Arrays.asList(json.get("ids").asText().split(","));
-			List<String> fields = Arrays.asList(json.get("fields").asText().split(","));
 
-			SearchOptions options = new SearchOptions();
-			options.setOffset(json.get("page").asInt());
-			options.setCount(json.get("pageSize").asInt());
+			SearchOptions options = new SearchOptions(0, 10);
+			options.setScroll(false);
+			options.setOffset(q.page);
+			options.setCount(q.count);
+			ElasticCoordinator co = new ElasticCoordinator(options);
+			SingleResponse sr = co.relatedMLTSearch(q.filters);
 
-			ElasticSearcher similar = new ElasticSearcher();
-			similar.setTypes(Arrays.asList(json.get("types").asText().split(",")));
-
-
-			//org.elasticsearch.action.search.SearchResponse similars = similar.relatedWithMLT("", ids, fields);
-			//Map<String, List<?>> resourcesPerType = ElasticUtils.getResourcesPerType(similars);
-			Map<String, List<?>> resourcesPerType = new HashMap<String, List<?>>();
-
-			return Promise.pure((Result)ok(Json.toJson(resourcesPerType)));
+			return Promise.pure((Result)ok(Json.toJson(sr)));
 		} catch(NullPointerException npe) {
 
 			return Promise.pure((Result)badRequest("Some fields are missing from the provided json"));
@@ -427,28 +422,17 @@ public class SearchController extends WithController {
 
 	public static Promise<Result> searchForDisMaxRelatedItems() {
 		JsonNode json = request().body().asJson();
-
+		final search.Query q = Json.fromJson(json, search.Query.class );
 		try {
-			String terms = json.get("terms").asText();
-			String provider = json.get("provider").asText();
-			String exclude = json.get("exclude").asText();
 
 			SearchOptions options = new SearchOptions(0, 10);
 			options.setScroll(false);
-			options.setOffset(json.get("page").asInt());
-			options.setCount(json.get("pageSize").asInt());
-			/*options.addFilter("dataProvider", "");
-			options.addFilter("dataProvider", "");
-			options.addFilter("provider", "");*/
+			options.setOffset(q.page);
+			options.setCount(q.count);
+			ElasticCoordinator co = new ElasticCoordinator(options);
+			SingleResponse sr = co.relatedDisMaxSearch(q.filters);
 
-			ElasticSearcher similar = new ElasticSearcher();
-			similar.setTypes(Arrays.asList(json.get("types").asText().split(",")));
-
-			//org.elasticsearch.action.search.SearchResponse similars = similar.relatedWithDisMax(terms, provider, exclude, options);
-			//Map<String, List<?>> resourcesPerType = ElasticUtils.getResourcesPerType(similars);
-			Map<String, List<?>> resourcesPerType = new HashMap<String, List<?>>();
-
-			return Promise.pure((Result)ok(Json.toJson(resourcesPerType)));
+			return Promise.pure((Result)ok(Json.toJson(sr)));
 		} catch(NullPointerException npe) {
 
 			return Promise.pure((Result)badRequest("Some fields are missing from the provided json"));
