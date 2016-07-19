@@ -45,6 +45,8 @@ import utils.Serializer;
 @Converters(MediaTypeConverter.class)
 public class EmbeddedMediaObject {
 	public static final ALogger log = Logger.of( EmbeddedMediaObject.class );
+
+	private static final int MEGA_PIXEL = 1000000;
 	
 	public static enum MediaVersion {
 		Original, Medium, Thumbnail, Square, Tiny;
@@ -184,7 +186,7 @@ public class EmbeddedMediaObject {
 		POOR,
 		/**
 		 * Medium media quality. </br>
-		 * Images: 1 MP or less
+		 * Images: less than 4 MP.
 		 * Videos: 480p.
 		 * Audio: 44.1 kHz or less.
 		 */
@@ -197,6 +199,24 @@ public class EmbeddedMediaObject {
 		HIGH;
 		//UNKNOWN, IMAGE_SMALL, IMAGE_500k, IMAGE_1, IMAGE_4, VIDEO_SD, VIDEO_HD, AUDIO_8k, AUDIO_32k, AUDIO_256k, TEXT_IMAGE, TEXT_TEXT
 	}
+	
+	public void computeQuality() {
+		switch (type) {
+		case IMAGE:
+			int mp = getWidth()*getHeight();
+			if (mp < MEGA_PIXEL)
+				setQuality(Quality.POOR);
+			else  if (mp < 4*MEGA_PIXEL){
+				setQuality(Quality.MEDIUM);
+			} else
+				setQuality(Quality.HIGH);
+			break;
+
+		default:
+			break;
+		}
+	}
+
 
 	// in KB
 	private long size;

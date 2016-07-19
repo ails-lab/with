@@ -189,17 +189,7 @@ public class MediaCheckerActor extends UntypedActor {
 		med.setColorSpace(json.get("colorspace").asText());
 		med.setOrientation();
 		// TODO : fix this naive quality enumeration, for now just for testing!
-		long size = med.getSize();
-
-		if (size < 100) {
-			med.setQuality(Quality.IMAGE_SMALL);
-		} else if (size < 500) {
-			med.setQuality(Quality.IMAGE_500k);
-		} else if (size < 1000) {
-			med.setQuality(Quality.IMAGE_1);
-		} else {
-			med.setQuality(Quality.IMAGE_4);
-		}
+		med.computeQuality();
 		med.setMediaVersion(MediaVersion.Original);
 		med.setParentId(med.getDbId());
 

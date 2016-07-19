@@ -31,6 +31,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.google.common.net.MediaType;
 
+import model.EmbeddedMediaObject.Quality;
 import model.basicDataTypes.LiteralOrResource;
 
 /**
@@ -271,4 +272,5 @@ public class MediaObject extends EmbeddedMediaObject {
 	public MediaObject() {
 	}
 
+	
 }

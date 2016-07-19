@@ -65,7 +65,7 @@ public class DPLASpaceSource extends ISpaceSource {
 		addDefaultWriter(FiltersFields.CREATOR.getFilterId(), fwriter("sourceResource.creator"));
 		addDefaultWriter(FiltersFields.CONTRIBUTOR.getFilterId(), fwriter("sourceResource.contributor"));
 		addDefaultWriter(FiltersFields.PROVIDER.getFilterId(), fwriter("provider.name"));
-		addDefaultWriter(FiltersFields.TYPE.getFilterId(), fwriter("sourceResource.type"));
+//		addDefaultWriter(FiltersFields.TYPE.getFilterId(), fwriter("sourceResource.type"));
 		addDefaultComplexWriter(FiltersFields.YEAR.getFilterId(), qfwriterYEAR());
 		addDefaultWriter(FiltersFields.RIGHTS.getFilterId(), fwriter("sourceResource.rights"));
 		

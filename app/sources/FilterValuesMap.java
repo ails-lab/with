@@ -18,8 +18,10 @@ package sources;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.function.Function;
@@ -28,6 +30,8 @@ import model.EmbeddedMediaObject.WithMediaRights;
 import model.EmbeddedMediaObject.WithMediaType;
 import search.FiltersFields;
 import search.Sources;
+import sources.core.CommonFilter;
+import sources.core.CommonFilterLogic;
 import sources.core.ESpaceSources;
 import sources.core.MapsConfig;
 import sources.core.QueryModifier;
@@ -40,9 +44,12 @@ public class FilterValuesMap {
 	// private HashMap<String, List<Pair<String>>> queryTexts;
 	private HashMap<String, List<Object>> commonvalues;
 	private HashMap<String, Function<List<String>, QueryModifier>> writters;
+	
+	private HashMap<String, List<String>> restrictions;
 
 	public FilterValuesMap() {
 		map = new HashMap<>();
+		restrictions = new HashMap<>();
 		specificvalues = new HashMap<>();
 		commonvalues = new HashMap<>();
 		// queryTexts = new HashMap<String, List<Pair<String>>>();
@@ -153,6 +160,17 @@ public class FilterValuesMap {
 		return writters.containsKey(filterID);
 	}
 	
+	public void addRestriction(String filterId, String... values){
+		restrictions.put(filterId, Arrays.asList(values));
+	}
+	
+	public boolean checkRestriction(String filterId, List<String> values){
+		List<String> a = restrictions.get(filterId);
+		if (a!=null)
+		return ListUtils.containsAny(a, values);
+		else
+			return true;
+	}
 	
 	
 	
@@ -295,6 +313,26 @@ public class FilterValuesMap {
 
 	public Set<String> getFilters() {
 		return new TreeSet<>(writters.keySet());
+	}
+
+	public Set<String> getRestrictions() {
+		return new TreeSet<>(restrictions.keySet());
+	}
+	
+	/**
+	 * builds the facets based on the restrictions of the source. Assumes all the items returned 
+	 * in the query fulfill the restrictions.
+	 * @param itemsCount the number of items returned in the query.
+	 * @return
+	 */
+	public List<CommonFilterLogic> getRestrictionsAsFilters(int itemsCount) {
+		ArrayList<CommonFilterLogic> res = new ArrayList<>();
+		for (Entry<String, List<String>> restr : restrictions.entrySet()) {
+			CommonFilterLogic f = new CommonFilterLogic(restr.getKey());
+			f.addValue(restr.getValue(), itemsCount);
+			res.add(f);
+		}
+		return res;
 	}
 
 }
