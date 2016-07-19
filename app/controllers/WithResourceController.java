@@ -41,7 +41,7 @@ import model.basicDataTypes.ProvenanceInfo;
 import model.quality.RecordQuality;
 import model.resources.CulturalObject.CulturalObjectData;
 import model.resources.RecordResource;
-import model.resources.WithResource.WithResourceType;
+import model.resources.WithResourceType;
 
 import org.bson.types.ObjectId;
 
@@ -177,9 +177,6 @@ public class WithResourceController extends WithController {
 			if (json.has("contextData"))
 				((ObjectNode) json).remove("contextData");
 			Class<?> clazz = Class.forName("model.resources." + resourceType);
-			// if (position.isDefined())
-			// fillInContextTarget(json, collectionDbId.toString(),
-			// position.get());
 			RecordResource record = (RecordResource) Json.fromJson(json, clazz);
 			MultiLiteral label = record.getDescriptiveData().getLabel();
 			if ((label == null) || (label.get(Language.DEFAULT) == null)
@@ -217,13 +214,12 @@ public class WithResourceController extends WithController {
 				} else {// In case the record already exists we overwrite
 						// the existing record's descriptive data for the fields
 						// included in the json, if the user has WRITE access.
-					if (noDouble) {
-						if (DB.getRecordResourceDAO()
-								.existsSameExternaIdInCollection(externalId,
-										collectionDbId)) {
-							result.put("error", "double");
-							return forbidden(result);
-						}
+					boolean existsInSameCollection = DB.getRecordResourceDAO()
+							.existsSameExternaIdInCollection(externalId,
+									collectionDbId);
+					if (noDouble && existsInSameCollection) {
+						result.put("error", "double");
+						return forbidden(result);
 					}
 					if (DB.getRecordResourceDAO()
 							.hasAccess(effectiveUserDbIds(),
@@ -233,17 +229,7 @@ public class WithResourceController extends WithController {
 								.editRecord("descriptiveData",
 										resource.getDbId(),
 										json.get("descriptiveData"));
-					addToCollection(position, recordId, collectionDbId, owns);
-					// TODO: if record has annotations, update/add
-					// annotations (already filtered so that they refer to
-					// colId)
-					// if (record.getContextData() != null
-					// && !record.getContextData().isEmpty()) {
-					// ContextData contextData = (ContextData) record
-					// .getContextData().get(0);
-					// DB.getRecordResourceDAO()
-					// .updateContextData(contextData);
-					// }
+					addToCollection(position, recordId, collectionDbId, owns, existsInSameCollection);
 				}
 			} else { // create new record in db
 				ObjectNode errors;
@@ -355,7 +341,7 @@ public class WithResourceController extends WithController {
 							externalId);
 					break;
 				}
-				addToCollection(position, recordId, collectionDbId, owns);
+				addToCollection(position, recordId, collectionDbId, owns, false);
 			}
 			fillMissingThumbnailsAsync(recordId);
 			result.put("message", "Record succesfully added to collection");
@@ -410,13 +396,13 @@ public class WithResourceController extends WithController {
 	// belongs to are merged and are copied to the record
 	// only if the user OWNs the resource.
 	public static void addToCollection(Option<Integer> position,
-			ObjectId recordId, ObjectId colId, boolean owns) {
+			ObjectId recordId, ObjectId colId, boolean owns, boolean existsInSameCollection) {
 		if (position.isDefined() && (recordId != null)) {
 			Integer pos = position.get();
 			DB.getRecordResourceDAO().addToCollection(recordId, colId, pos,
-					owns);
+					owns, existsInSameCollection);
 		} else {
-			DB.getRecordResourceDAO().appendToCollection(recordId, colId, owns);
+			DB.getRecordResourceDAO().appendToCollection(recordId, colId, owns, existsInSameCollection);
 		}
 	}
 

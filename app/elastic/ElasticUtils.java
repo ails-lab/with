@@ -30,11 +30,11 @@ import model.EmbeddedMediaObject.MediaVersion;
 import model.basicDataTypes.WithAccess.AccessEntry;
 import model.basicDataTypes.WithDate;
 import model.resources.WithResource;
-import model.resources.WithResource.WithAdmin;
-import model.resources.WithResource.WithResourceType;
+import model.resources.WithResourceType;
 import model.DescriptiveData;
 import model.resources.RecordResource;
 import model.resources.RecordResource.RecordDescriptiveData;
+import model.resources.WithAdmin;
 
 import org.bson.types.ObjectId;
 import org.elasticsearch.action.search.SearchResponse;

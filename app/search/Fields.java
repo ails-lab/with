@@ -44,10 +44,10 @@ public enum Fields {
 	
 	// this should allow to search for records inside a persons collections, a usergroups collection a space
 	// access cannot do this, since public records don't have access for user ids
-	collectedBy, // shortcut field for any other field
-	collectedBy_READ, // which users have this record in READ collections
-	collectedBy_WRITE, // in WRITE collections   
-	collectedBy_OWN, //  in OWN collections
+	administrative_collectedBy, // shortcut field for any other field
+	administrative_collectedBy_READ, // which users have this record in READ collections
+	administrative_collectedBy_WRITE, // in WRITE collections   
+	administrative_collectedBy_OWN, //  in OWN collections
 	
 	// provenance info
 	provenance_provider,
@@ -66,7 +66,9 @@ public enum Fields {
 	media_quality, // needs some nice enum values
 	media_mimeType,
 	
-	//
+	usage_tags,
+	
+ 	//
 	// descriptive data fields, first the basics
 	//
 	
@@ -134,18 +136,16 @@ public enum Fields {
 	
 	
 	//
-	// some jackson magic to get fieldnames correct
+	// some jackson magic to get fieldIds correct
 	//
 	@JsonValue
-	public final String value() {
-		return this.name().replace("_", ".");
+	public final String fieldId() {
+	 	return this.name().replace("_", ".");
 	}
 	@JsonCreator
-	public static Fields forValue( String fieldId ) {
+	public static Fields forFieldId( String fieldId ) {
 		String fieldName = fieldId.replace(".", "_");
 		return Fields.valueOf(fieldName);
 	}
-	
-	
 }
 

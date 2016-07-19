@@ -26,7 +26,9 @@ import model.annotations.Annotation;
 import model.annotations.ContextData;
 import model.annotations.ContextData.ContextDataBody;
 import model.basicDataTypes.MultiLiteralOrResource;
+import model.resources.WithAdmin;
 import model.resources.WithResource;
+import model.resources.WithResourceType;
 import model.resources.collection.Exhibition.ExhibitionDescriptiveData;
 
 import org.bson.types.ObjectId;
@@ -96,7 +98,7 @@ public class CollectionObject<T extends CollectionObject.CollectionDescriptiveDa
 	}
 
 	@Embedded
-	public static class CollectionAdmin extends WithResource.WithAdmin {
+	public static class CollectionAdmin extends WithAdmin {
 
 		protected int entryCount = 0;
 		//protected CollectionType collectionType = CollectionType.SimpleCollection;

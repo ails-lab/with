@@ -30,7 +30,7 @@ import model.basicDataTypes.Language;
 import model.basicDataTypes.WithAccess;
 import model.basicDataTypes.WithAccess.Access;
 import model.resources.RecordResource;
-import model.resources.WithResource.WithResourceType;
+import model.resources.WithResourceType;
 
 import org.bson.types.ObjectId;
 import org.elasticsearch.action.search.SearchResponse;

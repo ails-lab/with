@@ -49,7 +49,7 @@ public class RecordResource<T extends RecordResource.RecordDescriptiveData>
 
 	}
 
-	public static class RecordAdmin extends WithResource.WithAdmin {
+	public static class RecordAdmin extends WithAdmin {
 
 		// if this resource / record is derived (modified) from a different Record.
 		private ObjectId parentResourceId;

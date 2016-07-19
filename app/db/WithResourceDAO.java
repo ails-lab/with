@@ -32,6 +32,7 @@ import model.basicDataTypes.WithAccess;
 import model.basicDataTypes.WithAccess.Access;
 import model.basicDataTypes.WithAccess.AccessEntry;
 import model.resources.collection.CollectionObject;
+import model.resources.RecordResource;
 import model.resources.WithResource;
 import model.usersAndGroups.User;
 
@@ -333,6 +334,22 @@ public class WithResourceDAO<T extends WithResource> extends DAO<T> {
 				.disableValidation();
 		updateOps.set("administrative.withURI", uri);
 		this.update(q, updateOps);
+	}
+	
+	public void updateCollectedBy(ObjectId resourceId, ObjectId userId, Access oldAccess, Access newAccess) {
+		//get collectedBy of resourceId, remove first occurrence of (oldAccess,userId), reset collectedBy
+		//so that it contains (newAccess, userId)
+		UpdateOperations<T> updateOps = this.createUpdateOperations()
+				.disableValidation();
+		ArrayList<String> retrievedFields = new ArrayList<String>();
+		retrievedFields.add("administrative.access");
+		WithResource resource = getById(resourceId, new ArrayList<String>(Arrays.asList("administrative.collectedBy")));
+		List<AccessEntry> collectedByOld = resource.getAdministrative().getCollectedBy();
+		collectedByOld.remove(new AccessEntry(userId, oldAccess));
+		collectedByOld.add(new AccessEntry(userId, newAccess));
+		updateOps.set("administrative.collectedBy", collectedByOld);
+		this.update(this.createQuery().field("_id").equal(resourceId),
+				updateOps);
 	}
 
 	public void changeAccess(ObjectId resourceId, ObjectId userId,
