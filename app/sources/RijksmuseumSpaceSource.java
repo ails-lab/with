@@ -29,7 +29,7 @@ import model.EmbeddedMediaObject.WithMediaType;
 import model.EmbeddedMediaObject;
 import model.resources.CulturalObject;
 import model.resources.RecordResource;
-import model.resources.WithResource.WithResourceType;
+import model.resources.WithResourceType;
 import play.libs.Json;
 import search.FiltersFields;
 import search.Sources;
