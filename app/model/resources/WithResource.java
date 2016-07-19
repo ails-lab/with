@@ -73,8 +73,8 @@ import elastic.ElasticUtils;
 public class WithResource<T extends DescriptiveData, U extends WithAdmin> {
 
 	public static final ALogger log = Logger.of( WithResource.class );
-	
-	
+
+
 	public static class Usage {
 		// in how many favorites is it
 		private int likes;
@@ -264,7 +264,7 @@ public class WithResource<T extends DescriptiveData, U extends WithAdmin> {
 	@Embedded
 	//@JsonDeserialize(using = Deserializer.ContextDataDeserializer.class)
 	private ContextData contextData;
-	
+
 	@JsonInclude(Include.ALWAYS)
 	private double qualityMeasure;
 
@@ -275,7 +275,7 @@ public class WithResource<T extends DescriptiveData, U extends WithAdmin> {
 	public void setQualityMeasure(double qualityMeasure) {
 		this.qualityMeasure = qualityMeasure;
 	}
-	
+
 	@JsonSerialize(using = Serializer.ObjectIdArraySerializer.class)
 	private Set<ObjectId> annotationIds;
 	private List<Annotation> annotations;
@@ -439,7 +439,7 @@ public class WithResource<T extends DescriptiveData, U extends WithAdmin> {
 	public void addMedia(MediaVersion mediaVersion, EmbeddedMediaObject media) {
 		addMedia(mediaVersion, media, false);
 	}
-	
+
 	/**
 	 * sets the main media object to the resource
 	 * @param mediaVersion version of the media
@@ -517,7 +517,7 @@ public class WithResource<T extends DescriptiveData, U extends WithAdmin> {
 	 * Currently we are indexing only Resources that represent collected records
 	 */
 	public Map<String, Object> transformWR() {
-		return ElasticUtils.basicTransformation(this);
+		return ElasticUtils.toIndex(this);
 	}
 
 

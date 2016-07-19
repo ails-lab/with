@@ -33,8 +33,6 @@ import javax.imageio.ImageReader;
 import javax.imageio.metadata.IIOMetadata;
 import javax.imageio.stream.ImageInputStream;
 
-import model.Collection;
-import model.CollectionRecord;
 import model.DescriptiveData;
 import model.EmbeddedMediaObject;
 import model.MediaObject;
@@ -53,6 +51,7 @@ import model.basicDataTypes.WithAccess.AccessEntry;
 import model.resources.RecordResource;
 import model.resources.RecordResource.RecordDescriptiveData;
 import model.resources.WithResource.ExternalCollection;
+import model.resources.WithResource.WithResourceType;
 import model.resources.collection.CollectionObject;
 import model.usersAndGroups.User;
 
@@ -73,6 +72,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import play.libs.Json;
+import scala.Array;
 import db.DB;
 import elastic.Elastic;
 import elastic.ElasticEraser;
@@ -89,14 +89,14 @@ public class ElasticTest {
 
 		RecordResource rr = getRecordResource();
 		//CollectionObject co = DB.getCollectionObjectDAO().getById(new ObjectId("569e1f284f55a2655367ec1e"));
-		if (DB.getRecordResourceDAO().makePermanent(rr) == null) { System.out.println("No storage!"); return; }
+		//if (DB.getRecordResourceDAO().makePermanent(rr) == null) { System.out.println("No storage!"); return; }
 		System.out.println("Stored!");
 		ObjectMapper mapper = new ObjectMapper();
 		mapper.setSerializationInclusion(Include.NON_NULL);
 		Json.setObjectMapper(mapper);
-		System.out.println(Json.toJson(rr));
-		System.out.println(rr.transform());
-
+		//System.out.println(Json.toJson(rr));
+		//System.out.println(rr.transform());
+		System.out.println(Json.toJson(ElasticUtils.toIndex(rr)));
 		//ElasticIndexer.index(Elastic.typeResource, rr.getDbId(), rr.transform());
 
 	}
@@ -150,7 +150,7 @@ public class ElasticTest {
 			ids.add(rr.getDbId());
 			docs.add(rr.transform());
 		}
-		ElasticIndexer.indexMany(Elastic.typeCollection, ids, docs);
+		ElasticIndexer.indexMany(WithResourceType.SimpleCollection.toString().toLowerCase(), ids, docs);
 	}
 
 	@Test
@@ -415,31 +415,7 @@ public class ElasticTest {
 		ElasticReindexer.indexInconsistentDocs();
 	}
 
-	/* ************************ OLD CODE ****************** */
-	@Test
-	public void reindex_records_from_mongo() {
-		List<CollectionRecord> allRecs = DB.getCollectionRecordDAO().find().asList();
-		for(CollectionRecord r: allRecs) {
-			//ElasticIndexer indexer = new ElasticIndexer(r);
-			//indexer.index();
-		}
-	}
 
-
-	@Test
-	public void reindex_collection_from_mongo() {
-		List<Collection> allCols = DB.getCollectionDAO().find().asList();
-		for(Collection c: allCols) {
-			//ElasticIndexer indexer = new ElasticIndexer(c);
-			//indexer.indexCollectionMetadata();
-		}
-	}
-
-	@Test
-	public void testTransformations() {
-		RecordResource<RecordDescriptiveData> rr = getRecordResource();
-		System.out.println(Json.toJson(rr.transform()));
-	}
 
 
 	/* **************** PRIVATE METHODS ********************** */
@@ -481,10 +457,7 @@ public class ElasticTest {
 		rr.setProvenance(prov);
 
 		//collectedIn
-		List<CollectionInfo> collectedIn = new ArrayList<CollectionInfo>();
-		CollectionInfo ci = new CollectionInfo(new ObjectId(), 42);
-		collectedIn.add(ci);
-		rr.setCollectedIn(collectedIn);
+		rr.setCollectedIn(new ArrayList<ObjectId>() {{ add(new ObjectId()); }});
 
 		//resourceType is collectionObject
 		//co.setResourceType(WithResourceType.CollectionObject);

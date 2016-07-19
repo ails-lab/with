@@ -24,9 +24,15 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.stream.Collectors;
 
 import model.EmbeddedMediaObject;
 import model.EmbeddedMediaObject.MediaVersion;
+import model.basicDataTypes.MultiLiteral;
+import model.basicDataTypes.MultiLiteralOrResource;
+import model.basicDataTypes.ProvenanceInfo;
+import model.basicDataTypes.WithAccess;
+import model.basicDataTypes.WithAccess.Access;
 import model.basicDataTypes.WithAccess.AccessEntry;
 import model.basicDataTypes.WithDate;
 import model.resources.WithResource;
@@ -43,6 +49,7 @@ import org.elasticsearch.search.SearchHits;
 import play.Logger;
 import play.libs.Json;
 import utils.Serializer;
+import utils.Serializer.WithAccessSerializerForElastic;
 
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -51,8 +58,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.google.common.net.MediaType;
 
 import db.DB;
+import edu.stanford.nlp.io.EncodingPrintWriter.err;
 
 public class ElasticUtils {
 	static private final Logger.ALogger log = Logger.of(ElasticUtils.class);
@@ -350,4 +359,100 @@ public class ElasticUtils {
 		return resourcesPerType;
 	}
 
+
+	/*
+	 * Method that creates elastic json with the same fields
+	 */
+	public static <T extends DescriptiveData, A extends WithAdmin> Map<String, Object> toIndex(WithResource<T, A> rr) {
+
+
+		/*
+		 *
+		 */
+		JsonNode m = mediaMapConverter(rr.getMedia());
+		JsonNode jn = withAccessConverter(rr.getAdministrative());
+		rr.setMedia(null);
+		rr.getAdministrative().setAccess(null);
+
+
+		/*
+		 *
+		 */
+
+		ObjectMapper mapper = new ObjectMapper();
+		SimpleModule module = new SimpleModule();
+		module.addSerializer(MultiLiteral.class, new Serializer.MUltiliteralSerializerForElastic());
+		module.addSerializer(MultiLiteralOrResource.class, new Serializer.MUltiliteralSerializerForElastic());
+		module.addSerializer(WithAccess.class, new Serializer.WithAccessSerializerForElastic());
+		mapper.registerModule(module);
+		mapper.setSerializationInclusion(Include.NON_NULL);
+		Json.setObjectMapper(mapper);
+		// json with multiliteral _all and languages fields
+		JsonNode json = Json.toJson(rr);
+		((ObjectNode)json).put("administrative", jn);
+		((ObjectNode)json).put("media", m);
+
+		if(json.get("provenance")!=null)
+			((ArrayNode)json.get("provenance")).add(getDataProvAndSource(rr.getProvenance()));
+		((ObjectNode)json).remove("content");
+		((ObjectNode)json).remove("collectedResources");
+		((ObjectNode)json).remove("dbId");
+
+
+		Map<String, Object> elasticDoc = mapper.convertValue(json, Map.class);
+
+		return elasticDoc;
+	}
+
+
+
+	private static JsonNode getDataProvAndSource(List<ProvenanceInfo> pr) {
+		ObjectNode jn = Json.newObject();
+		if(pr.size() > 0) {
+			jn.put("dataProvider", pr.get(0).getProvider());
+			jn.put("source", pr.get(pr.size()-1).getProvider());
+		}
+
+		return jn;
+
+	}
+
+
+	private static JsonNode mediaMapConverter(List<HashMap<MediaVersion, EmbeddedMediaObject>> m) {
+		ObjectMapper mapper = new ObjectMapper();
+		SimpleModule module = new SimpleModule();
+		module.addSerializer(MediaType.class, new Serializer.MimeTypeSerializer());
+		module.addSerializer(EmbeddedMediaObject.class, new Serializer.EmbeddeMediaSerializer());
+		mapper.registerModule(module);
+		mapper.setSerializationInclusion(Include.NON_NULL);
+		Json.setObjectMapper(mapper);
+
+		List<EmbeddedMediaObject> ms = new ArrayList<EmbeddedMediaObject>();
+		for(Map<MediaVersion, EmbeddedMediaObject> i: m)
+			for(Entry<?,EmbeddedMediaObject> e: i.entrySet())
+				ms.add(e.getValue());
+
+		return Json.toJson(ms);
+	}
+
+	private static JsonNode withAccessConverter(WithAdmin wa) {
+		ObjectMapper mapper = new ObjectMapper();
+		SimpleModule module = new SimpleModule();
+		module.addSerializer(ObjectId.class, new Serializer.ObjectIdArraySerializer());
+		module.addSerializer(WithAccess.class, new Serializer.WithAccessSerializerForElastic());
+		mapper.registerModule(module);
+		mapper.setSerializationInclusion(Include.NON_NULL);
+		Json.setObjectMapper(mapper);
+
+		ObjectNode jn =  (ObjectNode) Json.toJson(wa.getAccess());
+		ObjectNode collBY = mapper.createObjectNode();
+		collBY.put("READ", Json.toJson(wa.getCollectedBy().stream().filter( ae -> ae.getLevel()==Access.READ)
+				.map(AccessEntry::getUser).map(ObjectId::toString).collect(Collectors.toList())));
+		collBY.put("WRITE", Json.toJson(wa.getCollectedBy().stream().filter( ae -> ae.getLevel()==Access.WRITE)
+				.map(AccessEntry::getUser).map(ObjectId::toString).collect(Collectors.toList())));
+		collBY.put("OWN", Json.toJson(wa.getCollectedBy().stream().filter( ae -> ae.getLevel()==Access.OWN)
+				.map(AccessEntry::getUser).map(ObjectId::toString).collect(Collectors.toList())));
+		jn.put("collectedBy", collBY);
+		return jn;
+	}
 }
