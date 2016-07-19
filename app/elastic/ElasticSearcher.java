@@ -44,6 +44,7 @@ import org.elasticsearch.index.query.GeoDistanceQueryBuilder;
 import org.elasticsearch.index.query.MatchQueryBuilder;
 import org.elasticsearch.index.query.MoreLikeThisQueryBuilder;
 import org.elasticsearch.index.query.NestedQueryBuilder;
+import org.elasticsearch.index.query.OrQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.QueryStringQueryBuilder;
@@ -146,8 +147,9 @@ public class ElasticSearcher {
 	public SearchResponse executeWithAggs(List<QueryBuilder> must_qs, List<QueryBuilder> must_not_qs, SearchOptions options) {
 		SearchRequestBuilder search = this.getBoolSearchRequestBuilder(must_qs, null, must_not_qs, options);
 		for(String aggName: options.getAggregatedFields()) {
-			TermsBuilder agg = AggregationBuilders.terms(aggName.replace(".all", "")).field(aggName);
-			search.addAggregation(agg);
+			TermsBuilder agg1 = AggregationBuilders.terms(aggName+"1").field(aggName+".string");
+			TermsBuilder agg2 = AggregationBuilders.terms(aggName+"2").field(aggName+"._all.string");
+			search.addAggregation(agg1).addAggregation(agg2);
 		}
 
 		//System.out.println(search.toString());
@@ -166,7 +168,7 @@ public class ElasticSearcher {
 
 		BoolQueryBuilder bool = QueryBuilders.boolQuery();
 		for(Filter f: filters) {
-			if(f.exact)
+			if(!f.exact)
 				bool.should(funcScoreQuery(f.fieldId, f.value));
 			else
 				bool.should(termQuery(f.fieldId, f.value));
@@ -223,7 +225,7 @@ public class ElasticSearcher {
 	* Eg could be used within getByLabel etc
 	*/
 	public QueryBuilder termQuery(String fieldName, String value) {
-		TermQueryBuilder term_query = QueryBuilders.termQuery(fieldName+"_all", value);
+		TermQueryBuilder term_query = QueryBuilders.termQuery(fieldName+".string", value);
 		return term_query;
 	}
 
@@ -421,7 +423,7 @@ public class ElasticSearcher {
 				  .setSize(100);
 		}
 
-		if(options.searchFields!=null && options.searchFields.length > 0) {
+		if((options.searchFields!=null) && (options.searchFields.length > 0)) {
 			search.addFields(options.searchFields);
 		}
 		search.setQuery(q);

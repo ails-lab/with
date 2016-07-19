@@ -23,10 +23,15 @@ import org.bson.types.ObjectId;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.search.SearchHit;
+import org.elasticsearch.search.aggregations.Aggregation;
+import org.elasticsearch.search.aggregations.Aggregations;
+import org.elasticsearch.search.aggregations.bucket.terms.InternalTerms;
+import org.elasticsearch.search.aggregations.bucket.terms.Terms;
 
 import db.DB;
 import search.Filter;
 import search.Response.SingleResponse;
+import search.Response.ValueCount;
 import elastic.ElasticSearcher.SearchOptions;
 
 public class ElasticCoordinator {
@@ -34,7 +39,7 @@ public class ElasticCoordinator {
 	private SearchOptions options;
 
 	public ElasticCoordinator() {}
-	
+
 	public ElasticCoordinator(SearchOptions options) {
 		this.options = options;
 	}
@@ -50,13 +55,15 @@ public class ElasticCoordinator {
 	public SingleResponse federatedSearch(List<List<Filter>> filters) {
 		ElasticSearcher searcher = new ElasticSearcher();
 
+		filters.forEach( (a) -> {a.forEach( (f) ->{ if(f.fieldId.equals("anywhere")) f.fieldId = "";});});
+
 		List<QueryBuilder> musts = new ArrayList<QueryBuilder>();
 		for(List<Filter> ors: filters) {
 			musts.add(searcher.boolShouldQuery(ors));
 		}
-		SearchResponse elasticresp =
-				searcher.getBoolSearchRequestBuilder(musts, null, null, options)
-				.execute().actionGet();
+		SearchResponse elasticresp = searcher.executeWithAggs(musts, null, options);
+				/*searcher.getBoolSearchRequestBuilder(musts, null, null, options)
+				.execute().actionGet();*/
 
 
 		SingleResponse sresp = new SingleResponse();
@@ -67,6 +74,9 @@ public class ElasticCoordinator {
 		sresp.items = DB.getRecordResourceDAO().getByIds(ids);
 		sresp.totalCount = (int) elasticresp.getHits().getTotalHits();
 
+		if(elasticresp.getAggregations() != null)
+			extractFacets(elasticresp.getAggregations(), sresp);
+
 		return sresp;
 	}
 
@@ -74,12 +84,12 @@ public class ElasticCoordinator {
 		return null;
 	}
 
-	
+
 	public SearchResponse queryExcecution(QueryBuilder q, SearchOptions options) {
 		ElasticSearcher searcher = new ElasticSearcher();
 		return searcher.getSearchRequestBuilder(q, options).execute().actionGet();
 	}
-	
+
 	public SingleResponse relatedDisMaxSearch(List<List<Filter>> filters) {
 		ElasticSearcher relator = new ElasticSearcher();
 
@@ -132,4 +142,14 @@ public class ElasticCoordinator {
 	}
 
 
+	private void extractFacets(Aggregations aggs, SingleResponse sresp) {
+			for (Aggregation agg : aggs.asList()) {
+				Terms aggTerm = (Terms) agg;
+				if (aggTerm.getBuckets().size() > 0) {
+					for (int i=0; i< aggTerm.getBuckets().size(); i++) {
+						sresp.addFacet(aggTerm.getName(), aggTerm.getBuckets().get(i).getKeyAsString(), (int)aggTerm.getBuckets().get(i).getDocCount());
+					}
+				}
+			}
+	}
 }
