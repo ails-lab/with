@@ -105,6 +105,22 @@ public class Response {
 		 * page (Result). If a paging query asks for more results, counts are freshly calculated.
 		 */
 		public List<ValueCounts> counts = new ArrayList<ValueCounts>();
+		
+		//
+		//  Convenience Functions to build the SingleResponse
+		//
+		
+		public void addItem( Object item ) {
+			
+		}
+		
+		public void addValueToCounts( String fieldId, String value ) {
+			
+		}
+		
+		public void addFacet( String fieldId, String value, int count  ) {
+			
+		}
 	}
 	
 	/**
