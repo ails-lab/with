@@ -53,7 +53,8 @@ libraryDependencies ++= Seq(
  "com.codahale.metrics" % "metrics-core" % "3.0.2",
  "com.google.oauth-client" % "google-oauth-client" % "1.20.0",
  "com.google.api-client" % "google-api-client" % "1.22.0",
- "com.google.apis" % "google-api-services-plus" % "v1-rev413-1.22.0"
+ "com.google.apis" % "google-api-services-plus" % "v1-rev413-1.22.0",
+ "org.facebook4j" % "facebook4j-core" % "2.4.6"
 )
 
 sources in doc in Compile := List() 

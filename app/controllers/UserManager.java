@@ -19,11 +19,10 @@ package controllers;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
-import java.net.URLEncoder;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
@@ -32,37 +31,11 @@ import java.util.regex.Pattern;
 
 import javax.net.ssl.HttpsURLConnection;
 
-import model.ApiKey;
-import model.resources.collection.CollectionObject;
-import model.usersAndGroups.User;
-import model.usersAndGroups.UserGroup;
-import notifications.Notification;
-
-import org.apache.commons.lang3.CharSet;
 import org.apache.commons.mail.DefaultAuthenticator;
 import org.apache.commons.mail.Email;
 import org.apache.commons.mail.EmailException;
 import org.apache.commons.mail.SimpleEmail;
 import org.bson.types.ObjectId;
-
-import play.Logger;
-import play.Logger.ALogger;
-import play.libs.Akka;
-import play.libs.Crypto;
-import play.libs.Json;
-import play.mvc.Result;
-
-import java.util.HashSet;
-
-import scala.concurrent.Await;
-import scala.concurrent.Future;
-import scala.concurrent.duration.Duration;
-import utils.Serializer;
-import utils.Serializer.LightUserSerializer;
-import actors.ApiKeyManager.Create;
-import akka.actor.ActorSelection;
-import akka.pattern.Patterns;
-import akka.util.Timeout;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -71,21 +44,6 @@ import com.fasterxml.jackson.databind.ObjectReader;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-
-import org.apache.http.Consts;
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.ByteArrayEntity;
-import org.apache.http.entity.ContentType;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.params.CoreProtocolPNames;
-import org.apache.http.util.EntityUtils;
-
-import com.google.api.client.auth.oauth2.AuthorizationCodeFlow;
-import com.google.api.client.auth.oauth2.AuthorizationCodeFlow.Builder;
-import com.google.api.client.auth.oauth2.AuthorizationCodeTokenRequest;
 import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeFlow;
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import com.google.api.client.googleapis.auth.oauth2.GoogleTokenResponse;
@@ -94,19 +52,37 @@ import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.services.plus.Plus;
 import com.google.api.services.plus.PlusScopes;
 import com.google.api.services.plus.model.Person;
-import com.google.api.services.plus.model.Person.Emails;
 
+import actors.ApiKeyManager.Create;
+import akka.actor.ActorSelection;
+import akka.pattern.Patterns;
+import akka.util.Timeout;
 import db.DB;
+import facebook4j.Facebook;
+import facebook4j.FacebookFactory;
+import facebook4j.conf.Configuration;
+import facebook4j.conf.ConfigurationBuilder;
+import model.ApiKey;
+import model.resources.collection.CollectionObject;
+import model.usersAndGroups.User;
+import model.usersAndGroups.UserGroup;
+import play.Logger;
+import play.Logger.ALogger;
+import play.libs.Akka;
+import play.libs.Crypto;
+import play.libs.Json;
+import play.mvc.Result;
+import scala.concurrent.Await;
+import scala.concurrent.Future;
+import scala.concurrent.duration.Duration;
+import utils.Serializer;
 
 public class UserManager extends WithController {
 
 	public static final ALogger log = Logger.of(UserManager.class);
 	private static final long TOKENTIMEOUT = 10 * 1000l /* 10 sec */;
 	private static final String facebookAccessTokenUrl = "https://graph.facebook.com/v2.3/oauth/access_token";
-	private static final String graphApiUrl = "https://graph.facebook.com/v2.3/me";
 	private static final String facebookSecret = "818572771c2f350e80790b264399cc81";
-	private static final String googleAccessTokenUrl = "https://accounts.google.com/o/oauth2/token";
-	private static final String peopleApiUrl = "https://www.googleapis.com/plus/v1/people/me/openIdConnect";
 	private static final String googleSecret = "aGOCP6xGZ_ylm389OAf15mTy";
 
 	/**
@@ -420,13 +396,33 @@ public class UserManager extends WithController {
 			URL url = new URL(facebookAccessTokenUrl + "?" + params);
 			InputStream is = ((HttpsURLConnection) url.openConnection()).getInputStream();
 			String accessToken = Json.parse(is).get("access_token").asText();
-			// Retrieve profile information about the current user.
-			url = new URL(graphApiUrl + "?access_token=" + accessToken);
-			is = ((HttpsURLConnection) url.openConnection()).getInputStream();
-			// TODO: Get email from answer when the method facebookLogin(String
-			// facebookId, String accessToken) becomes obsolete
-			String id = Json.parse(is).get("id").asText();
-			return facebookLogin(id, accessToken);
+			// Create conf builder and set authorization and access keys
+			ConfigurationBuilder configurationBuilder = new ConfigurationBuilder();
+			configurationBuilder.setDebugEnabled(true);
+			configurationBuilder.setOAuthAppId(json.get("clientId").asText());
+			configurationBuilder.setOAuthAppSecret(facebookSecret);
+			configurationBuilder.setOAuthAccessToken(accessToken);
+			configurationBuilder
+					.setOAuthPermissions("email, id, name, first_name, last_name, generic");
+			configurationBuilder.setUseSSL(true);
+			configurationBuilder.setJSONStoreEnabled(true);
+
+			// Create configuration and get Facebook instance
+			Configuration configuration = configurationBuilder.build();
+			FacebookFactory ff = new FacebookFactory(configuration);
+			Facebook facebook = ff.getInstance();
+			facebook4j.User facebookUser = facebook.getMe();
+			User user = DB.getUserDAO().getByFacebookId(facebookUser.getId());
+			if (user != null)
+				return login(user);
+			String email = facebookUser.getEmail();
+			user = DB.getUserDAO().getByEmail(email);
+			if (user == null) {
+				return register(facebookUser);
+			}
+			user.setFacebookId(facebookUser.getId());;
+			DB.getUserDAO().makePermanent(user);
+			return login(user);
 		} catch (Exception e) {
 			return badRequest(Json.parse("{\"error\":\"Invalid credentials\"}"));
 		}
@@ -441,6 +437,22 @@ public class UserManager extends WithController {
 		user.setUsername(split[0]);
 		user.setEmail(email);
 		user.setGoogleId(profile.getId());
+		// TODO : Avatar
+		DB.getUserDAO().makePermanent(user);
+		ObjectId fav = CollectionObjectController.createFavorites(user.getDbId());
+		user.setFavorites(fav);
+		return login(user);
+	}
+	
+	private static Result register(facebook4j.User facebookUser) {
+		User user = new User();
+		user.setFirstName(facebookUser.getFirstName());
+		user.setLastName(facebookUser.getLastName());
+		String email = facebookUser.getEmail();
+		String[] split = email.split("@");
+		user.setUsername(split[0]);
+		user.setEmail(email);
+		user.setFacebookId(facebookUser.getId());
 		// TODO : Avatar
 		DB.getUserDAO().makePermanent(user);
 		ObjectId fav = CollectionObjectController.createFavorites(user.getDbId());
