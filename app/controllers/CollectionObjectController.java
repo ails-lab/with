@@ -52,7 +52,6 @@ import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
 import org.bson.Document;
 import org.bson.types.ObjectId;
-import org.mongodb.morphia.query.Query;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -102,6 +101,10 @@ import play.libs.F.Option;
 import play.libs.F.Promise;
 import play.libs.Json;
 import play.mvc.Result;
+import search.Filter;
+import search.Query;
+import search.Response;
+import search.Response.SingleResponse;
 import sources.EuropeanaCollectionSpaceSource;
 import sources.EuropeanaSpaceSource;
 import sources.OWLExporter.CulturalItemOWLExporter;
@@ -1098,53 +1101,76 @@ public class CollectionObjectController extends WithResourceController {
 	/*
 	 * Search for collections/exhibitions in myCollections page.
 	 */
-	public static Result searchMyCollections(String term, Option<String> creator, boolean isExhibition, boolean isShared) {
-		ObjectNode result = Json.newObject();
-
+	public static Result searchMyCollections(String term, boolean isShared) {
 		if (effectiveUserIds().isEmpty()) {
 			return forbidden(Json
 					.parse("\"error\", \"Must specify user for the collection\""));
 		}
-		List<List<Tuple<ObjectId, Access>>> accessedByUserOrGroup = new ArrayList<List<Tuple<ObjectId, Access>>>();
-		List<Tuple<ObjectId, Access>> accessedByLoggedInUser = new ArrayList<Tuple<ObjectId, Access>>();
-		/*for (String effectiveId : effectiveUserIds()) {
-				accessedByLoggedInUser.add(new Tuple<ObjectId, Access>(
-						new ObjectId(effectiveId), Access.READ));
-		}*/
-		accessedByLoggedInUser.add(new Tuple<ObjectId, Access>(
-				new ObjectId(effectiveUserId()), Access.READ));
-		accessedByUserOrGroup.add(accessedByLoggedInUser);
-
-
-		ElasticSearcher searcher = new ElasticSearcher();
-		searcher.addType(WithResourceType.CollectionObject.toString().toLowerCase());
-		if(!isExhibition)
-			searcher.addType(WithResourceType.SimpleCollection.toString().toLowerCase());
+		Query q = new Query();
+		String userId = effectiveUserId();
+		Query.Clause visible =Query.Clause.create();
+		if(!isShared)
+			visible.add( "administrative.access.OWN", userId, true );
 		else
-			searcher.addType(WithResourceType.Exhibition.toString().toLowerCase());
+			visible.add("administrative.access.READ", userId, true )
+				.add("administrative.access.WRITE", userId, true);
 
-		SearchOptions options =  new SearchOptions();
-		/*options.accessList = accessedByUserOrGroup;
+		Query.Clause searchTerm = Query.Clause.create()
+				.add( "anywhere", term, false );
+		Query.Clause type = Query.Clause.create()
+				.add( "resourceType", WithResourceType.SimpleCollection.toString().toLowerCase(), true );
 
-		SearchResponse resp = null;
-		if((creator != null) && creator.isDefined())
-			if(!isShared) {
-				options.addFilter("creatorUsername", creator.get());
-				resp = searcher.searchMycollections(term, options);
-			}
-			else {
-				resp = searcher.searchSharedCollections(term, creator.get(), options);
-			}
+		q.addClause(searchTerm.filters());
+		q.addClause(type.filters());
+		q.addClause(visible.filters());
+		SearchOptions options = new SearchOptions();
+		options.offset = 0;
+		options.count = 10;
 
+		ElasticCoordinator co = new ElasticCoordinator(options);
+		Function<List<List<Filter>>, SingleResponse> recordSearch = ( (filters) -> ( co.federatedSearch(filters)));
 
-		ArrayNode filteredCols = Json.newObject().arrayNode();
-		for(SearchHit h: resp.getHits().getHits())
-			filteredCols.add(Json.toJson(DB.getCollectionObjectDAO().getById(new ObjectId(h.getId()))));
+		Response r = new Response();
+		r.query = q;
+		r.addSingleResponse(ParallelAPICall.createPromise(recordSearch, q.filters).get(OK));
 
-		result.put("filteredCols", filteredCols);
-		return ok(filteredCols); */
-		return ok();
+		return ok(Json.toJson(r));
+	}
 
+	public static Result searchMyExhibitions(String term, boolean isShared) {
+		if (effectiveUserIds().isEmpty()) {
+			return forbidden(Json
+					.parse("\"error\", \"Must specify user for the collection\""));
+		}
+		Query q = new Query();
+		String userId = effectiveUserId();
+		Query.Clause visible =Query.Clause.create();
+		if(!isShared)
+			visible.add( "administrative.access.OWN", userId, true );
+		else
+			visible.add("administrative.access.READ", userId, true )
+				.add("administrative.access.WRITE", userId, true);
+
+		Query.Clause searchTerm = Query.Clause.create()
+				.add( "anywhere", term, false );
+		Query.Clause type = Query.Clause.create()
+				.add( "resourceType", WithResourceType.Exhibition.toString().toLowerCase(), true );
+
+		q.addClause(searchTerm.filters());
+		q.addClause(type.filters());
+		q.addClause(visible.filters());
+		SearchOptions options = new SearchOptions();
+		options.offset = 0;
+		options.count = 10;
+
+		ElasticCoordinator co = new ElasticCoordinator(options);
+		Function<List<List<Filter>>, SingleResponse> recordSearch = ( (filters) -> ( co.federatedSearch(filters)));
+
+		Response r = new Response();
+		r.query = q;
+		r.addSingleResponse(ParallelAPICall.createPromise(recordSearch, q.filters).get(OK));
+
+		return ok(Json.toJson(r));
 	}
 
 
@@ -1204,7 +1230,7 @@ public class CollectionObjectController extends WithResourceController {
 			return internalServerError(result);
 		}
 	}
-	
+
 	/**
 	 * List all Records from a Collection that have certain thesaurus terms using a start item and a page size
 	 */
@@ -1212,33 +1238,33 @@ public class CollectionObjectController extends WithResourceController {
 		ObjectNode result = Json.newObject();
 		ObjectId colId = new ObjectId(collectionId);
 		Locks locks = null;
-		
+
 		JsonNode json = request().body().asJson();
 		try {
-			
+
 			locks = Locks.create().read("Collection #" + collectionId).acquire();
 
 			Result response = errorIfNoAccessToCollection(Action.READ, colId);
 
 			if (!response.toString().equals(ok().toString())) {
 				return response;
-			} else {				
+			} else {
 				QueryBuilder query = CollectionIndexController.getIndexCollectionQuery(colId, json);
-				
+
 				SearchOptions so = new SearchOptions(start, start + count);
 				ElasticCoordinator es = new ElasticCoordinator();
-				
+
 				SearchResponse res = es.queryExcecution(query, so);
 				SearchHits sh = res.getHits();
-				
+
 				long totalHits = sh.getTotalHits();
-				
+
 				List<String> ids = new ArrayList<>();
 				for (Iterator<SearchHit> iter = sh.iterator(); iter.hasNext();) {
 					SearchHit hit = iter.next();
 					ids.add(hit.getId());
 				}
-				
+
 				List<RecordResource> records = DB.getRecordResourceDAO().getByCollectionIds(colId, ids);
 
 				if (records == null) {
@@ -1260,7 +1286,7 @@ public class CollectionObjectController extends WithResourceController {
 						continue;
 					}
 					if (contentFormat.equals("noContent")
-							&& r.getContent() != null) {
+							&& (r.getContent() != null)) {
 						r.getContent().clear();
 						recordsList.add(Json.toJson(r));
 						fillContextData(
@@ -1271,7 +1297,7 @@ public class CollectionObjectController extends WithResourceController {
 										.getCollectedResources(), recordsList);
 						continue;
 					}
-					if (r.getContent() != null
+					if ((r.getContent() != null)
 							&& r.getContent().containsKey(contentFormat)) {
 						HashMap<String, String> newContent = new HashMap<String, String>(
 								1);
@@ -1295,14 +1321,14 @@ public class CollectionObjectController extends WithResourceController {
 				locks.release();
 		}
 	}
-	
+
 	public static Result similarListRecordResources(String collectionId, String itemid, String contentFormat, int start, int count) {
 		ObjectNode result = Json.newObject();
 		ObjectId colId = new ObjectId(collectionId);
 		Locks locks = null;
-		
+
 		try {
-			
+
 			locks = Locks.create().read("Collection #" + collectionId).acquire();
 
 			Result response = errorIfNoAccessToCollection(Action.READ, colId);
@@ -1311,22 +1337,22 @@ public class CollectionObjectController extends WithResourceController {
 				return response;
 			} else {
 				RecordResource rr = DB.getRecordResourceDAO().getById(new ObjectId(itemid));
-								
+
 				QueryBuilder query = CollectionIndexController.getSimilarItemsIndexCollectionQuery(colId, rr.getDescriptiveData());
-				
+
 				SearchOptions so = new SearchOptions(start, start + count);
 				ElasticCoordinator es = new ElasticCoordinator();
 				SearchResponse res = es.queryExcecution(query, so);
 				SearchHits sh = res.getHits();
-				
+
 				long totalHits = sh.getTotalHits();
-				
+
 				List<String> ids = new ArrayList<>();
 				for (Iterator<SearchHit> iter = sh.iterator(); iter.hasNext();) {
 					SearchHit hit = iter.next();
 					ids.add(hit.getId());
 				}
-				
+
 				List<RecordResource> records = DB.getRecordResourceDAO().getByCollectionIds(colId, ids);
 
 				if (records == null) {
@@ -1335,7 +1361,7 @@ public class CollectionObjectController extends WithResourceController {
 					return internalServerError(result);
 				}
 				ArrayNode recordsList = Json.newObject().arrayNode();
-				
+
 				for (RecordResource r : records) {
 					// filter out records to which the user has no read access
 					response = errorIfNoAccessToRecord(Action.READ, r.getDbId());
@@ -1349,7 +1375,7 @@ public class CollectionObjectController extends WithResourceController {
 						continue;
 					}
 					if (contentFormat.equals("noContent")
-							&& r.getContent() != null) {
+							&& (r.getContent() != null)) {
 						r.getContent().clear();
 						recordsList.add(Json.toJson(r));
 						fillContextData(
@@ -1360,7 +1386,7 @@ public class CollectionObjectController extends WithResourceController {
 										.getCollectedResources(), recordsList);
 						continue;
 					}
-					if (r.getContent() != null
+					if ((r.getContent() != null)
 							&& r.getContent().containsKey(contentFormat)) {
 						HashMap<String, String> newContent = new HashMap<String, String>(
 								1);
@@ -1431,7 +1457,7 @@ public class CollectionObjectController extends WithResourceController {
 		ObjectNode result = Json.newObject();
 		ObjectId colId = new ObjectId(id);
 		Locks locks = null;
-		
+
 		try {
 			locks = Locks.create().read("Collection #" + id).acquire();
 			Result response = errorIfNoAccessToCollection(Action.EDIT, colId);
@@ -1439,17 +1465,17 @@ public class CollectionObjectController extends WithResourceController {
 				return response;
 			} else {
 				JsonNode json = request().body().asJson();
-				
+
 				ObjectId user = WithController.effectiveUserDbId();
 				List<AnnotatorConfig> annConfigs = AnnotatorConfig.createAnnotationConfigs(json);
-				
+
 				BiFunction<ObjectId, ObjectId, Boolean> methodQuery = (ObjectId cid, ObjectId uid) -> {
 					List<ContextData<ContextDataBody>> rr = DB.getCollectionObjectDAO().getById(cid).getCollectedResources();
-					
+
 					for (ContextData<ContextDataBody> cd : rr) {
 						try {
 							String recordId = cd.getTarget().getRecordId().toHexString();
-							
+
 //							if (DB.getRecordResourceDAO().hasAccess(uid, Action.EDIT, new ObjectId(recordId))  || isSuperUser()) {
 								RecordResourceController.annotateRecord(recordId, user, annConfigs);
 //							}
@@ -1458,7 +1484,7 @@ public class CollectionObjectController extends WithResourceController {
 							log.error(e.getMessage());
 						}
 					}
-					
+
 					Notification notification = new Notification();
 					notification.setActivity(Activity.MESSAGE);
 					notification.setMessage("Annotating of collection '" + DB.getCollectionObjectDAO().getById(cid).getDescriptiveData().getLabel().get(Language.DEFAULT).get(0) + "' has finished");
@@ -1471,12 +1497,12 @@ public class CollectionObjectController extends WithResourceController {
 
 					return true;
 				};
-				
+
 				ParallelAPICall.createPromise(methodQuery, colId, user, Priority.BACKEND);
 
 				return ok(result);
 			}
-				
+
 		} catch (Exception e1) {
 			result.put("error", e1.getMessage());
 			return internalServerError(result);
