@@ -69,33 +69,6 @@ public class SourceResponse {
 		this.startIndex = offset;
 		List<WithResource<?, ?>> items = new ArrayList<WithResource<?, ?>>();
 
-//		TODO make it using the new model...
-//for (CollectionRecord er : elasticrecords) {
-//	ItemsResponse it = new ItemsResponse();
-//	List<CollectionRecord> rs = DB.getCollectionRecordDAO().getByExternalId(er.getExternalId());
-//	if (rs != null && !rs.isEmpty()) {
-//		CollectionRecord r = rs.get(0);
-//		it.comesFrom = r.getSource();
-//		it.title = r.getTitle();
-//		it.description = r.getDescription();
-//		it.id = r.getDbId().toString();
-//		if(r.getThumbnailUrl() != null)
-//			it.thumb = Arrays.asList(r.getThumbnailUrl().toString());
-//		if (r.getIsShownBy() != null)
-//			it.fullresolution = Arrays.asList(r.getIsShownBy().toString());
-//		it.url = new MyURL();
-//		it.url.fromSourceAPI = r.getSourceUrl();
-//		it.provider = r.getProvider();
-//		it.externalId = r.getExternalId();
-//		it.type = r.getType();
-//		it.rights = r.getItemRights();
-//		it.dataProvider = r.getDataProvider();
-//		it.creator = r.getCreator();
-//		it.year = new ArrayList<>(Arrays.asList(r.getYear()));
-//	    it.tags = er.getTags();
-//		items.add(it);
-//	}
-//}
 		this.items.setCulturalCHO(items);
 	}
 
@@ -168,14 +141,11 @@ public class SourceResponse {
 		r.count = this.count;
 		r.totalCount = this.totalCount;
 		r.items = this.items.getAll();
-		r.facets =new ArrayList<>();
+		r.facets =new ValueCounts();
 		for (CommonFilterLogic f : filtersLogic) {
 			CommonFilterResponse ff = f.export();
-			ValueCounts vc = new ValueCounts();
-			vc.fieldId = ff.filterID;
-			vc.valueCounts = ListUtils.transform(ff.suggestedValues, (ValueCount x)-> 
-			new Response.ValueCount(x.value, x.count));
-			r.facets.add(vc);
+			r.facets.put( ff.filterID, ListUtils.transform(ff.suggestedValues, (ValueCount x)-> 
+			new Response.ValueCount(x.value, x.count)));
 		}
 		return r;
 	}
