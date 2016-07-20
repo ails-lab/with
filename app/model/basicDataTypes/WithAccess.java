@@ -150,6 +150,11 @@ public class WithAccess  {
 		return res;		
 	}
 	
+	/**
+	 * Can a user with given ids (effective ids) read the object
+	 * @param users
+	 * @return
+	 */
 	public boolean canRead( ObjectId... users ) {
 		return ( accessByUsers( users ) != Access.NONE ); 
 	}

@@ -43,7 +43,7 @@ public enum FiltersFields {
 		
 		
 		private FiltersFields(Fields filterId, MultiLiteral filterName) {
-			this(filterId.value(),filterName);
+			this(filterId.fieldId(),filterName);
 		}
 		private FiltersFields(String filterId, MultiLiteral filterName) {
 			this.filterId = filterId;

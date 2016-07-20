@@ -40,10 +40,12 @@ public class Response {
 		public int count;
 		
 		public ValueCount() { };
-		public ValueCount( String value, int count ) {
+		public ValueCount(String value, int count) {
+			super();
 			this.value = value;
 			this.count = count;
 		}
+		
 	}
 	
 	public static class ValueCounts extends HashMap<String,List<ValueCount>> {
