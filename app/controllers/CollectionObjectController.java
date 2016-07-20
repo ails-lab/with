@@ -1102,42 +1102,14 @@ public class CollectionObjectController extends WithResourceController {
 	 * Search for collections/exhibitions in myCollections page.
 	 */
 	public static Result searchMyCollections(String term, boolean isShared) {
-		if (effectiveUserIds().isEmpty()) {
-			return forbidden(Json
-					.parse("\"error\", \"Must specify user for the collection\""));
-		}
-		Query q = new Query();
-		String userId = effectiveUserId();
-		Query.Clause visible =Query.Clause.create();
-		if(!isShared)
-			visible.add( "administrative.access.OWN", userId, true );
-		else
-			visible.add("administrative.access.READ", userId, true )
-				.add("administrative.access.WRITE", userId, true);
-
-		Query.Clause searchTerm = Query.Clause.create()
-				.add( "anywhere", term, false );
-		Query.Clause type = Query.Clause.create()
-				.add( "resourceType", WithResourceType.SimpleCollection.toString().toLowerCase(), true );
-
-		q.addClause(searchTerm.filters());
-		q.addClause(type.filters());
-		q.addClause(visible.filters());
-		SearchOptions options = new SearchOptions();
-		options.offset = 0;
-		options.count = 10;
-
-		ElasticCoordinator co = new ElasticCoordinator(options);
-		Function<List<List<Filter>>, SingleResponse> recordSearch = ( (filters) -> ( co.federatedSearch(filters)));
-
-		Response r = new Response();
-		r.query = q;
-		r.addSingleResponse(ParallelAPICall.createPromise(recordSearch, q.filters).get(OK));
-
-		return ok(Json.toJson(r));
+		return searchMyColOrEx(term, isShared, WithResourceType.SimpleCollection.toString().toLowerCase());
 	}
 
 	public static Result searchMyExhibitions(String term, boolean isShared) {
+		return searchMyColOrEx(term, isShared, WithResourceType.Exhibition.toString().toLowerCase());
+	}
+
+	private static Result searchMyColOrEx(String term, boolean isShared, String resourceType) {
 		if (effectiveUserIds().isEmpty()) {
 			return forbidden(Json
 					.parse("\"error\", \"Must specify user for the collection\""));
@@ -1154,7 +1126,7 @@ public class CollectionObjectController extends WithResourceController {
 		Query.Clause searchTerm = Query.Clause.create()
 				.add( "anywhere", term, false );
 		Query.Clause type = Query.Clause.create()
-				.add( "resourceType", WithResourceType.Exhibition.toString().toLowerCase(), true );
+				.add( "resourceType", resourceType, true );
 
 		q.addClause(searchTerm.filters());
 		q.addClause(type.filters());
@@ -1172,7 +1144,6 @@ public class CollectionObjectController extends WithResourceController {
 
 		return ok(Json.toJson(r));
 	}
-
 
 	/*
 	 * Search for records within a collection.
