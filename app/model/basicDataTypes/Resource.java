@@ -32,4 +32,5 @@ public class Resource {
 	public String toString() {
 		return uri;
 	}
+	
 }
