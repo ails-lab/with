@@ -16,6 +16,9 @@
 
 package model.basicDataTypes;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonValue;
+
 /**
  * A String that can only be a uri
  * @author Arne Stabenau
@@ -24,11 +27,13 @@ package model.basicDataTypes;
 public class Resource {
 	private String uri;
 	
+	@JsonCreator
 	public Resource( String uri ) {
 		// we might check if its a URI
 		this.uri = uri;
 	}
 	
+	@JsonValue
 	public String toString() {
 		return uri;
 	}
