@@ -123,10 +123,11 @@ DELETE  /media/orphan							controllers.MediaController.deleteOrphanMedia()
 DELETE 	/media/:id								controllers.MediaController.deleteMedia(id)
 
 # User Manager Controller
-GET      /user/me                                controllers.UserManager.getMyUser()
+GET      /user/me                               controllers.UserManager.getMyUser()
 POST	/user/register						    controllers.UserManager.register()
 POST	/user/login							    controllers.UserManager.login()
 POST	/user/facebookLogin						controllers.UserManager.facebookLogin()
+POST	/user/googleLogin						controllers.UserManager.googleLogin()
 GET		/user/logout						    controllers.UserManager.logout()
 GET		/user/emailAvailable	                controllers.UserManager.emailAvailable(email:java.lang.String)
 GET		/user/token				                controllers.UserManager.getToken()

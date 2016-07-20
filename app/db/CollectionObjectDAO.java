@@ -341,8 +341,8 @@ public class CollectionObjectDAO extends WithResourceDAO<CollectionObject> {
 				.field("administrative.withCreator")
 				.notEqual(loggedInEffIds.get(0));
 		List<Criteria> criteria = new ArrayList<Criteria>(
-				Arrays.asList(loggedInUserWithAtLeastAccessQuery(loggedInEffIds,
-						Access.READ)));
+				Arrays.asList(atLeastAccessCriteria(
+						Arrays.asList(new Tuple(loggedInEffIds.get(0), Access.READ)))));
 		qShared.and(criteria.toArray(new Criteria[criteria.size()]));
 		ObjectNode result2 = countPerCollectionType(qShared);
 		result.put("sharedWithMe", result2);

@@ -19,9 +19,10 @@ package controllers;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
@@ -30,36 +31,11 @@ import java.util.regex.Pattern;
 
 import javax.net.ssl.HttpsURLConnection;
 
-import model.ApiKey;
-import model.resources.collection.CollectionObject;
-import model.usersAndGroups.User;
-import model.usersAndGroups.UserGroup;
-import notifications.Notification;
-
 import org.apache.commons.mail.DefaultAuthenticator;
 import org.apache.commons.mail.Email;
 import org.apache.commons.mail.EmailException;
 import org.apache.commons.mail.SimpleEmail;
 import org.bson.types.ObjectId;
-
-import play.Logger;
-import play.Logger.ALogger;
-import play.libs.Akka;
-import play.libs.Crypto;
-import play.libs.Json;
-import play.mvc.Result;
-
-import java.util.HashSet;
-
-import scala.concurrent.Await;
-import scala.concurrent.Future;
-import scala.concurrent.duration.Duration;
-import utils.Serializer;
-import utils.Serializer.LightUserSerializer;
-import actors.ApiKeyManager.Create;
-import akka.actor.ActorSelection;
-import akka.pattern.Patterns;
-import akka.util.Timeout;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -68,16 +44,46 @@ import com.fasterxml.jackson.databind.ObjectReader;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeFlow;
+import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
+import com.google.api.client.googleapis.auth.oauth2.GoogleTokenResponse;
+import com.google.api.client.http.javanet.NetHttpTransport;
+import com.google.api.client.json.jackson2.JacksonFactory;
+import com.google.api.services.plus.Plus;
+import com.google.api.services.plus.PlusScopes;
+import com.google.api.services.plus.model.Person;
 
+import actors.ApiKeyManager.Create;
+import akka.actor.ActorSelection;
+import akka.pattern.Patterns;
+import akka.util.Timeout;
 import db.DB;
+import facebook4j.Facebook;
+import facebook4j.FacebookFactory;
+import facebook4j.conf.Configuration;
+import facebook4j.conf.ConfigurationBuilder;
+import model.ApiKey;
+import model.resources.collection.CollectionObject;
+import model.usersAndGroups.User;
+import model.usersAndGroups.UserGroup;
+import play.Logger;
+import play.Logger.ALogger;
+import play.libs.Akka;
+import play.libs.Crypto;
+import play.libs.Json;
+import play.mvc.Result;
+import scala.concurrent.Await;
+import scala.concurrent.Future;
+import scala.concurrent.duration.Duration;
+import utils.Serializer;
 
 public class UserManager extends WithController {
 
 	public static final ALogger log = Logger.of(UserManager.class);
 	private static final long TOKENTIMEOUT = 10 * 1000l /* 10 sec */;
 	private static final String facebookAccessTokenUrl = "https://graph.facebook.com/v2.3/oauth/access_token";
-	private static final String graphApiUrl = "https://graph.facebook.com/v2.3/me";
 	private static final String facebookSecret = "818572771c2f350e80790b264399cc81";
+	private static final String googleSecret = "aGOCP6xGZ_ylm389OAf15mTy";
 
 	/**
 	 * Propose new username when it is already in use.
@@ -91,8 +97,7 @@ public class UserManager extends WithController {
 	 *
 	 * @return the array node with two suggested alternative usernames
 	 */
-	private static ArrayNode proposeUsername(String initial, String firstName,
-			String lastName) {
+	private static ArrayNode proposeUsername(String initial, String firstName, String lastName) {
 		ArrayNode names = Json.newObject().arrayNode();
 		String proposedName;
 		int i = 0;
@@ -172,8 +177,7 @@ public class UserManager extends WithController {
 			} else {
 				password = json.get("password").asText();
 				if (password.length() < 6) {
-					error.put("password",
-							"Password must contain more than 6 characters");
+					error.put("password", "Password must contain more than 6 characters");
 				}
 			}
 		}
@@ -201,10 +205,11 @@ public class UserManager extends WithController {
 
 	public static Result getUser(String id) {
 		try {
-			//User user = DB.getUserDAO().getById(new ObjectId(id), new ArrayList<String>() {{ add("firstName"); add("lastName"); }});
+			// User user = DB.getUserDAO().getById(new ObjectId(id), new
+			// ArrayList<String>() {{ add("firstName"); add("lastName"); }});
 			User user = DB.getUserDAO().getById(new ObjectId(id));
 			if (user != null) {
-				//return ok(lightUserSerialization(user));
+				// return ok(lightUserSerialization(user));
 				return ok(Json.toJson(user));
 			}
 			return badRequest();
@@ -241,13 +246,11 @@ public class UserManager extends WithController {
 		// If everything is ok store the user at the database
 		User user = Json.fromJson(json, User.class);
 		DB.getUserDAO().makePermanent(user);
-		ObjectId fav = CollectionObjectController.createFavorites(user
-				.getDbId());
+		ObjectId fav = CollectionObjectController.createFavorites(user.getDbId());
 		user.setFavorites(fav);
 		session().put("user", user.getDbId().toHexString());
 		session().put("sourceIp", request().remoteAddress());
-		session().put("lastAccessTime",
-				Long.toString(System.currentTimeMillis()));
+		session().put("lastAccessTime", Long.toString(System.currentTimeMillis()));
 		return ok(Json.toJson(user));
 	}
 
@@ -263,20 +266,16 @@ public class UserManager extends WithController {
 		try {
 			ObjectId userId = new ObjectId(id);
 			ObjectId currentUserId = WithController.effectiveUserDbId();
-			Status errorMessage = badRequest(Json
-					.parse("{'error':'User cannot be deleted due to ownership of "
-							+ "shared collections or groups. Please contact the developers'}"));
-			if ((currentUserId == null) || (!currentUserId.equals(userId) && !WithController.isSuperUser()) )
-				return forbidden(Json
-						.parse("{'error' : 'No rights for user deletion'}"));
+			Status errorMessage = badRequest(Json.parse("{'error':'User cannot be deleted due to ownership of "
+					+ "shared collections or groups. Please contact the developers'}"));
+			if ((currentUserId == null) || (!currentUserId.equals(userId) && !WithController.isSuperUser()))
+				return forbidden(Json.parse("{'error' : 'No rights for user deletion'}"));
 			Set<ObjectId> groupsToDelete = new HashSet<ObjectId>();
 			Set<ObjectId> collectionsToDelete = new HashSet<ObjectId>();
-			User user = DB.getUserDAO().getById(userId,
-					Arrays.asList("adminInGroups"));
+			User user = DB.getUserDAO().getById(userId, Arrays.asList("adminInGroups"));
 			Set<ObjectId> groups = user.getAdminInGroups();
 			for (ObjectId groupId : groups) {
-				UserGroup group = DB.getUserGroupDAO().getById(groupId,
-						Arrays.asList("creator, users"));
+				UserGroup group = DB.getUserGroupDAO().getById(groupId, Arrays.asList("creator, users"));
 				if ((group == null) || !group.getCreator().equals(userId))
 					continue;
 				if (group.getUsers().size() > 1) {
@@ -284,8 +283,7 @@ public class UserManager extends WithController {
 				}
 				groupsToDelete.add(groupId);
 			}
-			List<CollectionObject> collections = DB.getCollectionObjectDAO()
-					.getByCreator(userId, 0, 0);
+			List<CollectionObject> collections = DB.getCollectionObjectDAO().getByCreator(userId, 0, 0);
 			for (CollectionObject collection : collections) {
 				if (collection.getAdministrative().getAccess().getAcl().size() > 1) {
 					return errorMessage;
@@ -297,11 +295,9 @@ public class UserManager extends WithController {
 			for (ObjectId collectionId : collectionsToDelete)
 				DB.getCollectionObjectDAO().deleteById(collectionId);
 			DB.getUserDAO().deleteById(userId);
-			return ok(Json
-					.parse("{'success' : 'User was successfully deleted from the database'}"));
+			return ok(Json.parse("{'success' : 'User was successfully deleted from the database'}"));
 		} catch (Exception e) {
-			return internalServerError(Json.parse("{'error' : '"
-					+ e.getMessage() + "'}"));
+			return internalServerError(Json.parse("{'error' : '" + e.getMessage() + "'}"));
 		}
 	}
 
@@ -309,11 +305,8 @@ public class UserManager extends WithController {
 		log.info(accessToken);
 		User u = null;
 		try {
-			URL url = new URL(
-					"https://www.googleapis.com/oauth2/v1/userinfo?alt=json&access_token="
-							+ accessToken);
-			HttpsURLConnection connection = (HttpsURLConnection) url
-					.openConnection();
+			URL url = new URL("https://www.googleapis.com/oauth2/v1/userinfo?alt=json&access_token=" + accessToken);
+			HttpsURLConnection connection = (HttpsURLConnection) url.openConnection();
 			InputStream is = connection.getInputStream();
 			JsonNode res = Json.parse(is);
 			String email = res.get("email").asText();
@@ -328,24 +321,29 @@ public class UserManager extends WithController {
 				String[] split = email.split("@");
 				u.setUsername(split[0]);
 				DB.getUserDAO().makePermanent(u);
-				ObjectId fav = CollectionObjectController.createFavorites(u
-						.getDbId());
+				ObjectId fav = CollectionObjectController.createFavorites(u.getDbId());
 			}
 			u.setGoogleId(googleId);
 			DB.getUserDAO().makePermanent(u);
-			//return ok(lightUserSerialization(u));
+			// return ok(lightUserSerialization(u));
 			if (u != null) {
 				session().put("user", u.getDbId().toHexString());
 				session().put("username", u.getUsername());
 				session().put("sourceIp", request().remoteAddress());
-				session().put("lastAccessTime",
-						Long.toString(System.currentTimeMillis()));
+				session().put("lastAccessTime", Long.toString(System.currentTimeMillis()));
 			}
 			return ok(Json.toJson(u));
 		} catch (Exception e) {
-			return badRequest(Json
-					.parse("{\"error\":\"Couldn't validate user\"}"));
+			return badRequest(Json.parse("{\"error\":\"Couldn't validate user\"}"));
 		}
+	}
+
+	private static Result login(User user) {
+		session().put("user", user.getDbId().toHexString());
+		session().put("username", user.getUsername());
+		session().put("sourceIp", request().remoteAddress());
+		session().put("lastAccessTime", Long.toString(System.currentTimeMillis()));
+		return ok(Json.toJson(user));
 	}
 
 	private static Result facebookLogin(String facebookId, String accessToken) {
@@ -355,8 +353,7 @@ public class UserManager extends WithController {
 			URL url = new URL(
 					"https://graph.facebook.com/me?fields=email,first_name,last_name&format=json&access_token="
 							+ accessToken);
-			HttpsURLConnection connection = (HttpsURLConnection) url
-					.openConnection();
+			HttpsURLConnection connection = (HttpsURLConnection) url.openConnection();
 			InputStream is = connection.getInputStream();
 			JsonNode res = Json.parse(is);
 			String email = res.get("email").asText();
@@ -371,23 +368,20 @@ public class UserManager extends WithController {
 				String[] split = email.split("@");
 				u.setUsername(split[0]);
 				DB.getUserDAO().makePermanent(u);
-				ObjectId fav = CollectionObjectController.createFavorites(u
-						.getDbId());
+				ObjectId fav = CollectionObjectController.createFavorites(u.getDbId());
 			}
 			u.setFacebookId(facebookId);
 			DB.getUserDAO().makePermanent(u);
-			//return ok(lightUserSerialization(u));
+			// return ok(lightUserSerialization(u));
 			if (u != null) {
 				session().put("user", u.getDbId().toHexString());
 				session().put("username", u.getUsername());
 				session().put("sourceIp", request().remoteAddress());
-				session().put("lastAccessTime",
-						Long.toString(System.currentTimeMillis()));
+				session().put("lastAccessTime", Long.toString(System.currentTimeMillis()));
 			}
 			return ok(Json.toJson(u));
 		} catch (Exception e) {
-			return badRequest(Json
-					.parse("{\"error\":\"Couldn't validate user\"}"));
+			return badRequest(Json.parse("{\"error\":\"Couldn't validate user\"}"));
 		}
 	}
 
@@ -395,22 +389,103 @@ public class UserManager extends WithController {
 		try {
 			JsonNode json = request().body().asJson();
 			// Exchange authorization code for access token.
-			String params = "code=" + json.get("code").asText() + "&client_id="
-					+ json.get("clientId").asText() + "&redirect_uri="
-					+ json.get("redirectUri").asText() + "&client_secret="
+			String params = "code=" + json.get("code").asText() + "&client_id=" + json.get("clientId").asText()
+					+ "&redirect_uri=" + json.get("redirectUri").asText() + "&client_secret="
 					// TODO: Put the facebookSecret in the configuration file
 					+ facebookSecret;
 			URL url = new URL(facebookAccessTokenUrl + "?" + params);
-			InputStream is = ((HttpsURLConnection) url.openConnection())
-					.getInputStream();
+			InputStream is = ((HttpsURLConnection) url.openConnection()).getInputStream();
 			String accessToken = Json.parse(is).get("access_token").asText();
-			// Retrieve profile information about the current user.
-			url = new URL(graphApiUrl + "?access_token=" + accessToken);
-			is = ((HttpsURLConnection) url.openConnection()).getInputStream();
-			// TODO: Get email from answer when the method facebookLogin(String
-			// facebookId, String accessToken) becomes obsolete
-			String id = Json.parse(is).get("id").asText();
-			return facebookLogin(id, accessToken);
+			// Create conf builder and set authorization and access keys
+			ConfigurationBuilder configurationBuilder = new ConfigurationBuilder();
+			configurationBuilder.setDebugEnabled(true);
+			configurationBuilder.setOAuthAppId(json.get("clientId").asText());
+			configurationBuilder.setOAuthAppSecret(facebookSecret);
+			configurationBuilder.setOAuthAccessToken(accessToken);
+			configurationBuilder
+					.setOAuthPermissions("email, id, name, first_name, last_name, generic");
+			configurationBuilder.setUseSSL(true);
+			configurationBuilder.setJSONStoreEnabled(true);
+
+			// Create configuration and get Facebook instance
+			Configuration configuration = configurationBuilder.build();
+			FacebookFactory ff = new FacebookFactory(configuration);
+			Facebook facebook = ff.getInstance();
+			facebook4j.User facebookUser = facebook.getMe();
+			User user = DB.getUserDAO().getByFacebookId(facebookUser.getId());
+			if (user != null)
+				return login(user);
+			String email = facebookUser.getEmail();
+			user = DB.getUserDAO().getByEmail(email);
+			if (user == null) {
+				return register(facebookUser);
+			}
+			user.setFacebookId(facebookUser.getId());;
+			DB.getUserDAO().makePermanent(user);
+			return login(user);
+		} catch (Exception e) {
+			return badRequest(Json.parse("{\"error\":\"Invalid credentials\"}"));
+		}
+	}
+
+	private static Result register(Person profile) {
+		User user = new User();
+		user.setFirstName(profile.getName().getGivenName());
+		user.setLastName(profile.getName().getFamilyName());
+		String email = profile.getEmails().get(0).getValue();
+		String[] split = email.split("@");
+		user.setUsername(split[0]);
+		user.setEmail(email);
+		user.setGoogleId(profile.getId());
+		// TODO : Avatar
+		DB.getUserDAO().makePermanent(user);
+		ObjectId fav = CollectionObjectController.createFavorites(user.getDbId());
+		user.setFavorites(fav);
+		return login(user);
+	}
+	
+	private static Result register(facebook4j.User facebookUser) {
+		User user = new User();
+		user.setFirstName(facebookUser.getFirstName());
+		user.setLastName(facebookUser.getLastName());
+		String email = facebookUser.getEmail();
+		String[] split = email.split("@");
+		user.setUsername(split[0]);
+		user.setEmail(email);
+		user.setFacebookId(facebookUser.getId());
+		// TODO : Avatar
+		DB.getUserDAO().makePermanent(user);
+		ObjectId fav = CollectionObjectController.createFavorites(user.getDbId());
+		user.setFavorites(fav);
+		return login(user);
+	}
+
+	public static Result googleLogin() {
+		try {
+			JsonNode json = request().body().asJson();
+			GoogleAuthorizationCodeFlow flow = new GoogleAuthorizationCodeFlow.Builder(new NetHttpTransport(),
+					new JacksonFactory(), json.get("clientId").asText(), googleSecret,
+					Collections.singleton(PlusScopes.PLUS_ME)).build();
+			GoogleTokenResponse tokenResponse = flow.newTokenRequest(json.get("code").asText())
+					.setRedirectUri(json.get("redirectUri").asText()).execute();
+			String accessToken = tokenResponse.getAccessToken();
+			// Build the credential from stored token data.
+			GoogleCredential credential = new GoogleCredential.Builder()
+					.setClientSecrets(json.get("clientId").asText(), googleSecret).build()
+					.setFromTokenResponse(tokenResponse);
+			Plus plus = new Plus.Builder(new NetHttpTransport(), new JacksonFactory(), credential).build();
+			Person profile = plus.people().get("me").execute();
+			User user = DB.getUserDAO().getByGoogleId(profile.getId());
+			if (user != null)
+				return login(user);
+			String email = profile.getEmails().get(0).getValue();
+			user = DB.getUserDAO().getByEmail(email);
+			if (user == null) {
+				return register(profile);
+			}
+			user.setGoogleId(profile.getId());
+			DB.getUserDAO().makePermanent(user);
+			return login(user);
 		} catch (Exception e) {
 			return badRequest(Json.parse("{\"error\":\"Invalid credentials\"}"));
 		}
@@ -433,8 +508,7 @@ public class UserManager extends WithController {
 				session().put("user", u.getDbId().toHexString());
 				session().put("username", u.getUsername());
 				session().put("sourceIp", request().remoteAddress());
-				session().put("lastAccessTime",
-						Long.toString(System.currentTimeMillis()));
+				session().put("lastAccessTime", Long.toString(System.currentTimeMillis()));
 				return ok(Json.toJson(u));
 			} else {
 				if (!json.has("accessToken")) {
@@ -453,8 +527,7 @@ public class UserManager extends WithController {
 				session().put("user", u.getDbId().toHexString());
 				session().put("username", u.getUsername());
 				session().put("sourceIp", request().remoteAddress());
-				session().put("lastAccessTime",
-						Long.toString(System.currentTimeMillis()));
+				session().put("lastAccessTime", Long.toString(System.currentTimeMillis()));
 				return ok(Json.toJson(u));
 			} else {
 				String accessToken = json.get("accessToken").asText();
@@ -491,9 +564,8 @@ public class UserManager extends WithController {
 			session().put("user", u.getDbId().toHexString());
 			session().put("username", u.getUsername());
 			session().put("sourceIp", request().remoteAddress());
-			session().put("lastAccessTime",
-					Long.toString(System.currentTimeMillis()));
-			//return ok(lightUserSerialization(u));
+			session().put("lastAccessTime", Long.toString(System.currentTimeMillis()));
+			// return ok(lightUserSerialization(u));
 			return ok(Json.toJson(u));
 		} else {
 			error.put("password", "Invalid Password");
@@ -522,8 +594,7 @@ public class UserManager extends WithController {
 				if (u != null) {
 					session().put("user", userId);
 					session().put("sourceIp", request().remoteAddress());
-					session().put("lastAccessTime",
-							Long.toString(System.currentTimeMillis()));
+					session().put("lastAccessTime", Long.toString(System.currentTimeMillis()));
 					ObjectNode result = Json.newObject();
 					result = (ObjectNode) Json.parse(DB.getJson(u));
 					result.remove("md5Password");
@@ -573,8 +644,7 @@ public class UserManager extends WithController {
 		}
 	}
 
-	public static Result editUser(String id) throws JsonProcessingException,
-			IOException {
+	public static Result editUser(String id) throws JsonProcessingException, IOException {
 
 		// Only changes first and last name for testing purposes
 		//
@@ -672,8 +742,7 @@ public class UserManager extends WithController {
 
 		if (userId != null) {
 
-			result.put("email",
-					"An email has been sent to the email address you have registered with.");
+			result.put("email", "An email has been sent to the email address you have registered with.");
 
 			create.proxyUserId = new ObjectId(userId);
 
@@ -683,8 +752,7 @@ public class UserManager extends WithController {
 
 		} else {
 
-			error.put("error",
-					"You need to log in before an API key can be issued.");
+			error.put("error", "You need to log in before an API key can be issued.");
 
 			result.put("error", error);
 
@@ -700,10 +768,8 @@ public class UserManager extends WithController {
 
 			result.remove("email");
 
-			error.put(
-					"error",
-					"Your user account already has already been issued an API key. "
-							+ "To request a new one, send an email to: withdev@image.ece.ntua.gr.");
+			error.put("error", "Your user account already has already been issued an API key. "
+					+ "To request a new one, send an email to: withdev@image.ece.ntua.gr.");
 
 			// result.put("Key", withKey.getKeyString());
 
@@ -712,8 +778,7 @@ public class UserManager extends WithController {
 			return badRequest(result);
 		}
 
-		final ActorSelection testActor = Akka.system().actorSelection(
-				"/user/apiKeyManager");
+		final ActorSelection testActor = Akka.system().actorSelection("/user/apiKeyManager");
 
 		create.dbId = "";
 		create.call = "";
@@ -757,22 +822,12 @@ public class UserManager extends WithController {
 			ln = " " + u.getLastName();
 		}
 
-		String message = "Dear user"
-				+ fn
-				+ ln
-				+ ","
-				+ newLine
-				+ newLine
-				+ "We received a request for a new API key. Your new API key is : "
-				+ newLine
-				+ newLine
-				+ s
+		String message = "Dear user" + fn + ln + "," + newLine + newLine
+				+ "We received a request for a new API key. Your new API key is : " + newLine + newLine + s
 				// token URL here
-				+ newLine + newLine
-				+ "You can use this key to make calls to the WITH API. "
-				+ "To return to the WITH API documentation follow this link : "
-				+ newLine + newLine + url + newLine + newLine
-				+ "Sincerely yours," + newLine + "The WITH team.";
+				+ newLine + newLine + "You can use this key to make calls to the WITH API. "
+				+ "To return to the WITH API documentation follow this link : " + newLine + newLine + url + newLine
+				+ newLine + "Sincerely yours," + newLine + "The WITH team.";
 
 		try {
 			sendEmail(u, create.email, message, "WITH API key");
@@ -853,19 +908,11 @@ public class UserManager extends WithController {
 		try {
 			String subject = "WITH password reset";
 
-			String msg = "Dear user: "
-					+ u.getFirstName()
-					+ " "
-					+ u.getLastName()
-					+ ","
-					+ newLine
-					+ newLine
+			String msg = "Dear user: " + u.getFirstName() + " " + u.getLastName() + "," + newLine + newLine
 					+ "We received a request for a password reset. Please click on the "
-					+ "following link to confirm this request:" + newLine
-					+ newLine + resetURL + "/" + enc
+					+ "following link to confirm this request:" + newLine + newLine + resetURL + "/" + enc
 					// token URL here
-					+ newLine + newLine + "Sincerely yours," + newLine
-					+ "The WITH team.";
+					+ newLine + newLine + "Sincerely yours," + newLine + "The WITH team.";
 
 			sendEmail(u, "", msg, subject);
 		} catch (EmailException e) {
@@ -892,14 +939,12 @@ public class UserManager extends WithController {
 	 * @param email
 	 * @throws EmailException
 	 */
-	public static void sendEmail(User u, String mailAdress, String message,
-			String subject) throws EmailException {
+	public static void sendEmail(User u, String mailAdress, String message, String subject) throws EmailException {
 		Email email = new SimpleEmail();
 		email.setSmtpPort(25);
 		email.setHostName("smtp.image.ece.ntua.gr");
 		email.setDebug(false);
-		email.setAuthenticator(new DefaultAuthenticator("mikegiatzi",
-				"tempforwith"));
+		email.setAuthenticator(new DefaultAuthenticator("mikegiatzi", "tempforwith"));
 		email.setStartTLSEnabled(true);
 		email.setSSLOnConnect(false);
 		email.setFrom("with-no-reply@image.ece.ntua.gr", "WITH"); // check if
@@ -955,10 +1000,10 @@ public class UserManager extends WithController {
 			try {
 				JsonNode input = Json.parse(Crypto.decryptAES(token));
 				long timestamp = input.get("timestamp").asLong();
-				if (new Date().getTime() < (timestamp + (TOKENTIMEOUT * 360 * 24 /*
-																				 * 24
-																				 * hours
-																				 */))) {
+				if (new Date().getTime() < (timestamp
+						+ (TOKENTIMEOUT * 360 * 24 /*
+													 * 24 hours
+													 */))) {
 					result.put("message", "Token is valid");
 					return ok(result);
 				} else {
@@ -981,10 +1026,10 @@ public class UserManager extends WithController {
 				JsonNode input = Json.parse(Crypto.decryptAES(token));
 				String userId = input.get("user").asText();
 				long timestamp = input.get("timestamp").asLong();
-				if (new Date().getTime() < (timestamp + (TOKENTIMEOUT * 360 * 24 /*
-																				 * 24
-																				 * hours
-																				 */))) {
+				if (new Date().getTime() < (timestamp
+						+ (TOKENTIMEOUT * 360 * 24 /*
+													 * 24 hours
+													 */))) {
 					u = DB.getUserDAO().get(new ObjectId(userId));
 					if (u != null) {
 						u.setPassword(newPassword);

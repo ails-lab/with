@@ -206,7 +206,7 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 					.collect(collectedResources,
 							new BeanToPropertyValueTransformer(
 									"target.recordId"));
-			q.field("_id").in(recordIds).order("q");
+			q.field("_id").in(recordIds);
 			return this.find(q).asList();
 		} catch (Exception e) {
 			return new ArrayList<RecordResource>();

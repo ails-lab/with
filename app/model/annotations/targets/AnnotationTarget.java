@@ -20,9 +20,11 @@ import model.annotations.selectors.SelectorType;
 
 import org.bson.types.ObjectId;
 
+import utils.Deserializer;
 import utils.Serializer;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 @JsonInclude(value = JsonInclude.Include.NON_NULL)
@@ -40,6 +42,7 @@ public class AnnotationTarget implements Cloneable {
 	 */
 	private String externalId;
 	
+	@JsonDeserialize(using = Deserializer.SelectorTypeDeserializer.class)
 	private SelectorType selector;
 
 	public ObjectId getRecordId() {

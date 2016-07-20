@@ -183,7 +183,7 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 				   // self.revealItems(responseCollections['collectionsOrExhibitions']);
 					
 			});
-		  var promise2 = self.getFeaturedExhibition(WITHApp.featuredExhibition);
+		  var promise2 = self.getFeaturedExhibition("570f9af34c74795dd10e3014");
           $.when(promise2).done(function (data) {
         	  
         	  self.featuredExhibition(new Collection(data));

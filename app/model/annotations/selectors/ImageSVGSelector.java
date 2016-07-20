@@ -20,6 +20,9 @@ import model.annotations.Annotation;
 
 import org.mongodb.morphia.query.Query;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+
+@JsonInclude(value = JsonInclude.Include.NON_NULL)
 public class ImageSVGSelector extends SelectorType {
 	
 	private String imageWithURL;

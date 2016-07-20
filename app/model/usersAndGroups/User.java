@@ -18,11 +18,14 @@ package model.usersAndGroups;
 
 import java.security.MessageDigest;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import model.resources.RecordResource;
 import model.resources.collection.CollectionObject;
+import model.resources.collection.CollectionObject.CollectionDescriptiveData;
 import notifications.Notification;
 
 import org.apache.commons.codec.binary.Hex;
@@ -42,11 +45,13 @@ import utils.Serializer;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import controllers.CollectionObjectController;
+import controllers.RecordResourceController;
 import db.DB;
 
 @Entity
@@ -58,7 +63,7 @@ import db.DB;
 		@Index(fields = @Field(value = "googleId", type = IndexType.ASC), options = @IndexOptions()),
 		@Index(fields = @Field(value = "userGroupsIds", type = IndexType.ASC), options = @IndexOptions()),
 		@Index(fields = @Field(value = "page.coordinates", type = IndexType.GEO2DSPHERE), options = @IndexOptions(background = true)) })
-@JsonInclude(value = JsonInclude.Include.NON_EMPTY)
+//@JsonInclude(value = JsonInclude.Include.NON_EMPTY)
 public class User extends UserOrGroup {
 
 	public static final ALogger log = Logger.of(User.class);
@@ -113,8 +118,7 @@ public class User extends UserOrGroup {
 
 	// @JsonIgnore
 	// private int exhibitionsCreated;
-
-	@JsonSerialize(using = Serializer.ObjectIdArraySerializer.class)
+	@JsonIgnore
 	private final Set<ObjectId> userGroupsIds = new HashSet<ObjectId>();
 
 	@JsonSerialize(using = Serializer.ObjectIdArraySerializer.class)
@@ -300,7 +304,7 @@ public class User extends UserOrGroup {
 	 *
 	 * public void addExhibitionsCreated() { this.exhibitionsCreated++; }
 	 */
-
+	@JsonIgnore
 	public ArrayNode getOrganizations() {
 		ArrayNode groups = Json.newObject().arrayNode();
 		try {
@@ -323,7 +327,8 @@ public class User extends UserOrGroup {
 		}
 
 	}
-
+	
+	@JsonIgnore
 	public ArrayNode getProjects() {
 		ArrayNode groups = Json.newObject().arrayNode();
 		try {
@@ -345,7 +350,8 @@ public class User extends UserOrGroup {
 			return groups;
 		}
 	}
-
+	
+	@JsonIgnore
 	public ArrayNode getUsergroups() {
 		ArrayNode groups = Json.newObject().arrayNode();
 		try {
@@ -368,14 +374,28 @@ public class User extends UserOrGroup {
 		}
 	}
 	
+	
+	
 	public ObjectNode getCount(){
 		ObjectNode json = DB.getCollectionObjectDAO().countMyAndSharedCollections(
 				new ArrayList<ObjectId>() {{ add(getDbId()); addAll(getUserGroupsIds()); }});
+		
+		JsonNode my =  json.get("my");
+		JsonNode shared =  json.get("sharedWithMe");
+		json.put("myCollections",my.get("SimpleCollection") );
+		json.put("myExhibitions", my.get("Exhibition"));
+		json.put("mySharedCollections", shared.get("SimpleCollection") );
+		json.put("mySharedExhibitions", shared.get("Exhibition") );
+		json.remove("my");
+		json.remove("sharedWithMe");
+		
+		json.put("myFavorites", favoritesCount());
+		
 		long pendingNots =0 ;
 		if(getNotifications()!=null) {
 			 pendingNots = getNotifications().stream().filter(n -> n.isPendingResponse()).count();
 		}
-		json.put("pendingnotifications", pendingNots);
+		json.put("myPendingNotifications", pendingNots);
 		Integer projects = 0;
 		Integer orgs  = 0;
 		if (!userGroupsIds.isEmpty()){
@@ -388,14 +408,13 @@ public class User extends UserOrGroup {
 					orgs++;
 				}
 			}
-			json.put("organizations", orgs);
-			json.put("projects", projects);
 		}
-		return json;
-		
-		
+		json.put("myOrganizations", orgs);
+		json.put("myProjects", projects);
+		return json;				
 	}
-
+	
+	@JsonIgnore
 	public Set<Notification> getNotifications() {
 		try {
 			Set<ObjectId> userOrGroupIds = new HashSet<ObjectId>();
@@ -425,6 +444,24 @@ public class User extends UserOrGroup {
 		return annotationCount;
 	}
 	
+	public ArrayList<String> getFavoriteIds() {
+		ArrayList<String> favoriteRecords = new ArrayList<String>();
+		if (favorites == null){
+			favorites = DB.getCollectionObjectDAO().getByOwnerAndLabel(this.getDbId(), null,
+					"_favorites").getDbId();
+		}
+		List<RecordResource> records  = DB.getRecordResourceDAO().getByCollection(favorites, Arrays.asList("administrative.externalId"));
+		try {
+			for (RecordResource record : records) {
+				favoriteRecords.add(record.getAdministrative().getExternalId());
+			}
+			return favoriteRecords;
+		} catch (Exception e) {
+			return favoriteRecords;
+
+		}
+	}
+	
 	public ObjectId getFavorites() {
 		if (favorites != null)
 			return favorites;
@@ -433,6 +470,18 @@ public class User extends UserOrGroup {
 		if (favoriteCol != null)
 			return favoriteCol.getDbId();
 		return CollectionObjectController.createFavorites(this.getDbId());
+	}
+	
+	public Integer favoritesCount() {
+		if (favorites != null){
+			CollectionObject<CollectionDescriptiveData> favoriteCol  = DB.getCollectionObjectDAO().get(favorites);
+			return favoriteCol.getCollectedResources().size();
+		}
+		CollectionObject favoriteCol = DB.getCollectionObjectDAO()
+				.getByOwnerAndLabel(this.getDbId(), null, "_favorites");
+		if (favoriteCol != null)
+			return favoriteCol.getCollectedResources().size();
+		return 0;
 	}
 
 	public void setFavorites(ObjectId favorites) {
