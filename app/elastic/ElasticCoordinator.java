@@ -32,6 +32,7 @@ import db.DB;
 import search.Filter;
 import search.Response.SingleResponse;
 import search.Response.ValueCount;
+import search.Sources;
 import elastic.ElasticSearcher.SearchOptions;
 
 public class ElasticCoordinator {
@@ -73,7 +74,8 @@ public class ElasticCoordinator {
 		}
 		sresp.items = DB.getRecordResourceDAO().getByIds(ids);
 		sresp.totalCount = (int) elasticresp.getHits().getTotalHits();
-
+		sresp.source = Sources.WITHin;
+		
 		if(elasticresp.getAggregations() != null)
 			extractFacets(elasticresp.getAggregations(), sresp);
 
