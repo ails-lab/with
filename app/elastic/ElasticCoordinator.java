@@ -18,6 +18,7 @@ package elastic;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.bson.types.ObjectId;
 import org.elasticsearch.action.search.SearchResponse;
@@ -28,6 +29,7 @@ import org.elasticsearch.search.aggregations.Aggregations;
 import org.elasticsearch.search.aggregations.bucket.terms.InternalTerms;
 import org.elasticsearch.search.aggregations.bucket.terms.Terms;
 
+import controllers.WithController.Profile;
 import db.DB;
 import search.Filter;
 import search.Response.SingleResponse;
@@ -68,10 +70,15 @@ public class ElasticCoordinator {
 
 		SingleResponse sresp = new SingleResponse();
 		List<ObjectId> ids = new ArrayList<ObjectId>();
+		String type = null;
 		for(SearchHit h: elasticresp.getHits()) {
+			type = h.getType();
 			ids.add(new ObjectId(h.getId()));
 		}
-		sresp.items = DB.getRecordResourceDAO().getByIds(ids);
+		if((type !=null) && type.contains("object"))
+			sresp.items = DB.getRecordResourceDAO().getByIds(ids).stream().map( r -> {return r.getRecordProfile(Profile.BASIC.toString());}).collect(Collectors.toList());
+		else
+			sresp.items = DB.getCollectionObjectDAO().getByIds(ids).stream().map( r -> {return r.getCollectionProfile(Profile.BASIC.toString());}).collect(Collectors.toList());
 		sresp.totalCount = (int) elasticresp.getHits().getTotalHits();
 
 		if(elasticresp.getAggregations() != null)
