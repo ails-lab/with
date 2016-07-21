@@ -105,6 +105,8 @@ import search.Filter;
 import search.Query;
 import search.Response;
 import search.Response.SingleResponse;
+import search.Sources;
+import sources.ElasticSource;
 import sources.EuropeanaCollectionSpaceSource;
 import sources.EuropeanaSpaceSource;
 import sources.OWLExporter.CulturalItemOWLExporter;
@@ -1101,18 +1103,18 @@ public class CollectionObjectController extends WithResourceController {
 	/*
 	 * Search for collections/exhibitions in myCollections page.
 	 */
-	public static Result searchMyCollections(String term, boolean isShared) {
-		return searchMyColOrEx(term, isShared, WithResourceType.SimpleCollection.toString().toLowerCase());
+	public static Promise<Result> searchMyCollections(String term, boolean isShared) {
+		return searchMyColOrEx(term, isShared, WithResourceType.SimpleCollection.toString());
 	}
 
-	public static Result searchMyExhibitions(String term, boolean isShared) {
-		return searchMyColOrEx(term, isShared, WithResourceType.Exhibition.toString().toLowerCase());
+	public static Promise<Result> searchMyExhibitions(String term, boolean isShared) {
+		return searchMyColOrEx(term, isShared, WithResourceType.Exhibition.toString());
 	}
 
-	private static Result searchMyColOrEx(String term, boolean isShared, String resourceType) {
+	private static Promise<Result> searchMyColOrEx(String term, boolean isShared, String resourceType) {
 		if (effectiveUserIds().isEmpty()) {
-			return forbidden(Json
-					.parse("\"error\", \"Must specify user for the collection\""));
+			return Promise.pure(forbidden(Json
+					.parse("\"error\", \"Must specify user for the collection\"")));
 		}
 		Query q = new Query();
 		String userId = effectiveUserId();
@@ -1131,49 +1133,52 @@ public class CollectionObjectController extends WithResourceController {
 		q.addClause(searchTerm.filters());
 		q.addClause(type.filters());
 		q.addClause(visible.filters());
-		SearchOptions options = new SearchOptions();
-		options.offset = 0;
-		options.count = 10;
+		q.count = 10;
+		q.start = 0;
 
-		ElasticCoordinator co = new ElasticCoordinator(options);
-		Function<List<List<Filter>>, SingleResponse> recordSearch = ( (filters) -> ( co.federatedSearch(filters)));
+		Promise<SingleResponse> srp = Sources.WITHin.getDriver().execute( q );
 
-		Response r = new Response();
-		r.query = q;
-		r.addSingleResponse(ParallelAPICall.createPromise(recordSearch, q.filters).get(OK));
+		return srp.map( sr -> {
+			Response r = new Response();
+			r.query = q;
+			r.addSingleResponse(sr);
+			r.createAccumulated();
 
-		return ok(Json.toJson(r));
+			return ok(Json.toJson(r));
+		});
+
 	}
 
 	/*
 	 * Search for records within a collection.
 	 */
-	public static Result searchWithinCollection(String collectionId, String term) {
-		ObjectNode result = Json.newObject();
-
+	public static Promise<Result> searchCollection(String term, String id) {
 		if (effectiveUserIds().isEmpty()) {
-			return forbidden(Json
-					.parse("\"error\", \"Must specify user for the collection\""));
+			return Promise.pure(forbidden(Json
+					.parse("\"error\", \"Must specify user for the collection\"")));
 		}
+		Query q = new Query();
+		String userId = effectiveUserId();
+		Query.Clause searchTerm = Query.Clause.create()
+				.add( "anywhere", term, false );
+		Query.Clause type = Query.Clause.create()
+				.add( "collectedIn", id, true );
 
-		ElasticSearcher searcher = new ElasticSearcher();
-		List<String> recordTypes = Elastic.allTypes;
-		recordTypes.remove(WithResourceType.CollectionObject.toString().toLowerCase());
-		recordTypes.remove(WithResourceType.SimpleCollection.toString().toLowerCase());
-		recordTypes.remove(WithResourceType.Exhibition.toString().toLowerCase());
-		searcher.setTypes(recordTypes);
+		q.addClause(searchTerm.filters());
+		q.addClause(type.filters());
+		q.count = 10;
+		q.start = 0;
 
-		SearchOptions options = new SearchOptions();
-		/*options.addFilter("collectedId", collectionId);
+		Promise<SingleResponse> srp = Sources.WITHin.getDriver().execute( q );
 
-		SearchResponse resp = searcher.searchForRecords(term, options);
-		ArrayNode filteredRecs = Json.newObject().arrayNode();
-		for(SearchHit h: resp.getHits().getHits())
-			filteredRecs.add(Json.toJson(DB.getWithResourceDAO().getById(new ObjectId(h.getId()))));
+		return srp.map( sr -> {
+			Response r = new Response();
+			r.query = q;
+			r.addSingleResponse(sr);
+			r.createAccumulated();
 
-		result.put("filteredRecs", filteredRecs);
-		return ok(filteredRecs);*/
-		return ok();
+			return ok(Json.toJson(r));
+		});
 
 	}
 
