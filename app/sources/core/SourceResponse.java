@@ -142,6 +142,7 @@ public class SourceResponse {
 		r.totalCount = this.totalCount;
 		r.items = this.items.getAll();
 		r.facets =new ValueCounts();
+		r.source = Sources.valueOf(source);
 		for (CommonFilterLogic f : filtersLogic) {
 			CommonFilterResponse ff = f.export();
 			r.facets.put( ff.filterID, ListUtils.transform(ff.suggestedValues, (ValueCount x)-> 
