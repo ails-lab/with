@@ -26,6 +26,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.ArrayList;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
 
 import org.bson.types.ObjectId;
 import org.mongodb.morphia.geo.Point;
@@ -34,6 +36,9 @@ import org.w3c.dom.ls.DOMImplementationLS;
 import org.w3c.dom.ls.LSSerializer;
 
 import controllers.WithController;
+import model.EmbeddedMediaObject;
+import model.basicDataTypes.Language;
+import model.basicDataTypes.LiteralOrResource;
 import model.basicDataTypes.MultiLiteral;
 import model.basicDataTypes.WithAccess;
 import model.basicDataTypes.WithAccess.Access;
@@ -43,6 +48,7 @@ import play.Logger;
 import play.Logger.ALogger;
 import play.libs.Json;
 
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.core.JsonGenerationException;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -195,6 +201,80 @@ public class Serializer {
 			}
 
 			jsonGen.writeObject(json);
+		}
+
+	}
+
+	public static class MUltiliteralSerializerForElastic extends JsonSerializer<Object> {
+
+		@Override
+		public void serialize(Object arg0, JsonGenerator arg1,
+				SerializerProvider arg2) throws IOException,
+				JsonProcessingException {
+
+			MultiLiteral multi = (MultiLiteral)arg0;
+			ObjectNode multiJson = Json.newObject();
+			List<String> all_literals = new ArrayList<String>();
+
+			for(Entry<String, List<String>> e: multi.entrySet()) {
+
+				// accumulate to _all field all values except uri & default
+				if(!e.getKey().equals(LiteralOrResource.URI) &&
+						!e.getKey().equals(Language.DEFAULT.getDefaultCode()))
+					all_literals.addAll(e.getValue());
+
+				// add to json the languages except unknown
+				if(!e.getKey().equals(Language.UNKNOWN.getDefaultCode()))
+					multiJson.put(e.getKey(), Json.toJson(e.getValue()));
+			}
+			multiJson.put("_all", Json.toJson(all_literals));
+			arg1.writeObject(multiJson);
+		}
+
+	}
+
+	public static class WithAccessSerializerForElastic extends JsonSerializer<WithAccess> {
+
+		@Override
+		public void serialize(WithAccess arg0, JsonGenerator arg1,
+				SerializerProvider arg2) throws IOException,
+				JsonProcessingException {
+			WithAccess wa = arg0;
+			ObjectMapper mapper = new ObjectMapper();
+			ObjectNode json = mapper.createObjectNode();
+			json.put("isPublic", wa.getIsPublic());
+			ObjectNode access = mapper.createObjectNode();
+			access.put("READ", Json.toJson(wa.getAcl().stream().filter( ae -> ae.getLevel()==Access.READ)
+					.map(AccessEntry::getUser).map(ObjectId::toString).collect(Collectors.toList())));
+			access.put("WRITE", Json.toJson(wa.getAcl().stream().filter( ae -> ae.getLevel()==Access.WRITE)
+					.map(AccessEntry::getUser).map(ObjectId::toString).collect(Collectors.toList())));
+			access.put("OWN", Json.toJson(wa.getAcl().stream().filter( ae -> ae.getLevel()==Access.OWN)
+					.map(AccessEntry::getUser).map(ObjectId::toString).collect(Collectors.toList())));
+			json.put("access", access);
+
+			arg1.writeObject(json);
+		}
+
+	}
+
+	public static class EmbeddeMediaSerializer extends JsonSerializer<EmbeddedMediaObject> {
+
+		@Override
+		public void serialize(EmbeddedMediaObject arg0, JsonGenerator arg1,
+				SerializerProvider arg2) throws IOException,
+				JsonProcessingException {
+			ObjectMapper mapper = new ObjectMapper();
+			ObjectNode json = mapper.createObjectNode();
+
+			if(arg0.getType()!=null)
+				json.put("type", Json.toJson(arg0.getType()));
+			if(arg0.getWithRights()!=null)
+				json.put("withRights", Json.toJson(arg0.getWithRights()));
+			if(arg0.getQuality()!=null)
+				json.put("quality", Json.toJson(arg0.getQuality()));
+			json.put("mimeType", Json.toJson(arg0.getMimeType()));
+
+			arg1.writeObject(json);
 		}
 
 	}

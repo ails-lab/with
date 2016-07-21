@@ -198,7 +198,7 @@ public class CulturalObject extends RecordResource<CulturalObject.CulturalObject
 	@Override
 	public Map<String, Object> transform() {
 
-		Map<String, Object> idx_map = super.transform();
+		/*Map<String, Object> idx_map = super.transform();
 
 		idx_map.put("dccreator", ((CulturalObjectData)getDescriptiveData()).getDccreator());
 		idx_map.put("dcidentifier", ((CulturalObjectData)getDescriptiveData()).getDcidentifier());
@@ -226,7 +226,8 @@ public class CulturalObject extends RecordResource<CulturalObject.CulturalObject
 		}
 
 
-		return idx_map;
+		return idx_map;*/
+		return transformWR();
 	}
 
 }

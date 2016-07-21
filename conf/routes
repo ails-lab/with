@@ -22,6 +22,9 @@ POST     /api/mergefilters         	controllers.SearchController.mergeFilters()
 POST     /api/search            	controllers.SearchController.search()
 POST 	 /api/search2				controllers.SearchController.search2()
 GET      /api/annotationsSearch    	controllers.AnnotationController.searchRecordsOfGroup(groupId: String, term: String)
+GET		/api/searchMyCollections	controllers.CollectionObjectController.searchMyCollections(term: String ?= "*", isShared: Boolean ?= false)
+GET		/api/searchMyExhibitions	controllers.CollectionObjectController.searchMyExhibitions(term: String ?= "*", isShared: Boolean ?= false)
+GET 	/api/searchCollection/:id   controllers.CollectionObjectController.searchCollection(term: String ?= "*", colId: String ?= "")
 
 #Autocomplete
 GET		/api/autocompleteExt		controllers.AutocompleteController.autocompleteExt(term:java.lang.String,limit:Integer,source:java.util.List[java.lang.String])
@@ -57,8 +60,7 @@ GET 	 /collection/listPublic 				controllers.CollectionObjectController.listPubl
 GET 	 /collection/listShared					controllers.CollectionObjectController.listShared(direct: Boolean ?= true, directlyAccessedByUserOrGroup: play.libs.F.Option[controllers.parameterTypes.MyPlayList], isExhibition: play.libs.F.Option[java.lang.Boolean], collectionHits:Boolean ?= false, offset: Integer ?=0, count: Integer ?=10, profile: String ?="BASIC", locale: play.libs.F.Option[java.lang.String])
 #GET      /collection/listSharedCollections		controllers.CollectionObjectController.listShared(direct: Boolean ?= true, directlyAccessedByUserOrGroup: play.libs.F.Option[controllers.parameterTypes.MyPlayList], collectionHits:Boolean ?= false, offset: Integer ?=0, count: Integer ?=10, profile: String ?="BASIC", locale: play.libs.F.Option[java.lang.String])
 #GET      /collection/listSharedExhibitions		controllers.CollectionObjectController.listShared(direct: Boolean ?= true, directlyAccessedByUserOrGroup: play.libs.F.Option[controllers.parameterTypes.MyPlayList], collectionHits:Boolean ?= false, offset: Integer ?=0, count: Integer ?=10, profile: String ?="BASIC", locale: play.libs.F.Option[java.lang.String])
-GET		 /collection/search						controllers.CollectionObjectController.searchMyCollections(term: String, creator: play.libs.F.Option[String], isExhibition: Boolean ?= false, isShared: Boolean ?= false)
-GET		 /collection/:id/search					controllers.CollectionObjectController.searchWithinCollection(id, term: String ?= "")
+
 GET 	 /collection/countMyAndShared			controllers.CollectionObjectController.countMyAndShared()
 GET 	 /collection/featured					controllers.CollectionObjectController.getFeatured(groupOrUserName: String, isExhibition: play.libs.F.Option[java.lang.Boolean], offset: Integer ?=0, countPerType: Integer ?=10, profile: String ?="BASIC", locale: play.libs.F.Option[java.lang.String])
 GET		 /collection/favorites					controllers.RecordResourceController.getFavorites()
