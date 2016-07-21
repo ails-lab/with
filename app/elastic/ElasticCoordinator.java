@@ -34,6 +34,7 @@ import db.DB;
 import search.Filter;
 import search.Response.SingleResponse;
 import search.Response.ValueCount;
+import search.Sources;
 import elastic.ElasticSearcher.SearchOptions;
 
 public class ElasticCoordinator {
@@ -80,7 +81,8 @@ public class ElasticCoordinator {
 		else
 			sresp.items = DB.getCollectionObjectDAO().getByIds(ids).stream().map( r -> {return r.getCollectionProfile(Profile.BASIC.toString());}).collect(Collectors.toList());
 		sresp.totalCount = (int) elasticresp.getHits().getTotalHits();
-
+		sresp.source = Sources.WITHin;
+		
 		if(elasticresp.getAggregations() != null)
 			extractFacets(elasticresp.getAggregations(), sresp);
 

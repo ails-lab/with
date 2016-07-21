@@ -20,7 +20,9 @@ import model.annotations.Annotation;
 
 import org.mongodb.morphia.query.Query;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 
+@JsonInclude(value = JsonInclude.Include.NON_NULL)
 public class PropertySelector extends SelectorType {
 	
 	private String property;

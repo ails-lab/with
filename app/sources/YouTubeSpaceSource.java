@@ -58,6 +58,7 @@ public class YouTubeSpaceSource extends ISpaceSource {
 
 	public YouTubeSpaceSource() {
 		super(Sources.YouTube);
+		addRestriction(FiltersFields.TYPE.getFilterId(),WithMediaType.VIDEO.getName());
 		roots = new HashMap<String, String>();
 	}
 
@@ -96,11 +97,6 @@ public class YouTubeSpaceSource extends ISpaceSource {
 		res.query = httpQuery;
 		JsonNode response;
 		
-		if (q.filters==null || q.filters.size()==0 ||
-				(q.filters.size()==1 && 
-				q.filters.get(0).filterID.equals(FiltersFields.TYPE.getFilterId()) &&
-				q.filters.get(0).values.contains(WithMediaType.VIDEO)
-				)){
 			try {
 				response = getHttpConnector().getURLContent(httpQuery);
 				// System.out.println(httpQuery);
@@ -123,8 +119,10 @@ public class YouTubeSpaceSource extends ISpaceSource {
 			} catch (Exception e) {
 				log.error( "",e );
 			}
-		} 
 
+			res.filtersLogic  = vmap.getRestrictionsAsFilters(res.count);
+			
+			
 		return res;
 	}
 

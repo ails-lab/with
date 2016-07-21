@@ -43,6 +43,21 @@ public class ListUtils {
 		}
 		return false;
 	}
+	
+	/**
+	 * tells if a collection contains all of the elements in another collection.
+	 * 
+	 * @param a
+	 * @param b
+	 * @return true iff all elements of collection b are in collection a.
+	 */
+	public static boolean containsAll(Collection a, Collection b) {
+		for (Object object : b) {
+			if (!a.contains(object))
+				return false;
+		}
+		return true;
+	}
 
 	/**
 	 * tells if a collection does not contain elements of another collection.

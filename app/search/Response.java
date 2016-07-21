@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -37,18 +38,25 @@ public class Response {
 		
 		// how often this happens in the query result
 		public int count;
+		
+		public ValueCount() { };
+		public ValueCount(String value, int count) {
+			super();
+			this.value = value;
+			this.count = count;
+		}
+		
 	}
 	
-	public static class ValueCounts {
-		// a field for facets
-		public String fieldId;
-		public List<ValueCount> valueCounts = new ArrayList<ValueCount>();
+	public static class ValueCounts extends HashMap<String,List<ValueCount>> {
+		// keys are field ids
+		// values are list of values and occurrence counts
 	}
 	
-	public static class ValueList {
-		// facets without counts...just values per field
-		public String fieldId;
-		public List<String> values = new ArrayList<String>();
+	public static class ValueList extends HashMap<String, List<String>> {
+		// keys are fieldIds
+		// value is list of occurring values in that field
+		// its like facets without counts
 	}
 	
 
@@ -92,26 +100,28 @@ public class Response {
 		 * The actual result items. These are already translated into WITH types and are likely not complete.
 		 * Sources should consider to limit the amount of data to something sensible.
 		 */
-		public List<?> items = new ArrayList();
+		public List items = new ArrayList();
 		
 		/**
 		 * If a source supports facets, they will be delivered here. All the requested facets should be returned,
-		 * if the fieldnames are supported.
+		 * if the fieldids are supported. A facet is a fieldId with a list of all values for that field and their occurrence
+		 * count for the WHOLE search result.
 		 */
-		public List<ValueCounts> facets = new ArrayList<ValueCounts>();
+		public ValueCounts facets = new ValueCounts();
 		
 		/**
 		 * If a source cannot support real facets, simple counts for the values will be provided here. They just cover this
-		 * page (Result). If a paging query asks for more results, counts are freshly calculated.
+		 * page (Result). If a paging query asks for more results, counts are freshly calculated. Values for the field that occur in 
+		 * a later page of the result will NOT be included. 
 		 */
-		public List<ValueCounts> counts = new ArrayList<ValueCounts>();
+		public ValueCounts counts = new ValueCounts();
 		
 		//
 		//  Convenience Functions to build the SingleResponse
 		//
 		
 		public void addItem( Object item ) {
-			
+			items.add( item );
 		}
 		
 		public void addValueToCounts( String fieldId, String value ) {
@@ -138,7 +148,7 @@ public class Response {
 	 * frequent values are in the front of the list, but no guarantees. AccumulatedValues get updated with continuation,
 	 * representing all the values that were delivered from all requested sources.
 	 */
-	public List<ValueList> accumulatedValues = new ArrayList<ValueList>();
+	public ValueList accumulatedValues = new ValueList();
 
 	/**
 	 * If this is a part of multipart response and we expect more parts to come, the next part can be retrieved with this id. 
@@ -183,14 +193,14 @@ public class Response {
 		}
 	}
 	
-	private void accumulateValueCountsList( HashMap<String,HashMap<String,Integer>> accumulator, List<ValueCounts> vcs ) {
-		for( ValueCounts vc: vcs ) {
-			HashMap<String,Integer> valCounts = accumulator.get( vc.fieldId);
+	private void accumulateValueCountsList( HashMap<String,HashMap<String,Integer>> accumulator, ValueCounts vcs ) {
+		for( Map.Entry<String,List<Response.ValueCount>> me: vcs.entrySet() ) {
+			HashMap<String,Integer> valCounts = accumulator.get( me.getKey());
 			if( valCounts == null ) {
 				valCounts = new HashMap<String, Integer>();
-				accumulator.put( vc.fieldId, valCounts );
+				accumulator.put( me.getKey(), valCounts );
 			} 
-			valueCountsIntoHashmap(vc.valueCounts, valCounts);			
+			valueCountsIntoHashmap(me.getValue(), valCounts);			
 		}
 	}
 	/**
@@ -206,15 +216,12 @@ public class Response {
 			accumulateValueCountsList(accumulated, sr.counts);
 		}
 		
-		// convert the Hash of hash of string count
+		// convert the Hash of hash of string count fieldId->value->count
 		// to the list valueList with sorting of values by count downwards
-		accumulatedValues = accumulated.entrySet().stream()
-		// every entry is for one fieldId		
-		.map( entry -> {
-			ValueList vl = new ValueList();
-			vl.fieldId = entry.getKey();
-			// here every entry contains a fieldvalue and a count
-			vl.values = entry.getValue().entrySet().stream()
+		accumulatedValues = new ValueList(); 
+		for( Map.Entry<String, HashMap<String, Integer>> entry: accumulated.entrySet() ) {
+			String fieldId = entry.getKey();
+			List<String> values = entry.getValue().entrySet().stream()
 			.sorted( (a,b)-> {
 				return (Integer.compare(a.getValue(), b.getValue())*(-1));
 			})
@@ -222,22 +229,23 @@ public class Response {
 			.map( e2 -> e2.getKey())
 			// we collect only the strings into a list
 			.collect( Collectors.toCollection(()->new ArrayList<String>()));
-			return vl;
-		})
-		// the finished ValueList objects are put in a list
-		.collect( Collectors.toCollection(()->new ArrayList<ValueList>()));
+			accumulatedValues.put( fieldId, values);
+		}
 	}
 	
-	
-	private ValueList findOrAddVl( String fieldId ) {
-		for( ValueList vl: accumulatedValues ) {
-			if( vl.fieldId.equals( fieldId )) return vl;
+	/**
+	 * Get value lost for this field or make one if it doesn't exist.
+	 * @param fieldId
+	 * @return
+	 */
+	private List<String> findOrAddVl( String fieldId ) {
+		List<String> values =  accumulatedValues.get(fieldId );
+		if( values == null ) {
+			values = new ArrayList<String>();
+			accumulatedValues.put( fieldId, values);
 		}
-		ValueList res = new ValueList();
-		res.fieldId = fieldId;
-		accumulatedValues.add( res );
 		
-		return res;
+		return values;
 	}
 	
 	/**
@@ -246,13 +254,13 @@ public class Response {
 	 * @param sr
 	 */
 	public void mergeAccumulated( Response other) {
-		other.accumulatedValues.forEach(
-			vl-> {	
-				ValueList thisVl =findOrAddVl( vl.fieldId );
+		other.accumulatedValues.entrySet().forEach(
+			entry -> {	
+				List<String> thisVl =findOrAddVl( entry.getKey() );
 				HashSet<String> index = new HashSet<String>();
-				index.addAll( thisVl.values);
-				vl.values.forEach(s -> {
-					if(! index.contains(s)) thisVl.values.add( s );
+				index.addAll( thisVl );
+				entry.getValue().forEach(s -> {
+					if(! index.contains(s)) thisVl.add( s );
 				});
 			}
 		);

@@ -121,7 +121,7 @@ public class Serializer {
 		}
 
 	}
-
+	
 	public static class MimeTypeSerializer extends JsonSerializer<Object> {
 
 		@Override

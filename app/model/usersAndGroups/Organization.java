@@ -34,4 +34,8 @@ public class Organization extends UserGroup {
 	public void setPage(Page page) {
 		this.page = page;
 	}
+	
+	public String getType() {
+		return "Organization";
+	}
 }

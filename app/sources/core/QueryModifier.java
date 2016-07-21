@@ -21,4 +21,11 @@ import java.util.Arrays;
 
 public abstract class QueryModifier {
 	public abstract QueryBuilder modify(QueryBuilder builder);
+	public static QueryModifier VOID_QueryModifier = new QueryModifier(){
+		@Override
+		public QueryBuilder modify(QueryBuilder builder) {
+			return builder;
+		}
+	};
 }
+

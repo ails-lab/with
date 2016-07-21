@@ -24,6 +24,7 @@ import java.util.function.Function;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
+import model.EmbeddedMediaObject.WithMediaType;
 import play.Logger;
 import play.Logger.ALogger;
 import search.FiltersFields;
@@ -81,6 +82,7 @@ public abstract class FlickrSpaceSource extends ISpaceSource {
 		setLicences();
 //		this.vmap = FilterValuesMap.getFlickrMap();
 		this.userID = userID;
+		addRestriction(FiltersFields.TYPE.getFilterId(),WithMediaType.IMAGE.getName());
 		addDefaultWriter(FiltersFields.TYPE.getFilterId(), fwriter("media"));
 		addDefaultWriter(FiltersFields.RIGHTS.getFilterId(), frwriter());
 		addDefaultComplexWriter(FiltersFields.YEAR.getFilterId(), qfwriterYEAR());
@@ -175,7 +177,7 @@ public abstract class FlickrSpaceSource extends ISpaceSource {
 				res.count = res.items.getCulturalCHO().size();
 	
 				res.facets = response.path("facets");
-				res.filtersLogic = new ArrayList<>();
+				res.filtersLogic = this.vmap.getRestrictionsAsFilters(res.totalCount);
 	
 				// for (String ir : licencesId.keySet()) {
 				// countValue(rights, ir, 1);

@@ -94,6 +94,7 @@ public class ProxySource extends EmptySource {
 	@Override
 	public Set<String> supportedFieldIds() {
 		Set<String> filters = spaceSource.getVmap().getFilters();
+		filters.addAll(spaceSource.getVmap().getRestrictions());
 		filters.add(FiltersFields.ANYWHERE.getFilterId());
 		return filters;
 	}

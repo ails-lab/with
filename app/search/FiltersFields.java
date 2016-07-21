@@ -22,16 +22,16 @@ public enum FiltersFields {
 		/**
 		 * also known as search term
 		 */
-		ANYWHERE("anywhere","Anywhere"),
-		TYPE("media.type","Media Type"),
-		PROVIDER("provider","Provider"),
+		ANYWHERE(Fields.anywhere,"Anywhere"),
+		TYPE(Fields.media_type,"Media Type"),
+		PROVIDER(Fields.provenance_provider,"Provider"),
 		CREATOR("dccreator.default","Creator"),
-		RIGHTS("media.withRights","Media Rights"),
-		COUNTRY("dctermsspatial.default","Spatial"),
-		YEAR("dates","Dates"),
+		RIGHTS(Fields.media_withRights,"Media Rights"),
+		COUNTRY(Fields.descriptiveData_country,"Spatial"),
+		YEAR(Fields.descriptiveData_dcdate_year,"Dates"),
 		CONTRIBUTOR("dccontributor.default","Contributor"),
-		DATA_PROVIDER("dataProvider","Data Provider"),
-		MIME_TYPE("MIME_TYPE","Mime Type"),
+		DATA_PROVIDER(Fields.provenance_dataprovider,"Data Provider"),
+		MIME_TYPE(Fields.media_mimeType,"Mime Type"),
 		IMAGE_SIZE("IMAGE_SIZE","Image Size"),
 		IMAGE_COLOUR("IMAGE_COLOUR","Image Color"),
 		COLOURPALETE("COLOURPALETE","Color Palete")
@@ -42,9 +42,16 @@ public enum FiltersFields {
 		private final String filterId;
 		
 		
+		private FiltersFields(Fields filterId, MultiLiteral filterName) {
+			this(filterId.fieldId(),filterName);
+		}
 		private FiltersFields(String filterId, MultiLiteral filterName) {
 			this.filterId = filterId;
 			this.filterName = filterName;
+		}
+		
+		private FiltersFields(Fields filterId, String filterName) {
+			this(filterId,new MultiLiteral(filterName).fillDEF());
 		}
 		
 		private FiltersFields(String filterId, String filterName) {

@@ -137,5 +137,8 @@ public class UserGroup extends UserOrGroup {
 	public void setCreator(ObjectId creator) {
 		this.creator = creator;
 	}
-
+	
+	public String getType() {
+		return "UserGroup";
+	}
 }
