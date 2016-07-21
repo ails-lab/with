@@ -226,6 +226,8 @@ public class ElasticSearcher {
 	*/
 	public QueryBuilder termQuery(String fieldName, String value) {
 		TermQueryBuilder term_query = QueryBuilders.termQuery(fieldName+".string", value);
+		if(fieldName.contains("public"))
+			term_query = QueryBuilders.termQuery(fieldName, value);
 		return term_query;
 	}
 
