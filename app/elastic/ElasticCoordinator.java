@@ -82,7 +82,7 @@ public class ElasticCoordinator {
 			sresp.items = DB.getCollectionObjectDAO().getByIds(ids).stream().map( r -> {return r.getCollectionProfile(Profile.BASIC.toString());}).collect(Collectors.toList());
 		sresp.totalCount = (int) elasticresp.getHits().getTotalHits();
 		sresp.source = Sources.WITHin;
-		
+
 		if(elasticresp.getAggregations() != null)
 			extractFacets(elasticresp.getAggregations(), sresp);
 
