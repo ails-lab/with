@@ -163,7 +163,7 @@ public class ElasticSearcher {
 
 	/* Query Constractors */
 
-	/* Bool query */
+	/* Bool Should query */
 	public QueryBuilder boolShouldQuery(List<Filter> filters) {
 
 		BoolQueryBuilder bool = QueryBuilders.boolQuery();
@@ -172,6 +172,20 @@ public class ElasticSearcher {
 				bool.should(funcScoreQuery(f.fieldId, f.value));
 			else
 				bool.should(termQuery(f.fieldId, f.value));
+		}
+		return bool;
+		}
+
+
+	/* Bool Must NOT query */
+	public QueryBuilder boolMustNotQuery(List<Filter> filters) {
+
+		BoolQueryBuilder bool = QueryBuilders.boolQuery();
+		for(Filter f: filters) {
+			if(!f.exact)
+				bool.mustNot(funcScoreQuery(f.fieldId, f.value));
+			else
+				bool.mustNot(termQuery(f.fieldId, f.value));
 		}
 		return bool;
 		}
