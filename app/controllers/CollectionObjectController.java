@@ -580,30 +580,30 @@ public class CollectionObjectController extends WithResourceController {
 
 	public static Result list(Option<MyPlayList> directlyAccessedByUserOrGroup,
 			Option<String> creator, Option<Boolean> isExhibition,
-			 Boolean collectionHits, int offset, int count, String profile, Option<String> locale) {
+			 Boolean collectionHits, int offset, int count, String profile, Option<String> locale, String sortBy) {
 		if(directlyAccessedByUserOrGroup.isDefined() && (directlyAccessedByUserOrGroup.get()==null)) {
 			return badRequest("Parameter 'directlyAccessedByUserOrGroup' was not well defined!");
 		}
 
 		if (WithController.isSuperUser()) {
-			return list(Option.None(), Option.None(),Option.None(), Option.Some(true), isExhibition, collectionHits, offset, count, profile, locale);
+			return list(Option.None(), Option.None(),Option.None(), Option.Some(true), isExhibition, collectionHits, offset, count, profile, locale, sortBy);
 		}
 		return list(directlyAccessedByUserOrGroup, Option.<MyPlayList>None(), creator,
-				Option.Some(false), isExhibition, collectionHits, offset, count, profile, locale);
+				Option.Some(false), isExhibition, collectionHits, offset, count, profile, locale, sortBy);
 	}
 
 	public static Result listPublic(Option<MyPlayList> directlyAccessedByUserOrGroup,
 			Option<String> creator, Option<Boolean> isExhibition,
 			 Boolean collectionHits, int offset, int count, String profile, Option<String> locale) {
 		return list(directlyAccessedByUserOrGroup, Option.<MyPlayList>None(), creator, Option.Some(true),
-				isExhibition, collectionHits, offset, count, profile, locale);
+				isExhibition, collectionHits, offset, count, profile, locale, "Date");
 	}
 
 	public static Result list(Option<MyPlayList> directlyAccessedByUserOrGroup,
 			Option<MyPlayList> recursivelyAccessedByUserOrGroup,
 			Option<String> creator, Option<Boolean> isPublic,
 			Option<Boolean> isExhibition, Boolean collectionHits, int offset,
-			int count, String profile, Option<String> locale) {
+			int count, String profile, Option<String> locale, String sortBy) {
 		ObjectNode result = Json.newObject().objectNode();
 		ArrayNode collArray = Json.newObject().arrayNode();
 		/*
@@ -675,11 +675,11 @@ public class CollectionObjectController extends WithResourceController {
 				info = DB.getCollectionObjectDAO().getByLoggedInUsersAndAcl(
 						toObjectIds(effectiveUserIds),
 						accessedByUserOrGroup, creatorId, isExhibitionBoolean,
-						collectionHits, offset, count);
+						collectionHits, offset, count, sortBy);
 			else
 				info = DB.getCollectionObjectDAO().getByAcl(
 						accessedByUserOrGroup, creatorId, isExhibitionBoolean,
-						collectionHits, offset, count);
+						collectionHits, offset, count, sortBy);
 			if (info.y != null) {
 				result.put("totalCollections", info.y.x);
 				result.put("totalExhibitions", info.y.y);
@@ -715,16 +715,16 @@ public class CollectionObjectController extends WithResourceController {
 
 	public static Result listShared(Boolean direct, Option<MyPlayList> directlyAccessedByUserOrGroup,
 			Option<Boolean> isExhibition, Boolean collectionHits, int offset, int count,
-			String profile, Option<String> locale) {
+			String profile, Option<String> locale, String sortBy) {
 		return listShared(direct, directlyAccessedByUserOrGroup, Option.<MyPlayList>None(),
-				isExhibition, collectionHits, offset, count, profile, locale);
+				isExhibition, collectionHits, offset, count, profile, locale, sortBy);
 	}
 
 	public static Result listShared(Boolean direct,
 			Option<MyPlayList> directlyAccessedByUserOrGroup,
 			Option<MyPlayList> recursivelyAccessedByUserOrGroup,
 			Option<Boolean> isExhibition, boolean collectionHits, int offset,
-			int count, String profile, Option<String> locale) {
+			int count, String profile, Option<String> locale, String sortBy) {
 		ObjectNode result = Json.newObject().objectNode();
 		ArrayNode collArray = Json.newObject().arrayNode();
 		List<String> effectiveUserIds = effectiveUserIds();
@@ -755,7 +755,7 @@ public class CollectionObjectController extends WithResourceController {
 			Tuple<List<CollectionObject>, Tuple<Integer, Integer>> info = DB
 					.getCollectionObjectDAO().getSharedAndByAcl(
 							accessedByUserOrGroup, userId, isExhibitionBoolean,
-							collectionHits, offset, count);
+							collectionHits, offset, count, sortBy);
 			if (info.y != null) {
 				result.put("totalCollections", info.y.x);
 				result.put("totalExhibitions", info.y.y);

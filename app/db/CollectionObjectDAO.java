@@ -235,12 +235,12 @@ public class CollectionObjectDAO extends WithResourceDAO<CollectionObject> {
 			List<ObjectId> loggeInEffIds,
 			List<List<Tuple<ObjectId, Access>>> accessedByUserOrGroup,
 			ObjectId creator, Boolean isExhibition, boolean totalHits,
-			int offset, int count) {
+			int offset, int count, String sortBy) {
 		List<Criteria> criteria = new ArrayList<Criteria>(
 				Arrays.asList(loggedInUserWithAtLeastAccessQuery(loggeInEffIds,
 						Access.READ)));
 		return getByAcl(criteria, accessedByUserOrGroup, creator, isExhibition,
-				totalHits, offset, count);
+				totalHits, offset, count, sortBy);
 	}
 
 	/**
@@ -263,7 +263,7 @@ public class CollectionObjectDAO extends WithResourceDAO<CollectionObject> {
 				this.createQuery().criteria("administrative.access.isPublic")
 						.equal(true)));
 		return getByAcl(criteria, accessedByUserOrGroup, creator, isExhibition,
-				totalHits, offset, count);
+				totalHits, offset, count, "Date");
 	}
 
 	public List<CollectionObject> getAccessibleByGroupAndPublic(ObjectId groupId) {
@@ -279,32 +279,33 @@ public class CollectionObjectDAO extends WithResourceDAO<CollectionObject> {
 	public Tuple<List<CollectionObject>, Tuple<Integer, Integer>> getSharedAndByAcl(
 			List<List<Tuple<ObjectId, Access>>> accessedByUserOrGroup,
 			ObjectId creator, Boolean isExhibition, boolean totalHits,
-			int offset, int count) {
+			int offset, int count, String sortBy) {
 		List<Criteria> criteria = new ArrayList<Criteria>(Arrays.asList(
 				this.createQuery().criteria("administrative.withCreator")
 						.notEqual(creator)));
 		return getByAcl(criteria, accessedByUserOrGroup, creator, isExhibition,
-				totalHits, offset, count);
+				totalHits, offset, count, sortBy);
 	}
 
 	public Tuple<List<CollectionObject>, Tuple<Integer, Integer>> getByAcl(
 			List<List<Tuple<ObjectId, Access>>> accessedByUserOrGroup,
 			ObjectId creator, Boolean isExhibition, boolean totalHits,
-			int offset, int count) {
+			int offset, int count, String sortBy) {
 		return getByAcl(new ArrayList<Criteria>(), accessedByUserOrGroup,
-				creator, isExhibition, totalHits, offset, count);
+				creator, isExhibition, totalHits, offset, count, sortBy);
 	}
 
 	public Tuple<List<CollectionObject>, Tuple<Integer, Integer>> getByAcl(
 			List<Criteria> andCriteria,
 			List<List<Tuple<ObjectId, Access>>> accessedByUserOrGroup,
 			ObjectId creator, Boolean isExhibition, boolean totalHits,
-			int offset, int count) {
+			int offset, int count, String sortBy) {
 		Query<CollectionObject> q = this.createQuery().disableValidation()
 				.retrievedFields(false, "collectedResources")
 				.field("descriptiveData.label.default.0")
 				.notEqual("_favorites");
-		q.order("-administrative.lastModified").offset(offset).limit(count);
+		String orderBy =  sortBy.equals("Date") ? "-administrative.lastModified" : "descriptiveData.label.default.0";
+		q.order(orderBy).offset(offset).limit(count);
 		if (creator != null)
 			q.field("administrative.withCreator").equal(creator);
 		for (List<Tuple<ObjectId, Access>> orAccessed : accessedByUserOrGroup) {
