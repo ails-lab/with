@@ -687,20 +687,30 @@ public class GroupManager extends WithController {
 	}
 
 	public static Result listUserGroups(String groupType, int offset,
-			int count, boolean belongsOnly) {
+			int count, boolean belongsOnly, String prefix) {
 
 		List<UserGroup> groups = new ArrayList<UserGroup>();
 		try {
 			GroupType type = GroupType.valueOf(groupType);
 			ObjectId userId = effectiveUserDbId();
 			if (userId == null) {
-				groups = DB.getUserGroupDAO().findPublic(type, offset, count);
-				return ok(Json.toJson(groups));
+				if(prefix.equals("*")) {
+					groups = DB.getUserGroupDAO().findPublic(type, offset, count);
+					return ok(Json.toJson(groups));
+				} else {
+					groups = DB.getUserGroupDAO().findPublicByPrefix(type, prefix, offset, count);
+					return ok(Json.toJson(groups));
+				}
 			}
 			User user = DB.getUserDAO().get(userId);
 			Set<ObjectId> userGroupsIds = user.getUserGroupsIds();
-			groups = DB.getUserGroupDAO().findByIds(userGroupsIds, type,
-					offset, count);
+			if(prefix.equals("*")) {
+				groups = DB.getUserGroupDAO().findByIds(userGroupsIds, type,
+						offset, count);
+			} else {
+				groups = DB.getUserGroupDAO().findByIdsAndPrefix(userGroupsIds, type,
+						prefix, offset, count);
+			}
 			int userGroupCount = DB.getUserGroupDAO().getGroupCount(
 					userGroupsIds, type);
 			if (groups.size() == count)
@@ -711,8 +721,8 @@ public class GroupManager extends WithController {
 				offset = offset - userGroupCount;
 			count = count - groups.size();
 			if (!belongsOnly)
-				groups.addAll(DB.getUserGroupDAO().findPublicWithRestrictions(
-						type, offset, count, userGroupsIds));
+				groups.addAll(DB.getUserGroupDAO().findPublicWithRestrictionsAndPrefix(
+						type, offset, count, userGroupsIds, prefix));
 			return ok(groupsWithCount(groups, userGroupCount));
 		} catch (Exception e) {
 			return ok(groupsWithCount(groups, groups.size()));

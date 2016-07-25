@@ -98,7 +98,7 @@ GET      /group/findByGroupName                 controllers.GroupManager.findByG
 GET		/group/descendantGroups/:groupId		controllers.GroupManager.getDescendantGroups(groupId, groupType: String  ?="All", direct: Boolean ?=true, collectionHits:Boolean ?= false)
 GET		/group/descendantOrganizations/:groupId	controllers.GroupManager.getDescendantGroups(groupId, groupType: String  ?="Organization", direct: Boolean ?=true, collectionHits:Boolean ?= false)
 GET		/group/descendantProjects/:groupId		controllers.GroupManager.getDescendantGroups(groupId, groupType: String  ?="Project", direct: Boolean ?=true, collectionHits:Boolean ?= false)
-GET		/group/list								controllers.GroupManager.listUserGroups(groupType: String ?="Project", offset: Integer ?=0, count: Integer ?=10, belongsOnly: Boolean ?=false)
+GET		/group/list								controllers.GroupManager.listUserGroups(groupType: String ?="Project", offset: Integer ?=0, count: Integer ?=10, belongsOnly: Boolean ?=false, prefix: String ?="*")
 PUT      /group/:id                             controllers.GroupManager.editGroup(id)
 DELETE   /group/:id                             controllers.GroupManager.deleteGroup(id)
 GET      /group/:id                             controllers.GroupManager.getGroup(id)
