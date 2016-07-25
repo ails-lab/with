@@ -146,7 +146,7 @@ public class SourceResponse {
 		for (CommonFilterLogic f : filtersLogic) {
 			CommonFilterResponse ff = f.export();
 			r.facets.put( ff.filterID, ListUtils.transform(ff.suggestedValues, (ValueCount x)-> 
-			new Response.ValueCount(x.value, x.count)));
+			new Response.ValueCount(x.value, x.count),0,SingleResponse.FACETS_LIMIT));
 		}
 		return r;
 	}

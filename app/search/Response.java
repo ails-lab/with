@@ -61,6 +61,12 @@ public class Response {
 	
 
 	public static class SingleResponse {
+		/**
+		 * limit of value counts returned in a single facet.
+		 */
+		public static final int FACETS_LIMIT = 10;
+
+
 		public static SingleResponse EMPTY = new Response.SingleResponse();
 
 		
