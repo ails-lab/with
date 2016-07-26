@@ -122,6 +122,12 @@ public class Response {
 		 */
 		public ValueCounts counts = new ValueCounts();
 		
+		/**
+		 * in case there was something wrong with the call the error message can be found here,
+		 * otherwise this field should be null.
+		 */
+		public String errorMessage;
+		
 		//
 		//  Convenience Functions to build the SingleResponse
 		//

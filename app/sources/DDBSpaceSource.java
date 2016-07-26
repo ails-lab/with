@@ -72,7 +72,7 @@ public class DDBSpaceSource extends ISpaceSource {
 		QueryBuilder builder = super.getBuilder(q);
 		builder.setBaseUrl("http://api.deutsche-digitale-bibliothek.de/search?");
 		builder.addSearchParam("oauth_consumer_key", apiKey);
-		builder.addQuery("query", q.searchTerm);
+		builder.setQuery("query", q.searchTerm);
 		builder.addSearchParam("rows", q.pageSize);
 		builder.addSearchParam("offset", "" + ((Integer.parseInt(q.page) - 1) * Integer.parseInt(q.pageSize)));
 		builder.addSearchParam("facet", "place_fct");

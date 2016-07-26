@@ -52,7 +52,7 @@ public class DBPediaSpaceSource extends ISpaceSource {
 		builder.addSearchParam("type", "Person,Place");
 		builder.addSearchParam("start", "" + ((Integer.parseInt(q.page) - 1) * Integer.parseInt(q.pageSize)));
 		builder.addSearchParam("rows", "" + (Integer.parseInt(q.pageSize) - 1));
-		builder.addQuery("query", q.searchTerm);
+		builder.setQuery("query", q.searchTerm);
 
 		return addfilters(q, builder).getHttp();
 	}

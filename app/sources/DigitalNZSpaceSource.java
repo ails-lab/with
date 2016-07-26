@@ -87,7 +87,7 @@ public class DigitalNZSpaceSource extends ISpaceSource {
 	public String getHttpQuery(CommonQuery q) {
 		QueryBuilder builder = new QueryBuilder("http://api.digitalnz.org/v3/records.json");
 		builder.addSearchParam("api_key", apiKey);
-		builder.addQuery("text", q.searchTerm);
+		builder.setQuery("text", q.searchTerm);
 		builder.addSearchParam("page", q.page);
 		builder.addSearchParam("per_page", q.pageSize);
 		builder.addSearchParam("facets", "year,creator,category,usage");

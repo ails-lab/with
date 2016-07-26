@@ -48,7 +48,7 @@ public class DPLASpaceSource extends ISpaceSource {
 		// q=zeus&api_key=SECRET_KEY&sourceResource.creator=Zeus
 		QueryBuilder builder = new QueryBuilder("http://api.dp.la/v2/items");
 		builder.addSearchParam("api_key", apiKey);
-		builder.addQuery("q", q.searchTerm);
+		builder.setQuery("q", q.searchTerm);
 		builder.addSearchParam("page", q.page);
 		builder.addSearchParam("page_size", q.pageSize);
 		builder.addSearchParam("facets",
