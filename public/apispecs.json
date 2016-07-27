@@ -3,7 +3,7 @@
     "info": {
         "version": "v0.6",
         "title": "WITH API",
-        "description": "Welcome to the WITH API documentation! \n If you are completely new to the API, please visit ```link available soon``` for an introduction to the model and basic functionalities. \n We are still in a development phase, so expect changes. We will keep this documentation updated and this text will include a memo of the latest changes. \n \n NEW: \n \n (since v. 0.6) Added a new call in search that merges filters, updated responses in record, collections with context data. \n \n (since v. 0.5) Fixed some issues with ```collection/list``` parameters not being displayed properly. \n \n (since v. 0.4): We have updated our model to a richer, more flexible one! We kept most of the calls the same, however we simplified a lot of the parameters in requests. Make sure you see the new response schemas as there have been some major changes. For any questions and help to implement our API feel free to contact us! ~ LAST UPDATE(v. 0.6): April 12, 2016"
+        "description": "Welcome to the WITH API documentation! \n If you are completely new to the API, please visit ```link available soon``` for an introduction to the model and basic functionalities. \n We are still in a development phase, so expect changes. We will keep this documentation updated and this text will include a memo of the latest changes. \n \n NEW: \n \n (since v. 0.68) Many changes, added calls for annotations and various others. Added calls for internal search within and among user collections. Documentation will be further updated once a couple of things have finished.\n \n (since v. 0.6) Added a new call in search that merges filters, updated responses in record, collections with context data. ~ LAST UPDATE(v. 0.68): July 26, 2016"
     },
     "paths": {
         "/api/search": {
@@ -42,14 +42,17 @@
                                         "enum": [
                                             "Europeana",
                                             "DPLA",
-                                            "DigitalNZ",
-                                            "Rijksmuseum",
-                                            "WITHin",
-                                            "BritishLibrary",
                                             "NLA",
+                                            "DigitalNZ",
+                                            "Youtube",
+                                            "Rijksmuseum",
                                             "DDB",
+                                            "BritishLibrary",
                                             "InternetArchive",
-                                            "Youtube"
+                                            "WITHin",
+                                            "DBPedia",
+                                            "Historypin",
+                                            "WITHinASpace"
                                         ]
                                     }
                                 }
@@ -113,14 +116,17 @@
                                         "enum": [
                                             "Europeana",
                                             "DPLA",
-                                            "DigitalNZ",
-                                            "Rijksmuseum",
-                                            "WITHin",
-                                            "BritishLibrary",
                                             "NLA",
+                                            "DigitalNZ",
+                                            "Youtube",
+                                            "Rijksmuseum",
                                             "DDB",
+                                            "BritishLibrary",
                                             "InternetArchive",
-                                            "Youtube"
+                                            "WITHin",
+                                            "DBPedia",
+                                            "Historypin",
+                                            "WITHinASpace"
                                         ]
                                     }
                                 },
@@ -192,14 +198,17 @@
                                         "enum": [
                                             "Europeana",
                                             "DPLA",
-                                            "DigitalNZ",
-                                            "Rijksmuseum",
-                                            "WITHin",
-                                            "BritishLibrary",
                                             "NLA",
+                                            "DigitalNZ",
+                                            "Youtube",
+                                            "Rijksmuseum",
                                             "DDB",
+                                            "BritishLibrary",
                                             "InternetArchive",
-                                            "Youtube"
+                                            "WITHin",
+                                            "DBPedia",
+                                            "Historypin",
+                                            "WITHinASpace"
                                         ]
                                     }
                                 }
@@ -301,6 +310,136 @@
                 }
             }
         },
+        "/record/randomRecords": {
+            "get": {
+                "parameters": [
+                    {
+                        "name": "groupId",
+                        "in": "query",
+                        "description": "This group will have read access to these records.",
+                        "type": "string"
+                    },
+                    {
+                        "name": "batchCount",
+                        "in": "query",
+                        "description": "How many records to be fetched.",
+                        "type": "integer"
+                    }
+                ],
+                "summary": "Get some random records.",
+                "description": "Fetch a specified amount of randomly selected records that are visible to a group.",
+                "tags": [
+                    "Record",
+                    "Group"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/InternalRecord"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/record/annotationCount": {
+            "get": {
+                "parameters": [
+                    {
+                        "name": "groupId",
+                        "in": "query",
+                        "description": "Specifies the group whose annotations to count.",
+                        "type": "string"
+                    }
+                ],
+                "summary": "Get the annotation count of a group.",
+                "description": "Returns the total count of annotations a group has made and the number of annotated records.",
+                "tags": [
+                    "Record",
+                    "Annotation",
+                    "Group"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "annotatedRecords": {
+                                    "type": "integer"
+                                },
+                                "annotations": {
+                                    "type": "integer"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/record/contextData": {
+            "post": {
+                "parameters": [
+                    {
+                        "name": "collectionId",
+                        "in": "query",
+                        "required": true,
+                        "description": "The collection Id that the record belongs to",
+                        "type": "string"
+                    },
+                    {
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "description": "Context data to add",
+                        "schema": {
+                            "$ref": "#/definitions/ContextData"
+                        }
+                    }
+                ],
+                "summary": "Update a record's context data.",
+                "description": "Updates the context data in a record, in respect to a collection that the record belongs to.",
+                "tags": [
+                    "Record",
+                    "Collection"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "properties": {
+                                "message": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request (invalid json)",
+                        "schema": {
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error (database error)",
+                        "schema": {
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/record/{recordId}": {
             "parameters": [
                 {
@@ -328,10 +467,28 @@
                         "items": {
                             "type": "string"
                         }
+                    },
+                    {
+                        "name": "profile",
+                        "in": "query",
+                        "type": "string",
+                        "default": "MEDIUM",
+                        "enum": [
+                            "BASIC",
+                            "MEDIUM",
+                            "FULL"
+                        ],
+                        "description": "Set to FULL to get all available metadata on the record, MEDIUM to remove some, and BASIC for the lightest version possible. "
+                    },
+                    {
+                        "name": "locale",
+                        "in": "query",
+                        "type": "string",
+                        "description": "Only shows a specific locale (language codes similar to the alpha2 country codes)."
                     }
                 ],
                 "summary": "Retrieve a record.",
-                "description": "Retrieve a JSON with the metadata of the record specified in the path, by its Id. To retrieve the Ids of records in collections, you can use the ```collection/{collectionId}/list``` call see the ```dbid``` field in the response. Many different serializations are available for the record's metadata. To select one, or more of them, use the \"format\" parameter. The different serializations will appear in the \"content\" field in the record response.",
+                "description": "Retrieve a JSON with the metadata of the record specified in the path, by its Id. To retrieve the Ids of records in collections, you can use the ```collection/{collectionId}/list``` call see the ```dbid``` field in the response. Many different serializations are available for the record's metadata. To select one, or more of them, use the \"format\" parameter. The different serializations will appear in the \"content\" field in the record response. The profile parameter regulates the verbosity of the response. Use FULL to get all available metadata on the record, MEDIUM to remove some, and BASIC for the lightest version possible. ",
                 "tags": [
                     "Record"
                 ],
@@ -431,6 +588,207 @@
                 }
             }
         },
+        "/annotation/{annotationId}": {
+            "parameters": [
+                {
+                    "name": "annotationId",
+                    "in": "path",
+                    "required": true,
+                    "description": "The id of the annotation",
+                    "type": "string"
+                }
+            ],
+            "get": {
+                "parameters": [
+                    {
+                        "name": "annotationId",
+                        "in": "path",
+                        "required": true,
+                        "description": "The id of the annotation",
+                        "type": "string"
+                    }
+                ],
+                "summary": "Retrieve an annotation.",
+                "description": "Retrieve a JSON with the metadata of the annotation specified in the path, by its Id.",
+                "tags": [
+                    "Annotation"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/Annotations"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error (database error)",
+                        "schema": {
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "summary": "Remove an annotation.",
+                "description": "Remove an existing annotation, specified by its id in the path.",
+                "parameters": [
+                    {
+                        "name": "annotationId",
+                        "in": "path",
+                        "required": true,
+                        "description": "The id of the annotation.",
+                        "type": "string"
+                    }
+                ],
+                "tags": [
+                    "Annotation"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "properties": {
+                                "message": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request (invalid id)",
+                        "schema": {
+                            "properties": {
+                                "message": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden (no edit permissions)",
+                        "schema": {
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error (database error)",
+                        "schema": {
+                            "properties": {
+                                "message": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/annotation/{annotationId}/approve": {
+            "parameters": [
+                {
+                    "name": "annotationId",
+                    "in": "path",
+                    "required": true,
+                    "description": "The id of the annotation",
+                    "type": "string"
+                }
+            ],
+            "get": {
+                "parameters": [
+                    {
+                        "name": "annotationId",
+                        "in": "path",
+                        "required": true,
+                        "description": "The id of the annotation",
+                        "type": "string"
+                    }
+                ],
+                "summary": "Approve an annotation.",
+                "description": "Approves a submitted annotation specified in the path, by its Id.",
+                "tags": [
+                    "Annotation"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "properties": {
+                                "message": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error (database error)",
+                        "schema": {
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/annotation/{annotationId}/reject": {
+            "parameters": [
+                {
+                    "name": "annotationId",
+                    "in": "path",
+                    "required": true,
+                    "description": "The id of the annotation",
+                    "type": "string"
+                }
+            ],
+            "get": {
+                "parameters": [
+                    {
+                        "name": "annotationId",
+                        "in": "path",
+                        "required": true,
+                        "description": "The id of the annotation",
+                        "type": "string"
+                    }
+                ],
+                "summary": "Reject an annotation.",
+                "description": "Rejects a submitted annotation specified in the path, by its Id.",
+                "tags": [
+                    "Annotation"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "properties": {
+                                "message": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error (database error)",
+                        "schema": {
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/collection/list": {
             "get": {
                 "parameters": [
@@ -439,26 +797,13 @@
                         "in": "query",
                         "description": "Filters returned collections based on the specified rights for each user in the input array of JSON objects. Each user needs to have direct access rights to this collection and not through a usergroup (organization or project).",
                         "type": "string",
-                        "default": "{\"username\": \"name\", \"rights\": \"OWN\"}"
-                    },
-                    {
-                        "name": "recursivelyAccessedByUserOrGroup",
-                        "in": "query",
-                        "description": "This field works like '''directlyAccessedByUserName''' with the difference that access rights can be inherited from a usergroup to which a user recursively belongs to.",
-                        "type": "string",
-                        "default": "{\"username\": \"name\", \"rights\": \"OWN\"}"
+                        "default": "[\"username\": \"name\", \"rights\": \"OWN\"]"
                     },
                     {
                         "name": "creator",
                         "in": "query",
                         "description": "Filters returned collections based on the '''ownerId''' field of a collection, ie the Id of the user that created the collection.",
                         "type": "string"
-                    },
-                    {
-                        "name": "isPublic",
-                        "in": "query",
-                        "description": "If true returns only public collections, if false or unspecified this filter remains inactive.",
-                        "type": "boolean"
                     },
                     {
                         "name": "isExhibition",
@@ -486,10 +831,122 @@
                         "default": 10,
                         "description": "Count (default 10)",
                         "type": "integer"
+                    },
+                    {
+                        "name": "profile",
+                        "in": "query",
+                        "type": "string",
+                        "default": "MEDIUM",
+                        "enum": [
+                            "BASIC",
+                            "MEDIUM",
+                            "FULL"
+                        ],
+                        "description": "Set to FULL to get all available metadata on the record, MEDIUM to remove some, and BASIC for the lightest version possible. "
+                    },
+                    {
+                        "name": "locale",
+                        "in": "query",
+                        "type": "string",
+                        "description": "Only shows a specific locale (language codes similar to the alpha2 country codes)."
                     }
                 ],
-                "summary": "Get a list of collections.",
+                "summary": "Get a list of accessible collections.",
                 "description": "This call returns a list of all the accessible collections (at least read access) to the logged in user. Using the parameter filters, you can narrow down the collections associated with a specific user. All filters are optional. Since this call has many parameters we suggest you go through all descriptions before using it.",
+                "tags": [
+                    "Collection"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "properties": {
+                                "collectionsOrExhibitions": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/definitions/Collection"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/collection/listPublic": {
+            "get": {
+                "parameters": [
+                    {
+                        "name": "directlyAccessedByUserOrGroup",
+                        "in": "query",
+                        "description": "Filters returned collections based on the specified rights for each user in the input array of JSON objects. Each user needs to have direct access rights to this collection and not through a usergroup (organization or project). ",
+                        "type": "string",
+                        "default": "{\"username\": \"name\", \"rights\": \"OWN\"}"
+                    },
+                    {
+                        "name": "creator",
+                        "in": "query",
+                        "description": "Filters returned collections based on the '''ownerId''' field of a collection, ie the Id of the user that created the collection.",
+                        "type": "string"
+                    },
+                    {
+                        "name": "isExhibition",
+                        "in": "query",
+                        "description": "If true returns only exhibitions, if false only collections and if unspecified returns both.",
+                        "type": "boolean"
+                    },
+                    {
+                        "name": "collectionHits",
+                        "in": "query",
+                        "type": "boolean",
+                        "description": "If true returns the total numbers of exhibitions and/or collections this call may return (limited by the count).",
+                        "default": false
+                    },
+                    {
+                        "name": "offset",
+                        "in": "query",
+                        "default": 0,
+                        "description": "Offset",
+                        "type": "integer"
+                    },
+                    {
+                        "name": "count",
+                        "in": "query",
+                        "default": 10,
+                        "description": "Count (default 10)",
+                        "type": "integer"
+                    },
+                    {
+                        "name": "profile",
+                        "in": "query",
+                        "type": "string",
+                        "default": "MEDIUM",
+                        "enum": [
+                            "BASIC",
+                            "MEDIUM",
+                            "FULL"
+                        ],
+                        "description": "Set to FULL to get all available metadata on the record, MEDIUM to remove some, and BASIC for the lightest version possible. "
+                    },
+                    {
+                        "name": "locale",
+                        "in": "query",
+                        "type": "string",
+                        "description": "Only shows a specific locale (language codes similar to the alpha2 country codes)."
+                    }
+                ],
+                "summary": "Get a list of public collections.",
+                "description": "This call returns a list of all public collections. Using the parameter filters, you can narrow down the collections associated with a specific user. All filters are optional. Since this call has many parameters we suggest you go through all descriptions before using it. The ```directyAccessedByUserOrGroup``` parameter filters results based on the access rights the users have to collections, even if they are public.",
                 "tags": [
                     "Collection"
                 ],
@@ -534,14 +991,13 @@
                         "in": "query",
                         "description": "Filters returned collections based on the specified rights for each user in the input array of JSON objects. Each user needs to have direct access rights to this collection and not through a usergroup (organization or project).",
                         "type": "string",
-                        "default": "{\"username\": \"name\", \"rights\": \"OWN\"}"
+                        "default": "[\"username\": \"name\", \"rights\": \"OWN\"]"
                     },
                     {
-                        "name": "recursivelyAccessedByUserOrGroup",
+                        "name": "creator",
                         "in": "query",
-                        "description": "This field works like directlyAccessedByUserName with the difference that access rights can be inherited from a usergroup to which a user recursively belongs to.",
-                        "type": "string",
-                        "default": "{\"username\": \"name\", \"rights\": \"OWN\"}"
+                        "description": "Filters returned collections based on the '''ownerId''' field of a collection, ie the Id of the user that created the collection.",
+                        "type": "string"
                     },
                     {
                         "name": "isExhibition",
@@ -559,9 +1015,9 @@
                     {
                         "name": "offset",
                         "in": "query",
+                        "default": 0,
                         "description": "Offset",
-                        "type": "integer",
-                        "default": 0
+                        "type": "integer"
                     },
                     {
                         "name": "count",
@@ -569,10 +1025,28 @@
                         "default": 10,
                         "description": "Count (default 10)",
                         "type": "integer"
+                    },
+                    {
+                        "name": "profile",
+                        "in": "query",
+                        "type": "string",
+                        "default": "MEDIUM",
+                        "enum": [
+                            "BASIC",
+                            "MEDIUM",
+                            "FULL"
+                        ],
+                        "description": "Set to FULL to get all available metadata on the record, MEDIUM to remove some, and BASIC for the lightest version possible. "
+                    },
+                    {
+                        "name": "locale",
+                        "in": "query",
+                        "type": "string",
+                        "description": "Only shows a specific locale (language codes similar to the alpha2 country codes)."
                     }
                 ],
                 "summary": "Get a list of collections shared with the user.",
-                "description": "This call returns a list of all the collections that have been shared with the logged in user. This means, the user did not create these collections but has been given access rights to it. The filters are similar to the ```collection/list``` call. Using the parameter filters, you can narrow down the collections associated with a specific user. All filters are optional. Since this call has many parameters we suggest you go through all descriptions before using it.",
+                "description": "This call returns a list of all the collections that have been shared with the logged in user. This means, the user did not create these, nor are they necessarily public collections but has been given access rights to it. The filters are similar to the ```collection/list``` call. Using the parameter filters, you can narrow down the collections associated with a specific user. All filters are optional. Since this call has many parameters we suggest you go through all descriptions before using it.",
                 "tags": [
                     "Collection"
                 ],
@@ -588,6 +1062,628 @@
                     },
                     "403": {
                         "description": "Forbidden (user not specified)",
+                        "schema": {
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/searchMyCollections": {
+            "get": {
+                "parameters": [
+                    {
+                        "name": "term",
+                        "in": "query",
+                        "description": "A search term.",
+                        "type": "string"
+                    },
+                    {
+                        "name": "offset",
+                        "in": "query",
+                        "description": "offset",
+                        "type": "integer"
+                    },
+                    {
+                        "name": "count",
+                        "in": "query",
+                        "description": "limits number of results",
+                        "type": "integer"
+                    },
+                    {
+                        "name": "isShared",
+                        "in": "query",
+                        "description": "If true returns only collections that have been shared with the logged in user.",
+                        "type": "boolean"
+                    }
+                ],
+                "summary": "Search within your collections.",
+                "description": "This call will return an array of your collections that match the search term. The results can be filtered by count, offset and shared status.",
+                "tags": [
+                    "Collection",
+                    "Search"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "properties": {
+                                "results": {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "object",
+                                        "properties": {
+                                            "source": {
+                                                "type": "string"
+                                            },
+                                            "totalCount": {
+                                                "type": "integer"
+                                            },
+                                            "start": {
+                                                "type": "integer"
+                                            },
+                                            "count": {
+                                                "type": "integer"
+                                            },
+                                            "page": {
+                                                "type": "integer"
+                                            },
+                                            "pageSize": {
+                                                "type": "integer"
+                                            },
+                                            "items": {
+                                                "type": "array",
+                                                "items": {
+                                                    "$ref": "#/definitions/Collection"
+                                                }
+                                            }
+                                        }
+                                    }
+                                },
+                                "sources": {
+                                    "description": "Different values such as Europeana, DPLA, DigitalNZ, Rijksmuseum, WITHin, and others.  Results from WITHin correspond to internal records.",
+                                    "type": "array",
+                                    "items": {
+                                        "type": "string",
+                                        "enum": [
+                                            "Europeana",
+                                            "DPLA",
+                                            "NLA",
+                                            "DigitalNZ",
+                                            "Youtube",
+                                            "Rijksmuseum",
+                                            "DDB",
+                                            "BritishLibrary",
+                                            "InternetArchive",
+                                            "WITHin",
+                                            "DBPedia",
+                                            "Historypin",
+                                            "WITHinASpace"
+                                        ]
+                                    }
+                                },
+                                "continuationId": {
+                                    "type": "string"
+                                },
+                                "query": {
+                                    "type": "object",
+                                    "properties": {
+                                        "sources": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "string",
+                                                "enum": [
+                                                    "Europeana",
+                                                    "DPLA",
+                                                    "NLA",
+                                                    "DigitalNZ",
+                                                    "Youtube",
+                                                    "Rijksmuseum",
+                                                    "DDB",
+                                                    "BritishLibrary",
+                                                    "InternetArchive",
+                                                    "WITHin",
+                                                    "DBPedia",
+                                                    "Historypin",
+                                                    "WITHinASpace"
+                                                ]
+                                            }
+                                        },
+                                        "filters": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/Filters"
+                                            }
+                                        },
+                                        "start": {
+                                            "type": "integer"
+                                        },
+                                        "count": {
+                                            "type": "integer"
+                                        },
+                                        "page": {
+                                            "type": "integer"
+                                        },
+                                        "pageSize": {
+                                            "type": "integer"
+                                        },
+                                        "responseLanguage": {
+                                            "type": "string"
+                                        },
+                                        "continuationId": {
+                                            "type": "string"
+                                        },
+                                        "continuation": {
+                                            "type": "boolean"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden (no logged in user)",
+                        "schema": {
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/searchMyExhibitions": {
+            "get": {
+                "parameters": [
+                    {
+                        "name": "term",
+                        "in": "query",
+                        "description": "A search term.",
+                        "type": "string"
+                    },
+                    {
+                        "name": "offset",
+                        "in": "query",
+                        "description": "offset",
+                        "type": "integer"
+                    },
+                    {
+                        "name": "count",
+                        "in": "query",
+                        "description": "limits number of results",
+                        "type": "integer"
+                    },
+                    {
+                        "name": "isShared",
+                        "in": "query",
+                        "description": "If true returns only exhibitions that have been shared with the logged in user.",
+                        "type": "boolean"
+                    }
+                ],
+                "summary": "Search within your collections.",
+                "description": "This call will return an array of your exhibitions that match the search term. The results can be filtered by count, offset and shared status.",
+                "tags": [
+                    "Exhibition",
+                    "Search"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "properties": {
+                                "results": {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "object",
+                                        "properties": {
+                                            "source": {
+                                                "type": "string"
+                                            },
+                                            "totalCount": {
+                                                "type": "integer"
+                                            },
+                                            "start": {
+                                                "type": "integer"
+                                            },
+                                            "count": {
+                                                "type": "integer"
+                                            },
+                                            "page": {
+                                                "type": "integer"
+                                            },
+                                            "pageSize": {
+                                                "type": "integer"
+                                            },
+                                            "items": {
+                                                "type": "array",
+                                                "items": {
+                                                    "$ref": "#/definitions/Collection"
+                                                }
+                                            }
+                                        }
+                                    }
+                                },
+                                "sources": {
+                                    "description": "Different values such as Europeana, DPLA, DigitalNZ, Rijksmuseum, WITHin, and others.  Results from WITHin correspond to internal records.",
+                                    "type": "array",
+                                    "items": {
+                                        "type": "string",
+                                        "enum": [
+                                            "Europeana",
+                                            "DPLA",
+                                            "NLA",
+                                            "DigitalNZ",
+                                            "Youtube",
+                                            "Rijksmuseum",
+                                            "DDB",
+                                            "BritishLibrary",
+                                            "InternetArchive",
+                                            "WITHin",
+                                            "DBPedia",
+                                            "Historypin",
+                                            "WITHinASpace"
+                                        ]
+                                    }
+                                },
+                                "continuationId": {
+                                    "type": "string"
+                                },
+                                "query": {
+                                    "type": "object",
+                                    "properties": {
+                                        "sources": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "string",
+                                                "enum": [
+                                                    "Europeana",
+                                                    "DPLA",
+                                                    "NLA",
+                                                    "DigitalNZ",
+                                                    "Youtube",
+                                                    "Rijksmuseum",
+                                                    "DDB",
+                                                    "BritishLibrary",
+                                                    "InternetArchive",
+                                                    "WITHin",
+                                                    "DBPedia",
+                                                    "Historypin",
+                                                    "WITHinASpace"
+                                                ]
+                                            }
+                                        },
+                                        "filters": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/Filters"
+                                            }
+                                        },
+                                        "start": {
+                                            "type": "integer"
+                                        },
+                                        "count": {
+                                            "type": "integer"
+                                        },
+                                        "page": {
+                                            "type": "integer"
+                                        },
+                                        "pageSize": {
+                                            "type": "integer"
+                                        },
+                                        "responseLanguage": {
+                                            "type": "string"
+                                        },
+                                        "continuationId": {
+                                            "type": "string"
+                                        },
+                                        "continuation": {
+                                            "type": "boolean"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden (no logged in user)",
+                        "schema": {
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/searchCollection/{collectionId}": {
+            "parameters": [
+                {
+                    "name": "collectionId",
+                    "in": "path",
+                    "required": true,
+                    "description": "Id of the collection",
+                    "type": "string"
+                }
+            ],
+            "get": {
+                "parameters": [
+                    {
+                        "name": "collectionId",
+                        "in": "path",
+                        "required": true,
+                        "description": "Id of the collection",
+                        "type": "string"
+                    },
+                    {
+                        "name": "term",
+                        "in": "query",
+                        "description": "A search term.",
+                        "type": "string"
+                    },
+                    {
+                        "name": "offset",
+                        "in": "query",
+                        "description": "offset",
+                        "type": "integer"
+                    },
+                    {
+                        "name": "count",
+                        "in": "query",
+                        "description": "limits number of results",
+                        "type": "integer"
+                    }
+                ],
+                "summary": "Search records within a collection.",
+                "description": "This call will return an array of records that belong in a specified collection, and match the search term. ",
+                "tags": [
+                    "Collection",
+                    "Record",
+                    "Search"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "properties": {
+                                "results": {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "object",
+                                        "properties": {
+                                            "source": {
+                                                "type": "string"
+                                            },
+                                            "totalCount": {
+                                                "type": "integer"
+                                            },
+                                            "start": {
+                                                "type": "integer"
+                                            },
+                                            "count": {
+                                                "type": "integer"
+                                            },
+                                            "page": {
+                                                "type": "integer"
+                                            },
+                                            "pageSize": {
+                                                "type": "integer"
+                                            },
+                                            "items": {
+                                                "type": "array",
+                                                "items": {
+                                                    "$ref": "#/definitions/InternalRecord"
+                                                }
+                                            }
+                                        }
+                                    }
+                                },
+                                "sources": {
+                                    "description": "Different values such as Europeana, DPLA, DigitalNZ, Rijksmuseum, WITHin, and others.  Results from WITHin correspond to internal records.",
+                                    "type": "array",
+                                    "items": {
+                                        "type": "string",
+                                        "enum": [
+                                            "Europeana",
+                                            "DPLA",
+                                            "NLA",
+                                            "DigitalNZ",
+                                            "Youtube",
+                                            "Rijksmuseum",
+                                            "DDB",
+                                            "BritishLibrary",
+                                            "InternetArchive",
+                                            "WITHin",
+                                            "DBPedia",
+                                            "Historypin",
+                                            "WITHinASpace"
+                                        ]
+                                    }
+                                },
+                                "continuationId": {
+                                    "type": "string"
+                                },
+                                "query": {
+                                    "type": "object",
+                                    "properties": {
+                                        "sources": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "string",
+                                                "enum": [
+                                                    "Europeana",
+                                                    "DPLA",
+                                                    "NLA",
+                                                    "DigitalNZ",
+                                                    "Youtube",
+                                                    "Rijksmuseum",
+                                                    "DDB",
+                                                    "BritishLibrary",
+                                                    "InternetArchive",
+                                                    "WITHin",
+                                                    "DBPedia",
+                                                    "Historypin",
+                                                    "WITHinASpace"
+                                                ]
+                                            }
+                                        },
+                                        "filters": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/Filters"
+                                            }
+                                        },
+                                        "start": {
+                                            "type": "integer"
+                                        },
+                                        "count": {
+                                            "type": "integer"
+                                        },
+                                        "page": {
+                                            "type": "integer"
+                                        },
+                                        "pageSize": {
+                                            "type": "integer"
+                                        },
+                                        "responseLanguage": {
+                                            "type": "string"
+                                        },
+                                        "continuationId": {
+                                            "type": "string"
+                                        },
+                                        "continuation": {
+                                            "type": "boolean"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden (no logged in user)",
+                        "schema": {
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/collection/countMyAndShared": {
+            "get": {
+                "summary": "Returns the number of collections owned or shared with the user.",
+                "description": "This call will return return the number of all collections owned by the logged in user or shared.",
+                "tags": [
+                    "Collection"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request (no signed in user)",
+                        "schema": {
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/collection/featured": {
+            "get": {
+                "parameters": [
+                    {
+                        "name": "groupOrUserName",
+                        "in": "query",
+                        "description": "A user or group that owns the collections.",
+                        "type": "string"
+                    },
+                    {
+                        "name": "isExhibition",
+                        "in": "query",
+                        "description": "If true returns only exhibitions, if false only collections and if unspecified returns both.",
+                        "type": "boolean"
+                    },
+                    {
+                        "name": "offset",
+                        "in": "query",
+                        "default": 0,
+                        "description": "Offset",
+                        "type": "integer"
+                    },
+                    {
+                        "name": "countPerType",
+                        "in": "query",
+                        "default": 10,
+                        "description": "Count per collection type (default 10)",
+                        "type": "integer"
+                    },
+                    {
+                        "name": "profile",
+                        "in": "query",
+                        "type": "string",
+                        "default": "MEDIUM",
+                        "enum": [
+                            "BASIC",
+                            "MEDIUM",
+                            "FULL"
+                        ],
+                        "description": "Set to FULL to get all available metadata on the record, MEDIUM to remove some, and BASIC for the lightest version possible. "
+                    },
+                    {
+                        "name": "locale",
+                        "in": "query",
+                        "type": "string",
+                        "description": "Only shows a specific locale (language codes similar to the alpha2 country codes)."
+                    }
+                ],
+                "summary": "Get a list of collections shared with the user.",
+                "description": "This call returns a list of all the collections that have been shared with the logged in user. This means, the user did not create these, nor are they necessarily public collections but has been given access rights to it. The filters are similar to the ```collection/list``` call. Using the parameter filters, you can narrow down the collections associated with a specific user. All filters are optional. Since this call has many parameters we suggest you go through all descriptions before using it.",
+                "tags": [
+                    "Collection"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "properties": {
+                                "totalCollections": {
+                                    "type": "integer"
+                                },
+                                "totalExhibitions": {
+                                    "type": "integer"
+                                },
+                                "collectionsOrExhibitions": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/definitions/Collection"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request (user or group does not exist)",
                         "schema": {
                             "properties": {
                                 "error": {
@@ -626,68 +1722,6 @@
                                 }
                             }
                         }
-                    }
-                }
-            }
-        },
-        "/collection/liked": {
-            "post": {
-                "summary": "Adds a record to favourites.",
-                "description": "This call adds a record in the favourites collection.",
-                "tags": [
-                    "Record",
-                    "Collection"
-                ],
-                "parameters": [
-                    {
-                        "in": "body",
-                        "name": "body",
-                        "description": "Record JSON schema",
-                        "schema": {
-                            "$ref": "#/definitions/InternalRecord"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "403": {
-                        "description": "Forbidden (double entry)",
-                        "schema": {
-                            "properties": {
-                                "error": {
-                                    "type": "string"
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/collection/favoriteCollection": {
-            "get": {
-                "summary": "Get a collection that contains your favorite records.",
-                "description": "This call will return a collection that contains all records marked as favourites.",
-                "tags": [
-                    "Record",
-                    "Collection"
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/Collection"
-                        }
-                    },
-                    "403": {
-                        "description": "Forbidden (user not logged in)"
                     }
                 }
             }
@@ -830,6 +1864,118 @@
                     },
                     "500": {
                         "description": "Internal Server Error (cannot retrieve records from database)",
+                        "schema": {
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/collection/favoriteCollection": {
+            "get": {
+                "summary": "Get a collection that contains your favorite records.",
+                "description": "This call will return a collection that contains all records marked as favourites.",
+                "tags": [
+                    "Record",
+                    "Collection"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/Collection"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden (user not logged in)"
+                    }
+                }
+            }
+        },
+        "/collection/sort/{collectionId}": {
+            "parameters": [
+                {
+                    "name": "collectionId",
+                    "in": "path",
+                    "required": true,
+                    "description": "Id of the collection",
+                    "type": "string"
+                }
+            ],
+            "get": {
+                "parameters": [
+                    {
+                        "name": "collectionId",
+                        "in": "path",
+                        "required": true,
+                        "description": "Id of the collection",
+                        "type": "string"
+                    }
+                ],
+                "summary": "Sort the records of a collection.",
+                "description": "This call will sort all records of a collection based on their quality measure. ",
+                "tags": [
+                    "Collection",
+                    "Record"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "properties": {
+                                "message": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden (no logged in user)",
+                        "schema": {
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/collection/liked": {
+            "post": {
+                "summary": "Adds a record to favourites.",
+                "description": "This call adds a record in the favourites collection.",
+                "tags": [
+                    "Record",
+                    "Collection"
+                ],
+                "parameters": [
+                    {
+                        "in": "body",
+                        "name": "body",
+                        "description": "Record JSON schema",
+                        "schema": {
+                            "$ref": "#/definitions/InternalRecord"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden (double entry)",
                         "schema": {
                             "properties": {
                                 "error": {
@@ -1092,6 +2238,339 @@
                 }
             }
         },
+        "/collection/{collectionId}/moveRecord": {
+            "parameters": [
+                {
+                    "name": "collectionId",
+                    "in": "path",
+                    "required": true,
+                    "description": "Id of the collection or exhibition from which to remove the record",
+                    "type": "string"
+                }
+            ],
+            "put": {
+                "description": "Moves record from a specified collection (path), to a different position. Note that calls to this path can also be used for exhibitions.",
+                "summary": "Remove a record from a collection.",
+                "tags": [
+                    "Collection",
+                    "Exhibition",
+                    "Record"
+                ],
+                "parameters": [
+                    {
+                        "name": "collectionId",
+                        "in": "path",
+                        "required": true,
+                        "description": "Id of the collection",
+                        "type": "string"
+                    },
+                    {
+                        "name": "oldPosition",
+                        "in": "query",
+                        "description": "old position",
+                        "type": "integer",
+                        "default": 0,
+                        "required": true
+                    },
+                    {
+                        "name": "newPosition",
+                        "in": "query",
+                        "description": "new position",
+                        "type": "integer",
+                        "default": 0,
+                        "required": true
+                    },
+                    {
+                        "name": "recordId",
+                        "in": "query",
+                        "required": true,
+                        "description": "Id of the record",
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK (collection Id in string)",
+                        "schema": {
+                            "properties": {
+                                "message": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden (no permission to edit collection)",
+                        "schema": {
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error (no or wrong record Id, cannot delete from database, exception error)",
+                        "schema": {
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/collection": {
+            "post": {
+                "parameters": [
+                    {
+                        "name": "body",
+                        "in": "body",
+                        "description": "Collection schema.",
+                        "schema": {
+                            "$ref": "#/definitions/Collection"
+                        }
+                    }
+                ],
+                "summary": "Create a new collection or exhibition.",
+                "description": "This call will create a new collection or exhibition and store it in the database. Please use with caution as testing with this call will update your current collections!",
+                "tags": [
+                    "Collection",
+                    "Exhibition"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "properties": {
+                                "collection": {
+                                    "$ref": "#/definitions/Collection"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden (no read-access)",
+                        "schema": {
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error(database error)",
+                        "schema": {
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/collection/importSearch": {
+            "post": {
+                "summary": "importSearch",
+                "description": "imports search",
+                "tags": [
+                    "Collection"
+                ],
+                "parameters": [
+                    {
+                        "name": "body",
+                        "in": "body",
+                        "description": "Collection schema.",
+                        "schema": {
+                            "$ref": "#/definitions/Collection"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/Collection"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden (no read-access)",
+                        "schema": {
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error(database error)",
+                        "schema": {
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/collection/importIDs": {
+            "post": {
+                "summary": "import ids",
+                "description": "imports ids",
+                "tags": [
+                    "Collection"
+                ],
+                "parameters": [
+                    {
+                        "name": "body",
+                        "in": "body",
+                        "description": "Collection schema.",
+                        "schema": {
+                            "$ref": "#/definitions/Collection"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/Collection"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden (no read-access)",
+                        "schema": {
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error(database error)",
+                        "schema": {
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/collection/importEuropeanaCollection": {
+            "post": {
+                "summary": "Import a collection from Europeana.",
+                "description": "Creates a new collection and imports records from an existing Europeana collection. Take notice that the id parameter refers to Europeana's id. The limit parameter can be set to -1 to import all items.",
+                "tags": [
+                    "Collection"
+                ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "query",
+                        "required": true,
+                        "description": "Europeana's Id of the collection",
+                        "type": "string"
+                    },
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "required": true,
+                        "description": "Limits number of items",
+                        "type": "integer"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/Collection"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request (bad id)",
+                        "schema": {
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error(database error)",
+                        "schema": {
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/collection/exportToOWL": {
+            "get": {
+                "parameters": [
+                    {
+                        "name": "cname",
+                        "in": "query",
+                        "description": "Name (label) of the collection",
+                        "type": "string"
+                    }
+                ],
+                "summary": "Export a collection to OWL.",
+                "description": "Export to OWL.",
+                "tags": [
+                    "Collection",
+                    "Exhibition"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "properties": {
+                                "collection": {
+                                    "$ref": "#/definitions/Collection"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden (no read-access)",
+                        "schema": {
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error(database error)",
+                        "schema": {
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/collection/{collectionId}": {
             "parameters": [
                 {
@@ -1147,7 +2626,7 @@
                     }
                 }
             },
-            "post": {
+            "put": {
                 "summary": "Update metadata in a collection.",
                 "description": "Use this call to change the stored metadata of a collection. Note that calls to this path can also be used for exhibitions.",
                 "tags": [
@@ -1267,22 +2746,41 @@
                 }
             }
         },
-        "/collection": {
+        "/exhibition/{exhibitionId}/addBackgroundImg": {
+            "parameters": [
+                {
+                    "name": "exhibitionId",
+                    "in": "path",
+                    "description": "Internal id of the collection or exhibition",
+                    "required": true,
+                    "type": "string"
+                }
+            ],
             "post": {
                 "parameters": [
                     {
+                        "name": "exhibitionId",
+                        "in": "path",
+                        "description": "Internal id of the exhibition.",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
                         "name": "body",
                         "in": "body",
-                        "description": "A sample body for test calls.",
+                        "description": "Media object schema.",
                         "schema": {
-                            "$ref": "#/definitions/SampleCollection"
+                            "properties": {
+                                "media": {
+                                    "$ref": "#/definitions/MediaRecord"
+                                }
+                            }
                         }
                     }
                 ],
-                "summary": "Create a new collection or exhibition.",
-                "description": "This call will create a new collection or exhibition and store it in the database. Please use with caution as testing with this call will update your current collections!",
+                "summary": "Add a background image to an exhibition.",
+                "description": "This call will update the exhibition's background image in WITH. You need to create a media object beforehand and put the result in the body of this call.",
                 "tags": [
-                    "Collection",
                     "Exhibition"
                 ],
                 "responses": {
@@ -1290,8 +2788,8 @@
                         "description": "OK",
                         "schema": {
                             "properties": {
-                                "collection": {
-                                    "$ref": "#/definitions/Collection"
+                                "message": {
+                                    "type": "string"
                                 }
                             }
                         }
@@ -1667,6 +3165,56 @@
                         "description": "OK",
                         "schema": {
                             "$ref": "#/definitions/Group"
+                        }
+                    }
+                }
+            }
+        },
+        "/group/list": {
+            "get": {
+                "tags": [
+                    "Group"
+                ],
+                "summary": "Get a list of groups you belong to.",
+                "description": "Retrieves a list of all group the logged in user belongs to. This call selectively can be applied to all group types, ie organizations and projects. You can also specify if you want groups you belong to directly or through the group hierarchy.",
+                "parameters": [
+                    {
+                        "name": "groupType",
+                        "in": "query",
+                        "description": "Type of group.",
+                        "type": "string"
+                    },
+                    {
+                        "name": "offset",
+                        "in": "query",
+                        "description": "offset",
+                        "type": "integer"
+                    },
+                    {
+                        "name": "belongsOnly",
+                        "in": "query",
+                        "description": "True if you belong to the group directly and not through the group hierarchy",
+                        "type": "boolean"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/Group"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error (cannot retrieve or save to database)",
+                        "schema": {
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
+                            }
                         }
                     }
                 }
@@ -2071,6 +3619,405 @@
                 }
             }
         },
+        "/group/membersInfo/{groupId}": {
+            "parameters": [
+                {
+                    "name": "groupId",
+                    "in": "path",
+                    "required": true,
+                    "description": "Id of a group",
+                    "type": "string"
+                }
+            ],
+            "get": {
+                "tags": [
+                    "User",
+                    "Group"
+                ],
+                "summary": "See a group's members.",
+                "description": "Retrieves a list with the members that belong in the specified group. The results can be either only users or groups, or both.",
+                "parameters": [
+                    {
+                        "name": "groupId",
+                        "in": "path",
+                        "required": true,
+                        "description": "Id of a group.",
+                        "type": "string"
+                    },
+                    {
+                        "name": "category",
+                        "in": "query",
+                        "description": "Result types.",
+                        "type": "string",
+                        "enum": [
+                            "groups",
+                            "users",
+                            "both"
+                        ]
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK (successfully submitted request)",
+                        "schema": {
+                            "properties": {
+                                "users": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/definitions/User"
+                                    }
+                                },
+                                "groups": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/definitions/Group"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error (cannot retrieve or write to database)",
+                        "schema": {
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/group/admin/{groupId}": {
+            "parameters": [
+                {
+                    "name": "groupId",
+                    "in": "path",
+                    "required": true,
+                    "description": "Id of a group",
+                    "type": "string"
+                }
+            ],
+            "put": {
+                "tags": [
+                    "User",
+                    "Group"
+                ],
+                "summary": "Make someone a group admin.",
+                "description": "Make someone an admin of a group. Only creators or other administrators can perform this operation.",
+                "parameters": [
+                    {
+                        "name": "groupId",
+                        "in": "path",
+                        "required": true,
+                        "description": "Id of a group.",
+                        "type": "string"
+                    },
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "description": "Id of a user.",
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "properties": {
+                                "OK": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request (bad user id)",
+                        "schema": {
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden (logged in user is not an owner or admin)",
+                        "schema": {
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error (cannot retrieve or write to database)",
+                        "schema": {
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "User",
+                    "Group"
+                ],
+                "summary": "Remove a group admin.",
+                "description": "Remove an admin from a group. Only creators or other administrators can perform this operation. The call returns an OK message if the specified user was not an admin.",
+                "parameters": [
+                    {
+                        "name": "groupId",
+                        "in": "path",
+                        "required": true,
+                        "description": "Id of a group.",
+                        "type": "string"
+                    },
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "description": "Id of a user.",
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK (remove admin or user was not an admin)",
+                        "schema": {
+                            "properties": {
+                                "OK": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request (bad user id)",
+                        "schema": {
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden (logged in user is not an owner or admin)",
+                        "schema": {
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error (cannot retrieve or write to database)",
+                        "schema": {
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/group/{groupId}/addFeatured": {
+            "parameters": [
+                {
+                    "name": "groupId",
+                    "in": "path",
+                    "required": true,
+                    "description": "Id of a group",
+                    "type": "string"
+                }
+            ],
+            "post": {
+                "tags": [
+                    "Collection",
+                    "Group"
+                ],
+                "summary": "Add featured collections and exhibitions to a group.",
+                "description": "Add some collections to the featured collections and exhibitions that appear in the page of a group (Organization or Project). The body for this call is an object with two lists that contain collection or exhibition ids.",
+                "parameters": [
+                    {
+                        "name": "groupId",
+                        "in": "path",
+                        "required": true,
+                        "description": "Id of a group.",
+                        "type": "string"
+                    },
+                    {
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "description": "Id of a user.",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "fCollections": {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "string"
+                                    }
+                                },
+                                "fExhibitions": {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "properties": {
+                                "OK": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request (bad group id or body)",
+                        "schema": {
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden (logged in user is not an owner or admin)",
+                        "schema": {
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error (cannot retrieve or write to database)",
+                        "schema": {
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/group/{groupId}/removeFeatured": {
+            "parameters": [
+                {
+                    "name": "groupId",
+                    "in": "path",
+                    "required": true,
+                    "description": "Id of a group",
+                    "type": "string"
+                }
+            ],
+            "post": {
+                "tags": [
+                    "Collection",
+                    "Group"
+                ],
+                "summary": "Remove featured collections and exhibitions from a group.",
+                "description": "Remove some collections from the featured collections and exhibitions that appear in the page of a group (Organization or Project). The body for this call is an object with two lists that contain collection or exhibition ids.",
+                "parameters": [
+                    {
+                        "name": "groupId",
+                        "in": "path",
+                        "required": true,
+                        "description": "Id of a group.",
+                        "type": "string"
+                    },
+                    {
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "description": "Id of a user.",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "fCollections": {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "string"
+                                    }
+                                },
+                                "fExhibitions": {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "properties": {
+                                "OK": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request (bad group id or body)",
+                        "schema": {
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden (logged in user is not an owner or admin)",
+                        "schema": {
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error (cannot retrieve or write to database)",
+                        "schema": {
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/rights/{collectionId}/{right}": {
             "parameters": [
                 {
@@ -2171,21 +4118,14 @@
         "/media/create": {
             "post": {
                 "summary": "Upload new media.",
-                "description": "Upload a new media object (currently only supports  images). This call works in two ways. You can either upload a file or provide an external url to a file. An IMPORTANT difference is, when uploading a file, the request should be a multipart/form-data. When creating from a url however, it should be a JSON body. In any case, the fields are the same. You can optionally provide rights for the media, if none are provided the default value will be \"UNKNOWN\". Technical metadata for the new media will be automatically extracted. The returned object for this call is a list of URLs that point to the cached media object and its various representations. You can use the \"original\" url to create a record with the new media. The media ID is encoded in that url. See the call ```media/byUrl```, on how to use the url to get the media metadata.",
+                "description": "Upload a new media object. This call works in two ways. You can either upload a file or provide an external url to a file. An IMPORTANT difference is, when uploading a file, the request should be a multipart/form-data. When creating from a url however, it should be a JSON body. In any case, the fields are the same. You can optionally provide rights for the media, if none are provided the default value will be \"UNKNOWN\". Technical metadata for the new media will be automatically extracted. The returned object for this call is a list of URLs that point to the cached media object and its various representations. You can use the \"original\" url to create a record with the new media. The media ID is encoded in that url. See the call ```media/byUrl```, on how to use the url to get the media metadata.",
                 "parameters": [
                     {
                         "name": "body",
                         "in": "body",
-                        "description": "New group metadata. You only need to provide the fields you want to change.",
+                        "description": "Media metadata",
                         "schema": {
-                            "properties": {
-                                "url": {
-                                    "type": "string"
-                                },
-                                "withMediaRights": {
-                                    "type": "string"
-                                }
-                            }
+                            "$ref": "#/definitions/MediaRecord"
                         }
                     }
                 ],
@@ -2283,6 +4223,61 @@
                     }
                 }
             },
+            "post": {
+                "summary": "Edit metadata for a media object.",
+                "description": "Update the metadata for the media object specified by the mediaId.",
+                "tags": [
+                    "Media"
+                ],
+                "parameters": [
+                    {
+                        "name": "file",
+                        "type": "boolean",
+                        "required": true,
+                        "in": "query",
+                        "description": "Updates metadata or file."
+                    },
+                    {
+                        "name": "mediaId",
+                        "in": "path",
+                        "required": true,
+                        "description": "Internal Id of a media object.",
+                        "type": "string"
+                    },
+                    {
+                        "name": "body",
+                        "in": "body",
+                        "description": "Media metadata",
+                        "schema": {
+                            "$ref": "#/definitions/MediaObjectEmbedded"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/MediaObjectEmbedded"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request (invalid request)",
+                        "schema": {
+                            "$ref": "#/definitions/MediaReply"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error (database error)",
+                        "schema": {
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
             "delete": {
                 "summary": "Delete a media object.",
                 "description": "Removes the database entry for the media object specified by the url parameter.",
@@ -2311,6 +4306,43 @@
                     },
                     "400": {
                         "description": "Bad Request (invalid request)",
+                        "schema": {
+                            "properties": {
+                                "message": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error (database error)",
+                        "schema": {
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/user/me": {
+            "get": {
+                "description": "Returns metadata for the logged in user.",
+                "summary": "See your user metadata.",
+                "tags": [
+                    "User"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/User"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request (no logged in user)",
                         "schema": {
                             "properties": {
                                 "message": {
@@ -2396,7 +4428,11 @@
                     "400": {
                         "description": "Bad Request (json object describes all errors)",
                         "schema": {
-                            "type": "object"
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
+                            }
                         }
                     }
                 }
@@ -2408,7 +4444,7 @@
                     "User"
                 ],
                 "summary": "User login.",
-                "description": "Log an user in (create a browser cookie). Some API calls do not take the user as a parameter and you need to be logged in first. You can log in with your google or facebook id. The email parameter can be a username.",
+                "description": "Log an user in (create a browser cookie). Some API calls do not take the user as a parameter and you need to be logged in first. You can log in with your googleId but for facebook you should use ```/user/facebookLogin```. The email parameter can be a username.",
                 "parameters": [
                     {
                         "in": "body",
@@ -2426,9 +4462,6 @@
                                 },
                                 "googleId": {
                                     "type": "string"
-                                },
-                                "facebookId": {
-                                    "type": "string"
                                 }
                             }
                         }
@@ -2445,6 +4478,92 @@
                         "description": "Bad Request (error status, problem description JSON object)",
                         "schema": {
                             "type": "object"
+                        }
+                    }
+                }
+            }
+        },
+        "/user/facebookLogin": {
+            "post": {
+                "tags": [
+                    "User"
+                ],
+                "summary": "User login.",
+                "description": "Log an user in with their facebook id.",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "accessToken",
+                        "description": "Facebook access token",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "in": "query",
+                        "name": "facebookId",
+                        "description": "Facebook id",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK (creates login browser cookie, returns user metadata JSON including userID.)",
+                        "schema": {
+                            "$ref": "#/definitions/User"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request (couldn't validate user)",
+                        "schema": {
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/user/googleLogin": {
+            "post": {
+                "tags": [
+                    "User"
+                ],
+                "summary": "User login.",
+                "description": "Log an user in with their facebook id.",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "accessToken",
+                        "description": "Facebook access token",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "in": "query",
+                        "name": "facebookId",
+                        "description": "Facebook id",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK (creates login browser cookie, returns user metadata JSON including userID.)",
+                        "schema": {
+                            "$ref": "#/definitions/User"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request (couldn't validate user)",
+                        "schema": {
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
+                            }
                         }
                     }
                 }
@@ -2866,6 +4985,177 @@
                     }
                 }
             }
+        },
+        "/record/{recordId}/listAnnotations": {
+            "parameters": [
+                {
+                    "name": "recordId",
+                    "in": "path",
+                    "required": true,
+                    "description": "The id of the record",
+                    "type": "string"
+                }
+            ],
+            "get": {
+                "parameters": [
+                    {
+                        "name": "recordId",
+                        "in": "path",
+                        "required": true,
+                        "description": "The id of the record",
+                        "type": "string"
+                    }
+                ],
+                "summary": "List the annotations of a record.",
+                "description": "Shows a record's annotations.",
+                "tags": [
+                    "Record",
+                    "Annotation"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/Annotations"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/record/{recordId}/annotate": {
+            "parameters": [
+                {
+                    "name": "recordId",
+                    "in": "path",
+                    "required": true,
+                    "description": "The id of the record",
+                    "type": "string"
+                }
+            ],
+            "get": {
+                "parameters": [
+                    {
+                        "name": "recordId",
+                        "in": "path",
+                        "required": true,
+                        "description": "The id of the record",
+                        "type": "string"
+                    },
+                    {
+                        "in": "body",
+                        "name": "body",
+                        "description": "A JSON with the annotation.",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/Annotations"
+                            }
+                        }
+                    }
+                ],
+                "summary": "Annotate a record.",
+                "description": "Adds annotations to a record.",
+                "tags": [
+                    "Record",
+                    "Annotation"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "properties": {
+                                "message": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/collection/{collectionId}/annotate": {
+            "parameters": [
+                {
+                    "name": "collectionId",
+                    "in": "path",
+                    "required": true,
+                    "description": "The id of the collection",
+                    "type": "string"
+                }
+            ],
+            "get": {
+                "parameters": [
+                    {
+                        "name": "collectionId",
+                        "in": "path",
+                        "required": true,
+                        "description": "The id of the collection",
+                        "type": "string"
+                    },
+                    {
+                        "in": "body",
+                        "name": "body",
+                        "description": "A JSON with the annotation.",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/Annotations"
+                            }
+                        }
+                    }
+                ],
+                "summary": "Annotate a collection.",
+                "description": "Adds annotations to a collection.",
+                "tags": [
+                    "Collection",
+                    "Annotation"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "properties": {
+                                "message": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -3168,6 +5458,100 @@
                 }
             }
         },
+        "Annotations": {
+            "description": "Annotations schema",
+            "type": "object",
+            "properties": {
+                "dbid": {
+                    "type": "string"
+                },
+                "annotationWithURI": {
+                    "type": "string"
+                },
+                "annotators": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "withCreator": {
+                                "type": "string"
+                            },
+                            "generator": {
+                                "type": "string"
+                            },
+                            "generated": {
+                                "type": "string"
+                            },
+                            "lastModified": {
+                                "type": "string"
+                            },
+                            "confidence": {
+                                "type": "integer"
+                            }
+                        }
+                    }
+                },
+                "score": {
+                    "type": "object",
+                    "properties": {
+                        "approvedBy": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        },
+                        "rejectedBy": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                },
+                "body": {
+                    "type": "object",
+                    "properties": {
+                        "uri": {
+                            "type": "string"
+                        },
+                        "label": {
+                            "$ref": "#/definitions/MultiLiteral"
+                        },
+                        "uriVocabulary": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "target": {
+                    "type": "object",
+                    "properties": {
+                        "recordId": {
+                            "type": "string"
+                        },
+                        "selector": {
+                            "type": "object",
+                            "properties": {
+                                "property": {
+                                    "type": "string"
+                                },
+                                "origValue": {
+                                    "type": "string"
+                                },
+                                "origLang": {
+                                    "type": "string"
+                                },
+                                "start": {
+                                    "type": "integer"
+                                },
+                                "end": {
+                                    "type": "integer"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "WithResource": {
             "description": "This is the parent type of the WITH data model. Record and Collection models extend this model.",
             "type": "object",
@@ -3220,6 +5604,9 @@
                 },
                 "contextData": {
                     "$ref": "#/definitions/ContextData"
+                },
+                "qualityMeasure": {
+                    "type": "integer"
                 }
             }
         },
@@ -3321,11 +5708,14 @@
                         "$ref": "#/definitions/Provenance"
                     }
                 },
-                "contextData": {
-                    "$ref": "#/definitions/ContextData"
-                },
                 "descriptiveData": {
                     "$ref": "#/definitions/CulturalDescriptiveData"
+                },
+                "qualityMeasure": {
+                    "type": "integer"
+                },
+                "contextData": {
+                    "$ref": "#/definitions/ContextData"
                 },
                 "content": {
                     "type": "object",
@@ -3386,14 +5776,6 @@
                 },
                 "lastModified": {
                     "type": "string"
-                },
-                "underModeration": {
-                    "type": "object",
-                    "properties": {
-                        "key": {
-                            "$ref": "#/definitions/Access"
-                        }
-                    }
                 },
                 "externalId": {
                     "type": "string"
@@ -4113,16 +6495,7 @@
                 "original": {
                     "type": "string"
                 },
-                "tiny": {
-                    "type": "string"
-                },
-                "square": {
-                    "type": "string"
-                },
                 "thumbnail": {
-                    "type": "string"
-                },
-                "medium": {
                     "type": "string"
                 }
             }
@@ -4134,16 +6507,7 @@
                 "original": {
                     "$ref": "#/definitions/MediaObjectEmbedded"
                 },
-                "tiny": {
-                    "$ref": "#/definitions/MediaObjectEmbedded"
-                },
-                "square": {
-                    "$ref": "#/definitions/MediaObjectEmbedded"
-                },
                 "thumbnail": {
-                    "$ref": "#/definitions/MediaObjectEmbedded"
-                },
-                "medium": {
                     "$ref": "#/definitions/MediaObjectEmbedded"
                 }
             }
