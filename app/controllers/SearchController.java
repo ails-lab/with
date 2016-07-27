@@ -18,11 +18,12 @@ package controllers;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
@@ -40,7 +41,6 @@ import elastic.Elastic;
 import elastic.ElasticCoordinator;
 import elastic.ElasticSearcher;
 import elastic.ElasticSearcher.SearchOptions;
-import elastic.ElasticUtils;
 import play.Logger;
 import play.Logger.ALogger;
 import play.data.Form;
@@ -50,6 +50,7 @@ import play.mvc.Result;
 import search.Query;
 import search.Response;
 import search.Response.SingleResponse;
+import search.Source;
 import search.Sources;
 import sources.core.CommonFilterLogic;
 import sources.core.CommonFilterResponse;
@@ -180,9 +181,16 @@ public class SearchController extends WithController {
 	}
 
 	public static Result searchSources() {
-		List<String> res = new ArrayList<>();
-		for (final ISpaceSource src : ESpaceSources.getESources()) {
-			res.add(src.getSourceName().toString());
+		List<JsonNode> res = new ArrayList<>();
+		for( Sources source: Sources.values()) {
+			Source s = source.getDriver();
+			ObjectNode jsonSource = Json.newObject();
+			Set<String> fieldIds = s.supportedFieldIds();
+			if( fieldIds == null ) fieldIds = Collections.emptySet();
+			for(String fieldId: fieldIds )
+				jsonSource.withArray("supportedFields").add( fieldId );
+			jsonSource.put("name", source.name());
+			res.add( jsonSource );
 		}
 		return ok(Json.toJson(res));
 	}

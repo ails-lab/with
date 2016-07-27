@@ -19,6 +19,11 @@ package search;
 import java.util.HashSet;
 import java.util.Set;
 
+import javax.json.JsonObject;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+
 import play.libs.F.Promise;
 
 /**
@@ -87,6 +92,14 @@ public class EmptySource implements Source {
 	
 	public Query pruneFilters( Query inputQuery ) {
 		return inputQuery.pruneFilters( thisSource(), supportedFieldIds());
+	}
+	
+	
+	public void addError(ObjectNode response, String message) {
+		response.put("error", message);
+	}
+	public boolean isError(JsonNode response){
+		return response.has("error");
 	}
 	
 }

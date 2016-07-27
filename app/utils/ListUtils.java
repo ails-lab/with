@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -125,10 +126,26 @@ public class ListUtils {
 	 * @return
 	 */
 	public static <T, R> List<R> transform(Collection<T> objects, Function<T, R> function) {
+		return transform(objects, function, 0, objects.size());
+	}
+	/**
+	 * transforms the elements of a collection in the specified range (pos,...,pos+count-1) of type T to a collection of elements of type R using
+	 * a functions that does the transformation. 
+	 * @param objects
+	 * @param function
+	 * @param pos
+	 * @param count
+	 * @return
+	 */
+	public static <T, R> List<R> transform(Collection<T> objects, Function<T, R> function, int pos, int count) {
 		List<R> res = new ArrayList<>();
 		if (objects!=null){
-			for (T t : objects) {
-				res.add(function.apply(t));
+			int i=0;
+			for (Iterator<T> iterator = objects.iterator(); 
+					iterator.hasNext() && i<pos+count; i++) {
+				T t = iterator.next();
+				if (i>=pos)
+					res.add(function.apply(t));
 			}
 		}
 		return res;

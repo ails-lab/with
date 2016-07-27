@@ -32,7 +32,7 @@ public class DBPediaController extends WithResourceController {
 		builder.addSearchParam("type", type);
 		builder.addSearchParam("start", "" + start);
 		builder.addSearchParam("rows", "" + count);
-		builder.addQuery("query", query);
+		builder.setQuery("query", query);
 
 		ObjectNode result = Json.newObject();
 		
