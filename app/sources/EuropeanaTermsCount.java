@@ -63,7 +63,7 @@ public class EuropeanaTermsCount {
 			};
 			QueryBuilder builder = new QueryBuilder("http://europeana.eu/api/v2/search.json");
 			builder.addSearchParam("wskey", apiKey);
-			builder.addQuery("query", term);
+			builder.setQuery("query", term);
 			JsonContextRecord response = new JsonContextRecord(getHTML(builder.getHttp()));
 			int count = response.getIntValue("totalResults");
 			

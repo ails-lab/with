@@ -66,8 +66,8 @@ public class RijksmuseumSpaceSource extends ISpaceSource {
 			builder.addSearchParam("imgonly", "True");
 		builder.addSearchParam("f", "1");
 		
-		builder.addQuery("q", q.searchTerm);
-		builder.addSearchParam("p", "" + ((Integer.parseInt(q.page) - 1) * Integer.parseInt(q.pageSize) + 1));
+		builder.setQuery("q", q.searchTerm);
+		builder.addSearchParam("p", "" + (Integer.parseInt(q.page) - 1));
 
 		builder.addSearchParam("ps", "" + q.pageSize);
 

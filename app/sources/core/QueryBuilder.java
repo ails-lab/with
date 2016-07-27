@@ -22,6 +22,11 @@ import java.util.List;
 
 import sources.core.Utils.LongPair;
 import sources.core.Utils.Pair;
+/**
+ * is a helper class to assist when building a query that mainly has parameters. 
+ * @author Enrique Matos Alfonso (gardero@gmail.com)
+ *
+ */
 public class QueryBuilder {
 
 	protected String baseUrl;
@@ -88,20 +93,39 @@ public class QueryBuilder {
 		return this;
 	}
 	
-	public QueryBuilder addQuery(Pair<String> q) {
+	/**
+	 * sets the query search term.
+	 * @param q
+	 * @return
+	 */
+	public QueryBuilder setQuery(Pair<String> q) {
 		query = q;
 		return this;
 	}
 	
-	public QueryBuilder addQuery(String name, String value) {
-		return addQuery(new Pair<String>(name, value));
+	/**
+	 * sets the query search term.
+	 * @param q
+	 * @return
+	 */
+	public QueryBuilder setQuery(String name, String value) {
+		return setQuery(new Pair<String>(name, value));
 	}
 	
+	/**
+	 * a text is added to the search term of the query.
+	 * @param q
+	 * @return
+	 */
 	public QueryBuilder addToQuery(String q) {
 		query.second+=q;
 		return this;
 	}
 
+	/**
+	 * mainly used for POST queries that need data to send to endpoint.
+	 * @return
+	 */
 	public Object getData() {
 		return data;
 	}
@@ -110,6 +134,10 @@ public class QueryBuilder {
 		this.data = data;
 	}
 
+	/**
+	 * the last part of the query. It is pasted exactly as it is. 
+	 * @return
+	 */
 	public String getTail() {
 		return tail;
 	}
