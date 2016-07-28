@@ -66,6 +66,13 @@ import edu.stanford.nlp.io.EncodingPrintWriter.err;
 public class ElasticUtils {
 	static private final Logger.ALogger log = Logger.of(ElasticUtils.class);
 
+	/*public static List<String> multiliterals = new ArrayList<String>() {{ 
+		add("label");
+		add("description");
+		add("keywords");
+		add("altLabels");
+	}};*/
+	
 	/*
 	 * Currently we are indexing only Resources that represent
 	 * collected records
@@ -455,4 +462,5 @@ public class ElasticUtils {
 		jn.put("collectedBy", collBY);
 		return jn;
 	}
+	
 }
