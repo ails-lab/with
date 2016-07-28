@@ -378,9 +378,7 @@ public class ElasticUtils {
 		 */
 		JsonNode m = mediaMapConverter(rr.getMedia());
 		JsonNode jn = withAccessConverter(rr.getAdministrative());
-		rr.setMedia(null);
-		rr.getAdministrative().setAccess(null);
-
+		
 
 		/*
 		 *
@@ -396,8 +394,8 @@ public class ElasticUtils {
 		Json.setObjectMapper(mapper);
 		// json with multiliteral _all and languages fields
 		JsonNode json = Json.toJson(rr);
-		((ObjectNode)json).put("administrative", jn);
-		((ObjectNode)json).put("media", m);
+		((ObjectNode)json).set("administrative", jn);
+		((ObjectNode)json).set("media", m);
 
 		if(json.get("provenance")!=null)
 			((ArrayNode)json.get("provenance")).add(getDataProvAndSource(rr.getProvenance()));
