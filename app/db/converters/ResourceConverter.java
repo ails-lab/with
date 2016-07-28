@@ -40,6 +40,8 @@ public class ResourceConverter extends TypeConverter implements SimpleValueConve
 	}
 	
 	public Object encode( Object resource,  MappedField optionalExtraInfo) {
+		if (resource == null)
+			return "";
 		String s = resource.toString();
 		return s;
 	}
