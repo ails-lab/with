@@ -22,11 +22,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.function.Consumer;
 import java.util.function.Function;
-
-import sources.core.CommonFilterLogic;
-import sources.core.CommonFilterResponse;
 
 public class ListUtils {
 
@@ -126,7 +122,7 @@ public class ListUtils {
 	 * @return
 	 */
 	public static <T, R> List<R> transform(Collection<T> objects, Function<T, R> function) {
-		return transform(objects, function, 0, objects.size());
+		return transform(objects, function, 0, (objects==null)?0:objects.size());
 	}
 	/**
 	 * transforms the elements of a collection in the specified range (pos,...,pos+count-1) of type T to a collection of elements of type R using
