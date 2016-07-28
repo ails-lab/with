@@ -194,9 +194,10 @@ public class ElasticSearcher {
 	/* Function Score query */
 	public QueryBuilder funcScoreQuery(String field, String term) {
 		QueryStringQueryBuilder qstr = QueryBuilders.queryStringQuery(term);
-		//for(String field: fields) {
-			qstr.field(field+"_all");
-		//}
+		if(!field.equals("")) {
+			qstr.field(field);
+			qstr.field(field+"._all");
+		}
 		qstr.useDisMax(true);
 		qstr.tieBreaker(0);
 		qstr.defaultOperator(Operator.OR);
