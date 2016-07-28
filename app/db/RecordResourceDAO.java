@@ -459,7 +459,7 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 				.createUpdateOperations();
 		Query<RecordResource> q = this.createQuery().field("_id")
 				.equal(recordId);
-		RecordResource record = this.getById(collectionId, new ArrayList<String>(Arrays.asList("collectedIn, administrative.collectedBy")));
+		RecordResource record = this.getById(recordId, new ArrayList<String>(Arrays.asList("collectedIn, administrative.collectedBy")));
 		List<ObjectId>  collectedIn = record.getCollectedIn();
 		int occurencesOfRecordInCollection = Collections.frequency(collectedIn, collectionId);
 		List<AccessEntry> collectionRights = collection.getAdministrative().getAccess().getAcl();
