@@ -213,7 +213,7 @@ public class CollectionObject<T extends CollectionObject.CollectionDescriptiveDa
 		output.getDescriptiveData().setLabel(getDescriptiveData().getLabel());
 		output.getDescriptiveData().setDescription(getDescriptiveData().getDescription());
 		output.setProvenance(getProvenance());
-		if (getMedia().size() > 3)
+		if (getMedia() != null && getMedia().size() > 3)
 			output.setMedia(getMedia().subList(0, 3));
 		else
 			output.setMedia(getMedia());
