@@ -89,6 +89,20 @@ public class UserGroupDAO extends DAO<UserGroup> {
 		return find(q).asList();
 	}
 
+	public long countPublic(GroupType groupType, String prefix) {
+		Query<UserGroup> q = createQuery().disableValidation()
+				.field("privateGroup").equal(false);
+		if (!prefix.equals("*")) {
+			q.field("friendlyName").startsWithIgnoreCase(prefix);
+		}
+		if (groupType.equals(GroupType.All)) {
+			return count(q);
+		}
+		q.field("className").equal(
+				"model.usersAndGroups." + groupType.toString());
+		return count(q);
+	}
+
 	public List<UserGroup> findPublicByPrefix(GroupType groupType, String prefix, int offset, int count) {
 		Query<UserGroup> q = createQuery().disableValidation()
 				.field("privateGroup").equal(false).offset(offset).limit(count)

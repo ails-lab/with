@@ -693,13 +693,14 @@ public class GroupManager extends WithController {
 		try {
 			GroupType type = GroupType.valueOf(groupType);
 			ObjectId userId = effectiveUserDbId();
+			int userGroupCount = Math.toIntExact(DB.getUserGroupDAO().countPublic(type, prefix));
 			if (userId == null) {
 				if(prefix.equals("*")) {
 					groups = DB.getUserGroupDAO().findPublic(type, offset, count);
-					return ok(Json.toJson(groups));
+					return ok(groupsWithCount(groups, userGroupCount));
 				} else {
 					groups = DB.getUserGroupDAO().findPublicByPrefix(type, prefix, offset, count);
-					return ok(Json.toJson(groups));
+					return ok(groupsWithCount(groups, userGroupCount));
 				}
 			}
 			User user = DB.getUserDAO().get(userId);
@@ -711,7 +712,7 @@ public class GroupManager extends WithController {
 				groups = DB.getUserGroupDAO().findByIdsAndPrefix(userGroupsIds, type,
 						prefix, offset, count);
 			}
-			int userGroupCount = DB.getUserGroupDAO().getGroupCount(
+			userGroupCount = DB.getUserGroupDAO().getGroupCount(
 					userGroupsIds, type);
 			if (groups.size() == count)
 				return ok(groupsWithCount(groups, userGroupCount));
