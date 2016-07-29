@@ -173,5 +173,5 @@ GET     /source/dbpedia/lookup						controllers.DBPediaController.dbpediaLookup(
 GET		/record/:id/listAnnotations				    controllers.RecordResourceController.getAnnotations(id)
 POST		/record/:id/annotate						controllers.RecordResourceController.annotateRecord(id)
 POST		/collection/:id/annotate						controllers.CollectionObjectController.annotateCollection(id)
-GET			/collection/api/removeIdsOfDeletedRecords	controllers.WithResourcesController.removeIdsOfDeletedRecords()
+GET			/collection/api/removeIdsOfDeletedRecords	controllers.WithResourceController.removeIdsOfDeletedRecords()
 
