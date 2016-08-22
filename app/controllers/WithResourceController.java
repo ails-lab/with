@@ -19,10 +19,13 @@ package controllers;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
@@ -42,8 +45,11 @@ import model.quality.RecordQuality;
 import model.resources.CulturalObject.CulturalObjectData;
 import model.resources.RecordResource;
 import model.resources.WithResourceType;
+import model.resources.collection.CollectionObject;
 
 import org.bson.types.ObjectId;
+import org.mongodb.morphia.query.Query;
+import org.mongodb.morphia.query.UpdateOperations;
 
 import play.Logger;
 import play.Logger.ALogger;
@@ -64,8 +70,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
+import ch.qos.logback.core.Context;
 import db.DB;
 import db.WithResourceDAO;
+import edu.stanford.nlp.ling.CoreAnnotations.ContextsAnnotation;
 
 /**
  * @author mariaral
@@ -711,5 +719,42 @@ public class WithResourceController extends WithController {
 				externalId);
 		return removeRecordFromCollection(fav, record.getDbId().toString(),
 				Option.None(), false);
+	}
+	
+	public static Result removeIdsOfDeletedRecords() {
+		Iterator<RecordResource> recordIterator = DB.getRecordResourceDAO().createQuery().iterator();
+		int i = 1;
+		Set recordIds = new HashSet<>();
+		while (recordIterator.hasNext()) {
+			log.info("Getting " + i++ + " record");
+			RecordResource record = recordIterator.next();
+			recordIds.add(record.getDbId());
+		}
+		Iterator<CollectionObject> collectionIterator = DB.getCollectionObjectDAO().createQuery().iterator();
+		i = 1;
+		while (collectionIterator.hasNext()) {
+			log.info("Getting " + i++ + " collection");
+			CollectionObject collection = collectionIterator.next();
+			List<ContextData<ContextDataBody>> collectedResources = collection.getCollectedResources();
+			int resourcesRemoved = 0;
+			for (ContextData<ContextDataBody> cr : collectedResources) {
+				if (!recordIds.contains(cr.getTarget().getRecordId())) {
+					collectedResources.remove(cr);
+					resourcesRemoved++;
+				}
+			}
+			if (resourcesRemoved > 0) {
+				Query<CollectionObject> q = DB.getCollectionObjectDAO().createQuery()
+						.field("_id").equal(collection.getDbId());
+				UpdateOperations<CollectionObject> collectionUpdate = DB
+						.getCollectionObjectDAO().createUpdateOperations()
+						.disableValidation();
+				collectionUpdate.set("collectedResources", collectedResources);
+				collectionUpdate.inc("administrative.entryCount", 0 - resourcesRemoved);
+				collectionUpdate.set("administrative.lastModified", new Date());
+				DB.getCollectionObjectDAO().update(q, collectionUpdate);
+			}
+		}
+		return ok();		
 	}
 }
