@@ -61,10 +61,19 @@ public class ElasticCoordinator {
 	public SingleResponse federatedSearch(List<List<Filter>> filters) {
 		ElasticSearcher searcher = new ElasticSearcher();
 
-		filters.forEach( (a) -> {a.forEach( (f) ->{ if(f.fieldId.equals("anywhere")) f.fieldId = "";});});
+		List<List<Filter>> newFilters = filters.stream().map(
+				clause -> {
+				return clause.stream().map( 
+					filter-> {
+					Filter newFilter = (Filter) filter.clone();
+					if(newFilter.fieldId.equals("anywhere")) newFilter.fieldId = "";
+					return newFilter;
+					}
+				).collect( Collectors.toList()); }
+			).collect( Collectors.toList());	
 
 		List<QueryBuilder> musts = new ArrayList<QueryBuilder>();
-		for(List<Filter> ors: filters) {
+		for(List<Filter> ors: newFilters) {
 			musts.add(searcher.boolShouldQuery(ors));
 		}
 		List<QueryBuilder> must_not = new ArrayList<QueryBuilder>();
