@@ -141,7 +141,10 @@ public class SearchController extends WithController {
 				// create promises
 				Iterable<Promise<Response.SingleResponse>> promises =
 						queries.entrySet().stream()
-						.map( entry -> entry.getKey().getDriver().execute(entry.getValue()))
+						.map( 
+								entry -> 
+								entry.getKey().getDriver().execute(entry.getValue())
+							)
 						.collect( Collectors.toList());
 
 				if( q.continuation ) {
