@@ -48,7 +48,7 @@ public class ElasticIndexer {
 			.execute()
 			.actionGet();
 		} catch(ElasticsearchException ee) {
-			log.error(ee.getDetailedMessage());
+			log.error(ee.getDetailedMessage(),ee );
 		}
 		return response;
 
@@ -77,7 +77,7 @@ public class ElasticIndexer {
 			}
 			Elastic.getBulkProcessor().close();
 		} catch(ElasticsearchException ee) {
-			log.error(ee.getDetailedMessage());
+			log.error(ee.getDetailedMessage(),ee);
 		}
 
 		return "Operation completed succesfully";
