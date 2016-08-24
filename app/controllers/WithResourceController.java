@@ -737,13 +737,16 @@ public class WithResourceController extends WithController {
 			CollectionObject collection = collectionIterator.next();
 			List<ContextData<ContextDataBody>> collectedResources = collection.getCollectedResources();
 			int resourcesRemoved = 0;
-			for (ContextData<ContextDataBody> cr : collectedResources) {
+			Iterator<ContextData<ContextDataBody>> it = collectedResources.iterator();
+			while(it.hasNext()) {
+				ContextData<ContextDataBody> cr = it.next();
 				if (!recordIds.contains(cr.getTarget().getRecordId())) {
-					collectedResources.remove(cr);
+					it.remove();
 					resourcesRemoved++;
-				}
+				}	
 			}
 			if (resourcesRemoved > 0) {
+				log.info("Found " + resourcesRemoved +" deleted records");
 				Query<CollectionObject> q = DB.getCollectionObjectDAO().createQuery()
 						.field("_id").equal(collection.getDbId());
 				UpdateOperations<CollectionObject> collectionUpdate = DB
