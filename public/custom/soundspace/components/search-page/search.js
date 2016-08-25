@@ -215,22 +215,30 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
 			}
 			else{
 				
-				self.sourceview(false);
-				$("#gridlist").show();
-			   $container.isotope({
-					itemSelector: '.media',
-					masonry: {
-						columnWidth		: '.sizer',
-						percentPosition	: true
-					}
-				});
+				self.sourceview(false);				
+				  /* $container.isotope({
+						itemSelector: '.media',
+						masonry: {
+							columnWidth		: '.sizer',
+							percentPosition	: true
+						}
+					});
+				   $container.isotope("layout");*/
+						
+				}
+				$( '.searchbar .view li').removeClass( 'active' );
+				$(event.currentTarget).addClass( 'active' );
+				
+
+				var data = $(event.currentTarget).find("a").attr('data-view')
+
+			/*	$( '.searchresults').find( 'section' ).removeClass( 'active' );
+				$( '.searchresults #'+ data + 'list' ).toggleClass( 'active' );*/
+
+				if ( data === 'grid' ) {
 					
-			}
-			
-			$( '.searchbar .view li').removeClass( 'active' );
-			$(event.currentTarget).addClass( 'active' );
-
-
+					$container.isotope();
+				}
 		};
 
 		self.reset = function() {
