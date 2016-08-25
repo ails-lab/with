@@ -1127,7 +1127,7 @@ public class CollectionObjectController extends WithResourceController {
 				.add("administrative.access.WRITE", userId, true);
 
 		Query.Clause searchTerm = Query.Clause.create()
-				.add( "descriptiveData.label", term, false );
+				.add( "descriptiveData.label.default", term, false );
 		Query.Clause type = Query.Clause.create()
 				.add( "resourceType", resourceType, true );
 
