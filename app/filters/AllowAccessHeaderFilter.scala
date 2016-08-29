@@ -53,6 +53,7 @@ class AllowAccessHeaderFilter extends Filter {
   }
 
   def apply(next: (RequestHeader) => Future[Result])(rh: RequestHeader) = {
+    log.debug( "Requested URI: " + rh.uri );
     next(rh).map { result => 
       // check if origin is whitelisted
       // if yes return it
