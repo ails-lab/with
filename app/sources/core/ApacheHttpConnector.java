@@ -18,11 +18,15 @@ package sources.core;
 
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URI;
 import java.net.URISyntaxException;
 
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.http.Header;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
@@ -37,13 +41,19 @@ import play.Logger;
 import play.Logger.ALogger;
 
 public class ApacheHttpConnector extends HttpConnector {
+	
+	public static class FileAndType {
+		public String mimeType;
+		public File data;
+	}
+	
 	public static final ALogger log = Logger.of( ApacheHttpConnector.class );
 	
 	private static ApacheHttpConnector instance;
 	
 	public static HttpConnector getApacheHttpConnector(){
 		if (instance==null){
-			instance = new ApacheHttpConnector();
+			instance = new ApacheHttpConnector();			
 		}
 		return instance;
 	}
@@ -74,6 +84,29 @@ public class ApacheHttpConnector extends HttpConnector {
 		
 		return readValue;
 	}
+	
+	public FileAndType getContentAndType(String url) throws Exception {
+		try {
+			FileAndType res = new FileAndType();
+			log.debug("calling: " + url);
+			long time = System.currentTimeMillis();
+			res.data = File.createTempFile("dwnld", "");
+			HttpResponse response = getContentResponse( buildGet( url ));
+			Header[] headers = response.getHeaders("Content-type");
+			for( Header h: headers ) {
+				if( StringUtils.isNotEmpty( h.getValue())) res.mimeType = h.getValue();
+			}
+			log.debug( "Content-type: " + StringUtils.join(headers, ","));
+			FileUtils.copyInputStreamToFile(response.getEntity().getContent(), res.data );
+			return res;
+		} catch (Exception e) {
+			log.error("calling: " + url);
+			log.error("msg: " + e.getMessage());
+
+			throw e;
+		}
+	}
+
 
 	public <T> T getContent(String url) throws Exception {
 		log.debug("1 calling: " + url);

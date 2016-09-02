@@ -34,15 +34,6 @@ import java.util.function.BiFunction;
 
 import javax.imageio.ImageIO;
 
-import model.EmbeddedMediaObject.MediaVersion;
-import model.EmbeddedMediaObject.Quality;
-import model.EmbeddedMediaObject.WithMediaRights;
-import model.EmbeddedMediaObject.WithMediaType;
-import model.resources.RecordResource;
-import model.MediaObject;
-import net.coobird.thumbnailator.Thumbnails;
-import net.coobird.thumbnailator.geometry.Positions;
-
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -58,29 +49,36 @@ import org.im4java.core.ConvertCmd;
 import org.im4java.core.IM4JavaException;
 import org.im4java.core.IMOperation;
 
-import play.Logger;
-import play.Logger.ALogger;
-import play.libs.Akka;
-import play.libs.F.Promise;
-import play.libs.Json;
-import play.mvc.Controller;
-import play.mvc.Http;
-import play.mvc.Http.MultipartFormData.FilePart;
-import play.mvc.Result;
-import sources.core.HttpConnector;
-import sources.core.ParallelAPICall;
-import utils.MetricsUtils;
-import actors.MediaCheckerActor.MediaCheckMessage;
-import akka.actor.ActorRef;
-import akka.actor.ActorSelection;
-
 import com.codahale.metrics.Timer;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.net.MediaType;
 
+import actors.MediaCheckerActor.MediaCheckMessage;
+import akka.actor.ActorRef;
+import akka.actor.ActorSelection;
 import db.DB;
+import model.EmbeddedMediaObject.MediaVersion;
+import model.EmbeddedMediaObject.WithMediaRights;
+import model.EmbeddedMediaObject.WithMediaType;
+import model.MediaObject;
+import model.resources.RecordResource;
+import net.coobird.thumbnailator.Thumbnails;
+import net.coobird.thumbnailator.geometry.Positions;
+import play.Logger;
+import play.Logger.ALogger;
+import play.libs.Akka;
+import play.libs.F.Promise;
+import play.libs.Json;
+import play.mvc.Http;
+import play.mvc.Http.MultipartFormData.FilePart;
+import play.mvc.Result;
+import sources.core.ApacheHttpConnector;
+import sources.core.ApacheHttpConnector.FileAndType;
+import sources.core.HttpConnector;
+import sources.core.ParallelAPICall;
+import utils.MetricsUtils;
 
 public class MediaController extends WithController {
 	public static final ALogger log = Logger.of(MediaController.class);
@@ -133,15 +131,14 @@ public class MediaController extends WithController {
 				return media;
 			media = new MediaObject();
 			log.info("Downloading " + url);
-			File img = HttpConnector.getWSHttpConnector().getURLContentAsFile(
+			FileAndType img = ((ApacheHttpConnector) ApacheHttpConnector.getApacheHttpConnector()).getContentAndType(
 					url);
-			byte[] mediaBytes = IOUtils.toByteArray(new FileInputStream(img));
+			byte[] mediaBytes = IOUtils.toByteArray(new FileInputStream(img.data));
 			media.setUrl(url);
 			media.setMediaBytes(mediaBytes);
 			if (version != null) {
 				media.setMediaVersion(version);
-				media.setMimeType(MediaType.parse(Files.probeContentType(img
-						.toPath())));
+				media.setMimeType(MediaType.parse( img.mimeType ));
 				DB.getMediaObjectDAO().makePermanent(media);
 				MediaCheckMessage mcm = new MediaCheckMessage(media);
 				ActorSelection api = Akka.system().actorSelection(
@@ -152,7 +149,7 @@ public class MediaController extends WithController {
 			}
 			return media;
 		} catch (Exception e) {
-			log.error("Couldn't download image:" + e.getMessage());
+			log.error("Couldn't download image at '" + url +"' version " + version, e);
 			return null;
 		}
 	}
