@@ -47,7 +47,7 @@ public class WithDate {
 
 	// controlled expression of an epoch "stone age", "renaissance", "16th
 	// century"
-	LiteralOrResource epoch;
+	LiteralOrResource epoch = new LiteralOrResource();
 
 	// if the year is not accurate, give the inaccuracy here( 0- accurate)
 	int approximation;
@@ -68,11 +68,21 @@ public class WithDate {
 			this.isoDate = d;
 			Calendar instance = Calendar.getInstance();
 			instance.setTime(d);
-			if (year == Integer.MAX_VALUE)
-				year = instance.get(Calendar.YEAR);
+			setYearIfEmpty(instance.get(Calendar.YEAR));
 		}
 	}
-
+	
+	public void setIsoDateIfEmpty(Date d) {
+		if (d == null)
+			return;
+		if (this.isoDate == null) {
+			this.isoDate = d;
+		}
+		Calendar instance = Calendar.getInstance();
+		instance.setTime(d);
+		setYearIfEmpty(instance.get(Calendar.YEAR));
+	}
+	
 	public int getYear() {
 		return year;
 	}
@@ -81,6 +91,11 @@ public class WithDate {
 		this.year = year;
 	}
 
+	public void setYearIfEmpty(int year) {
+		if (this.year == Integer.MAX_VALUE)
+			this.year = year;
+	}
+	
 	public LiteralOrResource getEpoch() {
 		return epoch;
 	}
@@ -88,7 +103,7 @@ public class WithDate {
 	public void setEpoch(LiteralOrResource epoch) {
 		this.epoch = epoch;
 	}
-
+	
 	public int getApproximation() {
 		return approximation;
 	}
@@ -111,33 +126,26 @@ public class WithDate {
 
 	public void sanitizeDates() {
 		// code to init the other Date representations
-		boolean fillYear = (this.year == Integer.MAX_VALUE);
-		boolean fillIsoDate = (this.isoDate == null);
 		if (sources.core.Utils.isNumericInteger(this.free)) {
-			if (fillYear)
-				setYear(Integer.parseInt(this.free));
+			setYearIfEmpty(Integer.parseInt(this.free));
 		} else if (this.free.matches("\\d+\\s+(bc|BC)")) {
-			if (fillYear)
-				setYear(Integer.parseInt(free.split("\\s")[0]));
+			setYearIfEmpty(Integer.parseInt(free.split("\\s")[0]));
 		} else if (this.free.matches("\\d\\d\\d\\d-\\d\\d\\d\\d")) {
-			if (fillYear)
-				setYear(Integer.parseInt(free.split("-")[0]));
+			setYearIfEmpty(Integer.parseInt(free.split("-")[0]));
 		} else if (this.free.matches("\\d\\d-\\d\\d-\\d\\d\\d\\d")) {
 			try {
-				if (fillIsoDate)
-					setIsoDate((new SimpleDateFormat("dd-mm-yyyy")).parse(this.free));
+				setIsoDateIfEmpty((new SimpleDateFormat("dd-mm-yyyy")).parse(this.free));
 			} catch (ParseException e) {
 				log.warn("Parse Exception: " + this.free);
 			}
 		} else if (this.free.matches("\\d\\d\\d\\d-\\d\\d-\\d\\d")) {
 			try {
-				if (fillIsoDate)
-					setIsoDate((new SimpleDateFormat("yyyy-mm-dd")).parse(this.free));
+				setIsoDateIfEmpty((new SimpleDateFormat("yyyy-mm-dd")).parse(this.free));
 			} catch (ParseException e) {
 				log.warn("Parse Exception: " + this.free);
 			}
 		} else if (sources.core.Utils.isValidURL(this.free)) {
-			this.epoch = new LiteralOrResource(this.free);
+			this.epoch.addURI(this.free);
 		} else {
 			log.warn("unrecognized date: " + this.free);
 		}

@@ -510,6 +510,8 @@ public class DAO<E> extends BasicDAO<E, ObjectId> {
 					: parentField + "." + fieldName;
 			if (fieldValue.isNull())
 				continue;
+			if (fieldName.equals("dates"))
+				continue;
 			if (fieldValue.isObject()) {
 				updateFields(newFieldName, fieldValue, updateOps);
 			} else {
