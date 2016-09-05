@@ -21,8 +21,13 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+
 import play.Logger;
 import play.Logger.ALogger;
+import utils.Deserializer;
+import utils.Serializer;
 
 /**
  * Capture accurate and inaccurate dates in a visualisable way. Enable search
@@ -30,24 +35,22 @@ import play.Logger.ALogger;
  * class.
  */
 public class WithDate {
-	public static final ALogger log = Logger.of( WithDate.class );
-	
+	public static final ALogger log = Logger.of(WithDate.class);
+
+	@JsonSerialize(using = Serializer.DateSerializer.class)
+	@JsonDeserialize(using = Deserializer.DateDeserializer.class)
 	Date isoDate;
 	// facet
 	// year should be filled in whenever possible
 	// 100 bc is translated to -100
-	int year;
+	int year = Integer.MAX_VALUE;
 
 	// controlled expression of an epoch "stone age", "renaissance", "16th
 	// century"
-	LiteralOrResource epoch;
+	LiteralOrResource epoch = new LiteralOrResource();
 
 	// if the year is not accurate, give the inaccuracy here( 0- accurate)
 	int approximation;
-
-	// ontology based time
-	String uri;
-	// ResourceType uriType;
 
 	// mandatory, other fields are extracted from that
 	String free;
@@ -65,10 +68,21 @@ public class WithDate {
 			this.isoDate = d;
 			Calendar instance = Calendar.getInstance();
 			instance.setTime(d);
-			year = instance.get(Calendar.YEAR);
+			setYearIfEmpty(instance.get(Calendar.YEAR));
 		}
 	}
-
+	
+	public void setIsoDateIfEmpty(Date d) {
+		if (d == null)
+			return;
+		if (this.isoDate == null) {
+			this.isoDate = d;
+		}
+		Calendar instance = Calendar.getInstance();
+		instance.setTime(d);
+		setYearIfEmpty(instance.get(Calendar.YEAR));
+	}
+	
 	public int getYear() {
 		return year;
 	}
@@ -77,6 +91,11 @@ public class WithDate {
 		this.year = year;
 	}
 
+	public void setYearIfEmpty(int year) {
+		if (this.year == Integer.MAX_VALUE)
+			this.year = year;
+	}
+	
 	public LiteralOrResource getEpoch() {
 		return epoch;
 	}
@@ -84,7 +103,7 @@ public class WithDate {
 	public void setEpoch(LiteralOrResource epoch) {
 		this.epoch = epoch;
 	}
-
+	
 	public int getApproximation() {
 		return approximation;
 	}
@@ -92,23 +111,6 @@ public class WithDate {
 	public void setApproximation(int approximation) {
 		this.approximation = approximation;
 	}
-
-	public String getUri() {
-		return uri;
-	}
-
-	public void setUri(String uri) {
-		this.uri = uri;
-	}
-
-	//
-	// public ResourceType getUriType() {
-	// return uriType;
-	// }
-	//
-	// public void setUriType(ResourceType uriType) {
-	// this.uriType = uriType;
-	// }
 
 	public String getFree() {
 		return free;
@@ -120,35 +122,32 @@ public class WithDate {
 
 	public WithDate(String free) {
 		super();
-		setDate(free);
 	}
 
-	public void setDate(String free) {
-		this.free = free;
+	public void sanitizeDates() {
 		// code to init the other Date representations
-		if (sources.core.Utils.isNumericInteger(free)) {
-			this.year = Integer.parseInt(free);
-		} else if (free.matches("\\d+\\s+(bc|BC)")) {
-			this.year = Integer.parseInt(free.split("\\s")[0]);
-		} else if (free.matches("\\d\\d\\d\\d-\\d\\d\\d\\d")) {
-			this.year = Integer.parseInt(free.split("-")[0]);
-		} else if (free.matches("\\d\\d-\\d\\d-\\d\\d\\d\\d")) {
+		if (sources.core.Utils.isNumericInteger(this.free)) {
+			setYearIfEmpty(Integer.parseInt(this.free));
+		} else if (this.free.matches("\\d+\\s+(bc|BC)")) {
+			setYearIfEmpty(Integer.parseInt(free.split("\\s")[0]));
+		} else if (this.free.matches("\\d\\d\\d\\d-\\d\\d\\d\\d")) {
+			setYearIfEmpty(Integer.parseInt(free.split("-")[0]));
+		} else if (this.free.matches("\\d\\d-\\d\\d-\\d\\d\\d\\d")) {
 			try {
-				setIsoDate((new SimpleDateFormat("dd-mm-yyyy")).parse(free));
+				setIsoDateIfEmpty((new SimpleDateFormat("dd-mm-yyyy")).parse(this.free));
 			} catch (ParseException e) {
-				log.warn("Parse Exception: " + free);
+				log.warn("Parse Exception: " + this.free);
 			}
-		} else if (free.matches("\\d\\d\\d\\d-\\d\\d-\\d\\d")) {
+		} else if (this.free.matches("\\d\\d\\d\\d-\\d\\d-\\d\\d")) {
 			try {
-				setIsoDate((new SimpleDateFormat("yyyy-mm-dd")).parse(free));
+				setIsoDateIfEmpty((new SimpleDateFormat("yyyy-mm-dd")).parse(this.free));
 			} catch (ParseException e) {
-				log.warn("Parse Exception: " + free);
+				log.warn("Parse Exception: " + this.free);
 			}
-		} else if (sources.core.Utils.isValidURL(free)) {
-			this.uri = free;
-			// this.uriType = ResourceType.uri;
+		} else if (sources.core.Utils.isValidURL(this.free)) {
+			this.epoch.addURI(this.free);
 		} else {
-			log.warn("unrecognized date: " + free);
+			log.warn("unrecognized date: " + this.free);
 		}
 	}
 
