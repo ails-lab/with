@@ -205,6 +205,8 @@ public class WithResourceController extends WithController {
 					last)).getResourceId();
 			if (externalId == null)
 				externalId = record.getAdministrative().getExternalId();
+			if (record.getDescriptiveData().getDates() != null && !record.getDescriptiveData().getDates().isEmpty())
+				record.getDescriptiveData().getDates().forEach((date) -> date.sanitizeDates());
 			ObjectId recordId = null;
 			boolean owns = DB.getRecordResourceDAO().hasAccess(
 					effectiveUserDbIds(), Action.DELETE, recordId);
