@@ -25,8 +25,8 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URLConnection;
-import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -38,6 +38,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.utils.DateUtils;
 import org.apache.http.entity.mime.HttpMultipartMode;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.entity.mime.content.FileBody;
@@ -96,6 +97,12 @@ public class MediaController extends WithController {
 			media = DB.getMediaObjectDAO()
 					.getByUrlAndVersion(url, mediaVersion);
 			if (media != null) {
+				response().setHeader(Http.HeaderNames.CACHE_CONTROL, "PUBLIC, max-age=" + 86400 );
+				response().setHeader(Http.HeaderNames.EXPIRES, 
+						DateUtils.formatDate(new Date( System.currentTimeMillis()+86400000)));
+				// WOuld like to set response().setHeader(Http.HeaderNames.LAST_MODIFIED, 
+				// but there is now store date on the MediaObject (yet 9/2016)
+				log.debug( "Found '"+url+"' Version: " + version + " in database");
 				return ok(media.getMediaBytes()).as(
 						media.getMimeType().toString());
 			}
@@ -139,6 +146,7 @@ public class MediaController extends WithController {
 			if (version != null) {
 				media.setMediaVersion(version);
 				media.setMimeType(MediaType.parse( img.mimeType ));
+				log.debug( "Storing '"+url+"' Version: " + version + " in database");
 				DB.getMediaObjectDAO().makePermanent(media);
 				MediaCheckMessage mcm = new MediaCheckMessage(media);
 				ActorSelection api = Akka.system().actorSelection(
