@@ -14,6 +14,8 @@ lazy val root = (project in file(".")).enablePlugins(PlayJava)
 
 scalaVersion := "2.11.1"
 
+dependencyOverrides += "io.netty" % "netty" % "3.9.9.Final"
+
 libraryDependencies ++= Seq(
 //  javaJdbc,
 //  javaEbean,
