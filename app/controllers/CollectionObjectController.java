@@ -1104,7 +1104,7 @@ public class CollectionObjectController extends WithResourceController {
 	/*
 	 * Search for collections/exhibitions in myCollections page.
 	 */
-	public static Promise<Result> searchMyCollections(String term, boolean isShared, int offset, int count, boolean isExhibition) {
+	public static Promise<Result> searchMyCollections(String term, boolean isShared, boolean isExhibition, int offset, int count) {
 		return searchMyColOrEx(term, isShared, isExhibition ? WithResourceType.Exhibition.toString() : WithResourceType.SimpleCollection.toString(), offset, count);
 	}
 
