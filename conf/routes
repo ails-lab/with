@@ -22,7 +22,7 @@ POST     /api/mergefilters         	controllers.SearchController.mergeFilters()
 POST     /api/search            	controllers.SearchController.search()
 POST 	 /api/search2				controllers.SearchController.search2()
 GET      /api/annotationsSearch    	controllers.AnnotationController.searchRecordsOfGroup(groupId: String, term: String)
-GET		/api/searchMyCollections	controllers.CollectionObjectController.searchMyCollections(term: String ?= "*", isShared: Boolean ?= false, offset : Integer ?= 0, count: Integer ?= 10)
+GET		/api/searchMyCollections	controllers.CollectionObjectController.searchMyCollections(term: String ?= "*", isShared: Boolean ?= false, isExhibition: Boolean ?= false, offset : Integer ?= 0, count: Integer ?= 10)
 GET		/api/searchMyExhibitions	controllers.CollectionObjectController.searchMyExhibitions(term: String ?= "*", isShared: Boolean ?= false, offset : Integer ?= 0, count: Integer ?= 10)
 GET 	/api/searchCollection/:id   controllers.CollectionObjectController.searchCollection(term: String ?= "*", id, offset : Integer ?= 0, count: Integer ?= 10)
 
