@@ -93,7 +93,7 @@ public class UserGroupDAO extends DAO<UserGroup> {
 		Query<UserGroup> q = createQuery().disableValidation()
 				.field("privateGroup").equal(false);
 		if (!prefix.equals("*")) {
-			q.field("friendlyName").startsWithIgnoreCase(prefix);
+			q.field("friendlyName").containsIgnoreCase(prefix);
 		}
 		if (groupType.equals(GroupType.All)) {
 			return count(q);
@@ -106,7 +106,7 @@ public class UserGroupDAO extends DAO<UserGroup> {
 	public List<UserGroup> findPublicByPrefix(GroupType groupType, String prefix, int offset, int count) {
 		Query<UserGroup> q = createQuery().disableValidation()
 				.field("privateGroup").equal(false).offset(offset).limit(count)
-				.field("friendlyName").startsWithIgnoreCase(prefix)
+				.field("friendlyName").containsIgnoreCase(prefix)
 				.order("-created");
 		if (groupType.equals(GroupType.All)) {
 			return find(q).asList();
@@ -138,7 +138,7 @@ public class UserGroupDAO extends DAO<UserGroup> {
 			GroupType groupType, String prefix, int offset, int count) {
 		Query<UserGroup> q = createQuery().disableValidation().field("_id")
 				.in(groupIds).offset(offset).limit(count).order("-created")
-				.field("friendlyName").startsWithIgnoreCase(prefix);
+				.field("friendlyName").containsIgnoreCase(prefix);
 		if (!groupType.equals(GroupType.All)) {
 			q.field("className").equal(
 					"model.usersAndGroups." + groupType.toString());
@@ -187,7 +187,7 @@ public class UserGroupDAO extends DAO<UserGroup> {
 			int offset, int count, Set<ObjectId> excludedIds, String prefix) {
 		Query<UserGroup> q = createQuery().disableValidation()
 				.field("privateGroup").equal(false).offset(offset).limit(count)
-				.order("-created").field("friendlyName").startsWithIgnoreCase(prefix);
+				.order("-created").field("friendlyName").containsIgnoreCase(prefix);
 
 		if (!excludedIds.isEmpty())
 			q.field("_id").notIn(excludedIds);
