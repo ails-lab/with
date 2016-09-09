@@ -147,5 +147,19 @@ public enum Fields {
 		String fieldName = fieldId.replace(".", "_");
 		return Fields.valueOf(fieldName);
 	}
+
+	/**
+	 * Whether this fieldId is in the list.
+	 * @param fieldId
+	 * @return
+	 */
+	public static boolean validFieldId( String fieldId ) {
+		try {
+			forFieldId( fieldId );
+			return true;
+		} catch( Exception e ) {
+			return false;
+		}
+	}
 }
 

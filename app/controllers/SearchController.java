@@ -136,6 +136,9 @@ public class SearchController extends WithController {
 					}
 					q.addClause( visible.filters());
 				}
+				// print warnings in the log for fields not known
+				q.validateFieldIds();
+
 				// split the query
 				Map<Sources, Query> queries = q.splitBySource();
 				// create promises
