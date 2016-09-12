@@ -19,10 +19,13 @@ package controllers;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
@@ -38,19 +41,22 @@ import model.annotations.ContextData.ContextDataType;
 import model.basicDataTypes.Language;
 import model.basicDataTypes.MultiLiteral;
 import model.basicDataTypes.ProvenanceInfo;
-import model.basicDataTypes.ProvenanceInfo.Sources;
 import model.quality.RecordQuality;
 import model.resources.CulturalObject.CulturalObjectData;
 import model.resources.RecordResource;
-import model.resources.WithResource.WithResourceType;
+import model.resources.WithResourceType;
+import model.resources.collection.CollectionObject;
 
 import org.bson.types.ObjectId;
+import org.mongodb.morphia.query.Query;
+import org.mongodb.morphia.query.UpdateOperations;
 
 import play.Logger;
 import play.Logger.ALogger;
 import play.libs.F.Option;
 import play.libs.Json;
 import play.mvc.Result;
+import search.Sources;
 import sources.core.ISpaceSource;
 import sources.core.ParallelAPICall;
 import sources.core.ParallelAPICall.Priority;
@@ -64,8 +70,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
+import ch.qos.logback.core.Context;
 import db.DB;
 import db.WithResourceDAO;
+import edu.stanford.nlp.ling.CoreAnnotations.ContextsAnnotation;
 
 /**
  * @author mariaral
@@ -181,9 +189,6 @@ public class WithResourceController extends WithController {
 			if (json.has("contextData"))
 				((ObjectNode) json).remove("contextData");
 			Class<?> clazz = Class.forName("model.resources." + resourceType);
-			// if (position.isDefined())
-			// fillInContextTarget(json, collectionDbId.toString(),
-			// position.get());
 			RecordResource record = (RecordResource) Json.fromJson(json, clazz);
 			MultiLiteral label = record.getDescriptiveData().getLabel();
 			if ((label == null) || (label.get(Language.DEFAULT) == null)
@@ -204,6 +209,8 @@ public class WithResourceController extends WithController {
 					last)).getResourceId();
 			if (externalId == null)
 				externalId = record.getAdministrative().getExternalId();
+			if (record.getDescriptiveData().getDates() != null && !record.getDescriptiveData().getDates().isEmpty())
+				record.getDescriptiveData().getDates().forEach((date) -> date.sanitizeDates());
 			ObjectId recordId = null;
 			boolean owns = DB.getRecordResourceDAO().hasAccess(
 					effectiveUserDbIds(), Action.DELETE, recordId);
@@ -221,13 +228,12 @@ public class WithResourceController extends WithController {
 				} else {// In case the record already exists we overwrite
 						// the existing record's descriptive data for the fields
 						// included in the json, if the user has WRITE access.
-					if (noDouble) {
-						if (DB.getRecordResourceDAO()
-								.existsSameExternaIdInCollection(externalId,
-										collectionDbId)) {
-							result.put("error", "double");
-							return forbidden(result);
-						}
+					boolean existsInSameCollection = DB.getRecordResourceDAO()
+							.existsSameExternaIdInCollection(externalId,
+									collectionDbId);
+					if (noDouble && existsInSameCollection) {
+						result.put("error", "double");
+						return forbidden(result);
 					}
 					if (DB.getRecordResourceDAO()
 							.hasAccess(effectiveUserDbIds(),
@@ -237,17 +243,7 @@ public class WithResourceController extends WithController {
 								.editRecord("descriptiveData",
 										resource.getDbId(),
 										json.get("descriptiveData"));
-					addToCollection(position, recordId, collectionDbId, owns);
-					// TODO: if record has annotations, update/add
-					// annotations (already filtered so that they refer to
-					// colId)
-					// if (record.getContextData() != null
-					// && !record.getContextData().isEmpty()) {
-					// ContextData contextData = (ContextData) record
-					// .getContextData().get(0);
-					// DB.getRecordResourceDAO()
-					// .updateContextData(contextData);
-					// }
+					addToCollection(position, recordId, collectionDbId, owns, existsInSameCollection);
 				}
 			} else { // create new record in db
 				ObjectNode errors;
@@ -359,7 +355,7 @@ public class WithResourceController extends WithController {
 							externalId);
 					break;
 				}
-				addToCollection(position, recordId, collectionDbId, owns);
+				addToCollection(position, recordId, collectionDbId, owns, false);
 			}
 			fillMissingThumbnailsAsync(recordId);
 			result.put("message", "Record succesfully added to collection");
@@ -414,13 +410,13 @@ public class WithResourceController extends WithController {
 	// belongs to are merged and are copied to the record
 	// only if the user OWNs the resource.
 	public static void addToCollection(Option<Integer> position,
-			ObjectId recordId, ObjectId colId, boolean owns) {
+			ObjectId recordId, ObjectId colId, boolean owns, boolean existsInSameCollection) {
 		if (position.isDefined() && (recordId != null)) {
 			Integer pos = position.get();
 			DB.getRecordResourceDAO().addToCollection(recordId, colId, pos,
-					owns);
+					owns, existsInSameCollection);
 		} else {
-			DB.getRecordResourceDAO().appendToCollection(recordId, colId, owns);
+			DB.getRecordResourceDAO().appendToCollection(recordId, colId, owns, existsInSameCollection);
 		}
 	}
 
@@ -732,5 +728,45 @@ public class WithResourceController extends WithController {
 				externalId);
 		return removeRecordFromCollection(fav, record.getDbId().toString(),
 				Option.None(), false);
+	}
+	
+	public static Result removeIdsOfDeletedRecords() {
+		Iterator<RecordResource> recordIterator = DB.getRecordResourceDAO().createQuery().iterator();
+		int i = 1;
+		Set recordIds = new HashSet<>();
+		while (recordIterator.hasNext()) {
+			log.info("Getting " + i++ + " record");
+			RecordResource record = recordIterator.next();
+			recordIds.add(record.getDbId());
+		}
+		Iterator<CollectionObject> collectionIterator = DB.getCollectionObjectDAO().createQuery().iterator();
+		i = 1;
+		while (collectionIterator.hasNext()) {
+			log.info("Getting " + i++ + " collection");
+			CollectionObject collection = collectionIterator.next();
+			List<ContextData<ContextDataBody>> collectedResources = collection.getCollectedResources();
+			int resourcesRemoved = 0;
+			Iterator<ContextData<ContextDataBody>> it = collectedResources.iterator();
+			while(it.hasNext()) {
+				ContextData<ContextDataBody> cr = it.next();
+				if (!recordIds.contains(cr.getTarget().getRecordId())) {
+					it.remove();
+					resourcesRemoved++;
+				}	
+			}
+			if (resourcesRemoved > 0) {
+				log.info("Found " + resourcesRemoved +" deleted records");
+				Query<CollectionObject> q = DB.getCollectionObjectDAO().createQuery()
+						.field("_id").equal(collection.getDbId());
+				UpdateOperations<CollectionObject> collectionUpdate = DB
+						.getCollectionObjectDAO().createUpdateOperations()
+						.disableValidation();
+				collectionUpdate.set("collectedResources", collectedResources);
+				collectionUpdate.inc("administrative.entryCount", 0 - resourcesRemoved);
+				collectionUpdate.set("administrative.lastModified", new Date());
+				DB.getCollectionObjectDAO().update(q, collectionUpdate);
+			}
+		}
+		return ok();		
 	}
 }

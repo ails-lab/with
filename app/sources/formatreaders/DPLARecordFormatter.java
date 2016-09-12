@@ -25,11 +25,11 @@ import model.EmbeddedMediaObject.WithMediaType;
 import model.basicDataTypes.Language;
 import model.basicDataTypes.LiteralOrResource;
 import model.basicDataTypes.ProvenanceInfo;
-import model.basicDataTypes.ProvenanceInfo.Sources;
 import model.resources.CulturalObject;
 import model.resources.CulturalObject.CulturalObjectData;
+import search.FiltersFields;
+import search.Sources;
 import sources.FilterValuesMap;
-import sources.core.CommonFilters;
 import sources.core.Utils;
 import sources.utils.JsonContextRecord;
 import sources.utils.StringUtils;
@@ -66,13 +66,13 @@ public class DPLARecordFormatter extends CulturalRecordFormatter {
 		model.setCoordinates(StringUtils.getPoint(rec.getStringValue("sourceResource.spatial[.*].coordinates")));
 		model.setLabel(rec.getMultiLiteralValue(false,"sourceResource.title","originalRecord.label"));
 		model.setDescription(rec.getMultiLiteralValue(false,"sourceResource.description","originalRecord.description"));
-		model.setIsShownBy(rec.getLiteralOrResourceValue("hasView.@id"));
-		model.setIsShownAt(rec.getLiteralOrResourceValue("isShownAt"));
+		model.setIsShownBy( rec.getResource("hasView.@id"));
+		model.setIsShownAt(rec.getResource("isShownAt"));
 		model.setDates(rec.getWithDateArrayValue("sourceResource.date.begin"));
 		model.setDccontributor(rec.getMultiLiteralOrResourceValue(false,"sourceResource.contributor","originalRecord.contributor"));
 		model.setDccreator(rec.getMultiLiteralOrResourceValue(false,"sourceResource.creator","originalRecord.creator"));
 		model.setKeywords(rec.getMultiLiteralOrResourceValue(false,"sourceResource.subject[.*].name","originalRecord.subject"));
-		String uriAt = model.getIsShownAt()==null?null:model.getIsShownAt().getURI();
+		String uriAt = model.getIsShownAt()==null?null:model.getIsShownAt().toString();
 		object.addToProvenance(new ProvenanceInfo(rec.getStringValue("dataProvider"), uriAt,null));
 		object.addToProvenance(new ProvenanceInfo(rec.getStringValue("provider.name"), rec.getStringValue("provider.@id"), null));
 		String recID = rec.getStringValue("id");
@@ -81,12 +81,12 @@ public class DPLARecordFormatter extends CulturalRecordFormatter {
 				new ProvenanceInfo(Sources.DPLA.toString(), uri, recID));
 		List<String> rights = rec.getStringArrayValue("sourceResource.rights");
 		String stringValue = rec.getStringValue("sourceResource.type","originalRecord.type");
-		List<Object> translateToCommon = getValuesMap().translateToCommon(CommonFilters.TYPE.getId(), stringValue);
+		List<Object> translateToCommon = getValuesMap().translateToCommon(FiltersFields.TYPE.getFilterId(), stringValue);
 		WithMediaType type = translateToCommon==null?null:(WithMediaType.getType(translateToCommon.get(0).toString())) ;
 		WithMediaRights withRights = ((rights==null) || (rights.size()==0))?WithMediaRights.UNKNOWN
-				:WithMediaRights.getRights(getValuesMap().translateToCommon(CommonFilters.RIGHTS.getId(), rights.get(0)).get(0).toString());
+				:WithMediaRights.getRights(getValuesMap().translateToCommon(FiltersFields.RIGHTS.getFilterId(), rights.get(0)).get(0).toString());
 		String uri3 = rec.getStringValue("object");
-		String uri2 = model.getIsShownBy()==null?null:model.getIsShownBy().getURI();
+		String uri2 = model.getIsShownBy()==null?null:model.getIsShownBy().toString();
 		if (Utils.hasInfo(uri3)){
 			EmbeddedMediaObject medThumb = new EmbeddedMediaObject();
 			medThumb.setUrl(uri3);

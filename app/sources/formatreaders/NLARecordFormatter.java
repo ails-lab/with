@@ -28,12 +28,12 @@ import model.EmbeddedMediaObject.WithMediaType;
 import model.basicDataTypes.Language;
 import model.basicDataTypes.LiteralOrResource;
 import model.basicDataTypes.ProvenanceInfo;
-import model.basicDataTypes.ProvenanceInfo.Sources;
 import model.resources.CulturalObject;
 import model.resources.CulturalObject.CulturalObjectData;
 import play.Logger;
+import search.FiltersFields;
+import search.Sources;
 import sources.FilterValuesMap;
-import sources.core.CommonFilters;
 import sources.core.Utils;
 import sources.utils.JsonContextRecord;
 import sources.utils.StringUtils;
@@ -73,18 +73,18 @@ public class NLARecordFormatter extends CulturalRecordFormatter {
 		model.getDates().addAll(rec.getWithDateArrayValue("date"));
 		model.setKeywords(rec.getMultiLiteralOrResourceValue("subject"));
 		model.setDcdate(rec.getWithDateArrayValue("date"));
-		model.setIsShownBy(rec.getLiteralOrResourceValue("identifier[type=url,linktype=fulltext|restricted|unknown].value"));
+		model.setIsShownBy(rec.getResource("identifier[type=url,linktype=fulltext|restricted|unknown].value"));
 		
 		
 		object.addToProvenance(new ProvenanceInfo(Sources.NLA.toString(), rec.getStringValue("troveUrl"), id));
 		
 		List<String> rights = rec.getStringArrayValue("rights");
 		String stringValue = rec.getStringValue("type");
-		List<Object> translateToCommon = getValuesMap().translateToCommon(CommonFilters.TYPE.getId(), stringValue);
+		List<Object> translateToCommon = getValuesMap().translateToCommon(FiltersFields.TYPE.getFilterId(), stringValue);
 		WithMediaType type = (Utils.hasInfo(translateToCommon))?WithMediaType.getType(translateToCommon.get(0).toString()):WithMediaType.OTHER;
-		WithMediaRights withRights = (rights==null || rights.size()==0)?null:(WithMediaRights) getValuesMap().translateToCommon(CommonFilters.RIGHTS.getId(), rights.get(0)).get(0);
+		WithMediaRights withRights = (rights==null || rights.size()==0)?null:(WithMediaRights) getValuesMap().translateToCommon(FiltersFields.RIGHTS.getFilterId(), rights.get(0)).get(0);
 		String uri3 = rec.getStringValue("identifier[type=url,linktype=thumbnail].value");
-		String uri2 = model.getIsShownBy()==null?null:model.getIsShownBy().getURI();
+		String uri2 = model.getIsShownBy()==null?null:model.getIsShownBy().toString();
 		
 		if (Utils.hasInfo(uri3)){
 			EmbeddedMediaObject medThumb = new EmbeddedMediaObject();

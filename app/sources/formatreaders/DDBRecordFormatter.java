@@ -25,11 +25,11 @@ import model.EmbeddedMediaObject.WithMediaType;
 import model.basicDataTypes.Language;
 import model.basicDataTypes.LiteralOrResource;
 import model.basicDataTypes.ProvenanceInfo;
-import model.basicDataTypes.ProvenanceInfo.Sources;
 import model.resources.CulturalObject;
 import model.resources.CulturalObject.CulturalObjectData;
+import search.FiltersFields;
+import search.Sources;
 import sources.FilterValuesMap;
-import sources.core.CommonFilters;
 import sources.core.Utils;
 import sources.utils.JsonContextRecord;
 import sources.utils.StringUtils;
@@ -59,9 +59,9 @@ public class DDBRecordFormatter extends CulturalRecordFormatter {
 		
 		List<String> rights = rec.getStringArrayValue("license.@resource");
 		String stringValue = rec.getStringValue("media");
-		List<Object> translateToCommon = getValuesMap().translateToCommon(CommonFilters.TYPE.getId(), stringValue);
+		List<Object> translateToCommon = getValuesMap().translateToCommon(FiltersFields.TYPE.getFilterId(), stringValue);
 		WithMediaType type = WithMediaType.getType(translateToCommon.get(0).toString());
-		WithMediaRights withRights = (rights==null || rights.size()==0)?null:(WithMediaRights) getValuesMap().translateToCommon(CommonFilters.RIGHTS.getId(), rights.get(0)).get(0);
+		WithMediaRights withRights = (rights==null || rights.size()==0)?null:(WithMediaRights) getValuesMap().translateToCommon(FiltersFields.RIGHTS.getFilterId(), rights.get(0)).get(0);
 		String uri3 = "https://www.deutsche-digitale-bibliothek.de/" + rec.getStringValue("thumbnail");
 		
 		if (Utils.hasInfo(uri3)){

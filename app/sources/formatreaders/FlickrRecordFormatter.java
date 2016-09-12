@@ -32,12 +32,12 @@ import model.basicDataTypes.Language;
 import model.basicDataTypes.LiteralOrResource;
 import model.basicDataTypes.MultiLiteralOrResource;
 import model.basicDataTypes.ProvenanceInfo;
-import model.basicDataTypes.ProvenanceInfo.Sources;
 import model.resources.CulturalObject;
 import model.resources.CulturalObject.CulturalObjectData;
+import search.FiltersFields;
+import search.Sources;
 import sources.BritishLibrarySpaceSource;
 import sources.FilterValuesMap;
-import sources.core.CommonFilters;
 import sources.core.Utils;
 import sources.utils.JsonContextRecord;
 import sources.utils.StringUtils;
@@ -80,8 +80,8 @@ public abstract class FlickrRecordFormatter extends CulturalRecordFormatter {
 					"https://www.flickr.com/photos/"+user+"/" + id + "/", id));
 					
 			String rights = BritishLibrarySpaceSource.getLicence(rec.getStringValue("license"));
-			WithMediaType type = (WithMediaType.getType(getValuesMap().translateToCommon(CommonFilters.TYPE.getId(), rec.getStringValue("media")).get(0).toString())) ;
-			Object r = getValuesMap().translateToCommon(CommonFilters.RIGHTS.getId(),rights).get(0);
+			WithMediaType type = (WithMediaType.getType(getValuesMap().translateToCommon(FiltersFields.TYPE.getFilterId(), rec.getStringValue("media")).get(0).toString())) ;
+			Object r = getValuesMap().translateToCommon(FiltersFields.RIGHTS.getFilterId(),rights).get(0);
 			WithMediaRights withRights = (Utils.hasInfo(rights))?null:(WithMediaRights) r;
 			String uri3 = rec.getStringValue("url_s");
 			String uri2 = rec.getStringValue("url_o");

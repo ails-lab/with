@@ -62,7 +62,7 @@ public class MultiLiteralOrResource extends MultiLiteral {
 		}
 	}
 	
-	public MultiLiteralOrResource merge(MultiLiteral other) {
+	public MultiLiteralOrResource merge(MultiLiteralOrResource other) {
 		for (String k : other.keySet()) {
 			List<String> value = other.get(k);
 			for (String string : value) {

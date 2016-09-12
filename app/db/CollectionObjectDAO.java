@@ -21,10 +21,21 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
-import java.util.function.BiFunction;
 
+import org.bson.types.ObjectId;
+import org.mongodb.morphia.query.Criteria;
+import org.mongodb.morphia.query.CriteriaContainer;
+import org.mongodb.morphia.query.Query;
+import org.mongodb.morphia.query.QueryResults;
+import org.mongodb.morphia.query.UpdateOperations;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.mongodb.BasicDBObject;
+
+import controllers.MediaController;
+import db.DAO.QueryOperator;
 import model.EmbeddedMediaObject;
 import model.EmbeddedMediaObject.MediaVersion;
 import model.EmbeddedMediaObject.WithMediaType;
@@ -32,33 +43,11 @@ import model.MediaObject;
 import model.annotations.ContextData;
 import model.annotations.ContextData.ContextDataBody;
 import model.basicDataTypes.WithAccess.Access;
-import model.resources.collection.CollectionObject;
 import model.resources.RecordResource;
-import model.resources.WithResource;
-import model.resources.WithResource.WithResourceType;
-
-import org.bson.types.ObjectId;
-import org.elasticsearch.common.lang3.ArrayUtils;
-import org.mongodb.morphia.query.Criteria;
-import org.mongodb.morphia.query.CriteriaContainer;
-import org.mongodb.morphia.query.Query;
-import org.mongodb.morphia.query.QueryResults;
-import org.mongodb.morphia.query.UpdateOperations;
-
+import model.resources.WithResourceType;
+import model.resources.collection.CollectionObject;
 import play.libs.Json;
-import sources.core.ParallelAPICall;
 import utils.Tuple;
-
-import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.mongodb.BasicDBObject;
-
-import controllers.MediaController;
-import db.DAO.QueryOperator;
-import elastic.Elastic;
-import elastic.ElasticUpdater;
 
 @SuppressWarnings({ "rawtypes", "unchecked", "serial" })
 public class CollectionObjectDAO extends WithResourceDAO<CollectionObject> {
@@ -114,8 +103,6 @@ public class CollectionObjectDAO extends WithResourceDAO<CollectionObject> {
 		projections.put("media", 0);
 		projections.put("usage", 0);
 		projections.put("collectedResources", new BasicDBObject("$slice", new int[] { startIdx, slice }));
-
-
 		return DB.getMorphia().fromDBObject(CollectionObject.class,
 				this.getCollection().findOne(query, projections));
 	}
@@ -248,12 +235,12 @@ public class CollectionObjectDAO extends WithResourceDAO<CollectionObject> {
 			List<ObjectId> loggeInEffIds,
 			List<List<Tuple<ObjectId, Access>>> accessedByUserOrGroup,
 			ObjectId creator, Boolean isExhibition, boolean totalHits,
-			int offset, int count) {
+			int offset, int count, String sortBy) {
 		List<Criteria> criteria = new ArrayList<Criteria>(
 				Arrays.asList(loggedInUserWithAtLeastAccessQuery(loggeInEffIds,
 						Access.READ)));
 		return getByAcl(criteria, accessedByUserOrGroup, creator, isExhibition,
-				totalHits, offset, count);
+				totalHits, offset, count, sortBy);
 	}
 
 	/**
@@ -276,9 +263,9 @@ public class CollectionObjectDAO extends WithResourceDAO<CollectionObject> {
 				this.createQuery().criteria("administrative.access.isPublic")
 						.equal(true)));
 		return getByAcl(criteria, accessedByUserOrGroup, creator, isExhibition,
-				totalHits, offset, count);
+				totalHits, offset, count, "Date");
 	}
-	
+
 	public List<CollectionObject> getAccessibleByGroupAndPublic(ObjectId groupId) {
 		Query<CollectionObject> q = this.createQuery().disableValidation()
 				.retrievedFields(true, "_id", "administrative.entryCount")
@@ -292,32 +279,33 @@ public class CollectionObjectDAO extends WithResourceDAO<CollectionObject> {
 	public Tuple<List<CollectionObject>, Tuple<Integer, Integer>> getSharedAndByAcl(
 			List<List<Tuple<ObjectId, Access>>> accessedByUserOrGroup,
 			ObjectId creator, Boolean isExhibition, boolean totalHits,
-			int offset, int count) {
+			int offset, int count, String sortBy) {
 		List<Criteria> criteria = new ArrayList<Criteria>(Arrays.asList(
 				this.createQuery().criteria("administrative.withCreator")
 						.notEqual(creator)));
 		return getByAcl(criteria, accessedByUserOrGroup, creator, isExhibition,
-				totalHits, offset, count);
+				totalHits, offset, count, sortBy);
 	}
 
 	public Tuple<List<CollectionObject>, Tuple<Integer, Integer>> getByAcl(
 			List<List<Tuple<ObjectId, Access>>> accessedByUserOrGroup,
 			ObjectId creator, Boolean isExhibition, boolean totalHits,
-			int offset, int count) {
+			int offset, int count, String sortBy) {
 		return getByAcl(new ArrayList<Criteria>(), accessedByUserOrGroup,
-				creator, isExhibition, totalHits, offset, count);
+				creator, isExhibition, totalHits, offset, count, sortBy);
 	}
 
 	public Tuple<List<CollectionObject>, Tuple<Integer, Integer>> getByAcl(
 			List<Criteria> andCriteria,
 			List<List<Tuple<ObjectId, Access>>> accessedByUserOrGroup,
 			ObjectId creator, Boolean isExhibition, boolean totalHits,
-			int offset, int count) {
+			int offset, int count, String sortBy) {
 		Query<CollectionObject> q = this.createQuery().disableValidation()
 				.retrievedFields(false, "collectedResources")
 				.field("descriptiveData.label.default.0")
 				.notEqual("_favorites");
-		q.order("-administrative.lastModified").offset(offset).limit(count);
+		String orderBy =  sortBy.equals("Date") ? "-administrative.lastModified" : "descriptiveData.label.default.0";
+		q.order(orderBy).offset(offset).limit(count);
 		if (creator != null)
 			q.field("administrative.withCreator").equal(creator);
 		for (List<Tuple<ObjectId, Access>> orAccessed : accessedByUserOrGroup) {
@@ -337,7 +325,7 @@ public class CollectionObjectDAO extends WithResourceDAO<CollectionObject> {
 					this.find(q).asList(), null);
 		}
 	}
-	
+
 	public ObjectNode countMyAndSharedCollections(
 			List<ObjectId> loggedInEffIds) {
 		ObjectNode result = Json.newObject().objectNode();
@@ -354,8 +342,8 @@ public class CollectionObjectDAO extends WithResourceDAO<CollectionObject> {
 				.field("administrative.withCreator")
 				.notEqual(loggedInEffIds.get(0));
 		List<Criteria> criteria = new ArrayList<Criteria>(
-				Arrays.asList(loggedInUserWithAtLeastAccessQuery(loggedInEffIds,
-						Access.READ)));
+				Arrays.asList(atLeastAccessCriteria(
+						Arrays.asList(new Tuple(loggedInEffIds.get(0), Access.READ)))));
 		qShared.and(criteria.toArray(new Criteria[criteria.size()]));
 		ObjectNode result2 = countPerCollectionType(qShared);
 		result.put("sharedWithMe", result2);
@@ -410,11 +398,10 @@ public class CollectionObjectDAO extends WithResourceDAO<CollectionObject> {
 		return DB.getDs().findAndModify(q, collectionUpdate, true);
 	}
 
-	public void removeFromCollection(ObjectId collectionId, ObjectId recordId,
+	public CollectionObject removeFromCollection(ObjectId collectionId, ObjectId recordId,
 			int position, boolean first, boolean all) throws Exception {
-
 		CollectionObject collection = this.getById(collectionId,
-				Arrays.asList("collectedResources"));
+				Arrays.asList("collectedResources", "administrative.access"));
 		int i = 0;
 		List<ContextData> newCollectedResources = new ArrayList<ContextData>(
 				collection.getCollectedResources());
@@ -461,6 +448,7 @@ public class CollectionObjectDAO extends WithResourceDAO<CollectionObject> {
 						positions.get(--resourcesRemoved));
 			} while (resourcesRemoved > 0);
 		}
+		return collection;
 	}
 
 	public void moveInCollection(ObjectId collectionId, ObjectId recordId,

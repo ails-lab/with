@@ -25,11 +25,12 @@ import model.EmbeddedMediaObject.WithMediaType;
 import model.basicDataTypes.Language;
 import model.basicDataTypes.LiteralOrResource;
 import model.basicDataTypes.ProvenanceInfo;
-import model.basicDataTypes.ProvenanceInfo.Sources;
+import model.basicDataTypes.Resource;
 import model.resources.CulturalObject;
 import model.resources.CulturalObject.CulturalObjectData;
+import search.FiltersFields;
+import search.Sources;
 import sources.FilterValuesMap;
-import sources.core.CommonFilters;
 import sources.core.Utils;
 import sources.utils.JsonContextRecord;
 import sources.utils.StringUtils;
@@ -45,7 +46,7 @@ public class DDBItemRecordFormatter extends CulturalRecordFormatter {
 	public CulturalObject fillObjectFrom(JsonContextRecord rec) {
 		CulturalObjectData model = (CulturalObjectData) object.getDescriptiveData();
 		rec.enterContext("RDF");
-		List<Object> vals = getValuesMap().translateToCommon(CommonFilters.TYPE.getId(), rec.getStringValue("ProvidedCHO.type"));
+		List<Object> vals = getValuesMap().translateToCommon(FiltersFields.TYPE.getFilterId(), rec.getStringValue("ProvidedCHO.type"));
 		WithMediaType type = (Utils.hasInfo(vals))? WithMediaType.getType(vals.get(0).toString()):WithMediaType.OTHER;
 		
 		// TODO read the language
@@ -87,13 +88,13 @@ public class DDBItemRecordFormatter extends CulturalRecordFormatter {
 		
 		LiteralOrResource rights = rec.getLiteralOrResourceValue("WebResource.rights");
 		List<Object> translateToCommon = !Utils.hasInfo(rights)?null: 
-			getValuesMap().translateToCommon(CommonFilters.RIGHTS.getId(),
+			getValuesMap().translateToCommon(FiltersFields.RIGHTS.getFilterId(),
 		 rights.getURI());
 		WithMediaRights withMediaRights = !Utils.hasInfo(rights)?null:
 			(WithMediaRights.getRights((String) translateToCommon.get(0)));
 		
-		model.setIsShownAt(rec.getLiteralOrResourceValue("Aggregation.isShownAt"));
-		model.setIsShownBy(rec.getLiteralOrResourceValue("Aggregation.isShownBy"));
+		model.setIsShownAt(new Resource( rec.getStringValue("Aggregation.isShownAt")));
+		model.setIsShownBy(new Resource( rec.getStringValue("Aggregation.isShownBy")));
 		String uriAt = rec.getStringValue("Aggregation.dataProvider[1].@resource");
 		ProvenanceInfo provInfo = new ProvenanceInfo(rec.getStringValue("Aggregation.dataProvider[0]"),uriAt,null);
 		object.addToProvenance(provInfo);
@@ -112,8 +113,8 @@ public class DDBItemRecordFormatter extends CulturalRecordFormatter {
 		
 
 //		model.getDates().addAll(rec.getWithDateArrayValue("year"));
-		LiteralOrResource isShownBy = model.getIsShownBy();
-		String uri2 = isShownBy==null?null:isShownBy.getURI();
+		Resource isShownBy = model.getIsShownBy();
+		String uri2 = isShownBy==null?null:isShownBy.toString();
 		String uri3 = ro==null?null:ro.getURI();
 		if (Utils.hasInfo(uri3)){
 			EmbeddedMediaObject medThumb = new EmbeddedMediaObject();

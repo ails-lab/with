@@ -27,11 +27,11 @@ import model.EmbeddedMediaObject.WithMediaType;
 import model.basicDataTypes.Language;
 import model.basicDataTypes.LiteralOrResource;
 import model.basicDataTypes.ProvenanceInfo;
-import model.basicDataTypes.ProvenanceInfo.Sources;
 import model.resources.CulturalObject;
 import model.resources.CulturalObject.CulturalObjectData;
+import search.FiltersFields;
+import search.Sources;
 import sources.FilterValuesMap;
-import sources.core.CommonFilters;
 import sources.core.Utils;
 import sources.utils.JsonContextRecord;
 import sources.utils.StringUtils;
@@ -48,7 +48,7 @@ public class MuseumofModernArtRecordFormatter extends CulturalRecordFormatter {
 		CulturalObjectData model = (CulturalObjectData) object.getDescriptiveData();
 		
 		String stringValue = rec.getStringValue("Classification");
-		List<Object> vals = getValuesMap().translateToCommon(CommonFilters.TYPE.getId(), stringValue);
+		List<Object> vals = getValuesMap().translateToCommon(FiltersFields.TYPE.getFilterId(), stringValue);
 		WithMediaType type = (WithMediaType.getType(vals.get(0).toString())) ;
 		
 
@@ -74,9 +74,9 @@ public class MuseumofModernArtRecordFormatter extends CulturalRecordFormatter {
 		model.setLabel(rec.getMultiLiteralValue("Title"));
 		model.setDescription(rec.getMultiLiteralValue("CreditLine"));
 
-		model.setIsShownAt(rec.getLiteralOrResourceValue("URL"));
+		model.setIsShownAt(rec.getResource("URL"));
 
-		String uriAt = model.getIsShownAt()==null?null:model.getIsShownAt().getURI();
+		String uriAt = model.getIsShownAt()==null?null:model.getIsShownAt().toString();
 		ProvenanceInfo provInfo = new ProvenanceInfo("MuseumofModernArt",uriAt,rec.getStringValue("ObjectID"));
 		object.addToProvenance(provInfo);
 		

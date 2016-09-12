@@ -26,6 +26,8 @@ import model.annotations.Annotation;
 import model.annotations.Annotation.AnnotationAdmin;
 import model.annotations.Annotation.MotivationType;
 import model.annotations.bodies.AnnotationBodyTagging;
+import model.annotations.selectors.SelectorType;
+import model.annotations.targets.AnnotationTarget;
 import model.basicDataTypes.Language;
 
 import org.apache.commons.beanutils.BeanToPropertyValueTransformer;
@@ -58,17 +60,27 @@ public class AnnotationDAO extends DAO<Annotation> {
 	public Annotation getExistingAnnotation(Annotation annotation) {
 		if (annotation.getDbId() != null)
 			return this.getById(annotation.getDbId());
+
 		Query<Annotation> q = this.createQuery().disableValidation()
 				.field("target.recordId")
 				.equal(annotation.getTarget().getRecordId());
+		
 		if (annotation.getMotivation().equals(MotivationType.Tagging)) {
-			AnnotationBodyTagging body = (AnnotationBodyTagging) annotation
-					.getBody();
+			AnnotationBodyTagging body = (AnnotationBodyTagging) annotation.getBody();
+			
 			if (body.getUri() != null)
 				q.field("body.uri").equal(body.getUri());
 			if (body.getLabel() != null)
 				q.field("body.label.default").equal(
 						body.getLabel().get(Language.DEFAULT));
+			
+			AnnotationTarget target = (AnnotationTarget) annotation.getTarget();
+			
+			SelectorType selector = target.getSelector();
+			if (selector != null) {
+				selector.addToQuery(q);
+			}
+
 		} else {
 			return null;
 		}
@@ -125,6 +137,23 @@ public class AnnotationDAO extends DAO<Annotation> {
 		this.update(q, updateOps);
 	}
 	
+	public void addApprove(ObjectId id, ObjectId userId) {
+		Query<Annotation> q = this.createQuery().field("_id").equal(id);
+		UpdateOperations<Annotation> updateOps = this.createUpdateOperations();
+		updateOps.add("score.approvedBy", userId, false);		
+		updateOps.removeAll("score.rejectedBy", userId);
+		this.update(q, updateOps);
+	}
+	
+	public void addReject(ObjectId id, ObjectId userId) {
+		Query<Annotation> q = this.createQuery().field("_id").equal(id);
+		UpdateOperations<Annotation> updateOps = this.createUpdateOperations();
+		updateOps.add("score.rejectedBy", userId, false);
+		updateOps.removeAll("score.approvedBy", userId);
+		this.update(q, updateOps);
+	}
+
+
 	public void removeAnnotators(ObjectId id, List<AnnotationAdmin> annotators) {
 		Query<Annotation> q = this.createQuery().field("_id").equal(id);
 		UpdateOperations<Annotation> updateOps = this.createUpdateOperations();

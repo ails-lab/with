@@ -29,18 +29,18 @@ import org.json.JSONObject;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
-import model.basicDataTypes.ProvenanceInfo.Sources;
 import model.resources.CulturalObject;
 import model.resources.RecordResource;
 import model.resources.WithResource;
 import play.Logger;
 import play.libs.Json;
+import search.FiltersFields;
+import search.Sources;
 import sources.core.AdditionalQueryModifier;
 import sources.core.AutocompleteResponse;
 import sources.core.AutocompleteResponse.DataJSON;
 import sources.core.AutocompleteResponse.Suggestion;
 import sources.core.CommonFilterLogic;
-import sources.core.CommonFilters;
 import sources.core.CommonQuery;
 import sources.core.FacetsModes;
 import sources.core.HttpConnector;
@@ -66,7 +66,7 @@ public class HistorypinSpaceSource extends ISpaceSource {
 	
 	public HistorypinSpaceSource() {
 		super(Sources.Historypin);
-		addDefaultWriter(CommonFilters.TYPE.getId(), qfwriter("pin"));
+		addDefaultWriter(FiltersFields.TYPE.getFilterId(), qfwriter("pin"));
 		formatreader = new HistorypinRecordFormatter();
 
 	}

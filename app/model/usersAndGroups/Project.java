@@ -19,11 +19,14 @@ package model.usersAndGroups;
 import org.mongodb.morphia.annotations.Embedded;
 import org.mongodb.morphia.annotations.Entity;
 
+import com.fasterxml.jackson.databind.node.ObjectNode;
+
 @Entity("UserGroup")
 public class Project extends UserGroup {
 
 	@Embedded
 	private Page page;
+	private ObjectNode uiSettings;
 
 	public Page getPage() {
 		return page;
@@ -32,6 +35,18 @@ public class Project extends UserGroup {
 	public void setPage(Page page) {
 		this.page = page;
 	}
+	
+	public String getType() {
+		return "Project";
+	}
 
-
+	
+	public ObjectNode getUiSettings() {
+		return this.uiSettings;
+	}
+	
+	public void setUiSettings( ObjectNode uiSettings ) {
+		this.uiSettings = uiSettings;
+	}
 }
+

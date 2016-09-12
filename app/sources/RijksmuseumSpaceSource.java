@@ -25,17 +25,20 @@ import org.w3c.dom.Document;
 import com.fasterxml.jackson.databind.JsonNode;
 
 import model.EmbeddedMediaObject.MediaVersion;
+import model.EmbeddedMediaObject.WithMediaType;
 import model.EmbeddedMediaObject;
-import model.basicDataTypes.ProvenanceInfo.Sources;
 import model.resources.CulturalObject;
 import model.resources.RecordResource;
+import model.resources.WithResourceType;
 import play.libs.Json;
+import search.FiltersFields;
+import search.Sources;
 import sources.core.CommonFilterLogic;
-import sources.core.CommonFilters;
 import sources.core.CommonQuery;
 import sources.core.HttpConnector;
 import sources.core.ISpaceSource;
 import sources.core.QueryBuilder;
+import sources.core.QueryModifier;
 import sources.core.RecordJSONMetadata;
 import sources.core.RecordJSONMetadata.Format;
 import sources.core.SourceResponse;
@@ -50,8 +53,10 @@ public class RijksmuseumSpaceSource extends ISpaceSource {
 	public RijksmuseumSpaceSource() {
 		super(Sources.Rijksmuseum);
 		apiKey = "SECRET_KEY";
+		addRestriction(FiltersFields.TYPE.getFilterId(),WithMediaType.IMAGE.getName());
 		formatreader = new RijksmuseumRecordFormatter(vmap);
 	}
+
 
 	public String getHttpQuery(CommonQuery q) {
 		QueryBuilder builder = new QueryBuilder("https://www.rijksmuseum.nl/api/en/collection");
@@ -61,8 +66,8 @@ public class RijksmuseumSpaceSource extends ISpaceSource {
 			builder.addSearchParam("imgonly", "True");
 		builder.addSearchParam("f", "1");
 		
-		builder.addQuery("q", q.searchTerm);
-		builder.addSearchParam("p", "" + ((Integer.parseInt(q.page) - 1) * Integer.parseInt(q.pageSize) + 1));
+		builder.setQuery("q", q.searchTerm);
+		builder.addSearchParam("p", "" + (Integer.parseInt(q.page) - 1));
 
 		builder.addSearchParam("ps", "" + q.pageSize);
 
@@ -90,6 +95,8 @@ public class RijksmuseumSpaceSource extends ISpaceSource {
 				res.facets = response.path("facets");
 
 				res.filtersLogic = createFilters(response);
+				res.filtersLogic.addAll(vmap.getRestrictionsAsFilters(res.count));
+				
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -99,9 +106,9 @@ public class RijksmuseumSpaceSource extends ISpaceSource {
 	
 	public List<CommonFilterLogic> createFilters(JsonNode response) {
 		List<CommonFilterLogic> filters = new ArrayList<CommonFilterLogic>();
-		CommonFilterLogic type = new CommonFilterLogic(CommonFilters.TYPE).addTo(filters);
-		CommonFilterLogic creator = new CommonFilterLogic(CommonFilters.CREATOR).addTo(filters);
-		CommonFilterLogic country = new CommonFilterLogic(CommonFilters.COUNTRY).addTo(filters);
+//		CommonFilterLogic type = new CommonFilterLogic(FiltersFields.TYPE).addTo(filters);
+		CommonFilterLogic creator = new CommonFilterLogic(FiltersFields.CREATOR).addTo(filters);
+		CommonFilterLogic country = new CommonFilterLogic(FiltersFields.COUNTRY).addTo(filters);
 				
 		for (JsonNode facet : response.path("facets")) {
 			String filterType = facet.path("name").asText();
@@ -109,9 +116,9 @@ public class RijksmuseumSpaceSource extends ISpaceSource {
 				String label = jsonNode.path("key").asText();
 				int count = jsonNode.path("value").asInt();
 				switch (filterType) {
-				case "type":
-					countValue(type, label, count);
-					break;
+//				case "type":
+//					countValue(type, label, count);
+//					break;
 				case "maker":
 					countValue(creator, label, false, count);
 					break;
@@ -124,6 +131,7 @@ public class RijksmuseumSpaceSource extends ISpaceSource {
 
 			}
 		}
+
 		return filters;
 	}
 	

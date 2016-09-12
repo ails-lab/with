@@ -16,25 +16,23 @@
 
 package sources.formatreaders;
 
-import java.util.Arrays;
 import java.util.List;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
-import akka.dispatch.Filter;
 import model.EmbeddedMediaObject;
 import model.EmbeddedMediaObject.MediaVersion;
 import model.EmbeddedMediaObject.WithMediaRights;
 import model.EmbeddedMediaObject.WithMediaType;
 import model.basicDataTypes.Language;
-import model.basicDataTypes.ProvenanceInfo.Sources;
 import model.basicDataTypes.LiteralOrResource;
 import model.basicDataTypes.ProvenanceInfo;
+import model.basicDataTypes.Resource;
 import model.resources.CulturalObject;
 import model.resources.CulturalObject.CulturalObjectData;
-import play.Logger;
+import search.FiltersFields;
+import search.Sources;
 import sources.FilterValuesMap;
-import sources.core.CommonFilters;
 import sources.core.Utils;
 import sources.utils.JsonContextRecord;
 import sources.utils.StringUtils;
@@ -73,8 +71,8 @@ public class DNZBasicRecordFormatter extends CulturalRecordFormatter {
 		model.setDescription(rec.getMultiLiteralValue("description","additional_description"));
 		model.setAltLabels(rec.getMultiLiteralValue("alternative_title"));
 		model.setDcidentifier(rec.getMultiLiteralOrResourceValue("dc_identifier"));
-		model.setIsShownBy(rec.getLiteralOrResourceValue("object_url","thumbnail_url", "large_thumbnail_url"));
-		model.setIsShownAt(rec.getLiteralOrResourceValue("landing_url"));
+		model.setIsShownBy(new Resource( rec.getStringValue("object_url","thumbnail_url", "large_thumbnail_url")));
+		model.setIsShownAt(new Resource( rec.getStringValue("landing_url")));
 		model.setDates(rec.getWithDateArrayValue("date"));
 		model.setDccreator(rec.getMultiLiteralOrResourceValue("creator"));
 		model.setDccontributor(rec.getMultiLiteralOrResourceValue("contributor"));
@@ -92,7 +90,7 @@ public class DNZBasicRecordFormatter extends CulturalRecordFormatter {
 		String stringValue = rec.getStringValue("category");
 		WithMediaType type = null;
 		if (Utils.hasAny(stringValue)){
-			List<Object> translateToCommon = getValuesMap().translateToCommon(CommonFilters.TYPE.getId(), stringValue);
+			List<Object> translateToCommon = getValuesMap().translateToCommon(FiltersFields.TYPE.getFilterId(), stringValue);
 			for (Object object : translateToCommon) {
 				WithMediaType type2 = WithMediaType.getType(object.toString());
 				if (type2!=null){
@@ -102,7 +100,7 @@ public class DNZBasicRecordFormatter extends CulturalRecordFormatter {
 				}
 			}
 		}
-		WithMediaRights withRights = (rights==null || rights.size()==0)?null:(WithMediaRights.getRights(getValuesMap().translateToCommon(CommonFilters.RIGHTS.getId(), rights.get(0)).get(0).toString())) ;
+		WithMediaRights withRights = (rights==null || rights.size()==0)?null:(WithMediaRights.getRights(getValuesMap().translateToCommon(FiltersFields.RIGHTS.getFilterId(), rights.get(0)).get(0).toString())) ;
 		
 		
 		

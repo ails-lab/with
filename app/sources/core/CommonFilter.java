@@ -38,6 +38,12 @@ public class CommonFilter implements Cloneable {
 		this.filterID = filterID;
 		this.values = Arrays.asList(values);
 	}
+	
+	public CommonFilter(String filterID, List<String> values) {
+		super();
+		this.filterID = filterID;
+		this.values = values;
+	}
 
 	@Override
 	public String toString() {

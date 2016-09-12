@@ -26,7 +26,9 @@ import model.annotations.Annotation;
 import model.annotations.ContextData;
 import model.annotations.ContextData.ContextDataBody;
 import model.basicDataTypes.MultiLiteralOrResource;
+import model.resources.WithAdmin;
 import model.resources.WithResource;
+import model.resources.WithResourceType;
 import model.resources.collection.Exhibition.ExhibitionDescriptiveData;
 
 import org.bson.types.ObjectId;
@@ -96,7 +98,7 @@ public class CollectionObject<T extends CollectionObject.CollectionDescriptiveDa
 	}
 
 	@Embedded
-	public static class CollectionAdmin extends WithResource.WithAdmin {
+	public static class CollectionAdmin extends WithAdmin {
 
 		protected int entryCount = 0;
 		//protected CollectionType collectionType = CollectionType.SimpleCollection;
@@ -162,18 +164,19 @@ public class CollectionObject<T extends CollectionObject.CollectionDescriptiveDa
 	 * collected records
 	 */
 	public Map<String, Object> transform() {
-		Map<String, Object> idx_map =  this.transformWR();
+		/*Map<String, Object> idx_map =  this.transformWR();
 
 		idx_map.put("dccreator", ((CollectionDescriptiveData)this.getDescriptiveData()).getDccreator());
 		idx_map.put("dctermsaudience", ((CollectionDescriptiveData)this.getDescriptiveData()).getDctermsaudience());
 		idx_map.put("dclanguage", ((CollectionDescriptiveData)this.getDescriptiveData()).getDclanguage());
 
-		/*ArrayNode cd = (ArrayNode) Json.toJson(this.getCollectedResources());
+		ArrayNode cd = (ArrayNode) Json.toJson(this.getCollectedResources());
 		ObjectMapper mapper = new ObjectMapper();
 		mapper.setSerializationInclusion(Include.NON_NULL);
 		List<Object> cd_map = mapper.convertValue(cd, List.class);
-		idx_map.put("collectedResources", cd_map);*/
-		return idx_map;
+		idx_map.put("collectedResources", cd_map);
+		return idx_map;*/
+		return transformWR();
 	}
 
 	public CollectionObject getCollectionProfile(String profileString) {
@@ -210,7 +213,7 @@ public class CollectionObject<T extends CollectionObject.CollectionDescriptiveDa
 		output.getDescriptiveData().setLabel(getDescriptiveData().getLabel());
 		output.getDescriptiveData().setDescription(getDescriptiveData().getDescription());
 		output.setProvenance(getProvenance());
-		if (getMedia().size() > 3)
+		if (getMedia() != null && getMedia().size() > 3)
 			output.setMedia(getMedia().subList(0, 3));
 		else
 			output.setMedia(getMedia());

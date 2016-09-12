@@ -18,10 +18,10 @@ package sources;
 
 import model.EmbeddedMediaObject.WithMediaRights;
 import model.EmbeddedMediaObject.WithMediaType;
-import model.basicDataTypes.ProvenanceInfo.Sources;
 import model.resources.WithResource;
+import search.FiltersFields;
+import search.Sources;
 import sources.core.CommonFilterLogic;
-import sources.core.CommonFilters;
 import sources.core.CommonQuery;
 import sources.core.SourceResponse;
 import sources.core.Utils;

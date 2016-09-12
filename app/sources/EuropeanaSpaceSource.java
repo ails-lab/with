@@ -27,18 +27,18 @@ import org.json.JSONObject;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
-import model.basicDataTypes.ProvenanceInfo.Sources;
 import model.resources.RecordResource;
 import model.resources.WithResource;
 import play.Logger;
 import play.Logger.ALogger;
 import play.libs.Json;
+import search.FiltersFields;
+import search.Sources;
 import sources.core.AdditionalQueryModifier;
 import sources.core.AutocompleteResponse;
 import sources.core.AutocompleteResponse.DataJSON;
 import sources.core.AutocompleteResponse.Suggestion;
 import sources.core.CommonFilterLogic;
-import sources.core.CommonFilters;
 import sources.core.CommonQuery;
 import sources.core.FacetsModes;
 import sources.core.ISpaceSource;
@@ -76,26 +76,26 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 //		profile = "rich";
 		apiKey = "SECRET_KEY";
 		
-		addDefaultWriter(CommonFilters.MIME_TYPE.getId(), qfwriter("MIME_TYPE"));
-		addDefaultWriter(CommonFilters.IMAGE_SIZE.getId(), qfwriter("IMAGE_SIZE"));
-		addDefaultWriter(CommonFilters.IMAGE_COLOUR.getId(), qfwriter("IMAGE_COLOUR"));
-		addDefaultWriter(CommonFilters.COLOURPALETE.getId(), qfwriter("COLOURPALETE"));
+		addDefaultWriter(FiltersFields.MIME_TYPE.getFilterId(), qfwriter("MIME_TYPE"));
+		addDefaultWriter(FiltersFields.IMAGE_SIZE.getFilterId(), qfwriter("IMAGE_SIZE"));
+		addDefaultWriter(FiltersFields.IMAGE_COLOUR.getFilterId(), qfwriter("IMAGE_COLOUR"));
+		addDefaultWriter(FiltersFields.COLOURPALETE.getFilterId(), qfwriter("COLOURPALETE"));
 		
 		
-		addDefaultQueryModifier(CommonFilters.PROVIDER.getId(), qwriter("PROVIDER"));
-		addDefaultQueryModifier(CommonFilters.DATA_PROVIDER.getId(), qwriter("DATA_PROVIDER"));
-		addDefaultQueryModifier(CommonFilters.COUNTRY.getId(), qwriter("COUNTRY"));
+		addDefaultQueryModifier(FiltersFields.PROVIDER.getFilterId(), qwriter("PROVIDER"));
+		addDefaultQueryModifier(FiltersFields.DATA_PROVIDER.getFilterId(), qwriter("DATA_PROVIDER"));
+		addDefaultQueryModifier(FiltersFields.COUNTRY.getFilterId(), qwriter("COUNTRY"));
 
-		addDefaultQueryModifier(CommonFilters.YEAR.getId(), qDatewriter());
+		addDefaultQueryModifier(FiltersFields.YEAR.getFilterId(), qDatewriter());
 
-		addDefaultQueryModifier(CommonFilters.CREATOR.getId(), qwriter("CREATOR"));
+		addDefaultQueryModifier(FiltersFields.CREATOR.getFilterId(), qwriter("CREATOR"));
 
 		// addDefaultWriter(CommonFilters.CONTRIBUTOR_ID,
 		// qfwriter("proxy_dc_contributor"));
 
-		addDefaultQueryModifier(CommonFilters.RIGHTS.getId(), qrightwriter());
+		addDefaultQueryModifier(FiltersFields.RIGHTS.getFilterId(), qrightwriter());
 
-		addDefaultQueryModifier(CommonFilters.TYPE.getId(), qwriter("TYPE"));
+		addDefaultQueryModifier(FiltersFields.TYPE.getFilterId(), qwriter("TYPE"));
 
 		
 		formatreader = new EuropeanaRecordFormatter();
@@ -148,7 +148,7 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 	
 
 	private Function<List<String>, Pair<String>> qfwriter(String parameter) {
-		if (parameter.equals(CommonFilters.YEAR.name())) {
+		if (parameter.equals(FiltersFields.YEAR.name())) {
 			return qfwriterYEAR();
 		}
 		return FunctionsUtils.toORList("qf", 
@@ -213,7 +213,7 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 		QueryBuilder builder = new EuropeanaQueryBuilder("http://europeana.eu/api/v2/search.json");
 		builder.addSearchParam("wskey", apiKey);
 
-		builder.addQuery("query", q.searchTerm);
+		builder.setQuery("query", q.searchTerm);
 
 		if (usingCursor){
 			if (q.page.equals("1"))
@@ -249,17 +249,17 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 
 	public List<CommonFilterLogic> createFilters(JsonNode response) {
 		List<CommonFilterLogic> filters = new ArrayList<CommonFilterLogic>();
-		CommonFilterLogic type = new CommonFilterLogic(CommonFilters.TYPE).addTo(filters);
-		CommonFilterLogic provider = new CommonFilterLogic(CommonFilters.PROVIDER).addTo(filters);
-		CommonFilterLogic dataprovider = new CommonFilterLogic(CommonFilters.DATA_PROVIDER).addTo(filters);
-		CommonFilterLogic creator = new CommonFilterLogic(CommonFilters.CREATOR).addTo(filters);
-		CommonFilterLogic rights = new CommonFilterLogic(CommonFilters.RIGHTS).addTo(filters);
-		CommonFilterLogic country = new CommonFilterLogic(CommonFilters.COUNTRY).addTo(filters);
-		CommonFilterLogic year = new CommonFilterLogic(CommonFilters.YEAR).addTo(filters);
-		CommonFilterLogic mtype = new CommonFilterLogic(CommonFilters.MIME_TYPE).addTo(filters);
-		CommonFilterLogic isize = new CommonFilterLogic(CommonFilters.IMAGE_SIZE).addTo(filters);
-		CommonFilterLogic icolor = new CommonFilterLogic(CommonFilters.IMAGE_COLOUR).addTo(filters);
-		CommonFilterLogic cpalete = new CommonFilterLogic(CommonFilters.COLOURPALETE).addTo(filters);
+		CommonFilterLogic type = new CommonFilterLogic(FiltersFields.TYPE).addTo(filters);
+		CommonFilterLogic provider = new CommonFilterLogic(FiltersFields.PROVIDER).addTo(filters);
+		CommonFilterLogic dataprovider = new CommonFilterLogic(FiltersFields.DATA_PROVIDER).addTo(filters);
+		CommonFilterLogic creator = new CommonFilterLogic(FiltersFields.CREATOR).addTo(filters);
+		CommonFilterLogic rights = new CommonFilterLogic(FiltersFields.RIGHTS).addTo(filters);
+		CommonFilterLogic country = new CommonFilterLogic(FiltersFields.COUNTRY).addTo(filters);
+		CommonFilterLogic year = new CommonFilterLogic(FiltersFields.YEAR).addTo(filters);
+		CommonFilterLogic mtype = new CommonFilterLogic(FiltersFields.MIME_TYPE).addTo(filters);
+		CommonFilterLogic isize = new CommonFilterLogic(FiltersFields.IMAGE_SIZE).addTo(filters);
+		CommonFilterLogic icolor = new CommonFilterLogic(FiltersFields.IMAGE_COLOUR).addTo(filters);
+		CommonFilterLogic cpalete = new CommonFilterLogic(FiltersFields.COLOURPALETE).addTo(filters);
 				
 		for (JsonNode facet : response.path("facets")) {
 			String filterType = facet.path("name").asText();

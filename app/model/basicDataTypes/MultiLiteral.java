@@ -19,7 +19,9 @@ package model.basicDataTypes;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.mongodb.morphia.annotations.Converters;
 
@@ -111,5 +113,14 @@ public class MultiLiteral extends HashMap<String, List<String>> implements
 	public MultiLiteral merge(MultiLiteral other) {
 		this.putAll(other);
 		return this;
+	}
+	
+	public Set<Language> getLanguages() {
+		Set<Language> res = new HashSet<>();
+		for (String s : keySet()) {
+			res.add(Language.getLanguage(s));
+		}
+		
+		return res;
 	}
 }

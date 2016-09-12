@@ -18,7 +18,6 @@ package model.resources;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -31,8 +30,6 @@ import model.annotations.Annotation;
 import model.annotations.ContextData;
 import model.basicDataTypes.CollectionInfo;
 import model.basicDataTypes.ProvenanceInfo;
-import model.basicDataTypes.WithAccess;
-import model.basicDataTypes.WithAccess.Access;
 import model.usersAndGroups.User;
 
 import org.bson.types.ObjectId;
@@ -43,21 +40,18 @@ import org.mongodb.morphia.annotations.Id;
 import org.mongodb.morphia.annotations.Index;
 import org.mongodb.morphia.annotations.IndexOptions;
 import org.mongodb.morphia.annotations.Indexes;
-import org.mongodb.morphia.annotations.Version;
 import org.mongodb.morphia.utils.IndexType;
 
 import play.Logger;
 import play.Logger.ALogger;
 import play.libs.Json;
 import sources.formatreaders.CulturalRecordFormatter;
-import utils.Deserializer;
 import utils.Serializer;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
@@ -76,115 +70,10 @@ import elastic.ElasticUtils;
 		@Index(fields = @Field(value = "descriptiveData.label", type = IndexType.ASC), options = @IndexOptions()),
 		@Index(fields = @Field(value = "collectedIn", type = IndexType.ASC), options = @IndexOptions()) })
 @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
-public class WithResource<T extends DescriptiveData, U extends WithResource.WithAdmin> {
+public class WithResource<T extends DescriptiveData, U extends WithAdmin> {
 
 	public static final ALogger log = Logger.of( WithResource.class );
-	
-	
-	public static class WithAdmin {
 
-		// index
-		@JsonSerialize(using = Serializer.WithAccessSerializer.class)
-		@JsonDeserialize(using = Deserializer.WithAccessDeserializer.class)
-		private WithAccess access = new WithAccess();
-
-		/*
-		 * withCreator is empty in cases of records imported from external
-		 * resources. For resources uploaded by a user, it links to the userId
-		 * who uploaded that resource. For collections, it links to the userId
-		 * who created the collection.
-		 */
-		// index
-		@JsonSerialize(using = Serializer.ObjectIdSerializer.class)
-		private ObjectId withCreator = null;
-
-		// uri that this resource has in the rdf repository
-		private String withURI;
-
-		@JsonSerialize(using = Serializer.DateSerializer.class)
-		@JsonDeserialize(using = Deserializer.DateDeserializer.class)
-		private Date created;
-
-		@JsonSerialize(using = Serializer.DateSerializer.class)
-		@JsonDeserialize(using = Deserializer.DateDeserializer.class)
-		@Version
-		private Date lastModified;
-
-		@Embedded
-		// @JsonSerialize(using = Serializer.AccessMapSerializer.class)
-		// @JsonDeserialize(using = Deserializer.AccessMapDeserializer.class)
-		// private final Map<ObjectId, Access> underModeration = new
-		// HashMap<ObjectId, Access>();
-		// recordId of last entry of provenance chain id the resource has been
-		// imported from external resource
-		// dbId if uploaded by user
-		protected String externalId;
-
-		public WithAccess getAccess() {
-			return access;
-		}
-
-		@JsonIgnore
-		public void setAccess(WithAccess access) {
-			this.access = access;
-		}
-
-		public String getWithURI() {
-			return withURI;
-		}
-
-		public void setWithURI(String withURI) {
-			this.withURI = withURI;
-		}
-
-		public Date getCreated() {
-			return created;
-		}
-
-		public void setCreated(Date created) {
-			this.created = created;
-			if (this.lastModified == null) {
-				this.lastModified = created;
-			}
-		}
-
-		public Date getLastModified() {
-			return lastModified;
-		}
-
-		public void setLastModified(Date lastModified) {
-			this.lastModified = lastModified;
-		}
-
-		public ObjectId getWithCreator() {
-			return withCreator;
-		}
-
-		public void setWithCreator(ObjectId creatorId) {
-			// OWN rights from old creator are not withdrawn (ownership is not
-			// identical to creation role)
-			this.withCreator = creatorId;
-			if (withCreator != null)
-				this.getAccess().addToAcl(creatorId, Access.OWN);
-		}
-
-		public User retrieveWithCreator() {
-			ObjectId userId = getWithCreator();
-			if (userId != null)
-				return DB.getUserDAO().getById(userId);
-			else
-				return null;
-		}
-
-		public String getExternalId() {
-			return externalId;
-		}
-
-		public void setExternalId(String externalId) {
-			this.externalId = externalId;
-		}
-
-	}
 
 	public static class Usage {
 		// in how many favorites is it
@@ -326,13 +215,6 @@ public class WithResource<T extends DescriptiveData, U extends WithResource.With
 		}
 	}
 
-	public static enum WithResourceType {
-		WithResource, CollectionObject, SimpleCollection, Exhibition, RecordResource,
-		CulturalObject, EuScreenObject, EventObject,
-		PlaceObject, TimespanObject, ThesaurusObject,
-		AgentObject;
-	}
-
 	@Id
 	@JsonSerialize(using = Serializer.ObjectIdSerializer.class)
 	private ObjectId dbId;
@@ -382,7 +264,7 @@ public class WithResource<T extends DescriptiveData, U extends WithResource.With
 	@Embedded
 	//@JsonDeserialize(using = Deserializer.ContextDataDeserializer.class)
 	private ContextData contextData;
-	
+
 	@JsonInclude(Include.ALWAYS)
 	private double qualityMeasure;
 
@@ -393,7 +275,7 @@ public class WithResource<T extends DescriptiveData, U extends WithResource.With
 	public void setQualityMeasure(double qualityMeasure) {
 		this.qualityMeasure = qualityMeasure;
 	}
-	
+
 	@JsonSerialize(using = Serializer.ObjectIdArraySerializer.class)
 	private Set<ObjectId> annotationIds;
 	private List<Annotation> annotations;
@@ -557,7 +439,7 @@ public class WithResource<T extends DescriptiveData, U extends WithResource.With
 	public void addMedia(MediaVersion mediaVersion, EmbeddedMediaObject media) {
 		addMedia(mediaVersion, media, false);
 	}
-	
+
 	/**
 	 * sets the main media object to the resource
 	 * @param mediaVersion version of the media
@@ -635,7 +517,7 @@ public class WithResource<T extends DescriptiveData, U extends WithResource.With
 	 * Currently we are indexing only Resources that represent collected records
 	 */
 	public Map<String, Object> transformWR() {
-		return ElasticUtils.basicTransformation(this);
+		return ElasticUtils.toIndex(this);
 	}
 
 

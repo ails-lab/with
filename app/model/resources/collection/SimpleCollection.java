@@ -21,6 +21,7 @@ import org.mongodb.morphia.annotations.Entity;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
+import model.resources.WithResourceType;
 import model.resources.collection.CollectionObject.CollectionDescriptiveData;
 
 @JsonIgnoreProperties(ignoreUnknown = true)

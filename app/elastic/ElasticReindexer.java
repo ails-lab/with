@@ -249,7 +249,7 @@ public class ElasticReindexer {
 			Iterator<ThesaurusObject> thesaurusCursor = DB.getThesaurusDAO().find(q).iterator();
 			while(thesaurusCursor.hasNext()) {
 				ThesaurusObject th = thesaurusCursor.next();
-				bulk.add(new IndexRequest(Elastic.index, ElasticUtils.defineInstanceOf(th), th.getDbid().toString())
+				bulk.add(new IndexRequest(Elastic.index, ElasticUtils.defineInstanceOf(th), th.getDbId().toString())
 				.source(th.transform()));
 			}
 			bulk.flush();
@@ -259,7 +259,7 @@ public class ElasticReindexer {
 		Iterator<ThesaurusObject> thesaurusCursor = DB.getThesaurusDAO().find(q).iterator();
 		while(thesaurusCursor.hasNext()) {
 			ThesaurusObject th = thesaurusCursor.next();
-			bulk.add(new IndexRequest(Elastic.index, ElasticUtils.defineInstanceOf(th), th.getDbid().toString())
+			bulk.add(new IndexRequest(Elastic.index, ElasticUtils.defineInstanceOf(th), th.getDbId().toString())
 			.source(th.transform()));
 		}
 

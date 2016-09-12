@@ -29,16 +29,17 @@ import model.EmbeddedMediaObject.MediaVersion;
 import model.EmbeddedMediaObject.WithMediaType;
 import model.basicDataTypes.LiteralOrResource;
 import model.basicDataTypes.ProvenanceInfo;
-import model.basicDataTypes.ProvenanceInfo.Sources;
+import model.basicDataTypes.Resource;
 import model.resources.RecordResource;
 import model.resources.RecordResource.RecordDescriptiveData;
 import play.Logger;
 import play.Logger.ALogger;
 import play.libs.Json;
+import search.FiltersFields;
+import search.Sources;
 import sources.core.AutocompleteResponse;
 import sources.core.AutocompleteResponse.DataJSON;
 import sources.core.AutocompleteResponse.Suggestion;
-import sources.core.CommonFilters;
 import sources.core.CommonQuery;
 import sources.core.ISpaceSource;
 import sources.core.RecordJSONMetadata;
@@ -57,6 +58,7 @@ public class YouTubeSpaceSource extends ISpaceSource {
 
 	public YouTubeSpaceSource() {
 		super(Sources.YouTube);
+		addRestriction(FiltersFields.TYPE.getFilterId(),WithMediaType.VIDEO.getName());
 		roots = new HashMap<String, String>();
 	}
 
@@ -95,11 +97,6 @@ public class YouTubeSpaceSource extends ISpaceSource {
 		res.query = httpQuery;
 		JsonNode response;
 		
-		if (q.filters==null || q.filters.size()==0 ||
-				(q.filters.size()==1 && 
-				q.filters.get(0).filterID.equals(CommonFilters.TYPE.getId()) &&
-				q.filters.get(0).values.contains(WithMediaType.VIDEO)
-				)){
 			try {
 				response = getHttpConnector().getURLContent(httpQuery);
 				// System.out.println(httpQuery);
@@ -122,8 +119,10 @@ public class YouTubeSpaceSource extends ISpaceSource {
 			} catch (Exception e) {
 				log.error( "",e );
 			}
-		} 
 
+			res.filtersLogic  = vmap.getRestrictionsAsFilters(res.count);
+			
+			
 		return res;
 	}
 
@@ -149,7 +148,7 @@ public class YouTubeSpaceSource extends ISpaceSource {
 		
 		RecordDescriptiveData model;
 		it.setDescriptiveData(model=new RecordDescriptiveData());
-		model.setIsShownAt(new LiteralOrResource(isAt).fillDEF());
+		model.setIsShownAt(new Resource( isAt));
 		model.setLabel(item.getMultiLiteralValue("snippet.title"));
 		model.setDescription(item.getMultiLiteralValue("snippet.title"));
 
@@ -178,7 +177,7 @@ public class YouTubeSpaceSource extends ISpaceSource {
 		addOtherThumbs(item, it);
 		RecordDescriptiveData model;
 		it.setDescriptiveData(model=new RecordDescriptiveData());
-		model.setIsShownAt(new LiteralOrResource(isAt).fillDEF());
+		model.setIsShownAt(new Resource(isAt));
 		model.setLabel(item.getMultiLiteralValue("snippet.title"));
 		model.setDescription(item.getMultiLiteralValue("snippet.title"));
 		model.setKeywords(item.getMultiLiteralOrResourceValue("snippet.tags"));

@@ -28,7 +28,7 @@ import java.util.function.Function;
 import play.libs.F.Promise;
 import play.libs.Json;
 import model.quality.RecordQuality;
-import model.resources.WithResource.WithResourceType;
+import model.resources.WithResourceType;
 
 import org.bson.types.ObjectId;
 import org.elasticsearch.action.get.GetRequest;
@@ -273,6 +273,7 @@ public class DAO<E> extends BasicDAO<E, ObjectId> {
 							.invoke(doc));
 				}
 			} catch (Exception e) {
+				System.out.println(e.getMessage());
 				log.error(e.getMessage(), e);
 				return null;
 			}
@@ -370,7 +371,7 @@ public class DAO<E> extends BasicDAO<E, ObjectId> {
 	 * @return
 	 */
 	public E getById(ObjectId id, List<String> retrievedFields) {
-		Query<E> q = this.createQuery().field("_id").equal(id);
+		Query<E> q = this.createQuery().field("_id").equal(id).disableValidation();
 		if (retrievedFields != null)
 			q.retrievedFields(true,
 					retrievedFields.toArray(new String[retrievedFields.size()]));
@@ -508,6 +509,8 @@ public class DAO<E> extends BasicDAO<E, ObjectId> {
 			String newFieldName = parentField.isEmpty() ? fieldName
 					: parentField + "." + fieldName;
 			if (fieldValue.isNull())
+				continue;
+			if (fieldName.equals("dates"))
 				continue;
 			if (fieldValue.isObject()) {
 				updateFields(newFieldName, fieldValue, updateOps);

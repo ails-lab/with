@@ -16,16 +16,24 @@
 
 package controllers;
 
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.validation.ConstraintViolation;
 
+import model.DescriptiveData;
+import model.annotations.Annotation;
 import model.annotations.ContextData;
 import model.annotations.ContextData.ContextDataType;
+import model.annotations.selectors.PropertyTextFragmentSelector;
+import model.annotations.targets.AnnotationTarget;
 import model.basicDataTypes.Language;
+import model.basicDataTypes.MultiLiteral;
 import model.resources.RecordResource;
 import model.resources.collection.CollectionObject;
 import model.resources.collection.CollectionObject.CollectionAdmin;
@@ -38,7 +46,11 @@ import play.data.validation.Validation;
 import play.libs.F.Option;
 import play.libs.Json;
 import play.mvc.Result;
+import sources.core.ParallelAPICall;
+import sources.core.ParallelAPICall.Priority;
 import utils.Tuple;
+import annotators.Annotator;
+import annotators.AnnotatorConfig;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -48,6 +60,8 @@ import db.DB;
 
 import java.util.Random;
 import java.util.HashSet;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 
 import play.libs.F.Some;
 /**
@@ -258,6 +272,71 @@ public class RecordResourceController extends WithResourceController {
 		}
 	}
 	
+	public static Result annotateRecord(String recordId) {
+		ObjectNode result = Json.newObject();
+		try {
+			Result response = errorIfNoAccessToRecord(Action.EDIT, new ObjectId(recordId));
+			if (!response.toString().equals(ok().toString())) {
+				return response;
+			} else {
+				JsonNode json = request().body().asJson();
+				
+				List<AnnotatorConfig> annConfigs = AnnotatorConfig.createAnnotationConfigs(json);
+				ObjectId user = WithController.effectiveUserDbId();
+				
+				annotateRecord(recordId, user, annConfigs);
+				
+				return ok();
+			}				
+		} catch (Exception e) {
+			result.put("error", e.getMessage());
+			return internalServerError(result);
+		}
+	}
+
+	public static void annotateRecord(String recordId, ObjectId user, List<AnnotatorConfig> annConfigs) throws Exception {
+		String[] fields = new String[] {"description", "label"};
+		
+		RecordResource record = DB.getRecordResourceDAO().get(new ObjectId(recordId));
+		DescriptiveData dd = record.getDescriptiveData();
+		
+		for (String p : fields) {
+			Method method = dd.getClass().getMethod("get" + p.substring(0,1).toUpperCase() + p.substring(1));
+		
+			Object res = method.invoke(dd);
+			if (res != null && res instanceof MultiLiteral) {
+				MultiLiteral value = (MultiLiteral)res;
+
+				for (Language lang : value.getLanguages()) {
+					if (lang == Language.UNKNOWN || lang == Language.DEFAULT) {
+						continue;
+					}
+					
+					for (String text : value.get(lang)) {
+						AnnotationTarget target = new AnnotationTarget();
+						target.setRecordId(record.getDbId());
+						
+						PropertyTextFragmentSelector selector = new PropertyTextFragmentSelector();
+						selector.setOrigValue(text);
+						selector.setOrigLang(lang);
+						selector.setProperty(p);
+						
+						target.setSelector(selector);
+						
+						for (AnnotatorConfig annConfig : annConfigs) {
+							Annotator annotator = Annotator.getAnnotator(annConfig.getAnnotatorClass(), lang);
+							if (annotator != null) {
+								for (Annotation ann : annotator.annotate(text, target, annConfig.getProps())) {
+									AnnotationController.addAnnotation(ann, user);
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+	
 	public static Result getRandomRecords(String groupId, int batchCount) {
 		ObjectId group = new ObjectId(groupId);
 		CollectionAndRecordsCounts collectionsAndCount = getCollsAndCountAccessiblebyGroup(group);
@@ -312,4 +391,28 @@ public class RecordResourceController extends WithResourceController {
 		int totalRecordsCount = 0;
 	}
 	
+	public static Result getAnnotations(String id) {
+		ObjectNode result = Json.newObject();
+		try {
+			RecordResource record = DB.getRecordResourceDAO().get(new ObjectId(id));
+			Result response = errorIfNoAccessToRecord(Action.READ,
+					new ObjectId(id));
+			if (!response.toString().equals(ok().toString()))
+				return response;
+			else {
+				ArrayNode array = result.arrayNode();
+				record.fillAnnotations();
+				
+				List<Annotation> anns = record.getAnnotations();
+				
+				for (Annotation ann : anns) {
+					array.add(Json.toJson(ann));
+				}
+				return ok(array);
+			}				
+		} catch (Exception e) {
+			result.put("error", e.getMessage());
+			return internalServerError(result);
+		}
+	}
 }

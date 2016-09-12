@@ -24,16 +24,18 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.function.Function;
 
-import model.basicDataTypes.ProvenanceInfo.Sources;
+import akka.actor.dsl.Inbox.Query;
 import model.resources.RecordResource;
+import search.FiltersFields;
+import search.Sources;
 import sources.FilterValuesMap;
 import sources.core.Utils.Pair;
 import utils.ListUtils;
 
 public abstract class ISpaceSource {
-	protected List<CommonFilters> filtersSupportedBySource = new ArrayList<CommonFilters>();
-	protected HashMap<String, CommonFilters> sourceToFiltersMappings = new HashMap<String, CommonFilters>();
-	protected HashMap<CommonFilters, String> filtersToSourceMappings = new HashMap<CommonFilters, String>();
+	protected List<FiltersFields> filtersSupportedBySource = new ArrayList<FiltersFields>();
+	protected HashMap<String, FiltersFields> sourceToFiltersMappings = new HashMap<String, FiltersFields>();
+	protected HashMap<FiltersFields, String> filtersToSourceMappings = new HashMap<FiltersFields, String>();
 	protected FilterValuesMap vmap = new FilterValuesMap();
 	protected Sources sourceLABEL = null;
 	protected String apiKey="";
@@ -109,7 +111,7 @@ public abstract class ISpaceSource {
 		if (q.filters == null || q.filters.size() == 0)
 			return true;
 		else{
-			Function<CommonFilter, Boolean> condition = (CommonFilter f)->vmap.containsFilter(f.filterID);
+			Function<CommonFilter, Boolean> condition = (CommonFilter f)->vmap.checkRestriction(f.filterID,f.values);
 			return ListUtils.allof(q.filters,condition );
 		}
 	}
@@ -149,6 +151,10 @@ public abstract class ISpaceSource {
 //	protected List<String> translateToQuery(String filterID, String value) {
 //		return vmap.translateToQuery(filterID, value);
 //	}
+	
+	protected void addRestriction(String filterId, String... values) {
+		vmap.addRestriction(filterId, values);
+	}
 	
 	protected List<QueryModifier> translateToQuery(String filterID, List<String> values) {
 		return vmap.translateToQuery(filterID, values);

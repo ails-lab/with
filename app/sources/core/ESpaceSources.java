@@ -22,6 +22,7 @@ import java.util.List;
 import play.Logger;
 import play.Logger.ALogger;
 import sources.BritishLibrarySpaceSource;
+import sources.DBPediaSpaceSource;
 import sources.DDBSpaceSource;
 import sources.DPLASpaceSource;
 import sources.DigitalNZSpaceSource;
@@ -32,8 +33,6 @@ import sources.FlickrSpaceSource;
 import sources.HistorypinSpaceSource;
 import sources.NLASpaceSource;
 import sources.RijksmuseumSpaceSource;
-import sources.WithSpaceSource;
-import sources.WithinASpaceSource;
 import sources.YouTubeSpaceSource;
 /*import espace.core.sources.BritishLibrarySpaceSource;
 import espace.core.sources.DDBSpaceSource;
@@ -63,9 +62,10 @@ public class ESpaceSources {
 		esources.add(new DDBSpaceSource());
 		esources.add(new BritishLibrarySpaceSource());
 		esources.add(new FlickrSpaceSource.InternetArchiveSpaceSource());
-		esources.add(new WithSpaceSource());
+//		esources.add(new WithSpaceSource());
+		esources.add(new DBPediaSpaceSource());
 		esources.add(new HistorypinSpaceSource());
-		esources.add(new WithinASpaceSource());
+//		esources.add(new WithinASpaceSource());
 		log.info("Initialization of sources list");
 	}
 

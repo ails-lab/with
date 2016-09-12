@@ -38,6 +38,7 @@ import org.mongodb.morphia.query.UpdateResults;
 
 import play.Logger;
 import play.Logger.ALogger;
+import scala.annotation.meta.field;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
@@ -54,10 +55,10 @@ public class UserGroupDAO extends DAO<UserGroup> {
 		UserGroup userGroup = this.getUniqueByFieldAndValue("username", username, Arrays.asList("_id"));
 		if (userGroup != null)
 			return userGroup.getDbId();
-		else 
+		else
 			return null;
 	}
-	
+
 	public UserGroup getByName(String name) {
 		return this.findOne("username", name);
 	}
@@ -88,10 +89,56 @@ public class UserGroupDAO extends DAO<UserGroup> {
 		return find(q).asList();
 	}
 
+	public long countPublic(GroupType groupType, String prefix) {
+		Query<UserGroup> q = createQuery().disableValidation()
+				.field("privateGroup").equal(false);
+		if (!prefix.equals("*")) {
+			q.field("friendlyName").containsIgnoreCase(prefix);
+		}
+		if (groupType.equals(GroupType.All)) {
+			return count(q);
+		}
+		q.field("className").equal(
+				"model.usersAndGroups." + groupType.toString());
+		return count(q);
+	}
+
+	public List<UserGroup> findPublicByPrefix(GroupType groupType, String prefix, int offset, int count) {
+		Query<UserGroup> q = createQuery().disableValidation()
+				.field("privateGroup").equal(false).offset(offset).limit(count)
+				.field("friendlyName").containsIgnoreCase(prefix)
+				.order("-created");
+		if (groupType.equals(GroupType.All)) {
+			return find(q).asList();
+		}
+		q.and(q.criteria("className").equal(
+				"model.usersAndGroups." + groupType.toString()));
+		return find(q).asList();
+	}
+
 	public List<UserGroup> findByIds(Set<ObjectId> groupIds,
 			GroupType groupType, int offset, int count) {
 		Query<UserGroup> q = createQuery().disableValidation().field("_id")
 				.in(groupIds).offset(offset).limit(count).order("-created");
+		if (!groupType.equals(GroupType.All)) {
+			q.field("className").equal(
+					"model.usersAndGroups." + groupType.toString());
+		}
+		List<UserGroup> groups = null;
+		try {
+			groups = find(q).asList();
+		} catch (Exception e) {
+			groups = new ArrayList<UserGroup>();
+		}
+
+		return groups;
+	}
+
+	public List<UserGroup> findByIdsAndPrefix(Set<ObjectId> groupIds,
+			GroupType groupType, String prefix, int offset, int count) {
+		Query<UserGroup> q = createQuery().disableValidation().field("_id")
+				.in(groupIds).offset(offset).limit(count).order("-created")
+				.field("friendlyName").containsIgnoreCase(prefix);
 		if (!groupType.equals(GroupType.All)) {
 			q.field("className").equal(
 					"model.usersAndGroups." + groupType.toString());
@@ -123,6 +170,24 @@ public class UserGroupDAO extends DAO<UserGroup> {
 		Query<UserGroup> q = createQuery().disableValidation()
 				.field("privateGroup").equal(false).offset(offset).limit(count)
 				.order("-created");
+
+		if (!excludedIds.isEmpty())
+			q.field("_id").notIn(excludedIds);
+
+		if (groupType.equals(GroupType.All)) {
+			return find(q).asList();
+		}
+		q.and(q.criteria("className").equal(
+				"model.usersAndGroups." + groupType.toString()));
+
+		return find(q).asList();
+	}
+
+	public List<UserGroup> findPublicWithRestrictionsAndPrefix(GroupType groupType,
+			int offset, int count, Set<ObjectId> excludedIds, String prefix) {
+		Query<UserGroup> q = createQuery().disableValidation()
+				.field("privateGroup").equal(false).offset(offset).limit(count)
+				.order("-created").field("friendlyName").containsIgnoreCase(prefix);
 
 		if (!excludedIds.isEmpty())
 			q.field("_id").notIn(excludedIds);
@@ -261,16 +326,16 @@ public class UserGroupDAO extends DAO<UserGroup> {
 			urls.addAll(page.getCover().values());
 		}
 	}
-	
+
 	public void addFeatured(ObjectId groupId, List<ObjectId> featured) {
 		Query<UserGroup> q = this.createQuery().field("_id").equal(groupId);
 		UpdateOperations<UserGroup> updateOps = this
 				.createUpdateOperations().disableValidation();
 
 	}
-	
-	
+
+
 	public void deleteFeatured(ObjectId groupId, List<ObjectId> featured) {
-		
+
 	}
 }

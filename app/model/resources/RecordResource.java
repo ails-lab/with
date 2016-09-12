@@ -49,7 +49,7 @@ public class RecordResource<T extends RecordResource.RecordDescriptiveData>
 
 	}
 
-	public static class RecordAdmin extends WithResource.WithAdmin {
+	public static class RecordAdmin extends WithAdmin {
 
 		// if this resource / record is derived (modified) from a different Record.
 		private ObjectId parentResourceId;
@@ -72,16 +72,18 @@ public class RecordResource<T extends RecordResource.RecordDescriptiveData>
 	 * collected records
 	 */
 	public Map<String, Object> transform() {
-		Map<String, Object> idx_map =  this.transformWR();
+		/*Map<String, Object> idx_map =  this.transformWR();
 
 		List<ObjectId> colIn = new ArrayList<ObjectId>();
 		this.getCollectedIn().forEach( (ci) -> {colIn.add(ci);} );
 
 		idx_map.put("collectedId", colIn);
 
-		return idx_map;
+		return idx_map;*/
+
+		return transformWR();
 	}
-	
+
 	public RecordResource<T> getRecordProfile(String profileString) {
 		Profile profile = Profile.valueOf(profileString);
 		if (profile == null)
@@ -98,8 +100,8 @@ public class RecordResource<T extends RecordResource.RecordDescriptiveData>
 				//if (input.getResourceType().equals(WithResourceType.CulturalObject)) {
 					addBasicRecordFields(output);
 					HashMap<MediaVersion, EmbeddedMediaObject> media = new HashMap<MediaVersion, EmbeddedMediaObject>(1);
-					if (getMedia() != null && getMedia().size() > 0) {
-						EmbeddedMediaObject thumbnail = ((HashMap<MediaVersion, EmbeddedMediaObject>) getMedia().get(0)).get(MediaVersion.Thumbnail);
+					if ((getMedia() != null) && (getMedia().size() > 0)) {
+						EmbeddedMediaObject thumbnail = getMedia().get(0).get(MediaVersion.Thumbnail);
 						if (thumbnail != null) {
 							media.put(MediaVersion.Thumbnail, thumbnail);
 						}
@@ -110,8 +112,8 @@ public class RecordResource<T extends RecordResource.RecordDescriptiveData>
 				}
 				else if (profile.equals(Profile.MEDIUM)) {
 					addMediumRecordFields(output);
-					EmbeddedMediaObject thumbnail = ((HashMap<MediaVersion, EmbeddedMediaObject>) getMedia().get(0)).get(MediaVersion.Thumbnail);
-					EmbeddedMediaObject original = ((HashMap<MediaVersion, EmbeddedMediaObject>) getMedia().get(0)).get(MediaVersion.Original);
+					EmbeddedMediaObject thumbnail = getMedia().get(0).get(MediaVersion.Thumbnail);
+					EmbeddedMediaObject original = getMedia().get(0).get(MediaVersion.Original);
 					HashMap<MediaVersion, EmbeddedMediaObject> media = new HashMap<MediaVersion, EmbeddedMediaObject>(2);
 					media.put(MediaVersion.Thumbnail, thumbnail);
 					media.put(MediaVersion.Original, original);
@@ -125,21 +127,21 @@ public class RecordResource<T extends RecordResource.RecordDescriptiveData>
 			}
 		}
 	}
-	
+
 	private void addBasicRecordFields(RecordResource output) {
 		output.setResourceType(getResourceType());
-		output.setAdministrative((RecordAdmin) getAdministrative());
+		output.setAdministrative(getAdministrative());
 		output.getDescriptiveData().setLabel(getDescriptiveData().getLabel());
 		output.getDescriptiveData().setDescription(getDescriptiveData().getDescription());
 		//add more fields from descriptive?
 		output.setDbId(getDbId());
 		output.setProvenance(getProvenance());
 	}
-	
+
 	//adds all descriptiveData
 	private void addMediumRecordFields(RecordResource output) {
 		output.setResourceType(getResourceType());
-		output.setAdministrative((RecordAdmin) getAdministrative());
+		output.setAdministrative(getAdministrative());
 		output.setDbId(getDbId());
 		output.setProvenance(getProvenance());
 		output.setDescriptiveData(getDescriptiveData());

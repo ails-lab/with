@@ -58,7 +58,7 @@ public class RecordDAO {
 			.overridingErrorMessage("Cannot save RecordLink to DB!");
 
 		//find by id
-		CollectionRecord a = DB.getCollectionRecordDAO().getById(new ObjectId(recId.getId().toString()));
+		CollectionRecord a = DB.getCollectionRecordDAO().getById(new ObjectId(recId.getFilterId().toString()));
 		assertThat(a)
 		.overridingErrorMessage("RecordLink not retreived using dbId.")
 		.isNotNull();

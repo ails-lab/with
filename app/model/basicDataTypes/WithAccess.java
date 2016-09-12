@@ -118,7 +118,53 @@ public class WithAccess  {
 			}
 		}
 	}
-
+	
+	/**
+	 * Find maximum access level for given user.
+	 * @param userId
+	 * @return
+	 */
+	public Access accessByUser( ObjectId userId ) {
+		Access res = Access.NONE;
+		for(AccessEntry ae:acl ) {
+			if( ae.user.equals(userId ))
+				if( ae.level.ordinal() > res.ordinal())
+					res = ae.level;	
+		}
+		return res;
+	}
+	
+	/**
+	 * Find maximum access level for given users (usually effectiveIds).
+	 * @param userId
+	 * @return
+	 */
+	public Access accessByUsers( ObjectId... users ) {
+		Access res = Access.NONE;
+		for(AccessEntry ae:acl ) {
+			for( ObjectId id: users) 
+				if( ae.user.equals(id ))
+				if( ae.level.ordinal() > res.ordinal())
+					res = ae.level;	
+		}
+		return res;		
+	}
+	
+	/**
+	 * Can a user with given ids (effective ids) read the object
+	 * @param users
+	 * @return
+	 */
+	public boolean canRead( ObjectId... users ) {
+		return ( accessByUsers( users ) != Access.NONE ); 
+	}
+	
+	public boolean canDelete( ObjectId... users ) {
+		return ( accessByUsers( users ) == Access.OWN ); 
+	}
+	
+	
+	
 	public void setAcl(List<AccessEntry> acl) {
 		this.acl = acl;
 	}

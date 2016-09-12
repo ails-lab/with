@@ -17,22 +17,23 @@
 package sources.core;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import model.basicDataTypes.ProvenanceInfo.Sources;
-import model.resources.CulturalObject;
-import model.resources.RecordResource;
-import model.resources.WithResource;
-
 import org.elasticsearch.action.search.SearchResponse;
-
-import utils.ListUtils;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.JsonNode;
+
+import model.resources.CulturalObject;
+import model.resources.RecordResource;
+import model.resources.WithResource;
+import search.Response;
+import search.Response.SingleResponse;
+import search.Response.ValueCounts;
+import search.Sources;
+import utils.ListUtils;
 
 @JsonIgnoreProperties({"filtersLogic","resourcesPerType", "facets"})
 public class SourceResponse {
@@ -70,33 +71,6 @@ public class SourceResponse {
 		this.startIndex = offset;
 		List<WithResource<?, ?>> items = new ArrayList<WithResource<?, ?>>();
 
-//		TODO make it using the new model...
-//for (CollectionRecord er : elasticrecords) {
-//	ItemsResponse it = new ItemsResponse();
-//	List<CollectionRecord> rs = DB.getCollectionRecordDAO().getByExternalId(er.getExternalId());
-//	if (rs != null && !rs.isEmpty()) {
-//		CollectionRecord r = rs.get(0);
-//		it.comesFrom = r.getSource();
-//		it.title = r.getTitle();
-//		it.description = r.getDescription();
-//		it.id = r.getDbId().toString();
-//		if(r.getThumbnailUrl() != null)
-//			it.thumb = Arrays.asList(r.getThumbnailUrl().toString());
-//		if (r.getIsShownBy() != null)
-//			it.fullresolution = Arrays.asList(r.getIsShownBy().toString());
-//		it.url = new MyURL();
-//		it.url.fromSourceAPI = r.getSourceUrl();
-//		it.provider = r.getProvider();
-//		it.externalId = r.getExternalId();
-//		it.type = r.getType();
-//		it.rights = r.getItemRights();
-//		it.dataProvider = r.getDataProvider();
-//		it.creator = r.getCreator();
-//		it.year = new ArrayList<>(Arrays.asList(r.getYear()));
-//	    it.tags = er.getTags();
-//		items.add(it);
-//	}
-//}
 		this.items.setCulturalCHO(items);
 	}
 
@@ -164,4 +138,20 @@ public class SourceResponse {
 		items.setCulturalCHO(resources);
 	}
 
+	public SingleResponse exportToSingleSource() {
+		SingleResponse r = new SingleResponse();
+		r.count = this.count;
+		r.totalCount = this.totalCount;
+		r.items = this.items.getAll();
+		r.facets =new ValueCounts();
+		r.source = Sources.valueOf(source);
+		for (CommonFilterLogic f : filtersLogic) {
+			CommonFilterResponse ff = f.export();
+			r.facets.put( ff.filterID, ListUtils.transform(ff.suggestedValues, (ValueCount x)-> 
+			new Response.ValueCount(x.value, x.count),0,SingleResponse.FACETS_LIMIT));
+		}
+		return r;
+	}
+
 }
+

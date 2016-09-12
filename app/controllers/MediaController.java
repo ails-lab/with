@@ -25,8 +25,8 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URLConnection;
-import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -34,19 +34,11 @@ import java.util.function.BiFunction;
 
 import javax.imageio.ImageIO;
 
-import model.EmbeddedMediaObject.MediaVersion;
-import model.EmbeddedMediaObject.Quality;
-import model.EmbeddedMediaObject.WithMediaRights;
-import model.EmbeddedMediaObject.WithMediaType;
-import model.resources.RecordResource;
-import model.MediaObject;
-import net.coobird.thumbnailator.Thumbnails;
-import net.coobird.thumbnailator.geometry.Positions;
-
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.utils.DateUtils;
 import org.apache.http.entity.mime.HttpMultipartMode;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.entity.mime.content.FileBody;
@@ -58,29 +50,36 @@ import org.im4java.core.ConvertCmd;
 import org.im4java.core.IM4JavaException;
 import org.im4java.core.IMOperation;
 
-import play.Logger;
-import play.Logger.ALogger;
-import play.libs.Akka;
-import play.libs.F.Promise;
-import play.libs.Json;
-import play.mvc.Controller;
-import play.mvc.Http;
-import play.mvc.Http.MultipartFormData.FilePart;
-import play.mvc.Result;
-import sources.core.HttpConnector;
-import sources.core.ParallelAPICall;
-import utils.MetricsUtils;
-import actors.MediaCheckerActor.MediaCheckMessage;
-import akka.actor.ActorRef;
-import akka.actor.ActorSelection;
-
 import com.codahale.metrics.Timer;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.net.MediaType;
 
+import actors.MediaCheckerActor.MediaCheckMessage;
+import akka.actor.ActorRef;
+import akka.actor.ActorSelection;
 import db.DB;
+import model.EmbeddedMediaObject.MediaVersion;
+import model.EmbeddedMediaObject.WithMediaRights;
+import model.EmbeddedMediaObject.WithMediaType;
+import model.MediaObject;
+import model.resources.RecordResource;
+import net.coobird.thumbnailator.Thumbnails;
+import net.coobird.thumbnailator.geometry.Positions;
+import play.Logger;
+import play.Logger.ALogger;
+import play.libs.Akka;
+import play.libs.F.Promise;
+import play.libs.Json;
+import play.mvc.Http;
+import play.mvc.Http.MultipartFormData.FilePart;
+import play.mvc.Result;
+import sources.core.ApacheHttpConnector;
+import sources.core.ApacheHttpConnector.FileAndType;
+import sources.core.HttpConnector;
+import sources.core.ParallelAPICall;
+import utils.MetricsUtils;
 
 public class MediaController extends WithController {
 	public static final ALogger log = Logger.of(MediaController.class);
@@ -98,6 +97,12 @@ public class MediaController extends WithController {
 			media = DB.getMediaObjectDAO()
 					.getByUrlAndVersion(url, mediaVersion);
 			if (media != null) {
+				response().setHeader(Http.HeaderNames.CACHE_CONTROL, "PUBLIC, max-age=" + 86400 );
+				response().setHeader(Http.HeaderNames.EXPIRES, 
+						DateUtils.formatDate(new Date( System.currentTimeMillis()+86400000)));
+				// WOuld like to set response().setHeader(Http.HeaderNames.LAST_MODIFIED, 
+				// but there is now store date on the MediaObject (yet 9/2016)
+				log.debug( "Found '"+url+"' Version: " + version + " in database");
 				return ok(media.getMediaBytes()).as(
 						media.getMimeType().toString());
 			}
@@ -133,15 +138,15 @@ public class MediaController extends WithController {
 				return media;
 			media = new MediaObject();
 			log.info("Downloading " + url);
-			File img = HttpConnector.getWSHttpConnector().getURLContentAsFile(
+			FileAndType img = ((ApacheHttpConnector) ApacheHttpConnector.getApacheHttpConnector()).getContentAndType(
 					url);
-			byte[] mediaBytes = IOUtils.toByteArray(new FileInputStream(img));
+			byte[] mediaBytes = IOUtils.toByteArray(new FileInputStream(img.data));
 			media.setUrl(url);
 			media.setMediaBytes(mediaBytes);
 			if (version != null) {
 				media.setMediaVersion(version);
-				media.setMimeType(MediaType.parse(Files.probeContentType(img
-						.toPath())));
+				media.setMimeType(MediaType.parse( img.mimeType ));
+				log.debug( "Storing '"+url+"' Version: " + version + " in database");
 				DB.getMediaObjectDAO().makePermanent(media);
 				MediaCheckMessage mcm = new MediaCheckMessage(media);
 				ActorSelection api = Akka.system().actorSelection(
@@ -152,7 +157,7 @@ public class MediaController extends WithController {
 			}
 			return media;
 		} catch (Exception e) {
-			log.error("Couldn't download image:" + e.getMessage());
+			log.error("Couldn't download image at '" + url +"' version " + version, e);
 			return null;
 		}
 	}
@@ -413,16 +418,7 @@ public class MediaController extends WithController {
 		med.setColorSpace(json.get("colorspace").asText());
 		med.setOrientation();
 		// TODO : fix this naive quality enumeration, for now just for testing!
-		long size = med.getSize();
-		if (size < 100) {
-			med.setQuality(Quality.IMAGE_SMALL);
-		} else if (size < 500) {
-			med.setQuality(Quality.IMAGE_500k);
-		} else if (size < 1000) {
-			med.setQuality(Quality.IMAGE_1);
-		} else {
-			med.setQuality(Quality.IMAGE_4);
-		}
+		med.computeQuality();
 		med.setMediaVersion(MediaVersion.Original);
 		med.setParentId(med.getDbId());
 	}

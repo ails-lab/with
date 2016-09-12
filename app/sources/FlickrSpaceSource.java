@@ -24,10 +24,11 @@ import java.util.function.Function;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
-import model.basicDataTypes.ProvenanceInfo.Sources;
+import model.EmbeddedMediaObject.WithMediaType;
 import play.Logger;
 import play.Logger.ALogger;
-import sources.core.CommonFilters;
+import search.FiltersFields;
+import search.Sources;
 import sources.core.CommonQuery;
 import sources.core.ISpaceSource;
 import sources.core.QueryBuilder;
@@ -81,9 +82,10 @@ public abstract class FlickrSpaceSource extends ISpaceSource {
 		setLicences();
 //		this.vmap = FilterValuesMap.getFlickrMap();
 		this.userID = userID;
-		addDefaultWriter(CommonFilters.TYPE.getId(), fwriter("media"));
-		addDefaultWriter(CommonFilters.RIGHTS.getId(), frwriter());
-		addDefaultComplexWriter(CommonFilters.YEAR.getId(), qfwriterYEAR());
+		addRestriction(FiltersFields.TYPE.getFilterId(),WithMediaType.IMAGE.getName());
+		addDefaultWriter(FiltersFields.TYPE.getFilterId(), fwriter("media"));
+		addDefaultWriter(FiltersFields.RIGHTS.getFilterId(), frwriter());
+		addDefaultComplexWriter(FiltersFields.YEAR.getFilterId(), qfwriterYEAR());
 		// addDefaultWriter(CommonFilters.COUNTRY.name(),
 		// fwriter("sourceResource.spatial.country"));
 
@@ -146,7 +148,7 @@ public abstract class FlickrSpaceSource extends ISpaceSource {
 		builder.addSearchParam("user_id", userID);
 		builder.addSearchParam("extras",
 				"description, license, date_upload, date_taken, owner_name, icon_server, original_format, last_update, geo,tags, machine_tags, o_dims, views, media, path_alias, url_sq, url_t, url_s, url_q, url_m, url_n, url_z, url_c, url_l, url_o");
-		builder.addQuery("text", q.searchTerm);
+		builder.setQuery("text", q.searchTerm);
 		builder.addSearchParam("page", q.page);
 	
 		builder.addSearchParam("per_page", "" + q.pageSize);
@@ -175,7 +177,7 @@ public abstract class FlickrSpaceSource extends ISpaceSource {
 				res.count = res.items.getCulturalCHO().size();
 	
 				res.facets = response.path("facets");
-				res.filtersLogic = new ArrayList<>();
+				res.filtersLogic = this.vmap.getRestrictionsAsFilters(res.totalCount);
 	
 				// for (String ir : licencesId.keySet()) {
 				// countValue(rights, ir, 1);

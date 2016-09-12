@@ -24,15 +24,15 @@ import org.w3c.dom.Document;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
-import model.basicDataTypes.ProvenanceInfo.Sources;
 import model.resources.RecordResource;
 import model.resources.WithResource;
 import play.Logger;
 import play.Logger.ALogger;
 import play.libs.Json;
+import search.FiltersFields;
+import search.Sources;
 import sources.core.AdditionalQueryModifier;
 import sources.core.CommonFilterLogic;
-import sources.core.CommonFilters;
 import sources.core.CommonQuery;
 import sources.core.ISpaceSource;
 import sources.core.QueryBuilder;
@@ -51,8 +51,8 @@ public class NLASpaceSource extends ISpaceSource {
 	public NLASpaceSource() {
 		super(Sources.NLA);
 		apiKey = "SECRET_KEY";
-		addDefaultQueryModifier(CommonFilters.TYPE.getId(), qfwriter("format"));
-		addDefaultQueryModifier(CommonFilters.YEAR.getId(), qfwriterYEAR());
+		addDefaultQueryModifier(FiltersFields.TYPE.getFilterId(), qfwriter("format"));
+		addDefaultQueryModifier(FiltersFields.YEAR.getFilterId(), qfwriterYEAR());
 
 		formatreader = new NLARecordFormatter();
 
@@ -98,7 +98,7 @@ public class NLASpaceSource extends ISpaceSource {
 		QueryBuilder builder = new QueryBuilder("http://api.trove.nla.gov.au/result");
 		builder.addSearchParam("key", apiKey);
 		builder.addSearchParam("zone", "picture,book,music,article");
-		builder.addQuery("q", q.searchTerm);
+		builder.setQuery("q", q.searchTerm);
 		// TODO term to exclude?
 		builder.addSearchParam("n", q.pageSize);
 		builder.addSearchParam("s", "" + ((Integer.parseInt(q.page) - 1) * Integer.parseInt(q.pageSize)));
@@ -117,8 +117,8 @@ public class NLASpaceSource extends ISpaceSource {
 		String httpQuery = getHttpQuery(q);
 		res.query = httpQuery;
 		JsonNode response;
-		CommonFilterLogic type = new CommonFilterLogic(CommonFilters.TYPE);
-		CommonFilterLogic year = new CommonFilterLogic(CommonFilters.YEAR);
+		CommonFilterLogic type = new CommonFilterLogic(FiltersFields.TYPE);
+		CommonFilterLogic year = new CommonFilterLogic(FiltersFields.YEAR);
 
 		if (checkFilters(q)) {
 			try {
