@@ -29,6 +29,7 @@ import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 
 import db.converters.AccessEnumConverter;
+import db.converters.JacksonConverter;
 import db.converters.MultiLiteralConverter;
 import db.converters.MultiLiteralOrResourceConverter;
 import db.converters.ResourceConverter;
@@ -110,6 +111,8 @@ public class DB {
 				.addConverter(new AccessEnumConverter());
 			morphia.getMapper().getConverters()
 			.addConverter(new ResourceConverter());
+			morphia.getMapper().getConverters()
+			.addConverter(new JacksonConverter());
 			//Mapper mapper = morphia.getMapper();
 		    //mapper.getOptions().setObjectFactory(new CustomMorphiaObjectFactory());
 		}

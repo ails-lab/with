@@ -16,7 +16,7 @@
 
 package search;
 
-public class Filter {
+public class Filter implements Cloneable {
 
 	/**
 	 * FieldIdswill be the path expressions into the json represeantation of the resource you are querying.
@@ -62,6 +62,16 @@ public class Filter {
 
 	public Filter() {
 
+	}
+	
+	public Object clone() {
+		try {
+			Object obj =  super.clone();
+			return obj;
+		} catch( Exception e ) {
+			// shouldn't really happen
+		}
+		return null;
 	}
 }
 

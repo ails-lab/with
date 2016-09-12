@@ -66,6 +66,13 @@ import edu.stanford.nlp.io.EncodingPrintWriter.err;
 public class ElasticUtils {
 	static private final Logger.ALogger log = Logger.of(ElasticUtils.class);
 
+	/*public static List<String> multiliterals = new ArrayList<String>() {{ 
+		add("label");
+		add("description");
+		add("keywords");
+		add("altLabels");
+	}};*/
+	
 	/*
 	 * Currently we are indexing only Resources that represent
 	 * collected records
@@ -371,9 +378,7 @@ public class ElasticUtils {
 		 */
 		JsonNode m = mediaMapConverter(rr.getMedia());
 		JsonNode jn = withAccessConverter(rr.getAdministrative());
-		rr.setMedia(null);
-		rr.getAdministrative().setAccess(null);
-
+		
 
 		/*
 		 *
@@ -389,8 +394,8 @@ public class ElasticUtils {
 		Json.setObjectMapper(mapper);
 		// json with multiliteral _all and languages fields
 		JsonNode json = Json.toJson(rr);
-		((ObjectNode)json).put("administrative", jn);
-		((ObjectNode)json).put("media", m);
+		((ObjectNode)json).set("administrative", jn);
+		((ObjectNode)json).set("media", m);
 
 		if(json.get("provenance")!=null)
 			((ArrayNode)json.get("provenance")).add(getDataProvAndSource(rr.getProvenance()));
@@ -455,4 +460,5 @@ public class ElasticUtils {
 		jn.put("collectedBy", collBY);
 		return jn;
 	}
+	
 }

@@ -17,32 +17,48 @@
 package db.converters;
 
 import org.mongodb.morphia.annotations.Converters;
-import org.mongodb.morphia.converters.SimpleValueConverter;
 import org.mongodb.morphia.converters.TypeConverter;
 import org.mongodb.morphia.mapping.MappedField;
 
-import model.basicDataTypes.Resource;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.mongodb.DBObject;
+import com.mongodb.util.JSON;
 
-@Converters(ResourceConverter.class)
-public class ResourceConverter extends TypeConverter implements SimpleValueConverter  {
+import play.Logger;
+import play.Logger.ALogger;
+
+@Converters(JacksonConverter.class)
+public class JacksonConverter extends TypeConverter  {
 	
-	public ResourceConverter() {
-		super(Resource.class);
+	static ObjectMapper om =new ObjectMapper();
+	public static final ALogger log = Logger.of( JacksonConverter.class);
+
+	public JacksonConverter() {
+		super(ObjectNode.class);
 	}
 	
 	public Object decode(Class targetClass, Object fromDBObject,
 			MappedField optionalExtraInfo) {
-		if (fromDBObject == null) 
-            return null;
-		else {
-			return new Resource( fromDBObject.toString());
+		try {
+			if (fromDBObject == null) 
+				return null;
+			else {
+				return om.readTree( fromDBObject.toString());
+			}
+		} catch( Exception e ) {
+			log.error( "Mongo Jackson conversion issue", e );
+			return null;
 		}
 	}
 	
 	public Object encode( Object resource,  MappedField optionalExtraInfo) {
-		if (resource == null)
-			return "";
-		String s = resource.toString();
-		return s;
+		try {
+			DBObject res = (DBObject) JSON.parse( om.writeValueAsString(resource));
+			return res;
+		} catch( Exception e ) {
+			log.error( "Jackson Mongo conversion issue", e );
+			return null;
+		}
 	}
 }

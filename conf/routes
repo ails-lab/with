@@ -22,9 +22,9 @@ POST     /api/mergefilters         	controllers.SearchController.mergeFilters()
 POST     /api/search            	controllers.SearchController.search()
 POST 	 /api/search2				controllers.SearchController.search2()
 GET      /api/annotationsSearch    	controllers.AnnotationController.searchRecordsOfGroup(groupId: String, term: String)
-GET		/api/searchMyCollections	controllers.CollectionObjectController.searchMyCollections(term: String ?= "*", isShared: Boolean ?= false)
-GET		/api/searchMyExhibitions	controllers.CollectionObjectController.searchMyExhibitions(term: String ?= "*", isShared: Boolean ?= false)
-GET 	/api/searchCollection/:id   controllers.CollectionObjectController.searchCollection(term: String ?= "*", id)
+GET		/api/searchMyCollections	controllers.CollectionObjectController.searchMyCollections(term: String ?= "*", isShared: Boolean ?= false, isExhibition: Boolean ?= false, offset : Integer ?= 0, count: Integer ?= 10)
+GET		/api/searchMyExhibitions	controllers.CollectionObjectController.searchMyExhibitions(term: String ?= "*", isShared: Boolean ?= false, offset : Integer ?= 0, count: Integer ?= 10)
+GET 	/api/searchCollection/:id   controllers.CollectionObjectController.searchCollection(term: String ?= "*", id, offset : Integer ?= 0, count: Integer ?= 10)
 
 #Autocomplete
 GET		/api/autocompleteExt		controllers.AutocompleteController.autocompleteExt(term:java.lang.String,limit:Integer,source:java.util.List[java.lang.String])
@@ -98,7 +98,12 @@ GET      /group/findByGroupName                 controllers.GroupManager.findByG
 GET		/group/descendantGroups/:groupId		controllers.GroupManager.getDescendantGroups(groupId, groupType: String  ?="All", direct: Boolean ?=true, collectionHits:Boolean ?= false)
 GET		/group/descendantOrganizations/:groupId	controllers.GroupManager.getDescendantGroups(groupId, groupType: String  ?="Organization", direct: Boolean ?=true, collectionHits:Boolean ?= false)
 GET		/group/descendantProjects/:groupId		controllers.GroupManager.getDescendantGroups(groupId, groupType: String  ?="Project", direct: Boolean ?=true, collectionHits:Boolean ?= false)
-GET		/group/list								controllers.GroupManager.listUserGroups(groupType: String ?="Project", offset: Integer ?=0, count: Integer ?=10, belongsOnly: Boolean ?=false)
+GET		/group/list								controllers.GroupManager.listUserGroups(groupType: String ?="Project", offset: Integer ?=0, count: Integer ?=10, belongsOnly: Boolean ?=false, prefix: String ?="*")
+
+# Manager the WITH space (mainly for the UI component) editable only for SuperUsers
+GET		/group/with								controllers.GroupManager.getWithSpace()
+PUT		/group/with								controllers.GroupManager.editWithSpace()
+
 PUT      /group/:id                             controllers.GroupManager.editGroup(id)
 DELETE   /group/:id                             controllers.GroupManager.deleteGroup(id)
 GET      /group/:id                             controllers.GroupManager.getGroup(id)
@@ -173,5 +178,5 @@ GET     /source/dbpedia/lookup						controllers.DBPediaController.dbpediaLookup(
 GET		/record/:id/listAnnotations				    controllers.RecordResourceController.getAnnotations(id)
 POST		/record/:id/annotate						controllers.RecordResourceController.annotateRecord(id)
 POST		/collection/:id/annotate						controllers.CollectionObjectController.annotateCollection(id)
-
+GET			/collection/api/removeIdsOfDeletedRecords	controllers.WithResourceController.removeIdsOfDeletedRecords()
 

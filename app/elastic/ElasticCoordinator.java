@@ -20,6 +20,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import model.resources.RecordResource;
+import model.resources.collection.CollectionObject;
+
 import org.bson.types.ObjectId;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.index.query.QueryBuilder;
@@ -58,13 +61,25 @@ public class ElasticCoordinator {
 	public SingleResponse federatedSearch(List<List<Filter>> filters) {
 		ElasticSearcher searcher = new ElasticSearcher();
 
-		filters.forEach( (a) -> {a.forEach( (f) ->{ if(f.fieldId.equals("anywhere")) f.fieldId = "";});});
+		List<List<Filter>> newFilters = filters.stream().map(
+				clause -> {
+				return clause.stream().map(
+					filter-> {
+					Filter newFilter = (Filter) filter.clone();
+					if(newFilter.fieldId.equals("anywhere")) newFilter.fieldId = "";
+					return newFilter;
+					}
+				).collect( Collectors.toList()); }
+			).collect( Collectors.toList());
 
 		List<QueryBuilder> musts = new ArrayList<QueryBuilder>();
-		for(List<Filter> ors: filters) {
+		for(List<Filter> ors: newFilters) {
 			musts.add(searcher.boolShouldQuery(ors));
 		}
-		SearchResponse elasticresp = searcher.executeWithAggs(musts, null, options);
+		List<QueryBuilder> must_not = new ArrayList<QueryBuilder>();
+		must_not.add(searcher.boolShouldQuery(new ArrayList<Filter>() {{ add(new Filter("descriptiveData.label.default", "_favorites", true)); }}));
+
+		SearchResponse elasticresp = searcher.executeWithAggs(musts, must_not, options);
 				/*searcher.getBoolSearchRequestBuilder(musts, null, null, options)
 				.execute().actionGet();*/
 
@@ -76,13 +91,19 @@ public class ElasticCoordinator {
 			type = h.getType();
 			ids.add(new ObjectId(h.getId()));
 		}
-		if((type !=null) && type.contains("object"))
-			sresp.items = DB.getRecordResourceDAO().getByIds(ids).stream().map( r -> {return r.getRecordProfile(Profile.BASIC.toString());}).collect(Collectors.toList());
-		else
-			sresp.items = DB.getCollectionObjectDAO().getByIds(ids).stream().map( r -> {return r.getCollectionProfile(Profile.BASIC.toString());}).collect(Collectors.toList());
+		if((type !=null) && type.contains("object")) {
+			List<RecordResource> it = DB.getRecordResourceDAO().getByIds(ids);
+			if(it!=null)
+				sresp.items = it.stream().map( r -> {return r.getRecordProfile(Profile.BASIC.toString());}).collect(Collectors.toList());
+		}
+		else {
+			List<CollectionObject> co = DB.getCollectionObjectDAO().getByIds(ids);
+			if(co!=null)
+				sresp.items = co.stream().map( r -> {return r.getCollectionProfile(Profile.BASIC.toString());}).collect(Collectors.toList());
+		}
 		sresp.totalCount = (int) elasticresp.getHits().getTotalHits();
 		sresp.source = Sources.WITHin;
-		
+
 		if(elasticresp.getAggregations() != null)
 			extractFacets(elasticresp.getAggregations(), sresp);
 
@@ -156,7 +177,11 @@ public class ElasticCoordinator {
 				Terms aggTerm = (Terms) agg;
 				if (aggTerm.getBuckets().size() > 0) {
 					for (int i=0; i< aggTerm.getBuckets().size(); i++) {
-						sresp.addFacet(aggTerm.getName(), aggTerm.getBuckets().get(i).getKeyAsString(), (int)aggTerm.getBuckets().get(i).getDocCount());
+						// omit the last character of aggregation name
+						// in order to take the exact name of the field name
+						sresp.addFacet(aggTerm.getName().substring(0, aggTerm.getName().length()-1),
+								aggTerm.getBuckets().get(i).getKeyAsString(),
+								(int)aggTerm.getBuckets().get(i).getDocCount());
 					}
 				}
 			}

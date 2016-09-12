@@ -207,8 +207,7 @@ public class Elastic {
 
 				})
 				.setBulkActions(1000)
-				.setBulkSize(new ByteSizeValue(5000))
-				.setFlushInterval(TimeValue.timeValueSeconds(5))
+				.setBulkSize(new ByteSizeValue(50000000))
 				.setConcurrentRequests(1)
 				.build();
 		}

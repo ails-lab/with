@@ -24,6 +24,20 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 
+import org.bson.types.ObjectId;
+import org.mongodb.morphia.geo.GeoJson;
+import org.mongodb.morphia.geo.Point;
+import org.mongodb.morphia.query.Criteria;
+import org.mongodb.morphia.query.Query;
+import org.mongodb.morphia.query.QueryResults;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+
+import db.DAO.QueryOperator;
+import db.DB;
 import model.basicDataTypes.WithAccess.Access;
 import model.resources.collection.CollectionObject;
 import model.usersAndGroups.Organization;
@@ -32,27 +46,12 @@ import model.usersAndGroups.Project;
 import model.usersAndGroups.User;
 import model.usersAndGroups.UserGroup;
 import model.usersAndGroups.UserOrGroup;
-
-import org.bson.types.ObjectId;
-import org.mongodb.morphia.geo.GeoJson;
-import org.mongodb.morphia.geo.Point;
-import org.mongodb.morphia.query.Criteria;
-import org.mongodb.morphia.query.Query;
-
 import play.Logger;
 import play.Logger.ALogger;
 import play.libs.Json;
-import play.mvc.Controller;
 import play.mvc.Result;
 import sources.core.HttpConnector;
 import utils.Tuple;
-
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-
-import db.DAO.QueryOperator;
-import db.DB;
 
 @SuppressWarnings({ "unchecked", "rawtypes" })
 public class GroupManager extends WithController {
@@ -533,7 +532,7 @@ public class GroupManager extends WithController {
 	}
 
 	/**
-	 * Return child groups or all descedant groups according to group type.
+	 * Return child groups or all descendant groups according to group type.
 	 *
 	 * @param groupId
 	 * @param groupType
@@ -592,8 +591,8 @@ public class GroupManager extends WithController {
 
 		UserGroup group;
 		if ((group = DB.getUserGroupDAO().get(new ObjectId(groupId))) == null) {
-			result.put("message", "There is no such a group");
-			log.error("There is no such a group");
+			result.put("message", "There is no such group");
+			log.error("There is no such group");
 			return badRequest(result);
 		}
 		if ((category.equals("users") || category.equals("both"))
@@ -686,22 +685,84 @@ public class GroupManager extends WithController {
 		return result;
 	}
 
+	/**
+	 * Retrieve the WITH space from the DB (with its UI settings)
+	 * Although its private everybody is allowed to get it...
+	 * Its private so it doesnt appear on normal project / space listings  
+	 * @return
+	 */
+	public static Result getWithSpace() {
+		UserGroup with = DB.getUserGroupDAO().findOne("username", "with");
+		if( with != null ) {
+			return ok( userGroupToJSON(with));
+		}
+		return badRequest( "WITH space missing!");
+	}
+	
+	/**
+	 * Take the argument json and store it in the WITH space. Only superusers
+	 * are allowed to do this.
+	 * This implementation needs sanitation of the passed json (ideally together with any other group
+	 * edit method )
+	 * @return
+	 */
+	public static Result editWithSpace() {
+		if( ! isSuperUser()) return badRequest( "Forbidden!");
+		JsonNode json = request().body().asJson();
+		UserGroup with = DB.getUserGroupDAO().findOne("username", "with");
+		if( with != null ) {
+			DB.getUserGroupDAO().editGroup(with.getDbId(), json);
+			return getWithSpace();
+		}  else {
+			// create a with space
+			Project p = new Project();
+			ObjectMapper om = new ObjectMapper();
+			p.setFriendlyName("WITH default space");
+			p.setUsername("with");
+			// default empty settings might not be good
+			p.setUiSettings(om.createObjectNode());
+			Query<User> adminQuery = DB.getUserDAO().createQuery();
+			adminQuery.field( "superUser" ).equal(true );
+			QueryResults<User> res = DB.getUserDAO().find( adminQuery );
+			for( User u:res ) {
+				p.addAdministrator(u.getDbId());
+				p.setCreator(u.getDbId());
+			}
+			p.setPrivateGroup(true);
+			DB.getUserGroupDAO().save(p);
+			DB.getUserGroupDAO().editGroup( p.getDbId(), json );
+			return getWithSpace();
+		}
+	}
+	
+	
 	public static Result listUserGroups(String groupType, int offset,
-			int count, boolean belongsOnly) {
+			int count, boolean belongsOnly, String prefix) {
 
 		List<UserGroup> groups = new ArrayList<UserGroup>();
 		try {
 			GroupType type = GroupType.valueOf(groupType);
 			ObjectId userId = effectiveUserDbId();
+			int userGroupCount = Math.toIntExact(DB.getUserGroupDAO().countPublic(type, prefix));
 			if (userId == null) {
-				groups = DB.getUserGroupDAO().findPublic(type, offset, count);
-				return ok(Json.toJson(groups));
+				if(prefix.equals("*")) {
+					groups = DB.getUserGroupDAO().findPublic(type, offset, count);
+					return ok(groupsWithCount(groups, userGroupCount));
+				} else {
+					groups = DB.getUserGroupDAO().findPublicByPrefix(type, prefix, offset, count);
+					return ok(groupsWithCount(groups, userGroupCount));
+				}
 			}
 			User user = DB.getUserDAO().get(userId);
 			Set<ObjectId> userGroupsIds = user.getUserGroupsIds();
-			groups = DB.getUserGroupDAO().findByIds(userGroupsIds, type,
-					offset, count);
-			int userGroupCount = DB.getUserGroupDAO().getGroupCount(
+			if(prefix.equals("*")) {
+				groups = DB.getUserGroupDAO().findByIds(userGroupsIds, type,
+						offset, count);
+			} else {
+				groups = DB.getUserGroupDAO().findByIdsAndPrefix(userGroupsIds, type,
+						prefix, offset, count);
+			}
+			userGroupCount = DB.getUserGroupDAO().getGroupCount(
 					userGroupsIds, type);
 			if (groups.size() == count)
 				return ok(groupsWithCount(groups, userGroupCount));
@@ -711,8 +772,8 @@ public class GroupManager extends WithController {
 				offset = offset - userGroupCount;
 			count = count - groups.size();
 			if (!belongsOnly)
-				groups.addAll(DB.getUserGroupDAO().findPublicWithRestrictions(
-						type, offset, count, userGroupsIds));
+				groups.addAll(DB.getUserGroupDAO().findPublicWithRestrictionsAndPrefix(
+						type, offset, count, userGroupsIds, prefix));
 			return ok(groupsWithCount(groups, userGroupCount));
 		} catch (Exception e) {
 			return ok(groupsWithCount(groups, groups.size()));

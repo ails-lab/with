@@ -101,6 +101,7 @@ import play.libs.F.Option;
 import play.libs.F.Promise;
 import play.libs.Json;
 import play.mvc.Result;
+import scala.collection.mutable.ArrayBuilder.ofBoolean;
 import search.Filter;
 import search.Query;
 import search.Response;
@@ -1103,15 +1104,15 @@ public class CollectionObjectController extends WithResourceController {
 	/*
 	 * Search for collections/exhibitions in myCollections page.
 	 */
-	public static Promise<Result> searchMyCollections(String term, boolean isShared) {
-		return searchMyColOrEx(term, isShared, WithResourceType.SimpleCollection.toString());
+	public static Promise<Result> searchMyCollections(String term, boolean isShared, boolean isExhibition, int offset, int count) {
+		return searchMyColOrEx(term, isShared, isExhibition ? WithResourceType.Exhibition.toString() : WithResourceType.SimpleCollection.toString(), offset, count);
 	}
 
-	public static Promise<Result> searchMyExhibitions(String term, boolean isShared) {
-		return searchMyColOrEx(term, isShared, WithResourceType.Exhibition.toString());
+	public static Promise<Result> searchMyExhibitions(String term, boolean isShared, int offset, int count) {
+		return searchMyColOrEx(term, isShared, WithResourceType.Exhibition.toString(), offset, count);
 	}
 
-	private static Promise<Result> searchMyColOrEx(String term, boolean isShared, String resourceType) {
+	private static Promise<Result> searchMyColOrEx(String term, boolean isShared, String resourceType, int offset, int count) {
 		if (effectiveUserIds().isEmpty()) {
 			return Promise.pure(forbidden(Json
 					.parse("\"error\", \"Must specify user for the collection\"")));
@@ -1126,15 +1127,15 @@ public class CollectionObjectController extends WithResourceController {
 				.add("administrative.access.WRITE", userId, true);
 
 		Query.Clause searchTerm = Query.Clause.create()
-				.add( "anywhere", term, false );
+				.add( "descriptiveData.label.default", term, false );
 		Query.Clause type = Query.Clause.create()
 				.add( "resourceType", resourceType, true );
 
 		q.addClause(searchTerm.filters());
 		q.addClause(type.filters());
 		q.addClause(visible.filters());
-		q.count = 10;
-		q.start = 0;
+		q.count = count;
+		q.start = offset;
 
 		Promise<SingleResponse> srp = Sources.WITHin.getDriver().execute( q );
 
@@ -1152,7 +1153,7 @@ public class CollectionObjectController extends WithResourceController {
 	/*
 	 * Search for records within a collection.
 	 */
-	public static Promise<Result> searchCollection(String term, String id) {
+	public static Promise<Result> searchCollection(String term, String id, int offset, int count) {
 		if (effectiveUserIds().isEmpty()) {
 			return Promise.pure(forbidden(Json
 					.parse("\"error\", \"Must specify user for the collection\"")));
@@ -1166,8 +1167,8 @@ public class CollectionObjectController extends WithResourceController {
 
 		q.addClause(searchTerm.filters());
 		q.addClause(type.filters());
-		q.count = 10;
-		q.start = 0;
+		q.count = count;
+		q.start = offset;
 
 		Promise<SingleResponse> srp = Sources.WITHin.getDriver().execute( q );
 
