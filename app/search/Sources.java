@@ -32,6 +32,7 @@ import sources.ElasticSource;
 public enum Sources {
 	// TODO implement it the right way
 	Mint(EmptySource.class,"Mint"),
+	//Europeana(EuropeanaExternalSource.class, "Europeana"),
 	Europeana(EuropeanaProxySource.class, "Europeana"),
 	UploadedByUser(EmptySource.class,"UploadedByUser"),
 	BritishLibrary(BritishLibProxySource.class,"BritishLibrary", "The British Library"),
