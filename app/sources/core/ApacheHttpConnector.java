@@ -96,28 +96,36 @@ public class ApacheHttpConnector extends HttpConnector {
 		return readValue;
 	}
 	
-//	public FileAndType getContentAndType(String url) throws Exception {
-//		try {
-//			FileAndType res = new FileAndType();
-//			log.debug("calling: " + url);
-//			long time = System.currentTimeMillis();
-//			res.data = File.createTempFile("dwnld", "");
-//			HttpResponse response = getContentResponse( buildGet( url ));
-//			Header[] headers = response.getHeaders("Content-type");
-//			for( Header h: headers ) {
-//				if( StringUtils.isNotEmpty( h.getValue())) res.mimeType = h.getValue();
-//			}
-//			log.debug( "Content-type: " + StringUtils.join(headers, ","));
-//			FileUtils.copyInputStreamToFile(response.getEntity().getContent(), res.data );
-//			return res;
-//		} catch (Exception e) {
-//			log.error("calling: " + url);
-//			log.error("msg: " + e.getMessage());
-//
-//			throw e;
-//		}
-//	}
-//	
+	public FileAndType getContentAndType(String url) throws Exception {
+		CloseableHttpClient client = null;
+		CloseableHttpResponse response = null;
+		try {
+			FileAndType res = new FileAndType();
+			log.debug("calling: " + url);
+			long time = System.currentTimeMillis();
+			res.data = File.createTempFile("dwnld", "");
+			client = HttpClientBuilder.create().build();
+			response = client.execute(buildGet( url ));
+			Header[] headers = response.getHeaders("Content-type");
+			for( Header h: headers ) {
+				if( StringUtils.isNotEmpty( h.getValue())) res.mimeType = h.getValue();
+			}
+			log.debug( "Content-type: " + StringUtils.join(headers, ","));
+			FileUtils.copyInputStreamToFile(response.getEntity().getContent(), res.data );
+			return res;
+		} catch (Exception e) {
+			log.error("calling: " + url);
+			log.error("msg: " + e.getMessage());
+
+			throw e;
+		} finally{
+			if (client != null)
+				client.close();
+			if (response != null)
+				response.close();
+		}
+	}
+
 
 	public <T> T getContent(String url) throws Exception {
 		log.debug("1 calling: " + url);
