@@ -256,12 +256,12 @@ public class Query {
 		for( List<Filter> clause: filters ) {
 			for( Filter f: clause ) {
 				if(! Fields.validFieldId( f.fieldId ))
-					log.warn( "FieldId '" + f.fieldId + "' is not known.");
+					log.warn( "FieldId '" + f.fieldId + "' in filters is not known.");
 			}
 		}
 		for( String fieldId: facets) {
 			if(! Fields.validFieldId( fieldId ))
-				log.warn( "FieldId '" + fieldId+ "' is not known.");
+				log.warn( "FieldId '" + fieldId+ "' in facets is not known.");
 		}
 	}
 

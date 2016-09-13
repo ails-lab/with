@@ -149,7 +149,7 @@ public enum Fields {
 	}
 
 	/**
-	 * Whether this fieldId is in the list.
+	 * Whether this fieldId is in the list. It might not and still be valid!
 	 * @param fieldId
 	 * @return
 	 */
