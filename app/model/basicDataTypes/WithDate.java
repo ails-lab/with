@@ -71,7 +71,7 @@ public class WithDate {
 			setYearIfEmpty(instance.get(Calendar.YEAR));
 		}
 	}
-	
+
 	public void setIsoDateIfEmpty(Date d) {
 		if (d == null)
 			return;
@@ -82,7 +82,7 @@ public class WithDate {
 		instance.setTime(d);
 		setYearIfEmpty(instance.get(Calendar.YEAR));
 	}
-	
+
 	public int getYear() {
 		return year;
 	}
@@ -95,7 +95,7 @@ public class WithDate {
 		if (this.year == Integer.MAX_VALUE)
 			this.year = year;
 	}
-	
+
 	public LiteralOrResource getEpoch() {
 		return epoch;
 	}
@@ -103,7 +103,7 @@ public class WithDate {
 	public void setEpoch(LiteralOrResource epoch) {
 		this.epoch = epoch;
 	}
-	
+
 	public int getApproximation() {
 		return approximation;
 	}
@@ -126,6 +126,8 @@ public class WithDate {
 
 	public void sanitizeDates() {
 		// code to init the other Date representations
+		if(this.free == null)
+			return;
 		if (sources.core.Utils.isNumericInteger(this.free)) {
 			setYearIfEmpty(Integer.parseInt(this.free));
 		} else if (this.free.matches("\\d+\\s+(bc|BC)")) {

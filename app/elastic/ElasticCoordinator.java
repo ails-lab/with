@@ -63,14 +63,14 @@ public class ElasticCoordinator {
 
 		List<List<Filter>> newFilters = filters.stream().map(
 				clause -> {
-				return clause.stream().map( 
+				return clause.stream().map(
 					filter-> {
 					Filter newFilter = (Filter) filter.clone();
 					if(newFilter.fieldId.equals("anywhere")) newFilter.fieldId = "";
 					return newFilter;
 					}
 				).collect( Collectors.toList()); }
-			).collect( Collectors.toList());	
+			).collect( Collectors.toList());
 
 		List<QueryBuilder> musts = new ArrayList<QueryBuilder>();
 		for(List<Filter> ors: newFilters) {
@@ -177,7 +177,11 @@ public class ElasticCoordinator {
 				Terms aggTerm = (Terms) agg;
 				if (aggTerm.getBuckets().size() > 0) {
 					for (int i=0; i< aggTerm.getBuckets().size(); i++) {
-						sresp.addFacet(aggTerm.getName(), aggTerm.getBuckets().get(i).getKeyAsString(), (int)aggTerm.getBuckets().get(i).getDocCount());
+						// omit the last character of aggregation name
+						// in order to take the exact name of the field name
+						sresp.addFacet(aggTerm.getName().substring(0, aggTerm.getName().length()-1),
+								aggTerm.getBuckets().get(i).getKeyAsString(),
+								(int)aggTerm.getBuckets().get(i).getDocCount());
 					}
 				}
 			}
