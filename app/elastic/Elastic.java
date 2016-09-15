@@ -16,6 +16,7 @@
 
 package elastic;
 
+
 import static org.elasticsearch.node.NodeBuilder.nodeBuilder;
 
 import java.io.IOException;
@@ -59,6 +60,12 @@ import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 
 import db.DB;
+
+/*
+ * Provides static methods to create, configure, initialize the index.
+ * Use 'getTransportClient' or 'getBulkProcessor' to connect to elastic.
+ */
+
 
 public class Elastic {
 	public static final Logger.ALogger log = Logger.of(Elastic.class);
