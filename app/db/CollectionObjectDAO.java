@@ -304,7 +304,7 @@ public class CollectionObjectDAO extends WithResourceDAO<CollectionObject> {
 				.retrievedFields(false, "collectedResources")
 				.field("descriptiveData.label.default.0")
 				.notEqual("_favorites");
-		String orderBy =  sortBy.equals("Date") ? "-administrative.lastModified" : "descriptiveData.label.default.0";
+		String orderBy =  sortBy.equals("Date") ? "-administrative.lastModified" : "descriptiveData.label.default";
 		q.order(orderBy).offset(offset).limit(count);
 		if (creator != null)
 			q.field("administrative.withCreator").equal(creator);
