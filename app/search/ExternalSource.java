@@ -28,6 +28,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import model.basicDataTypes.ProvenanceInfo;
 import model.resources.RecordResource;
+import model.resources.WithResource;
 import play.libs.F.Promise;
 import play.libs.Json;
 import search.Response.SingleResponse;
@@ -43,6 +44,7 @@ import sources.core.QueryBuilder;
 import sources.core.QueryModifier;
 import sources.core.SourceResponse;
 import sources.core.Utils.Pair;
+import sources.utils.JsonContextRecord;
 import utils.ListUtils;
 
 public abstract class ExternalSource extends EmptySource {
@@ -116,11 +118,33 @@ public abstract class ExternalSource extends EmptySource {
 	public void readRecords(JsonNode node, SingleResponse response, 
 			JsonContextRecordFormatReader formatReader){
 		for (JsonNode jsonNode : node) {
-			response.addItem(formatReader.readObjectFrom(jsonNode));
+			WithResource item = formatReader.readObjectFrom(jsonNode);
+			readFields(item);
+			response.addItem(item);
 		} 
 	}
 
 	
+	private void readFields(WithResource item) {
+		// TODO Auto-generated method stub
+		
+	}
+	
+	private void readField(WithResource item, Fields field) {
+		switch (field) {
+		case resourceType:
+			
+			break;
+
+		default:
+//			String stringPath = field.fieldId();
+//			String json = Json.toJson(f.overwriteObjectFrom(fullRecord,record)).toString();
+//			
+//			JsonContextRecord rec = new JsonContextRecord(jsonString)
+			break;
+		}
+	}
+
 	@Override
 	public abstract Promise<Object> completeRecord(Object incompleteRecord);
 	public abstract Promise<Object> getById(String id);
