@@ -16,7 +16,11 @@
 
 package search;
 
+import org.apache.lucene.index.FilterLeafReader.FilterFields;
+
+import model.basicDataTypes.Language;
 import model.basicDataTypes.MultiLiteral;
+import play.Logger;
 
 public enum FiltersFields {
 		/**
@@ -64,6 +68,14 @@ public enum FiltersFields {
 		
 		public String getFilterId() {
 			return filterId;
+		}
+		
+		public static FiltersFields getFilterFromID(String fieldID){
+			for (FiltersFields f : FiltersFields.values()) {
+				if (f.filterId.equals(fieldID))
+					return f;
+			}
+			return null;
 		}
 
 		

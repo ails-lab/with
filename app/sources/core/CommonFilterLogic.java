@@ -48,8 +48,14 @@ public class CommonFilterLogic implements Cloneable {
 	}
 	
 	public CommonFilterLogic(String filter) {
-		this.data.filterID = filter;
-		this.data.filterName = filter;
+		FiltersFields f = FiltersFields.getFilterFromID(filter);
+		if (f != null) {
+			this.data.filterID = f.getFilterId();
+			this.data.filterName = f.getFilterName().get(Language.DEFAULT).get(0);
+		} else {
+			this.data.filterID = filter;
+			this.data.filterName = filter;
+		}
 	}
 	
 	public CommonFilterLogic(String filter, String text) {
