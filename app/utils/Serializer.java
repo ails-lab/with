@@ -55,6 +55,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializerProvider;
+import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.net.MediaType;
 
@@ -121,7 +122,7 @@ public class Serializer {
 		}
 
 	}
-	
+
 	public static class MimeTypeSerializer extends JsonSerializer<Object> {
 
 		@Override
@@ -265,6 +266,9 @@ public class Serializer {
 				JsonProcessingException {
 			ObjectMapper mapper = new ObjectMapper();
 			ObjectNode json = mapper.createObjectNode();
+			SimpleModule module = new SimpleModule();
+			module.addSerializer(MediaType.class, new Serializer.MimeTypeSerializer());
+			mapper.registerModule(module);
 
 			if(arg0.getType()!=null)
 				json.put("type", Json.toJson(arg0.getType()));
@@ -272,7 +276,7 @@ public class Serializer {
 				json.put("withRights", Json.toJson(arg0.getWithRights()));
 			if(arg0.getQuality()!=null)
 				json.put("quality", Json.toJson(arg0.getQuality()));
-			json.put("mimeType", Json.toJson(arg0.getMimeType()));
+				json.put("mimeType", mapper.valueToTree(arg0.getMimeType()));
 
 			arg1.writeObject(json);
 		}

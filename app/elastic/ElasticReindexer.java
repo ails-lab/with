@@ -236,7 +236,7 @@ public class ElasticReindexer {
 	}
 
 	/*
-	 *
+	 *   Re-index all thesaurus objects
 	 */
 	public static boolean reindexAllDbThesaurus() {
 
