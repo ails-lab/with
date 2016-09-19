@@ -170,6 +170,10 @@ public class WithResourceController extends WithController {
 		return addRecordToCollection(Json.toJson(record), new ObjectId(colId),
 				position, noRepeated);
 	}
+	public static void updateRecord(ObjectId recordId, String source, String sourceId ){
+//		DB.getRecordResourceDAO().editRecord("", recordId, json);
+		addContentToRecord(recordId, source, sourceId);
+	}
 
 	public static Result addRecordToCollection(JsonNode json,
 			ObjectId collectionDbId, Option<Integer> position, Boolean noDouble) {
@@ -537,6 +541,7 @@ public class WithResourceController extends WithController {
 				}
 				i++;
 			}
+			DB.getWithResourceDAO().computeAndUpdateQuality(recordId);
 			return true;
 		};
 		ParallelAPICall.createPromise(methodQuery, recordId, Priority.BACKEND);
@@ -633,7 +638,7 @@ public class WithResourceController extends WithController {
 					if (data.getFormat().equals("JSON-WITH")) {
 						
 						DB.getWithResourceDAO().computeAndUpdateQuality(recordId);
-						log.info(data.getJsonContent());
+						log.debug(data.getJsonContent());
 						
 						ObjectMapper mapper = new ObjectMapper();
 						JsonNode json = mapper.readTree(data.getJsonContent())
@@ -654,6 +659,8 @@ public class WithResourceController extends WithController {
 										});
 						DB.getWithResourceDAO().updateEmbeddedMedia(recordId,
 								media);
+						
+//						DB.getWithResourceDAO().computeAndUpdateQuality(recordId);
 					} else {
 						DB.getRecordResourceDAO().updateContent(
 								record.getDbId(), data.getFormat(),

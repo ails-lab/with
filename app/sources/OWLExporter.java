@@ -45,6 +45,7 @@ import model.DescriptiveData.Quality;
 import model.basicDataTypes.Language;
 import model.basicDataTypes.MultiLiteral;
 import model.basicDataTypes.MultiLiteralOrResource;
+import model.basicDataTypes.ProvenanceInfo;
 import model.resources.CulturalObject;
 import model.resources.CulturalObject.CulturalObjectData;
 import model.resources.RecordResource.RecordDescriptiveData;
@@ -53,6 +54,11 @@ import sources.core.Utils;
 import utils.ListUtils;
 
 public class OWLExporter {
+	private static final String _SPACE = "_space_";
+
+
+	private static final String _SLASH = "_slash_";
+
 	
 	private OWLOntologyManager manager;
 	private OWLOntology ontology;
@@ -99,7 +105,11 @@ public class OWLExporter {
 	}
 
 	private OWLNamedIndividual getOwlInstance(String instance) {
-		return factory.getOWLNamedIndividual(":"+instance, prefixManager);
+		return factory.getOWLNamedIndividual(":"+cleanName(instance), prefixManager);
+	}
+
+	static String cleanName(String instance) {
+		return instance.replace("/", _SLASH).replace(" ", _SPACE);
 	}
 	
 	public void exportRoleAssertion(String instanceA, String roleName, String instanceB) {
@@ -164,7 +174,8 @@ public class OWLExporter {
 		}
 
 		public void exportItem(CulturalObject item){
-			String instance = item.getDbId().toString();
+			ProvenanceInfo p = item.getProvenance().get(item.getProvenance().size()-1);
+			String instance = p.getProvider()+cleanName(p.getResourceId());
 			CulturalObjectData descriptiveData = (CulturalObjectData) item.getDescriptiveData();
 			exportDataPropertyAssertion(instance, "hasLabel", toText(descriptiveData.getLabel()));
 			exportDataPropertyAssertion(instance, "hasDescription", toText(descriptiveData.getDescription()));
