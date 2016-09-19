@@ -66,13 +66,13 @@ import edu.stanford.nlp.io.EncodingPrintWriter.err;
 public class ElasticUtils {
 	static private final Logger.ALogger log = Logger.of(ElasticUtils.class);
 
-	/*public static List<String> multiliterals = new ArrayList<String>() {{ 
+	/*public static List<String> multiliterals = new ArrayList<String>() {{
 		add("label");
 		add("description");
 		add("keywords");
 		add("altLabels");
 	}};*/
-	
+
 	/*
 	 * Currently we are indexing only Resources that represent
 	 * collected records
@@ -378,7 +378,7 @@ public class ElasticUtils {
 		 */
 		JsonNode m = mediaMapConverter(rr.getMedia());
 		JsonNode jn = withAccessConverter(rr.getAdministrative());
-		
+
 
 		/*
 		 *
@@ -391,9 +391,9 @@ public class ElasticUtils {
 		module.addSerializer(WithAccess.class, new Serializer.WithAccessSerializerForElastic());
 		mapper.registerModule(module);
 		mapper.setSerializationInclusion(Include.NON_NULL);
-		Json.setObjectMapper(mapper);
+
 		// json with multiliteral _all and languages fields
-		JsonNode json = Json.toJson(rr);
+		JsonNode json = mapper.valueToTree(rr);
 		((ObjectNode)json).set("administrative", jn);
 		((ObjectNode)json).set("media", m);
 
@@ -430,14 +430,13 @@ public class ElasticUtils {
 		module.addSerializer(EmbeddedMediaObject.class, new Serializer.EmbeddeMediaSerializer());
 		mapper.registerModule(module);
 		mapper.setSerializationInclusion(Include.NON_NULL);
-		Json.setObjectMapper(mapper);
 
 		List<EmbeddedMediaObject> ms = new ArrayList<EmbeddedMediaObject>();
 		for(Map<MediaVersion, EmbeddedMediaObject> i: m)
 			for(Entry<?,EmbeddedMediaObject> e: i.entrySet())
 				ms.add(e.getValue());
 
-		return Json.toJson(ms);
+		return mapper.valueToTree(ms);
 	}
 
 	private static JsonNode withAccessConverter(WithAdmin wa) {
@@ -447,9 +446,9 @@ public class ElasticUtils {
 		module.addSerializer(WithAccess.class, new Serializer.WithAccessSerializerForElastic());
 		mapper.registerModule(module);
 		mapper.setSerializationInclusion(Include.NON_NULL);
-		Json.setObjectMapper(mapper);
 
-		ObjectNode jn =  (ObjectNode) Json.toJson(wa.getAccess());
+
+		ObjectNode jn =  (ObjectNode) mapper.valueToTree(wa.getAccess());
 		ObjectNode collBY = mapper.createObjectNode();
 		collBY.put("READ", Json.toJson(wa.getCollectedBy().stream().filter( ae -> ae.getLevel()==Access.READ)
 				.map(AccessEntry::getUser).map(ObjectId::toString).collect(Collectors.toList())));
@@ -460,5 +459,5 @@ public class ElasticUtils {
 		jn.put("collectedBy", collBY);
 		return jn;
 	}
-	
+
 }

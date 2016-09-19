@@ -1266,7 +1266,7 @@ public class CollectionObjectController extends WithResourceController {
 		Query q = new Query();
 		String userId = effectiveUserId();
 		Query.Clause searchTerm = Query.Clause.create()
-				.add( "anywhere", term, false );
+				.add( "descriptiveData.label.default", term, false );
 		Query.Clause type = Query.Clause.create()
 				.add( "collectedIn", id, true );
 
