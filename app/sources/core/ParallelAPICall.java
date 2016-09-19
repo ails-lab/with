@@ -73,6 +73,7 @@ public class ParallelAPICall {
 			final Function<I, R> methodQuery, final I input) {
 		return createPromise(methodQuery, input, Priority.BACKEND);
 	}
+	
 
 	public static <I, U, R> Promise<R> createPromise(
 			final Function<I, R> methodQuery, final I input, Priority priority) {
@@ -81,6 +82,12 @@ public class ParallelAPICall {
 				return methodQuery.apply(input);
 			}
 		}, priority.getExcecutionContext());
+		return p;
+	}
+	
+	public static <U, R> Promise<R> createPromise(
+			final Function0<R> methodQuery, Priority priority) {
+		Promise<R> p = Promise.promise(methodQuery, priority.getExcecutionContext());
 		return p;
 	}
 

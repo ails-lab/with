@@ -17,17 +17,10 @@
 package model.basicDataTypes;
 
 import org.mongodb.morphia.annotations.Converters;
-import org.mongodb.morphia.annotations.Field;
-import org.mongodb.morphia.annotations.Index;
-import org.mongodb.morphia.annotations.IndexOptions;
-import org.mongodb.morphia.annotations.Indexes;
-import org.mongodb.morphia.utils.IndexType;
-
 import db.converters.ProvenanceInfoConverter;
 
 @Converters(ProvenanceInfoConverter.class)
 public class ProvenanceInfo {
-
 
 	private String provider;
 	private String uri;

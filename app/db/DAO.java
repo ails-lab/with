@@ -452,7 +452,7 @@ public class DAO<E> extends BasicDAO<E, ObjectId> {
 		RecordQuality q = new RecordQuality();
 		E obj = getById(id, Arrays.asList("descriptiveData","provenance", "media"));
 		double dq= q.compute(new JsonContextRecord(Json.toJson(obj)));
-		log.info("Quality "+dq);
+		log.debug("Quality "+dq);
 		updateField(id, "qualityMeasure", dq);
 	}
 

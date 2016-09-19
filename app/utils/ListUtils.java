@@ -23,6 +23,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.function.Function;
+import sources.core.Utils;
 
 public class ListUtils {
 
@@ -169,6 +170,13 @@ public class ListUtils {
 	 */
 	public static<T> T last(List<T> list) {
 		return list.get(list.size()-1);
+	}
+
+	public static <T> T getLast(List<T> list) {
+		if (Utils.hasInfo(list)){
+			return list.get(list.size()-1);
+		}
+		return null;
 	}
 
 }
