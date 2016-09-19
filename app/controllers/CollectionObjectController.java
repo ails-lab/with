@@ -1036,6 +1036,10 @@ public class CollectionObjectController extends WithResourceController {
 						RecordResource profiledRecord = r.getRecordProfile(profile);
 						filterResourceByLocale(locale, profiledRecord);
 						recordsList.add(Json.toJson(profiledRecord));
+						fillContextData(
+								DB.getCollectionObjectDAO()
+										.getSliceOfCollectedResources(colId, start, start + count)
+										.getCollectedResources(), recordsList);
 					}
 				}
 				result.put(
