@@ -309,7 +309,11 @@ public class MediaObjectDAO {
 	public void updateQualityForMediaObjects() {
 		DBCursor mediaList = DB.getGridFs().getFileList(new BasicDBObject(),
 				new BasicDBObject("_id", 1));
+		int size = mediaList.count();
+		int i = 0;
+		int oldpercent = 0;
 		for (DBObject media : mediaList) {
+			i++;
 			MediaObject mymedia = DB.getMorphia().getMapper().fromDBObject(
 					MediaObject.class, media, new DefaultEntityCache());
 			// load it 
@@ -317,10 +321,18 @@ public class MediaObjectDAO {
 //			then update it
 			try {
 				makePermanent(mymedia);
+				log.debug("Success! ["+i+"th] media updated");
 			} catch (Exception e) {
+				log.error("Fail! ["+i+"th] media was not updated");
 				log.error("Exeption",e);
 			}
+			int percent = (i*100)/size;
+			if (percent>oldpercent){
+				oldpercent = percent;
+				log.debug("Updating Media Quality "+percent+"% i.e. "+i+"/"+size);
+			}
 		}
+		log.debug("Updating Media Quality Completed!");
 	}
 	
 }
