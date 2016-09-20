@@ -29,6 +29,8 @@ import java.util.Set;
 import org.apache.commons.io.IOUtils;
 import org.bson.types.ObjectId;
 import org.mongodb.morphia.mapping.cache.DefaultEntityCache;
+import org.mongodb.morphia.query.Query;
+import org.mongodb.morphia.query.UpdateOperations;
 
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBCursor;
@@ -301,6 +303,24 @@ public class MediaObjectDAO {
 					.deleteById(new ObjectId(media.get("_id").toString()));
 		}
 		log.info("Deleted orphan media objects: " + deletedCount);
+	}
+	
+	
+	public void updateQualityForMediaObjects() {
+		DBCursor mediaList = DB.getGridFs().getFileList(new BasicDBObject(),
+				new BasicDBObject("_id", 1));
+		for (DBObject media : mediaList) {
+			MediaObject mymedia = DB.getMorphia().getMapper().fromDBObject(
+					MediaObject.class, media, new DefaultEntityCache());
+			// load it 
+			mymedia.computeQuality();
+//			then update it
+			try {
+				makePermanent(mymedia);
+			} catch (Exception e) {
+				log.error("Exeption",e);
+			}
+		}
 	}
 	
 }

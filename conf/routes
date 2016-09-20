@@ -14,6 +14,10 @@ GET      /notifications/myNotifications            controllers.NotificationContr
 PUT      /notifications/read                       controllers.NotificationController.readNotifications()
 POST     /notifications/send                       controllers.NotificationController.sendMessage(receiverId)
 
+
+GET     /api/updatemediaquality      controllers.CollectionObjectController.updateMediaQuality()
+
+
 POST     /api/advancedsearch        controllers.SearchController.searchwithfilter()
 GET     /api/advancedsearchGET      controllers.SearchController.searchwithfilterGET(q: sources.core.CommonQuery)
 POST     /api/initialfilters        controllers.SearchController.getfilters()
