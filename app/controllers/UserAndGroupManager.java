@@ -325,6 +325,11 @@ public class UserAndGroupManager extends WithController {
 		ObjectNode result = Json.newObject();
 		try {
 			String adminId = effectiveUserId();
+			if (adminId.equals(id)){
+				result.put("error",
+						"You should not remove yourself from a group if you are an administrator!");
+				return forbidden(result);
+			}
 			if ((adminId == null) || (adminId.equals(""))) {
 				result.put("error",
 						"Only creator or administrators of the group have the right to edit the group");
