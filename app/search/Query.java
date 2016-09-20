@@ -16,15 +16,11 @@
 
 package search;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
-
+import play.Logger;
 import utils.ListUtils;
+
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * The Query class encapsulates all possible Queries that the system supports within and externally.
@@ -33,6 +29,9 @@ import utils.ListUtils;
  *
  */
 public class Query {
+
+	public static final Logger.ALogger log =Logger.of( Query.class );
+
 	/**
 	 * Which sources need to be queried.
 	 */
@@ -52,12 +51,12 @@ public class Query {
 	/**
 	 * How many we request from each source and at what offset. start is zero based.
 	 */
-	public int start, count;
+	private int start, count;
 
 	/**
 	 * Alternative to say the same. page is one based!
 	 */
-	public int page, pageSize;
+	private int page, pageSize;
 
 
 	/**
@@ -106,7 +105,7 @@ public class Query {
 	 * If there are no filters left or if the source is not requested, return null.
 	 *
 	 *  If there are no supportedFieldnames, return a clone.
-	 * @param supportedFieldnames
+	 * @param supportedFieldIds
 	 * @return
 	 */
 	public Query pruneFilters(Sources source, Set<String> supportedFieldIds) {
@@ -148,23 +147,39 @@ public class Query {
 		return res;
 	}
 
-	//
-	// Convenience builder functions
- 	//
-
 	public int getPage() {
-		if( page == 0 ) {
-			int calcPage = start / count;
-			return calcPage + 1;
-		} else return page;
+		return page;
 	}
 
 	public int getPageSize() {
-		if( page == 0 ) return count;
-		else return pageSize;
+		return pageSize;
 	}
 
+	public int getCount() {
+		return count;
+	}
 
+	public int getStart() {
+		return start;
+	}
+
+	//
+	// Convenience builder functions
+	//
+
+	public void setStartCount( int start, int count ) {
+		this.count = count;
+		this.start = start;
+		this.pageSize = count;
+		this.page = (start/count)+1;
+	}
+
+	public void setPageAndSize( int page, int pageSize ) {
+		this.page = page;
+		this.pageSize = pageSize;
+		this.count = pageSize;
+		this.start = (page-1)*pageSize;
+	}
 	/**
 	 * The given filters are assumed to be or-ed and are and-ed to this query
 	 * @param filters
@@ -188,7 +203,7 @@ public class Query {
 
 	/**
 	 * Specify one fieldname and multiple possible values. They are added as being ored together and anded to existing Filters.
-	 * @param fieldname
+	 * @param fieldId
 	 * @param allowedValues
 	 * @return
 	 */
@@ -249,6 +264,22 @@ public class Query {
 		return new Query();
 	}
 
+	/**
+	 * Log if some fields in here are not known
+	 */
+	public void validateFieldIds() {
+		// first the query filters
+		for( List<Filter> clause: filters ) {
+			for( Filter f: clause ) {
+				if(! Fields.validFieldId( f.fieldId ))
+					log.warn( "FieldId '" + f.fieldId + "' in filters is not known.");
+			}
+		}
+		for( String fieldId: facets) {
+			if(! Fields.validFieldId( fieldId ))
+				log.warn( "FieldId '" + fieldId+ "' in facets is not known.");
+		}
+	}
 
 	public Map<Sources, Query> splitBySource() {
 		Map<Sources, Query> res = new HashMap<>();

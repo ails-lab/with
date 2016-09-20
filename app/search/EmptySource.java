@@ -78,7 +78,11 @@ public class EmptySource implements Source {
 	public Set<String> supportedFieldIds() {
 		return null;
 	}
-	
+
+	public String apiConsole() {
+		return null;
+	}
+
 	/**
 	 * If a source supports autocompleting a query, here it can do it. Return null if you don't autocomplete.
 	 */

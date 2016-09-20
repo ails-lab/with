@@ -58,6 +58,7 @@ import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
+import org.mongodb.morphia.mapping.cache.DefaultEntityCache;
 import org.bson.Document;
 import org.bson.types.ObjectId;
 
@@ -76,6 +77,7 @@ import elastic.Elastic;
 import elastic.ElasticCoordinator;
 import elastic.ElasticSearcher;
 import elastic.ElasticSearcher.SearchOptions;
+import model.MediaObject;
 import model.annotations.ContextData;
 import model.annotations.ContextData.ContextDataBody;
 import model.annotations.bodies.AnnotationBodyTagging;
@@ -386,6 +388,11 @@ public class CollectionObjectController extends WithResourceController {
 			result.put("error", e.getMessage());
 			return internalServerError(result);
 		}
+	}
+	
+	public static Result updateMediaQuality(){
+		DB.getMediaObjectDAO().updateQualityForMediaObjects();
+		return ok();
 	}
 	
 	public static Result updateCollectionObject(String collectionId) {
@@ -1243,8 +1250,7 @@ public class CollectionObjectController extends WithResourceController {
 		q.addClause(searchTerm.filters());
 		q.addClause(type.filters());
 		q.addClause(visible.filters());
-		q.count = count;
-		q.start = offset;
+		q.setStartCount(offset, count);
 
 		Promise<SingleResponse> srp = Sources.WITHin.getDriver().execute( q );
 
@@ -1276,8 +1282,7 @@ public class CollectionObjectController extends WithResourceController {
 
 		q.addClause(searchTerm.filters());
 		q.addClause(type.filters());
-		q.count = count;
-		q.start = offset;
+		q.setStartCount(offset, count);
 
 		Promise<SingleResponse> srp = Sources.WITHin.getDriver().execute( q );
 
@@ -1566,8 +1571,7 @@ public class CollectionObjectController extends WithResourceController {
 								RecordResourceController.annotateRecord(recordId, user, annConfigs);
 //							}
 						} catch (Exception e) {
-//							e.printStackTrace();
-							log.error(e.getMessage());
+							log.error(e.getMessage(), e );
 						}
 					}
 

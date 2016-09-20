@@ -193,4 +193,9 @@ public class DigitalNZSpaceSource extends ISpaceSource {
 		}
 	}
 
+	@Override
+	public String apiConsole() {
+		return "http://api.digitalnz.org/";
+	}
+
 }

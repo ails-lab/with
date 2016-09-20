@@ -156,9 +156,9 @@ public class EuropeanaExternalSource extends ExternalSource {
 //				builder.addSearchParam("cursor", nextCursor);
 //		} else
 		builder.addSearchParam("start", "" + 
-		(((q.page - 1) * q.pageSize) + 1));
+		(((q.getPage() - 1) * q.getPageSize()) + 1));
 
-		builder.addSearchParam("rows", "" + q.pageSize);
+		builder.addSearchParam("rows", "" + q.getPageSize());
 		builder.addSearchParam("profile", "rich facets");
 		String facets = "DEFAULT";
 //		if (q.facetsMode != null) {
