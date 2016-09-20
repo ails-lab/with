@@ -1564,8 +1564,7 @@ public class CollectionObjectController extends WithResourceController {
 								RecordResourceController.annotateRecord(recordId, user, annConfigs);
 //							}
 						} catch (Exception e) {
-//							e.printStackTrace();
-							log.error(e.getMessage());
+							log.error(e.getMessage(), e );
 						}
 					}
 
