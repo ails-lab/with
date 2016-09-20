@@ -51,12 +51,12 @@ public class Query {
 	/**
 	 * How many we request from each source and at what offset. start is zero based.
 	 */
-	public int start, count;
+	private int start, count;
 
 	/**
 	 * Alternative to say the same. page is one based!
 	 */
-	public int page, pageSize;
+	private int page, pageSize;
 
 
 	/**
@@ -147,23 +147,39 @@ public class Query {
 		return res;
 	}
 
-	//
-	// Convenience builder functions
- 	//
-
 	public int getPage() {
-		if( page == 0 ) {
-			int calcPage = start / count;
-			return calcPage + 1;
-		} else return page;
+		return page;
 	}
 
 	public int getPageSize() {
-		if( page == 0 ) return count;
-		else return pageSize;
+		return pageSize;
 	}
 
+	public int getCount() {
+		return count;
+	}
 
+	public int getStart() {
+		return start;
+	}
+
+	//
+	// Convenience builder functions
+	//
+
+	public void setStartCount( int start, int count ) {
+		this.count = count;
+		this.start = start;
+		this.pageSize = count;
+		this.page = (start/count)+1;
+	}
+
+	public void setPageAndSize( int page, int pageSize ) {
+		this.page = page;
+		this.pageSize = pageSize;
+		this.count = pageSize;
+		this.start = (page-1)*pageSize;
+	}
 	/**
 	 * The given filters are assumed to be or-ed and are and-ed to this query
 	 * @param filters

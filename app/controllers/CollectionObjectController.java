@@ -1243,8 +1243,7 @@ public class CollectionObjectController extends WithResourceController {
 		q.addClause(searchTerm.filters());
 		q.addClause(type.filters());
 		q.addClause(visible.filters());
-		q.count = count;
-		q.start = offset;
+		q.setStartCount(offset, count);
 
 		Promise<SingleResponse> srp = Sources.WITHin.getDriver().execute( q );
 
@@ -1276,8 +1275,7 @@ public class CollectionObjectController extends WithResourceController {
 
 		q.addClause(searchTerm.filters());
 		q.addClause(type.filters());
-		q.count = count;
-		q.start = offset;
+		q.setStartCount(offset, count);
 
 		Promise<SingleResponse> srp = Sources.WITHin.getDriver().execute( q );
 

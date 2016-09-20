@@ -98,7 +98,13 @@ public class ProxySource extends EmptySource {
 		filters.add(FiltersFields.ANYWHERE.getFilterId());
 		return filters;
 	}
-	
+
+	@Override
+	public String apiConsole() {
+		return spaceSource.apiConsole();
+	}
+
+
 	public static class EuropeanaProxySource extends ProxySource{
 
 		public EuropeanaProxySource() {
