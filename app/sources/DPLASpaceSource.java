@@ -194,4 +194,8 @@ public class DPLASpaceSource extends ISpaceSource {
 		}
 	}
 
+	@Override
+	public String apiConsole() {
+		return "http://api.dp.la/";
+	}
 }

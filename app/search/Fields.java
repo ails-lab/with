@@ -19,6 +19,10 @@ package search;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 /**
  * In this enum we collect all the fieldnames we allow as queries. There should be some documentation provided
  * @author Arne Stabenau
@@ -147,5 +151,26 @@ public enum Fields {
 		String fieldName = fieldId.replace(".", "_");
 		return Fields.valueOf(fieldName);
 	}
+
+	/**
+	 * Whether this fieldId is in the list. It might not and still be valid!
+	 * @param fieldId
+	 * @return
+	 */
+	public static boolean validFieldId( String fieldId ) {
+		try {
+			forFieldId( fieldId );
+			return true;
+		} catch( Exception e ) {
+			return false;
+		}
+	}
+
+	public static List<String> allValues() {
+	    List<String> allFields = Stream.of( Fields.values())
+                .map( Fields::fieldId )
+                .collect(Collectors.toList());
+        return allFields;
+    }
 }
 

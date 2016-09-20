@@ -212,4 +212,9 @@ public class NLASpaceSource extends ISpaceSource {
 		}
 	}
 
+	@Override
+	public String apiConsole() {
+		return "http://api.trove.nla.gov.au/";
+	}
+
 }

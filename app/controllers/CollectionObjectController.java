@@ -1250,8 +1250,7 @@ public class CollectionObjectController extends WithResourceController {
 		q.addClause(searchTerm.filters());
 		q.addClause(type.filters());
 		q.addClause(visible.filters());
-		q.count = count;
-		q.start = offset;
+		q.setStartCount(offset, count);
 
 		Promise<SingleResponse> srp = Sources.WITHin.getDriver().execute( q );
 
@@ -1283,8 +1282,7 @@ public class CollectionObjectController extends WithResourceController {
 
 		q.addClause(searchTerm.filters());
 		q.addClause(type.filters());
-		q.count = count;
-		q.start = offset;
+		q.setStartCount(offset, count);
 
 		Promise<SingleResponse> srp = Sources.WITHin.getDriver().execute( q );
 
@@ -1573,8 +1571,7 @@ public class CollectionObjectController extends WithResourceController {
 								RecordResourceController.annotateRecord(recordId, user, annConfigs);
 //							}
 						} catch (Exception e) {
-//							e.printStackTrace();
-							log.error(e.getMessage());
+							log.error(e.getMessage(), e );
 						}
 					}
 

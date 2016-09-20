@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -54,7 +55,11 @@ public class ApacheHttpConnector extends HttpConnector {
 	private static final int TRIES = 3;
 	
 	private static ApacheHttpConnector instance;
-	
+	public static HttpClientBuilder httpClientBuilder =
+			HttpClientBuilder.create()
+			.setConnectionTimeToLive(1, TimeUnit.MINUTES)
+			.setMaxConnPerRoute(5);
+
 	public static HttpConnector getApacheHttpConnector(){
 		if (instance==null){
 			instance = new ApacheHttpConnector();			
@@ -73,7 +78,7 @@ public class ApacheHttpConnector extends HttpConnector {
 		try {
 			log.debug("calling: " + url);
 			long time = System.currentTimeMillis();
-			client = HttpClientBuilder.create().build();
+			client = httpClientBuilder.build();
 			response = client.execute(method);
 			long ftime = (System.currentTimeMillis() - time) / 1000;
 			log.debug("waited " + ftime + " sec for: " + url);
@@ -104,7 +109,7 @@ public class ApacheHttpConnector extends HttpConnector {
 			log.debug("calling: " + url);
 			long time = System.currentTimeMillis();
 			res.data = File.createTempFile("dwnld", "");
-			client = HttpClientBuilder.create().build();
+			client = httpClientBuilder.build();
 			response = client.execute(buildGet( url ));
 			Header[] headers = response.getHeaders("Content-type");
 			for( Header h: headers ) {
