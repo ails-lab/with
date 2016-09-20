@@ -39,6 +39,7 @@ import utils.ListUtils;
 
 public class FilterValuesMap {
 
+
 	private static HashMap<Sources, FilterValuesMap> map;
 	private HashMap<String, List<Object>> specificvalues;
 	// private HashMap<String, List<Pair<String>>> queryTexts;

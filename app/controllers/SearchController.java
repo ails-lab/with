@@ -384,7 +384,7 @@ public class SearchController extends WithController {
 				List<CommonQuery> list = src.splitFilters(q);
 				for (CommonQuery commonQuery : list) {
 					promises.add(ParallelAPICall.<ISpaceSource, CommonQuery, SourceResponse> createPromise(methodQuery,
-							src, commonQuery, Priority.FRONTEND));
+							src, commonQuery,Priority.FRONTEND));
 				}
 			}
 		}

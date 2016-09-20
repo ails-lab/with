@@ -16,10 +16,18 @@
 
 package controllers;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.Charset;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -100,6 +108,8 @@ import play.libs.F.Function0;
 import play.libs.F.Option;
 import play.libs.F.Promise;
 import play.libs.Json;
+import play.mvc.Http.MultipartFormData;
+import play.mvc.Http.MultipartFormData.FilePart;
 import play.mvc.Result;
 import scala.collection.mutable.ArrayBuilder.ofBoolean;
 import search.Filter;
@@ -112,6 +122,15 @@ import sources.EuropeanaCollectionSpaceSource;
 import sources.EuropeanaSpaceSource;
 import sources.OWLExporter.CulturalItemOWLExporter;
 import sources.core.CommonQuery;
+import sources.core.JsonContextRecordFormatReader;
+import sources.core.ParallelAPICall;
+import sources.core.ParallelAPICall.Priority;
+import sources.core.ResourcesListImporter;
+import sources.core.SourceResponse;
+import sources.core.Utils;
+import sources.formatreaders.DPLARecordFormatter;
+import sources.formatreaders.MuseumofModernArtRecordFormatter;
+import sources.utils.JsonContextRecord;
 import sources.core.ParallelAPICall;
 import sources.core.SourceResponse;
 import sources.core.Utils;
@@ -166,7 +185,7 @@ public class CollectionObjectController extends WithResourceController {
 				src.setUsingCursor(true);
 
 				return internalImport(src, ccid, q, limit, resultInfo, true,
-						true);
+						false);
 
 			} catch (Exception e) {
 				log.error( "", e );
@@ -177,22 +196,9 @@ public class CollectionObjectController extends WithResourceController {
 
 	public static Result importIDs(String cname, String source, String ids) {
 		ObjectNode resultInfo = Json.newObject();
-		ObjectId creatorDbId = new ObjectId(loggedInUser());
-		CollectionObject ccid = null;
-		if (!isCollectionCreated(creatorDbId, cname)) {
-			CollectionObject collection = new SimpleCollection();
-			collection.getDescriptiveData().setLabel(
-					new MultiLiteral(cname).fillDEF());
-			boolean success = internalAddCollection(collection,
-					WithResourceType.SimpleCollection, creatorDbId, resultInfo);
-			if (!success)
-				return badRequest(resultInfo);
-			ccid = collection;
-		} else {
-			List<CollectionObject> col = DB.getCollectionObjectDAO()
-					.getByLabel(Language.DEFAULT, cname);
-			ccid = col.get(0);
-		}
+		CollectionObject ccid = getOrCreateCollection(cname, resultInfo);
+		if (ccid==null)
+			return internalServerError(resultInfo);
 		for (String oid : ids.split("[,\\s]+")) {
 			CulturalObject record = new CulturalObject();
 			CulturalObjectData descriptiveData = new CulturalObjectData();
@@ -203,6 +209,28 @@ public class CollectionObjectController extends WithResourceController {
 					F.Option.None(), resultInfo);
 		}
 		return ok(resultInfo);
+	}
+
+	private static CollectionObject getOrCreateCollection(String collectionName, ObjectNode resultInfo) {
+		ObjectId creatorDbId = new ObjectId(loggedInUser());
+		CollectionObject ccid = null;
+		if (!isCollectionCreated(creatorDbId, collectionName)) {
+			CollectionObject collection = new SimpleCollection();
+			collection.getDescriptiveData().setLabel(
+					new MultiLiteral(collectionName).fillDEF());
+			boolean success = internalAddCollection(collection,
+					WithResourceType.SimpleCollection, creatorDbId, resultInfo);
+			if (!success){
+				resultInfo.put("error", "Failed creating the collection");
+				return null;
+			}
+			ccid = collection;
+		} else {
+			List<CollectionObject> col = DB.getCollectionObjectDAO()
+					.getByLabel(Language.DEFAULT, collectionName);
+			ccid = col.get(0);
+		}
+		return ccid;
 	}
 
 	/**
@@ -231,6 +259,7 @@ public class CollectionObjectController extends WithResourceController {
 				false);
 	}
 
+
 	private static Promise<Result> internalImport(EuropeanaSpaceSource src,
 			CollectionObject collection, CommonQuery q, int limit,
 			ObjectNode resultInfo, boolean dontDuplicate, boolean waitToFinish) {
@@ -243,7 +272,7 @@ public class CollectionObjectController extends WithResourceController {
 		int firstPageCount1 = addResultToCollection(result, collection
 				.getDbId().toString(), mylimit, resultInfo, dontDuplicate);
 
-		Promise<Result> promiseOfInt = Promise.promise(new Function0<Result>() {
+		Function0<Result> function0 = new Function0<Result>() {
 			public Result apply() {
 				SourceResponse result;
 				int page = 1;
@@ -252,16 +281,22 @@ public class CollectionObjectController extends WithResourceController {
 					page++;
 					q.page = page + "";
 					result = src.getResults(q);
-					int c = addResultToCollection(result, collection.getDbId()
-							.toString(), mylimit - itemsCount, resultInfo,
-							dontDuplicate);
-					itemsCount = itemsCount + c;
+					if (!result.error){
+						int c = addResultToCollection(result, collection.getDbId()
+								.toString(), mylimit - itemsCount, resultInfo,
+								dontDuplicate);
+						itemsCount = itemsCount + c;
+					} else {
+						break;
+					}
 				}
 				return ok(Json.toJson(collectionWithMyAccessData(
 						collection,
 						effectiveUserIds(), "BASIC", Option.Some("DEFAULT"))));
 			}
-		});
+		};
+		Promise<Result> promiseOfInt = Promise.promise(function0);
+//		Promise<Result> promiseOfInt = ParallelAPICall.createPromise(function0, Priority.MINE);
 		if (resultInfo.has("error"))
 			return Promise.pure((Result) badRequest(resultInfo));
 		if (waitToFinish)
@@ -271,14 +306,45 @@ public class CollectionObjectController extends WithResourceController {
 					collection,
 					effectiveUserIds(), "BASIC", Option.Some("DEFAULT")))));
 	}
+	
+	public static Result uploadCollection() {
+		ObjectNode resultInfo = Json.newObject();
+		MultipartFormData body = request().body().asMultipartFormData();
+	    FilePart picture = body.getFile("items");
+	    String source = body.asFormUrlEncoded().get("source")[0];
+	    CollectionObject ccid = getOrCreateCollection(source, resultInfo);
+		if (ccid==null)
+			return internalServerError(resultInfo);
+	    if (picture != null) {
+	        File file = picture.getFile();
+	        // TODO pick the correct reader
+	        JsonContextRecordFormatReader itemReader = new MuseumofModernArtRecordFormatter();
+			ResourcesListImporter rec = new ResourcesListImporter(itemReader);
+	        addResultToCollection(rec.process(file), ccid.getDbId().toString(), -1, resultInfo, true);
+	        if (resultInfo.has("error")){
+	        	return internalServerError(resultInfo);
+	        }
+	        return ok("File uploaded");
+	    } else {
+	        flash("error", "Missing file");
+	        return badRequest();
+	    }
+	}
 
 	private static int addResultToCollection(SourceResponse result,
 			String collectionID, int limit, ObjectNode resultInfo,
 			boolean dontRepeat) {
+		Collection<WithResource<?, ?>> culturalCHO = result.items
+				.getCulturalCHO();
+		return addResultToCollection(culturalCHO, collectionID, limit, resultInfo, dontRepeat);
+	}
+
+	private static int addResultToCollection(Collection<WithResource<?, ?>> items, String collectionID, int limit,
+			ObjectNode resultInfo, boolean dontRepeat) {
+		log.debug("adding "+items.size()+" items to collection "+collectionID);
 		int itemsCount = 0;
-		for (Iterator<WithResource<?, ?>> iterator = result.items
-				.getCulturalCHO().iterator(); iterator.hasNext()
-				&& (itemsCount < limit);) {
+		for (Iterator<WithResource<?, ?>> iterator = items.iterator(); iterator.hasNext()
+				&& (limit<0 || itemsCount < limit);) {
 			WithResource<?, ?> item = iterator.next();
 			WithResourceController.internalAddRecordToCollection(collectionID,
 					(RecordResource) item, F.Option.None(), resultInfo,
@@ -321,6 +387,39 @@ public class CollectionObjectController extends WithResourceController {
 			return internalServerError(result);
 		}
 	}
+	
+	public static Result updateCollectionObject(String collectionId) {
+		ObjectNode result = Json.newObject();
+		try {
+			ObjectId collectionDbId = new ObjectId(collectionId);
+			int entryCount = ((CollectionAdmin) DB
+					.getCollectionObjectDAO()
+					.getById(collectionDbId,
+							Arrays.asList("administrative.entryCount"))
+					.getAdministrative()).getEntryCount();
+			Function<String, String> update = (String id) ->{
+				int pos = 0;
+				int pageSize = Math.min(entryCount, 100);
+				while (pos<entryCount){
+					List<RecordResource> records = DB.getRecordResourceDAO()
+							.getByCollectionBetweenPositions(collectionDbId, pos, pos+pageSize,"provenance");
+					for (int i = 0; i < records.size(); i++) {
+						RecordResource recordResource = records.get(i);
+						@SuppressWarnings("unchecked")
+						ProvenanceInfo provenance = (ProvenanceInfo) ListUtils.getLast(recordResource.getProvenance());
+						WithResourceController.updateRecord(recordResource.getDbId(), provenance.getProvider(),provenance.getResourceId());
+					}
+					pos+=pageSize;
+				}
+				return null;
+			};
+			ParallelAPICall.createPromise(update, collectionId,Priority.BACKEND);
+			return ok();
+		} catch (Exception e) {
+			result.put("error", e.getMessage());
+			return internalServerError(result);
+		}
+	}
 
 	public static Result exportCollectionObjectToOWL(String cname) {
 
@@ -343,19 +442,25 @@ public class CollectionObjectController extends WithResourceController {
 					.getById(collectionDbId,
 							Arrays.asList("administrative.entryCount"))
 					.getAdministrative()).getEntryCount();
-			List<RecordResource> records = DB.getRecordResourceDAO()
-					.getByCollectionBetweenPositions(collectionDbId, 0,
-							Math.min(entryCount, 1000));
-
-			for (RecordResource recordResource : records) {
-				if (recordResource instanceof CulturalObject) {
-					CulturalObject new_record = (CulturalObject) recordResource;
-					exporter.exportItem(new_record);
+			entryCount = Math.min(entryCount, 8000);
+			int pageSize = Math.min(entryCount, 100);
+			int pos = 0;
+			while (pos<entryCount){
+				List<RecordResource> records = DB.getRecordResourceDAO()
+						.getByCollectionBetweenPositions(collectionDbId, pos,
+								pos+pageSize);
+				for (RecordResource recordResource : records) {
+					if (recordResource instanceof CulturalObject) {
+						CulturalObject new_record = (CulturalObject) recordResource;
+						exporter.exportItem(new_record);
+					}
 				}
+				pos+=pageSize;
 			}
+			
+			
 			return ok(exporter.export());
 		} catch (Exception e) {
-			e.printStackTrace();
 			result.put("error", e.getMessage());
 			return internalServerError(result);
 		}
@@ -1036,6 +1141,10 @@ public class CollectionObjectController extends WithResourceController {
 						RecordResource profiledRecord = r.getRecordProfile(profile);
 						filterResourceByLocale(locale, profiledRecord);
 						recordsList.add(Json.toJson(profiledRecord));
+						fillContextData(
+								DB.getCollectionObjectDAO()
+										.getSliceOfCollectedResources(colId, start, start + count)
+										.getCollectedResources(), recordsList);
 					}
 				}
 				result.put(
@@ -1161,7 +1270,7 @@ public class CollectionObjectController extends WithResourceController {
 		Query q = new Query();
 		String userId = effectiveUserId();
 		Query.Clause searchTerm = Query.Clause.create()
-				.add( "anywhere", term, false );
+				.add( "descriptiveData.label.default", term, false );
 		Query.Clause type = Query.Clause.create()
 				.add( "collectedIn", id, true );
 

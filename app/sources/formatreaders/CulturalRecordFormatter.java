@@ -70,6 +70,7 @@ public abstract class CulturalRecordFormatter extends JsonContextRecordFormatRea
 			fillObjectFrom(text);
 		} catch (Exception e) {
 			log.error("Error Importing object from source",e );
+			log.error("json item "+text);
 		}
 		List<ProvenanceInfo> provenance = object.getProvenance();
 		int index = provenance.size() - 1;
