@@ -354,6 +354,8 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 							colId,
 							new ArrayList<String>(Arrays
 									.asList("administrative.access")));
+			if (parentCollection == null)
+				continue;
 			if (parentCollection.getAdministrative().getAccess().getIsPublic())
 				return true;
 		}
