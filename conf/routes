@@ -89,6 +89,7 @@ GET     /collection/importEuropeanaCollection	controllers.CollectionObjectContro
 GET      /collection/exportToOWL 			    controllers.CollectionObjectController.exportCollectionObjectToOWL(cname)
 GET      /collection/update 			    controllers.CollectionObjectController.updateCollectionObject(collectionId: String)
 
+GET      /collection/multiple                   controllers.CollectionObjectController.getMultipleCollectionObjects( id: java.util.List[String],profile: String ?="MEDIUM", locale: play.libs.F.Option[java.lang.String])
 GET	     /collection/:id 	        			controllers.CollectionObjectController.getCollectionObject(id, profile: String ?="MEDIUM", locale: play.libs.F.Option[java.lang.String])
 PUT		 /collection/:id 						controllers.CollectionObjectController.editCollectionObject(id)
 DELETE   /collection/:id	                    controllers.CollectionObjectController.deleteCollectionObject(id)
