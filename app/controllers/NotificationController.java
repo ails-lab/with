@@ -21,6 +21,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
+import model.resources.WithResourceType;
 import model.usersAndGroups.User;
 import model.usersAndGroups.UserGroup;
 import notifications.Notification;
@@ -145,11 +146,14 @@ public class NotificationController extends WithController {
 				ObjectId userId = notification.getSender();
 				User user = DB.getUserDAO().get(userId);
 				return groupNotification(notification, user, accept, currentUser.getDbId(), user.getDbId(), activity);
-			case COLLECTION_SHARE: //notification has been sent only in case of upgrade
+			case COLLECTION_SHARE:
+				 EXHIBITION_SHARE: //notification has been sent only in case of upgrade
 				if (notification instanceof ResourceNotification) {
 					resourceNotification = (ResourceNotification) notification;
 					ShareInfo shareInfo = resourceNotification.getShareInfo();
-					activity = accept ? Activity.COLLECTION_SHARED : Activity.COLLECTION_REJECTED;
+					Activity shared = (notification.getActivity() == Activity.COLLECTION_SHARE) ? Activity.COLLECTION_SHARED : Activity.EXHIBITION_SHARED;
+					Activity rejected = (notification.getActivity() == Activity.COLLECTION_SHARE) ? Activity.COLLECTION_REJECTED : Activity.EXHIBITION_REJECTED;
+					activity = accept ? shared : rejected;
 					resourceNotification.setPendingResponse(false);
 					resourceNotification.setReadAt(new Timestamp(now.getTime()));
 					DB.getNotificationDAO().makePermanent(notification);
@@ -159,7 +163,7 @@ public class NotificationController extends WithController {
 						RightsController.changeAccess(resourceId, shareInfo.getUserOrGroup(), shareInfo.getPreviousAccess(), shareInfo.getOwnerEffectiveIds(),
 								true, false);
 						ResourceNotification newNotification = new ResourceNotification();
-						newNotification.setActivity(Activity.COLLECTION_REJECTED);
+						newNotification.setActivity(rejected);
 						newNotification.setResource(resourceNotification.getResource());
 						newNotification.setShareInfo(shareInfo);
 						newNotification.setSender(notification.getReceiver());
