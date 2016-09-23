@@ -28,7 +28,7 @@ import org.elasticsearch.search.fetch.source.FetchSourceContext;
 import play.Logger;
 
 public class ElasticEraser {
-	static private final Logger.ALogger log = Logger.of(ElasticUpdater.class);
+	static private final Logger.ALogger log = Logger.of(ElasticEraser.class);
 
 
 	/*
