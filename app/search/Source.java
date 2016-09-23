@@ -91,4 +91,10 @@ public interface Source {
 	 * than about 20 values as a result don't make much sense.
 	 */
 	public Promise<String[]> autocomplete(String partialQueryString);
+
+	/**
+	 * If the source supports an API console, return the URL, otherwise return null.
+	 * @return
+	 */
+	public String apiConsole();
 }

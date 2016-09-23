@@ -51,6 +51,7 @@ import sources.core.ParallelAPICall.Priority;
 import utils.Tuple;
 import annotators.Annotator;
 import annotators.AnnotatorConfig;
+import controllers.WithController.Action;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -414,5 +415,24 @@ public class RecordResourceController extends WithResourceController {
 			result.put("error", e.getMessage());
 			return internalServerError(result);
 		}
+	}
+	
+	public static Result getMultipleRecordResources(List<String> id, String profile, Option<String> locale) {
+		ArrayNode result = Json.newObject().arrayNode();
+		for (String singleId : id) {
+			try {
+				ObjectId recordId = new ObjectId(singleId);
+				Result response = errorIfNoAccessToRecord(Action.READ, recordId);
+				if (!response.toString().equals(ok().toString()))
+					continue;
+				RecordResource record = DB.getRecordResourceDAO().getByIdAndExclude(recordId, Arrays.asList("content"));
+                RecordResource profiledRecord = record.getRecordProfile(profile);
+                filterResourceByLocale(locale, profiledRecord);
+				result.add(Json.toJson(profiledRecord));
+			} catch (Exception e) {
+				log.error( e.getMessage(), e );
+			}       	
+		}
+		return ok( result );
 	}
 }

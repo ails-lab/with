@@ -194,6 +194,14 @@ public abstract class ISpaceSource {
 	public void setVmap(FilterValuesMap vmap) {
 		this.vmap = vmap;
 	}
+
+	/**
+	 * Override if you have a URL for an API console.
+	 * @return
+	 */
+    public  String apiConsole() {
+    	return null;
+	}
 	
 	/*public WithResource fillObjectFrom(JsonNode rec) {
 		return new WithResource();

@@ -437,5 +437,9 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 		}
 		return val;
 	}
-	
+
+	@Override
+	public String apiConsole() {
+		return "http://labs.europeana.eu/api/console/?function=search&query=example";
+	}
 }

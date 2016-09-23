@@ -16,17 +16,16 @@
 
 package sources;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Function;
 
 import play.Logger;
 import play.libs.F.Promise;
-import search.Query;
-import search.Response.SingleResponse;
-import search.Source;
-import search.Sources;
+import search.*;
 import search.Filter;
+import search.Response.SingleResponse;
 import sources.core.ParallelAPICall;
 import elastic.ElasticCoordinator;
 import elastic.ElasticSearcher.SearchOptions;
@@ -45,8 +44,8 @@ public class ElasticSource implements Source {
 	@Override
 	public Promise<SingleResponse> execute(Query query) {
 		SearchOptions elasticoptions = new SearchOptions();
-		elasticoptions.count = query.count;
-		elasticoptions.offset = query.start;
+		elasticoptions.count = query.getCount();
+		elasticoptions.offset = query.getStart();
 		elasticoptions.getAggregatedFields().addAll(query.facets);
 
 
@@ -75,9 +74,12 @@ public class ElasticSource implements Source {
 
 	@Override
 	public Set<String> supportedFieldIds() {
-		// TODO Auto-generated method stub
-		return null;
+		Set<String> res = new HashSet();
+		res.addAll(Fields.allValues());
+		return res;
 	}
 
-
+	public String apiConsole() {
+		return null;
+	}
 }

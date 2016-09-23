@@ -79,6 +79,7 @@ public class UserAndGroupManager extends WithController {
 					// costly?
 					node.put("value", user.getUsername());
 					node.put("data", data);
+				//	node.put("id", user.getDbId().toString());
 					suggestions.add(node);
 				}
 			}
@@ -108,6 +109,7 @@ public class UserAndGroupManager extends WithController {
 							 */
 							node.put("value", group.getUsername());
 							node.put("data", data);
+						//	node.put("id", group.getDbId().toString());
 							suggestions.add(node);
 						}
 					}
@@ -323,6 +325,11 @@ public class UserAndGroupManager extends WithController {
 		ObjectNode result = Json.newObject();
 		try {
 			String adminId = effectiveUserId();
+			if (adminId.equals(id)){
+				result.put("error",
+						"You should not remove yourself from a group if you are an administrator!");
+				return forbidden(result);
+			}
 			if ((adminId == null) || (adminId.equals(""))) {
 				result.put("error",
 						"Only creator or administrators of the group have the right to edit the group");
@@ -592,6 +599,11 @@ public class UserAndGroupManager extends WithController {
 		ObjectNode result = Json.newObject();
 		try {
 			String adminId = effectiveUserId();
+			if (adminId.equals(id)){
+				result.put("error",
+						"You should not remove your self from the administrators of a group!");
+				return forbidden(result);
+			}
 			if ((adminId == null) || (adminId.equals(""))) {
 				result.put("error",
 						"Only creator or administrators of the group have the right to edit the group");

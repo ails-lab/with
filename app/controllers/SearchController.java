@@ -124,6 +124,12 @@ public class SearchController extends WithController {
 			// Parse the query.
 			try {
 				final search.Query q = Json.fromJson(json, search.Query.class );
+				// fix it up or write a deserializer
+				if( q.getPage() > 0 ) {
+					q.setPageAndSize( q.getPage(), q.getPageSize());
+				} else {
+					q.setStartCount( q.getStart(), q.getCount());
+				}
 				// check if the query needs readability additions for WITHin
 				if( q.containsSource( Sources.WITHin)) {
 					// add conditions for visibility in WITH
@@ -136,6 +142,9 @@ public class SearchController extends WithController {
 					}
 					q.addClause( visible.filters());
 				}
+				// print warnings in the log for fields not known
+				q.validateFieldIds();
+
 				// split the query
 				Map<Sources, Query> queries = q.splitBySource();
 				// create promises
@@ -193,6 +202,7 @@ public class SearchController extends WithController {
 			for(String fieldId: fieldIds )
 				jsonSource.withArray("supportedFields").add( fieldId );
 			jsonSource.put("name", source.name());
+			jsonSource.put("apiConsole", s.apiConsole());
 			res.add( jsonSource );
 		}
 		return ok(Json.toJson(res));
@@ -411,12 +421,19 @@ public class SearchController extends WithController {
 	public static Promise<Result> searchForMLTRelatedItems() {
 		JsonNode json = request().body().asJson();
 		final search.Query q = Json.fromJson(json, search.Query.class );
+		// fix it up or write a deserializer
+		if( q.getPage() > 0 ) {
+			q.setPageAndSize( q.getPage(), q.getPageSize());
+		} else {
+			q.setStartCount( q.getStart(), q.getCount());
+		}
+
 		try {
 
 			SearchOptions options = new SearchOptions(0, 10);
 			options.setScroll(false);
-			options.setOffset(q.page);
-			options.setCount(q.count);
+			options.setOffset(q.getStart());
+			options.setCount(q.getCount());
 			ElasticCoordinator co = new ElasticCoordinator(options);
 			SingleResponse sr = co.relatedMLTSearch(q.filters);
 
@@ -434,12 +451,19 @@ public class SearchController extends WithController {
 	public static Promise<Result> searchForDisMaxRelatedItems() {
 		JsonNode json = request().body().asJson();
 		final search.Query q = Json.fromJson(json, search.Query.class );
+		// fix it up or write a deserializer
+		if( q.getPage() > 0 ) {
+			q.setPageAndSize( q.getPage(), q.getPageSize());
+		} else {
+			q.setStartCount( q.getStart(), q.getCount());
+		}
+
 		try {
 
 			SearchOptions options = new SearchOptions(0, 10);
 			options.setScroll(false);
-			options.setOffset(q.page);
-			options.setCount(q.count);
+			options.setOffset(q.getStart());
+			options.setCount(q.getCount());
 			ElasticCoordinator co = new ElasticCoordinator(options);
 			SingleResponse sr = co.relatedDisMaxSearch(q.filters);
 

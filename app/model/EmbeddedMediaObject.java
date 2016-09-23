@@ -196,8 +196,9 @@ public class EmbeddedMediaObject {
 		 * Videos: 720p or 1080p.
 		 * Audio: More than 44.1 kHz.
 		 */
-		HIGH;
-		//UNKNOWN, IMAGE_SMALL, IMAGE_500k, IMAGE_1, IMAGE_4, VIDEO_SD, VIDEO_HD, AUDIO_8k, AUDIO_32k, AUDIO_256k, TEXT_IMAGE, TEXT_TEXT
+		HIGH,
+		
+		IMAGE_SMALL, IMAGE_500k, IMAGE_1, IMAGE_4, VIDEO_SD, VIDEO_HD, AUDIO_8k, AUDIO_32k, AUDIO_256k, TEXT_IMAGE, TEXT_TEXT
 	}
 	
 	public void computeQuality() {
@@ -213,9 +214,13 @@ public class EmbeddedMediaObject {
 			break;
 
 		default:
+			setQuality(Quality.UNKNOWN);
 			break;
 		}
+				
 	}
+	
+	
 
 
 	// in KB
