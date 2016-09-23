@@ -53,7 +53,6 @@ public class RijksmuseumSpaceSource extends ISpaceSource {
 	public RijksmuseumSpaceSource() {
 		super(Sources.Rijksmuseum);
 		apiKey = "SECRET_KEY";
-		addRestriction(FiltersFields.TYPE.getFilterId(),WithMediaType.IMAGE.getName());
 		formatreader = new RijksmuseumRecordFormatter(vmap);
 	}
 

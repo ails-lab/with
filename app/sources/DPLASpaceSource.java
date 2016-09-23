@@ -24,6 +24,7 @@ import java.util.function.Function;
 import com.fasterxml.jackson.databind.JsonNode;
 
 import model.resources.RecordResource;
+import model.resources.WithResource;
 import play.Logger;
 import play.Logger.ALogger;
 import play.libs.Json;
@@ -40,6 +41,7 @@ import sources.core.Utils;
 import sources.core.Utils.Pair;
 import sources.formatreaders.DPLARecordFormatter;
 import sources.utils.FunctionsUtils;
+import sources.utils.JsonContextRecord;
 
 public class DPLASpaceSource extends ISpaceSource {
 	public static final ALogger log = Logger.of( DPLASpaceSource.class);
@@ -114,6 +116,7 @@ public class DPLASpaceSource extends ISpaceSource {
 		res.query = httpQuery;
 		JsonNode response;
 		CommonFilterLogic type = new CommonFilterLogic(FiltersFields.TYPE);
+		CommonFilterLogic rights = new CommonFilterLogic(FiltersFields.RIGHTS);
 		CommonFilterLogic provider = new CommonFilterLogic(FiltersFields.PROVIDER);
 		CommonFilterLogic dataProvider = new CommonFilterLogic(FiltersFields.DATA_PROVIDER);
 		CommonFilterLogic creator = new CommonFilterLogic(FiltersFields.CREATOR);
@@ -134,8 +137,9 @@ public class DPLASpaceSource extends ISpaceSource {
 					// "type", false);
 					// countValue(type, t);
 
-					res.addItem(formatreader.readObjectFrom(item));
-					// countValue(creator, obj.getCreator());
+					WithResource myitem;
+					res.addItem(myitem = formatreader.readObjectFrom(item));
+					countValue(rights, new JsonContextRecord(item).getStringArrayValue("sourceResource.rights"));
 
 				}
 				res.facets = response.path("facets");
@@ -158,6 +162,7 @@ public class DPLASpaceSource extends ISpaceSource {
 				res.filtersLogic.add(creator);
 				res.filtersLogic.add(country);
 				res.filtersLogic.add(contributor);
+				res.filtersLogic.add(rights);
 
 			} catch (Exception e) {
 				log.error( "", e );
