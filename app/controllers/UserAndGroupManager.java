@@ -341,6 +341,11 @@ public class UserAndGroupManager extends WithController {
 						"You are the only administrator of this group!");
 				return forbidden(result);
 			}
+			if (group.getCreator().equals(new ObjectId(id))){
+				result.put("error",
+						"Cannot remove the creator!");
+				return forbidden(result);
+			}
 			if (!group.getAdminIds().contains(new ObjectId(adminId))
 					&& !admin.isSuperUser()
 					&& !group.getCreator().equals(new ObjectId(adminId))) {
