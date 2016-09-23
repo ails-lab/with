@@ -325,11 +325,6 @@ public class UserAndGroupManager extends WithController {
 		ObjectNode result = Json.newObject();
 		try {
 			String adminId = effectiveUserId();
-			if (adminId.equals(id)){
-				result.put("error",
-						"You should not remove yourself from a group if you are an administrator!");
-				return forbidden(result);
-			}
 			if ((adminId == null) || (adminId.equals(""))) {
 				result.put("error",
 						"Only creator or administrators of the group have the right to edit the group");
@@ -340,6 +335,11 @@ public class UserAndGroupManager extends WithController {
 			if (group == null) {
 				result.put("error", "Cannot retrieve group from database");
 				return internalServerError(result);
+			}
+			if (adminId.equals(id) && (group.getAdminIds().size() == 1)){
+				result.put("error",
+						"You are the only administrator of this group!");
+				return forbidden(result);
 			}
 			if (!group.getAdminIds().contains(new ObjectId(adminId))
 					&& !admin.isSuperUser()
