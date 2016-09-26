@@ -24,6 +24,7 @@ import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -78,7 +79,6 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import db.DB;
-//import org.mindswap.pellet.owlapi.Reasoner;
 
 
 public class DBPediaDataImporter {
@@ -354,8 +354,8 @@ public class DBPediaDataImporter {
 
 		OpenMode om = OpenMode.CREATE;
 	  
-		Directory dir = FSDirectory.open(tmpIndex);
-		IndexWriterConfig iwc = new IndexWriterConfig(null, new KeywordAnalyzer());
+		Directory dir = FSDirectory.open(tmpIndex.toPath());
+		IndexWriterConfig iwc = new IndexWriterConfig(new KeywordAnalyzer());
 		iwc.setOpenMode(om);
 		
 		writer = new IndexWriter(dir, iwc);
@@ -440,7 +440,7 @@ public class DBPediaDataImporter {
 		vocabulary.put("name", "dbx");
 		vocabulary.put("version", "2015-10");
 
-		try (Directory dir = FSDirectory.open(tmpIndex);
+		try (Directory dir = FSDirectory.open(tmpIndex.toPath());
 			  DirectoryReader reader = DirectoryReader.open(dir)) {
 		
 			IndexSearcher searcher = new IndexSearcher(reader);

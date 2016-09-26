@@ -80,8 +80,12 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import db.DB;
 import db.WithResourceDAO;
 import elastic.Elastic;
+import elastic.ElasticCoordinator;
 import elastic.ElasticSearcher;
 import elastic.ElasticSearcher.SearchOptions;
+import annotators.Lexicon.Vocabulary;
+import annotators.Annotator.AnnotatorType;
+import controllers.thesaurus.struct.SearchSuggestion;
 
 /**
  * @author mariaral
@@ -251,8 +255,6 @@ public class ThesaurusController extends Controller {
 	public static Result getSuggestions(String word) {
 		
 		try {
-			ElasticSearcher es = new ElasticSearcher();
-			
 			ArrayNode terms = Json.newObject().arrayNode();
 			
 			Matcher m = p.matcher(word);
@@ -301,7 +303,9 @@ public class ThesaurusController extends Controller {
 //				System.out.println(query);
 				SearchOptions so = new SearchOptions(0, Integer.MAX_VALUE);
 				so.isPublic = false;
-				SearchResponse res = es.execute(query, so, retrievedFields);
+				so.searchFields = retrievedFields;
+				ElasticCoordinator es = new ElasticCoordinator();
+				SearchResponse res = es.queryExcecution(query, so);
 				SearchHits sh = res.getHits();
 				
 				ArrayList<SearchSuggestion> suggestions = new ArrayList<SearchSuggestion>();

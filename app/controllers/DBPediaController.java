@@ -92,7 +92,7 @@ public class DBPediaController extends WithResourceController {
 		qs.append(")");
 		
 		QueryBuilder builder = new QueryBuilder(DBPEDIA_INDEX);
-		builder.addQuery("q", qs.toString());
+		builder.setQuery("q", qs.toString());
 		builder.addSearchParam("fl", "uri,type");
 		builder.addSearchParam("wt", "json");
 		builder.addSearchParam("start", start + "");

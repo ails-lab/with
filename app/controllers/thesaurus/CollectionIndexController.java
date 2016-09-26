@@ -23,8 +23,13 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeSet;
 
 import model.DescriptiveData;
+import model.annotations.Annotation;
+import model.annotations.ContextData;
+import model.annotations.ContextData.ContextDataBody;
+import model.annotations.bodies.AnnotationBodyTagging;
 import model.basicDataTypes.Language;
 import model.basicDataTypes.LiteralOrResource;
 import model.basicDataTypes.MultiLiteral;
@@ -32,6 +37,7 @@ import model.basicDataTypes.MultiLiteralOrResource;
 import model.resources.CulturalObject.CulturalObjectData;
 import model.resources.PlaceObject.PlaceData;
 import model.resources.AgentObject.AgentData;
+import model.resources.RecordResource;
 import model.resources.ThesaurusObject.SKOSTerm;
 
 import org.bson.types.ObjectId;
@@ -54,7 +60,9 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import controllers.CollectionObjectController;
 import controllers.WithResourceController;
+import controllers.thesaurus.struct.BodyClass;
 import controllers.thesaurus.struct.Counter;
+import controllers.thesaurus.struct.SortClass;
 import controllers.thesaurus.struct.ThesaurusFacet;
 import db.DB;
 import db.ThesaurusObjectDAO;
