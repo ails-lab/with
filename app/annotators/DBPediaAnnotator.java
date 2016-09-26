@@ -35,6 +35,7 @@ import model.annotations.selectors.PropertyTextFragmentSelector;
 import model.annotations.targets.AnnotationTarget;
 import model.basicDataTypes.Language;
 import model.basicDataTypes.MultiLiteral;
+import annotators.Lexicon.Vocabulary;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
@@ -42,7 +43,6 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.HttpClientBuilder;
-import org.bson.types.ObjectId;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.hp.hpl.jena.query.QueryExecution;
@@ -80,6 +80,14 @@ public class DBPediaAnnotator extends Annotator {
 	
 	private String service;
 	
+	public static AnnotatorType getType() {
+		return AnnotatorType.NER;
+	}
+	
+	public static String getName() {
+		return "DBPedia Spotlight Annotator";
+	}
+
     public static DBPediaAnnotator getAnnotator(Language lang) {
 		if (!serverMap.containsKey(lang)) {
 			return null;
@@ -103,9 +111,6 @@ public class DBPediaAnnotator extends Annotator {
     	service = serverMap.get(lang);
     }
 
-	public String getName() {
-		return "DBPediaSpotlight";
-	}
 
 	public String getService() {
 		return service;
@@ -180,7 +185,7 @@ public class DBPediaAnnotator extends Annotator {
 	    		
 	    		AnnotationBodyTagging annBody = new AnnotationBodyTagging();
 	    		annBody.setUri(URI);
-	    		annBody.setUriVocabulary(AnnotationBodyTagging.Vocabulary.DBPEDIA_RESOURCE);
+	    		annBody.setUriVocabulary(Vocabulary.DBPEDIA_RESOURCE.getName());
 	    		
 	    		MultiLiteral ml = new MultiLiteral(lang, label);
 	    		ml.fillDEF();
@@ -200,8 +205,6 @@ public class DBPediaAnnotator extends Annotator {
 	    		admin.setGenerator(service);
 	    		admin.setGenerated(new Date());
 	    		admin.setConfidence(score);
-//	    		admin.setWithCreator(withCreator);
-//	    		admin.setCreated(new Date());
 	    		
 	    		admins.add(admin);
 	    		

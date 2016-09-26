@@ -14,7 +14,7 @@
  */
 
 
-package controllers.thesaurus;
+package controllers.thesaurus.struct;
 
 import java.util.ArrayList;
 import java.util.Collection;

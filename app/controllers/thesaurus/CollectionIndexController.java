@@ -54,6 +54,8 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import controllers.CollectionObjectController;
 import controllers.WithResourceController;
+import controllers.thesaurus.struct.Counter;
+import controllers.thesaurus.struct.ThesaurusFacet;
 import db.DB;
 import db.ThesaurusObjectDAO;
 import elastic.ElasticCoordinator;
@@ -82,6 +84,12 @@ public class CollectionIndexController extends WithResourceController	{
 		ObjectNode result = Json.newObject();
 		
 		try {
+//			Result response = errorIfNoAccessToCollection(Action.READ, new ObjectId(id));
+//			
+//			if (!response.toString().equals(ok().toString())) {
+//				return response;
+//			}
+			
 			JsonNode json = request().body().asJson();
 			
 			QueryBuilder query = getIndexCollectionQuery(new ObjectId(id), json);
@@ -122,14 +130,14 @@ public class CollectionIndexController extends WithResourceController	{
 			ThesaurusFacet tf = new ThesaurusFacet();
 			tf.create(list, selected);
 			
-			ObjectId collectionDbId = new ObjectId(id);
-			Result response = errorIfNoAccessToCollection(Action.READ, collectionDbId);
-			
-			if (!response.toString().equals(ok().toString())) {
-				return response;
-			} else {
+//			ObjectId collectionDbId = new ObjectId(id);
+//			Result response = errorIfNoAccessToCollection(Action.READ, collectionDbId);
+//			
+//			if (!response.toString().equals(ok().toString())) {
+//				return response;
+//			} else {
 				return ok(tf.toJSON(Language.EN));
-			}
+//			}
 		} catch (Exception e) {
 			result.put("error", e.getMessage());
 			return internalServerError(result);
@@ -140,6 +148,12 @@ public class CollectionIndexController extends WithResourceController	{
 		ObjectNode result = Json.newObject();
 		
 		try {
+//			Result response = errorIfNoAccessToCollection(Action.READ, new ObjectId(id));
+//			
+//			if (!response.toString().equals(ok().toString())) {
+//				return response;
+//			}
+			
 			JsonNode json = request().body().asJson();
 			
 			QueryBuilder query = getIndexCollectionQuery(new ObjectId(id), json);
@@ -189,16 +203,83 @@ public class CollectionIndexController extends WithResourceController	{
 			
 			reply.put("terms", terms);
 			
-			ObjectId collectionDbId = new ObjectId(id);
-			Result response = errorIfNoAccessToCollection(Action.READ, collectionDbId);
-			
-			if (!response.toString().equals(ok().toString()))
-				return response;
-			else {
+//			ObjectId collectionDbId = new ObjectId(id);
+//			Result response = errorIfNoAccessToCollection(Action.READ, collectionDbId);
+//			
+//			if (!response.toString().equals(ok().toString()))
+//				return response;
+//			else {
 				return ok(reply);
-			}
+//			}
 		} catch (Exception e) {
 //			e.printStackTrace();
+			result.put("error", e.getMessage());
+			return internalServerError(result);
+		}
+	}
+
+	public static Result getCollectionAnnotations(String cid) {
+		ObjectNode result = Json.newObject();
+		
+		try {
+			Result response = errorIfNoAccessToCollection(Action.READ, new ObjectId(cid));
+			
+			if (!response.toString().equals(ok().toString())) {
+				return response;
+			}
+			
+			List<ContextData<ContextDataBody>> rr = DB.getCollectionObjectDAO().getById(new ObjectId(cid)).getCollectedResources();
+			
+			Map<BodyClass, Counter> annMap = new HashMap();
+			
+			for (ContextData<ContextDataBody> cd : rr) {
+				ObjectId rid = cd.getTarget().getRecordId();
+
+				RecordResource<RecordResource.RecordDescriptiveData> rec = DB.getRecordResourceDAO().getById(rid);
+				rec.fillAnnotations();
+					
+				Set<BodyClass> uris = new HashSet<>();
+					
+				for (Annotation ann : rec.getAnnotations()) {
+					AnnotationBodyTagging body = (AnnotationBodyTagging)ann.getBody();
+					if (body.getUri() != null) {
+						uris.add(new BodyClass(body.getUri(), body.getLabel()));
+					}
+				}
+				
+				for (BodyClass bc : uris) {
+					Counter cc = annMap.get(bc);
+					if (cc == null) {
+						cc = new Counter(0);
+						annMap.put(bc, cc);
+					}
+					
+					cc.increase();
+				}
+			}
+			
+			Set<SortClass> sorted = new TreeSet<>();
+			
+			for (Map.Entry<BodyClass, Counter> entry : annMap.entrySet()) {
+				sorted.add(new SortClass(entry.getKey().uri, entry.getKey().label, entry.getValue().getValue()));
+			}
+			
+			ArrayNode array = Json.newObject().arrayNode();
+
+			for (SortClass sc : sorted) {
+				ObjectNode entry = Json.newObject();
+				entry.put("uri", sc.uri);
+				entry.put("label", Json.toJson(sc.label));
+				entry.put("count", sc.count);
+				
+				array.add(entry);
+			}
+
+			result.put("annotations", array);
+			
+			return ok(result);
+			
+		} catch (Exception e) {
 			result.put("error", e.getMessage());
 			return internalServerError(result);
 		}

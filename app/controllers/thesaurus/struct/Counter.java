@@ -14,7 +14,7 @@
  */
 
 
-package controllers.thesaurus;
+package controllers.thesaurus.struct;
 
 public class Counter {
 

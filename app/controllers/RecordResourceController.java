@@ -20,6 +20,7 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -28,6 +29,8 @@ import javax.validation.ConstraintViolation;
 
 import model.DescriptiveData;
 import model.annotations.Annotation;
+import model.annotations.Annotation.AnnotationAdmin;
+import model.annotations.Annotation.AnnotationScore;
 import model.annotations.ContextData;
 import model.annotations.ContextData.ContextDataType;
 import model.annotations.selectors.PropertyTextFragmentSelector;
@@ -37,6 +40,7 @@ import model.basicDataTypes.MultiLiteral;
 import model.resources.RecordResource;
 import model.resources.collection.CollectionObject;
 import model.resources.collection.CollectionObject.CollectionAdmin;
+import model.usersAndGroups.User;
 
 import org.bson.types.ObjectId;
 
@@ -327,8 +331,13 @@ public class RecordResourceController extends WithResourceController {
 						for (AnnotatorConfig annConfig : annConfigs) {
 							Annotator annotator = Annotator.getAnnotator(annConfig.getAnnotatorClass(), lang);
 							if (annotator != null) {
-								for (Annotation ann : annotator.annotate(text, target, annConfig.getProps())) {
-									AnnotationController.addAnnotation(ann, user);
+								try {
+									for (Annotation ann : annotator.annotate(text, target, annConfig.getProps())) {
+										AnnotationController.addAnnotation(ann, user);
+									}
+								} catch (Exception e) {
+									e.printStackTrace();
+									log.error(e.getMessage());
 								}
 							}
 						}
@@ -337,6 +346,51 @@ public class RecordResourceController extends WithResourceController {
 			}
 		}
 	}
+	
+	public static Result deleteRejectedAnnotations(String rid) {
+		ObjectNode result = Json.newObject();
+		try {
+			Result response = errorIfNoAccessToRecord(Action.EDIT, new ObjectId(rid));
+			if (!response.toString().equals(ok().toString())) {
+				return response;
+			} else {
+				ObjectId userId = WithController.effectiveUserDbId();
+					
+				for (Annotation annotation : DB.getAnnotationDAO().getUserAnnotations(userId, new ObjectId(rid), Arrays.asList("annotators", "score.rejectedBy"))) {
+					AnnotationScore as = annotation.getScore();
+					if (as != null) {
+						ArrayList<ObjectId> rej = as.getRejectedBy();
+						if (rej != null) {
+							for (ObjectId id : rej) {
+								if (id.equals(userId)) {
+									ArrayList<AnnotationAdmin> annotators = annotation.getAnnotators();
+									AnnotationAdmin annotator = null;
+									for (AnnotationAdmin a : annotators) {
+										if (a.getWithCreator().equals(userId)) {
+											annotator = a;
+										}
+									}
+			
+									ObjectId annId = annotation.getDbId();
+									if (annotators.size() == 1) {
+										DB.getAnnotationDAO().deleteAnnotation(annId);
+									} else {
+										DB.getAnnotationDAO().removeAnnotators(annotation.getDbId(), Arrays.asList(annotator));
+									}
+								}
+							}
+						}
+					}
+				}
+				
+				return ok();
+			}				
+		} catch (Exception e) {
+			result.put("error", e.getMessage());
+			return internalServerError(result);
+		}
+	}
+
 	
 	public static Result getRandomRecords(String groupId, int batchCount) {
 		ObjectId group = new ObjectId(groupId);
@@ -407,7 +461,17 @@ public class RecordResourceController extends WithResourceController {
 				List<Annotation> anns = record.getAnnotations();
 				
 				for (Annotation ann : anns) {
-					array.add(Json.toJson(ann));
+					JsonNode json = Json.toJson(ann);
+					for (Iterator<JsonNode> iter = json.get("annotators").elements(); iter.hasNext();) {
+						JsonNode annotator = iter.next();
+						
+						String userId = annotator.get("withCreator").asText();
+						
+						User user = DB.getUserDAO().getById(new ObjectId(userId));
+						((ObjectNode)annotator).put("username", user.getUsername());
+						
+					}
+					array.add(json);
 				}
 				return ok(array);
 			}				

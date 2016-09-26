@@ -142,6 +142,39 @@ public class ThesaurusObject {
 
 	@JsonInclude(value = JsonInclude.Include.NON_NULL)
 	@Embedded
+	public static class SKOSVocabulary {
+
+		private String name;
+
+		private String version;
+		
+		public SKOSVocabulary() {}
+
+		public SKOSVocabulary(String name, String version) {
+			this.name = name;
+			this.version = version;
+		}
+		
+		public String getName() {
+			return name;
+		}
+		
+		public String getVersion() {
+			return version;
+		}
+		
+		public void setName(String name) {
+			this.name = name;
+		}
+		
+		public void setVersion(String version) {
+			this.version = version;
+		}
+		
+	}
+
+	@JsonInclude(value = JsonInclude.Include.NON_NULL)
+	@Embedded
 	public static class SKOSSemantic extends SKOSTerm {
 
 		private Literal scopeNote;
@@ -156,7 +189,9 @@ public class ThesaurusObject {
 		private List<String> inCollections;
 		private List<String> inSchemes;
 		private List<String> exactMatch;
-
+		
+		private SKOSVocabulary vocabulary;
+		
 		public String getUri() {
 			return uri;
 		}
@@ -268,6 +303,14 @@ public class ThesaurusObject {
 		public void setExactMatch(List<String> exactMatch) {
 			this.exactMatch = exactMatch;
 		}
+		
+		public SKOSVocabulary getVocabulary() {
+			return vocabulary;
+		}
+
+		public void setVocabulary(SKOSVocabulary vocabulary) {
+			this.vocabulary = vocabulary;
+		}
 	}
 
 
@@ -373,8 +416,8 @@ public class ThesaurusObject {
 
 		map.put("uri", semantic.uri);
 		
-		if (semantic.thesaurus != null) {
-			map.put("thesaurus", semantic.thesaurus);
+		if (semantic.vocabulary != null) {
+			map.put("vocabulary", semantic.vocabulary.getName());
 		}
 
 		if (semantic.prefLabel != null) {
@@ -425,6 +468,69 @@ public class ThesaurusObject {
 			if (!altLabel.isEmpty()) {
 				map.putAll(flattenMultiLiteralMap("altLabel", altLabel));
 				map.put("altLabel_all", allAltLabels);
+			}
+		}
+
+		if (semantic.broader != null) {
+			List<String> broaderUris = new ArrayList<>();
+
+			Map<String, List<String>> broaderPrefLabelAcc = new HashMap<>();
+			Map<String, List<String>> broaderAltLabelAcc = new HashMap<>();
+			List<String> allBroaderPrefLabel = new ArrayList<>();
+			List<String> allBroaderAltLabel = new ArrayList<>();
+
+			for (SKOSTerm broader : semantic.broader) {
+				broaderUris.add(broader.getUri());
+
+				if (broader.prefLabel != null) {
+					for (Map.Entry<String, String> e : broader.prefLabel.entrySet()) {
+						String k = e.getKey();
+						String v = e.getValue();
+
+						if (!k.equals(Language.DEFAULT) && (v != null) && (v.length() > 0)) {
+							allBroaderPrefLabel.add(v);
+							addToLangAll(broaderPrefLabelAcc, k, v);
+							addToLangAll(langAcc, k, v);
+						}
+					}
+				}
+
+				if (broader.altLabel != null) {
+					for (Map.Entry<String, List<String>> e : broader.altLabel.entrySet()) {
+						String k = e.getKey();
+						List<String> v = e.getValue();
+
+						if (!k.equals(Language.DEFAULT) && (v != null) && (v.size() > 0)) {
+							for (String vv : e.getValue()) {
+								if ((vv != null) && (vv.length() > 0)) {
+									allBroaderAltLabel.add(vv);
+									addToLangAll(broaderAltLabelAcc, k, vv);
+									addToLangAll(langAcc, k, vv);
+								}
+							}
+						}
+					}
+				}
+			}
+
+			if (broaderUris.size() > 0) {
+				map.put("broaderUri", broaderUris);
+			}
+
+			if (broaderAltLabelAcc.size() > 0) {
+				map.putAll(flattenMultiLiteralMap("broaderPrefLabel", broaderPrefLabelAcc));
+			}
+
+			if (allBroaderPrefLabel.size() > 0) {
+				map.put("broaderPrefLabel_all", allBroaderPrefLabel);
+			}
+
+			if (broaderAltLabelAcc.size() > 0) {
+				map.putAll(flattenMultiLiteralMap("broaderAltLabel", broaderAltLabelAcc));
+			}
+
+			if (allBroaderAltLabel.size() > 0) {
+				map.put("broaderAltLabel_all", allBroaderAltLabel);
 			}
 		}
 

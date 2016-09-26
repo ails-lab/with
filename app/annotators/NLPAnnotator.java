@@ -35,17 +35,13 @@ import model.annotations.targets.AnnotationTarget;
 import model.basicDataTypes.Language;
 
 
-
-
 import model.basicDataTypes.MultiLiteral;
-
-import org.bson.types.ObjectId;
-
+import annotators.Annotator.AnnotatorType;
 import annotators.struct.AnnotatedObject;
 import annotators.struct.AnnotationIndex;
 import annotators.struct.AnnotationValue;
+import annotators.struct.SimpleAnnotationValue;
 import annotators.struct.Span;
-
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.CoreAnnotations.LemmaAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations.NamedEntityTagAnnotation;
@@ -55,29 +51,34 @@ import edu.stanford.nlp.ling.CoreAnnotations.TokensAnnotation;
 import edu.stanford.nlp.pipeline.StanfordCoreNLP;
 import edu.stanford.nlp.util.CoreMap;
 
-public class NERAnnotator extends Annotator {
+public class NLPAnnotator extends Annotator {
 
-	public String getName() {
-		return "StanfordNLP";
-	}
 	
 	public String getService() {
 		return "";
 	}
 	
-    protected static Map<Language, NERAnnotator> annotators = new HashMap<>();
+    protected static Map<Language, NLPAnnotator> annotators = new HashMap<>();
 
-    public static NERAnnotator getAnnotator(Language lang) {
+	public static AnnotatorType getType() {
+		return AnnotatorType.NER;
+	}
+
+	public static String getName() {
+		return "NLP Annotator";
+	}
+
+    public static NLPAnnotator getAnnotator(Language lang) {
     	if (lang != Language.EN) {
     		return null;
     	}
     	
-    	NERAnnotator ta = annotators.get(lang);
+    	NLPAnnotator ta = annotators.get(lang);
     	if (ta == null) {
-    		synchronized (NERAnnotator.class) {
+    		synchronized (NLPAnnotator.class) {
     			ta = annotators.get(lang);
     			if (ta == null) {
-    				ta  = new NERAnnotator();
+    				ta  = new NLPAnnotator();
     				annotators.put(lang, ta);
     			}
     		}
@@ -88,7 +89,7 @@ public class NERAnnotator extends Annotator {
     	
     private StanfordCoreNLP pipeline;
     
-    private NERAnnotator() {
+    private NLPAnnotator() {
     	Properties props = new Properties();
 //    	props.put("annotators", "tokenize, ssplit, pos, lemma, ner, parse, dcoref");
 //    	props.put("annotators", "tokenize, ssplit, pos, lemma, ner, parse");
@@ -115,7 +116,7 @@ public class NERAnnotator extends Annotator {
 	    		
 	    		AnnotationBodyTagging annBody = new AnnotationBodyTagging();
 	    		annBody.setUri("http://nerd.eurecom.fr/ontology#Location");
-	    		annBody.setUriVocabulary(AnnotationBodyTagging.Vocabulary.NERD);
+//	    		annBody.setUriVocabulary(ThesaurusController.Vocabulary.NERD);
 	    		MultiLiteral ml = new MultiLiteral(Language.EN, "Location");
 	    		ml.fillDEF();
     			annBody.setLabel(ml);
@@ -154,7 +155,7 @@ public class NERAnnotator extends Annotator {
 	    		
 	    		AnnotationBodyTagging annBody = new AnnotationBodyTagging();
 	    		annBody.setUri("http://nerd.eurecom.fr/ontology#Person");
-	    		annBody.setUriVocabulary(AnnotationBodyTagging.Vocabulary.NERD);
+//	    		annBody.setUriVocabulary(ThesaurusController.Vocabulary.NERD);
 	    		MultiLiteral ml = new MultiLiteral(Language.EN, "Person");
 	    		ml.fillDEF();
     			annBody.setLabel(ml);
@@ -193,7 +194,7 @@ public class NERAnnotator extends Annotator {
 	    		
 	    		AnnotationBodyTagging annBody = new AnnotationBodyTagging();
 	    		annBody.setUri("http://nerd.eurecom.fr/ontology#Organization");
-	    		annBody.setUriVocabulary(AnnotationBodyTagging.Vocabulary.NERD);
+//	    		annBody.setUriVocabulary(AnnotationBodyTagging.Vocabulary.NERD);
 	    		MultiLiteral ml = new MultiLiteral(Language.EN, "Organization");
 	    		ml.fillDEF();
     			annBody.setLabel(ml);

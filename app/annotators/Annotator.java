@@ -36,13 +36,18 @@ public abstract class Annotator {
 	
 	public static String LANGUAGE = "lang";
 	
-	public abstract String getName();
+//	public abstract String getName();
 	
 	public abstract String getService();
 	
 	public abstract List<Annotation> annotate(String text, AnnotationTarget target, Map<String, Object> properties) throws Exception;
 	
 	private Pattern p = Pattern.compile("(<.*?>)");
+	
+	public static enum AnnotatorType {
+		LOOKUP,
+		NER
+	}
 	
 	protected String strip(String text) {
 		Matcher m = p.matcher(text);
@@ -91,7 +96,7 @@ public abstract class Annotator {
 			res.add(ann);
 		}
 
-		ann = NERAnnotator.getAnnotator(lang);
+		ann = NLPAnnotator.getAnnotator(lang);
 		if (ann != null) {
 			res.add(ann);
 		}
@@ -109,8 +114,8 @@ public abstract class Annotator {
 			return DictionaryAnnotator.getAnnotator(lang, true);
 		}
 
-		if (clazz.equals(NERAnnotator.class)) {
-			return NERAnnotator.getAnnotator(lang);
+		if (clazz.equals(NLPAnnotator.class)) {
+			return NLPAnnotator.getAnnotator(lang);
 		}
 		
 		return null;

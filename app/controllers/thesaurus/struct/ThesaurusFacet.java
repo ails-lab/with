@@ -14,7 +14,7 @@
  */
 
 
-package controllers.thesaurus;
+package controllers.thesaurus.struct;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -24,7 +24,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.jena.atlas.lib.SetUtils;
 import org.bson.types.ObjectId;
 
 import com.fasterxml.jackson.databind.node.ArrayNode;

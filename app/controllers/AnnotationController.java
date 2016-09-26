@@ -110,6 +110,15 @@ public class AnnotationController extends Controller {
 		}
 	}
 
+	public static Result unscoreAnnotation(String id) {
+		try {			
+			DB.getAnnotationDAO().removeScore(new ObjectId(id), WithController.effectiveUserDbId());
+			return ok();
+		} catch (Exception e) {
+			return internalServerError();
+		}
+	}
+	
 	public static Result rejectAnnotation(String id) {
 		try {			
 			DB.getAnnotationDAO().addReject(new ObjectId(id), WithController.effectiveUserDbId());
@@ -118,7 +127,6 @@ public class AnnotationController extends Controller {
 			return internalServerError();
 		}
 	}
-
 	
 	public static Annotation addAnnotation(Annotation annotation, ObjectId user) {
 		

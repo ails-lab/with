@@ -24,7 +24,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.bson.types.ObjectId;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
@@ -41,6 +40,7 @@ import model.annotations.selectors.PropertyTextFragmentSelector;
 import model.annotations.targets.AnnotationTarget;
 import model.basicDataTypes.Language;
 import model.basicDataTypes.MultiLiteral;
+import annotators.Lexicon.Vocabulary;
 import annotators.struct.AnnotatedObject;
 import annotators.struct.AnnotationIndex;
 import annotators.struct.AnnotationValue;
@@ -57,7 +57,6 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import elastic.Elastic;
-import elastic.ElasticCoordinator;
 import elastic.ElasticSearcher;
 import elastic.ElasticSearcher.SearchOptions;
 
@@ -69,6 +68,14 @@ public class DictionaryAnnotator extends Annotator {
 	
 	public static String VOCABULARIES = "VOCABULARIES";
 	
+	public static AnnotatorType getType() {
+		return AnnotatorType.LOOKUP;
+	}
+
+	public static String getName() {
+		return "WITH Dictionary Annotator";
+	}
+
     public static DictionaryAnnotator getAnnotator(Language lang, boolean cs) {
     	DictionaryAnnotator ta = annotators.get(lang);
     	
@@ -92,16 +99,16 @@ public class DictionaryAnnotator extends Annotator {
 		String enField = "prefLabel.en";
 		String uriField = "uri";
 		String thesaurusField = "thesaurus";
-				
+		
+		ElasticSearcher es = new ElasticSearcher();
+		
 		BoolQueryBuilder query = QueryBuilders.boolQuery();
 		query.must(QueryBuilders.termQuery("_type", Elastic.thesaurusResource));
 
 		SearchOptions so = new SearchOptions(0, Integer.MAX_VALUE);
 		so.isPublic = false;
-		so.searchFields = new String[] {langField, altLangField, uriField, thesaurusField, enField};
-		ElasticCoordinator es = new ElasticCoordinator();
 		
-		SearchResponse res = es.queryExcecution(query, so);
+		SearchResponse res = es.execute(query, so, new String[] {langField, altLangField, uriField, thesaurusField, enField} );
 		SearchHits sh = res.getHits();
 
 		Map<String, ArrayList<ObjectNode>> map = new HashMap<>();
@@ -177,10 +184,6 @@ public class DictionaryAnnotator extends Annotator {
 
 	}
 	
-	@Override
-	public String getName() {
-		return "Dictionary Annotator";
-	}
 
 	@Override
 	public String getService() {
@@ -195,13 +198,13 @@ public class DictionaryAnnotator extends Annotator {
 		
 		Chunking chunking = tt.chunk(text);
 		
-		NERAnnotator sann = NERAnnotator.getAnnotator(lang);
+		NLPAnnotator sann = NLPAnnotator.getAnnotator(lang);
 		AnnotationIndex ai = null;
 		if (sann != null) {
 			ai = sann.analyze(text);
 		}
 		
-		Set<AnnotationBodyTagging.Vocabulary> vocs = (Set<AnnotationBodyTagging.Vocabulary>)props.get(VOCABULARIES);
+		Set<Vocabulary> vocs = (Set<Vocabulary>)props.get(VOCABULARIES);
 		
 	    for (Chunk chunk : chunking.chunkSet()) {
 	    	JsonNode array = Json.parse(chunk.type());
@@ -231,7 +234,7 @@ public class DictionaryAnnotator extends Annotator {
 	    	for (Iterator<JsonNode> iter = array.elements(); iter.hasNext();) {
 	    		JsonNode node = iter.next();
 	    		
-	    		AnnotationBodyTagging.Vocabulary voc = AnnotationBodyTagging.Vocabulary.getVocabulary(node.get("vocabulary").asText());
+	    		Vocabulary voc = Vocabulary.getVocabulary(node.get("vocabulary").asText());
 	    		if (vocs != null && !vocs.contains(voc)) {
 	    			continue;
 	    		}
@@ -240,7 +243,7 @@ public class DictionaryAnnotator extends Annotator {
 
 	    		AnnotationBodyTagging annBody = new AnnotationBodyTagging();
 	    		annBody.setUri(node.get("uri").asText());
-	    		annBody.setUriVocabulary(voc);
+	    		annBody.setUriVocabulary(voc.getName());
 	    		
 	    		MultiLiteral ml;
 	    		JsonNode enLabel = node.get("label-en");
@@ -265,8 +268,6 @@ public class DictionaryAnnotator extends Annotator {
 	    		admin.setGenerator(getName());
 	    		admin.setGenerated(new Date());
 	    		admin.setConfidence(-1.0f);
-//	    		admin.setWithCreator(withCreator);
-//	    		admin.setCreated(new Date());
 
 	    		admins.add(admin);
 	    		

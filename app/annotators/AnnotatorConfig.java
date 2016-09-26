@@ -24,8 +24,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import model.annotations.bodies.AnnotationBodyTagging;
-import model.annotations.bodies.AnnotationBodyTagging.Vocabulary;
+import annotators.Lexicon.Vocabulary;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
@@ -63,22 +62,22 @@ public class AnnotatorConfig {
 		
 		JsonNode vocs = json.get("vocabulary");
 		if (vocs != null) {
-			Map<Class<? extends Annotator>, Set<AnnotationBodyTagging.Vocabulary>> annotatorMap = new HashMap<>();
+			Map<Class<? extends Annotator>, Set<Vocabulary>> annotatorMap = new HashMap<>();
 
 			for (Iterator<JsonNode> iter = vocs.elements(); iter.hasNext();) {
-				Vocabulary voc = AnnotationBodyTagging.Vocabulary.getVocabulary(iter.next().asText());
+				Vocabulary voc = Vocabulary.getVocabulary(iter.next().asText());
 				Class<? extends Annotator> annClass = voc.getAnnotator();
 				
-				Set<AnnotationBodyTagging.Vocabulary> vocSet = annotatorMap.get(annClass);
+				Set<Vocabulary> vocSet = annotatorMap.get(annClass);
 				if (vocSet == null) {
-					vocSet = new HashSet<AnnotationBodyTagging.Vocabulary>();
+					vocSet = new HashSet<Vocabulary>();
 					annotatorMap.put(annClass, vocSet);
 				}
 				
 				vocSet.add(voc);
 			}
 			
-			for (Map.Entry<Class<? extends Annotator>, Set<AnnotationBodyTagging.Vocabulary>> entry : annotatorMap.entrySet()) {
+			for (Map.Entry<Class<? extends Annotator>, Set<Vocabulary>> entry : annotatorMap.entrySet()) {
 				Map<String, Object> props = new HashMap<>();
 				props.put(DictionaryAnnotator.VOCABULARIES, entry.getValue());
 				
@@ -91,7 +90,7 @@ public class AnnotatorConfig {
 			Set<Class<? extends Annotator>> annotatorMap = new HashSet<>();
 			
 			for (Iterator<JsonNode> iter = ners.elements(); iter.hasNext();) {
-				Vocabulary voc = AnnotationBodyTagging.Vocabulary.getVocabulary(iter.next().asText());
+				Vocabulary voc = Vocabulary.getVocabulary(iter.next().asText());
 				Class<? extends Annotator> annClass = voc.getAnnotator();
 				
 				annotatorMap.add(annClass);

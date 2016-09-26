@@ -108,6 +108,18 @@ public class AnnotationDAO extends DAO<Annotation> {
 		return this.find(q).asList();
 	}
 
+	public List<Annotation> getUserAnnotations(ObjectId userId, ObjectId recordId, List<String> retrievedFields) {
+		Query<Annotation> q = this
+				.createQuery()
+				.field("annotators.withCreator").equal(userId)
+				.field("target.recordId").equal(recordId)
+				.retrievedFields(
+						true,
+						retrievedFields.toArray(new String[retrievedFields
+						          .size()]));
+		return this.find(q).asList();
+	}
+	
 	public long countUserAnnotations(ObjectId userId) {
 		long count = this.createQuery().field("annotators.withCreator")
 				.equal(userId).countAll();
@@ -141,6 +153,14 @@ public class AnnotationDAO extends DAO<Annotation> {
 		Query<Annotation> q = this.createQuery().field("_id").equal(id);
 		UpdateOperations<Annotation> updateOps = this.createUpdateOperations();
 		updateOps.add("score.approvedBy", userId, false);		
+		updateOps.removeAll("score.rejectedBy", userId);
+		this.update(q, updateOps);
+	}
+	
+	public void removeScore(ObjectId id, ObjectId userId) {
+		Query<Annotation> q = this.createQuery().field("_id").equal(id);
+		UpdateOperations<Annotation> updateOps = this.createUpdateOperations();
+		updateOps.removeAll("score.approvedBy", userId);		
 		updateOps.removeAll("score.rejectedBy", userId);
 		this.update(q, updateOps);
 	}

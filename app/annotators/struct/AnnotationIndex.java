@@ -24,9 +24,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
-import annotators.ComplexAnnotationValue;
-import annotators.SimpleAnnotationValue;
-
 public class AnnotationIndex implements Cloneable, Serializable {
 
 	private String text; 
