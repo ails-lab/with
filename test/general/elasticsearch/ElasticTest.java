@@ -51,7 +51,7 @@ import model.basicDataTypes.WithAccess.AccessEntry;
 import model.resources.RecordResource;
 import model.resources.RecordResource.RecordDescriptiveData;
 import model.resources.WithResource.ExternalCollection;
-import model.resources.WithResource.WithResourceType;
+import model.resources.WithResourceType;
 import model.resources.collection.CollectionObject;
 import model.usersAndGroups.User;
 
@@ -78,7 +78,6 @@ import elastic.Elastic;
 import elastic.ElasticEraser;
 import elastic.ElasticIndexer;
 import elastic.ElasticReindexer;
-import elastic.ElasticUpdater;
 import elastic.ElasticUtils;
 
 public class ElasticTest {
@@ -222,200 +221,6 @@ public class ElasticTest {
 		DB.getRecordResourceDAO().deleteById(rr1.getDbId());
 		DB.getRecordResourceDAO().deleteById(rr2.getDbId());
 	}
-
-	@Test
-	public void testUpdateOne() {
-
-		RecordResource rr = getRecordResource();
-		DB.getRecordResourceDAO().makePermanent(rr);
-
-		ElasticIndexer.index(Elastic.typeResource, rr.getDbId(), rr.transform());
-
-		TermQueryBuilder termQ = QueryBuilders.termQuery("_id", rr.getDbId());
-		SearchResponse resp = Elastic.getTransportClient().prepareSearch(Elastic.index)
-				.setSize(0)
-				.setTerminateAfter(1)
-				.setQuery(termQ)
-				.execute().actionGet();
-
-		//assertEquals(resp.getHits().getTotalHits(), 1);
-
-		Map<String, Object> doc = new HashMap<String, Object>();
-		MultiLiteral label = new MultiLiteral();
-		label.add(Language.EN.toString(), "666989");
-		doc.put("label", label);
-
-
-		ElasticUpdater.updateOne(Elastic.typeResource, rr.getDbId(), doc);
-
-		termQ = QueryBuilders.termQuery("label.en", "666 title");
-		resp = Elastic.getTransportClient().prepareSearch(Elastic.index)
-				.setSize(0)
-				.setTerminateAfter(1)
-				.setQuery(termQ)
-				.execute().actionGet();
-
-		assertEquals(resp.getHits().getTotalHits(), 1);
-
-		DB.getRecordResourceDAO().deleteById(rr.getDbId());
-	}
-
-	@Test
-	public void testUpdateMany() throws Exception {
-		RecordResource rr1 = getRecordResource();
-		RecordResource rr2 = getRecordResource();
-		DB.getRecordResourceDAO().makePermanent(rr1);
-		DB.getRecordResourceDAO().makePermanent(rr2);
-
-
-		ElasticIndexer.index(Elastic.typeResource, rr1.getDbId(), rr1.transform());
-		ElasticIndexer.index(Elastic.typeResource, rr2.getDbId(), rr2.transform());
-
-		TermQueryBuilder termQ = QueryBuilders.termQuery("_id", rr1.getDbId());
-		SearchResponse resp = Elastic.getTransportClient().prepareSearch(Elastic.index)
-				.setSize(0)
-				.setTerminateAfter(1)
-				.setQuery(termQ)
-				.execute().actionGet();
-		assertThat(resp.getHits().getTotalHits(), not(equalTo(0)));
-
-		termQ = QueryBuilders.termQuery("_id", rr2.getDbId());
-		resp = Elastic.getTransportClient().prepareSearch(Elastic.index)
-				.setSize(0)
-				.setTerminateAfter(1)
-				.setQuery(termQ)
-				.execute().actionGet();
-		assertThat(resp.getHits().getTotalHits(), not(equalTo(0)));
-
-		Map<String, Object> doc1 = new HashMap<String, Object>();
-		MultiLiteral label1 = new MultiLiteral();
-		label1.add(Language.EN.toString(), "666989");
-		doc1.put("label", label1);
-		Map<String, Object> doc2 = new HashMap<String, Object>();
-		MultiLiteral label2 = new MultiLiteral();
-		label2.add(Language.EN.toString(), "666989");
-		doc2.put("label", label2);
-
-		List<String> types = new ArrayList<String>();
-		List<ObjectId> ids = new ArrayList<ObjectId>();
-		List<Map<String, Object>> docs = new ArrayList<Map<String, Object>>();
-		types.add(Elastic.typeResource);
-		types.add(Elastic.typeResource);
-		ids.add(rr1.getDbId());
-		ids.add(rr2.getDbId());
-		docs.add(doc1);
-		docs.add(doc2);
-
-		ElasticUpdater.updateMany(types, ids, docs);
-
-		termQ = QueryBuilders.termQuery("label", "This is the new 1 label");
-		resp = Elastic.getTransportClient().prepareSearch(Elastic.index)
-				.setSize(0)
-				.setTerminateAfter(1)
-				.setQuery(termQ)
-				.execute().actionGet();
-
-		assertEquals(resp.getHits().getTotalHits(), 1);
-
-		termQ = QueryBuilders.termQuery("label", "This is the new 2 label");
-		resp = Elastic.getTransportClient().prepareSearch(Elastic.index)
-				.setSize(0)
-				.setTerminateAfter(1)
-				.setQuery(termQ)
-				.execute().actionGet();
-
-		assertEquals(resp.getHits().getTotalHits(), 1);
-
-		DB.getRecordResourceDAO().deleteById(rr1.getDbId());
-		DB.getRecordResourceDAO().deleteById(rr2.getDbId());
-	}
-
-	@Test
-	public  void testAddResourceToCollection() {
-		RecordResource rr = getRecordResource();
-		DB.getRecordResourceDAO().makePermanent(rr);
-
-		ElasticIndexer.index(Elastic.typeResource, rr.getDbId(), rr.transform());
-
-		TermQueryBuilder termQ = QueryBuilders.termQuery("_id", rr.getDbId());
-		SearchResponse resp = Elastic.getTransportClient().prepareSearch(Elastic.index)
-				.setSize(0)
-				.setTerminateAfter(1)
-				.setQuery(termQ)
-				.execute().actionGet();
-
-		//assertEquals(resp.getHits().getTotalHits(), 1);
-		List<CollectionInfo> list = rr.getCollectedIn();
-		list.add(new CollectionInfo(new ObjectId(), 666));
-		try {
-			ElasticUpdater.addResourceToCollection(rr.getDbId().toString(), list);
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	}
-
-	@Test
-	public void testRemoveResourceFromCollection() {
-		RecordResource rr = getRecordResource();
-		//collectedIn
-		ObjectId oid = new ObjectId();
-		List<CollectionInfo> collectedIn = new ArrayList<CollectionInfo>();
-		CollectionInfo ci = new CollectionInfo(oid, 42);
-		collectedIn.add(ci);
-		rr.setCollectedIn(collectedIn);
-		DB.getRecordResourceDAO().makePermanent(rr);
-
-		ElasticIndexer.index(Elastic.typeResource, rr.getDbId(), rr.transform());
-
-		TermQueryBuilder termQ = QueryBuilders.termQuery("_id", rr.getDbId());
-		SearchResponse resp = Elastic.getTransportClient().prepareSearch(Elastic.index)
-				.setSize(0)
-				.setTerminateAfter(1)
-				.setQuery(termQ)
-				.execute().actionGet();
-
-	//	assertEquals(resp.getHits().getTotalHits(), 1);
-
-		ElasticUpdater.removeResourceFromCollection(rr.getDbId().toString(), oid, 42);
-	}
-
-	@Test
-	public void testUpdatePositionInCollection() {
-		RecordResource rr = getRecordResource();
-		//collectedIn
-		ObjectId oid = new ObjectId();
-		List<CollectionInfo> collectedIn = new ArrayList<CollectionInfo>();
-		CollectionInfo ci = new CollectionInfo(oid, 42);
-		collectedIn.add(ci);
-		rr.setCollectedIn(collectedIn);
-		DB.getRecordResourceDAO().makePermanent(rr);
-
-		ElasticIndexer.index(Elastic.typeResource, rr.getDbId(), rr.transform());
-
-		TermQueryBuilder termQ = QueryBuilders.termQuery("_id", rr.getDbId());
-		SearchResponse resp = Elastic.getTransportClient().prepareSearch(Elastic.index)
-				.setSize(0)
-				.setTerminateAfter(1)
-				.setQuery(termQ)
-				.execute().actionGet();
-
-	//	assertEquals(resp.getHits().getTotalHits(), 1);
-
-		ElasticUpdater.updatePositionInCollection(rr.getDbId().toString(), oid, 42, 6666);
-	}
-
-	@Test
-	public void testUpdateVisibility() {
-
-	}
-
-	@Test
-	public void testIndexInconsistentDocs() {
-		ElasticReindexer.indexInconsistentDocs();
-	}
-
-
 
 
 	/* **************** PRIVATE METHODS ********************** */

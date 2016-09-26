@@ -120,11 +120,14 @@ public class ElasticCoordinator {
 		return searcher.getSearchRequestBuilder(q, options).execute().actionGet();
 	}
 
+	/*
+	 * Supplement methods not implemented yet
+	 */
+
 	public SingleResponse relatedDisMaxSearch(List<List<Filter>> filters) {
 		ElasticSearcher relator = new ElasticSearcher();
 
-		//SearchResponse elasticresp = relator.getSearchRequestBuilder(relator.relatedWithDisMax(terms, provider, excludeId)
-		SearchResponse elasticresp = null;
+		SearchResponse elasticresp = relator.relatedWithDisMax(filters.get(0));
 
 		SingleResponse sresp = new SingleResponse();
 		List<ObjectId> ids = new ArrayList<ObjectId>();
@@ -140,8 +143,7 @@ public class ElasticCoordinator {
 	public SingleResponse relatedMLTSearch(List<List<Filter>> filters) {
 		ElasticSearcher relator = new ElasticSearcher();
 
-		//SearchResponse elasticresp = relator.getSearchRequestBuilder(relator.relatedWithDisMax(terms, provider, excludeId)
-		SearchResponse elasticresp = null;
+		SearchResponse elasticresp = relator.relatedWithDisMax(filters.get(0));
 
 		SingleResponse sresp = new SingleResponse();
 		List<ObjectId> ids = new ArrayList<ObjectId>();
@@ -154,23 +156,10 @@ public class ElasticCoordinator {
 		return sresp;
 	}
 
-	public SingleResponse relatedBoolShouldSearch(List<List<Filter>> filters) {
-		ElasticSearcher relator = new ElasticSearcher();
 
-		//SearchResponse elasticresp = relator.getSearchRequestBuilder(relator.relatedWithDisMax(terms, provider, excludeId)
-		SearchResponse elasticresp = null;
-
-		SingleResponse sresp = new SingleResponse();
-		List<ObjectId> ids = new ArrayList<ObjectId>();
-		for(SearchHit h: elasticresp.getHits()) {
-			ids.add(new ObjectId(h.getId()));
-		}
-		sresp.items = DB.getRecordResourceDAO().getByIds(ids);
-		sresp.totalCount = (int) elasticresp.getHits().getTotalHits();
-
-		return sresp;
-	}
-
+	/*
+	 * ******************************************
+	 */
 
 	private void extractFacets(Aggregations aggs, SingleResponse sresp) {
 			for (Aggregation agg : aggs.asList()) {

@@ -24,6 +24,7 @@ import java.io.InputStreamReader;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -34,14 +35,19 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.conn.routing.HttpRoute;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
+import org.apache.http.pool.PoolStats;
+import org.apache.http.util.EntityUtils;
 import play.Logger;
 import play.Logger.ALogger;
+import play.core.Router;
 
 public class ApacheHttpConnector extends HttpConnector {
 	
@@ -53,12 +59,18 @@ public class ApacheHttpConnector extends HttpConnector {
 	public static final ALogger log = Logger.of( ApacheHttpConnector.class );
 
 	private static final int TRIES = 3;
-	
+	private static AtomicInteger counter = new AtomicInteger();
+
 	private static ApacheHttpConnector instance;
+    private static PoolingHttpClientConnectionManager connMan = new PoolingHttpClientConnectionManager();
+
 	public static HttpClientBuilder httpClientBuilder =
 			HttpClientBuilder.create()
+            .setConnectionManager( connMan )
+            .setConnectionManagerShared(true)
 			.setConnectionTimeToLive(1, TimeUnit.MINUTES)
-			.setMaxConnPerRoute(5);
+			.setMaxConnPerRoute(10)
+            .setMaxConnTotal(100);
 
 	public static HttpConnector getApacheHttpConnector(){
 		if (instance==null){
@@ -75,6 +87,10 @@ public class ApacheHttpConnector extends HttpConnector {
 		JsonNode readValue = null;
 		CloseableHttpResponse response = null;
 		BufferedReader rd = null;
+
+        // every 20 requests we have a lok at the pool...
+        int val = counter.addAndGet(1);
+        if( val % 20 == 0 ) logPoolInfo();
 		try {
 			log.debug("calling: " + url);
 			long time = System.currentTimeMillis();
@@ -86,21 +102,45 @@ public class ApacheHttpConnector extends HttpConnector {
 			ObjectMapper mapper = new ObjectMapper();
 			readValue = mapper.readValue(rd, JsonNode.class);
 		} catch (Exception e) {
+		    logPoolInfo();
 			log.error("calling: " + url);
 			log.error("msg: " + e.getMessage());
 			throw e;
 		} finally {
+            if (response != null) {
+                EntityUtils.consumeQuietly(response.getEntity());
+                response.close();
+            }
 			if (client != null)
 				client.close();
-			if (response != null)
-				response.close();
 			if (rd != null)
 				rd.close();
 		}
 		
 		return readValue;
 	}
-	
+
+	private void logPoolInfo( ) {
+	    StringBuffer sb = new StringBuffer();
+	    PoolStats stats =  connMan.getTotalStats();
+        sb.append( "Available "  + stats.getAvailable()+"\n");
+        sb.append( "Pending "  + stats.getPending()+"\n");
+        sb.append( "Leased "  + stats.getLeased() + "\n" );
+        sb.append( "Max "  + stats.getMax() + "\n" );
+
+        for( HttpRoute r: connMan.getRoutes()) {
+            stats = connMan.getStats(r);
+            sb.append( r.toString() + "\n");
+            sb.append( "Available "  + stats.getAvailable()+"\n");
+            sb.append( "Pending "  + stats.getPending()+"\n");
+            sb.append( "Leased "  + stats.getLeased() + "\n");
+            sb.append( "Max "  + stats.getMax() + "\n" );
+        }
+
+        log.debug( sb.toString() );
+
+    }
+
 	public FileAndType getContentAndType(String url) throws Exception {
 		CloseableHttpClient client = null;
 		CloseableHttpResponse response = null;
@@ -124,10 +164,12 @@ public class ApacheHttpConnector extends HttpConnector {
 
 			throw e;
 		} finally{
+            if (response != null) {
+                EntityUtils.consumeQuietly(response.getEntity());
+                response.close();
+            }
 			if (client != null)
 				client.close();
-			if (response != null)
-				response.close();
 		}
 	}
 

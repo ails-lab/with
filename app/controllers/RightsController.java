@@ -27,6 +27,7 @@ import model.EmbeddedMediaObject.MediaVersion;
 import model.basicDataTypes.WithAccess;
 import model.basicDataTypes.WithAccess.Access;
 import model.basicDataTypes.WithAccess.AccessEntry;
+import model.resources.WithResourceType;
 import model.resources.collection.CollectionObject;
 import model.usersAndGroups.User;
 import model.usersAndGroups.UserGroup;
@@ -190,6 +191,10 @@ public class RightsController extends WithResourceController {
 		notification.setReceiver(userOrGroupId);
 		notification.setResource(colDbId);
 		notification.setSender(ownerId);
+		WithResourceType collectionType = DB.getCollectionObjectDAO().getById(colDbId, Arrays.asList("resourceType")).getResourceType();
+		Activity share = (collectionType == WithResourceType.SimpleCollection) ? Activity.COLLECTION_SHARE : Activity.EXHIBITION_SHARE;
+		Activity shared = (collectionType == WithResourceType.SimpleCollection) ? Activity.COLLECTION_SHARED : Activity.EXHIBITION_SHARED;
+		Activity unshared = (collectionType == WithResourceType.SimpleCollection) ? Activity.COLLECTION_UNSHARED : Activity.EXHIBITION_UNSHARED;
 		User sender = DB.getUserDAO().getById(ownerId, new ArrayList<String>(Arrays.asList("avatar")));
 		HashMap<MediaVersion, String> avatar = sender.getAvatar();
 		if (avatar != null && avatar.containsKey(MediaVersion.Square))
@@ -201,7 +206,7 @@ public class RightsController extends WithResourceController {
 		notification.setOpenedAt(new Timestamp(now.getTime()));
 		if (downgrade) {
 			notification.setPendingResponse(false);
-			notification.setActivity(Activity.COLLECTION_UNSHARED);
+			notification.setActivity(unshared);
 			notification.setShareInfo(shareInfo);
 			DB.getNotificationDAO().makePermanent(notification);
 			NotificationCenter.sendNotification(notification);
@@ -212,7 +217,7 @@ public class RightsController extends WithResourceController {
 			UserGroup userGroup = DB.getUserGroupDAO().getById(userOrGroupId, new ArrayList<String>(Arrays.asList("_id", "adminIds")));
 			if (DB.getUserDAO().isSuperUser(ownerId) || (userGroup != null && userGroup.getAdminIds().contains(ownerId))) {
 				notification.setPendingResponse(false);
-				notification.setActivity(Activity.COLLECTION_SHARED);
+				notification.setActivity(shared);
 				notification.setShareInfo(shareInfo);
 				DB.getNotificationDAO().makePermanent(notification);
 				NotificationCenter.sendNotification(notification);
@@ -222,13 +227,13 @@ public class RightsController extends WithResourceController {
 			else {//receiver can reject the notification
 				List<Notification> requests = DB.getNotificationDAO()
 						.getPendingResourceNotifications(userOrGroupId,
-								colDbId, Activity.COLLECTION_SHARE, newAccess);
+								colDbId, share, newAccess);
 				if (requests.isEmpty()) {
 					// Find if there is a request for other type of access and
 					// override it
 					requests = DB.getNotificationDAO()
 							.getPendingResourceNotifications(userOrGroupId,
-									colDbId, Activity.COLLECTION_SHARE);
+									colDbId, share);
 					for (Notification request : requests) {
 						request.setPendingResponse(false);
 						now = new Date();
@@ -238,7 +243,7 @@ public class RightsController extends WithResourceController {
 					// Make a new request for collection sharing request
 					shareInfo.setPreviousAccess(oldAccess);
 					notification.setPendingResponse(true);
-					notification.setActivity(Activity.COLLECTION_SHARE);
+					notification.setActivity(share);
 					now = new Date();
 					shareInfo.setOwnerEffectiveIds(effectiveIds);
 					notification.setShareInfo(shareInfo);

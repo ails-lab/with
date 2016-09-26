@@ -711,14 +711,16 @@ public class MediaController extends WithController {
 	/**
 	 * get the specified media object from DB
 	 */
-	public static Result getMetadataOrFile(String mediaId, boolean file) {
+	public static Result  getMetadataOrFile(String mediaId, boolean file) {
 
 		MediaObject media = null;
 		try {
 			media = DB.getMediaObjectDAO().findById(new ObjectId(mediaId));
 		} catch (Exception e) {
 			log.error("Cannot retrieve media document from database", e);
-			return internalServerError("Cannot retrieve media document from database");
+		}
+		if( media == null ) {
+			return internalServerError("Cannot retrieve media" + mediaId + " document from database");
 		}
 		if (file) {
 			// confirm this is right! .as Changes the Content-Type header for

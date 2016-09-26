@@ -191,7 +191,10 @@ public class ElasticSearcher {
 		}
 
 
-	/* Function Score query */
+	/*
+	 * Function Score query
+	 * Not exact match
+	 *  */
 	public QueryBuilder funcScoreQuery(String field, String term) {
 		QueryStringQueryBuilder qstr = QueryBuilders.queryStringQuery(term);
 		if(!field.equals("")) {
@@ -257,53 +260,57 @@ public class ElasticSearcher {
 	}
 
 	/* Related using Dis_Max query */
-	public QueryBuilder relatedWithDisMax(String terms, String provider, String excludeId) {
+	public SearchResponse relatedWithDisMax(List<Filter> filters) {
 
-		if(terms == null) terms = "";
 
 		DisMaxQueryBuilder dis_max_q = QueryBuilders.disMaxQuery();
-		MatchQueryBuilder title_match = QueryBuilders.matchQuery("label_all", terms);
-		MatchQueryBuilder desc_match = QueryBuilders.matchQuery("description_all", terms);
-		MatchQueryBuilder provider_match = QueryBuilders.matchQuery("provider", provider);
-
-		dis_max_q.add(title_match).add(desc_match).add(provider_match);
+		for(Filter f: filters) {
+			MatchQueryBuilder match1 = QueryBuilders.matchQuery(f.fieldId+f.lang, f.value);
+			MatchQueryBuilder match2 = QueryBuilders.matchQuery(f.fieldId+"._all", f.value);
+			dis_max_q.add(match1).add(match2);
+		}
 		dis_max_q.tieBreaker(0.3f);
 
-		return dis_max_q;
+		return this.getSearchRequestBuilder(dis_max_q, new SearchOptions()).execute().actionGet();
 	}
 
 	/* Related using More Like This query */
-	public QueryBuilder relatedWithMLT(String text, List<String> ids, List<String> fields) {
+	public SearchResponse relatedWithMLT(List<Filter> filters) {
 
-		if(text == null) text = "";
 
 		MoreLikeThisQueryBuilder mlt;
-		if(fields != null)
-			mlt = QueryBuilders.moreLikeThisQuery(fields.toArray(new String[fields.size()]));
-		else
-			mlt = QueryBuilders.moreLikeThisQuery();
+		List<String> fields = new ArrayList<String>();
+		List<String> texts = new ArrayList<String>();
+		List<String> ids = new ArrayList<String>();
+		for(Filter f: filters) {
+			if(f.fieldId.equals("_id")) {
+				fields.add(f.fieldId);
+				texts.add(f.value);
+			} else {
+				ids.add(f.value);
+			}
+		}
+		mlt = QueryBuilders.moreLikeThisQuery(fields.toArray(new String[fields.size()]));
+		mlt.like(texts.toArray(new String[texts.size()]));
+		mlt.ids(ids.toArray(new String[ids.size()]));
 
-		mlt.likeText(text);
-		if(ids != null) mlt.ids(ids.toArray(new String[ids.size()]));
+
 		mlt.maxQueryTerms(20);
 		mlt.minTermFreq(1);
 
-		return mlt;
+		return this.getSearchRequestBuilder(mlt, new SearchOptions()).execute().actionGet();
 	}
 
 	/* Related using Bool query with Should clauses */
-	public QueryBuilder relatedWithShouldClauses(Map<String, List<String>> records) {
+	public SearchResponse relatedWithShouldClauses(List<Filter> filters) {
 
 		BoolQueryBuilder bool = QueryBuilders.boolQuery();
-		for(Entry<String, List<String>> e: records.entrySet()) {
-			int boost = Integer.parseInt(e.getKey().split(":")[1]);
-			for(String v: e.getValue()) {
-				QueryBuilder query = QueryBuilders.matchQuery("_all", v).boost(boost);
-				bool.should(query);
-			}
+		for(Filter f: filters) {
+			QueryBuilder query1 = QueryBuilders.matchQuery(f.fieldId+f.lang, f.value);
+			QueryBuilder query2 = QueryBuilders.matchQuery(f.fieldId+"._all", f.value);
+			bool.should(query1).should(query2);
 		}
-
-		return bool;
+		return this.getSearchRequestBuilder(bool, new SearchOptions()).execute().actionGet();
 	}
 
 
@@ -318,7 +325,6 @@ public class ElasticSearcher {
 
 	/*
 	 * Geo filter
-	 * WILL BE DEPRECATED
 	 */
 	/*
 	* Tip 0: The default field to be used is "coordinates"
