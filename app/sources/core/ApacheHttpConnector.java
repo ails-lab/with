@@ -40,6 +40,7 @@ import org.apache.http.impl.client.HttpClientBuilder;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import org.apache.http.util.EntityUtils;
 import play.Logger;
 import play.Logger.ALogger;
 
@@ -58,7 +59,8 @@ public class ApacheHttpConnector extends HttpConnector {
 	public static HttpClientBuilder httpClientBuilder =
 			HttpClientBuilder.create()
 			.setConnectionTimeToLive(1, TimeUnit.MINUTES)
-			.setMaxConnPerRoute(5);
+			.setMaxConnPerRoute(10)
+            .setMaxConnTotal(100);
 
 	public static HttpConnector getApacheHttpConnector(){
 		if (instance==null){
@@ -90,10 +92,12 @@ public class ApacheHttpConnector extends HttpConnector {
 			log.error("msg: " + e.getMessage());
 			throw e;
 		} finally {
+            if (response != null) {
+                EntityUtils.consumeQuietly(response.getEntity());
+                response.close();
+            }
 			if (client != null)
 				client.close();
-			if (response != null)
-				response.close();
 			if (rd != null)
 				rd.close();
 		}
@@ -124,10 +128,12 @@ public class ApacheHttpConnector extends HttpConnector {
 
 			throw e;
 		} finally{
+            if (response != null) {
+                EntityUtils.consumeQuietly(response.getEntity());
+                response.close();
+            }
 			if (client != null)
 				client.close();
-			if (response != null)
-				response.close();
 		}
 	}
 
