@@ -67,6 +67,7 @@ public class ApacheHttpConnector extends HttpConnector {
 	public static HttpClientBuilder httpClientBuilder =
 			HttpClientBuilder.create()
             .setConnectionManager( connMan )
+            .setConnectionManagerShared(true)
 			.setConnectionTimeToLive(1, TimeUnit.MINUTES)
 			.setMaxConnPerRoute(10)
             .setMaxConnTotal(100);
