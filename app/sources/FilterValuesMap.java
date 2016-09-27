@@ -227,6 +227,7 @@ public class FilterValuesMap {
 	}
 	
 	private void fillFlickr() {
+		addRestriction(FiltersFields.TYPE.getFilterId(),WithMediaType.IMAGE.getName(), WithMediaType.VIDEO.getName());
 		addMapping(FiltersFields.RIGHTS.getFilterId(), WithMediaRights.RR, FlickrSpaceSource.getLicence("0"));
 		addMapping(FiltersFields.RIGHTS.getFilterId(), WithMediaRights.Creative_Not_Commercial, FlickrSpaceSource.getLicence("3"),
 				BritishLibrarySpaceSource.getLicence("2"), FlickrSpaceSource.getLicence("1"));
