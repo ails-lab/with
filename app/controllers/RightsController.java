@@ -162,12 +162,12 @@ public class RightsController extends WithResourceController {
 	
 	public static void changeAccess(ObjectId colId, ObjectId userOrGroupId, Access newAccess, List<ObjectId> effectiveIds, 
 			boolean downgrade, boolean membersDowngrade) {
-		DB.getCollectionObjectDAO().changeAccess(colId, userOrGroupId, newAccess);
+		Access oldAccess = DB.getCollectionObjectDAO().changeAccess(colId, userOrGroupId, newAccess);
 		if (downgrade && membersDowngrade) {//the rights of all records that belong to the collection are downgraded
-			DB.getRecordResourceDAO().updateMembersToNewAccess(colId, userOrGroupId, newAccess, effectiveIds);
+			DB.getRecordResourceDAO().updateMembersToNewAccess(colId, userOrGroupId, oldAccess, newAccess, effectiveIds);
 		}
 		else {//if upgrade, or downgrade but !membersDowngrade the new rights of the collection are merged to all records that belong to the collection. 
-			DB.getRecordResourceDAO().updateMembersToMergedRights(colId, new AccessEntry(userOrGroupId, newAccess), effectiveIds);
+			DB.getRecordResourceDAO().updateMembersToMergedRights(colId, oldAccess, new AccessEntry(userOrGroupId, newAccess), effectiveIds);
 		}		
 	}
 	
