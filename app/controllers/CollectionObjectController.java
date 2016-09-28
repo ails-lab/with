@@ -285,7 +285,7 @@ public class CollectionObjectController extends WithResourceController {
         log.debug("adding " + items.size() + " items to collection " + collectionID);
         int itemsCount = 0;
         for (Iterator<WithResource<?, ?>> iterator = items.iterator(); iterator.hasNext()
-                && (limit < 0 || itemsCount < limit); ) {
+                && ((limit < 0) || (itemsCount < limit)); ) {
             WithResource<?, ?> item = iterator.next();
             WithResourceController.internalAddRecordToCollection(collectionID,
                     (RecordResource) item, F.Option.None(), resultInfo,
@@ -1228,10 +1228,13 @@ public class CollectionObjectController extends WithResourceController {
      * Search for records within a collection.
      */
     public static Promise<Result> searchCollection(String term, String id, int offset, int count) {
-        if (effectiveUserIds().isEmpty()) {
-            return Promise.pure(forbidden(Json
-                    .parse("\"error\", \"Must specify user for the collection\"")));
-        }
+
+        if (effectiveUserIds().isEmpty())
+        	if(!DB.getCollectionObjectDAO().isPublic(new ObjectId(id))) {
+        		return Promise.pure(forbidden(Json
+        				.parse("\"error\"  \"Must specify user for the collection\"")));
+        	}
+
         Query q = new Query();
         String userId = effectiveUserId();
         Query.Clause searchTerm = Query.Clause.create()
