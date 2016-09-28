@@ -40,11 +40,12 @@ import play.libs.F.Option;
 import play.mvc.QueryStringBindable;
 import search.Filter;
 import search.FiltersFields;
+import search.IFilterContainer;
 import search.Query;
 import utils.ListUtils;
 import utils.Tuple;
 
-public class CommonQuery implements Cloneable , QueryStringBindable<CommonQuery>{
+public class CommonQuery implements IFilterContainer, Cloneable , QueryStringBindable<CommonQuery>{
 
 	public static final ALogger log = Logger.of( CommonQuery.class );
 
@@ -259,6 +260,16 @@ public class CommonQuery implements Cloneable , QueryStringBindable<CommonQuery>
 	@Override
 	public String unbind(String arg0) {
 		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public List<String> getFilterRestriction(String filterID) {
+		if (filters!=null)
+		for (CommonFilter f : filters) {
+			if (filterID.equals(f.filterID))
+				return f.values;
+		}
 		return null;
 	}
 }

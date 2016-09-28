@@ -94,7 +94,7 @@ public class RijksmuseumSpaceSource extends ISpaceSource {
 				res.facets = response.path("facets");
 
 				res.filtersLogic = createFilters(response);
-				res.filtersLogic.addAll(vmap.getRestrictionsAsFilters(res.count));
+				res.filtersLogic.addAll(vmap.getRestrictionsAsFilters(q,res.count));
 				
 			} catch (Exception e) {
 				e.printStackTrace();

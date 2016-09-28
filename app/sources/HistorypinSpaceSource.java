@@ -136,6 +136,8 @@ public class HistorypinSpaceSource extends ISpaceSource {
 				}
 				
 
+				res.filtersLogic = vmap.getRestrictionsAsFilters(q,res.count);
+
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();

@@ -88,7 +88,6 @@ public abstract class FlickrSpaceSource extends ISpaceSource {
 		vmap = FilterValuesMap.getMap(source);
 //		this.vmap = FilterValuesMap.getFlickrMap();
 		this.userID = userID;
-		addRestriction(FiltersFields.TYPE.getFilterId(),WithMediaType.IMAGE.getName());
 		addDefaultWriter(FiltersFields.TYPE.getFilterId(), fwriter("media"));
 		addDefaultWriter(FiltersFields.RIGHTS.getFilterId(), frwriter());
 		addDefaultComplexWriter(FiltersFields.YEAR.getFilterId(), qfwriterYEAR());
@@ -186,7 +185,7 @@ public abstract class FlickrSpaceSource extends ISpaceSource {
 				res.count = res.items.getCulturalCHO().size();
 	
 				res.facets = response.path("facets");
-				res.filtersLogic = this.vmap.getRestrictionsAsFilters(res.totalCount);
+				res.filtersLogic = this.vmap.getRestrictionsAsFilters(q,res.totalCount);
 	
 				// for (String ir : licencesId.keySet()) {
 				// countValue(rights, ir, 1);

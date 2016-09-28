@@ -28,7 +28,7 @@ import java.util.stream.Collectors;
  * @author Arne Stabenau
  *
  */
-public class Query {
+public class Query implements IFilterContainer{
 
 	public static final Logger.ALogger log =Logger.of( Query.class );
 
@@ -232,6 +232,21 @@ public class Query {
 		}
 		return result;
 	}
+	
+	@Override
+	public List<String> getFilterRestriction(String filterID) {
+		List<String> res = new ArrayList<>();
+		for (List<Filter> clause : filters) {
+			for (Filter filter : clause) {
+				if (filterID.equals(filter.fieldId))
+					res.add(filter.value);
+			}
+			if (!res.isEmpty())
+				return res;
+		}
+		return null;
+	}
+	
 	/**
 	 * returns the filter with the specified filter name.
 	 * @param filterName

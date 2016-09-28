@@ -179,4 +179,34 @@ public class ListUtils {
 		return null;
 	}
 
+	/**
+	 * set difference implementation (a-b)
+	 * @param a
+	 * @param b
+	 * @return
+	 */
+	public static <T> List<T> setDifference(Collection<T> a, Collection<T> b) {
+		ArrayList<T> res = new ArrayList<>();
+		res.addAll(a);
+		if (b != null)
+			res.removeAll(b);
+		return res;
+	}
+
+	/**
+	 * set intersection implementation (a/\b)
+	 * @param a
+	 * @param b
+	 * @return
+	 */
+	public static <T> List<T> setIntersection(Collection<T> a, Collection<T> b) {
+		ArrayList<T> res = new ArrayList<>();
+		if (Utils.hasInfo(a) && Utils.hasInfo(b))
+		for (T t : a) {
+			if (b.contains(t))
+				res.add(t);
+		}
+		return res;
+	}
+
 }

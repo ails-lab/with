@@ -29,12 +29,14 @@ import java.util.function.Function;
 import model.EmbeddedMediaObject.WithMediaRights;
 import model.EmbeddedMediaObject.WithMediaType;
 import search.FiltersFields;
+import search.IFilterContainer;
 import search.Sources;
 import sources.core.CommonFilter;
 import sources.core.CommonFilterLogic;
 import sources.core.ESpaceSources;
 import sources.core.MapsConfig;
 import sources.core.QueryModifier;
+import sources.core.Utils;
 import utils.ListUtils;
 
 public class FilterValuesMap {
@@ -208,7 +210,9 @@ public class FilterValuesMap {
 			case Historypin:
 				ms.fillHistorypin();
 				break;
-
+			case YouTube:
+				ms.fillYoutube();
+				break;
 			default:
 				break;
 			}
@@ -217,6 +221,10 @@ public class FilterValuesMap {
 	}
 	
 
+
+	private void fillYoutube() {
+		addRestriction(FiltersFields.TYPE.getFilterId(),WithMediaType.VIDEO.getName());
+	}
 
 	private void fillDBPedia() {
 //		addMapping(CommonFilters.TYPE.getId(), WithMediaType.IMAGE, "Image", "Photograph",
@@ -261,6 +269,13 @@ public class FilterValuesMap {
 	}
 	
 	private void fillHistorypin() {
+		addRestriction(FiltersFields.TYPE.getFilterId(),
+				WithMediaType.IMAGE.getName(), 
+				WithMediaType.TEXT.getName(), 
+				WithMediaType.AUDIO.getName(), 
+				WithMediaType.VIDEO.getName()
+				);
+		
 	}
 	
 	private void fillDNZ() {
@@ -288,11 +303,14 @@ public class FilterValuesMap {
 	 * @param itemsCount the number of items returned in the query.
 	 * @return
 	 */
-	public List<CommonFilterLogic> getRestrictionsAsFilters(int itemsCount) {
+	public List<CommonFilterLogic> getRestrictionsAsFilters(IFilterContainer q, int itemsCount) {
 		ArrayList<CommonFilterLogic> res = new ArrayList<>();
 		for (Entry<String, List<String>> restr : restrictions.entrySet()) {
 			CommonFilterLogic f = new CommonFilterLogic(restr.getKey());
-			f.addValue(restr.getValue(), itemsCount);
+			List<String> filterRestriction = q.getFilterRestriction(restr.getKey());
+			List<String> setIntersection = Utils.hasInfo(filterRestriction)
+					? ListUtils.setIntersection(restr.getValue(), filterRestriction) : restr.getValue();
+			f.addValue(setIntersection, itemsCount);
 			res.add(f);
 		}
 		return res;
