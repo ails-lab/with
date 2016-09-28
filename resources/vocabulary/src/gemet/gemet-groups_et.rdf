@@ -1,0 +1,312 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<rdf:RDF xml:lang="et"
+         xmlns:rdf='http://www.w3.org/1999/02/22-rdf-syntax-ns#'
+         xmlns:rdfs='http://www.w3.org/2000/01/rdf-schema#'
+         xmlns:skos="http://www.w3.org/2004/02/skos/core#"
+         xmlns="http://www.eionet.europa.eu/gemet/2004/06/gemet-schema.rdf#"
+   xml:base="http://www.eionet.europa.eu/gemet/">
+<rdf:Description rdf:about="supergroup/4044">
+<rdfs:label>INIMTOIMINGUD JA TOOTED, MŌJUD KESKKONNALE</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="supergroup/5306">
+<rdfs:label>LISANIMISTUD</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="supergroup/5499">
+<rdfs:label>LOODUSKESKKOND, INIMESE MUUDETUD KESKKOND</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="supergroup/2894">
+<rdfs:label>SOTSIAALASPEKTID, KESKKONNAPOLIITILISED MEETMED</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="group/10111">
+<rdfs:label>KESKKOND (looduslik keskkond, tehiskeskkond)</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="group/10112">
+<rdfs:label>SAADUSED, MATERJALID</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="group/10114">
+<rdfs:label>KOORMUSED, MÕJUD</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="group/10117">
+<rdfs:label>ÜLDTERMINID</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="group/10118">
+<rdfs:label>LOODUSVARAD (loodusvarade kasutamine)</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="group/1062">
+<rdfs:label>ANTROPOSFÄÄR (ehitatud keskkond, inimasustus)</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="group/13109">
+<rdfs:label>KESKKONNAPOLIITIKA</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="group/1349">
+<rdfs:label>KEEMIA, AINED, PROTSESSID</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="group/14979">
+<rdfs:label>AEG (kronoloogia)</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="group/14980">
+<rdfs:label>ABITERMINID</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="group/1922">
+<rdfs:label>INFORMATSIOON, HARIDUS, KULTUUR, KESKKONNATEADVUS</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="group/234">
+<rdfs:label>PÕLLUMAJANDUS, METSANDUS, LOOMAKASVATUS, KALANDUS</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="group/2504">
+<rdfs:label>MAJANDUS, RAHANDUS</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="group/2711">
+<rdfs:label>ENERGIA</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="group/3875">
+<rdfs:label>TERVIS, TOITUMINE</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="group/4125">
+<rdfs:label>HÜDROSFÄÄR (magevesi, merevesi, veekogud</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="group/4281">
+<rdfs:label>TÖÖSTUS, KÄSITÖÖ, TEHNOLOOGIA, SEADMED</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="group/4630">
+<rdfs:label>MAA (maastik, geograafia)</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="group/4750">
+<rdfs:label>SEADUSED, NORMID, LEPINGUD</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="group/4856">
+<rdfs:label>LITOSFÄÄR (muld ja pinnas, geoloogilised protsessid)</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="group/618">
+<rdfs:label>ATMOSFÄÄR (õhk, kliima)</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="group/6237">
+<rdfs:label>FÜÜSILISED TEGURID, MÜRA, VIBRATSIOON, KIIRGUS</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="group/7007">
+<rdfs:label>VIRGESTUS, TURISM</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="group/7136">
+<rdfs:label>UURIMISTÖÖ, TEADUSED</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="group/7243">
+<rdfs:label>OHUD, OHUTUS</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="group/7779">
+<rdfs:label>ÜHISKOND</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="group/7956">
+<rdfs:label>KOSMOS</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="group/8575">
+<rdfs:label>KAUBANDUS, TEENUSED</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="group/8603">
+<rdfs:label>LIIKLUS, VEONDUS</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="group/893">
+<rdfs:label>BIOSFÄÄR (organismid, ökosüsteemid)</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="group/9117">
+<rdfs:label>JÄÄTMED, REOAINED, KESKKONNAREOSTUS</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="group/96">
+<rdfs:label>JUHTIMINE, HALDAMINE, STRATEEGIA, POLIITIKA, ASUTUSED, PLANEERIMINE</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="theme/4">
+<rdfs:label>bioloogia</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="theme/5">
+<rdfs:label>ehitus</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="theme/10">
+<rdfs:label>energia</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="theme/25">
+<rdfs:label>füüsika</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="theme/16">
+<rdfs:label>geograafia</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="theme/20">
+<rdfs:label>informatsioon</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="theme/17">
+<rdfs:label>inimese tervis</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="theme/1">
+<rdfs:label>juhtimine</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="theme/39">
+<rdfs:label>jäätmed</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="theme/12">
+<rdfs:label>kalandus</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="theme/32">
+<rdfs:label>katastroofid, õnnetused, ohud</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="theme/33">
+<rdfs:label>kaubandus, teenindus</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="theme/6">
+<rdfs:label>keemia</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="theme/11">
+<rdfs:label>keskkonnapollitika</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="theme/28">
+<rdfs:label>kiirgused</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="theme/7">
+<rdfs:label>kliima</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="theme/36">
+<rdfs:label>kosmos</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="theme/38">
+<rdfs:label>linnakeskkond, linnastress</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="theme/23">
+<rdfs:label>looduslikud alad, maastik, ökosüsteemid</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="theme/8">
+<rdfs:label>loodusprotsessid</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="theme/31">
+<rdfs:label>loodusvarad</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="theme/18">
+<rdfs:label>loomakasvatus</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="theme/9">
+<rdfs:label>majandus</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="theme/27">
+<rdfs:label>materjalid</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="theme/14">
+<rdfs:label>metsandus</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="theme/35">
+<rdfs:label>muld</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="theme/24">
+<rdfs:label>müra, vibratsioon</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="theme/2">
+<rdfs:label>põllumajandus</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="theme/26">
+<rdfs:label>reostus (saastus)</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="theme/21">
+<rdfs:label>seadused</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="theme/34">
+<rdfs:label>sotsiaalküsimused, rahvastik</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="theme/22">
+<rdfs:label>sõjaväe keskkonnamõju</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="theme/13">
+<rdfs:label>toit, joogivesi</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="theme/29">
+<rdfs:label>turism</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="theme/19">
+<rdfs:label>tööstus</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="theme/30">
+<rdfs:label>uurimistöö</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="theme/37">
+<rdfs:label>veondus</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="theme/40">
+<rdfs:label>vesi</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="theme/3">
+<rdfs:label>õhk</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="theme/15">
+<rdfs:label>üldterminid</rdfs:label>
+</rdf:Description>
+
+</rdf:RDF>

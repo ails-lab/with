@@ -1,0 +1,312 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<rdf:RDF xml:lang="eu"
+         xmlns:rdf='http://www.w3.org/1999/02/22-rdf-syntax-ns#'
+         xmlns:rdfs='http://www.w3.org/2000/01/rdf-schema#'
+         xmlns:skos="http://www.w3.org/2004/02/skos/core#"
+         xmlns="http://www.eionet.europa.eu/gemet/2004/06/gemet-schema.rdf#"
+   xml:base="http://www.eionet.europa.eu/gemet/">
+<rdf:Description rdf:about="supergroup/4044">
+<rdfs:label>GIZA JARDUERAK ETA PRODUKTUAK, ONDORIOAK INGURUGIROAN</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="supergroup/2894">
+<rdfs:label>GIZARTE-ALDERDIAK, INGURUGIRO-POLITIKAKO NEURRIAK</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="supergroup/5499">
+<rdfs:label>INGURUNE NATURALA, INGURUNE ANTROPOFIKOA</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="supergroup/5306">
+<rdfs:label>TERMINO OSAGARRIAK</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="group/10111">
+<rdfs:label>INGURUGIROA (ingurune naturala, ingurune antropikoa)</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="group/10112">
+<rdfs:label>PRODUKTUAK, MATERIALAK</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="group/10114">
+<rdfs:label>ONDORIOAK, INPAKTUAK</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="group/10117">
+<rdfs:label>TERMINO OROKORRAK</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="group/10118">
+<rdfs:label>BALIABIDEAK (baliabideen erabilera)</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="group/1062">
+<rdfs:label>ANTROPOSFERA (ingurune hiritarra, giza kokalekuak, lurralde-antolamendua)</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="group/13109">
+<rdfs:label>INGURUGIRO-POLITIKA</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="group/1349">
+<rdfs:label>KIMIKA, SUBSTANTZIAK, PROZESUAK</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="group/14979">
+<rdfs:label>DENBORA (kronologia)</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="group/14980">
+<rdfs:label>TERMINO FUNTZIONALAK</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="group/1922">
+<rdfs:label>INFORMAZIOA, HEZKUNTZA, KULTURA, INGURUGIRO-SENTSIBILIZAZIOA</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="group/234">
+<rdfs:label>NEKAZARITZA, BASOGINTZA</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="group/2504">
+<rdfs:label>EKONOMIA, FINANTZAK</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="group/2711">
+<rdfs:label>ENERGIA</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="group/3875">
+<rdfs:label>OSASUNA, ELIKADURA</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="group/4125">
+<rdfs:label>HIDROSFERA (ur geza, ur, gazia, ur-motak)</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="group/4281">
+<rdfs:label>INDUSTRIA, LANBIDEAK</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="group/4630">
+<rdfs:label>LURRA (paisaia, geografia)</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="group/4750">
+<rdfs:label>LEGEAK, ARAUAK, HITZARMENAK</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="group/4856">
+<rdfs:label>LITOSFERA (lurzorua, prozesu geologikoak)</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="group/618">
+<rdfs:label>ATMOSFERA (airea, klima)</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="group/6237">
+<rdfs:label>ALDERDI FISIKOAK, ZARATA, DARDARA, ERRADIAZIOAK</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="group/7007">
+<rdfs:label>AISIALDIA, TURISMOA</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="group/7136">
+<rdfs:label>IKERKUNTZA, ZIENTZIAK</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="group/7243">
+<rdfs:label>ARRISKUAK, SEGURTASUNA</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="group/7779">
+<rdfs:label>GIZARTEA</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="group/7956">
+<rdfs:label>ESPAZIOA</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="group/8575">
+<rdfs:label>MERKATARITZA, ZERBITZUAK</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="group/8603">
+<rdfs:label>ZIRKULAZIOA, GARRAIOA</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="group/893">
+<rdfs:label>BIOSFERA (organismoak, ekosistemak)</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="group/9117">
+<rdfs:label>HONDAKINAK, KUTSATZAILEAK, KUTSADURA</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="group/96">
+<rdfs:label>ADMINISTRAZIOA, KUDEAKETA, POLITIKA, ERAKUNDEAK, PLANGINTZA</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="theme/18">
+<rdfs:label>abeltzaintza</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="theme/1">
+<rdfs:label>administrazioa</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="theme/3">
+<rdfs:label>airea</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="theme/22">
+<rdfs:label>alderdi militarrak</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="theme/12">
+<rdfs:label>arrantza</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="theme/31">
+<rdfs:label>baliabideak</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="theme/14">
+<rdfs:label>basogintza</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="theme/4">
+<rdfs:label>biologia</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="theme/8">
+<rdfs:label>dinamika naturala</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="theme/9">
+<rdfs:label>ekonomia</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="theme/13">
+<rdfs:label>elikagaiak, edateko ura</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="theme/10">
+<rdfs:label>energia</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="theme/5">
+<rdfs:label>eraikuntza</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="theme/28">
+<rdfs:label>erradiazioak</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="theme/36">
+<rdfs:label>espazioa</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="theme/25">
+<rdfs:label>fisika</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="theme/37">
+<rdfs:label>garraioa</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="theme/16">
+<rdfs:label>geografia</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="theme/17">
+<rdfs:label>gizakiaren osasuna</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="theme/34">
+<rdfs:label>gizarte-alderdiak, biztanleak</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="theme/39">
+<rdfs:label>hondakinak</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="theme/32">
+<rdfs:label>hondamendiak, istripuak, arriskua</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="theme/30">
+<rdfs:label>ikerkuntza</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="theme/19">
+<rdfs:label>industria</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="theme/20">
+<rdfs:label>informazioa</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="theme/11">
+<rdfs:label>ingurugiro-politika</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="theme/38">
+<rdfs:label>ingurune hiritarra, hiri-estresa</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="theme/6">
+<rdfs:label>kimika</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="theme/7">
+<rdfs:label>klima</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="theme/26">
+<rdfs:label>kutsadura</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="theme/21">
+<rdfs:label>legeak</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="theme/35">
+<rdfs:label>lurzorua</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="theme/27">
+<rdfs:label>materialak</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="theme/33">
+<rdfs:label>merkataritza, zerbitzuak</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="theme/23">
+<rdfs:label>natur guneak, paisaia, ekosistemak</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="theme/2">
+<rdfs:label>nekazaritza</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="theme/15">
+<rdfs:label>orokorra</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="theme/29">
+<rdfs:label>turismoa</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="theme/40">
+<rdfs:label>ura</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="theme/24">
+<rdfs:label>zarata, dardarak</rdfs:label>
+</rdf:Description>
+
+</rdf:RDF>

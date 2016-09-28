@@ -1,0 +1,312 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<rdf:RDF xml:lang="it"
+         xmlns:rdf='http://www.w3.org/1999/02/22-rdf-syntax-ns#'
+         xmlns:rdfs='http://www.w3.org/2000/01/rdf-schema#'
+         xmlns:skos="http://www.w3.org/2004/02/skos/core#"
+         xmlns="http://www.eionet.europa.eu/gemet/2004/06/gemet-schema.rdf#"
+   xml:base="http://www.eionet.europa.eu/gemet/">
+<rdf:Description rdf:about="supergroup/5499">
+<rdfs:label>AMBIENTE NATURALE, AMBIENTE ANTROPICO</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="supergroup/2894">
+<rdfs:label>ASPETTI SOCIALI, MISURE DI POLITICA AMBIENTALE</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="supergroup/4044">
+<rdfs:label>ATTIVITA&apos; E PRODOTTI UMANI, EFFETTI SULL&apos;AMBIENTE</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="supergroup/5306">
+<rdfs:label>MISCELLANEA DI TERMINI</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="group/10111">
+<rdfs:label>AMBIENTE (ambiente naturale, ambiente antropico)</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="group/10112">
+<rdfs:label>PRODOTTI, MATERIALI</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="group/10114">
+<rdfs:label>EFFETTI, IMPATTI</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="group/10117">
+<rdfs:label>TERMINI GENERALI</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="group/10118">
+<rdfs:label>RISORSE (utilizzazione delle risorse)</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="group/1062">
+<rdfs:label>ANTROPOSFERA (ambiente edificato, insediamenti umani, assetto del territorio)</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="group/13109">
+<rdfs:label>POLITICA AMBIENTALE</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="group/1349">
+<rdfs:label>CHIMICA, SOSTANZE, PROCESSI</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="group/14979">
+<rdfs:label>TEMPO (cronologia)</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="group/14980">
+<rdfs:label>TERMINI FUNZIONALI</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="group/1922">
+<rdfs:label>INFORMAZIONE, EDUCAZIONE, CULTURA, CONSAPEVOLEZZA AMBIENTALE</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="group/234">
+<rdfs:label>AGRICOLTURA; ATTIVITA&apos; FORESTALI; ALLEVAMENTO; PESCA</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="group/2504">
+<rdfs:label>ECONOMIA, FINANZA</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="group/2711">
+<rdfs:label>ENERGIA</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="group/3875">
+<rdfs:label>SALUTE, NUTRIZIONE</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="group/4125">
+<rdfs:label>IDROSFERA (acqua dolce, acqua marina, acque)</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="group/4281">
+<rdfs:label>INDUSTRIA; ARTIGIANATO; TECNOLOGIA; APPARECCHIATURE</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="group/4630">
+<rdfs:label>TERRITORIO (paesaggio, geografia)</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="group/4750">
+<rdfs:label>LEGISLAZIONE, NORME, CONVENZIONI</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="group/4856">
+<rdfs:label>LITOSFERA (suolo, processi geologici)</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="group/618">
+<rdfs:label>ATMOSFERA (aria, clima)</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="group/6237">
+<rdfs:label>ASPETTI FISICI, RUMORE, VIBRAZIONI, RADIAZIONI</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="group/7007">
+<rdfs:label>RICREAZIONE, TURISMO</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="group/7136">
+<rdfs:label>RICERCA, SCIENZA</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="group/7243">
+<rdfs:label>RISCHI, SICUREZZA</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="group/7779">
+<rdfs:label>ASPETTI SOCIALI, DEMOGRAFIA</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="group/7956">
+<rdfs:label>SPAZIO</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="group/8575">
+<rdfs:label>COMMERCIO, SERVIZI</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="group/8603">
+<rdfs:label>TRAFFICO, TRASPORTI</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="group/893">
+<rdfs:label>BIOSFERA (organismi, ecosistemi)</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="group/9117">
+<rdfs:label>RIFIUTI, INQUINANTI, INQUINAMENTO</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="group/96">
+<rdfs:label>AMMINISTRAZIONE, GESTIONE, POLITICA GESTIONALE, POLITICA, ISTITUZIONI, PIANIFICAZIONE</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="theme/40">
+<rdfs:label>acqua</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="theme/2">
+<rdfs:label>agricoltura</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="theme/13">
+<rdfs:label>alimenti, acqua potabile</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="theme/18">
+<rdfs:label>allevamento</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="theme/38">
+<rdfs:label>ambiente urbano, stress urbano</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="theme/1">
+<rdfs:label>amministrazione</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="theme/23">
+<rdfs:label>aree naturali, paesaggio, ecosistemi</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="theme/3">
+<rdfs:label>aria</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="theme/22">
+<rdfs:label>aspetti militari</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="theme/34">
+<rdfs:label>aspetti sociali, popolazione</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="theme/4">
+<rdfs:label>biologia</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="theme/6">
+<rdfs:label>chimica</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="theme/7">
+<rdfs:label>clima</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="theme/33">
+<rdfs:label>commercio, servizi</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="theme/8">
+<rdfs:label>dinamica naturale</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="theme/32">
+<rdfs:label>disastri, incidenti, rischi</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="theme/9">
+<rdfs:label>economia</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="theme/5">
+<rdfs:label>edilizia</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="theme/10">
+<rdfs:label>energia</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="theme/25">
+<rdfs:label>fisica</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="theme/14">
+<rdfs:label>forestazione</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="theme/15">
+<rdfs:label>generale</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="theme/16">
+<rdfs:label>geografia</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="theme/19">
+<rdfs:label>industria</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="theme/20">
+<rdfs:label>informazione</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="theme/26">
+<rdfs:label>inquinamento</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="theme/21">
+<rdfs:label>legislazione</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="theme/27">
+<rdfs:label>materiali</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="theme/12">
+<rdfs:label>pesca</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="theme/11">
+<rdfs:label>politica ambientale</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="theme/28">
+<rdfs:label>radiazioni</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="theme/30">
+<rdfs:label>ricerca</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="theme/39">
+<rdfs:label>rifiuti</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="theme/31">
+<rdfs:label>risorse</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="theme/24">
+<rdfs:label>rumore, vibrazioni</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="theme/17">
+<rdfs:label>salute umana</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="theme/36">
+<rdfs:label>spazio</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="theme/35">
+<rdfs:label>suolo</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="theme/37">
+<rdfs:label>trasporti</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="theme/29">
+<rdfs:label>turismo</rdfs:label>
+</rdf:Description>
+
+</rdf:RDF>

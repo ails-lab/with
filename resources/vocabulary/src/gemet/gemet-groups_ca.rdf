@@ -1,0 +1,312 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<rdf:RDF xml:lang="ca"
+         xmlns:rdf='http://www.w3.org/1999/02/22-rdf-syntax-ns#'
+         xmlns:rdfs='http://www.w3.org/2000/01/rdf-schema#'
+         xmlns:skos="http://www.w3.org/2004/02/skos/core#"
+         xmlns="http://www.eionet.europa.eu/gemet/2004/06/gemet-schema.rdf#"
+   xml:base="http://www.eionet.europa.eu/gemet/">
+<rdf:Description rdf:about="supergroup/4044">
+<rdfs:label>ACTIVITATS HUMANES I PRODUCTES, EFECTES SOBRE EL MEDI AMBIENT</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="supergroup/2894">
+<rdfs:label>ASPECTES SOCIALS, POLÍTICA AMBIENTAL, MESURES</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="supergroup/5306">
+<rdfs:label>LLISTES ADDICIONALS</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="supergroup/5499">
+<rdfs:label>MEDI NATURAL, MEDI ANTRÒPIC</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="group/10111">
+<rdfs:label>MEDI AMBIENT (medi natural, medi antròpic)</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="group/10112">
+<rdfs:label>PRODUCTES MATERIALS</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="group/10114">
+<rdfs:label>EFECTES, IMPACTES</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="group/10117">
+<rdfs:label>TERMES GENERALS</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="group/10118">
+<rdfs:label>RECURSOS (ús dels recursos)</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="group/1062">
+<rdfs:label>ANTROPOSFERA (medi edificat, assentaments humans, ordenació del territori)</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="group/13109">
+<rdfs:label>POLÍTICA AMBIENTAL</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="group/1349">
+<rdfs:label>QUÍMICA, SUBSTÀNCIES, PROCESSOS</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="group/14979">
+<rdfs:label>TEMPS (cronologia) </rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="group/14980">
+<rdfs:label>TERMES FUNCIONALS</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="group/1922">
+<rdfs:label>INFORMACIÓ, EDUCACIÓ, CULTURA, CONSCIÈNCIA AMBIENTAL</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="group/234">
+<rdfs:label>AGRICULTURA, SILVICULTURA, CRIA D&apos;ANIMALS, PESCA</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="group/2504">
+<rdfs:label>ECONOMIA, FINANCES</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="group/2711">
+<rdfs:label>ENERGIA</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="group/3875">
+<rdfs:label>SALUT, NUTRICIÓ</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="group/4125">
+<rdfs:label>HIDROSFERA (aigua dolça, aigua marina, aigües)</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="group/4281">
+<rdfs:label>INDÚSTRIA, ARTESANIA, TECNOLOGIA, EQUIPAMENTS</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="group/4630">
+<rdfs:label>TERRITORI (paisatge, geografia)</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="group/4750">
+<rdfs:label>LEGISLACIÓ, NORMES, CONVENCIONS</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="group/4856">
+<rdfs:label>LITOSFERA (sòl, processos geològics)</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="group/618">
+<rdfs:label>ATMOSFERA (aire, clima)</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="group/6237">
+<rdfs:label>ASPECTES FÍSICS, SOROLL, VIBRACIONS, RADIACIONS</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="group/7007">
+<rdfs:label>RECREACIÓ, TURISME</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="group/7136">
+<rdfs:label>INVESTIGACIÓ, CIÈNCIES</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="group/7243">
+<rdfs:label>RISCOS, SEGURETAT</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="group/7779">
+<rdfs:label>SOCIETAT</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="group/7956">
+<rdfs:label>ESPAI</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="group/8575">
+<rdfs:label>COMERÇ, SERVEIS</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="group/8603">
+<rdfs:label>TRÀNSIT, TRANSPORT</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="group/893">
+<rdfs:label>BIOSFERA (organismes, ecosistemes)</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="group/9117">
+<rdfs:label>RESIDUS, CONTAMINANTS, CONTAMINACIÓ</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="group/96">
+<rdfs:label>ADMINISTRACIÓ, GESTIÓ, POLÍTICA, INSTITUCIONS, PLANIFICACIÓ</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="theme/1">
+<rdfs:label>administració</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="theme/2">
+<rdfs:label>agricultura</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="theme/40">
+<rdfs:label>aigua</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="theme/3">
+<rdfs:label>aire</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="theme/13">
+<rdfs:label>aliment, aigua potable</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="theme/23">
+<rdfs:label>àrees naturals, paisatge, ecosistemes</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="theme/22">
+<rdfs:label>aspectes militars</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="theme/34">
+<rdfs:label>aspectes socials, població</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="theme/4">
+<rdfs:label>biologia</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="theme/7">
+<rdfs:label>clima</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="theme/33">
+<rdfs:label>comerç, serveis</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="theme/26">
+<rdfs:label>contaminació</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="theme/18">
+<rdfs:label>cria d&apos;animals</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="theme/32">
+<rdfs:label>desastres, accidents, riscos</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="theme/8">
+<rdfs:label>dinàmica natural</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="theme/9">
+<rdfs:label>economia</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="theme/5">
+<rdfs:label>edificació</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="theme/10">
+<rdfs:label>energia</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="theme/36">
+<rdfs:label>espai</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="theme/25">
+<rdfs:label>física</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="theme/15">
+<rdfs:label>general</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="theme/16">
+<rdfs:label>geografia</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="theme/19">
+<rdfs:label>indústria</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="theme/20">
+<rdfs:label>informació</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="theme/30">
+<rdfs:label>investigació</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="theme/21">
+<rdfs:label>legislació</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="theme/27">
+<rdfs:label>materials</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="theme/38">
+<rdfs:label>medi ambient urbà, tensió urbana (estrès urbà)</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="theme/12">
+<rdfs:label>pesca</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="theme/11">
+<rdfs:label>política ambiental</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="theme/6">
+<rdfs:label>química</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="theme/28">
+<rdfs:label>radiacions</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="theme/31">
+<rdfs:label>recursos</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="theme/39">
+<rdfs:label>residu</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="theme/17">
+<rdfs:label>salut humana</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="theme/14">
+<rdfs:label>silvicultura</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="theme/35">
+<rdfs:label>sòl</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="theme/24">
+<rdfs:label>soroll, vibracions</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="theme/37">
+<rdfs:label>transports</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="theme/29">
+<rdfs:label>turisme</rdfs:label>
+</rdf:Description>
+
+</rdf:RDF>

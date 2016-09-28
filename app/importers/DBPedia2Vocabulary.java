@@ -81,11 +81,12 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import db.DB;
 
 
-public class DBPediaDataImporter {
+public class DBPedia2Vocabulary {
 
 	private String ontologyFile = System.getProperty("user.dir") + DB.getConf().getString("vocabulary.srcpath") + File.separator + "dbpedia_2015-10.owl";
-	private String instancesFile = System.getProperty("user.dir") + DB.getConf().getString("vocabulary.srcpath") + File.separator + "instance_types_en.ttl.bz2";
-	private String labelsFiles = System.getProperty("user.dir") + DB.getConf().getString("vocabulary.srcpath") + File.separator + "labels_en.ttl.bz2";
+	private String labelsFileName = "labels_en.ttl.bz2";
+	private String inPath = System.getProperty("user.dir") + DB.getConf().getString("vocabulary.srcpath");
+	
 	private File tmpIndex;
 	
 	private String dboFile = System.getProperty("user.dir") + DB.getConf().getString("vocabulary.path") + File.separator + "dbo.txt";
@@ -105,10 +106,10 @@ public class DBPediaDataImporter {
 	private Set<OWLClass> filter;
 	
 	public static void main(String[] args) {
-		new DBPediaDataImporter();
+		new DBPedia2Vocabulary();
 	}
 	
-	public DBPediaDataImporter() {
+	public DBPedia2Vocabulary() {
 
 		filter = new HashSet<>();
 		filter.add(df.getOWLClass(IRI.create("http://dbpedia.org/ontology/Person")));
@@ -364,68 +365,40 @@ public class DBPediaDataImporter {
 
 	private void readInstances() throws IOException, CompressorException {
 		System.out.println("Adding instances");
-		try (FileInputStream fin = new FileInputStream(instancesFile);
-	         BufferedInputStream bis = new BufferedInputStream(fin);
-	         CompressorInputStream input = new CompressorStreamFactory().createCompressorInputStream(bis);
-	         BufferedReader br = new BufferedReader(new InputStreamReader(input))) {
-
-			String line;
-	
-			int count = 0;
-			while ((line = br.readLine()) != null)   {
-				Matcher m = triple.matcher(line);
-				
-				if (m.find()) {
-					String id = "ID_" + System.currentTimeMillis() + "_" + Math.floor(100000*Math.random());
-					String uri = m.group(1);
-					String type = m.group(2);
-					String value = StringEscapeUtils.unescapeJava(m.group(3));
-					
-					Document doc = new Document();
+		
+		for (File f : new File(inPath).listFiles()) {
+			if (f.getName().endsWith("bz2")) {
+				try (FileInputStream fin = new FileInputStream(f);
+			         BufferedInputStream bis = new BufferedInputStream(fin);
+			         CompressorInputStream input = new CompressorStreamFactory().createCompressorInputStream(bis);
+			         BufferedReader br = new BufferedReader(new InputStreamReader(input))) {
+		
+					String line;
 			
-					doc.add(new StringField("id", id, Field.Store.YES));
-					doc.add(new StringField("uri", uri, Field.Store.YES));
-					doc.add(new StringField("type", type, Field.Store.YES));
-					doc.add(new StringField("value", value, Field.Store.YES));
-
-					writer.addDocument(doc);
-					count++;
+					int count = 0;
+					while ((line = br.readLine()) != null)   {
+						Matcher m = triple.matcher(line);
+						
+						if (m.find()) {
+							String id = "ID_" + System.currentTimeMillis() + "_" + Math.floor(100000*Math.random());
+							String uri = m.group(1);
+							String type = m.group(2);
+							String value = StringEscapeUtils.unescapeJava(m.group(3));
+							
+							Document doc = new Document();
+					
+							doc.add(new StringField("id", id, Field.Store.YES));
+							doc.add(new StringField("uri", uri, Field.Store.YES));
+							doc.add(new StringField("type", type, Field.Store.YES));
+							doc.add(new StringField("value", value, Field.Store.YES));
+		
+							writer.addDocument(doc);
+							count++;
+						}
+					}
+					System.out.println(count + " elements added from " + f.getName());
 				}
 			}
-			System.out.println(count + " instances added");
-		}
-		
-		
-		System.out.println("Adding labels");
-		try (FileInputStream fin = new FileInputStream(labelsFiles);
-	         BufferedInputStream bis = new BufferedInputStream(fin);
-	         CompressorInputStream input = new CompressorStreamFactory().createCompressorInputStream(bis);
-	         BufferedReader br = new BufferedReader(new InputStreamReader(input))) {
-
-			String line;
-	
-			int count = 0;
-			while ((line = br.readLine()) != null)   {
-				Matcher m = triple.matcher(line);
-				
-				if (m.find()) {
-					String id = "ID_" + System.currentTimeMillis() + "_" + Math.floor(100000*Math.random());
-					String uri = m.group(1);
-					String type = m.group(2);
-					String value = StringEscapeUtils.unescapeJava(m.group(3));
-					
-					Document doc = new Document();
-			
-					doc.add(new StringField("id", id, Field.Store.YES));
-					doc.add(new StringField("uri", uri, Field.Store.YES));
-					doc.add(new StringField("type", type, Field.Store.YES));
-					doc.add(new StringField("value", value, Field.Store.YES));
-
-					writer.addDocument(doc);
-					count++;
-				}
-			}
-			System.out.println(count + " labels added");
 		}
 		
 		writer.close();
@@ -452,7 +425,7 @@ public class DBPediaDataImporter {
 			dbrFile = dbrFile + ".txt";
 			
 			System.out.println("Creating thesaurus files");
-			try (FileInputStream fin = new FileInputStream(labelsFiles);
+			try (FileInputStream fin = new FileInputStream(inPath + File.separator + labelsFileName);
 		         BufferedInputStream bis = new BufferedInputStream(fin);
 		         CompressorInputStream input = new CompressorStreamFactory().createCompressorInputStream(bis);
 		         BufferedReader br = new BufferedReader(new InputStreamReader(input));

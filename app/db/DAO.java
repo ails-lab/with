@@ -223,6 +223,41 @@ public class DAO<E> extends BasicDAO<E, ObjectId> {
 	}
 
 	/**
+	 * Use this method to save and Object to the database
+	 *
+	 * @param record
+	 */
+	public List<Key<E>> makePermanentMany(Class cz, List<E> docs) {
+		List<ObjectId> ids = new ArrayList<>();
+		List<Map<String, Object>> maps = new ArrayList<>();
+		
+		String type = defineInstanceOf(cz);
+		List<Key<E>> dbKeys = new ArrayList<>();
+		
+		for (E doc : docs) {
+			try {
+				Key<E> dbKey = this.save(doc, WriteConcern.ACKNOWLEDGED);
+				dbKeys.add(dbKey);
+				
+//				ids.add((ObjectId)doc.getClass().getMethod("getDbId", new Class<?>[0]).invoke(doc));
+//				maps.add((Map<String, Object>) doc.getClass().getMethod("transform", new Class<?>[0]).invoke(doc));
+			} catch (Exception e) {
+				log.error("Cannot save " + doc.getClass().getSimpleName(), e);
+			}
+		}
+		
+		/* Index Resource */
+//		BiFunction<List<ObjectId>, List<Map<String, Object>>, String> indexResource = (
+//				List<ObjectId> colIds, List<Map<String, Object>> map) -> {
+//			return ElasticIndexer.indexMany(type, colIds, map);
+//		};
+//		
+//		ParallelAPICall.createPromise(indexResource, ids, maps); 
+
+		return dbKeys;
+	}
+	
+	/**
 	 * Use this method to delete and Object to the database
 	 *
 	 * @param record
@@ -312,6 +347,25 @@ public class DAO<E> extends BasicDAO<E, ObjectId> {
 	private String defineInstanceOf(E doc) {
 
 		String instanceName = doc.getClass().getSimpleName();
+		List<String> enumNames = new ArrayList<String>();
+		Arrays.asList(WithResourceType.values()).forEach((t) -> {
+			enumNames.add(t.toString());
+			return;
+		});
+		if (enumNames.contains(instanceName)) {
+			if (!instanceName.equalsIgnoreCase(WithResourceType.WithResource
+					.toString()))
+				return instanceName.toLowerCase();
+			else
+				return WithResourceType.RecordResource.toString().toLowerCase();
+		} else
+			return null;
+
+	}
+
+	private String defineInstanceOf(Class cz) {
+
+		String instanceName = cz.getSimpleName();
 		List<String> enumNames = new ArrayList<String>();
 		Arrays.asList(WithResourceType.values()).forEach((t) -> {
 			enumNames.add(t.toString());

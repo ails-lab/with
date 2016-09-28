@@ -16,22 +16,15 @@
 
 package importers;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -39,26 +32,6 @@ import java.util.regex.Pattern;
 import model.basicDataTypes.Language;
 import net.minidev.json.JSONObject;
 
-import org.apache.commons.lang3.StringEscapeUtils;
-import org.apache.lucene.analysis.core.KeywordAnalyzer;
-import org.apache.lucene.document.Document;
-import org.apache.lucene.document.Field;
-import org.apache.lucene.document.StringField;
-import org.apache.lucene.index.DirectoryReader;
-import org.apache.lucene.index.IndexWriter;
-import org.apache.lucene.index.IndexWriterConfig;
-import org.apache.lucene.index.IndexWriterConfig.OpenMode;
-import org.apache.lucene.index.Term;
-import org.apache.lucene.search.IndexSearcher;
-import org.apache.lucene.search.Query;
-import org.apache.lucene.search.ScoreDoc;
-import org.apache.lucene.search.TermQuery;
-import org.apache.lucene.search.TopDocs;
-import org.apache.lucene.store.Directory;
-import org.apache.lucene.store.FSDirectory;
-import org.apache.commons.compress.compressors.CompressorException;
-import org.apache.commons.compress.compressors.CompressorInputStream;
-import org.apache.commons.compress.compressors.CompressorStreamFactory;
 import org.semanticweb.HermiT.Reasoner;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.IRI;
@@ -69,10 +42,7 @@ import org.semanticweb.owlapi.model.OWLDataFactory;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
-import org.semanticweb.owlapi.reasoner.Node;
-import org.semanticweb.owlapi.reasoner.NodeSet;
 import org.semanticweb.owlapi.reasoner.OWLReasoner;
-import org.semanticweb.owlapi.model.OWLOntologyID;
 
 import play.libs.Json;
 
@@ -81,10 +51,9 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import db.DB;
-//import org.mindswap.pellet.owlapi.Reasoner;
 
 
-public class OntologyImporter {
+public class OWL2Vocabulary {
 
 	private String inPath = System.getProperty("user.dir") + DB.getConf().getString("vocabulary.srcpath");
 	private String outPath = System.getProperty("user.dir") + DB.getConf().getString("vocabulary.path");
@@ -99,15 +68,21 @@ public class OntologyImporter {
 	private static OWLDataFactory df = new OWLManager().getOWLDataFactory();
 
 	public static void main(String[] args) {
-		new OntologyImporter("nerd-v0.5.n3", "Named Entity Recognition and Disambiguation Ontology", null, "nerd", "0.5", "http://nerd.eurecom.fr/ontology", "nerd.eurecom.fr", "http://nerd.eurecom.fr/ontology#Thing");
+		new OWL2Vocabulary("nerd/nerd-v0.5.n3", 
+				           "Named Entity Recognition and Disambiguation Ontology", 
+				           null, 
+				           "nerd", 
+				           "0.5", 
+				           "http://nerd.eurecom.fr/ontology", 
+				           "nerd.eurecom.fr", 
+				           "http://nerd.eurecom.fr/ontology#Thing");
 	}
 	
-	public OntologyImporter(String fn, String title, String labelProperty, String name, String version, String scheme, String filter, String top) {
+	public OWL2Vocabulary(String fn, String title, String labelProperty, String name, String version, String scheme, String filter, String top) {
 
 		try {
 			readOntology(fn, title, labelProperty, name, version, scheme, filter, top);
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
@@ -279,6 +254,10 @@ public class OntologyImporter {
 		}
 
 		
+		int cutout = Math.max(fn.lastIndexOf("/"), fn.lastIndexOf("\\"));
+		if (cutout > 0) {
+			fn = fn.substring(cutout);
+		}
 		try (FileWriter fr = new FileWriter(new File(outPath + File.separator + fn + ".txt"));
             BufferedWriter br = new BufferedWriter(fr)) {
 			
@@ -355,7 +334,6 @@ public class OntologyImporter {
 			br.write(jtop.toString());
 
         } catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	

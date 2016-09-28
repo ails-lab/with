@@ -23,7 +23,7 @@ libraryDependencies ++= Seq(
   filters,
   javaWs,
  "org.mongodb.morphia" % "morphia" % "1.0.1",
- "org.apache.jena" % "apache-jena-libs" % "2.10.1",
+ "org.apache.jena" % "apache-jena-libs" % "3.1.0",
  "commons-io" % "commons-io" % "2.3",
  "com.google.code.gson" % "gson" % "2.2.4",
  "com.google.code.gson" % "gson" % "2.2.4",

@@ -81,14 +81,15 @@ import db.DB;
 import db.WithResourceDAO;
 import elastic.Elastic;
 import elastic.ElasticCoordinator;
+import elastic.ElasticEraser;
 import elastic.ElasticSearcher;
 import elastic.ElasticSearcher.SearchOptions;
-import annotators.Lexicon.Vocabulary;
+import annotators.Vocabulary;
 import annotators.Annotator.AnnotatorType;
 import controllers.thesaurus.struct.SearchSuggestion;
 
 /**
- * @author mariaral
+ * @author achort
  *
  */
 @SuppressWarnings({ "rawtypes", "unchecked" })
@@ -129,22 +130,56 @@ public class ThesaurusController extends Controller {
 			return false;
 		}
 		
-		ObjectId recordId;
-		
 		if (DB.getThesaurusDAO().existsWithExternalId(uri)) {
 			ThesaurusObject resource = DB.getThesaurusDAO()
 					.getUniqueByFieldAndValue("administrative.externalId",
 							uri,
 							new ArrayList<String>(Arrays.asList("_id")));
 			DB.getThesaurusDAO().editRecord("semantic", resource.getDbId(), json.get("semantic"));
+			// should be reindexed
 
 		} else {
 			record.getAdministrative().setCreated(new Date());
 			DB.getThesaurusDAO().makePermanent(record);
-			recordId = record.getDbId();
+			ObjectId recordId = record.getDbId();
 			DB.getThesaurusDAO().updateField(recordId, "administrative.externalId", uri);
 		}
 		
+		return true;
+	}
+	
+	public static boolean addThesaurusTerms(List<JsonNode> jsons) throws ClassNotFoundException {
+		
+		Class<?> clazz = Class.forName("model.resources.ThesaurusObject");
+
+		ArrayList<ThesaurusObject> records = new ArrayList<>();
+
+		for (JsonNode json : jsons) {
+			ThesaurusObject record = (ThesaurusObject) Json.fromJson(json, clazz);
+			String uri = record.getSemantic().getUri();
+			
+			if (uri == null) {
+				continue;
+			}
+			
+			if (DB.getThesaurusDAO().existsWithExternalId(uri)) {
+				ThesaurusObject resource = DB.getThesaurusDAO()
+						.getUniqueByFieldAndValue("administrative.externalId",
+								uri,
+								new ArrayList<String>(Arrays.asList("_id")));
+				DB.getThesaurusDAO().editRecord("semantic", resource.getDbId(), json.get("semantic"));
+				//should reindex
+			} else {
+				record.getAdministrative().setCreated(new Date());
+				record.getAdministrative().setExternalId(uri);
+				records.add(record);
+//				DB.getThesaurusDAO().makePermanent(record);
+//				ObjectId recordId = record.getDbId();
+//				DB.getThesaurusDAO().updateField(recordId, "administrative.externalId", uri);
+			}
+			
+			DB.getThesaurusDAO().makePermanentMany(ThesaurusObject.class, records);
+		}
 		
 		return true;
 	}
@@ -216,8 +251,9 @@ public class ThesaurusController extends Controller {
 
 		try {
 			ArrayNode aresult = Json.newObject().arrayNode();
-
-			for (Vocabulary voc : Vocabulary.values()) {
+			System.out.println("THESAURI");
+			for (Vocabulary voc : Vocabulary.getVocabularies()) {
+				System.out.println(voc.getName());
 				
 				ObjectNode json = Json.newObject();
 				json.put("vocabulary", voc.getName());

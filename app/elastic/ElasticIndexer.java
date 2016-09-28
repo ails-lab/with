@@ -74,6 +74,7 @@ public class ElasticIndexer {
 						type,
 						ids.get(i).toString())
 				.source(docs.get(i)));
+				
 			}
 			Elastic.getBulkProcessor().close();
 		} catch(ElasticsearchException ee) {

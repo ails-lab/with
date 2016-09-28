@@ -40,7 +40,7 @@ import model.annotations.selectors.PropertyTextFragmentSelector;
 import model.annotations.targets.AnnotationTarget;
 import model.basicDataTypes.Language;
 import model.basicDataTypes.MultiLiteral;
-import annotators.Lexicon.Vocabulary;
+import annotators.Vocabulary;
 import annotators.struct.AnnotatedObject;
 import annotators.struct.AnnotationIndex;
 import annotators.struct.AnnotationValue;
