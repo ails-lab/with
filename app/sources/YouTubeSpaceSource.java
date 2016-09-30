@@ -95,7 +95,7 @@ public class YouTubeSpaceSource extends ISpaceSource {
 		String httpQuery = getHttpQuery(q);
 		res.query = httpQuery;
 		JsonNode response;
-		
+		if (q.getFilterRestriction(FiltersFields.TYPE.getFilterId()).contains(WithMediaType.VIDEO.getName()))
 			try {
 				response = getHttpConnector().getURLContent(httpQuery);
 				// System.out.println(httpQuery);
