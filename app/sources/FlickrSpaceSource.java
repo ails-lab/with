@@ -195,7 +195,6 @@ public abstract class FlickrSpaceSource extends ISpaceSource {
 				// CommonFilterLogic type = CommonFilterLogic.typeFilter();
 				// countValue(type, "video", 1);
 				// countValue(type, "photo", 1);
-				 res.filtersLogic.add(rights);
 			} catch (Exception e) {
 				log.error("", e );
 			}
