@@ -144,7 +144,7 @@ public class EuropeanaExternalSource extends ExternalSource {
 	
 	@Override
 	public QueryBuilder getBuilder(Query q) {
-		QueryBuilder builder = new EuropeanaQueryBuilder("http://europeana.eu/api/v2/search.json");
+		QueryBuilder builder = new EuropeanaQueryBuilder("http://www.europeana.eu/api/v2/search.json");
 		builder.addSearchParam("wskey", "ANnuDzRpW");
 
 		builder.setQuery("query", q.findFilter(Fields.anywhere.fieldId()).value);

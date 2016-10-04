@@ -348,14 +348,22 @@ public class WithResourceDAO<T extends WithResource> extends DAO<T> {
 		retrievedFields.add("administrative.access");
 		WithResource resource = getById(resourceId, new ArrayList<String>(Arrays.asList("administrative.collectedBy")));
 		List<AccessEntry> collectedByOld = resource.getAdministrative().getCollectedBy();
-		collectedByOld.remove(new AccessEntry(userId, oldAccess));
-		collectedByOld.add(new AccessEntry(userId, newAccess));
+		if (oldAccess != Access.NONE)
+			collectedByOld.remove(new AccessEntry(userId, oldAccess));
+		if (newAccess != Access.NONE)
+			collectedByOld.add(new AccessEntry(userId, newAccess));
 		updateOps.set("administrative.collectedBy", collectedByOld);
 		this.update(this.createQuery().field("_id").equal(resourceId),
 				updateOps);
 	}
 
-	public void changeAccess(ObjectId resourceId, ObjectId userId,
+	/**
+	 * return the old access level.
+	 * @param resourceId
+	 * @param userId
+	 * @param newAccess
+	 */
+	public Access changeAccess(ObjectId resourceId, ObjectId userId,
 			Access newAccess) {
 		Query<T> q = this.createQuery().field("_id").equal(resourceId);
 		ArrayList<String> retrievedFields = new ArrayList<String>();
@@ -363,12 +371,13 @@ public class WithResourceDAO<T extends WithResource> extends DAO<T> {
 		T resource = this.findOne(q.retrievedFields(true,
 				retrievedFields.toArray(new String[retrievedFields.size()])));
 		WithAccess access = resource.getAdministrative().getAccess();
+		Access oldAccess = Access.NONE;
 		int index = 0;
 		UpdateOperations<T> updateOps = this.createUpdateOperations()
 				.disableValidation();
 		for (AccessEntry entry : access.getAcl()) {
 			if (entry.getUser().equals(userId)) {
-				// userExists = true;
+				oldAccess = entry.getLevel();
 				break;
 			}
 			index += 1;
@@ -386,6 +395,7 @@ public class WithResourceDAO<T extends WithResource> extends DAO<T> {
 		}
 		this.update(this.createQuery().field("_id").equal(resourceId),
 				updateOps);
+		return oldAccess;
 	}
 
 	public WithAccess mergeRights(List<WithAccess> parentColAccess,

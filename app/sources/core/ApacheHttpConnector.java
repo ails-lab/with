@@ -29,9 +29,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.Header;
-import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.HttpClient;
+import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpUriRequest;
@@ -47,7 +46,6 @@ import org.apache.http.pool.PoolStats;
 import org.apache.http.util.EntityUtils;
 import play.Logger;
 import play.Logger.ALogger;
-import play.core.Router;
 
 public class ApacheHttpConnector extends HttpConnector {
 	
@@ -64,13 +62,20 @@ public class ApacheHttpConnector extends HttpConnector {
 	private static ApacheHttpConnector instance;
     private static PoolingHttpClientConnectionManager connMan = new PoolingHttpClientConnectionManager();
 
+    private final static RequestConfig requestConfig = RequestConfig.custom()
+            .setConnectTimeout(3000)
+            .setConnectionRequestTimeout(3000)
+            .setSocketTimeout(3000)
+            .build();
+    
 	public static HttpClientBuilder httpClientBuilder =
 			HttpClientBuilder.create()
             .setConnectionManager( connMan )
             .setConnectionManagerShared(true)
 			.setConnectionTimeToLive(1, TimeUnit.MINUTES)
 			.setMaxConnPerRoute(10)
-            .setMaxConnTotal(100);
+            .setMaxConnTotal(100)
+            .setDefaultRequestConfig(requestConfig);
 
 	public static HttpConnector getApacheHttpConnector(){
 		if (instance==null){

@@ -129,7 +129,7 @@ public class YouTubeSpaceSource extends ISpaceSource {
 		RecordResource it = new RecordResource();
 		String id = item.getStringValue("id.videoId");
 		String isAt = "https://www.youtube.com/watch?v="+id;
-		it.addToProvenance(new ProvenanceInfo(sourceLABEL.toString(), isAt, id));
+		it.addToProvenance(new ProvenanceInfo(getSourceName().toString(), isAt, id));
 
 		EmbeddedMediaObject th = new EmbeddedMediaObject();
 		th.setType(WithMediaType.VIDEO);
@@ -159,7 +159,7 @@ public class YouTubeSpaceSource extends ISpaceSource {
 		RecordResource it = new RecordResource();
 		String id = item.getStringValue("id");
 		String isAt = "https://www.youtube.com/watch?v="+id;
-		it.addToProvenance(new ProvenanceInfo(sourceLABEL.toString(), isAt, id));
+		it.addToProvenance(new ProvenanceInfo(getSourceName().toString(), isAt, id));
 
 		EmbeddedMediaObject th = new EmbeddedMediaObject();
 		th.setType(WithMediaType.VIDEO);

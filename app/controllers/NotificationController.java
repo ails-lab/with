@@ -147,7 +147,7 @@ public class NotificationController extends WithController {
 				User user = DB.getUserDAO().get(userId);
 				return groupNotification(notification, user, accept, currentUser.getDbId(), user.getDbId(), activity);
 			case COLLECTION_SHARE:
-				 EXHIBITION_SHARE: //notification has been sent only in case of upgrade
+			case EXHIBITION_SHARE: //notification has been sent only in case of upgrade
 				if (notification instanceof ResourceNotification) {
 					resourceNotification = (ResourceNotification) notification;
 					ShareInfo shareInfo = resourceNotification.getShareInfo();

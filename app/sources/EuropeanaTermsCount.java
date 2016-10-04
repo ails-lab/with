@@ -61,7 +61,7 @@ public class EuropeanaTermsCount {
 			Function<String, String> function = (String ss) -> {
 				return "\"" + ss + "\"";
 			};
-			QueryBuilder builder = new QueryBuilder("http://europeana.eu/api/v2/search.json");
+			QueryBuilder builder = new QueryBuilder("http://www.europeana.eu/api/v2/search.json");
 			builder.addSearchParam("wskey", apiKey);
 			builder.setQuery("query", term);
 			JsonContextRecord response = new JsonContextRecord(getHTML(builder.getHttp()));

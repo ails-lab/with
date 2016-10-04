@@ -53,7 +53,7 @@ public class EuropeanaQuery {
 	}
 
 	private String getQueryBody() {
-		return "http://europeana.eu/api/v2/search.json?wskey=" + europeanaKey;
+		return "http://www.europeana.eu/api/v2/search.json?wskey=" + europeanaKey;
 	}
 
 	public void addSearch(String q) {

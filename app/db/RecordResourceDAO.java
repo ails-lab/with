@@ -362,7 +362,7 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 		return mergedIsPublic;
 	}
 
-	public void updateMembersToMergedRights(ObjectId collectionId,
+	public void updateMembersToMergedRights(ObjectId collectionId, Access oldAccess,
 			AccessEntry newAccess, List<ObjectId> effectiveIds) {
 		ArrayList<String> retrievedFields = new ArrayList<String>(
 				Arrays.asList("_id", "administrative.access"));
@@ -378,11 +378,7 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 				WithAccess mergedAccess = mergeParentCollectionRights(
 						r.getDbId(), collectionId, colAccess);
 				updateField(r.getDbId(), "administrative.access", mergedAccess);
-				CollectionObject collection = DB.getCollectionObjectDAO().getById(collectionId, retrievedFields);
-				WithAccess collectionAccess = collection.getAdministrative().getAccess();
 				ObjectId userId = newAccess.getUser();
-				Access oldAccess = collectionAccess.getAcl().stream().
-					filter(x -> x.getUser().equals(userId)).findFirst().get().getLevel();
 				updateCollectedBy(r.getDbId(), userId, oldAccess, newAccess.getLevel());
 			}
 		}
@@ -431,7 +427,7 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 	}
 
 	public void updateMembersToNewAccess(ObjectId collectionId,
-			ObjectId userId, Access newAccess, List<ObjectId> effectiveIds) {
+			ObjectId userId, Access oldAccess, Access newAccess, List<ObjectId> effectiveIds) {
 		ArrayList<String> retrievedFields = new ArrayList<String>(
 				Arrays.asList("_id"));
 		List<RecordResource> memberRecords = getByCollection(collectionId,
@@ -441,10 +437,6 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 					Action.DELETE, r.getDbId()))
 				changeAccess(r.getDbId(), userId, newAccess);
 			retrievedFields = new ArrayList<String>(Arrays.asList("administrative.access"));
-			CollectionObject collection = DB.getCollectionObjectDAO().getById(collectionId, retrievedFields);
-			WithAccess collectionAccess = collection.getAdministrative().getAccess();
-			Access oldAccess = collectionAccess.getAcl().stream().
-				filter(x -> x.getUser().equals(userId)).findFirst().get().getLevel();
 			updateCollectedBy(r.getDbId(), userId, oldAccess, newAccess);
 		}
 	}

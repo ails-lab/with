@@ -108,7 +108,10 @@ public class MediaController extends WithController {
 			}
 			// Cache media
 			downloadMediaAsync(url, mediaVersion);
-			return redirect(url);
+			FileAndType med = ((ApacheHttpConnector) ApacheHttpConnector.getApacheHttpConnector()).getContentAndType(
+					url);
+			return ok(med.data).as(med.mimeType);
+			//return redirect(url);
 		} catch (Exception e) {
 			log.error("Cannot retrieve media document from database", e);
 			return internalServerError("Cannot retrieve media document from database");
