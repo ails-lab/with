@@ -372,7 +372,10 @@ public class UserAndGroupManager extends WithController {
 			}
 			if (DB.getUserDAO().get(userOrGroupId) != null) {
 				User user = DB.getUserDAO().get(userOrGroupId);
-
+				//remove user from the group admins
+				if (group.getAdminIds().contains(userOrGroupId)) {
+					group.removeAdministrator(userOrGroupId);
+				}
 				// remove the user from the group
 				ancestorGroups.add(group.getDbId());
 				group.removeUser(user.getDbId());
