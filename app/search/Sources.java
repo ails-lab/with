@@ -21,6 +21,7 @@ import search.ProxySource.BritishLibProxySource;
 import search.ProxySource.DDBProxySource;
 import search.ProxySource.DPLAProxySource;
 import search.ProxySource.DigitalNZProxySource;
+import search.ProxySource.EuropeanaFashionProxySource;
 import search.ProxySource.EuropeanaProxySource;
 import search.ProxySource.HistoryPinProxySource;
 import search.ProxySource.InternetArchiveProxySource;
@@ -42,6 +43,7 @@ public enum Sources {
 	DPLA(DPLAProxySource.class,"DPLA","Digital Public Library of America"),
 	// TODO implement it the right way
 	EFashion(EmptySource.class,"EFashion"),
+	EuropeanaFashion(EuropeanaFashionProxySource.class,"EuropeanaFashion"),
 	YouTube(YoutubeProxySource.class,"Youtube"),
 	NLA(NLAProxySource.class,"NLA","National Library of Australia"),
 	// TODO implement it the right way

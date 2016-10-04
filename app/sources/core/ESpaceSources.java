@@ -27,6 +27,7 @@ import sources.DDBSpaceSource;
 import sources.DPLASpaceSource;
 import sources.DigitalNZSpaceSource;
 import sources.ElasticSource;
+import sources.EuropeanaFashion1SpaceSource;
 import sources.EuropeanaFashionSpaceSource;
 import sources.EuropeanaSpaceSource;
 import sources.FlickrSpaceSource;
@@ -52,6 +53,7 @@ public class ESpaceSources {
 	static void init() {
 		esources = new ArrayList<ISpaceSource>();
 		esources.add(new EuropeanaSpaceSource());
+		esources.add(new EuropeanaFashion1SpaceSource());
 		esources.add(new DPLASpaceSource());
 		esources.add(new NLASpaceSource());
 		esources.add(new DigitalNZSpaceSource());
