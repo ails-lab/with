@@ -707,6 +707,14 @@ public class GroupManager extends WithController {
 		return badRequest( "WITH space missing!");
 	}
 	
+	public static Result getSpace(String name) {
+		UserGroup with = DB.getUserGroupDAO().findOne("username", name);
+		if( with != null ) {
+			return ok( userGroupToJSON(with));
+		}
+		return badRequest( "Space missing!");
+	}
+	
 	/**
 	 * Take the argument json and store it in the WITH space. Only superusers
 	 * are allowed to do this.

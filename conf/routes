@@ -112,6 +112,7 @@ GET		/group/list								controllers.GroupManager.listUserGroups(groupType: Strin
 GET		/group/with								controllers.GroupManager.getWithSpace()
 PUT		/group/with								controllers.GroupManager.editWithSpace()
 
+GET		 /group/space							controllers.GroupManager.getSpace(name)
 PUT      /group/:id                             controllers.GroupManager.editGroup(id)
 DELETE   /group/:id                             controllers.GroupManager.deleteGroup(id)
 GET      /group/:id                             controllers.GroupManager.getGroup(id)
