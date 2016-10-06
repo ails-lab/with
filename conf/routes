@@ -132,7 +132,6 @@ GET      /rights/:colId/:right                  controllers.RightsController.edi
 GET      /rights/:colId							controllers.RightsController.editCollectionPublicity(colId, isPublic: Boolean, membersDowngrade: Boolean ?= false)
 
 # Media Controller
-GET		/media/sanitizeThumbnails				controllers.MediaController.sanitizeThumbnails()
 POST	/media/create							controllers.MediaController.createMedia(file: Boolean ?= true)
 GET		/media/byUrl							controllers.MediaController.getMediaByUrl(url, version: String ?= "Original")
 GET 	/media/:id								controllers.MediaController.getMetadataOrFile(id, file: Boolean ?=true)
@@ -189,5 +188,4 @@ GET     /source/dbpedia/lookup						controllers.DBPediaController.dbpediaLookup(
 GET		/record/:id/listAnnotations				    controllers.RecordResourceController.getAnnotations(id)
 POST		/record/:id/annotate						controllers.RecordResourceController.annotateRecord(id)
 POST		/collection/:id/annotate						controllers.CollectionObjectController.annotateCollection(id)
-GET			/collection/api/removeIdsOfDeletedRecords	controllers.WithResourceController.removeIdsOfDeletedRecords()
-GET			/record/api/arrange/:colId				controllers.RecordResourceController.arrangeRecords(colId)						
+GET			/collection/api/removeIdsOfDeletedRecords	controllers.WithResourceController.removeIdsOfDeletedRecords()						
