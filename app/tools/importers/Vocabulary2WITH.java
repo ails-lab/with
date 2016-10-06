@@ -16,13 +16,21 @@
 
 package tools.importers;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.FileReader;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.function.Function;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 
 import org.bson.types.ObjectId;
 import org.elasticsearch.action.search.SearchResponse;
@@ -59,11 +67,27 @@ public class Vocabulary2WITH {
 	
 	public static int step = 2000;
 	
-	public static void importJSONVocabularyToWITH(String name) {
+	public static void importAll() {
+		File dir = new File(VocabularyImportConfiguration.outPath);
+		for (File f : dir.listFiles()) {
+			String name = f.getName();
+			
+			if (name.endsWith(".zip")) {
+				try {
+					importJSONVocabularyToWITH(name.substring(0, name.lastIndexOf(".")));
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+	}
+	
+	public static void importJSONVocabularyToWITH(String name) throws FileNotFoundException, IOException {
 		long starttime = System.currentTimeMillis();
 		System.out.println("Adding vocabulary " + name);
 
 		File f = new File(VocabularyImportConfiguration.outPath + File.separator + name + ".txt");
+		uncompress(f);
 
 		int count = 0;
 
@@ -112,6 +136,11 @@ public class Vocabulary2WITH {
 			return;
 		}
 			
+		File zf = new File(VocabularyImportConfiguration.outPath + File.separator + name + ".zip");
+		if (zf.exists()) {
+			zf.delete();
+		}
+		
 		System.out.println("Completed. Added " + count + " for " + name);
 	}
 	
@@ -135,6 +164,31 @@ public class Vocabulary2WITH {
 		Function<List<ObjectId>, Boolean> deleteResources = (List<ObjectId> ids) -> (ElasticEraser.deleteManyTermsFromThesaurus(ids));
 		ParallelAPICall.createPromise(deleteResources, tids);
 
+	}
+	
+	private final static int BUFFER = 2048;
+	
+	private static void uncompress(File f) throws FileNotFoundException, IOException {
+		try (FileInputStream fis = new FileInputStream(f);
+		     ZipInputStream zis = new ZipInputStream(new BufferedInputStream(fis))) {
+	    	  
+			ZipEntry entry;
+			while((entry = zis.getNextEntry()) != null) {
+				System.out.println("Extracting: " +entry);
+		        int count;
+		        byte data[] = new byte[BUFFER];
+		        
+		        try (FileOutputStream fos = new FileOutputStream(entry.getName());
+ 		             BufferedOutputStream dest = new BufferedOutputStream(fos, BUFFER)) {
+		        
+			        while ((count = zis.read(data, 0, BUFFER)) != -1) {
+			        	dest.write(data, 0, count);
+			        }
+		        
+			        dest.flush();
+		        }
+			}
+		}
 	}
 
 }

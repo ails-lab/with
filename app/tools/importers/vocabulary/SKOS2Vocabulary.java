@@ -127,12 +127,14 @@ public class SKOS2Vocabulary {
 	        null);	
 
 	public static void main(String[] args) {
-		//SKOSConfiguration[] confs = new SKOSConfiguration[] { fashion, gemet, euscreenxl, photo, partageplus, mimo, hornbostelsachs };
-		SKOSImportConfiguration[] confs = new SKOSImportConfiguration[] { hornbostelsachs };
+		SKOSImportConfiguration[] confs = new SKOSImportConfiguration[] { fashion, gemet, euscreenxl, photo, partageplus, mimo, hornbostelsachs };
+//		SKOSImportConfiguration[] confs = new SKOSImportConfiguration[] { hornbostelsachs };
 		
 		for (SKOSImportConfiguration c : confs) {
 			try {
 				doImport(c);
+				c.compress();
+				c.deleteTemp();
 			} catch (Exception e) {
 				e.printStackTrace();
 			}

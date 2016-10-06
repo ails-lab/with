@@ -75,6 +75,7 @@ import org.semanticweb.owlapi.model.OWLOntologyID;
 
 import play.libs.Json;
 
+import com.aliasi.util.Arrays;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -88,7 +89,6 @@ public class DBPedia2Vocabulary {
 	private String inPath = VocabularyImportConfiguration.inPath + File.separator + "dbr";
 
 	private String dboFile = VocabularyImportConfiguration.outPath + File.separator + "dbo.txt";
-	private String dbrFile = VocabularyImportConfiguration.outPath + File.separator + "dbr";
 
 	private String labelsFileName = "labels_en.ttl.bz2";
 	private File tmpIndex;
@@ -96,15 +96,15 @@ public class DBPedia2Vocabulary {
 	private IndexWriter writer;
 	private OWLReasoner reasoner; 
 	
-	private Pattern triple = Pattern.compile("^<(.*?)> <(.*?)> <?(.*?)>? \\.$");
-	private Pattern labelPattern = Pattern.compile("^\"(.*?)\"@(.*)$");
+	private static Pattern triple = Pattern.compile("^<(.*?)> <(.*?)> <?(.*?)>? \\.$");
+	private static Pattern labelPattern = Pattern.compile("^\"(.*?)\"@(.*)$");
 		
 	private Map<OWLClass, ObjectNode> labelMap = new HashMap<>();
 	
 	private static OWLDataFactory df = new OWLManager().getOWLDataFactory();
 
-	private Set<OWLClass> filter;
-	private String restr = null;
+	private Set<OWLClass>[] filter;
+	private String[] filterName;
 	
 	private static OWLImportConfiguration dbo = new OWLImportConfiguration("dbo", 
 	        "DBPedia Ontology", 
@@ -113,30 +113,55 @@ public class DBPedia2Vocabulary {
 	        "http://www.w3.org/2000/01/rdf-schema#label",
 	        "dbpedia.org",
 	        "http://dbpedia.org/ontology",
-	        "http://nerd.eurecom.fr/ontology#Thing");	
+	        null);	
 	
 	public static void main(String[] args) {
-		new DBPedia2Vocabulary(dbo, "Person");
-	}
-	
-	public DBPedia2Vocabulary(OWLImportConfiguration conf, String restrictToType) {
-
-		filter = new HashSet<>();
+		List<String[]> filters = new ArrayList<>();
+		filters.add(new String[] {"Person"});
+		filters.add(new String[] {"Place"});
 		
-		if (restrictToType != null) {
-			filter.add(df.getOWLClass(IRI.create("http://dbpedia.org/ontology/" + restrictToType)));
-			restr = restrictToType;
-		}
-		
-		tmpIndex = new File(System.getProperty("user.dir") + File.separator + "tmp" + File.separator + "lucene");
+		DBPedia2Vocabulary importer = new DBPedia2Vocabulary(dbo, filters);
 		try {
-			prepare();
-			readInstances();
-			readOntology(conf);
-			createThesaurus();
+			importer.readOntology(dbo);
+			dbo.compress();
+			dbo.deleteTemp();
+
+			importer.prepare();
+			importer.readInstances();
+			File[] dbrFiles = importer.createThesaurus();
+			
+			for (File s : dbrFiles) {
+				String name = s.getName();
+				VocabularyImportConfiguration.compress(name.substring(0, name.lastIndexOf(".")));
+				VocabularyImportConfiguration.deleteTemp(name.substring(0, name.lastIndexOf(".")));
+			}
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+		}
+
+	}
+	
+	public DBPedia2Vocabulary(OWLImportConfiguration conf, List<String[]> restrictToType) {
+
+		tmpIndex = new File(System.getProperty("user.dir") + File.separator + "tmp" + File.separator + "lucene");
+		
+		if (restrictToType != null) {
+			filter = new Set[restrictToType.size()];
+			filterName = new String[filter.length];
+
+			for (int i = 0; i < restrictToType.size(); i++) {
+				filter[i] = new HashSet<>();
+				filterName[i] = "";
+				for (String s: restrictToType.get(i)) {
+					filter[i].add(df.getOWLClass(IRI.create("http://dbpedia.org/ontology/" + s)));
+					
+					if (filterName[i].length() > 0) {
+						filterName[i] += "-";
+					}
+					filterName[i] += s.toLowerCase();
+				}
+			}
 		}
 	}
 	
@@ -421,7 +446,7 @@ public class DBPedia2Vocabulary {
 		
 	}
 	
-	private void createThesaurus() throws IOException, CompressorException {
+	private File[] createThesaurus() throws IOException, CompressorException {
 		ArrayNode schemes = Json.newObject().arrayNode();
 		schemes.add("http://with.image.ntua.gr/schema/dbr");
 
@@ -429,146 +454,173 @@ public class DBPedia2Vocabulary {
 		vocabulary.put("name", "dbr");
 		vocabulary.put("version", "2015-10");
 
+		File[] dbrFiles;
+		
 		try (Directory dir = FSDirectory.open(tmpIndex.toPath());
 			  DirectoryReader reader = DirectoryReader.open(dir)) {
 		
 			IndexSearcher searcher = new IndexSearcher(reader);
 		
-			if (filter != null) {
-				dbrFile = dbrFile + "-" + restr.toLowerCase();
-			}
-			
-			dbrFile = dbrFile + ".txt";
-			
 			System.out.println("Creating thesaurus files");
 			try (FileInputStream fin = new FileInputStream(inPath + File.separator + labelsFileName);
 		         BufferedInputStream bis = new BufferedInputStream(fin);
 		         CompressorInputStream input = new CompressorStreamFactory().createCompressorInputStream(bis);
-		         BufferedReader br = new BufferedReader(new InputStreamReader(input));
-					FileWriter fr = new FileWriter(new File(dbrFile));
-		            BufferedWriter obr = new BufferedWriter(fr)) {
-	
-				String line;
+		         BufferedReader br = new BufferedReader(new InputStreamReader(input))) {
+				
+				if (filter == null) {
+					dbrFiles = new File[] {new File(VocabularyImportConfiguration.outPath + File.separator + "dbr.txt")};
+				} else {
+					dbrFiles = new File[filterName.length];
+					for (int i = 0; i < filterName.length; i++) {
+						dbrFiles[i] = new File(VocabularyImportConfiguration.outPath + File.separator + "dbr-" + filterName[i] + ".txt");
+						System.out.println(VocabularyImportConfiguration.outPath + File.separator + "dbr-" + filterName[i] + ".txt");
+					}
+				}
+				
+				BufferedWriter[] obr = new BufferedWriter[dbrFiles.length];
+				for (int i = 0; i < obr.length; i++) {
+					obr[i] = new BufferedWriter(new FileWriter(dbrFiles[i]));
+				}
+
+				try {
+					String line;
+			
+					while ((line = br.readLine()) != null)   {
+						Matcher m = triple.matcher(line);
+						
+						if (m.find()) {
+							String uri = m.group(1);
 		
-				while ((line = br.readLine()) != null)   {
-					Matcher m = triple.matcher(line);
-					
-					if (m.find()) {
-						String uri = m.group(1);
+							Query query = new TermQuery(new Term("uri", uri));
+							TopDocs results = searcher.search(query, 1000);
+							
+							ScoreDoc[] hits = results.scoreDocs;
+							
+							List<String> labels = new ArrayList<>();
+							Set<String> types = new HashSet<>();
+							for (ScoreDoc hit : hits) {
+								Document doc = searcher.doc(hit.doc);
+								
+								String t = doc.getValues("type")[0];
+								String v = doc.getValues("value")[0];
+								
+								if (t.equals("http://www.w3.org/2000/01/rdf-schema#label")) {
+									labels.add(v);
+								} else if (t.equals("http://www.w3.org/1999/02/22-rdf-syntax-ns#type") && v.contains("dbpedia")) {
+									types.add(v);
+								}
+							}
+							
+							ObjectNode json = Json.newObject();
+							ObjectNode semantic = Json.newObject();
+							json.put("semantic", semantic);
+							
+							semantic.put("uri", uri);
+							semantic.put("type", "http://with.image.ntua.gr/model/Instance");
+							
+							ObjectNode prefLabel = Json.newObject();
+							for (String label : labels) {
+								Matcher lm = labelPattern.matcher(label);
+								if (lm.find()) {
+									Language lang = Language.getLanguage(lm.group(2));
+									if (lang != null) {
+										prefLabel.put(lang.getDefaultCode(), JSONObject.escape(lm.group(1)));
+									}
+								}
+							}
+							
+							if (prefLabel.size() > 0) {
+								semantic.put("prefLabel", prefLabel);
+							}
 	
-						Query query = new TermQuery(new Term("uri", uri));
-						TopDocs results = searcher.search(query, 1000);
-						
-						ScoreDoc[] hits = results.scoreDocs;
-						
-						List<String> labels = new ArrayList<>();
-						Set<String> types = new HashSet<>();
-						for (ScoreDoc hit : hits) {
-							Document doc = searcher.doc(hit.doc);
+							Set<OWLClass> dsc = new HashSet<>();
+							Set<OWLClass> asc = new HashSet<>();
 							
-							String t = doc.getValues("type")[0];
-							String v = doc.getValues("value")[0];
-							
-							if (t.equals("http://www.w3.org/2000/01/rdf-schema#label")) {
-								labels.add(v);
-							} else if (t.equals("http://www.w3.org/1999/02/22-rdf-syntax-ns#type") && v.contains("dbpedia")) {
-								types.add(v);
-							}
-						}
-						
-						ObjectNode json = Json.newObject();
-						ObjectNode semantic = Json.newObject();
-						json.put("semantic", semantic);
-						
-						semantic.put("uri", uri);
-						semantic.put("type", "http://with.image.ntua.gr/model/Instance");
-						
-						ObjectNode prefLabel = Json.newObject();
-						for (String label : labels) {
-							Matcher lm = labelPattern.matcher(label);
-							if (lm.find()) {
-								Language lang = Language.getLanguage(lm.group(2));
-								if (lang != null) {
-									prefLabel.put(lang.getDefaultCode(), JSONObject.escape(lm.group(1)));
+							for (String type : types) {
+								OWLClass cl = df.getOWLClass(IRI.create(type));
+								
+								for ( OWLClass c :reasoner.getSuperClasses(cl, true).getFlattened()) {
+									if (c.getIRI().toString().contains("dbpedia")) {
+										dsc.add(c);
+									}
 								}
-							}
-						}
-						
-						if (prefLabel.size() > 0) {
-							semantic.put("prefLabel", prefLabel);
-						}
-
-						Set<OWLClass> dsc = new HashSet<>();
-						Set<OWLClass> asc = new HashSet<>();
-						
-						for (String type : types) {
-							OWLClass cl = df.getOWLClass(IRI.create(type));
-							
-							for ( OWLClass c :reasoner.getSuperClasses(cl, true).getFlattened()) {
-								if (c.getIRI().toString().contains("dbpedia")) {
-									dsc.add(c);
+								
+								for ( OWLClass c :reasoner.getSuperClasses(cl, false).getFlattened()) {
+									if (c.getIRI().toString().contains("dbpedia")) {
+										asc.add(c);
+									}
 								}
 							}
 							
-							for ( OWLClass c :reasoner.getSuperClasses(cl, false).getFlattened()) {
-								if (c.getIRI().toString().contains("dbpedia")) {
-									asc.add(c);
+							if (dsc.size() > 0) {
+								ArrayNode arr = Json.newObject().arrayNode();
+							
+								for (OWLClass sc : dsc) {
+									ObjectNode term = Json.newObject();
+									term.put("uri", sc.getIRI().toString());
+									term.put("type", "http://www.w3.org/2004/02/skos/core#Concept");
+									
+									ObjectNode pLabel = labelMap.get(sc);
+									if (pLabel != null) {
+										term.put("prefLabel", pLabel);
+									}
+									
+									arr.add(term);
 								}
+								semantic.put("broader", arr);
+							}
+							
+							Integer[] forFilter = new Integer[0];
+	
+							if (asc.size() > 0) {
+								ArrayNode arr = Json.newObject().arrayNode();
+							
+								for (OWLClass sc : asc) {
+									ObjectNode term = Json.newObject();
+									term.put("uri", sc.getIRI().toString());
+									term.put("type", "http://www.w3.org/2004/02/skos/core#Concept");
+									
+									ObjectNode pLabel = labelMap.get(sc);
+									if (pLabel != null) {
+										term.put("prefLabel", pLabel);
+									}
+									
+									arr.add(term);
+									
+									if (filter == null) {
+										forFilter = new Integer[] {0};
+									} else {
+										List<Integer> tmp = new ArrayList<>();
+										for (int i = 0; i < filter.length; i++) {
+											if (filter[i].contains(sc)) {
+												tmp.add(i);
+											}
+										}
+										if (tmp.size() > 0) {
+											forFilter = tmp.toArray(new Integer[] {});
+										}
+									}
+								}
+								semantic.put("broaderTransitive", arr);
+							}
+							
+							semantic.put("inSchemes", schemes);
+							semantic.put("vocabulary", vocabulary);
+	
+							for (int f : forFilter) {
+								obr[f].write(json.toString());
+								obr[f].write(VocabularyImportConfiguration.newLine);
 							}
 						}
-						
-						if (dsc.size() > 0) {
-							ArrayNode arr = Json.newObject().arrayNode();
-						
-							for (OWLClass sc : dsc) {
-								ObjectNode term = Json.newObject();
-								term.put("uri", sc.getIRI().toString());
-								term.put("type", "http://www.w3.org/2004/02/skos/core#Concept");
-								
-								ObjectNode pLabel = labelMap.get(sc);
-								if (pLabel != null) {
-									term.put("prefLabel", pLabel);
-								}
-								
-								arr.add(term);
-							}
-							semantic.put("broader", arr);
-						}
-						
-						boolean include = false;
-
-						if (asc.size() > 0) {
-							ArrayNode arr = Json.newObject().arrayNode();
-						
-							for (OWLClass sc : asc) {
-								ObjectNode term = Json.newObject();
-								term.put("uri", sc.getIRI().toString());
-								term.put("type", "http://www.w3.org/2004/02/skos/core#Concept");
-								
-								ObjectNode pLabel = labelMap.get(sc);
-								if (pLabel != null) {
-									term.put("prefLabel", pLabel);
-								}
-								
-								arr.add(term);
-								
-								if (filter != null && filter.contains(sc)) {
-									include = true;
-								}
-							}
-							semantic.put("broaderTransitive", arr);
-						}
-						
-						semantic.put("inSchemes", schemes);
-						semantic.put("vocabulary", vocabulary);
-
-						if (include) {
-							obr.write(json.toString());
-							obr.write(VocabularyImportConfiguration.newLine);
-						}
+					}
+				} finally {
+					for (int i = 0; i < obr.length; i++) {
+						obr[i].close();
 					}
 				}
 			}
 		}
+		
+		return dbrFiles;
 	}
 }

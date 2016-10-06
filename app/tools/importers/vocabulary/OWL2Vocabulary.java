@@ -73,6 +73,8 @@ public class OWL2Vocabulary {
 		for (OWLImportConfiguration c : confs) {
 			try {
 				doImport(c);
+				c.compress();
+				c.deleteTemp();
 			} catch (Exception e) {
 				e.printStackTrace();
 			}

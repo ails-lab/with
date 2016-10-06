@@ -98,6 +98,7 @@ public abstract class Annotator {
 			res.add(ann);
 		}
 		
+		
 		return res;
 	}
 	
