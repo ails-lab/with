@@ -1564,6 +1564,7 @@ public class CollectionObjectController extends WithResourceController {
 
                     AnnotationNotification notification = new AnnotationNotification();
                     notification.setActivity(Activity.ANNOTATING_COMPLETED);
+					notification.setOpenedAt(new Timestamp(new Date().getTime()));
                     notification.setResource(cid);
                     notification.setReceiver(uid);
                     
