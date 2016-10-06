@@ -29,6 +29,7 @@ GET      /api/annotationsSearch    	controllers.AnnotationController.searchRecor
 GET		/api/searchMyCollections	controllers.CollectionObjectController.searchMyCollections(term: String ?= "*", isShared: Boolean ?= false, isExhibition: Boolean ?= false, offset : Integer ?= 0, count: Integer ?= 10)
 GET		/api/searchMyExhibitions	controllers.CollectionObjectController.searchMyExhibitions(term: String ?= "*", isShared: Boolean ?= false, offset : Integer ?= 0, count: Integer ?= 10)
 GET 	/api/searchCollection/:id   controllers.CollectionObjectController.searchCollection(term: String ?= "*", id, offset : Integer ?= 0, count: Integer ?= 10)
+GET		/api/searchPublicCollections controllers.CollectionObjectController.searchPublicCollections(term: String ?= "*", isExhibition: Boolean ?= false, offset : Integer ?= 0, count: Integer ?= 10)
 
 #Autocomplete
 GET		/api/autocompleteExt		controllers.AutocompleteController.autocompleteExt(term:java.lang.String,limit:Integer,source:java.util.List[java.lang.String])
@@ -131,6 +132,7 @@ GET      /rights/:colId/:right                  controllers.RightsController.edi
 GET      /rights/:colId							controllers.RightsController.editCollectionPublicity(colId, isPublic: Boolean, membersDowngrade: Boolean ?= false)
 
 # Media Controller
+GET		/media/sanitizeThumbnails				controllers.MediaController.sanitizeThumbnails()
 POST	/media/create							controllers.MediaController.createMedia(file: Boolean ?= true)
 GET		/media/byUrl							controllers.MediaController.getMediaByUrl(url, version: String ?= "Original")
 GET 	/media/:id								controllers.MediaController.getMetadataOrFile(id, file: Boolean ?=true)
@@ -188,4 +190,4 @@ GET		/record/:id/listAnnotations				    controllers.RecordResourceController.get
 POST		/record/:id/annotate						controllers.RecordResourceController.annotateRecord(id)
 POST		/collection/:id/annotate						controllers.CollectionObjectController.annotateCollection(id)
 GET			/collection/api/removeIdsOfDeletedRecords	controllers.WithResourceController.removeIdsOfDeletedRecords()
-
+GET			/record/api/arrange/:colId				controllers.RecordResourceController.arrangeRecords(colId)						

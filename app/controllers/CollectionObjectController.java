@@ -1223,6 +1223,31 @@ public class CollectionObjectController extends WithResourceController {
         });
 
     }
+    
+    public static Promise<Result> searchPublicCollections(String term, boolean isExhibition, int offset, int count) {
+    	String resourceType = isExhibition ? WithResourceType.Exhibition.toString() : WithResourceType.SimpleCollection.toString();
+    	Query q = new Query();
+        Query.Clause visible = Query.Clause.create();
+        visible.add("administrative.isPublic", "true", true);
+        Query.Clause searchTerm = Query.Clause.create()
+                .add("descriptiveData.label.default", term, false);
+        Query.Clause type = Query.Clause.create()
+                .add("resourceType", resourceType, true);
+        q.addClause(searchTerm.filters());
+        q.addClause(type.filters());
+        q.addClause(visible.filters());
+        q.setStartCount(offset, count);
+        Promise<SingleResponse> srp = Sources.WITHin.getDriver().execute(q);
+
+        return srp.map(sr -> {
+            Response r = new Response();
+            r.query = q;
+            r.addSingleResponse(sr);
+            r.createAccumulated();
+
+            return ok(Json.toJson(r));
+        });
+    }
 
     /*
      * Search for records within a collection.
