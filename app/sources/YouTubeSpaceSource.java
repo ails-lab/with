@@ -58,7 +58,6 @@ public class YouTubeSpaceSource extends ISpaceSource {
 
 	public YouTubeSpaceSource() {
 		super(Sources.YouTube);
-		addRestriction(FiltersFields.TYPE.getFilterId(),WithMediaType.VIDEO.getName());
 		roots = new HashMap<String, String>();
 	}
 
@@ -96,7 +95,7 @@ public class YouTubeSpaceSource extends ISpaceSource {
 		String httpQuery = getHttpQuery(q);
 		res.query = httpQuery;
 		JsonNode response;
-		
+		if (q.getFilterRestriction(FiltersFields.TYPE.getFilterId()).contains(WithMediaType.VIDEO.getName()))
 			try {
 				response = getHttpConnector().getURLContent(httpQuery);
 				// System.out.println(httpQuery);
@@ -120,7 +119,7 @@ public class YouTubeSpaceSource extends ISpaceSource {
 				log.error( "",e );
 			}
 
-			res.filtersLogic  = vmap.getRestrictionsAsFilters(res.count);
+			res.filtersLogic  = vmap.getRestrictionsAsFilters(q,res.count);
 			
 			
 		return res;
@@ -130,7 +129,7 @@ public class YouTubeSpaceSource extends ISpaceSource {
 		RecordResource it = new RecordResource();
 		String id = item.getStringValue("id.videoId");
 		String isAt = "https://www.youtube.com/watch?v="+id;
-		it.addToProvenance(new ProvenanceInfo(sourceLABEL.toString(), isAt, id));
+		it.addToProvenance(new ProvenanceInfo(getSourceName().toString(), isAt, id));
 
 		EmbeddedMediaObject th = new EmbeddedMediaObject();
 		th.setType(WithMediaType.VIDEO);
@@ -160,7 +159,7 @@ public class YouTubeSpaceSource extends ISpaceSource {
 		RecordResource it = new RecordResource();
 		String id = item.getStringValue("id");
 		String isAt = "https://www.youtube.com/watch?v="+id;
-		it.addToProvenance(new ProvenanceInfo(sourceLABEL.toString(), isAt, id));
+		it.addToProvenance(new ProvenanceInfo(getSourceName().toString(), isAt, id));
 
 		EmbeddedMediaObject th = new EmbeddedMediaObject();
 		th.setType(WithMediaType.VIDEO);

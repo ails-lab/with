@@ -227,9 +227,17 @@ public class GroupManager extends WithController {
 				.getCity();
 		String country = (newPage.getCountry() != null) ? newPage.getCountry()
 				: oldPage.getCountry();
-		String fullAddress = ((address == null) ? "" : address) + ","
-				+ ((city == null) ? "" : city) + ","
-				+ ((country == null) ? "" : country);
+		String fullAddress = "";
+		if (address != null && !address.equals(""))
+			fullAddress = fullAddress.concat(address+",");
+		if (city != null && !city.equals(""))
+			fullAddress = fullAddress.concat(city+",");
+		if (country != null && !country.equals("") && !(country.length() == 1))
+			fullAddress = fullAddress.concat(country);
+		if (fullAddress.equals(""))
+			return;
+		if (fullAddress.charAt(fullAddress.length() - 1) == ',')
+			fullAddress = fullAddress.substring(0, fullAddress.length()-1);
 		fullAddress = fullAddress.replace(" ", "+");
 		try {
 			JsonNode response = HttpConnector.getWSHttpConnector()
@@ -697,6 +705,14 @@ public class GroupManager extends WithController {
 			return ok( userGroupToJSON(with));
 		}
 		return badRequest( "WITH space missing!");
+	}
+	
+	public static Result getSpace(String name) {
+		UserGroup with = DB.getUserGroupDAO().findOne("username", name);
+		if( with != null ) {
+			return ok( userGroupToJSON(with));
+		}
+		return badRequest( "Space missing!");
 	}
 	
 	/**

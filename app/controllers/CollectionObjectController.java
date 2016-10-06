@@ -289,7 +289,7 @@ public class CollectionObjectController extends WithResourceController {
         log.debug("adding " + items.size() + " items to collection " + collectionID);
         int itemsCount = 0;
         for (Iterator<WithResource<?, ?>> iterator = items.iterator(); iterator.hasNext()
-                && (limit < 0 || itemsCount < limit); ) {
+                && ((limit < 0) || (itemsCount < limit)); ) {
             WithResource<?, ?> item = iterator.next();
             WithResourceController.internalAddRecordToCollection(collectionID,
                     (RecordResource) item, F.Option.None(), resultInfo,
@@ -1227,15 +1227,43 @@ public class CollectionObjectController extends WithResourceController {
         });
 
     }
+    
+    public static Promise<Result> searchPublicCollections(String term, boolean isExhibition, int offset, int count) {
+    	String resourceType = isExhibition ? WithResourceType.Exhibition.toString() : WithResourceType.SimpleCollection.toString();
+    	Query q = new Query();
+        Query.Clause visible = Query.Clause.create();
+        visible.add("administrative.isPublic", "true", true);
+        Query.Clause searchTerm = Query.Clause.create()
+                .add("descriptiveData.label.default", term, false);
+        Query.Clause type = Query.Clause.create()
+                .add("resourceType", resourceType, true);
+        q.addClause(searchTerm.filters());
+        q.addClause(type.filters());
+        q.addClause(visible.filters());
+        q.setStartCount(offset, count);
+        Promise<SingleResponse> srp = Sources.WITHin.getDriver().execute(q);
+
+        return srp.map(sr -> {
+            Response r = new Response();
+            r.query = q;
+            r.addSingleResponse(sr);
+            r.createAccumulated();
+
+            return ok(Json.toJson(r));
+        });
+    }
 
     /*
      * Search for records within a collection.
      */
     public static Promise<Result> searchCollection(String term, String id, int offset, int count) {
-        if (effectiveUserIds().isEmpty()) {
-            return Promise.pure(forbidden(Json
-                    .parse("\"error\", \"Must specify user for the collection\"")));
-        }
+
+        if (effectiveUserIds().isEmpty())
+        	if(!DB.getCollectionObjectDAO().isPublic(new ObjectId(id))) {
+        		return Promise.pure(forbidden(Json
+        				.parse("\"error\"  \"Must specify user for the collection\"")));
+        	}
+
         Query q = new Query();
         String userId = effectiveUserId();
         Query.Clause searchTerm = Query.Clause.create()

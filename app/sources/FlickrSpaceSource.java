@@ -29,6 +29,8 @@ import play.Logger;
 import play.Logger.ALogger;
 import search.FiltersFields;
 import search.Sources;
+import sources.core.ApacheHttpConnector;
+import sources.core.CommonFilterLogic;
 import sources.core.CommonQuery;
 import sources.core.ISpaceSource;
 import sources.core.QueryBuilder;
@@ -36,6 +38,7 @@ import sources.core.SourceResponse;
 import sources.core.Utils;
 import sources.core.Utils.Pair;
 import sources.formatreaders.FlickrRecordFormatter;
+import sources.utils.JsonContextRecord;
 import utils.ListUtils;
 
 public abstract class FlickrSpaceSource extends ISpaceSource {
@@ -47,19 +50,20 @@ public abstract class FlickrSpaceSource extends ISpaceSource {
 	protected String userID;
 
 	public static String getLicence(String id) {
+		setLicences();
 		return licences.get(id);
 	}
 
-	protected void setLicences() {
+	protected static void setLicences() {
 		if (licences==null){
-			String url = "https://api.flickr.com/services/rest/?method=flickr.photos.licenses.getInfo&api_key=" + apiKey
-					+ "&format=json&nojsoncallback=1";
+			String url = "https://api.flickr.com/services/rest/?method=flickr.photos.licenses.getInfo&"
+					+ "api_key=SECRET_KEY&format=json&nojsoncallback=1";
 			licences = new HashMap<String, String>();
 			licencesId = new HashMap<String, String>();
 			JsonNode response;
 	
 			try {
-				response = getHttpConnector().getURLContent(url);
+				response = ApacheHttpConnector.getApacheHttpConnector().getURLContent(url);
 				for (JsonNode item : response.path("licenses").path("license")) {
 					String id = Utils.readAttr(item, "id", true);
 					String name = Utils.readAttr(item, "name", true);
@@ -79,10 +83,8 @@ public abstract class FlickrSpaceSource extends ISpaceSource {
 	public FlickrSpaceSource(Sources source, String userID) {
 		super(source);
 		apiKey = "SECRET_KEY";
-		setLicences();
 //		this.vmap = FilterValuesMap.getFlickrMap();
 		this.userID = userID;
-		addRestriction(FiltersFields.TYPE.getFilterId(),WithMediaType.IMAGE.getName());
 		addDefaultWriter(FiltersFields.TYPE.getFilterId(), fwriter("media"));
 		addDefaultWriter(FiltersFields.RIGHTS.getFilterId(), frwriter());
 		addDefaultComplexWriter(FiltersFields.YEAR.getFilterId(), qfwriterYEAR());
@@ -164,6 +166,7 @@ public abstract class FlickrSpaceSource extends ISpaceSource {
 		res.query = httpQuery;
 		JsonNode response;
 		// CommonFilterLogic rights = CommonFilterLogic.rightsFilter();
+		CommonFilterLogic rights = new CommonFilterLogic(FiltersFields.RIGHTS);
 		if (checkFilters(q)) {
 			try {
 				response = getHttpConnector().getURLContent(httpQuery);
@@ -173,11 +176,13 @@ public abstract class FlickrSpaceSource extends ISpaceSource {
 					// countValue(type, t);
 					// countValue(rights, it.rights, 1);
 					res.addItem(formatreader.readObjectFrom(item));
+					String l = BritishLibrarySpaceSource.getLicence(new JsonContextRecord(item).getStringValue("license"));
+					countValue(rights, l);
 				}
 				res.count = res.items.getCulturalCHO().size();
 	
 				res.facets = response.path("facets");
-				res.filtersLogic = this.vmap.getRestrictionsAsFilters(res.totalCount);
+				res.filtersLogic = this.vmap.getRestrictionsAsFilters(q,res.totalCount);
 	
 				// for (String ir : licencesId.keySet()) {
 				// countValue(rights, ir, 1);
@@ -187,7 +192,6 @@ public abstract class FlickrSpaceSource extends ISpaceSource {
 				// CommonFilterLogic type = CommonFilterLogic.typeFilter();
 				// countValue(type, "video", 1);
 				// countValue(type, "photo", 1);
-				// res.filtersLogic.add(type);
 			} catch (Exception e) {
 				log.error("", e );
 			}

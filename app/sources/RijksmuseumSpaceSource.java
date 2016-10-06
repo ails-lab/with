@@ -53,7 +53,6 @@ public class RijksmuseumSpaceSource extends ISpaceSource {
 	public RijksmuseumSpaceSource() {
 		super(Sources.Rijksmuseum);
 		apiKey = "SECRET_KEY";
-		addRestriction(FiltersFields.TYPE.getFilterId(),WithMediaType.IMAGE.getName());
 		formatreader = new RijksmuseumRecordFormatter(vmap);
 	}
 
@@ -95,7 +94,7 @@ public class RijksmuseumSpaceSource extends ISpaceSource {
 				res.facets = response.path("facets");
 
 				res.filtersLogic = createFilters(response);
-				res.filtersLogic.addAll(vmap.getRestrictionsAsFilters(res.count));
+				res.filtersLogic.addAll(vmap.getRestrictionsAsFilters(q,res.count));
 				
 			} catch (Exception e) {
 				e.printStackTrace();

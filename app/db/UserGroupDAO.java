@@ -170,16 +170,13 @@ public class UserGroupDAO extends DAO<UserGroup> {
 		Query<UserGroup> q = createQuery().disableValidation()
 				.field("privateGroup").equal(false).offset(offset).limit(count)
 				.order("-created");
-
 		if (!excludedIds.isEmpty())
 			q.field("_id").notIn(excludedIds);
-
 		if (groupType.equals(GroupType.All)) {
 			return find(q).asList();
 		}
 		q.and(q.criteria("className").equal(
 				"model.usersAndGroups." + groupType.toString()));
-
 		return find(q).asList();
 	}
 
@@ -187,8 +184,9 @@ public class UserGroupDAO extends DAO<UserGroup> {
 			int offset, int count, Set<ObjectId> excludedIds, String prefix) {
 		Query<UserGroup> q = createQuery().disableValidation()
 				.field("privateGroup").equal(false).offset(offset).limit(count)
-				.order("-created").field("friendlyName").containsIgnoreCase(prefix);
-
+				.order("-created");
+		if (!prefix.equals("*"))
+			q.field("friendlyName").containsIgnoreCase(prefix);
 		if (!excludedIds.isEmpty())
 			q.field("_id").notIn(excludedIds);
 
@@ -197,7 +195,6 @@ public class UserGroupDAO extends DAO<UserGroup> {
 		}
 		q.and(q.criteria("className").equal(
 				"model.usersAndGroups." + groupType.toString()));
-
 		return find(q).asList();
 	}
 

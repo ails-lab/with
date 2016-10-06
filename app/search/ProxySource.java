@@ -26,6 +26,7 @@ import sources.BritishLibrarySpaceSource;
 import sources.DDBSpaceSource;
 import sources.DPLASpaceSource;
 import sources.DigitalNZSpaceSource;
+import sources.EuropeanaFashion1SpaceSource;
 import sources.EuropeanaSpaceSource;
 import sources.FlickrSpaceSource;
 import sources.HistorypinSpaceSource;
@@ -127,6 +128,15 @@ public class ProxySource extends EmptySource {
 		}
 		
 	}
+	
+	public static class EuropeanaFashionProxySource extends ProxySource{
+
+		public EuropeanaFashionProxySource() {
+			super(new EuropeanaFashion1SpaceSource());
+		}
+		
+	}
+	
 	
 	public static class InternetArchiveProxySource extends ProxySource{
 

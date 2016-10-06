@@ -29,6 +29,7 @@ GET      /api/annotationsSearch    	controllers.AnnotationController.searchRecor
 GET		/api/searchMyCollections	controllers.CollectionObjectController.searchMyCollections(term: String ?= "*", isShared: Boolean ?= false, isExhibition: Boolean ?= false, offset : Integer ?= 0, count: Integer ?= 10)
 GET		/api/searchMyExhibitions	controllers.CollectionObjectController.searchMyExhibitions(term: String ?= "*", isShared: Boolean ?= false, offset : Integer ?= 0, count: Integer ?= 10)
 GET 	/api/searchCollection/:id   controllers.CollectionObjectController.searchCollection(term: String ?= "*", id, offset : Integer ?= 0, count: Integer ?= 10)
+GET		/api/searchPublicCollections controllers.CollectionObjectController.searchPublicCollections(term: String ?= "*", isExhibition: Boolean ?= false, offset : Integer ?= 0, count: Integer ?= 10)
 
 #Autocomplete
 GET		/api/autocompleteExt		controllers.AutocompleteController.autocompleteExt(term:java.lang.String,limit:Integer,source:java.util.List[java.lang.String])
@@ -112,6 +113,7 @@ GET		/group/list								controllers.GroupManager.listUserGroups(groupType: Strin
 GET		/group/with								controllers.GroupManager.getWithSpace()
 PUT		/group/with								controllers.GroupManager.editWithSpace()
 
+GET		 /group/space							controllers.GroupManager.getSpace(name)
 PUT      /group/:id                             controllers.GroupManager.editGroup(id)
 DELETE   /group/:id                             controllers.GroupManager.deleteGroup(id)
 GET      /group/:id                             controllers.GroupManager.getGroup(id)
@@ -190,5 +192,4 @@ POST		/record/:id/annotate						controllers.RecordResourceController.annotateRec
 POST		/collection/:id/annotate						controllers.CollectionObjectController.annotateCollection(id)
 GET		/record/:id/deleteRejectedAnnotations		controllers.RecordResourceController.deleteRejectedAnnotations(id)
 
-GET			/collection/api/removeIdsOfDeletedRecords	controllers.WithResourceController.removeIdsOfDeletedRecords()
-
+GET			/collection/api/removeIdsOfDeletedRecords	controllers.WithResourceController.removeIdsOfDeletedRecords()						
