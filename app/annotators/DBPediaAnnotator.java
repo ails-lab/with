@@ -35,7 +35,6 @@ import model.annotations.selectors.PropertyTextFragmentSelector;
 import model.annotations.targets.AnnotationTarget;
 import model.basicDataTypes.Language;
 import model.basicDataTypes.MultiLiteral;
-import annotators.Vocabulary;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
@@ -45,6 +44,7 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.HttpClientBuilder;
 
 import com.fasterxml.jackson.databind.JsonNode;
+
 import org.apache.jena.query.QueryExecution;
 import org.apache.jena.query.QueryExecutionFactory;
 import org.apache.jena.query.QueryFactory;

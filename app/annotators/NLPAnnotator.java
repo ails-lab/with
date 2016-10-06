@@ -26,6 +26,11 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
+import utils.annotators.AnnotatedObject;
+import utils.annotators.AnnotationIndex;
+import utils.annotators.AnnotationValue;
+import utils.annotators.SimpleAnnotationValue;
+import utils.annotators.Span;
 import model.annotations.Annotation;
 import model.annotations.Annotation.AnnotationAdmin;
 import model.annotations.Annotation.MotivationType;
@@ -36,12 +41,6 @@ import model.basicDataTypes.Language;
 
 
 import model.basicDataTypes.MultiLiteral;
-import annotators.Annotator.AnnotatorType;
-import annotators.struct.AnnotatedObject;
-import annotators.struct.AnnotationIndex;
-import annotators.struct.AnnotationValue;
-import annotators.struct.SimpleAnnotationValue;
-import annotators.struct.Span;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.CoreAnnotations.LemmaAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations.NamedEntityTagAnnotation;
@@ -116,7 +115,7 @@ public class NLPAnnotator extends Annotator {
 	    		
 	    		AnnotationBodyTagging annBody = new AnnotationBodyTagging();
 	    		annBody.setUri("http://nerd.eurecom.fr/ontology#Location");
-//	    		annBody.setUriVocabulary(ThesaurusController.Vocabulary.NERD);
+	    		annBody.setUriVocabulary("nerd");
 	    		MultiLiteral ml = new MultiLiteral(Language.EN, "Location");
 	    		ml.fillDEF();
     			annBody.setLabel(ml);
@@ -155,7 +154,7 @@ public class NLPAnnotator extends Annotator {
 	    		
 	    		AnnotationBodyTagging annBody = new AnnotationBodyTagging();
 	    		annBody.setUri("http://nerd.eurecom.fr/ontology#Person");
-//	    		annBody.setUriVocabulary(ThesaurusController.Vocabulary.NERD);
+	    		annBody.setUriVocabulary("nerd");
 	    		MultiLiteral ml = new MultiLiteral(Language.EN, "Person");
 	    		ml.fillDEF();
     			annBody.setLabel(ml);
@@ -194,7 +193,7 @@ public class NLPAnnotator extends Annotator {
 	    		
 	    		AnnotationBodyTagging annBody = new AnnotationBodyTagging();
 	    		annBody.setUri("http://nerd.eurecom.fr/ontology#Organization");
-//	    		annBody.setUriVocabulary(AnnotationBodyTagging.Vocabulary.NERD);
+	    		annBody.setUriVocabulary("nerd");
 	    		MultiLiteral ml = new MultiLiteral(Language.EN, "Organization");
 	    		ml.fillDEF();
     			annBody.setLabel(ml);

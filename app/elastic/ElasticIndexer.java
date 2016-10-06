@@ -68,7 +68,7 @@ public class ElasticIndexer {
 		}
 
 		try {
-			for(int i=0; i<ids.size(); i++) {
+			for(int i = 0; i < ids.size(); i++) {
 				Elastic.getBulkProcessor().add(new IndexRequest(
 						Elastic.index,
 						type,
@@ -76,10 +76,15 @@ public class ElasticIndexer {
 				.source(docs.get(i)));
 				
 			}
-			Elastic.getBulkProcessor().close();
-		} catch(ElasticsearchException ee) {
-			log.error(ee.getDetailedMessage(),ee);
+			Elastic.getBulkProcessor().flush();
+//		} catch(ElasticsearchException ee) {
+//			log.error(ee.getDetailedMessage(),ee);
+//		}
+		}catch(Exception e) {
+			e.printStackTrace();
+			log.error(e.getMessage(),e);
 		}
+
 
 		return "Operation completed succesfully";
 	}

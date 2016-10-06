@@ -280,10 +280,10 @@ public class RecordResourceController extends WithResourceController {
 	public static Result annotateRecord(String recordId) {
 		ObjectNode result = Json.newObject();
 		try {
-			Result response = errorIfNoAccessToRecord(Action.EDIT, new ObjectId(recordId));
-			if (!response.toString().equals(ok().toString())) {
-				return response;
-			} else {
+//			Result response = errorIfNoAccessToRecord(Action.EDIT, new ObjectId(recordId));
+//			if (!response.toString().equals(ok().toString())) {
+//				return response;
+//			} else {
 				JsonNode json = request().body().asJson();
 				
 				List<AnnotatorConfig> annConfigs = AnnotatorConfig.createAnnotationConfigs(json);
@@ -292,7 +292,7 @@ public class RecordResourceController extends WithResourceController {
 				annotateRecord(recordId, user, annConfigs);
 				
 				return ok();
-			}				
+//			}				
 		} catch (Exception e) {
 			result.put("error", e.getMessage());
 			return internalServerError(result);
@@ -350,10 +350,10 @@ public class RecordResourceController extends WithResourceController {
 	public static Result deleteRejectedAnnotations(String rid) {
 		ObjectNode result = Json.newObject();
 		try {
-			Result response = errorIfNoAccessToRecord(Action.EDIT, new ObjectId(rid));
-			if (!response.toString().equals(ok().toString())) {
-				return response;
-			} else {
+//			Result response = errorIfNoAccessToRecord(Action.EDIT, new ObjectId(rid));
+//			if (!response.toString().equals(ok().toString())) {
+//				return response;
+//			} else {
 				ObjectId userId = WithController.effectiveUserDbId();
 					
 				for (Annotation annotation : DB.getAnnotationDAO().getUserAnnotations(userId, new ObjectId(rid), Arrays.asList("annotators", "score.rejectedBy"))) {
@@ -384,7 +384,7 @@ public class RecordResourceController extends WithResourceController {
 				}
 				
 				return ok();
-			}				
+//			}				
 		} catch (Exception e) {
 			result.put("error", e.getMessage());
 			return internalServerError(result);
@@ -471,6 +471,7 @@ public class RecordResourceController extends WithResourceController {
 						((ObjectNode)annotator).put("username", user.getUsername());
 						
 					}
+					
 					array.add(json);
 				}
 				return ok(array);

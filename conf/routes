@@ -176,11 +176,11 @@ GET 	/thesaurus/listThesauri		   				controllers.ThesaurusController.listThesaur
 GET 	/thesaurus/suggestions						controllers.ThesaurusController.getSuggestions(word: String)
 
 #Thesaurus gui
-POST	/collection/:id/facets 	        			controllers.thesaurus.CollectionIndexController.getCollectionFacets(id)
+POST	/collection/:id/facets 	        			controllers.CollectionIndexController.getCollectionFacets(id)
 POST	/collection/:id/selectionlist		   			controllers.CollectionObjectController.facetedListRecordResources(id, format: String ?="noContent", start: Integer ?=0, count: Integer ?=10)
 GET 	/collection/:id/similarlist		   			controllers.CollectionObjectController.similarListRecordResources(id, itemid: java.lang.String, format: String ?="noContent", start: Integer ?=0, count: Integer ?=10)
-POST	/collection/:id/keywords 	        			controllers.thesaurus.CollectionIndexController.getCollectionKeywords(id)
-GET		/collection/:id/annotationlist				controllers.thesaurus.CollectionIndexController.getCollectionAnnotations(id)
+#POST	/collection/:id/keywords 	        			controllers.CollectionIndexController.getCollectionKeywords(id)
+GET		/collection/:id/annotationlist				controllers.CollectionIndexController.getCollectionAnnotations(id)
 
 GET     /source/dbpedia/lookup						controllers.DBPediaController.dbpediaLookup(type: java.lang.String, query: java.lang.String, start: Integer ?=0, count: Integer ?=10)
 

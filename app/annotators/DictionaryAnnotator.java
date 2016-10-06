@@ -17,6 +17,7 @@
 package annotators;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -24,14 +25,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.elasticsearch.action.search.SearchResponse;
-import org.elasticsearch.index.query.BoolQueryBuilder;
-import org.elasticsearch.index.query.QueryBuilders;
-import org.elasticsearch.search.SearchHit;
-import org.elasticsearch.search.SearchHitField;
-import org.elasticsearch.search.SearchHits;
-
 import play.libs.Json;
+import utils.annotators.AnnotatedObject;
+import utils.annotators.AnnotationIndex;
+import utils.annotators.AnnotationValue;
+import utils.annotators.Span;
+import vocabularies.Vocabulary;
 import model.annotations.Annotation;
 import model.annotations.Annotation.AnnotationAdmin;
 import model.annotations.Annotation.MotivationType;
@@ -40,11 +39,8 @@ import model.annotations.selectors.PropertyTextFragmentSelector;
 import model.annotations.targets.AnnotationTarget;
 import model.basicDataTypes.Language;
 import model.basicDataTypes.MultiLiteral;
-import annotators.Vocabulary;
-import annotators.struct.AnnotatedObject;
-import annotators.struct.AnnotationIndex;
-import annotators.struct.AnnotationValue;
-import annotators.struct.Span;
+import model.resources.ThesaurusObject;
+import model.resources.ThesaurusObject.SKOSSemantic;
 
 import com.aliasi.chunk.Chunk;
 import com.aliasi.chunk.Chunking;
@@ -56,10 +52,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
-import elastic.Elastic;
-import elastic.ElasticCoordinator;
-import elastic.ElasticSearcher;
-import elastic.ElasticSearcher.SearchOptions;
+import db.DB;
 
 public class DictionaryAnnotator extends Annotator {
 	
@@ -95,81 +88,73 @@ public class DictionaryAnnotator extends Annotator {
 	private DictionaryAnnotator(Language lang, boolean caseSensitive) {
 		this.lang = lang;
 		
-		String langField = "prefLabel." + lang.getDefaultCode();
-		String altLangField = "altLabel." + lang.getDefaultCode();
-		String enField = "prefLabel.en";
-		String uriField = "uri";
-		String thesaurusField = "thesaurus";
+		String langField = "semantic.prefLabel." + lang.getDefaultCode();
+		String altLangField = "semantic.altLabel." + lang.getDefaultCode();
+		String enField = "semantic.prefLabel.en";
+		String uriField = "semantic.uri";
+		String thesaurusField = "semantic.vocabulary.name";
 		
-		BoolQueryBuilder query = QueryBuilders.boolQuery();
-		query.must(QueryBuilders.termQuery("_type", Elastic.thesaurusResource));
-
-		SearchOptions so = new SearchOptions(0, Integer.MAX_VALUE);
-		so.isPublic = false;
-		so.searchFields = new String[] {langField, altLangField, uriField, thesaurusField, enField};
-		ElasticCoordinator es = new ElasticCoordinator();
-		SearchResponse res = es.queryExcecution(query, so);
-		SearchHits sh = res.getHits();
-
 		Map<String, ArrayList<ObjectNode>> map = new HashMap<>();
 		
-		for (Iterator<SearchHit> iter = sh.iterator(); iter.hasNext();) {
-			SearchHit hit = iter.next();
+		List<ThesaurusObject> res = DB.getThesaurusDAO().getByFieldAndValue("semantic.type", "http://www.w3.org/2004/02/skos/core#Concept", Arrays.asList(new String[] {langField, altLangField, enField, uriField, thesaurusField}));
+		
+		for (ThesaurusObject to : res) {
+			SKOSSemantic semantic = to.getSemantic();
 			
-			SearchHitField label = hit.field(langField);
-			SearchHitField altLabel = hit.field(altLangField);
-			SearchHitField uri = hit.field(uriField);
-			SearchHitField thesaurus = hit.field(thesaurusField);
-			SearchHitField enLabel = hit.field(enField);
+			String label = null;
+			String enLabel = null;
+			if (semantic.getPrefLabel() != null) {
+				label = semantic.getPrefLabel().getLiteral(lang);
+				enLabel = semantic.getPrefLabel().getLiteral(Language.EN);
+			}
+
+			List<String> altLabels = null;
+			if (semantic.getAltLabel() != null) {
+				altLabels = semantic.getAltLabel().get(lang);
+			}
 			
+			String uri = semantic.getUri();
+			String thesaurus = semantic.getVocabulary().getName();
+
 			if (label != null && uri != null) {
-				String labelx  = label.getValue().toString();
-				
 				ObjectNode cc = Json.newObject();
-				cc.put("uri", uri.getValue().toString());
-				cc.put("label", labelx);
-				cc.put("vocabulary", thesaurus.getValue().toString());
+				cc.put("uri", uri);
+				cc.put("label", label);
+				cc.put("vocabulary", thesaurus);
 
 				if (enLabel != null) {
-					cc.put("label-en", enLabel.getValue().toString());
-//				} else {
-//					cc.put("label-en", label.getValue().toString());
+					cc.put("label-en", enLabel);
 				}
-				
-				ArrayList<ObjectNode> list = map.get(labelx);
+					
+				ArrayList<ObjectNode> list = map.get(label);
 				if (list == null) {
 					list = new ArrayList<>();
-					map.put(labelx, list);
+					map.put(label, list);
 				}
 				list.add(cc);
 			}
-			
-			if (altLabel != null  && uri != null) {
-				for (Object altValue : altLabel.getValues()) {
-					String labelx  = altValue.toString();
-					
+				
+			if (altLabels != null  && uri != null) {
+				for (String altLabel : altLabels) {
 					ObjectNode cc = Json.newObject();
-					cc.put("uri", uri.getValue().toString());
-					cc.put("label", labelx);
-					cc.put("vocabulary", thesaurus.getValue().toString());
+					cc.put("uri", uri);
+					cc.put("label", altLabel);
+					cc.put("vocabulary", thesaurus);
 
 					if (enLabel != null) {
-						cc.put("label-en", enLabel.getValue().toString());
-//					} else {
-//						cc.put("label-en", label.getValue().toString());
+						cc.put("label-en", enLabel);
 					}
-					
-					ArrayList<ObjectNode> list = map.get(labelx);
+						
+					ArrayList<ObjectNode> list = map.get(altLabel);
 					if (list == null) {
 						list = new ArrayList<>();
-						map.put(labelx, list);
+						map.put(altLabel, list);
 					}
 					list.add(cc);
-
 				}
 			}
 		}
-		
+
 		MapDictionary<String> dict = new MapDictionary<>();
 		
 		for (Map.Entry<String, ArrayList<ObjectNode>> entry : map.entrySet()) {

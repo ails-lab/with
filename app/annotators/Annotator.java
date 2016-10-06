@@ -23,12 +23,9 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.bson.types.ObjectId;
-
 import model.annotations.Annotation;
 import model.annotations.targets.AnnotationTarget;
 import model.basicDataTypes.Language;
-import model.resources.RecordResource;
 
 public abstract class Annotator {
 

@@ -24,7 +24,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import annotators.Vocabulary;
+import vocabularies.Vocabulary;
 
 import com.fasterxml.jackson.databind.JsonNode;
 

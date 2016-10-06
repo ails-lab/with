@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.BiFunction;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import play.libs.F.Promise;
 import play.libs.Json;
@@ -62,6 +63,7 @@ import com.mongodb.util.JSON;
 import elastic.Elastic;
 import elastic.ElasticEraser;
 import elastic.ElasticIndexer;
+import elastic.Indexable;
 
 public class DAO<E> extends BasicDAO<E, ObjectId> {
 
@@ -210,10 +212,9 @@ public class DAO<E> extends BasicDAO<E, ObjectId> {
 						ObjectId colId, Map<String, Object> map) -> {
 					return ElasticIndexer.index(type, colId, map);
 				};
-				ParallelAPICall.createPromise(indexResource, (ObjectId) doc
-						.getClass().getMethod("getDbId", new Class<?>[0])
-						.invoke(doc), (Map<String, Object>) doc.getClass()
-						.getMethod("transform", new Class<?>[0]).invoke(doc));
+				ParallelAPICall.createPromise(indexResource, 
+						                      (ObjectId) doc.getClass().getMethod("getDbId", new Class<?>[0]).invoke(doc), 
+						                      (Map<String, Object>) doc.getClass().getMethod("transform", new Class<?>[0]).invoke(doc));
 			}
 			return dbKey;
 		} catch (Exception e) {
@@ -222,40 +223,39 @@ public class DAO<E> extends BasicDAO<E, ObjectId> {
 		return null;
 	}
 
-	/**
-	 * Use this method to save and Object to the database
-	 *
-	 * @param record
+	/*
+	 * Bulk inserts on MongoDB and Elastic
 	 */
-	public List<Key<E>> makePermanentMany(Class cz, List<E> docs) {
-		List<ObjectId> ids = new ArrayList<>();
-		List<Map<String, Object>> maps = new ArrayList<>();
-		
-		String type = defineInstanceOf(cz);
-		List<Key<E>> dbKeys = new ArrayList<>();
-		
-		for (E doc : docs) {
-			try {
-				Key<E> dbKey = this.save(doc, WriteConcern.ACKNOWLEDGED);
-				dbKeys.add(dbKey);
-				
-//				ids.add((ObjectId)doc.getClass().getMethod("getDbId", new Class<?>[0]).invoke(doc));
-//				maps.add((Map<String, Object>) doc.getClass().getMethod("transform", new Class<?>[0]).invoke(doc));
-			} catch (Exception e) {
-				log.error("Cannot save " + doc.getClass().getSimpleName(), e);
-			}
+	public void storeMany(List<? extends Indexable> docs) {
+		if (docs.size() == 0) {
+			return;
 		}
 		
-		/* Index Resource */
-//		BiFunction<List<ObjectId>, List<Map<String, Object>>, String> indexResource = (
-//				List<ObjectId> colIds, List<Map<String, Object>> map) -> {
-//			return ElasticIndexer.indexMany(type, colIds, map);
-//		};
-//		
-//		ParallelAPICall.createPromise(indexResource, ids, maps); 
-
-		return dbKeys;
+		try {
+			this.getDatastore().save(docs,WriteConcern.ACKNOWLEDGED);
+			String type = defineInstanceOf(docs.get(0));
+			
+			if (type != null) {
+	
+				BiFunction<List<ObjectId>, List<Map<String, Object>>, String> indexResources = (List<ObjectId> colIds, List<Map<String, Object>> maps) -> {
+					return ElasticIndexer.indexMany(type, colIds, maps);
+				};
+	
+				ParallelAPICall.createPromise(indexResources, 
+						                      docs.stream().map((d) -> { 
+						                    	  return (ObjectId)d.getDbId();
+						                      }).collect(Collectors.toList()), 
+											  docs.stream().map((d) -> { 
+												  return (Map<String, Object>)d.transform();
+										      }).collect(Collectors.toList()));
+	
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			log.error("Cannot save bulky documents");
+		}
 	}
+	
 	
 	/**
 	 * Use this method to delete and Object to the database
@@ -345,6 +345,25 @@ public class DAO<E> extends BasicDAO<E, ObjectId> {
 	}
 
 	private String defineInstanceOf(E doc) {
+
+		String instanceName = doc.getClass().getSimpleName();
+		List<String> enumNames = new ArrayList<String>();
+		Arrays.asList(WithResourceType.values()).forEach((t) -> {
+			enumNames.add(t.toString());
+			return;
+		});
+		if (enumNames.contains(instanceName)) {
+			if (!instanceName.equalsIgnoreCase(WithResourceType.WithResource
+					.toString()))
+				return instanceName.toLowerCase();
+			else
+				return WithResourceType.RecordResource.toString().toLowerCase();
+		} else
+			return null;
+
+	}
+	
+	private String defineInstanceOf(Indexable doc) {
 
 		String instanceName = doc.getClass().getSimpleName();
 		List<String> enumNames = new ArrayList<String>();

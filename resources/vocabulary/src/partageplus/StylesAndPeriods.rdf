@@ -1,0 +1,576 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:owl="http://www.w3.org/2002/07/owl#" xmlns:skos="http://www.w3.org/2004/02/skos/core#">
+<skos:ConceptScheme rdf:about="http://partage.vocnet.org/StylesAndPeriods">
+	<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#ConceptScheme"/>
+</skos:ConceptScheme>
+<skos:Concept rdf:about="http://partage.vocnet.org/part00345">
+	<skos:prefLabel xml:lang="en">Arts and Crafts (movement)</skos:prefLabel>
+	<skos:inScheme rdf:resource="http://partage.vocnet.org/StylesAndPeriods"/>
+	<skos:broader rdf:resource="http://partage.vocnet.org/part00349"/>
+	<skos:exactMatch rdf:resource="http://vocab.getty.edu/aat/300266319"/>
+	<skos:editorialNote xml:lang="en">PPArtNouveauStyle</skos:editorialNote>
+	<skos:scopeNote xml:lang="en">An aesthetic and social movement of the late 19th century that originated in England and spread to the United States, Germany, and Northen Europe. A reaction against industrialization and the quality of manufactured goods, the movement is marked by a desire to revive the craftsmanship associated with traditional arts, a form follows function philiosphy, and an idealized view of the medieval craft guilds.</skos:scopeNote>
+</skos:Concept>
+<skos:Concept rdf:about="http://partage.vocnet.org/part00349">
+	<skos:prefLabel xml:lang="en">European</skos:prefLabel>
+	<skos:inScheme rdf:resource="http://partage.vocnet.org/StylesAndPeriods"/>
+	<skos:narrower rdf:resource="http://partage.vocnet.org/part00345"/>
+	<skos:narrower rdf:resource="http://partage.vocnet.org/part00353"/>
+	<skos:narrower rdf:resource="http://partage.vocnet.org/part00360"/>
+	<skos:narrower rdf:resource="http://partage.vocnet.org/part00558"/>
+	<skos:narrower rdf:resource="http://partage.vocnet.org/part00559"/>
+	<skos:narrower rdf:resource="http://partage.vocnet.org/part01065"/>
+	<skos:narrower rdf:resource="http://partage.vocnet.org/part01068"/>
+	<skos:narrower rdf:resource="http://partage.vocnet.org/part01261"/>
+	<skos:narrower rdf:resource="http://partage.vocnet.org/part01267"/>
+	<skos:exactMatch rdf:resource="http://vocab.getty.edu/aat/300020656"/>
+	<skos:scopeNote xml:lang="en">Refers to the cultures of the continent of Europe, which is in the northern hemisphere, is bounded by the Arctic Ocean, the Atlantic Ocean, and the Mediterranean Sea, and is generally considered to be delimited on the east by the Ural Mountains.</skos:scopeNote>
+</skos:Concept>
+<skos:Concept rdf:about="http://partage.vocnet.org/part00353">
+	<skos:prefLabel xml:lang="en">Art Nouveau</skos:prefLabel>
+	<skos:inScheme rdf:resource="http://partage.vocnet.org/StylesAndPeriods"/>
+	<skos:broader rdf:resource="http://partage.vocnet.org/part00349"/>
+	<skos:narrower rdf:resource="http://partage.vocnet.org/part00355"/>
+	<skos:narrower rdf:resource="http://partage.vocnet.org/part00357"/>
+	<skos:narrower rdf:resource="http://partage.vocnet.org/part00358"/>
+	<skos:narrower rdf:resource="http://partage.vocnet.org/part00361"/>
+	<skos:narrower rdf:resource="http://partage.vocnet.org/part00363"/>
+	<skos:narrower rdf:resource="http://partage.vocnet.org/part00364"/>
+	<skos:narrower rdf:resource="http://partage.vocnet.org/part00365"/>
+	<skos:narrower rdf:resource="http://partage.vocnet.org/part00366"/>
+	<skos:narrower rdf:resource="http://partage.vocnet.org/part00368"/>
+	<skos:narrower rdf:resource="http://partage.vocnet.org/part00369"/>
+	<skos:narrower rdf:resource="http://partage.vocnet.org/part00370"/>
+	<skos:narrower rdf:resource="http://partage.vocnet.org/part00373"/>
+	<skos:narrower rdf:resource="http://partage.vocnet.org/part00374"/>
+	<skos:narrower rdf:resource="http://partage.vocnet.org/part00375"/>
+	<skos:narrower rdf:resource="http://partage.vocnet.org/part00376"/>
+	<skos:narrower rdf:resource="http://partage.vocnet.org/part00378"/>
+	<skos:narrower rdf:resource="http://partage.vocnet.org/part00379"/>
+	<skos:narrower rdf:resource="http://partage.vocnet.org/part00381"/>
+	<skos:narrower rdf:resource="http://partage.vocnet.org/part00383"/>
+	<skos:narrower rdf:resource="http://partage.vocnet.org/part00384"/>
+	<skos:narrower rdf:resource="http://partage.vocnet.org/part00385"/>
+	<skos:narrower rdf:resource="http://partage.vocnet.org/part00386"/>
+	<skos:narrower rdf:resource="http://partage.vocnet.org/part00387"/>
+	<skos:narrower rdf:resource="http://partage.vocnet.org/part00388"/>
+	<skos:narrower rdf:resource="http://partage.vocnet.org/part00389"/>
+	<skos:narrower rdf:resource="http://partage.vocnet.org/part00391"/>
+	<skos:narrower rdf:resource="http://partage.vocnet.org/part00553"/>
+	<skos:narrower rdf:resource="http://partage.vocnet.org/part00555"/>
+	<skos:narrower rdf:resource="http://partage.vocnet.org/part00557"/>
+	<skos:narrower rdf:resource="http://partage.vocnet.org/part01067"/>
+	<skos:narrower rdf:resource="http://partage.vocnet.org/part01069"/>
+	<skos:narrower rdf:resource="http://partage.vocnet.org/part01071"/>
+	<skos:narrower rdf:resource="http://partage.vocnet.org/part01072"/>
+	<skos:narrower rdf:resource="http://partage.vocnet.org/part01073"/>
+	<skos:narrower rdf:resource="http://partage.vocnet.org/part01074"/>
+	<skos:narrower rdf:resource="http://partage.vocnet.org/part01076"/>
+	<skos:narrower rdf:resource="http://partage.vocnet.org/part01262"/>
+	<skos:narrower rdf:resource="http://partage.vocnet.org/part01263"/>
+	<skos:exactMatch rdf:resource="http://vocab.getty.edu/aat/300021430"/>
+	<skos:editorialNote xml:lang="en">PPArtNouveauStyle</skos:editorialNote>
+	<skos:scopeNote xml:lang="en">Refers generally to the style of painting, architecture, and the decorative and applied arts that flourished in Europe and the United States from about 1890 to 1910. The style is characterized by an emphasis on fluid, undulating, or serpentine lines or contours based on organic forms and the use of modern materials such as iron and glass. The style developed in to regional variations under various names, Glasgow style (Scotland); Modern style, Style nouille, Style coup de fouet (Belgium); Style Jules Verne, Style M\u00e9tro, Style 1900, Art fin de si\u00e8cle, Art belle \u00e9poque (France); Jugendstil (Germany and Austria); Sezessionstil (Austria); Arte joven (Spain); Modernisme (Catalonia); Arte nuova, Stile floreale, Stile Liberty (Italy); Nieuwe kunst (the Netherlands); Stil\u2019 modern (Russia); Tiffany style (USA).</skos:scopeNote>
+</skos:Concept>
+<skos:Concept rdf:about="http://partage.vocnet.org/part00355">
+	<skos:altLabel xml:lang="en">Arte Jóven</skos:altLabel>
+	<skos:prefLabel xml:lang="en">Arte Joven</skos:prefLabel>
+	<skos:inScheme rdf:resource="http://partage.vocnet.org/StylesAndPeriods"/>
+	<skos:broader rdf:resource="http://partage.vocnet.org/part00353"/>
+	<skos:exactMatch rdf:resource="http://vocab.getty.edu/aat/300375736"/>
+	<skos:editorialNote xml:lang="en">PPArtNouveauStyle</skos:editorialNote>
+	<skos:scopeNote xml:lang="en">Spanish variation of Art Nouveau named after the art and literary magazine of the same name founded by Pablo Picasso in 1901.</skos:scopeNote>
+	<skos:scopeNote xml:lang="en">Term designating a group of writters and artists from Madrid known as modernists, named after homonymous magazine founded by Pablo Picasso in 1901, the aim of which was to emulate Ramon Casas' magazine Paloma (Barcelona). The magazine and the group had a short life.</skos:scopeNote>
+</skos:Concept>
+<skos:Concept rdf:about="http://partage.vocnet.org/part00357">
+	<skos:prefLabel xml:lang="ca">Modernisme</skos:prefLabel>
+	<skos:prefLabel xml:lang="en">Modernisme</skos:prefLabel>
+	<skos:prefLabel xml:lang="es">Modernismo</skos:prefLabel>
+	<skos:altLabel xml:lang="en">Modernismo</skos:altLabel>
+	<skos:inScheme rdf:resource="http://partage.vocnet.org/StylesAndPeriods"/>
+	<skos:broader rdf:resource="http://partage.vocnet.org/part00353"/>
+	<skos:exactMatch rdf:resource="http://vocab.getty.edu/aat/300312268"/>
+	<skos:scopeNote xml:lang="en">The variation of the Art Nouveau movement in Spain. From the 1890s to the early 1900s, the syle appeared in the ironwork, glassware, and ceramics of commercial buildings, hotels, and residences, most prominently in the architecture of Antonio Gaud\u00ed. The graceful, curving style also reached a high level of skill in the furniture of J. S. Henry de Majorelle.</skos:scopeNote>
+	<skos:editorialNote xml:lang="en">PPArtNouveauStyle</skos:editorialNote>
+	<skos:scopeNote xml:lang="en">The variation of the Art Nouveau movement in Spain. From the 1890s to the early 1900s, the style appeared in the visual and decorative arts, and prominently in the architecture, with special relevance of Antoni Gaud\u00ed. Although as a cultural trend it appeared in the whole of Spain, as far as the arts are concerned, it acquired special splendor in Catalonia, and from there the style and the influences extended to other Spanish cities.</skos:scopeNote>
+</skos:Concept>
+<skos:Concept rdf:about="http://partage.vocnet.org/part00358">
+	<skos:prefLabel xml:lang="en">Arte Nuova</skos:prefLabel>
+	<skos:inScheme rdf:resource="http://partage.vocnet.org/StylesAndPeriods"/>
+	<skos:broader rdf:resource="http://partage.vocnet.org/part00353"/>
+	<skos:exactMatch rdf:resource="http://vocab.getty.edu/aat/300378904"/>
+	<skos:editorialNote xml:lang="en">PPArtNouveauStyle</skos:editorialNote>
+	<skos:scopeNote xml:lang="en">Italian variation of Art Nouveau, as seen mostly prominently in architecture.</skos:scopeNote>
+</skos:Concept>
+<skos:Concept rdf:about="http://partage.vocnet.org/part00360">
+	<skos:prefLabel xml:lang="en">Bandwurmstil</skos:prefLabel>
+	<skos:prefLabel xml:lang="de">Bandwurmstil</skos:prefLabel>
+	<skos:altLabel xml:lang="de">Moderne Strumpbandlinien</skos:altLabel>
+	<skos:altLabel xml:lang="de">Gereizter Regenwurm</skos:altLabel>
+	<skos:altLabel xml:lang="de">Belgischer Bandwurm</skos:altLabel>
+	<skos:prefLabel xml:lang="fr">Style anguille</skos:prefLabel>
+	<skos:inScheme rdf:resource="http://partage.vocnet.org/StylesAndPeriods"/>
+	<skos:broader rdf:resource="http://partage.vocnet.org/part00349"/>
+	<skos:exactMatch rdf:resource="http://vocab.getty.edu/aat/300375733"/>
+	<skos:scopeNote xml:lang="en">German term for a variation of Art Nouveau that developed in Belgium, meaning "tape worm style"; term was particularly used in the cities of Dresden and Berlin. See also the related "Schn\u00f6rkelstil."</skos:scopeNote>
+</skos:Concept>
+<skos:Concept rdf:about="http://partage.vocnet.org/part00361">
+	<skos:prefLabel xml:lang="en">Schnörkelstil</skos:prefLabel>
+	<skos:inScheme rdf:resource="http://partage.vocnet.org/StylesAndPeriods"/>
+	<skos:broader rdf:resource="http://partage.vocnet.org/part00353"/>
+	<skos:exactMatch rdf:resource="http://vocab.getty.edu/aat/300375734"/>
+	<skos:scopeNote xml:lang="en">German term used to refer to the work of Belgian artist Henry van de Velde, meaning "scroll style" or "flourish style"; term was particularly used in the cities of Dresden and Berlin</skos:scopeNote>
+</skos:Concept>
+<skos:Concept rdf:about="http://partage.vocnet.org/part00363">
+	<skos:prefLabel xml:lang="en">Belgische (style)</skos:prefLabel>
+	<skos:prefLabel xml:lang="de">Belgischer Stil</skos:prefLabel>
+	<skos:inScheme rdf:resource="http://partage.vocnet.org/StylesAndPeriods"/>
+	<skos:broader rdf:resource="http://partage.vocnet.org/part00353"/>
+	<skos:exactMatch rdf:resource="http://vocab.getty.edu/aat/300378902"/>
+	<skos:scopeNote xml:lang="en">Refers to a German variation of Art Nouveau, named after the work of Belgian artist Henry van de Velde. As a result, the term is often used in conjunction with "Veldesche."</skos:scopeNote>
+</skos:Concept>
+<skos:Concept rdf:about="http://partage.vocnet.org/part00364">
+	<skos:prefLabel xml:lang="en">Glasgow style</skos:prefLabel>
+	<skos:inScheme rdf:resource="http://partage.vocnet.org/StylesAndPeriods"/>
+	<skos:broader rdf:resource="http://partage.vocnet.org/part00353"/>
+	<skos:exactMatch rdf:resource="http://vocab.getty.edu/aat/300375728"/>
+	<skos:editorialNote xml:lang="en">PPArtNouveauStyle</skos:editorialNote>
+	<skos:scopeNote xml:lang="en">Scottish variation of Art Nouveau that originated at the Glasgow School of Art and flourished from ca. 1890 to ca. 1920. Chief among its proponents are Charles Rennie Mackintosh, Herbert MacNair and the sisters, Frances and Margaret MacDonald. When Francis H. Newbery (1853\u20131946) became director of the Glasgow School in 1885, his teachings were influenced by the Arts and Crafts Movement that stressed an art that combined functionalism with beauty while encouraging individuality and experimentation among its students. The journal \u201cThe Hobby Horse\u201d (begun in spring 1884), expressed a desire for the unification of old and new and a harmonious relationship between abstract lines and masses. The style was further developed through the increasing popularity of Celtic revivalism taking root in Glasgow at the time. The style begins to dissipate with the coming of World War I.</skos:scopeNote>
+</skos:Concept>
+<skos:Concept rdf:about="http://partage.vocnet.org/part00365">
+	<skos:prefLabel xml:lang="en">Jugendstil</skos:prefLabel>
+	<skos:prefLabel xml:lang="de">Jugendstil</skos:prefLabel>
+	<skos:altLabel xml:lang="de">Neudeutsche Kunst</skos:altLabel>
+	<skos:altLabel xml:lang="de">Neu-Stil</skos:altLabel>
+	<skos:inScheme rdf:resource="http://partage.vocnet.org/StylesAndPeriods"/>
+	<skos:broader rdf:resource="http://partage.vocnet.org/part00353"/>
+	<skos:exactMatch rdf:resource="http://vocab.getty.edu/aat/300021313"/>
+	<skos:narrowMatch rdf:resource="http://partage.vocnet.org/part00378"/>
+	<skos:editorialNote xml:lang="en">PPArtNouveauStyle</skos:editorialNote>
+	<skos:scopeNote xml:lang="en">Refers to the German and Austrian variation of Art Nouveau, named after the magazine Jugend in 1896. The style differs from Belgian and French Art Nouveau by a more restrained use of decoration. Jugendstil replaced the exuberance and naturalism of other Art Nouveau styles with a comparatively restrained aesthetic that was often almost unrecognizably derived from nature.</skos:scopeNote>
+	<skos:scopeNote xml:lang="en">Refers to the German and Austrian variation of Art Nouveau, named after the magazine "Jugend" that had been published in Munich since 1896. The style differs from Belgian and French Art Nouveau by a more restrained use of decoration. Jugendstil replaced the exuberance and naturalism of other Art Nouveau styles with a comparatively subdued aesthetic that was often almost unrecognizably, or not at all derived from nature.</skos:scopeNote>
+</skos:Concept>
+<skos:Concept rdf:about="http://partage.vocnet.org/part00366">
+	<skos:prefLabel xml:lang="en">La Libre Esthétique</skos:prefLabel>
+	<skos:inScheme rdf:resource="http://partage.vocnet.org/StylesAndPeriods"/>
+	<skos:broader rdf:resource="http://partage.vocnet.org/part00353"/>
+	<skos:exactMatch rdf:resource="http://vocab.getty.edu/aat/300378907"/>
+	<skos:scopeNote xml:lang="en">A Belgian variation of Art Nouveau, so-called after the exhibition of the same name, which was organized by lawyer Octave Maus in 1893. The term is often used in conjunction with "Les Style des Vingt," as that group was its predecessor.</skos:scopeNote>
+</skos:Concept>
+<skos:Concept rdf:about="http://partage.vocnet.org/part00368">
+	<skos:prefLabel xml:lang="en">Le Style des Vingt</skos:prefLabel>
+	<skos:inScheme rdf:resource="http://partage.vocnet.org/StylesAndPeriods"/>
+	<skos:broader rdf:resource="http://partage.vocnet.org/part00353"/>
+	<skos:exactMatch rdf:resource="http://vocab.getty.edu/aat/300378906"/>
+	<skos:scopeNote xml:lang="en">A Belgian variation of Art Nouveau named after the avant-garde group "Les XX" or "Les Vingt," who were organized by lawyer Octave Maus and first exhibited in Brussels in 1884. The term is often used in conjunction with "La Libre Esth\u00e9thique," as this group became the successor to Les XX after they were disbanded in 1893.</skos:scopeNote>
+</skos:Concept>
+<skos:Concept rdf:about="http://partage.vocnet.org/part00369">
+	<skos:prefLabel xml:lang="en">Style coup de fouet</skos:prefLabel>
+	<skos:inScheme rdf:resource="http://partage.vocnet.org/StylesAndPeriods"/>
+	<skos:broader rdf:resource="http://partage.vocnet.org/part00353"/>
+	<skos:exactMatch rdf:resource="http://vocab.getty.edu/aat/300378908"/>
+	<skos:scopeNote xml:lang="en">Refers to a Belgian variation of Art Nouveau, so named for the "coup de fouet" or whiplash motif common to the style.</skos:scopeNote>
+</skos:Concept>
+<skos:Concept rdf:about="http://partage.vocnet.org/part00370">
+	<skos:prefLabel xml:lang="en">Modern Style</skos:prefLabel>
+	<skos:inScheme rdf:resource="http://partage.vocnet.org/StylesAndPeriods"/>
+	<skos:broader rdf:resource="http://partage.vocnet.org/part00353"/>
+	<skos:exactMatch rdf:resource="http://vocab.getty.edu/aat/300375743"/>
+	<skos:editorialNote xml:lang="en">PPArtNouveauStyle</skos:editorialNote>
+	<skos:scopeNote xml:lang="en">A variation of Art Nouveau based on French works and influenced by works of Edward Burne-Jones and William Morris; the term is particularly applied to architecture and furniture design.</skos:scopeNote>
+</skos:Concept>
+<skos:Concept rdf:about="http://partage.vocnet.org/part00373">
+	<skos:prefLabel xml:lang="en">Quaint Style</skos:prefLabel>
+	<skos:inScheme rdf:resource="http://partage.vocnet.org/StylesAndPeriods"/>
+	<skos:broader rdf:resource="http://partage.vocnet.org/part00353"/>
+	<skos:exactMatch rdf:resource="http://vocab.getty.edu/aat/300378910"/>
+	<skos:scopeNote xml:lang="en">English variation of Art Nouveau, used mostly to describe mass-produced goods of many types, typically furniture.</skos:scopeNote>
+</skos:Concept>
+<skos:Concept rdf:about="http://partage.vocnet.org/part00374">
+	<skos:prefLabel xml:lang="en">Yachting Style</skos:prefLabel>
+	<skos:inScheme rdf:resource="http://partage.vocnet.org/StylesAndPeriods"/>
+	<skos:broader rdf:resource="http://partage.vocnet.org/part00353"/>
+	<skos:exactMatch rdf:resource="http://vocab.getty.edu/aat/300375737"/>
+	<skos:scopeNote xml:lang="en">Pejorative term for Art Nouveau coined by author Edmond de Goncourt after seeing an exhibition of Belgian artist Henry van de Velde, believing the style would be a suitable style for pleasure craft.</skos:scopeNote>
+</skos:Concept>
+<skos:Concept rdf:about="http://partage.vocnet.org/part00375">
+	<skos:prefLabel xml:lang="en">Nieuwe Kunst</skos:prefLabel>
+	<skos:inScheme rdf:resource="http://partage.vocnet.org/StylesAndPeriods"/>
+	<skos:broader rdf:resource="http://partage.vocnet.org/part00353"/>
+	<skos:narrower rdf:resource="http://partage.vocnet.org/part01264"/>
+	<skos:narrower rdf:resource="http://partage.vocnet.org/part01265"/>
+	<skos:narrower rdf:resource="http://partage.vocnet.org/part01266"/>
+	<skos:exactMatch rdf:resource="http://vocab.getty.edu/aat/300378891"/>
+	<skos:editorialNote xml:lang="en">PPArtNouveauStyle</skos:editorialNote>
+	<skos:scopeNote xml:lang="en">A Dutch variation of Art Nouveau, meaning "new art."</skos:scopeNote>
+	<skos:scopeNote xml:lang="en">The Dutch contribution to the international art nouveau, between 1892-1910. As in other countries, in the Netherlands this style has many faces. Substyles are called constructive, decorative and constructive-decorative, a mix-form of the first two styles. The international art nouveau is represented by the decorative style found mainly in and around The Hague. A distinctive characteristic of Dutch art nouveau (\u201cNieuwe Kunst\u201d) however is the focus on rationalism that is found in the constructive style, i.e. design that departs from the function of the object and the material used, in which ornament is subordinate and respectful to form and construction.</skos:scopeNote>
+</skos:Concept>
+<skos:Concept rdf:about="http://partage.vocnet.org/part00376">
+	<skos:prefLabel xml:lang="en">Paling stijl</skos:prefLabel>
+	<skos:inScheme rdf:resource="http://partage.vocnet.org/StylesAndPeriods"/>
+	<skos:broader rdf:resource="http://partage.vocnet.org/part00353"/>
+	<skos:exactMatch rdf:resource="http://vocab.getty.edu/aat/300375735"/>
+	<skos:scopeNote xml:lang="en">Refers to the Belgium variation of Art Nouveau, meaning "eel style."</skos:scopeNote>
+</skos:Concept>
+<skos:Concept rdf:about="http://partage.vocnet.org/part00378">
+	<skos:altLabel xml:lang="en">Sezessionstil</skos:altLabel>
+	<skos:prefLabel xml:lang="en">Secessionsstil</skos:prefLabel>
+	<skos:altLabel xml:lang="de">Sezessionsstil</skos:altLabel>
+	<skos:prefLabel xml:lang="de">Secessionsstil</skos:prefLabel>
+	<skos:inScheme rdf:resource="http://partage.vocnet.org/StylesAndPeriods"/>
+	<skos:broader rdf:resource="http://partage.vocnet.org/part00353"/>
+	<skos:exactMatch rdf:resource="http://vocab.getty.edu/aat/300021177"/>
+	<skos:broad_match
+ rdf:resource="http://partage.vocnet.org/part00365"/>
+	<skos:scopeNote xml:lang="en">Austrian variation of Art Nouveau, derived from architect Joseph Olbrich's exhibition hall for the Wiener Sezession. Associated mainly with architects and designers, the style reflects less the serpentine line and organic forms of the Art Nouveau and shows a more geometric quality influenced by the work of Charles Rennie Mackintosh.</skos:scopeNote>
+	<skos:scopeNote xml:lang="en">The curators of the MAK agreed upon the recommendation not to use this concept for indexing Art Nouveau object descriptions. The concept "Secessionsstil" is not appropriate for use in scientific context as there is no authoritative definition for the scope of this term.</skos:scopeNote>
+</skos:Concept>
+<skos:Concept rdf:about="http://partage.vocnet.org/part00379">
+	<skos:prefLabel xml:lang="en">Stile Liberty</skos:prefLabel>
+	<skos:altLabel xml:lang="en">Stile floreale</skos:altLabel>
+	<skos:altLabel xml:lang="it">Stile inglese</skos:altLabel>
+	<skos:altLabel xml:lang="it">Stile floreale</skos:altLabel>
+	<skos:prefLabel xml:lang="it">Stile Liberty</skos:prefLabel>
+	<skos:altLabel xml:lang="en">Stile inglese</skos:altLabel>
+	<skos:inScheme rdf:resource="http://partage.vocnet.org/StylesAndPeriods"/>
+	<skos:broader rdf:resource="http://partage.vocnet.org/part00353"/>
+	<skos:exactMatch rdf:resource="http://vocab.getty.edu/aat/300021362"/>
+	<skos:scopeNote xml:lang="en">Refers to the style and movement that was an Italian interpretation of Art Nouveau architectural principles. It was centered in Italy and emerged in the early 20th century, promoted by The Prima Esposizione Internazionale d'Arte Decorativa. Prominent examples of the style include the Hotel Tre Croci (1912) and the Palazzo Beri-Meregalli in Milan (1911-1914). The name derives from the store "Liberty and Co." in London.</skos:scopeNote>
+	<skos:editorialNote xml:lang="en">PPArtNouveauStyle</skos:editorialNote>
+</skos:Concept>
+<skos:Concept rdf:about="http://partage.vocnet.org/part00381">
+	<skos:prefLabel xml:lang="en">Stil' Modern</skos:prefLabel>
+	<skos:inScheme rdf:resource="http://partage.vocnet.org/StylesAndPeriods"/>
+	<skos:broader rdf:resource="http://partage.vocnet.org/part00353"/>
+	<skos:exactMatch rdf:resource="http://vocab.getty.edu/aat/300378919"/>
+	<skos:editorialNote xml:lang="en">PPArtNouveauStyle</skos:editorialNote>
+	<skos:scopeNote xml:lang="en">Refers to a Russian variation of Art Nouveau that incorporated elements of that style with Russian folk art.</skos:scopeNote>
+</skos:Concept>
+<skos:Concept rdf:about="http://partage.vocnet.org/part00383">
+	<skos:prefLabel xml:lang="en">Studio-Stil</skos:prefLabel>
+	<skos:inScheme rdf:resource="http://partage.vocnet.org/StylesAndPeriods"/>
+	<skos:broader rdf:resource="http://partage.vocnet.org/part00353"/>
+	<skos:exactMatch rdf:resource="http://vocab.getty.edu/aat/300375742"/>
+	<skos:scopeNote xml:lang="en">German term for a variation of Art Nouveau named after an English publication which promoted the works of the Arts and Crafts Exhibition Society.</skos:scopeNote>
+</skos:Concept>
+<skos:Concept rdf:about="http://partage.vocnet.org/part00384">
+	<skos:prefLabel xml:lang="en">Style 1900</skos:prefLabel>
+	<skos:inScheme rdf:resource="http://partage.vocnet.org/StylesAndPeriods"/>
+	<skos:broader rdf:resource="http://partage.vocnet.org/part00353"/>
+	<skos:exactMatch rdf:resource="http://vocab.getty.edu/aat/300378909"/>
+	<skos:scopeNote xml:lang="en">A French variation of Art Nouveau, particularly to describe artistic trends in various discplines such as architecture, the applied arts, and decorative arts around the turn of the 20th century</skos:scopeNote>
+</skos:Concept>
+<skos:Concept rdf:about="http://partage.vocnet.org/part00385">
+	<skos:prefLabel xml:lang="en">Style Guimard</skos:prefLabel>
+	<skos:inScheme rdf:resource="http://partage.vocnet.org/StylesAndPeriods"/>
+	<skos:broader rdf:resource="http://partage.vocnet.org/part00353"/>
+	<skos:exactMatch rdf:resource="http://vocab.getty.edu/aat/300378903"/>
+	<skos:scopeNote xml:lang="en">A variation of Art Nouveau in France, coined by architect Hector Guimard to describe his own style. Guimard was known for his Paris M\u00e9tro entrances made of steel and glass and the term is often used in conjunction with "Style M\u00e9tro.\u201d</skos:scopeNote>
+</skos:Concept>
+<skos:Concept rdf:about="http://partage.vocnet.org/part00386">
+	<skos:prefLabel xml:lang="en">Style Métro</skos:prefLabel>
+	<skos:prefLabel xml:lang="fr">Style Métro</skos:prefLabel>
+	<skos:altLabel xml:lang="fr">Style de bouche de Métro</skos:altLabel>
+	<skos:inScheme rdf:resource="http://partage.vocnet.org/StylesAndPeriods"/>
+	<skos:broader rdf:resource="http://partage.vocnet.org/part00353"/>
+	<skos:exactMatch rdf:resource="http://vocab.getty.edu/aat/300375730"/>
+	<skos:scopeNote xml:lang="en">Refers to the French variation of Art Nouveau, named after Paris Metro entrance structures designed by Hector Guimard, which emphasive the modern use of glass and steel. As a result, the term is often used in conjunction with "Style Guimard."</skos:scopeNote>
+</skos:Concept>
+<skos:Concept rdf:about="http://partage.vocnet.org/part00387">
+	<skos:prefLabel xml:lang="en">Style Jules Verne</skos:prefLabel>
+	<skos:inScheme rdf:resource="http://partage.vocnet.org/StylesAndPeriods"/>
+	<skos:broader rdf:resource="http://partage.vocnet.org/part00353"/>
+	<skos:exactMatch rdf:resource="http://vocab.getty.edu/aat/300378905"/>
+	<skos:scopeNote xml:lang="en">Refers to a French variation of Art Nouveau, so named for the style's imagery and emphasis on the fantastic as seen in the writings of author Jules Verne.</skos:scopeNote>
+</skos:Concept>
+<skos:Concept rdf:about="http://partage.vocnet.org/part00388">
+	<skos:prefLabel xml:lang="en">Style nouille</skos:prefLabel>
+	<skos:inScheme rdf:resource="http://partage.vocnet.org/StylesAndPeriods"/>
+	<skos:broader rdf:resource="http://partage.vocnet.org/part00353"/>
+	<skos:exactMatch rdf:resource="http://vocab.getty.edu/aat/300375729"/>
+	<skos:scopeNote xml:lang="en">Refers to a French variation of Art Nouveau, literally meaning "noodle style," referring to the interlacing lines characteristic of its designs.</skos:scopeNote>
+</skos:Concept>
+<skos:Concept rdf:about="http://partage.vocnet.org/part00389">
+	<skos:prefLabel xml:lang="en">Tiffany style</skos:prefLabel>
+	<skos:inScheme rdf:resource="http://partage.vocnet.org/StylesAndPeriods"/>
+	<skos:broader rdf:resource="http://partage.vocnet.org/part00353"/>
+	<skos:exactMatch rdf:resource="http://vocab.getty.edu/aat/300378920"/>
+	<skos:scopeNote xml:lang="en">Refers to an American variation of Art Nouveau, named after the lighting fixtures and interior designs of Louis Comfort Tiffany, which featured mosaics of opalescent glass and were based on natural forms.</skos:scopeNote>
+</skos:Concept>
+<skos:Concept rdf:about="http://partage.vocnet.org/part00391">
+	<skos:prefLabel xml:lang="en">Veldesche</skos:prefLabel>
+	<skos:altLabel xml:lang="de">Stil van de Velde</skos:altLabel>
+	<skos:prefLabel xml:lang="de">Veldescher Stil</skos:prefLabel>
+	<skos:inScheme rdf:resource="http://partage.vocnet.org/StylesAndPeriods"/>
+	<skos:broader rdf:resource="http://partage.vocnet.org/part00353"/>
+	<skos:exactMatch rdf:resource="http://vocab.getty.edu/aat/300375732"/>
+	<skos:scopeNote xml:lang="en">Refers to the German variation of Art Nouveau, named after the work of Belgian artist Henry van de Velde. Term is often used in conjunction with "Belgische."</skos:scopeNote>
+</skos:Concept>
+<skos:Concept rdf:about="http://partage.vocnet.org/part00553">
+	<skos:prefLabel xml:lang="pt">Arte Nova</skos:prefLabel>
+	<skos:prefLabel xml:lang="en">Arte Nova</skos:prefLabel>
+	<skos:inScheme rdf:resource="http://partage.vocnet.org/StylesAndPeriods"/>
+	<skos:broader rdf:resource="http://partage.vocnet.org/part00353"/>
+	<skos:editorialNote xml:lang="en">PPArtNouveauStyle</skos:editorialNote>
+	<skos:scopeNote xml:lang="en">Portuguese variation of Art Nouveau.</skos:scopeNote>
+</skos:Concept>
+<skos:Concept rdf:about="http://partage.vocnet.org/part00555">
+	<skos:prefLabel xml:lang="sv">Jugend (Sweden)</skos:prefLabel>
+	<skos:prefLabel xml:lang="en">Jugend (Sweden)</skos:prefLabel>
+	<skos:inScheme rdf:resource="http://partage.vocnet.org/StylesAndPeriods"/>
+	<skos:broader rdf:resource="http://partage.vocnet.org/part00353"/>
+	<skos:editorialNote xml:lang="en">PPArtNouveauStyle</skos:editorialNote>
+	<skos:scopeNote xml:lang="en">The Swedish variation of Jugend and Art Nouveau was more restrained than in Europe, because of the National Romantic style which appeared around the same time. In Sweden the Jugend style was defined by a more naturalistic ornamentation than the one in France and England and it was mainly inspired by the Swedish flora and fauna. In the latter years of the period some artists, inspired by the Austrian Sezessionstil, came to develop the style Kontrajugend which was calmer and had a more geometric d\u00e9cor.</skos:scopeNote>
+</skos:Concept>
+<skos:Concept rdf:about="http://partage.vocnet.org/part00557">
+	<skos:altLabel xml:lang="en">Young Poland</skos:altLabel>
+	<skos:prefLabel xml:lang="pl">Młoda Polska</skos:prefLabel>
+	<skos:prefLabel xml:lang="en">Młoda Polska</skos:prefLabel>
+	<skos:inScheme rdf:resource="http://partage.vocnet.org/StylesAndPeriods"/>
+	<skos:broader rdf:resource="http://partage.vocnet.org/part00353"/>
+	<skos:exactMatch rdf:resource="http://vocab.getty.edu/aat/300266311"/>
+	<skos:editorialNote xml:lang="en">PPArtNouveauStyle</skos:editorialNote>
+	<skos:scopeNote xml:lang="en">Modern Polish movement in the art, literature, and music. Roughly active from 1890-1918, it also refers to the group of artists involved in the movement.</skos:scopeNote>
+	<skos:scopeNote xml:lang="en">Term which encompasses various creative efforts not
+just in visual arts or architecture but also in poetry, literature and music. But in visual arts it has become a preferred term for Art Nouveau works by Polish artists. So there is an adjective "m\u0142odopolski" coined from M\u0142oda Polska (Young Poland) which means exactly "Art Nouveau" used in adjective form.</skos:scopeNote>
+</skos:Concept>
+<skos:Concept rdf:about="http://partage.vocnet.org/part00558">
+	<skos:prefLabel xml:lang="en">Zakopane style</skos:prefLabel>
+	<skos:inScheme rdf:resource="http://partage.vocnet.org/StylesAndPeriods"/>
+	<skos:broader rdf:resource="http://partage.vocnet.org/part00349"/>
+	<skos:editorialNote xml:lang="en">PPArtNouveauStyle</skos:editorialNote>
+	<skos:scopeNote xml:lang="en">Style created by Stanis\u0142aw Witkiewicz mostly on the basis of the folk art of the Zakopane region.</skos:scopeNote>
+</skos:Concept>
+<skos:Concept rdf:about="http://partage.vocnet.org/part00559">
+	<skos:prefLabel xml:lang="en">Hutsul style</skos:prefLabel>
+	<skos:inScheme rdf:resource="http://partage.vocnet.org/StylesAndPeriods"/>
+	<skos:broader rdf:resource="http://partage.vocnet.org/part00349"/>
+	<skos:editorialNote xml:lang="en">PPArtNouveauStyle</skos:editorialNote>
+	<skos:scopeNote xml:lang="en">Style of works by Hutsul folk artists and other
+artists inspired by them.</skos:scopeNote>
+</skos:Concept>
+<skos:Concept rdf:about="http://partage.vocnet.org/part01014">
+	<skos:prefLabel xml:lang="en">Vernacular style</skos:prefLabel>
+	<skos:inScheme rdf:resource="http://partage.vocnet.org/StylesAndPeriods"/>
+	<skos:scopeNote xml:lang="en">Design and production of objects based on the influence of folk art but not produced by folk artists; may include examples of cooperation between professional artists and folk artists as well.</skos:scopeNote>
+	<skos:editorialNote xml:lang="en">PPArtNouveauStyle</skos:editorialNote>
+</skos:Concept>
+<skos:Concept rdf:about="http://partage.vocnet.org/part01065">
+	<skos:prefLabel xml:lang="de">Proto-Expressionismus</skos:prefLabel>
+	<skos:prefLabel xml:lang="en">Proto-Expressionism</skos:prefLabel>
+	<skos:inScheme rdf:resource="http://partage.vocnet.org/StylesAndPeriods"/>
+	<skos:broader rdf:resource="http://partage.vocnet.org/part00349"/>
+	<skos:editorialNote xml:lang="en">PPArtNouveauStyle</skos:editorialNote>
+	<skos:scopeNote xml:lang="en">Refers to works anticipating aspects of Expressionism.</skos:scopeNote>
+</skos:Concept>
+<skos:Concept rdf:about="http://partage.vocnet.org/part01067">
+	<skos:prefLabel xml:lang="fr">Ligne Belge</skos:prefLabel>
+	<skos:prefLabel xml:lang="en">Ligne Belge</skos:prefLabel>
+	<skos:altLabel xml:lang="fr">Mouvement belge</skos:altLabel>
+	<skos:inScheme rdf:resource="http://partage.vocnet.org/StylesAndPeriods"/>
+	<skos:broader rdf:resource="http://partage.vocnet.org/part00353"/>
+</skos:Concept>
+<skos:Concept rdf:about="http://partage.vocnet.org/part01068">
+	<skos:prefLabel xml:lang="en">Proto-Art Nouveau</skos:prefLabel>
+	<skos:prefLabel xml:lang="de">Proto-Art Nouveau</skos:prefLabel>
+	<skos:inScheme rdf:resource="http://partage.vocnet.org/StylesAndPeriods"/>
+	<skos:broader rdf:resource="http://partage.vocnet.org/part00349"/>
+	<skos:editorialNote xml:lang="en">PPArtNouveauStyle</skos:editorialNote>
+	<skos:scopeNote xml:lang="en">Art Nouveau anticipating tendencies in English aesthetic production of the 1870ies and 1880ies, deriving from the Arts and Crafts-Movement, cf. Tschudi-Madsen (Sources of Art Nouveau, 1956; Jugendstil, 1967, pp. 12, 74ff., and 85; see also: Peter Selz (Art Nouveau. Art and Design at the Turn of the Century, 1959, pp. 26ff.). To be distinguished from Robert Schmutzler's use of the term referring to European painting around 1800, cf. Schmutzler 1962.</skos:scopeNote>
+</skos:Concept>
+<skos:Concept rdf:about="http://partage.vocnet.org/part01069">
+	<skos:prefLabel xml:lang="hr">Secesija</skos:prefLabel>
+	<skos:inScheme rdf:resource="http://partage.vocnet.org/StylesAndPeriods"/>
+	<skos:broader rdf:resource="http://partage.vocnet.org/part00353"/>
+	<skos:scopeNote xml:lang="en">Croatian term for the style of decorative arts, arts and architecture based on stylized organic forms and fluid serpentine lines (Art Nouveau) or the one based on geometric forms and decoration (Sezessionstil) from the late 19th century to the beginning of the WW1.</skos:scopeNote>
+	<skos:editorialNote xml:lang="en">PPArtNouveauStyle</skos:editorialNote>
+</skos:Concept>
+<skos:Concept rdf:about="http://partage.vocnet.org/part01071">
+	<skos:prefLabel xml:lang="en">Style Horta</skos:prefLabel>
+	<skos:inScheme rdf:resource="http://partage.vocnet.org/StylesAndPeriods"/>
+	<skos:broader rdf:resource="http://partage.vocnet.org/part00353"/>
+	<skos:scopeNote xml:lang="en">A variation of Art Nouveau in Belgium, relating to the work of Victor Horta.</skos:scopeNote>
+</skos:Concept>
+<skos:Concept rdf:about="http://partage.vocnet.org/part01072">
+	<skos:prefLabel xml:lang="fr">Style Moderne</skos:prefLabel>
+	<skos:prefLabel xml:lang="en">Style Moderne</skos:prefLabel>
+	<skos:inScheme rdf:resource="http://partage.vocnet.org/StylesAndPeriods"/>
+	<skos:broader rdf:resource="http://partage.vocnet.org/part00353"/>
+	<skos:editorialNote xml:lang="en">PPArtNouveauStyle</skos:editorialNote>
+	<skos:scopeNote xml:lang="en">A variation of Art Nouveau in France.</skos:scopeNote>
+</skos:Concept>
+<skos:Concept rdf:about="http://partage.vocnet.org/part01073">
+	<skos:prefLabel xml:lang="fr">Style rastaquouère</skos:prefLabel>
+	<skos:prefLabel xml:lang="en">Style rastaquouère</skos:prefLabel>
+	<skos:inScheme rdf:resource="http://partage.vocnet.org/StylesAndPeriods"/>
+	<skos:broader rdf:resource="http://partage.vocnet.org/part00353"/>
+	<skos:editorialNote xml:lang="en">PPArtNouveauStyle</skos:editorialNote>
+	<skos:scopeNote xml:lang="en">Pejorative term for a variation of Art Nouveau.</skos:scopeNote>
+</skos:Concept>
+<skos:Concept rdf:about="http://partage.vocnet.org/part01074">
+	<skos:altLabel xml:lang="fr">Style ténia</skos:altLabel>
+	<skos:prefLabel xml:lang="de">Tannenstil</skos:prefLabel>
+	<skos:prefLabel xml:lang="fr">Style sapin</skos:prefLabel>
+	<skos:prefLabel xml:lang="en">Style sapin</skos:prefLabel>
+	<skos:inScheme rdf:resource="http://partage.vocnet.org/StylesAndPeriods"/>
+	<skos:broader rdf:resource="http://partage.vocnet.org/part00353"/>
+	<skos:editorialNote xml:lang="en">PPArtNouveauStyle</skos:editorialNote>
+	<skos:scopeNote xml:lang="en">French term for a variation of Art Nouveau used in Switzerland relating to the aesthetic production of the pupils of Charles L\u2019Eplattenier in La-Chaux-de-Fonds around 1900-1910. The ornamental expression was based on regional flora of the canton Jura, deriving from pine-tree, Carline thistle and Alpine gentian.</skos:scopeNote>
+</skos:Concept>
+<skos:Concept rdf:about="http://partage.vocnet.org/part01076">
+	<skos:prefLabel xml:lang="de">Wellenstil</skos:prefLabel>
+	<skos:prefLabel xml:lang="en">Wellenstil</skos:prefLabel>
+	<skos:inScheme rdf:resource="http://partage.vocnet.org/StylesAndPeriods"/>
+	<skos:broader rdf:resource="http://partage.vocnet.org/part00353"/>
+	<skos:scopeNote xml:lang="en">German term for a variation of Art Nouveau.</skos:scopeNote>
+</skos:Concept>
+<skos:Concept rdf:about="http://partage.vocnet.org/part01261">
+	<skos:prefLabel xml:lang="en">Aesthetic Movement</skos:prefLabel>
+	<skos:inScheme rdf:resource="http://partage.vocnet.org/StylesAndPeriods"/>
+	<skos:broader rdf:resource="http://partage.vocnet.org/part00349"/>
+	<skos:exactMatch rdf:resource="http://vocab.getty.edu/aat/300018124"/>
+	<skos:editorialNote xml:lang="en">PPArtNouveauStyle</skos:editorialNote>
+	<skos:scopeNote xml:lang="en">Refers to a British and American movement influencing fine and decorative art and architecture in the 1870s and 1880s. Following the philosophy of "art for art's sake", the Aesthetic Movement stressed beauty and the autonomous value of art over didactic purpose, narrative content, or significant subject matter.</skos:scopeNote>
+</skos:Concept>
+<skos:Concept rdf:about="http://partage.vocnet.org/part01262">
+	<skos:prefLabel xml:lang="fi">Jugend (Finnland)</skos:prefLabel>
+	<skos:prefLabel xml:lang="en">Jugend (Finnland)</skos:prefLabel>
+	<skos:inScheme rdf:resource="http://partage.vocnet.org/StylesAndPeriods"/>
+	<skos:broader rdf:resource="http://partage.vocnet.org/part00353"/>
+	<skos:editorialNote xml:lang="en">PPArtNouveauStyles</skos:editorialNote>
+	<skos:scopeNote xml:lang="en">Finnish variations of Jugend / Art Nouveau, striving to create
+art and handicraft using aspects of national culture, such as folk poetry, folk life, mediaval Finnish ecclesiastical architecture, Carelian folk, architecture, among others, as starting point, and drawings inspiration e.g. from Finnish nature in its choice of decorative motifs, as well as striving to create a new idiom in its use of ornaments and materials.</skos:scopeNote>
+</skos:Concept>
+<skos:Concept rdf:about="http://partage.vocnet.org/part01263">
+	<skos:prefLabel xml:lang="sv">Kontrajugend</skos:prefLabel>
+	<skos:prefLabel xml:lang="en">Kontrajugend</skos:prefLabel>
+	<skos:inScheme rdf:resource="http://partage.vocnet.org/StylesAndPeriods"/>
+	<skos:broader rdf:resource="http://partage.vocnet.org/part00353"/>
+	<skos:editorialNote xml:lang="en">PPArtNouveauStyle</skos:editorialNote>
+	<skos:scopeNote xml:lang="en">Swedish term for more strict and geometrical variation of Art Nouveau.</skos:scopeNote>
+</skos:Concept>
+<skos:Concept rdf:about="http://partage.vocnet.org/part01264">
+	<skos:altLabel xml:lang="nl">Rationalistic style (Nieuwe Kunst))</skos:altLabel>
+	<skos:prefLabel xml:lang="nl">Constructive style (Nieuwe Kunst)</skos:prefLabel>
+	<skos:prefLabel xml:lang="en">Constructive style (Nieuwe Kunst)</skos:prefLabel>
+	<skos:inScheme rdf:resource="http://partage.vocnet.org/StylesAndPeriods"/>
+	<skos:broader rdf:resource="http://partage.vocnet.org/part00375"/>
+	<skos:editorialNote xml:lang="en">PPArtNouveauStyle</skos:editorialNote>
+	<skos:scopeNote xml:lang="en">Term for constructive style (also called rationalistic) variations of Art Nouveau, used in the Netherlands. Functional design: the form is based on function, construction and material. Characteristics are a division of constructive and functional elements, respect for the material used, restricted and subordinate use of ornament that accentuates the construction. Ornaments are often nature-based and reduced to mathematical principles (geometrical/linear). Inspired by the wish to make well-designed objects available to large groups in society, these socially-engaged artists welcomed the machine into the production process. This style flourished in Amsterdam.</skos:scopeNote>
+</skos:Concept>
+<skos:Concept rdf:about="http://partage.vocnet.org/part01265">
+	<skos:prefLabel xml:lang="nl">Decorative style (Nieuwe Kunst)</skos:prefLabel>
+	<skos:prefLabel xml:lang="en">Decorative style (Nieuwe Kunst)</skos:prefLabel>
+	<skos:inScheme rdf:resource="http://partage.vocnet.org/StylesAndPeriods"/>
+	<skos:broader rdf:resource="http://partage.vocnet.org/part00375"/>
+	<skos:editorialNote xml:lang="en">PPArtNouveauStyle</skos:editorialNote>
+	<skos:scopeNote xml:lang="en">Term for decorative style variations of Art Nouveau, used in the Netherlands. Ornament instead of construction, function or material is the basis for design. This style is inspired by the international (French-Belgian) art nouveau. Characteristics are the use of stylized or abstracted motives from nature and a two-dimensional treatment of surface. A dazzling play of lines sometimes veils the construction. This style flourished in The Hague and Delft and is also called \u2018slaolie\u2019 style, after a famous commercial poster by Jan Toorop for a Delft producer of salad oil.</skos:scopeNote>
+</skos:Concept>
+<skos:Concept rdf:about="http://partage.vocnet.org/part01266">
+	<skos:prefLabel xml:lang="nl">Constructive-decorative style (Nieuwe Kunst)</skos:prefLabel>
+	<skos:prefLabel xml:lang="en">Constructive-decorative style (Nieuwe Kunst)</skos:prefLabel>
+	<skos:inScheme rdf:resource="http://partage.vocnet.org/StylesAndPeriods"/>
+	<skos:broader rdf:resource="http://partage.vocnet.org/part00375"/>
+	<skos:scopeNote xml:lang="en">Term for constructive-decorative style Design used in the Netherlands. Construction is the basis for the form of an object, in which ornament is given an important role. Characteristic is the aesthetic focus that is evident in the use of exclusive and expensive materials, the mixing of many stylistic elements and an abundant amount of ornament. Decoration is a goal in itself for artists of this style, who are supporters of the \u2018l\u2019art pour l\u2019art\u2019 principle. They are akin to the Aesthetic Movement in Britain. This style flourished in Amsterdam.</skos:scopeNote>
+	<skos:editorialNote xml:lang="en">PPArtNouveauStyle</skos:editorialNote>
+</skos:Concept>
+<skos:Concept rdf:about="http://partage.vocnet.org/part01267">
+	<skos:prefLabel xml:lang="en">New Sculpture</skos:prefLabel>
+	<skos:altLabel xml:lang="en">New Sculpture Movement</skos:altLabel>
+	<skos:inScheme rdf:resource="http://partage.vocnet.org/StylesAndPeriods"/>
+	<skos:broader rdf:resource="http://partage.vocnet.org/part00349"/>
+	<skos:exactMatch rdf:resource="http://vocab.getty.edu/aat/300021223"/>
+	<skos:editorialNote xml:lang="en">PPArtNouveauStyle</skos:editorialNote>
+	<skos:scopeNote xml:lang="en">Refers to the movement in British sculpture from about 1870 to about 1920 that aimed to revive the quality of British sculpture. Viewed as a departure from the conservativism and blandness of Neoclassicism, the style is characterized by greater realism, a tendency toward symbolism and fantasy, the use of non-Classical themes, and the use of materials other than marble.</skos:scopeNote>
+</skos:Concept>
+<skos:Collection rdf:about="http://partage.vocnet.org/PPArtNouveauStyle">
+	<skos:prefLabel>PPArtNouveauStyle</skos:prefLabel>
+	<skos:member rdf:resource="http://partage.vocnet.org/part00345"/>
+	<skos:member rdf:resource="http://partage.vocnet.org/part00353"/>
+	<skos:member rdf:resource="http://partage.vocnet.org/part00355"/>
+	<skos:member rdf:resource="http://partage.vocnet.org/part00357"/>
+	<skos:member rdf:resource="http://partage.vocnet.org/part00358"/>
+	<skos:member rdf:resource="http://partage.vocnet.org/part00364"/>
+	<skos:member rdf:resource="http://partage.vocnet.org/part00365"/>
+	<skos:member rdf:resource="http://partage.vocnet.org/part00370"/>
+	<skos:member rdf:resource="http://partage.vocnet.org/part00375"/>
+	<skos:member rdf:resource="http://partage.vocnet.org/part00379"/>
+	<skos:member rdf:resource="http://partage.vocnet.org/part00381"/>
+	<skos:member rdf:resource="http://partage.vocnet.org/part00553"/>
+	<skos:member rdf:resource="http://partage.vocnet.org/part00555"/>
+	<skos:member rdf:resource="http://partage.vocnet.org/part00557"/>
+	<skos:member rdf:resource="http://partage.vocnet.org/part00558"/>
+	<skos:member rdf:resource="http://partage.vocnet.org/part00559"/>
+	<skos:member rdf:resource="http://partage.vocnet.org/part01014"/>
+	<skos:member rdf:resource="http://partage.vocnet.org/part01065"/>
+	<skos:member rdf:resource="http://partage.vocnet.org/part01068"/>
+	<skos:member rdf:resource="http://partage.vocnet.org/part01069"/>
+	<skos:member rdf:resource="http://partage.vocnet.org/part01072"/>
+	<skos:member rdf:resource="http://partage.vocnet.org/part01073"/>
+	<skos:member rdf:resource="http://partage.vocnet.org/part01074"/>
+	<skos:member rdf:resource="http://partage.vocnet.org/part01261"/>
+	<skos:member rdf:resource="http://partage.vocnet.org/part01263"/>
+	<skos:member rdf:resource="http://partage.vocnet.org/part01264"/>
+	<skos:member rdf:resource="http://partage.vocnet.org/part01265"/>
+	<skos:member rdf:resource="http://partage.vocnet.org/part01266"/>
+	<skos:member rdf:resource="http://partage.vocnet.org/part01267"/>
+</skos:Collection>
+<skos:Collection rdf:about="http://partage.vocnet.org/IndexingConcepts">
+	<skos:prefLabel>IndexingConcepts</skos:prefLabel>
+	<skos:member rdf:resource="http://partage.vocnet.org/part00345"/>
+	<skos:member rdf:resource="http://partage.vocnet.org/part00353"/>
+	<skos:member rdf:resource="http://partage.vocnet.org/part00355"/>
+	<skos:member rdf:resource="http://partage.vocnet.org/part00357"/>
+	<skos:member rdf:resource="http://partage.vocnet.org/part00358"/>
+	<skos:member rdf:resource="http://partage.vocnet.org/part00364"/>
+	<skos:member rdf:resource="http://partage.vocnet.org/part00365"/>
+	<skos:member rdf:resource="http://partage.vocnet.org/part00370"/>
+	<skos:member rdf:resource="http://partage.vocnet.org/part00375"/>
+	<skos:member rdf:resource="http://partage.vocnet.org/part00379"/>
+	<skos:member rdf:resource="http://partage.vocnet.org/part00381"/>
+	<skos:member rdf:resource="http://partage.vocnet.org/part00553"/>
+	<skos:member rdf:resource="http://partage.vocnet.org/part00555"/>
+	<skos:member rdf:resource="http://partage.vocnet.org/part00557"/>
+	<skos:member rdf:resource="http://partage.vocnet.org/part00558"/>
+	<skos:member rdf:resource="http://partage.vocnet.org/part00559"/>
+	<skos:member rdf:resource="http://partage.vocnet.org/part01014"/>
+	<skos:member rdf:resource="http://partage.vocnet.org/part01065"/>
+	<skos:member rdf:resource="http://partage.vocnet.org/part01068"/>
+	<skos:member rdf:resource="http://partage.vocnet.org/part01069"/>
+	<skos:member rdf:resource="http://partage.vocnet.org/part01072"/>
+	<skos:member rdf:resource="http://partage.vocnet.org/part01073"/>
+	<skos:member rdf:resource="http://partage.vocnet.org/part01074"/>
+	<skos:member rdf:resource="http://partage.vocnet.org/part01261"/>
+	<skos:member rdf:resource="http://partage.vocnet.org/part01262"/>
+	<skos:member rdf:resource="http://partage.vocnet.org/part01263"/>
+	<skos:member rdf:resource="http://partage.vocnet.org/part01264"/>
+	<skos:member rdf:resource="http://partage.vocnet.org/part01265"/>
+	<skos:member rdf:resource="http://partage.vocnet.org/part01266"/>
+	<skos:member rdf:resource="http://partage.vocnet.org/part01267"/>
+</skos:Collection>
+<skos:Collection rdf:about="http://partage.vocnet.org/NonIndexingConcepts">
+	<skos:prefLabel>NonIndexingConcepts</skos:prefLabel>
+	<skos:member rdf:resource="http://partage.vocnet.org/part00349"/>
+	<skos:member rdf:resource="http://partage.vocnet.org/part00360"/>
+	<skos:member rdf:resource="http://partage.vocnet.org/part00361"/>
+	<skos:member rdf:resource="http://partage.vocnet.org/part00363"/>
+	<skos:member rdf:resource="http://partage.vocnet.org/part00366"/>
+	<skos:member rdf:resource="http://partage.vocnet.org/part00368"/>
+	<skos:member rdf:resource="http://partage.vocnet.org/part00369"/>
+	<skos:member rdf:resource="http://partage.vocnet.org/part00373"/>
+	<skos:member rdf:resource="http://partage.vocnet.org/part00374"/>
+	<skos:member rdf:resource="http://partage.vocnet.org/part00376"/>
+	<skos:member rdf:resource="http://partage.vocnet.org/part00378"/>
+	<skos:member rdf:resource="http://partage.vocnet.org/part00383"/>
+	<skos:member rdf:resource="http://partage.vocnet.org/part00384"/>
+	<skos:member rdf:resource="http://partage.vocnet.org/part00385"/>
+	<skos:member rdf:resource="http://partage.vocnet.org/part00386"/>
+	<skos:member rdf:resource="http://partage.vocnet.org/part00387"/>
+	<skos:member rdf:resource="http://partage.vocnet.org/part00388"/>
+	<skos:member rdf:resource="http://partage.vocnet.org/part00389"/>
+	<skos:member rdf:resource="http://partage.vocnet.org/part00391"/>
+	<skos:member rdf:resource="http://partage.vocnet.org/part01067"/>
+	<skos:member rdf:resource="http://partage.vocnet.org/part01071"/>
+	<skos:member rdf:resource="http://partage.vocnet.org/part01076"/>
+</skos:Collection>
+</rdf:RDF>

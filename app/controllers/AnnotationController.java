@@ -33,7 +33,6 @@ import model.resources.RecordResource;
 import model.resources.WithResourceType;
 
 import org.bson.types.ObjectId;
-import org.elasticsearch.action.search.SearchResponse;
 
 import play.Logger;
 import play.Logger.ALogger;
@@ -50,7 +49,6 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import controllers.RecordResourceController.CollectionAndRecordsCounts;
 import controllers.WithController.Profile;
 import db.DB;
-import elastic.Elastic;
 import elastic.ElasticSearcher;
 import elastic.ElasticSearcher.SearchOptions;
 
