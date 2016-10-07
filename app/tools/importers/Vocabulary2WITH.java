@@ -51,7 +51,7 @@ import elastic.ElasticSearcher.SearchOptions;
 
 public class Vocabulary2WITH {
 
-	public static void main(String[] args) {
+	public static void main(String[] args) throws FileNotFoundException, IOException {
 //		importJSONVocabularyToWITH("fashion");
 //		importJSONVocabularyToWITH("photo");
 //		importJSONVocabularyToWITH("euscreenxl");
@@ -86,12 +86,13 @@ public class Vocabulary2WITH {
 		long starttime = System.currentTimeMillis();
 		System.out.println("Adding vocabulary " + name);
 
-		File f = new File(VocabularyImportConfiguration.outPath + File.separator + name + ".txt");
+		File f = new File(VocabularyImportConfiguration.outPath + File.separator + name + ".zip");
 		uncompress(f);
 
 		int count = 0;
 
-		try (BufferedReader br = new BufferedReader(new FileReader(f))) {
+		File uf = new File(VocabularyImportConfiguration.outPath + File.separator + name + ".txt");
+		try (BufferedReader br = new BufferedReader(new FileReader(uf))) {
 			String line;
 
 			long start = 0;
@@ -104,9 +105,9 @@ public class Vocabulary2WITH {
 					continue;
 				}
 				
-				if (count == start) {
-					System.out.println(starttime);
-				}
+//				if (count == start) {
+//					System.out.println("Start at " + starttime);
+//				}
 				
 				if (count >= end) {
 					break;
@@ -123,23 +124,21 @@ public class Vocabulary2WITH {
 				if (count % step == 0) {
 					System.out.println("Added " + count);
 				}
+//				System.out.println(line);
 			}
 			
 			if (jsons.size() > 0) {
 				ThesaurusController.addThesaurusTerms(jsons);
 			}
 			
-//			System.out.println(System.currentTimeMillis() - starttime);
+			System.out.println("Added in " + (System.currentTimeMillis() - starttime) + " msecs");
 			
 		} catch (Exception e) {
 			e.printStackTrace();
 			return;
 		}
 			
-		File zf = new File(VocabularyImportConfiguration.outPath + File.separator + name + ".zip");
-		if (zf.exists()) {
-			zf.delete();
-		}
+		uf.delete();
 		
 		System.out.println("Completed. Added " + count + " for " + name);
 	}
@@ -174,11 +173,11 @@ public class Vocabulary2WITH {
 	    	  
 			ZipEntry entry;
 			while((entry = zis.getNextEntry()) != null) {
-				System.out.println("Extracting: " +entry);
+				System.out.println("Extracting: " + entry);
 		        int count;
 		        byte data[] = new byte[BUFFER];
 		        
-		        try (FileOutputStream fos = new FileOutputStream(entry.getName());
+		        try (FileOutputStream fos = new FileOutputStream(VocabularyImportConfiguration.outPath + File.separator + entry.getName());
  		             BufferedOutputStream dest = new BufferedOutputStream(fos, BUFFER)) {
 		        
 			        while ((count = zis.read(data, 0, BUFFER)) != -1) {
