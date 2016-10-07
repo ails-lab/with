@@ -35,6 +35,13 @@ public class VocabularyImportConfiguration {
 	public static String inPath = System.getProperty("user.dir") + DB.getConf().getString("vocabulary.srcpath");
 	public static String outPath = System.getProperty("user.dir") + DB.getConf().getString("vocabulary.path");
 	
+	static {
+		File dir  = new File(outPath);
+		if (!dir.exists()) {
+			dir.mkdir();
+		}
+	}
+	
 	static String newLine = System.getProperty("line.separator");
 	
 	static Pattern labelPattern = Pattern.compile("^\"(.*?)\"@(.*)$");

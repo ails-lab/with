@@ -44,6 +44,10 @@ import com.fasterxml.jackson.databind.JsonNode;
 import play.libs.Json;
 import controllers.ThesaurusController;
 import sources.core.ParallelAPICall;
+import tools.importers.vocabulary.DBPedia2Vocabulary;
+import tools.importers.vocabulary.OWL2Vocabulary;
+import tools.importers.vocabulary.SKOS2Vocabulary;
+import tools.importers.vocabulary.SKOSImportConfiguration;
 import tools.importers.vocabulary.VocabularyImportConfiguration;
 import elastic.ElasticCoordinator;
 import elastic.ElasticEraser;
@@ -51,7 +55,19 @@ import elastic.ElasticSearcher.SearchOptions;
 
 public class Vocabulary2WITH {
 
+
 	public static void main(String[] args) throws FileNotFoundException, IOException {
+
+		File dir = new File(VocabularyImportConfiguration.outPath);
+		if (dir.exists()) {
+			for (File f : dir.listFiles()) {
+				f.delete();
+			}
+		}
+		
+		convertSourcesToJSONs();
+//		importAll();
+		
 //		importJSONVocabularyToWITH("fashion");
 //		importJSONVocabularyToWITH("photo");
 //		importJSONVocabularyToWITH("euscreenxl");
@@ -64,6 +80,18 @@ public class Vocabulary2WITH {
 //		importJSONVocabularyToWITH("dbr-place");
 //		importJSONVocabularyToWITH("dbr-person");
 	}
+	
+	private static void convertSourcesToJSONs() {
+		SKOS2Vocabulary.doImport(SKOS2Vocabulary.confs);
+		OWL2Vocabulary.doImport(OWL2Vocabulary.confs);
+		
+		List<String[]> filters = new ArrayList<>();
+		filters.add(new String[] {"Person"});
+		filters.add(new String[] {"Place"});
+		
+		DBPedia2Vocabulary.doImport(filters);
+	}
+	
 	
 	public static int step = 2000;
 	

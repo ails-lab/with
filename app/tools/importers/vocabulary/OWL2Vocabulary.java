@@ -67,9 +67,13 @@ public class OWL2Vocabulary {
 	        "http://nerd.eurecom.fr/ontology",
 	        "http://nerd.eurecom.fr/ontology#Thing");	
 
+	public static OWLImportConfiguration[] confs = new OWLImportConfiguration[] { nerd };
+	
 	public static void main(String[] args) {
-		OWLImportConfiguration[] confs = new OWLImportConfiguration[] { nerd };
-		
+		doImport(confs);
+	}
+	
+	public static void doImport(OWLImportConfiguration[] confs) {
 		for (OWLImportConfiguration c : confs) {
 			try {
 				doImport(c);

@@ -119,6 +119,11 @@ public class DBPedia2Vocabulary {
 		List<String[]> filters = new ArrayList<>();
 		filters.add(new String[] {"Person"});
 		filters.add(new String[] {"Place"});
+
+		doImport(filters);
+	}
+	
+	public static void doImport(List<String[]> filters) {
 		
 		DBPedia2Vocabulary importer = new DBPedia2Vocabulary(dbo, filters);
 		try {
@@ -126,7 +131,7 @@ public class DBPedia2Vocabulary {
 			dbo.compress();
 			dbo.deleteTemp();
 
-			importer.prepare();
+			importer.prepareIndex();
 			importer.readInstances();
 			File[] dbrFiles = importer.createThesaurus();
 			
@@ -135,6 +140,7 @@ public class DBPedia2Vocabulary {
 				VocabularyImportConfiguration.compress(name.substring(0, name.lastIndexOf(".")));
 				VocabularyImportConfiguration.deleteTemp(name.substring(0, name.lastIndexOf(".")));
 			}
+			importer.eraseIndex();
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -144,8 +150,6 @@ public class DBPedia2Vocabulary {
 	
 	public DBPedia2Vocabulary(OWLImportConfiguration conf, List<String[]> restrictToType) {
 
-		tmpIndex = new File(System.getProperty("user.dir") + File.separator + "tmp" + File.separator + "lucene");
-		
 		if (restrictToType != null) {
 			filter = new Set[restrictToType.size()];
 			filterName = new String[filter.length];
@@ -386,11 +390,16 @@ public class DBPedia2Vocabulary {
 	
 	}
 	
-	private void prepare() throws IOException {
+	private void prepareIndex() throws IOException {
 		System.out.println("Creating index");
 		
-		for (File f : tmpIndex.listFiles()) {
-			f.delete();
+		tmpIndex = new File(System.getProperty("user.dir") + File.separator + "tmp" + File.separator + "lucene");
+		if (!tmpIndex.exists()) {
+			tmpIndex.mkdir();
+		} else {
+			for (File f : tmpIndex.listFiles()) {
+				f.delete();
+			}
 		}
 
 		OpenMode om = OpenMode.CREATE;
@@ -402,47 +411,57 @@ public class DBPedia2Vocabulary {
 		writer = new IndexWriter(dir, iwc);
 
 	}
+	
+	private void eraseIndex() throws IOException {
+		if (tmpIndex.exists()) {
+			for (File f : tmpIndex.listFiles()) {
+				f.delete();
+			}
+		}
+	}
 
 	private void readInstances() throws IOException, CompressorException {
 		System.out.println("Adding instances");
 		
-		for (File f : new File(inPath).listFiles()) {
-			if (f.getName().endsWith("bz2")) {
-				System.out.println("Importing file " + f);
-				try (FileInputStream fin = new FileInputStream(f);
-			         BufferedInputStream bis = new BufferedInputStream(fin);
-			         CompressorInputStream input = new CompressorStreamFactory().createCompressorInputStream(bis);
-			         BufferedReader br = new BufferedReader(new InputStreamReader(input))) {
-		
-					String line;
+		try {
+			for (File f : new File(inPath).listFiles()) {
+				if (f.getName().endsWith("bz2")) {
+					System.out.println("Importing file " + f);
+					try (FileInputStream fin = new FileInputStream(f);
+				         BufferedInputStream bis = new BufferedInputStream(fin);
+				         CompressorInputStream input = new CompressorStreamFactory().createCompressorInputStream(bis);
+				         BufferedReader br = new BufferedReader(new InputStreamReader(input))) {
 			
-					int count = 0;
-					while ((line = br.readLine()) != null)   {
-						Matcher m = triple.matcher(line);
-						
-						if (m.find()) {
-							String id = "ID_" + System.currentTimeMillis() + "_" + Math.floor(100000*Math.random());
-							String uri = m.group(1);
-							String type = m.group(2);
-							String value = StringEscapeUtils.unescapeJava(m.group(3));
+						String line;
+				
+						int count = 0;
+						while ((line = br.readLine()) != null)   {
+							Matcher m = triple.matcher(line);
 							
-							Document doc = new Document();
-					
-							doc.add(new StringField("id", id, Field.Store.YES));
-							doc.add(new StringField("uri", uri, Field.Store.YES));
-							doc.add(new StringField("type", type, Field.Store.YES));
-							doc.add(new StringField("value", value, Field.Store.YES));
-		
-							writer.addDocument(doc);
-							count++;
+							if (m.find()) {
+								String id = "ID_" + System.currentTimeMillis() + "_" + Math.floor(100000*Math.random());
+								String uri = m.group(1);
+								String type = m.group(2);
+								String value = StringEscapeUtils.unescapeJava(m.group(3));
+								
+								Document doc = new Document();
+						
+								doc.add(new StringField("id", id, Field.Store.YES));
+								doc.add(new StringField("uri", uri, Field.Store.YES));
+								doc.add(new StringField("type", type, Field.Store.YES));
+								doc.add(new StringField("value", value, Field.Store.YES));
+			
+								writer.addDocument(doc);
+								count++;
+							}
 						}
+						System.out.println(count + " elements added from " + f.getName());
 					}
-					System.out.println(count + " elements added from " + f.getName());
 				}
 			}
+		} finally {		
+			writer.close();
 		}
-		
-		writer.close();
 		
 	}
 	

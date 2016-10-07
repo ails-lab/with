@@ -126,10 +126,13 @@ public class SKOS2Vocabulary {
             null, 
 	        null);	
 
+	public static SKOSImportConfiguration[] confs = new SKOSImportConfiguration[] { fashion, gemet, euscreenxl, photo, partageplus, mimo, hornbostelsachs };
+	
 	public static void main(String[] args) {
-		SKOSImportConfiguration[] confs = new SKOSImportConfiguration[] { fashion, gemet, euscreenxl, photo, partageplus, mimo, hornbostelsachs };
-//		SKOSImportConfiguration[] confs = new SKOSImportConfiguration[] { hornbostelsachs };
-		
+		doImport(confs);
+	}
+	
+	public static void doImport(SKOSImportConfiguration[] confs) {
 		for (SKOSImportConfiguration c : confs) {
 			try {
 				doImport(c);
@@ -140,8 +143,7 @@ public class SKOS2Vocabulary {
 			}
 		}
 	}
-	
-	public static void doImport(SKOSImportConfiguration conf) throws OWLOntologyCreationException, IOException {
+	private static void doImport(SKOSImportConfiguration conf) throws OWLOntologyCreationException, IOException {
 
 		Set<String> ks = null;
 		if (conf.existingSchemesToKeep != null) {
