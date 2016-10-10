@@ -16,21 +16,15 @@
 
 package tools.importers;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.function.Function;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
 
 import org.bson.types.ObjectId;
 import org.elasticsearch.action.search.SearchResponse;
@@ -48,7 +42,6 @@ import tools.importers.vocabulary.AAT2Vocabulary;
 import tools.importers.vocabulary.DBPedia2Vocabulary;
 import tools.importers.vocabulary.OWL2Vocabulary;
 import tools.importers.vocabulary.SKOS2Vocabulary;
-import tools.importers.vocabulary.SKOSImportConfiguration;
 import tools.importers.vocabulary.VocabularyImportConfiguration;
 import elastic.ElasticCoordinator;
 import elastic.ElasticEraser;
@@ -60,10 +53,16 @@ public class Vocabulary2WITH {
 	
 	public static void main(String[] args) throws FileNotFoundException, IOException {
 
+		// specify configure folders
+		VocabularyImportConfiguration.tmpdir = "C:/Users/achort.IPLAB/git/with-vocabularies/tmp";
+		
+		VocabularyImportConfiguration.srcdir = "C:/Users/achort.IPLAB/git/with-vocabularies/resources/vocabulary/src";
+		VocabularyImportConfiguration.outdir = "C:/Users/achort.IPLAB/git/with-vocabularies/resources/vocabulary/json";
+		
+		// converts sources in srcdir to zipped jsons in outfir
 		convertSourcesToJSONs();
 		
-//		tmpFolder = VocabularyImportConfiguration.getTempFolder();
-
+		// import jsons to WITH
 //		importAll();
 		
 //		importJSONVocabularyToWITH("fashion");
@@ -80,23 +79,28 @@ public class Vocabulary2WITH {
 	}
 	
 	private static void convertSourcesToJSONs() {
-//		SKOS2Vocabulary.doImport(SKOS2Vocabulary.confs);
-//		OWL2Vocabulary.doImport(OWL2Vocabulary.confs);
+		// import skos vocabularies
+		SKOS2Vocabulary.doImport(SKOS2Vocabulary.confs);
 		
-		AAT2Vocabulary.doImport();
+		// import owl vocabularies
+		OWL2Vocabulary.doImport(OWL2Vocabulary.confs);
 		
-//		List<String[]> filters = new ArrayList<>();
-//		filters.add(new String[] {"Person"});
-//		filters.add(new String[] {"Place"});
-//		
-//		DBPedia2Vocabulary.doImport(filters);
+		// import aat thesaurus
+		AAT2Vocabulary.doImport(AAT2Vocabulary.confs);
+		
+		// import dbpedia
+		List<String[]> filters = new ArrayList<>();
+		filters.add(new String[] {"Person"});
+		filters.add(new String[] {"Place"});
+		
+		DBPedia2Vocabulary.doImport(filters);
 	}
 	
 	
 	public static int step = 2000;
 	
 	public static void importAll() {
-		File dir = new File(VocabularyImportConfiguration.outPath);
+		File dir = new File(VocabularyImportConfiguration.outdir);
 		for (File f : dir.listFiles()) {
 			String name = f.getName();
 			
@@ -114,7 +118,7 @@ public class Vocabulary2WITH {
 		long starttime = System.currentTimeMillis();
 		System.out.println("Adding vocabulary " + name);
 
-		File f = new File(VocabularyImportConfiguration.outPath + File.separator + name + ".zip");
+		File f = new File(VocabularyImportConfiguration.outdir + File.separator + name + ".zip");
 		VocabularyImportConfiguration.uncompress(tmpFolder, f);
 
 		int count = 0;
@@ -133,10 +137,6 @@ public class Vocabulary2WITH {
 					continue;
 				}
 				
-//				if (count == start) {
-//					System.out.println("Start at " + starttime);
-//				}
-				
 				if (count >= end) {
 					break;
 				}
@@ -152,7 +152,6 @@ public class Vocabulary2WITH {
 				if (count % step == 0) {
 					System.out.println("Added " + count);
 				}
-//				System.out.println(line);
 			}
 			
 			if (jsons.size() > 0) {
@@ -192,8 +191,6 @@ public class Vocabulary2WITH {
 		ParallelAPICall.createPromise(deleteResources, tids);
 
 	}
-	
-	private final static int BUFFER = 2048;
 	
 
 

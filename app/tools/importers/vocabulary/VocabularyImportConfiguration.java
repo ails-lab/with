@@ -31,19 +31,12 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
-import db.DB;
 
 public class VocabularyImportConfiguration {
 
-	public static String inPath = System.getProperty("user.dir") + DB.getConf().getString("vocabulary.srcpath");
-	public static String outPath = System.getProperty("user.dir") + DB.getConf().getString("vocabulary.path");
+//	public static String inPath = System.getProperty("user.dir") + DB.getConf().getString("vocabulary.srcpath");
+//	public static String outPath = System.getProperty("user.dir") + DB.getConf().getString("vocabulary.path");
 	
-	static {
-		File dir  = new File(outPath);
-		if (!dir.exists()) {
-			dir.mkdir();
-		}
-	}
 	
 	static String newLine = System.getProperty("line.separator");
 	
@@ -51,19 +44,30 @@ public class VocabularyImportConfiguration {
 	
 	protected String folder;
 	
+	public static String srcdir;
+	public static String outdir;
+	
+	public static String tmpdir;
+	
 	public VocabularyImportConfiguration(String folder) {
 		this.folder = folder;
+		
+		File dir  = new File(outdir);
+		if (!dir.exists()) {
+			dir.mkdir();
+		}
+
 	}
 
 	public static File getTempFolder() {
-		File f = new File(System.getProperty("user.dir") + File.separator + "tmp");
+		File f = new File(tmpdir);
 		if (!f.exists()) {
 			f.mkdir();
 		} 
 		
-		File ff = new File(System.getProperty("user.dir") + File.separator + "tmp" + File.separator + "voc-" + (int)Math.floor(Math.random()*10000000));
+		File ff = new File(tmpdir + File.separator + "voc-" + (int)Math.floor(Math.random()*10000000));
 		while (ff.exists()) {
-			ff = new File(System.getProperty("user.dir") + File.separator + "tmp" + File.separator + "voc-" + (int)Math.floor(Math.random()*10000000));
+			ff = new File(tmpdir + File.separator + "voc-" + (int)Math.floor(Math.random()*10000000));
 		}
 
 		ff.mkdir();
@@ -72,7 +76,7 @@ public class VocabularyImportConfiguration {
 	}
 
 	public File getInputFolder() {
-		return new File(inPath + File.separator + folder);
+		return new File(srcdir + File.separator + folder);
 	}
 
 
@@ -153,8 +157,8 @@ public class VocabularyImportConfiguration {
 		return res;
 	}
 	
-	public static void deleteTemp(String fileName) {
-		File f = new File(outPath + File.separator + fileName + ".txt");
+	public void deleteTemp(String fileName) {
+		File f = new File(outdir + File.separator + fileName + ".txt");
 		if (f.exists()) {
 			f.delete();
 		}

@@ -88,8 +88,8 @@ import db.DB;
 
 public class DBPedia2Vocabulary {
 
-	private String ontologyFile = VocabularyImportConfiguration.inPath + File.separator + "dbo";
-	private String inPath = VocabularyImportConfiguration.inPath + File.separator + "dbr";
+	private String ontologyFile = VocabularyImportConfiguration.outdir + File.separator + "dbo";
+	private String inPath = VocabularyImportConfiguration.outdir + File.separator + "dbr";
 
 //	private String dboFile = VocabularyImportConfiguration.outPath + File.separator + "dbo.txt";
 
@@ -392,7 +392,7 @@ public class DBPedia2Vocabulary {
 		
 		System.out.println("Compressing output");
 		File cf = VocabularyImportConfiguration.compress(tmpFolder, conf.folder);
-		File tf = new File(VocabularyImportConfiguration.outPath + File.separator + cf.getName());
+		File tf = new File(VocabularyImportConfiguration.outdir + File.separator + cf.getName());
 		System.out.println("Copying output file");
 		Files.copy(cf.toPath(), tf.toPath(), StandardCopyOption.REPLACE_EXISTING);
 
@@ -647,7 +647,7 @@ public class DBPedia2Vocabulary {
 		for (File s : dbrFiles) {
 			System.out.println("Compressing " + s);
 			File cf = VocabularyImportConfiguration.compress(tmpFolder, s.getName().substring(0, s.getName().lastIndexOf(".")));
-			File tf = new File(VocabularyImportConfiguration.outPath + File.separator + cf.getName());
+			File tf = new File(VocabularyImportConfiguration.outdir + File.separator + cf.getName());
 			System.out.println("Copying " + cf + " " + tf);
 			Files.copy(cf.toPath(), tf.toPath(), StandardCopyOption.REPLACE_EXISTING);
 		}

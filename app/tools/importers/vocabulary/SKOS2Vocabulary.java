@@ -115,15 +115,17 @@ public class SKOS2Vocabulary {
 	}
 	
 	public static void doImport(SKOSImportConfiguration[] confs) {
+		SKOS2Vocabulary s2v = new SKOS2Vocabulary();
 		for (SKOSImportConfiguration c : confs) {
 			try {
-				doImport(c);
+				s2v.doImport(c);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
 		}
 	}
-	private static void doImport(SKOSImportConfiguration conf) throws OWLOntologyCreationException, IOException {
+	
+	private void doImport(SKOSImportConfiguration conf) throws OWLOntologyCreationException, IOException {
 
 		Set<String> ks = null;
 		if (conf.existingSchemesToKeep != null) {
@@ -348,7 +350,7 @@ public class SKOS2Vocabulary {
 		
 		System.out.println("Compressing " + tmpFolder + File.separator + conf.folder + ".txt");
 		File cf = VocabularyImportConfiguration.compress(tmpFolder, conf.folder);
-		File tf = new File(VocabularyImportConfiguration.outPath + File.separator + cf.getName());
+		File tf = new File(VocabularyImportConfiguration.outdir + File.separator + cf.getName());
 		System.out.println("Copying file " + cf + " to " + tf);
 		Files.copy(cf.toPath(), tf.toPath(), StandardCopyOption.REPLACE_EXISTING);
 
@@ -360,7 +362,7 @@ public class SKOS2Vocabulary {
 		
 	}
 
-	protected static JsonNode makeLiteralNode(String queryString, Model model, String var) {
+	protected JsonNode makeLiteralNode(String queryString, Model model, String var) {
 		Literal literal = new Literal();
 		Query query = QueryFactory.create(queryString) ;
 		try (QueryExecution exec = QueryExecutionFactory.create(query, model)) {
@@ -390,7 +392,7 @@ public class SKOS2Vocabulary {
 		}
 	}
 	
-	protected static ArrayNode makeURIArrayNode(String queryString, Model model, String var) {
+	protected ArrayNode makeURIArrayNode(String queryString, Model model, String var) {
 		ArrayNode array = Json.newObject().arrayNode();
 		
 		Query query = QueryFactory.create(queryString) ;
@@ -410,7 +412,7 @@ public class SKOS2Vocabulary {
 		}
 	}
 	
-	protected static ArrayNode makeFilteredURIArrayNode(String queryString, Model model, String var, Set<String> keepOnly) {
+	protected ArrayNode makeFilteredURIArrayNode(String queryString, Model model, String var, Set<String> keepOnly) {
 		ArrayNode array = Json.newObject().arrayNode();
 		
 		Query query = QueryFactory.create(queryString) ;
@@ -432,7 +434,7 @@ public class SKOS2Vocabulary {
 		}
 	}
 	
-	protected static ArrayNode makeNodesArray(String queryString, Model model, String var) {
+	protected ArrayNode makeNodesArray(String queryString, Model model, String var) {
 		ArrayNode array = Json.newObject().arrayNode();
 		
 		Query query = QueryFactory.create(queryString) ;
@@ -454,7 +456,7 @@ public class SKOS2Vocabulary {
 	}
 
 	
-	protected static ObjectNode makeMainStructure(String urit, Model model) {
+	protected ObjectNode makeMainStructure(String urit, Model model) {
 		Literal prefLabel = new Literal();
 		MultiLiteral altLabel = new MultiLiteral();
 		

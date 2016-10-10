@@ -64,17 +64,18 @@ public class AAT2Vocabulary extends SKOS2Vocabulary{
 		doImport(confs);
 	}
 	
-	public static void doImport() {
+	public static void doImport(SKOSImportConfiguration[] confs) {
+		AAT2Vocabulary a2v = new AAT2Vocabulary();
 		for (SKOSImportConfiguration c : confs) {
 			try {
-				doImport(c);
+				a2v.doImport(c);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
 		}
 	}
 	
-	private static void doImport(SKOSImportConfiguration conf) throws OWLOntologyCreationException, IOException {
+	private void doImport(SKOSImportConfiguration conf) throws OWLOntologyCreationException, IOException {
 
 		Set<String> ks = null;
 		if (conf.existingSchemesToKeep != null) {
@@ -310,7 +311,7 @@ public class AAT2Vocabulary extends SKOS2Vocabulary{
 		
 		System.out.println("Compressing " + tmpFolder + File.separator + conf.folder + ".txt");
 		File cf = VocabularyImportConfiguration.compress(tmpFolder, conf.folder);
-		File tf = new File(VocabularyImportConfiguration.outPath + File.separator + cf.getName());
+		File tf = new File(VocabularyImportConfiguration.outdir + File.separator + cf.getName());
 		System.out.println("Copying file " + cf + " to " + tf);
 		Files.copy(cf.toPath(), tf.toPath(), StandardCopyOption.REPLACE_EXISTING);
 
@@ -322,7 +323,7 @@ public class AAT2Vocabulary extends SKOS2Vocabulary{
 	}
 
 	
-	protected static ObjectNode makeMainStructure(String urit, Model model) {
+	protected ObjectNode makeMainStructure(String urit, Model model) {
 		Literal prefLabel = new Literal();
 		MultiLiteral altLabel = new MultiLiteral();
 		

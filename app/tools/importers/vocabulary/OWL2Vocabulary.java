@@ -343,7 +343,7 @@ public class OWL2Vocabulary {
 	
 		System.out.println("Compressing " + tmpFolder + File.separator + conf.folder + ".txt");
 		File cf = VocabularyImportConfiguration.compress(tmpFolder, conf.folder);
-		File tf = new File(VocabularyImportConfiguration.outPath + File.separator + cf.getName());
+		File tf = new File(VocabularyImportConfiguration.outdir + File.separator + cf.getName());
 		System.out.println("Copying file " + cf + " to " + tf);
 		Files.copy(cf.toPath(), tf.toPath(), StandardCopyOption.REPLACE_EXISTING);
 
