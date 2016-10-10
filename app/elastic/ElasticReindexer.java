@@ -59,55 +59,50 @@ public class ElasticReindexer {
 	 * Therefore we are NOT going to have duplicates.
 	 */
 	public static boolean reindexAllDbDocuments() {
-
 		BulkProcessor bulk = Elastic.getBulkProcessor();
 		long countAllRR = DB.getRecordResourceDAO().find().countAll();
 		long countAllCO = DB.getCollectionObjectDAO().find().countAll();
 
 		/* Index all RecordResources */
-		for(int i = 0; i < (countAllRR/1000); i++) {
-			Query<RecordResource> q = DB.getDs().createQuery(RecordResource.class).offset(i*1000).limit(1000);
-			Iterator<RecordResource> resourceCursor = DB.getRecordResourceDAO().find(q).iterator();
-			while(resourceCursor.hasNext()) {
-				RecordResource rr = resourceCursor.next();
-				bulk.add(new IndexRequest(Elastic.index, ElasticUtils.defineInstanceOf(rr), rr.getDbId().toString())
-				.source(rr.transform()));
+		try {
+			for (int i = 0; i <= (countAllRR / 1000); i++) {
+				log.error("index "+ i + " records");
+				Query<RecordResource> q = DB.getDs().createQuery(RecordResource.class).offset(i * 1000).limit(1000);
+				Iterator<RecordResource> resourceCursor = DB.getRecordResourceDAO().find(q).iterator();
+				while (resourceCursor.hasNext()) {
+					RecordResource rr = resourceCursor.next();
+					bulk.add(new IndexRequest(Elastic.index, ElasticUtils.defineInstanceOf(rr), rr.getDbId().toString())
+							.source(rr.transform()));
+				}
+				bulk.flush();
 			}
-			bulk.flush();
+		} catch (Exception e) {
+			log.error(e.getMessage(), e);
 		}
-
-		Query<RecordResource> q = DB.getDs().createQuery(RecordResource.class).offset((int)(countAllRR/1000)*1000).limit(1000);
-		Iterator<RecordResource> resourceCursor = DB.getRecordResourceDAO().find(q).iterator();
-		while(resourceCursor.hasNext()) {
-			RecordResource rr = resourceCursor.next();
-			bulk.add(new IndexRequest(Elastic.index, ElasticUtils.defineInstanceOf(rr), rr.getDbId().toString())
-			.source(rr.transform()));
-		}
-		bulk.flush();
 
 		/* Index all CollectionObjects */
-		for(int i = 0; i < (countAllCO/1000); i++) {
-			Query<CollectionObject> q1 = DB.getDs().createQuery(CollectionObject.class).offset(i*1000).limit(1000);
-			Iterator<CollectionObject> collectionCursor = DB.getCollectionObjectDAO().find(q1).iterator();
-			while(collectionCursor.hasNext()){
-				CollectionObject co = collectionCursor.next();
-				bulk.add(new IndexRequest(Elastic.index, ElasticUtils.defineInstanceOf(co), co.getDbId().toString())
-				.source(co.transform()));
+		int j = 0;
+		try {
+			for (int i = 0; i <= (countAllCO / 1000); i++) {
+				Query<CollectionObject> q1 = DB.getDs().createQuery(CollectionObject.class).offset(i * 1000)
+						.limit(1000);
+				Iterator<CollectionObject> collectionCursor = DB.getCollectionObjectDAO().find(q1).iterator();
+				while (collectionCursor.hasNext()) {
+					if (j % 100 == 0)
+						log.error("index " + j + " collections");
+					j++;
+					CollectionObject co = collectionCursor.next();
+					bulk.add(new IndexRequest(Elastic.index, ElasticUtils.defineInstanceOf(co), co.getDbId().toString())
+							.source(co.transform()));
+				}
+				bulk.flush();
 			}
-			bulk.flush();
-		}
 
-		Query<CollectionObject> q1 = DB.getDs().createQuery(CollectionObject.class).offset((int)(countAllRR/1000)*1000).limit(1000);
-		Iterator<CollectionObject> collectionCursor = DB.getCollectionObjectDAO().find(q1).iterator();
-		while(collectionCursor.hasNext()){
-			CollectionObject co = collectionCursor.next();
-			bulk.add(new IndexRequest(Elastic.index, ElasticUtils.defineInstanceOf(co), co.getDbId().toString())
-			.source(co.transform()));
+			return true;
+		} catch (Exception e) {
+			log.error(e.getMessage(), e);
 		}
-
-		bulk.flush();
 		return true;
-
 	}
 
 	/*
