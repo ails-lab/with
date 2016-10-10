@@ -297,8 +297,8 @@ public class GroupManager extends WithController {
 		}
 
 
-		ArrayNode fCollections = null;
-		ArrayNode fExhibitions = null;
+		ArrayNode fCollections = Json.newObject().arrayNode();
+		ArrayNode fExhibitions = Json.newObject().arrayNode();
 		try{
 			if(json.has("fCollections"))
 				fCollections = (ArrayNode)json.withArray("fCollections");
