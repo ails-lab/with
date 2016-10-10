@@ -21,10 +21,13 @@ import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -88,10 +91,10 @@ public class DBPedia2Vocabulary {
 	private String ontologyFile = VocabularyImportConfiguration.inPath + File.separator + "dbo";
 	private String inPath = VocabularyImportConfiguration.inPath + File.separator + "dbr";
 
-	private String dboFile = VocabularyImportConfiguration.outPath + File.separator + "dbo.txt";
+//	private String dboFile = VocabularyImportConfiguration.outPath + File.separator + "dbo.txt";
 
 	private String labelsFileName = "labels_en.ttl.bz2";
-	private File tmpIndex;
+	private File tmpFolder;
 	
 	private IndexWriter writer;
 	private OWLReasoner reasoner; 
@@ -128,19 +131,13 @@ public class DBPedia2Vocabulary {
 		DBPedia2Vocabulary importer = new DBPedia2Vocabulary(dbo, filters);
 		try {
 			importer.readOntology(dbo);
-			dbo.compress();
-			dbo.deleteTemp();
 
 			importer.prepareIndex();
 			importer.readInstances();
-			File[] dbrFiles = importer.createThesaurus();
 			
-			for (File s : dbrFiles) {
-				String name = s.getName();
-				VocabularyImportConfiguration.compress(name.substring(0, name.lastIndexOf(".")));
-				VocabularyImportConfiguration.deleteTemp(name.substring(0, name.lastIndexOf(".")));
-			}
-			importer.eraseIndex();
+			importer.createThesaurus();
+			
+			importer.erase();
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -149,6 +146,8 @@ public class DBPedia2Vocabulary {
 	}
 	
 	public DBPedia2Vocabulary(OWLImportConfiguration conf, List<String[]> restrictToType) {
+
+		tmpFolder = VocabularyImportConfiguration.getTempFolder();
 
 		if (restrictToType != null) {
 			filter = new Set[restrictToType.size()];
@@ -169,14 +168,15 @@ public class DBPedia2Vocabulary {
 		}
 	}
 	
-	private void readOntology(OWLImportConfiguration conf) throws OWLOntologyCreationException {
+	private void readOntology(OWLImportConfiguration conf) throws OWLOntologyCreationException, FileNotFoundException, IOException {
 		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
 		OWLOntology ontology = manager.loadOntologyFromOntologyDocument(IRI.create(new File(ontologyFile).listFiles()[0].toURI().toString()));
 		
 		reasoner = new Reasoner.ReasonerFactory().createReasoner(ontology);
 		
 		OWLAnnotationProperty ap = df.getOWLAnnotationProperty(IRI.create(conf.labelProperty));
-		
+
+
 		ObjectNode vocabulary = Json.newObject();
 		vocabulary.put("name", conf.prefix);
 		vocabulary.put("version", conf.version);
@@ -305,9 +305,11 @@ public class DBPedia2Vocabulary {
 			semantic.put("inSchemes", schemes);
 			semantic.put("vocabulary", vocabulary);
 		}
-
 		
-		try (FileWriter fr = new FileWriter(new File(dboFile));
+		
+		File outFile = new File(tmpFolder + File.separator + conf.folder + ".txt");
+		
+		try (FileWriter fr = new FileWriter(outFile);
             BufferedWriter br = new BufferedWriter(fr)) {
 			
 			for (ObjectNode on : jsons) {
@@ -387,24 +389,27 @@ public class DBPedia2Vocabulary {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		
+		System.out.println("Compressing output");
+		File cf = VocabularyImportConfiguration.compress(tmpFolder, conf.folder);
+		File tf = new File(VocabularyImportConfiguration.outPath + File.separator + cf.getName());
+		System.out.println("Copying output file");
+		Files.copy(cf.toPath(), tf.toPath(), StandardCopyOption.REPLACE_EXISTING);
+
+		System.out.println("Clearing tmp folder");
+		for (File f : tmpFolder.listFiles()) {
+			f.delete();
+		}
+		tmpFolder.delete();
 	
 	}
 	
 	private void prepareIndex() throws IOException {
 		System.out.println("Creating index");
 		
-		tmpIndex = new File(System.getProperty("user.dir") + File.separator + "tmp" + File.separator + "lucene");
-		if (!tmpIndex.exists()) {
-			tmpIndex.mkdir();
-		} else {
-			for (File f : tmpIndex.listFiles()) {
-				f.delete();
-			}
-		}
-
 		OpenMode om = OpenMode.CREATE;
 	  
-		Directory dir = FSDirectory.open(tmpIndex.toPath());
+		Directory dir = FSDirectory.open(tmpFolder.toPath());
 		IndexWriterConfig iwc = new IndexWriterConfig(new KeywordAnalyzer());
 		iwc.setOpenMode(om);
 		
@@ -412,11 +417,10 @@ public class DBPedia2Vocabulary {
 
 	}
 	
-	private void eraseIndex() throws IOException {
-		if (tmpIndex.exists()) {
-			for (File f : tmpIndex.listFiles()) {
-				f.delete();
-			}
+	private void erase() throws IOException {
+		System.out.println("Clearing folder " + tmpFolder);
+		for (File f : tmpFolder.listFiles()) {
+			f.delete();
 		}
 	}
 
@@ -475,7 +479,7 @@ public class DBPedia2Vocabulary {
 
 		File[] dbrFiles;
 		
-		try (Directory dir = FSDirectory.open(tmpIndex.toPath());
+		try (Directory dir = FSDirectory.open(tmpFolder.toPath());
 			  DirectoryReader reader = DirectoryReader.open(dir)) {
 		
 			IndexSearcher searcher = new IndexSearcher(reader);
@@ -487,12 +491,12 @@ public class DBPedia2Vocabulary {
 		         BufferedReader br = new BufferedReader(new InputStreamReader(input))) {
 				
 				if (filter == null) {
-					dbrFiles = new File[] {new File(VocabularyImportConfiguration.outPath + File.separator + "dbr.txt")};
+					dbrFiles = new File[] {new File(tmpFolder + File.separator + "dbr.txt")};
 				} else {
 					dbrFiles = new File[filterName.length];
 					for (int i = 0; i < filterName.length; i++) {
-						dbrFiles[i] = new File(VocabularyImportConfiguration.outPath + File.separator + "dbr-" + filterName[i] + ".txt");
-						System.out.println(VocabularyImportConfiguration.outPath + File.separator + "dbr-" + filterName[i] + ".txt");
+						dbrFiles[i] = new File(tmpFolder + File.separator + "dbr-" + filterName[i] + ".txt");
+						System.out.println(tmpFolder + File.separator + "dbr-" + filterName[i] + ".txt");
 					}
 				}
 				
@@ -640,6 +644,14 @@ public class DBPedia2Vocabulary {
 			}
 		}
 		
+		for (File s : dbrFiles) {
+			System.out.println("Compressing " + s);
+			File cf = VocabularyImportConfiguration.compress(tmpFolder, s.getName().substring(0, s.getName().lastIndexOf(".")));
+			File tf = new File(VocabularyImportConfiguration.outPath + File.separator + cf.getName());
+			System.out.println("Copying " + cf + " " + tf);
+			Files.copy(cf.toPath(), tf.toPath(), StandardCopyOption.REPLACE_EXISTING);
+		}
+
 		return dbrFiles;
 	}
 }

@@ -47,74 +47,24 @@ import org.apache.jena.query.ResultSet;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 
-public class SKOS2Vocabulary {
 
-	private static SKOSImportConfiguration fashion = new SKOSImportConfiguration("fashion", 
-	       	"Fashion Thesaurus", 
-	        "fashion", 
-	        "2014-12-10", 
-	        "thesaurus.europeanafashion.eu",
-	        null, 
-	        new String[] { "http://thesaurus.europeanafashion.eu/thesaurus/Techniques", 
-	                       "http://thesaurus.europeanafashion.eu/thesaurus/Colours",
-	                       "http://thesaurus.europeanafashion.eu/thesaurus/Type",
-	        	           "http://thesaurus.europeanafashion.eu/thesaurus/Materials" });
-	
-	private static SKOSImportConfiguration gemet = new SKOSImportConfiguration("gemet", 
-	        "GEMET Thesaurus", 
-	        "gemet", 
-	        "3.1", 
-	        "www.eionet.europa.eu",
+public class AAT2Vocabulary extends SKOS2Vocabulary{
+
+	private static SKOSImportConfiguration aat = new SKOSImportConfiguration("aat", 
+	        "The Art & Architecture Thesaurus ", 
+	        "aat", 
+	        "2016-10-7", 
+	        "vocab.getty.edu",
             null, 
 	        null);	
 
-	private static SKOSImportConfiguration euscreenxl = new SKOSImportConfiguration("euscreenxl", 
-	        "EUScreenXL Thesaurus", 
-	        "euscreenxl", 
-	        "v1", 
-	        "thesaurus.euscreen.eu",
-            null, 
-	        null);	
-	
-	private static SKOSImportConfiguration photo = new SKOSImportConfiguration("photo", 
-	        "Photography Thesaurus", 
-	        "photo", 
-	        "0", 
-	        "bib.arts.kuleuven.be",
-            null, 
-	        null);	
-	
-	private static SKOSImportConfiguration partageplus = new SKOSImportConfiguration("partageplus", 
-	        "Partage Plus Thesaurus", 
-	        "partageplus", 
-	        "0", 
-	        "partage.vocnet.org",
-            null, 
-	        null);
-	
-	private static SKOSImportConfiguration mimo = new SKOSImportConfiguration("mimo", 
-	        "MIMO Thesaurus", 
-	        "mimo", 
-	        "0", 
-	        "www.mimo-db.eu",
-            null, 
-	        null);	
-
-	private static SKOSImportConfiguration hornbostelsachs = new SKOSImportConfiguration("hornbostelsachs", 
-	        "Hornbostel-Sachs Thesaurus", 
-	        "hornbostelsachs", 
-	        "0", 
-	        "www.mimo-db.eu",
-            null, 
-	        null);	
-
-	public static SKOSImportConfiguration[] confs = new SKOSImportConfiguration[] { fashion, gemet, euscreenxl, photo, partageplus, mimo, hornbostelsachs };
+	public static SKOSImportConfiguration[] confs = new SKOSImportConfiguration[] { aat };
 	
 	public static void main(String[] args) {
 		doImport(confs);
 	}
 	
-	public static void doImport(SKOSImportConfiguration[] confs) {
+	public static void doImport() {
 		for (SKOSImportConfiguration c : confs) {
 			try {
 				doImport(c);
@@ -123,6 +73,7 @@ public class SKOS2Vocabulary {
 			}
 		}
 	}
+	
 	private static void doImport(SKOSImportConfiguration conf) throws OWLOntologyCreationException, IOException {
 
 		Set<String> ks = null;
@@ -183,7 +134,7 @@ public class SKOS2Vocabulary {
 					
 					Set<String> withBroader = new HashSet<>();
 					
-					queryString = "PREFIX skos: <http://www.w3.org/2004/02/skos/core#> SELECT ?z WHERE {?z skos:inScheme " + uri + " . ?z skos:broader ?q . ?q skos:inScheme " + uri + " .}" ;
+					queryString = "PREFIX skos: <http://www.w3.org/2004/02/skos/core#> PREFIX gvp: <http://vocab.getty.edu/ontology#> SELECT ?z ?q WHERE {?z skos:inScheme " + uri + " .?z gvp:broaderGeneric|gvp:broaderPartitive ?q .?q skos:inScheme " + uri + " .}" ;
 					query = QueryFactory.create(queryString) ; 
 					try (QueryExecution exec = QueryExecutionFactory.create(query, model)) {
 						for (ResultSet res = exec.execSelect(); res.hasNext() ; ) {
@@ -238,7 +189,7 @@ public class SKOS2Vocabulary {
 				}
 			}
 	
-			queryString = "PREFIX skos: <http://www.w3.org/2004/02/skos/core#> SELECT ?subject  WHERE {?subject a <http://www.w3.org/2004/02/skos/core#Concept>}" ;
+			queryString = "PREFIX gvp: <http://vocab.getty.edu/ontology#> SELECT ?subject  WHERE {?subject a gvp:Concept }";
 			query = QueryFactory.create(queryString) ; 
 	
 			try (QueryExecution qexec = QueryExecutionFactory.create(query, model)) {
@@ -251,22 +202,22 @@ public class SKOS2Vocabulary {
 					
 					uri = "<" + uri + ">";
 							
-					JsonNode scopeNote = makeLiteralNode("PREFIX skos: <http://www.w3.org/2004/02/skos/core#> SELECT ?literal WHERE {" + uri + " skos:scopeNote ?literal}", model, "literal");
+					JsonNode scopeNote = makeLiteralNode("PREFIX skos: <http://www.w3.org/2004/02/skos/core#> PREFIX gvp: <http://vocab.getty.edu/ontology#> PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> SELECT ?literal WHERE {" + uri + " skos:scopeNote ?q . ?q rdf:value ?literal}", model, "literal");
 					if (scopeNote != null) {
 						main.put("scopeNote", scopeNote);
 					}
 					
-					ArrayNode broader = makeNodesArray("PREFIX skos: <http://www.w3.org/2004/02/skos/core#> SELECT DISTINCT ?q WHERE {{SELECT ?q WHERE {" + uri + " skos:broader ?q}} UNION {SELECT ?q WHERE {?q skos:narrower " + uri + "}}}", model, "q");
+					ArrayNode broader = makeNodesArray("PREFIX gvp: <http://vocab.getty.edu/ontology#> SELECT DISTINCT ?q WHERE {{SELECT ?q WHERE {" + uri + " gvp:broaderGeneric ?q }} UNION {SELECT ?q WHERE {" + uri + " gvp:broaderPartitive ?q }}}", model, "q");
 					if (broader != null) {
 						main.put("broader", broader);
 					}
 					
-					ArrayNode narrower = makeNodesArray("PREFIX skos: <http://www.w3.org/2004/02/skos/core#> SELECT DISTINCT ?q WHERE {{SELECT ?q WHERE {" + uri + " skos:narrower ?q}} UNION {SELECT ?q WHERE {?q skos:broader " + uri + "}}}", model, "q");
+					ArrayNode narrower = makeNodesArray("PREFIX gvp: <http://vocab.getty.edu/ontology#> SELECT DISTINCT ?q WHERE {{SELECT ?q WHERE {?q gvp:broaderGeneric " + uri + "}} UNION {SELECT ?q WHERE {?q gvp:broaderPartitive " + uri + "}}}", model, "q");
 					if (narrower != null) {
 						main.put("narrower", narrower);
 					}
 					
-					ArrayNode broaderTransitive = makeNodesArray("PREFIX skos: <http://www.w3.org/2004/02/skos/core#> SELECT DISTINCT ?q WHERE {{SELECT ?q WHERE {" + uri + " skos:broader+ ?q}} UNION {SELECT ?q WHERE {?q skos:narrower+ " + uri + "}}}", model, "q");
+					ArrayNode broaderTransitive = makeNodesArray("PREFIX gvp: <http://vocab.getty.edu/ontology#> SELECT DISTINCT ?q WHERE {{SELECT ?q WHERE {" + uri + " gvp:broaderGeneric+ ?q }} UNION {SELECT ?q WHERE {" + uri + " gvp:broaderPartitive+ ?q }}}", model, "q");
 					if (broaderTransitive != null) {
 						main.put("broaderTransitive", broaderTransitive);
 					}
@@ -276,7 +227,7 @@ public class SKOS2Vocabulary {
 						main.put("inCollections", inCollections);
 					}
 	
-					ArrayNode related = makeNodesArray("PREFIX skos: <http://www.w3.org/2004/02/skos/core#> SELECT DISTINCT ?q WHERE {{SELECT ?q WHERE {" + uri + " skos:related ?q}} UNION {SELECT ?q WHERE {?q skos:related " + uri + "}}}", model, "q");
+					ArrayNode related = makeNodesArray("PREFIX gvp: <http://vocab.getty.edu/ontology#> SELECT DISTINCT ?q WHERE {{SELECT ?q WHERE {" + uri + " gvp:aat2000_related_to ?q}} UNION {SELECT ?q WHERE {?q gvp:aat2000_related_to " + uri + "}}}", model, "q");
 					if (related != null) {
 						main.put("related", related);
 					}
@@ -291,7 +242,7 @@ public class SKOS2Vocabulary {
 						main.put("closeMatch", closeMatch);
 					}
 					
-					ArrayNode inSchemes = makeFilteredURIArrayNode("PREFIX skos: <http://www.w3.org/2004/02/skos/core#> SELECT ?uri WHERE { {" + uri + " skos:inScheme ?uri} UNION {" + uri + " skos:topConceptOf ?uri} }", model, "uri", ks);
+					ArrayNode inSchemes = makeFilteredURIArrayNode("PREFIX skos: <http://www.w3.org/2004/02/skos/core#> SELECT ?uri WHERE {" + uri + " skos:inScheme  ?uri}", model, "uri", ks);
 					if (inSchemes != null) {
 						main.put("inSchemes", inSchemes);
 					} else if (conf.mainScheme != null){ 
@@ -312,37 +263,48 @@ public class SKOS2Vocabulary {
 
 					br.write(json.toString());
 					br.write(VocabularyImportConfiguration.newLine);
+				}
+			}
 
+			String[] cols = new String[] {"<http://www.w3.org/2004/02/skos/core#OrderedCollection>", 
+					                     "<http://vocab.getty.edu/ontology#Facet>",
+					                     "<http://vocab.getty.edu/ontology#GuideTerm>",
+					                     "<http://vocab.getty.edu/ontology#Hierarchy>" };
+			
+			Set<String> coluris = new HashSet<>();
+			
+			for (String col : cols) {
+				queryString = "PREFIX skos: <http://www.w3.org/2004/02/skos/core#> SELECT DISTINCT ?subject  WHERE {?subject a " + col + "}" ;
+				query = QueryFactory.create(queryString) ; 
+
+				try (QueryExecution qexec = QueryExecutionFactory.create(query, model)) {
+					for (ResultSet results = qexec.execSelect(); results.hasNext() ; ) {
+						QuerySolution qs = results.next();
+						
+						String uri = qs.get("subject").asResource().getURI();
+						
+						coluris.add(uri);
+					}
 				}
 			}
 			
-			queryString = "PREFIX skos: <http://www.w3.org/2004/02/skos/core#> SELECT ?subject  WHERE {?subject a <http://www.w3.org/2004/02/skos/core#Collection>}" ;
-			query = QueryFactory.create(queryString) ; 
-			
-	
-			try (QueryExecution qexec = QueryExecutionFactory.create(query, model)) {
-				for (ResultSet results = qexec.execSelect(); results.hasNext() ; ) {
-					QuerySolution qs = results.next();
-					
-					String uri = qs.get("subject").asResource().getURI();
-					
-					ObjectNode main = makeMainStructure(uri, model);
-					
-					uri = "<" + uri + ">";
-							
-					ArrayNode members = makeNodesArray("PREFIX skos: <http://www.w3.org/2004/02/skos/core#> SELECT ?uri WHERE {" + uri + " skos:member ?uri}", model, "uri");
-					if (members != null) {
-						main.put("members", members);
-					}
-	
-					main.put("vocabulary", vocabulary);
-					
-					ObjectNode json = Json.newObject();
-					json.put("semantic", main);
-
-					br.write(json.toString());
-					br.write(VocabularyImportConfiguration.newLine);
+			for (String uri : coluris) {
+				ObjectNode main = makeMainStructure(uri, model);
+				
+				uri = "<" + uri + ">";
+						
+				ArrayNode members = makeNodesArray("PREFIX skos: <http://www.w3.org/2004/02/skos/core#> PREFIX gvp: <http://vocab.getty.edu/ontology#> SELECT ?uri WHERE {" + uri + " skos:member|gvp:broaderGeneric+|gvp:broaderPartitive+ " + uri + "}", model, "uri");
+				if (members != null) {
+					main.put("members", members);
 				}
+
+				main.put("vocabulary", vocabulary);
+				
+				ObjectNode json = Json.newObject();
+				json.put("semantic", main);
+
+				br.write(json.toString());
+				br.write(VocabularyImportConfiguration.newLine);
 			}
 		}
 		
@@ -357,100 +319,6 @@ public class SKOS2Vocabulary {
 			f.delete();
 		}
 		tmpFolder.delete();
-		
-	}
-
-	protected static JsonNode makeLiteralNode(String queryString, Model model, String var) {
-		Literal literal = new Literal();
-		Query query = QueryFactory.create(queryString) ;
-		try (QueryExecution exec = QueryExecutionFactory.create(query, model)) {
-			
-			for (ResultSet res = exec.execSelect(); res.hasNext() ; ) {
-				QuerySolution s = res.next();
-				org.apache.jena.rdf.model.Literal lit = s.get(var).asLiteral();
-				String lang = lit.getLanguage();
-				Language ll = null;
-				if (lang != null) {
-					ll = Language.getLanguage(lang);
-					if (ll == null) {
-						ll = Language.UNKNOWN;
-					}
-				} else {
-					ll = Language.UNKNOWN;
-				}
-				
-				literal.addLiteral(ll, lit.getString());
-			}
-		}
-		
-		if (literal.size() > 0) {
-			return Json.toJson(literal);
-		} else {
-			return null;
-		}
-	}
-	
-	protected static ArrayNode makeURIArrayNode(String queryString, Model model, String var) {
-		ArrayNode array = Json.newObject().arrayNode();
-		
-		Query query = QueryFactory.create(queryString) ;
-		try (QueryExecution exec = QueryExecutionFactory.create(query, model)) {
-			
-			for (ResultSet res = exec.execSelect(); res.hasNext() ; ) {
-				QuerySolution s = res.next();
-				String uri = s.get(var).asResource().getURI();
-				array.add(uri);
-			}
-		}
-		
-		if (array.size() > 0) {
-			return array;
-		} else {
-			return null;
-		}
-	}
-	
-	protected static ArrayNode makeFilteredURIArrayNode(String queryString, Model model, String var, Set<String> keepOnly) {
-		ArrayNode array = Json.newObject().arrayNode();
-		
-		Query query = QueryFactory.create(queryString) ;
-		try (QueryExecution exec = QueryExecutionFactory.create(query, model)) {
-			
-			for (ResultSet res = exec.execSelect(); res.hasNext() ; ) {
-				QuerySolution s = res.next();
-				String uri = s.get(var).asResource().getURI();
-				if (keepOnly == null || keepOnly.contains(uri)) {
-					array.add(uri);
-				}
-			}
-		}
-		
-		if (array.size() > 0) {
-			return array;
-		} else {
-			return null;
-		}
-	}
-	
-	protected static ArrayNode makeNodesArray(String queryString, Model model, String var) {
-		ArrayNode array = Json.newObject().arrayNode();
-		
-		Query query = QueryFactory.create(queryString) ;
-		try (QueryExecution exec = QueryExecutionFactory.create(query, model)) {
-			
-			for (ResultSet res = exec.execSelect(); res.hasNext() ; ) {
-				QuerySolution s = res.next();
-				if (s.get(var) != null) {
-					array.add(makeMainStructure(s.get(var).asResource().getURI(), model));
-				}
-			}
-		}
-		
-		if (array.size() > 0) {
-			return array;
-		} else {
-			return null;
-		}
 	}
 
 	
@@ -465,7 +333,7 @@ public class SKOS2Vocabulary {
 		String queryString;
 		Query query;
 		
-		queryString = "PREFIX skos: <http://www.w3.org/2004/02/skos/core#> SELECT ?literal WHERE {" + uri + " skos:prefLabel ?literal}";
+		queryString = "PREFIX xl:<http://www.w3.org/2008/05/skos-xl#> SELECT ?literal WHERE {" + uri + " xl:prefLabel ?label . ?label xl:literalForm ?literal}";
 		query = QueryFactory.create(queryString);
 		
 		try (QueryExecution exec = QueryExecutionFactory.create(query, model)) {
@@ -487,7 +355,7 @@ public class SKOS2Vocabulary {
 			}
 		}
 		
-		queryString = "PREFIX skos: <http://www.w3.org/2004/02/skos/core#> SELECT ?literal WHERE {" + uri + " skos:altLabel ?literal}";
+		queryString = "PREFIX xl:<http://www.w3.org/2008/05/skos-xl#> SELECT ?literal WHERE {" + uri + " xl:altLabel ?label . ?label xl:literalForm ?literal}";
 		query = QueryFactory.create(queryString) ;
 		
 		try (QueryExecution exec = QueryExecutionFactory.create(query, model)) {
@@ -544,14 +412,21 @@ public class SKOS2Vocabulary {
 		String type = null;
 
 		queryString = "SELECT ?type WHERE {" + uri + " a ?type}";
+		
 		query = QueryFactory.create(queryString) ;
 		
 		try (QueryExecution exec = QueryExecutionFactory.create(query, model)) {
 			for (ResultSet res = exec.execSelect(); res.hasNext() ; ) {
 				QuerySolution s = res.next();
 				String t = s.get("type").asResource().getURI();
-				if (t.contains("skos/core#")) {
-					type = t;
+				if (t.equals("http://vocab.getty.edu/ontology#Concept")) {
+					type = "http://www.w3.org/2004/02/skos/core#Concept";
+					break;
+				} else if (t.equals("http://www.w3.org/2004/02/skos/core#OrderedCollection") || 
+						   t.equals("http://vocab.getty.edu/ontology#Facet") ||
+						   t.equals("http://vocab.getty.edu/ontology#GuideTerm") || 
+						   t.equals("http://vocab.getty.edu/ontology#Hierarchy")) {
+					type = "http://www.w3.org/2004/02/skos/core#Collection";
 					break;
 				}
 			}

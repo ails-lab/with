@@ -18,8 +18,11 @@ package tools.importers.vocabulary;
 
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -77,15 +80,13 @@ public class OWL2Vocabulary {
 		for (OWLImportConfiguration c : confs) {
 			try {
 				doImport(c);
-				c.compress();
-				c.deleteTemp();
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
 		}
 	}
 	
-	private static void doImport(OWLImportConfiguration conf) throws OWLOntologyCreationException {
+	private static void doImport(OWLImportConfiguration conf) throws OWLOntologyCreationException, FileNotFoundException, IOException {
 		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
 		OWLOntology ontology = manager.loadOntologyFromOntologyDocument(IRI.create(conf.getInputFolder().listFiles()[0].toURI().toString()));
 		
@@ -107,6 +108,7 @@ public class OWL2Vocabulary {
 
 		Set<OWLClass> topConcepts = new HashSet<>();
 		
+		System.out.println("Processing ontology");
 		ArrayList<ObjectNode> jsons = new ArrayList<>();
 		for (OWLClass cz : ontology.getClassesInSignature()) {
 			if (!conf.keep(cz)) {
@@ -254,7 +256,11 @@ public class OWL2Vocabulary {
 		}
 
 		
-		try (FileWriter fr = new FileWriter(conf.getOutputFile());
+		File tmpFolder = VocabularyImportConfiguration.getTempFolder();
+		File outFile = new File(tmpFolder + File.separator + conf.folder + ".txt");
+		
+		System.out.println("Creating vocabulary in " + outFile);
+		try (FileWriter fr = new FileWriter(outFile);
 				BufferedWriter br = new BufferedWriter(fr)) {
 			
 			for (ObjectNode on : jsons) {
@@ -335,6 +341,17 @@ public class OWL2Vocabulary {
 			e.printStackTrace();
 		}
 	
+		System.out.println("Compressing " + tmpFolder + File.separator + conf.folder + ".txt");
+		File cf = VocabularyImportConfiguration.compress(tmpFolder, conf.folder);
+		File tf = new File(VocabularyImportConfiguration.outPath + File.separator + cf.getName());
+		System.out.println("Copying file " + cf + " to " + tf);
+		Files.copy(cf.toPath(), tf.toPath(), StandardCopyOption.REPLACE_EXISTING);
+
+		System.out.println("Clearing " + tmpFolder);
+		for (File f : tmpFolder.listFiles()) {
+			f.delete();
+		}
+		tmpFolder.delete();
 	}
 	
 }

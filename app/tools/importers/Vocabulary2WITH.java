@@ -44,6 +44,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import play.libs.Json;
 import controllers.ThesaurusController;
 import sources.core.ParallelAPICall;
+import tools.importers.vocabulary.AAT2Vocabulary;
 import tools.importers.vocabulary.DBPedia2Vocabulary;
 import tools.importers.vocabulary.OWL2Vocabulary;
 import tools.importers.vocabulary.SKOS2Vocabulary;
@@ -55,17 +56,14 @@ import elastic.ElasticSearcher.SearchOptions;
 
 public class Vocabulary2WITH {
 
-
+	private static File tmpFolder;
+	
 	public static void main(String[] args) throws FileNotFoundException, IOException {
 
-		File dir = new File(VocabularyImportConfiguration.outPath);
-		if (dir.exists()) {
-			for (File f : dir.listFiles()) {
-				f.delete();
-			}
-		}
-		
 		convertSourcesToJSONs();
+		
+//		tmpFolder = VocabularyImportConfiguration.getTempFolder();
+
 //		importAll();
 		
 //		importJSONVocabularyToWITH("fashion");
@@ -82,14 +80,16 @@ public class Vocabulary2WITH {
 	}
 	
 	private static void convertSourcesToJSONs() {
-		SKOS2Vocabulary.doImport(SKOS2Vocabulary.confs);
-		OWL2Vocabulary.doImport(OWL2Vocabulary.confs);
+//		SKOS2Vocabulary.doImport(SKOS2Vocabulary.confs);
+//		OWL2Vocabulary.doImport(OWL2Vocabulary.confs);
 		
-		List<String[]> filters = new ArrayList<>();
-		filters.add(new String[] {"Person"});
-		filters.add(new String[] {"Place"});
+		AAT2Vocabulary.doImport();
 		
-		DBPedia2Vocabulary.doImport(filters);
+//		List<String[]> filters = new ArrayList<>();
+//		filters.add(new String[] {"Person"});
+//		filters.add(new String[] {"Place"});
+//		
+//		DBPedia2Vocabulary.doImport(filters);
 	}
 	
 	
@@ -115,11 +115,11 @@ public class Vocabulary2WITH {
 		System.out.println("Adding vocabulary " + name);
 
 		File f = new File(VocabularyImportConfiguration.outPath + File.separator + name + ".zip");
-		uncompress(f);
+		VocabularyImportConfiguration.uncompress(tmpFolder, f);
 
 		int count = 0;
 
-		File uf = new File(VocabularyImportConfiguration.outPath + File.separator + name + ".txt");
+		File uf = new File(tmpFolder + File.separator + name + ".txt");
 		try (BufferedReader br = new BufferedReader(new FileReader(uf))) {
 			String line;
 
@@ -195,27 +195,6 @@ public class Vocabulary2WITH {
 	
 	private final static int BUFFER = 2048;
 	
-	private static void uncompress(File f) throws FileNotFoundException, IOException {
-		try (FileInputStream fis = new FileInputStream(f);
-		     ZipInputStream zis = new ZipInputStream(new BufferedInputStream(fis))) {
-	    	  
-			ZipEntry entry;
-			while((entry = zis.getNextEntry()) != null) {
-				System.out.println("Extracting: " + entry);
-		        int count;
-		        byte data[] = new byte[BUFFER];
-		        
-		        try (FileOutputStream fos = new FileOutputStream(VocabularyImportConfiguration.outPath + File.separator + entry.getName());
- 		             BufferedOutputStream dest = new BufferedOutputStream(fos, BUFFER)) {
-		        
-			        while ((count = zis.read(data, 0, BUFFER)) != -1) {
-			        	dest.write(data, 0, count);
-			        }
-		        
-			        dest.flush();
-		        }
-			}
-		}
-	}
+
 
 }

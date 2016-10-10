@@ -17,7 +17,6 @@
 package tools.importers.vocabulary;
 
 public class SKOSImportConfiguration extends VocabularyImportConfiguration {
-	String folder;
 	String title;
 	String prefix;
 	String version;

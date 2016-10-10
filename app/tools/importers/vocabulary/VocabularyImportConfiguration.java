@@ -23,9 +23,12 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
 import db.DB;
@@ -46,19 +49,36 @@ public class VocabularyImportConfiguration {
 	
 	static Pattern labelPattern = Pattern.compile("^\"(.*?)\"@(.*)$");
 	
-	String folder;
+	protected String folder;
 	
 	public VocabularyImportConfiguration(String folder) {
 		this.folder = folder;
 	}
-	
+
+	public static File getTempFolder() {
+		File f = new File(System.getProperty("user.dir") + File.separator + "tmp");
+		if (!f.exists()) {
+			f.mkdir();
+		} 
+		
+		File ff = new File(System.getProperty("user.dir") + File.separator + "tmp" + File.separator + "voc-" + (int)Math.floor(Math.random()*10000000));
+		while (ff.exists()) {
+			ff = new File(System.getProperty("user.dir") + File.separator + "tmp" + File.separator + "voc-" + (int)Math.floor(Math.random()*10000000));
+		}
+
+		ff.mkdir();
+		
+		return ff; 
+	}
+
 	public File getInputFolder() {
 		return new File(inPath + File.separator + folder);
 	}
-	
-	public File getOutputFile() {
-		return new File(outPath + File.separator + folder + ".txt");
-	}
+
+
+//	public String getOutputFileName() {
+//		return folder + ".txt";
+//	}
 	
 	public Matcher labelMatcher(String label) {
 		return labelPattern.matcher(label);
@@ -66,26 +86,28 @@ public class VocabularyImportConfiguration {
 	
 	static final int BUFFER = 2048;
 	
-	public void compress() throws FileNotFoundException, IOException {
-		compress(folder);
-	}
+//	public void compress() throws FileNotFoundException, IOException {
+//		compress(folder);
+//	}
 	
-	public void deleteTemp() {
-		deleteTemp(folder);
-	}
+//	public void deleteTemp() {
+//		deleteTemp(folder);
+//	}
 	
-	public static void compress(String fileName) throws FileNotFoundException, IOException {
-		try (FileOutputStream dest = new FileOutputStream(new File(outPath + File.separator + fileName + ".zip"));
+	public static File compress(File path, String fileName) throws FileNotFoundException, IOException {
+		File f = new File(path + File.separator + fileName + ".zip");
+		
+		try (FileOutputStream dest = new FileOutputStream(f);
 			 ZipOutputStream out = new ZipOutputStream(new BufferedOutputStream(dest))) {
 			
 			byte data[] = new byte[BUFFER];
 			
-			File f = new File(outPath + File.separator + fileName + ".txt");
+			File ff = new File(path + File.separator + fileName + ".txt");
 			
-			try (FileInputStream fi = new FileInputStream(f);
+			try (FileInputStream fi = new FileInputStream(ff);
 			     BufferedInputStream origin = new BufferedInputStream(fi, BUFFER)) {
 
-				ZipEntry entry = new ZipEntry(f.getName());
+				ZipEntry entry = new ZipEntry(ff.getName());
 				
 				out.putNextEntry(entry);
 				
@@ -97,6 +119,38 @@ public class VocabularyImportConfiguration {
 				out.flush();
 			}
 		}
+		
+		return f;
+	}
+	
+	public static List<File> uncompress(File path, File f) throws FileNotFoundException, IOException {
+		List<File> res = new ArrayList<>();
+		
+		try (FileInputStream fis = new FileInputStream(f);
+		     ZipInputStream zis = new ZipInputStream(new BufferedInputStream(fis))) {
+	    	  
+			ZipEntry entry;
+			while((entry = zis.getNextEntry()) != null) {
+				System.out.println("Extracting: " + entry);
+		        int count;
+		        byte data[] = new byte[BUFFER];
+		        
+		        File ff = new File(path + File.separator + entry.getName());
+		        try (FileOutputStream fos = new FileOutputStream(ff);
+ 		             BufferedOutputStream dest = new BufferedOutputStream(fos, BUFFER)) {
+		        
+			        while ((count = zis.read(data, 0, BUFFER)) != -1) {
+			        	dest.write(data, 0, count);
+			        }
+		        
+			        dest.flush();
+		        }
+		        
+		        res.add(ff);
+			}
+		}
+		
+		return res;
 	}
 	
 	public static void deleteTemp(String fileName) {
