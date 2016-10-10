@@ -49,8 +49,6 @@ import elastic.ElasticSearcher.SearchOptions;
 
 public class Vocabulary2WITH {
 
-	private static File tmpFolder;
-	
 	public static void main(String[] args) throws FileNotFoundException, IOException {
 
 		// specify configure folders
@@ -60,22 +58,24 @@ public class Vocabulary2WITH {
 		VocabularyImportConfiguration.outdir = "C:/Users/achort.IPLAB/git/with-vocabularies/resources/vocabulary/json";
 		
 		// converts sources in srcdir to zipped jsons in outfir
-		convertSourcesToJSONs();
+		//convertSourcesToJSONs();
 		
-		// import jsons to WITH
-//		importAll();
+		// import all jsons to WITH
+		//importAll();
 		
-//		importJSONVocabularyToWITH("fashion");
-//		importJSONVocabularyToWITH("photo");
-//		importJSONVocabularyToWITH("euscreenxl");
-//		importJSONVocabularyToWITH("partageplus");
-//		importJSONVocabularyToWITH("mimo");
-//		importJSONVocabularyToWITH("gemet");
-//		importJSONVocabularyToWITH("hornbostelsachs");
-//		importJSONVocabularyToWITH("nerd");
-//		importJSONVocabularyToWITH("dbo");
-//		importJSONVocabularyToWITH("dbr-place");
-//		importJSONVocabularyToWITH("dbr-person");
+		// or import one-by-one
+		//importJSONVocabularyToWITH("fashion");
+		//importJSONVocabularyToWITH("photo");
+		//importJSONVocabularyToWITH("euscreenxl");
+		//importJSONVocabularyToWITH("partageplus");
+		//importJSONVocabularyToWITH("mimo");
+		//importJSONVocabularyToWITH("gemet");
+		//importJSONVocabularyToWITH("hornbostelsachs");
+		//importJSONVocabularyToWITH("nerd");
+		//importJSONVocabularyToWITH("aat");
+		//importJSONVocabularyToWITH("dbo");
+		//importJSONVocabularyToWITH("dbr-place");
+		//importJSONVocabularyToWITH("dbr-person");
 	}
 	
 	private static void convertSourcesToJSONs() {
@@ -118,6 +118,8 @@ public class Vocabulary2WITH {
 		long starttime = System.currentTimeMillis();
 		System.out.println("Adding vocabulary " + name);
 
+		File tmpFolder = VocabularyImportConfiguration.getTempFolder();
+		
 		File f = new File(VocabularyImportConfiguration.outdir + File.separator + name + ".zip");
 		VocabularyImportConfiguration.uncompress(tmpFolder, f);
 
