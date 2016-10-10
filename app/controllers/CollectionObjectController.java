@@ -1224,7 +1224,7 @@ public class CollectionObjectController extends WithResourceController {
 
     }
     
-    public static Promise<Result> searchPublicCollections(String term, boolean isExhibition, int offset, int count) {
+    public static Promise<Result> searchPublicCollections(String term, boolean isExhibition, int offset, int count, Option<String> spaceId) {
     	String resourceType = isExhibition ? WithResourceType.Exhibition.toString() : WithResourceType.SimpleCollection.toString();
     	Query q = new Query();
         Query.Clause visible = Query.Clause.create();
@@ -1233,6 +1233,11 @@ public class CollectionObjectController extends WithResourceController {
                 .add("descriptiveData.label.default", term, false);
         Query.Clause type = Query.Clause.create()
                 .add("resourceType", resourceType, true);
+        if (spaceId.isDefined()) {
+        	Query.Clause space = Query.Clause.create();
+        	space.add("administrative.access.WRITE", spaceId.get(), true);
+        	q.addClause(space.filters());
+    	}
         q.addClause(searchTerm.filters());
         q.addClause(type.filters());
         q.addClause(visible.filters());
