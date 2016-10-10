@@ -70,15 +70,17 @@ public class AnnotationDAO extends DAO<Annotation> {
 			
 			if (body.getUri() != null)
 				q.field("body.uri").equal(body.getUri());
-			if (body.getLabel() != null)
-				q.field("body.label.default").equal(
-						body.getLabel().get(Language.DEFAULT));
+//			if (body.getLabel() != null)
+//				q.field("body.label.default").equal(
+//						body.getLabel().get(Language.DEFAULT));
 			
 			AnnotationTarget target = (AnnotationTarget) annotation.getTarget();
 			
 			SelectorType selector = target.getSelector();
 			if (selector != null) {
 				selector.addToQuery(q);
+			} else {
+				q.field("target.selector").doesNotExist();
 			}
 
 		} else {
