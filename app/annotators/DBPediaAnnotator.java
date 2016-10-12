@@ -85,7 +85,7 @@ public class DBPediaAnnotator extends Annotator {
 	}
 	
 	public static String getName() {
-		return "DBPedia Spotlight Annotator";
+		return "DBPedia Spotlight";
 	}
 
     public static DBPediaAnnotator getAnnotator(Language lang) {
@@ -202,7 +202,7 @@ public class DBPediaAnnotator extends Annotator {
 
 	    		ArrayList<AnnotationAdmin> admins  = new ArrayList<>();
 	    		AnnotationAdmin admin = new Annotation.AnnotationAdmin();
-	    		admin.setGenerator(service);
+	    		admin.setGenerator(getName());
 	    		admin.setGenerated(new Date());
 	    		admin.setConfidence(score);
 	    		

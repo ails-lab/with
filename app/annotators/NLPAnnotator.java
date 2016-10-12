@@ -64,7 +64,7 @@ public class NLPAnnotator extends Annotator {
 	}
 
 	public static String getName() {
-		return "NLP Annotator";
+		return "WITH Named Entity Recognizer";
 	}
 
     public static NLPAnnotator getAnnotator(Language lang) {
