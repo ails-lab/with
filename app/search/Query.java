@@ -17,6 +17,7 @@
 package search;
 
 import play.Logger;
+import sources.utils.ListMap;
 import utils.ListUtils;
 
 import java.util.*;
@@ -224,10 +225,10 @@ public class Query implements IFilterContainer{
 	public List<HashMap<String,List<String>>> buildFactorizeFilters()  {
 		List<HashMap<String,List<String>>> result = new ArrayList<>(filters.size());
 		for (List<Filter> clause : filters) {
-			HashMap<String,List<String>> map = new HashMap<>();
+			ListMap<String,String> map = new ListMap<>();
 			result.add(map);
 			for (Filter filter : clause) {
-				ListUtils.getOrSet(filter.fieldId, map).add(filter.value);
+				map.getOrSet(filter.fieldId).add(filter.value);
 			}
 		}
 		return result;

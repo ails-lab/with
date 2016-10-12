@@ -110,7 +110,7 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 		Function<String, String> function = (String s) -> {
 			s = s.replace("(?!.*nc)", "* NOT *nc");
 			s = s.replace("(?!.*nd)", "* NOT *nd");
-			return "RIGHTS:(" + s.replace(".", "") + ")";
+			return "RIGHTS:(" + s.replace(".*", "*").replace(":", "\\:") + ")";
 		};
 		return new Function<List<String>, QueryModifier>() {
 			@Override

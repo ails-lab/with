@@ -86,11 +86,24 @@ public class FilterValuesMap {
 	private <T> List<T> getOrset(HashMap<String, List<T>> map, String key) {
 		return getOrset(map, key, true);
 	}
+	
+	private <T> List<T> getOrsetPlain(HashMap<String, List<T>> map, String key) {
+		List<T> res;
+		if (!map.containsKey(key)) {
+			// check regular expr;
+			res = new ArrayList<T>();
+			// not found
+			map.put(key, res);
+		} else {
+			res = map.get(key);
+		}
+		return res;
+	}
 
 	public void addMap(String filterID, Object commonValue, String... specificValue) {
 		getOrset(specificvalues, getKey(filterID, commonValue)).addAll(Arrays.asList(specificValue));
 		for (String string : specificValue) {
-			getOrset(commonvalues, getKey(filterID, string)).add(commonValue);
+			getOrsetPlain(commonvalues, getKey(filterID, string)).add(commonValue);
 		}
 		// getOrset(queryTexts, getKey(filterID, commonValue)).add(queryText);
 	}
@@ -98,7 +111,7 @@ public class FilterValuesMap {
 	public void addMap(String filterID, Object commonValue, List<String> specificValue) {
 		getOrset(specificvalues, getKey(filterID, commonValue)).addAll(specificValue);
 		for (String string : specificValue) {
-			getOrset(commonvalues, getKey(filterID, string)).add(commonValue);
+			getOrsetPlain(commonvalues, getKey(filterID, string)).add(commonValue);
 		}
 		// getOrset(queryTexts, getKey(filterID, commonValue)).add(queryText);
 	}
@@ -112,7 +125,6 @@ public class FilterValuesMap {
 					// String k = getKey(filterID, specificValue);
 					List<Object> orset = getOrset(commonvalues, kk, false);
 					v.addAll(orset);
-					return v;
 				}
 			}
 			if (v.isEmpty()) {
@@ -225,7 +237,7 @@ public class FilterValuesMap {
 	private void fillYoutube() {
 		addRestriction(FiltersFields.TYPE.getFilterId(),WithMediaType.VIDEO.getName());
 		addRestriction(FiltersFields.RIGHTS.getFilterId(),
-				WithMediaRights.Creative.toString());
+				WithMediaRights.Creative_BY.toString());
 		// TODO add youtube license
 		
 	}
@@ -241,18 +253,18 @@ public class FilterValuesMap {
 	private void fillFlickr() {
 		addRestriction(FiltersFields.TYPE.getFilterId(),WithMediaType.IMAGE.getName(), WithMediaType.VIDEO.getName());
 		addMapping(FiltersFields.RIGHTS.getFilterId(), WithMediaRights.RR, FlickrSpaceSource.getLicence("0"));
-		addMapping(FiltersFields.RIGHTS.getFilterId(), WithMediaRights.Creative_Not_Commercial, FlickrSpaceSource.getLicence("3"),
+		addMapping(FiltersFields.RIGHTS.getFilterId(), WithMediaRights.Creative_BY_NC, FlickrSpaceSource.getLicence("3"),
 				BritishLibrarySpaceSource.getLicence("2"), FlickrSpaceSource.getLicence("1"));
-		addMapping(FiltersFields.RIGHTS.getFilterId(), WithMediaRights.Modify, FlickrSpaceSource.getLicence("6"));
-		addMapping(FiltersFields.RIGHTS.getFilterId(), WithMediaRights.Creative, FlickrSpaceSource.getLicence("1"), FlickrSpaceSource.getLicence("2"),
+		addMapping(FiltersFields.RIGHTS.getFilterId(), WithMediaRights.Creative_BY_SA, FlickrSpaceSource.getLicence("6"));
+		addMapping(FiltersFields.RIGHTS.getFilterId(), WithMediaRights.Creative_BY, FlickrSpaceSource.getLicence("1"), FlickrSpaceSource.getLicence("2"),
 				BritishLibrarySpaceSource.getLicence("3"), FlickrSpaceSource.getLicence("4"), FlickrSpaceSource.getLicence("5"), FlickrSpaceSource.getLicence("6"));
 		addMapping(FiltersFields.RIGHTS.getFilterId(), WithMediaRights.UNKNOWN, FlickrSpaceSource.getLicence("7"));
 		addMapping(FiltersFields.RIGHTS.getFilterId(), WithMediaRights.Public, FlickrSpaceSource.getLicence("9"), FlickrSpaceSource.getLicence("10"));
 		addRestriction(FiltersFields.RIGHTS.getFilterId(),
 				WithMediaRights.RR.toString(),
-				WithMediaRights.Creative_Not_Commercial.toString(),
-				WithMediaRights.Modify.toString(),
-				WithMediaRights.Creative.toString(),
+				WithMediaRights.Creative_BY_NC.toString(),
+				WithMediaRights.Creative_BY_SA.toString(),
+				WithMediaRights.Creative_BY.toString(),
 				WithMediaRights.UNKNOWN.toString(),
 				WithMediaRights.Public.toString());
 		
@@ -285,6 +297,13 @@ public class FilterValuesMap {
 				WithMediaType.AUDIO.getName(), 
 				WithMediaType.VIDEO.getName()
 				);
+		addRestriction(FiltersFields.RIGHTS.getFilterId(),
+				WithMediaRights.Public.toString(),
+				WithMediaRights.Creative_BY.toString(),
+				WithMediaRights.Creative_BY_SA.toString(),
+				WithMediaRights.Creative_BY_NC.toString(),
+				WithMediaRights.UNKNOWN.toString(),
+				WithMediaRights.RR.toString());
 		
 	}
 	

@@ -16,6 +16,7 @@
 
 package sources.formatreaders;
 
+import java.util.HashMap;
 import java.util.List;
 
 import model.EmbeddedMediaObject;
@@ -33,10 +34,11 @@ import search.Sources;
 import sources.FilterValuesMap;
 import sources.core.Utils;
 import sources.utils.JsonContextRecord;
+import sources.utils.ListMap;
 import sources.utils.StringUtils;
 
 public class DDBItemRecordFormatter extends CulturalRecordFormatter {
-
+	
 	public DDBItemRecordFormatter() {
 		super(FilterValuesMap.getMap(Sources.DDB));
 		object = new CulturalObject();
@@ -46,7 +48,9 @@ public class DDBItemRecordFormatter extends CulturalRecordFormatter {
 	public CulturalObject fillObjectFrom(JsonContextRecord rec) {
 		CulturalObjectData model = (CulturalObjectData) object.getDescriptiveData();
 		rec.enterContext("RDF");
-		List<Object> vals = getValuesMap().translateToCommon(FiltersFields.TYPE.getFilterId(), rec.getStringValue("ProvidedCHO.type"));
+		String stringValue = rec.getStringValue("WebResource.type");
+		stringValue = "mediatype_"+stringValue.substring(stringValue.length()-3);
+		List<Object> vals = getValuesMap().translateToCommon(FiltersFields.TYPE.getFilterId(), stringValue);
 		WithMediaType type = (Utils.hasInfo(vals))? WithMediaType.getType(vals.get(0).toString()):WithMediaType.OTHER;
 		
 		// TODO read the language
@@ -87,11 +91,10 @@ public class DDBItemRecordFormatter extends CulturalRecordFormatter {
 //		model.setDccontributor(rec.getMultiLiteralOrResourceValue("dcContributor"));
 		
 		LiteralOrResource rights = rec.getLiteralOrResourceValue("WebResource.rights");
-		List<Object> translateToCommon = !Utils.hasInfo(rights)?null: 
-			getValuesMap().translateToCommon(FiltersFields.RIGHTS.getFilterId(),
-		 rights.getURI());
-		WithMediaRights withMediaRights = !Utils.hasInfo(rights)?null:
-			(WithMediaRights.getRights((String) translateToCommon.get(0)));
+		String rightsString = rec.getStringValue("WebResource.rights");
+		WithMediaRights withMediaRights = (!Utils.hasInfo(rightsString ))?null:
+			(WithMediaRights.getRights(getValuesMap().translateToCommon(FiltersFields.RIGHTS.getFilterId(),
+					rightsString).get(0).toString()));
 		
 		model.setIsShownAt(new Resource( rec.getStringValue("Aggregation.isShownAt")));
 		model.setIsShownBy(new Resource( rec.getStringValue("Aggregation.isShownBy")));

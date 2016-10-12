@@ -26,8 +26,11 @@ import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import model.EmbeddedMediaObject.WithMediaRights;
+import model.EmbeddedMediaObject.WithMediaType;
 import play.Logger;
 import play.Logger.ALogger;
+import search.FiltersFields;
 import search.Sources;
 import sources.FilterValuesMap;
 
@@ -62,7 +65,14 @@ public class MapsConfig {
 		if (hashMap!=null)
 		for (String filterID : hashMap.keySet()) {
 			for (Entry<String, List<String>> entry : hashMap.get(filterID).entrySet()) {
-				res.addMap(filterID, entry.getKey(), entry.getValue());	
+				String key = entry.getKey();
+				if (filterID.equals(FiltersFields.TYPE.getFilterId())){
+					key = WithMediaType.getType(key).getName();
+				} 				
+				if (filterID.equals(FiltersFields.RIGHTS.getFilterId())){
+					key = WithMediaRights.getRights(key).toString();
+				} 				
+				res.addMap(filterID, key, entry.getValue());	
 			}
 		}
 		return res;
