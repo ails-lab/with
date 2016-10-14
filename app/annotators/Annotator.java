@@ -33,6 +33,7 @@ public abstract class Annotator {
 	
 	public static String LANGUAGE = "lang";
 	public static String TEXT = "text";
+	public static String USERID = "userId";
 	
 //	public abstract String getName();
 	

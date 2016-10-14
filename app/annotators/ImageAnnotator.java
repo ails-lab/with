@@ -33,8 +33,13 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.HttpClientBuilder;
+import org.bson.types.ObjectId;
 
+import play.libs.Akka;
 import play.libs.Json;
+import scala.concurrent.Await;
+import scala.concurrent.Future;
+import scala.concurrent.duration.Duration;
 import utils.annotators.AnnotatedObject;
 import utils.annotators.AnnotationIndex;
 import utils.annotators.AnnotationValue;
@@ -50,6 +55,11 @@ import model.basicDataTypes.Language;
 import model.basicDataTypes.MultiLiteral;
 import model.resources.ThesaurusObject;
 import model.resources.ThesaurusObject.SKOSSemantic;
+import actors.TokenLoginActor;
+import actors.TokenLoginActor.TokenCreateMessage;
+import akka.actor.ActorSelection;
+import akka.pattern.Patterns;
+import akka.util.Timeout;
 
 import com.aliasi.chunk.Chunk;
 import com.aliasi.chunk.Chunking;
@@ -67,7 +77,7 @@ public class ImageAnnotator extends Annotator {
 	
 	protected static Map<Language, ImageAnnotator> annotators = new HashMap<>();
 
-	private static String service = "";
+	private static String service = "http://ironman.image.ece.ntua.gr:50000";
 	
 	public static AnnotatorType getType() {
 		return AnnotatorType.IMAGE;
@@ -79,17 +89,6 @@ public class ImageAnnotator extends Annotator {
 
     public static ImageAnnotator getAnnotator(Language lang, boolean cs) {
     	ImageAnnotator ta = null;
-//    	ImageAnnotator ta = annotators.get(lang);
-//    	
-//    	if (ta == null) {
-//    		synchronized (ImageAnnotator.class) {
-//	    		if (ta == null) {
-//		   			ta = new ImageAnnotator(lang, cs);
-//		   			annotators.put(lang, ta);
-//	    		}
-//    		}
-//   		} 
-    	
     	return ta;
     } 
     
@@ -106,6 +105,23 @@ public class ImageAnnotator extends Annotator {
 	public List<Annotation> annotate(AnnotationTarget target, Map<String, Object> props) throws Exception {
 		List<Annotation> res = new ArrayList<>();
 		
+	    TokenCreateMessage tokenCreateMsg = new TokenCreateMessage((ObjectId)props.get(Annotator.USERID));
+	    final ActorSelection tokenLoginActor = Akka.system().actorSelection("/user/tokenLoginActor");
+
+	    Timeout timeout = new Timeout(Duration.create(5, "seconds"));
+
+	    Future<Object> future = Patterns.ask(tokenLoginActor, tokenCreateMsg, timeout);
+
+	    JsonNode token = null;
+
+	    try{
+	        token = (JsonNode) Await.result(future, timeout.duration());
+	    } catch( Exception e) {
+	    	e.printStackTrace();
+	        // TODO Auto-generated catch block
+//	        log.error("", e);
+	    } 
+	    
 		HttpClient client = HttpClientBuilder.create().build();
 
 		HttpPost request = new HttpPost(service);
@@ -116,20 +132,12 @@ public class ImageAnnotator extends Annotator {
 //		json.put("id", arg1);
 //		json.put("imageURL", ser);
 //		json.put("annotationURL", arg1);
-//		json.put("recordId", arg1);
+		json.put("recordId", target.getRecordId().toString());
 
-		request.setEntity(new StringEntity(json.toString()));
-		
-		HttpResponse response = client.execute(request);		
-		
+//		request.setEntity(new StringEntity(json.toString()));
+//		
+//		HttpResponse response = client.execute(request);		
 
-//		  {  // single request
-//			     "id" : "xxxxx" , // the id of the request, in case we later want to support status requests about it
-//			     "imageURL" : "http://some.url.for.image/params?one=sdjhf&two=sjhfb", // the URL where the image can be downloaded. It might contain information to allow one-time access to images that are not publicly accessible. 
-//			     "annotationURL": "http://some.with.endpoint/params?one=sjhdb&two=sjkdhfg", // url where the result should be posted in the agreed json format. This is a standard With URL again with the addition of a one-time-token to allow access as a certain user. 
-//			 "recordId" :"o87403840w8e9ty0389ytpq", // the id of the record that will be annotated
-//			// there may be more fields necessary
-//			  },
 		return res;
 	}
 

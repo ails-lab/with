@@ -305,6 +305,7 @@ public class RecordResourceController extends WithResourceController {
 		RecordResource record = DB.getRecordResourceDAO().get(new ObjectId(recordId));
 		DescriptiveData dd = record.getDescriptiveData();
 		
+		System.out.println("ANNNN************** " + annConfigs);
 		for (String p : fields) {
 			Method method = dd.getClass().getMethod("get" + p.substring(0,1).toUpperCase() + p.substring(1));
 		
@@ -333,8 +334,13 @@ public class RecordResourceController extends WithResourceController {
 							if (annotator != null) {
 								try {
 									Map<String, Object> props = new HashMap<>();
-									props.putAll(annConfig.getProps());
+									if (annConfig.getProps() != null) {
+										props.putAll(annConfig.getProps());
+									}
 									props.put(Annotator.TEXT, text);
+									props.put(Annotator.USERID, user);
+									
+									System.out.println("ANNNN************** " + annotator + " > > " + props);
 									
 									for (Annotation ann : annotator.annotate(target, props)) {
 										AnnotationController.addAnnotation(ann, user);

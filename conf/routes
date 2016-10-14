@@ -175,6 +175,7 @@ POST	/thesaurus/addTerm	        			    controllers.ThesaurusController.addThesau
 DELETE  /thesaurus/deleteThesaurus/:name	        controllers.ThesaurusController.deleteThesaurus(name)
 GET 	/thesaurus/getTerm		   					controllers.ThesaurusController.getThesaurusTerm(uri: String)
 GET 	/thesaurus/listVocabularies		   				controllers.ThesaurusController.listVocabularies()
+GET 	/thesaurus/listAnnotators		   				controllers.ThesaurusController.listAnnotators()
 GET 	/thesaurus/suggestions						controllers.ThesaurusController.getSuggestions(word: String)
 
 #Thesaurus gui

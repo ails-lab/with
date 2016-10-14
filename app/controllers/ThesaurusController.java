@@ -44,6 +44,7 @@ import play.libs.Json;
 import play.mvc.Controller;
 import play.mvc.Result;
 import vocabularies.Vocabulary;
+import vocabularies.Vocabulary.VocabularyType;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -53,7 +54,11 @@ import db.DB;
 import elastic.Elastic;
 import elastic.ElasticSearcher;
 import elastic.ElasticSearcher.SearchOptions;
+import annotators.DBPediaAnnotator;
+import annotators.ImageAnnotator;
+import annotators.LookupAnnotator;
 import annotators.Annotator.AnnotatorType;
+import annotators.NLPAnnotator;
 
 /**
  * @author achort
@@ -231,6 +236,63 @@ public class ThesaurusController extends Controller {
 			result.put("error", e.getMessage());
 			return internalServerError(result);
 		}
+	}
+	
+	public static Result listAnnotators() {
+		ArrayNode result = Json.newObject().arrayNode();
+		
+		ObjectNode ann, option;
+		ArrayNode options;
+		
+		ann = Json.newObject();
+		ann.put("group", "Term Detection");
+		ann.put("hint", "Select the vocabularies that will be used for term detection");
+
+		options = Json.newObject().arrayNode();
+		for (Vocabulary voc : Vocabulary.getVocabularies()) {
+			if (voc.getType() == VocabularyType.THESAURUS) {
+				option = Json.newObject();
+				option.put("name", LookupAnnotator.class.getSimpleName()+"/" + voc.getName());
+				option.put("label", voc.getLabel());
+			
+				options.add(option);
+			}
+		}
+		ann.put("options", options);
+		result.add(ann);
+		
+		ann = Json.newObject();
+		ann.put("group", "Named Entity Recognition");
+		ann.put("hint", "Select the named entity recognition engines that will be used");
+		
+		options = Json.newObject().arrayNode();
+		option = Json.newObject();
+		option.put("name", DBPediaAnnotator.class.getSimpleName());
+		option.put("label", DBPediaAnnotator.getName());
+		options.add(option);
+
+		option = Json.newObject();
+		option.put("name", NLPAnnotator.class.getSimpleName());
+		option.put("label",NLPAnnotator.getName());
+		options.add(option);
+
+		ann.put("options", options);
+		result.add(ann);
+		
+		ann = Json.newObject();
+		ann.put("group", "Image Analysis");
+		ann.put("hint", "Select the image analysis services that will be used");
+		
+		options = Json.newObject().arrayNode();
+		option = Json.newObject();
+		option.put("name", ImageAnnotator.class.getSimpleName());
+		option.put("label", ImageAnnotator.getName());
+		options.add(option);
+
+		ann.put("options", options);
+		result.add(ann);
+		
+		return ok(Json.toJson(result));
 	}
 	
 	private static String useLanguages = DB.getConf().getString("annotators.autocomplete_languages");
