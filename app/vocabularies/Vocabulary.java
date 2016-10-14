@@ -16,25 +16,21 @@
 
 package vocabularies;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
-import play.libs.Json;
-import annotators.Annotator;
+import com.typesafe.config.ConfigValue;
 
-import com.fasterxml.jackson.databind.JsonNode;
-
-import controllers.ThesaurusController;
 import db.DB;
 
 public class Vocabulary {
 
 	public static enum VocabularyType {
 		THESAURUS,
-		RESOURCE
+		REFERENCE,
+		DATA
 	}
 	
 	static {
@@ -44,7 +40,7 @@ public class Vocabulary {
 	private String name;
 	private String label;
 	private VocabularyType type;
-	private Class<? extends Annotator> annotator;
+//	private Class<? extends Annotator> annotator;
 	private String version;
 	
 	private static List<Vocabulary> vocabularies;
@@ -53,43 +49,74 @@ public class Vocabulary {
 		return vocabularies;
 	}
 	
+	public static void main(String[] args) {
+		loadVocabularies();
+	}
+	
 	public static void loadVocabularies() {
 		vocabularies = new ArrayList<>();
 		
-		for (String p : DB.getConf().getString("vocabulary.names").split(",")) {
-			String title = DB.getConf().getString("vocabulary." + p + ".title");
-			String t = DB.getConf().getString("vocabulary." + p + ".type");
+		for (Entry<String, ConfigValue> voc : DB.getConf().getConfig("vocabularies").root().entrySet()) {
+			String name = voc.getKey();
 			VocabularyType type = null;
-			if (t.equals("thesaurus")) {
-				type = VocabularyType.THESAURUS;
-			} else {
-				type = VocabularyType.RESOURCE;
-			}
-			String ann = DB.getConf().getString("vocabulary." + p + ".annotator");
-			Class<? extends Annotator> annotator = null;
-			if (ann != null) {
-				try {
-					annotator = (Class<? extends Annotator>)Class.forName("annotators." + ann);
-				} catch (ClassNotFoundException e) {
-					e.printStackTrace();
+			String label = "";
+			String version = ""; 
+
+			for (Map.Entry<String, String> entry : ((Map<String,String>)voc.getValue().unwrapped()).entrySet()) {
+				String key = entry.getKey();
+				String val = entry.getValue();
+				
+				if (key.equals("type")) {
+					type = getVocabularyType(val);
+				} else if (key.equals("label")) {
+					label = val;
+				} else if (key.equals("version")) {
+					version = val;
 				}
-			}
-			String version = DB.getConf().getString("vocabulary." + p + ".version");
-			if (version == null) {
-				version = "";
-			}
+			};
 			
-			vocabularies.add(new Vocabulary(p, title, type, annotator, version));
+			System.out.println(name + " " + label + " " + type + " " + version);
+			
+			vocabularies.add(new Vocabulary(name, label, type, version));
+			
 		}
+		
+//		for (String p : DB.getConf().getString("vocabulary.names").split(",")) {
+//			String title = DB.getConf().getString("vocabulary." + p + ".title");
+//			String t = DB.getConf().getString("vocabulary." + p + ".type");
+//			VocabularyType type = null;
+//			if (t.equals("thesaurus")) {
+//				type = VocabularyType.THESAURUS;
+//			} else if (t.equals("reference")) {
+//				type = VocabularyType.REFERENCE;
+//			} else if (t.equals("data")) {
+//				type = VocabularyType.DATA;
+//			}
+//			String ann = DB.getConf().getString("vocabulary." + p + ".annotator");
+//			Class<? extends Annotator> annotator = null;
+//			if (ann != null) {
+//				try {
+//					annotator = (Class<? extends Annotator>)Class.forName("annotators." + ann);
+//				} catch (ClassNotFoundException e) {
+//					e.printStackTrace();
+//				}
+//			}
+//			String version = DB.getConf().getString("vocabulary." + p + ".version");
+//			if (version == null) {
+//				version = "";
+//			}
+//			
+//			vocabularies.add(new Vocabulary(p, title, type, annotator, version));
+//		}
 	}
 	
 
 	
-	public Vocabulary(String name, String label, VocabularyType type, Class<? extends Annotator> annotator, String version) {
+	public Vocabulary(String name, String label, VocabularyType type, String version) {
 		this.name = name;
 		this.setType(type);
 		this.setLabel(label);
-		this.setAnnotator(annotator);
+//		this.setAnnotator(annotator);
 		this.setVersion(version);
 	}
 	
@@ -99,21 +126,31 @@ public class Vocabulary {
 	
 	public static Vocabulary getVocabulary(String name){
 		for (Vocabulary voc : vocabularies) {
-			if (voc.name.equals(name)) {
+			if (voc.name.equalsIgnoreCase(name)) {
 				return voc;
 			} 
 		}
 		
 		return null;
 	}
-
-	public Class<? extends Annotator> getAnnotator() {
-		return annotator;
+	
+	public static VocabularyType getVocabularyType(String name){
+		for (VocabularyType type : VocabularyType.values()) {
+			if (type.name().equalsIgnoreCase(name)) {
+				return type;
+			} 
+		}
+		
+		return null;
 	}
 
-	public void setAnnotator(Class<? extends Annotator> annotator) {
-		this.annotator = annotator;
-	}
+//	public Class<? extends Annotator> getAnnotator() {
+//		return annotator;
+//	}
+//
+//	public void setAnnotator(Class<? extends Annotator> annotator) {
+//		this.annotator = annotator;
+//	}
 
 	public String getLabel() {
 		return label;

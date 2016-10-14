@@ -332,7 +332,11 @@ public class RecordResourceController extends WithResourceController {
 							Annotator annotator = Annotator.getAnnotator(annConfig.getAnnotatorClass(), lang);
 							if (annotator != null) {
 								try {
-									for (Annotation ann : annotator.annotate(text, target, annConfig.getProps())) {
+									Map<String, Object> props = new HashMap<>();
+									props.putAll(annConfig.getProps());
+									props.put(Annotator.TEXT, text);
+									
+									for (Annotation ann : annotator.annotate(target, props)) {
 										AnnotationController.addAnnotation(ann, user);
 									}
 								} catch (Exception e) {

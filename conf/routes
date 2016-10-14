@@ -174,7 +174,7 @@ GET	/api/idxthes									controllers.ReindexController.reindexAllThesaurus()
 POST	/thesaurus/addTerm	        			    controllers.ThesaurusController.addThesaurusTerm()
 DELETE  /thesaurus/deleteThesaurus/:name	        controllers.ThesaurusController.deleteThesaurus(name)
 GET 	/thesaurus/getTerm		   					controllers.ThesaurusController.getThesaurusTerm(uri: String)
-GET 	/thesaurus/listThesauri		   				controllers.ThesaurusController.listThesauri()
+GET 	/thesaurus/listVocabularies		   				controllers.ThesaurusController.listVocabularies()
 GET 	/thesaurus/suggestions						controllers.ThesaurusController.getSuggestions(word: String)
 
 #Thesaurus gui

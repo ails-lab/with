@@ -210,7 +210,7 @@ public class ThesaurusController extends Controller {
 		}
 	}
 
-	public static Result listThesauri() {
+	public static Result listVocabularies() {
 		ObjectNode result = Json.newObject();
 
 		try {
@@ -218,13 +218,9 @@ public class ThesaurusController extends Controller {
 			for (Vocabulary voc : Vocabulary.getVocabularies()) {
 				
 				ObjectNode json = Json.newObject();
-				json.put("vocabulary", voc.getName());
+				json.put("name", voc.getName());
 				json.put("label", voc.getLabel());
 				json.put("type", voc.getType().toString().toLowerCase());
-				if (voc.getAnnotator() != null) {
-					json.put("annotator", (String)voc.getAnnotator().getMethod("getName").invoke(null));
-					json.put("annotatortype", ((AnnotatorType)voc.getAnnotator().getMethod("getType").invoke(null)).toString().toLowerCase());
-				}
 				
 				aresult.add(json);
 			}
@@ -237,7 +233,7 @@ public class ThesaurusController extends Controller {
 		}
 	}
 	
-	private static String useLanguages = DB.getConf().getString("vocabulary.use_languages");
+	private static String useLanguages = DB.getConf().getString("annotators.autocomplete_languages");
 	private static String[] searchLangCodes;
 		
 	static {

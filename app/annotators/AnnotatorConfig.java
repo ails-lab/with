@@ -60,26 +60,26 @@ public class AnnotatorConfig {
 	public static List<AnnotatorConfig> createAnnotationConfigs(JsonNode json) {
 		List<AnnotatorConfig> annConfigs = new ArrayList<>();
 		
-		JsonNode vocs = json.get("vocabulary");
+		JsonNode vocs = json.get("lookup");
 		if (vocs != null) {
 			Map<Class<? extends Annotator>, Set<Vocabulary>> annotatorMap = new HashMap<>();
 
 			for (Iterator<JsonNode> iter = vocs.elements(); iter.hasNext();) {
 				Vocabulary voc = Vocabulary.getVocabulary(iter.next().asText());
-				Class<? extends Annotator> annClass = voc.getAnnotator();
-				
-				Set<Vocabulary> vocSet = annotatorMap.get(annClass);
-				if (vocSet == null) {
-					vocSet = new HashSet<Vocabulary>();
-					annotatorMap.put(annClass, vocSet);
-				}
-				
-				vocSet.add(voc);
+//				Class<? extends Annotator> annClass = voc.getAnnotator();
+//				
+//				Set<Vocabulary> vocSet = annotatorMap.get(annClass);
+//				if (vocSet == null) {
+//					vocSet = new HashSet<Vocabulary>();
+//					annotatorMap.put(annClass, vocSet);
+//				}
+//				
+//				vocSet.add(voc);
 			}
 			
 			for (Map.Entry<Class<? extends Annotator>, Set<Vocabulary>> entry : annotatorMap.entrySet()) {
 				Map<String, Object> props = new HashMap<>();
-				props.put(DictionaryAnnotator.VOCABULARIES, entry.getValue());
+				props.put(LookupAnnotator.VOCABULARIES, entry.getValue());
 				
 				annConfigs.add(new AnnotatorConfig(entry.getKey(), props));
 			}
@@ -89,12 +89,28 @@ public class AnnotatorConfig {
 		if (ners != null) {
 			Set<Class<? extends Annotator>> annotatorMap = new HashSet<>();
 			
-			for (Iterator<JsonNode> iter = ners.elements(); iter.hasNext();) {
-				Vocabulary voc = Vocabulary.getVocabulary(iter.next().asText());
-				Class<? extends Annotator> annClass = voc.getAnnotator();
-				
-				annotatorMap.add(annClass);
+//			for (Iterator<JsonNode> iter = ners.elements(); iter.hasNext();) {
+//				Vocabulary voc = Vocabulary.getVocabulary(iter.next().asText());
+//				Class<? extends Annotator> annClass = voc.getAnnotator();
+//				
+//				annotatorMap.add(annClass);
+//			}
+			
+			for (Class<? extends Annotator> entry : annotatorMap) {
+				annConfigs.add(new AnnotatorConfig(entry, null));
 			}
+		}
+		
+		JsonNode imgs = json.get("image");
+		if (imgs != null) {
+			Set<Class<? extends Annotator>> annotatorMap = new HashSet<>();
+			
+//			for (Iterator<JsonNode> iter = imgs.elements(); iter.hasNext();) {
+//				Vocabulary voc = Vocabulary.getVocabulary(iter.next().asText());
+//				Class<? extends Annotator> annClass = voc.getAnnotator();
+//				
+//				annotatorMap.add(annClass);
+//			}
 			
 			for (Class<? extends Annotator> entry : annotatorMap) {
 				annConfigs.add(new AnnotatorConfig(entry, null));

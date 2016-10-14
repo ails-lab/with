@@ -116,7 +116,9 @@ public class DBPediaAnnotator extends Annotator {
 		return service;
 	}
 	
-	public List<Annotation> annotate(String text, AnnotationTarget target, Map<String, Object> props) throws Exception {
+	public List<Annotation> annotate(AnnotationTarget target, Map<String, Object> props) throws Exception {
+		String text = (String)props.get(TEXT);
+		
 		text = strip(text);
 		
 		List<Annotation> res = new ArrayList<>();

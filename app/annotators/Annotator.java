@@ -32,18 +32,20 @@ public abstract class Annotator {
 	protected Language lang;
 	
 	public static String LANGUAGE = "lang";
+	public static String TEXT = "text";
 	
 //	public abstract String getName();
 	
 	public abstract String getService();
 	
-	public abstract List<Annotation> annotate(String text, AnnotationTarget target, Map<String, Object> properties) throws Exception;
+	public abstract List<Annotation> annotate(AnnotationTarget target, Map<String, Object> properties) throws Exception;
 	
 	private Pattern p = Pattern.compile("(<.*?>)");
 	
 	public static enum AnnotatorType {
 		LOOKUP,
-		NER
+		NER,
+		IMAGE
 	}
 	
 	protected String strip(String text) {
@@ -88,7 +90,7 @@ public abstract class Annotator {
 			res.add(ann);
 		}
 		
-		ann = DictionaryAnnotator.getAnnotator(lang, true);
+		ann = LookupAnnotator.getAnnotator(lang, true);
 		if (ann != null) {
 			res.add(ann);
 		}
@@ -108,8 +110,8 @@ public abstract class Annotator {
 			return DBPediaAnnotator.getAnnotator(lang);
 		}
 		
-		if (clazz.equals(DictionaryAnnotator.class)) {
-			return DictionaryAnnotator.getAnnotator(lang, true);
+		if (clazz.equals(LookupAnnotator.class)) {
+			return LookupAnnotator.getAnnotator(lang, true);
 		}
 
 		if (clazz.equals(NLPAnnotator.class)) {

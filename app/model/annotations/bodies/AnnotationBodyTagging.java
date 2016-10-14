@@ -20,7 +20,7 @@ import java.util.ArrayList;
 
 import annotators.Annotator;
 import annotators.DBPediaAnnotator;
-import annotators.DictionaryAnnotator;
+import annotators.LookupAnnotator;
 import annotators.NLPAnnotator;
 import model.basicDataTypes.MultiLiteral;
 

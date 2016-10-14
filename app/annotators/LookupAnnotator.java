@@ -54,9 +54,9 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import db.DB;
 
-public class DictionaryAnnotator extends Annotator {
+public class LookupAnnotator extends Annotator {
 	
-	protected static Map<Language, DictionaryAnnotator> annotators = new HashMap<>();
+	protected static Map<Language, LookupAnnotator> annotators = new HashMap<>();
 
 	private ExactDictionaryChunker tt;
 	
@@ -70,13 +70,13 @@ public class DictionaryAnnotator extends Annotator {
 		return "WITH Dictionary Annotator";
 	}
 
-    public static DictionaryAnnotator getAnnotator(Language lang, boolean cs) {
-    	DictionaryAnnotator ta = annotators.get(lang);
+    public static LookupAnnotator getAnnotator(Language lang, boolean cs) {
+    	LookupAnnotator ta = annotators.get(lang);
     	
     	if (ta == null) {
-    		synchronized (DictionaryAnnotator.class) {
+    		synchronized (LookupAnnotator.class) {
 	    		if (ta == null) {
-		   			ta = new DictionaryAnnotator(lang, cs);
+		   			ta = new LookupAnnotator(lang, cs);
 		   			annotators.put(lang, ta);
 	    		}
     		}
@@ -85,7 +85,7 @@ public class DictionaryAnnotator extends Annotator {
     	return ta;
     } 
     
-	private DictionaryAnnotator(Language lang, boolean caseSensitive) {
+	private LookupAnnotator(Language lang, boolean caseSensitive) {
 		this.lang = lang;
 		
 		String langField = "semantic.prefLabel." + lang.getDefaultCode();
@@ -176,7 +176,9 @@ public class DictionaryAnnotator extends Annotator {
 	}
 	
 	@Override
-	public List<Annotation> annotate(String text, AnnotationTarget target, Map<String, Object> props) throws Exception {
+	public List<Annotation> annotate(AnnotationTarget target, Map<String, Object> props) throws Exception {
+		String text = (String)props.get(TEXT);
+		
 		text = strip(text);
 		
 		List<Annotation> res = new ArrayList<>();

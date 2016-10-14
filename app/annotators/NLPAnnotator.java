@@ -101,7 +101,9 @@ public class NLPAnnotator extends Annotator {
     }
 
 	@Override
-	public List<Annotation> annotate(String text, AnnotationTarget target, Map<String, Object> properties) throws Exception {
+	public List<Annotation> annotate(AnnotationTarget target, Map<String, Object> props) throws Exception {
+		String text = (String)props.get(TEXT);
+		
 		text = strip(text);
 		
 		List<Annotation> res = new ArrayList<>();

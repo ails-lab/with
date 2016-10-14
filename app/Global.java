@@ -52,7 +52,7 @@ public class Global extends GlobalSettings {
 		ActorRef apiKeyManager = Akka.system().actorOf( Props.create( ApiKeyManager.class ), "apiKeyManager");
 		ActorRef lockManager = Akka.system().actorOf( Props.create( LockActor.class), "lockManager");
 		ActorRef mediaChecker = Akka.system().actorOf( Props.create( MediaCheckerActor.class), "mediaChecker");
-
+//		ActorRef tokenLoginActor = Akka.system().actorOf( Props.create( TokenLoginActor.class), "tokenLoginActor"); 
 
 		Locks.setLockManagerActorRef( lockManager );
 
