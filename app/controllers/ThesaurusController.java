@@ -279,18 +279,18 @@ public class ThesaurusController extends Controller {
 		ann.put("options", options);
 		result.add(ann);
 		
-		ann = Json.newObject();
-		ann.put("group", "Image Analysis");
-		ann.put("hint", "Select the image analysis services that will be used");
-		
-		options = Json.newObject().arrayNode();
-		option = Json.newObject();
-		option.put("name", ImageAnnotator.class.getSimpleName());
-		option.put("label", ImageAnnotator.getName());
-		options.add(option);
-
-		ann.put("options", options);
-		result.add(ann);
+//		ann = Json.newObject();
+//		ann.put("group", "Image Analysis");
+//		ann.put("hint", "Select the image analysis services that will be used");
+//		
+//		options = Json.newObject().arrayNode();
+//		option = Json.newObject();
+//		option.put("name", ImageAnnotator.class.getSimpleName());
+//		option.put("label", ImageAnnotator.getName());
+//		options.add(option);
+//
+//		ann.put("options", options);
+//		result.add(ann);
 		
 		return ok(Json.toJson(result));
 	}

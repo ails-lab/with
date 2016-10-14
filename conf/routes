@@ -29,7 +29,7 @@ GET      /api/annotationsSearch    	controllers.AnnotationController.searchRecor
 GET		/api/searchMyCollections	controllers.CollectionObjectController.searchMyCollections(term: String ?= "*", isShared: Boolean ?= false, isExhibition: Boolean ?= false, offset : Integer ?= 0, count: Integer ?= 10)
 GET		/api/searchMyExhibitions	controllers.CollectionObjectController.searchMyExhibitions(term: String ?= "*", isShared: Boolean ?= false, offset : Integer ?= 0, count: Integer ?= 10)
 GET 	/api/searchCollection/:id   controllers.CollectionObjectController.searchCollection(term: String ?= "*", id, offset : Integer ?= 0, count: Integer ?= 10)
-GET		/api/searchPublicCollections controllers.CollectionObjectController.searchPublicCollections(term: String ?= "*", isExhibition: Boolean ?= false, offset : Integer ?= 0, count: Integer ?= 10)
+GET		/api/searchPublicCollections controllers.CollectionObjectController.searchPublicCollections(term: String ?= "*", isExhibition: Boolean ?= false, offset : Integer ?= 0, count: Integer ?= 10, spaceId: play.libs.F.Option[String])
 
 #Autocomplete
 GET		/api/autocompleteExt		controllers.AutocompleteController.autocompleteExt(term:java.lang.String,limit:Integer,source:java.util.List[java.lang.String])
@@ -193,4 +193,4 @@ POST		/record/:id/annotate						controllers.RecordResourceController.annotateRec
 POST		/collection/:id/annotate						controllers.CollectionObjectController.annotateCollection(id)
 GET		/record/:id/deleteRejectedAnnotations		controllers.RecordResourceController.deleteRejectedAnnotations(id)
 
-GET			/collection/api/removeIdsOfDeletedRecords	controllers.WithResourceController.removeIdsOfDeletedRecords()						
+GET			/collection/api/removeIdsOfDeletedRecords	controllers.WithResourceController.removeIdsOfDeletedRecords()		

@@ -63,9 +63,9 @@ public class ApacheHttpConnector extends HttpConnector {
     private static PoolingHttpClientConnectionManager connMan = new PoolingHttpClientConnectionManager();
 
     private final static RequestConfig requestConfig = RequestConfig.custom()
-            .setConnectTimeout(3000)
-            .setConnectionRequestTimeout(3000)
-            .setSocketTimeout(3000)
+            .setConnectTimeout(5000)
+            .setConnectionRequestTimeout(5000)
+            .setSocketTimeout(5000)
             .build();
     
 	public static HttpClientBuilder httpClientBuilder =
