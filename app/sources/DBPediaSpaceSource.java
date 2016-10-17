@@ -17,8 +17,10 @@
 package sources;
 
 import java.util.ArrayList;
+
 import com.fasterxml.jackson.databind.JsonNode;
 
+import controllers.DBPediaController;
 import model.resources.AgentObject;
 import model.resources.PlaceObject;
 import model.resources.RecordResource;
@@ -47,29 +49,16 @@ public class DBPediaSpaceSource extends ISpaceSource {
 		placeformatreader = new DBPediaPlaceRecordFormatter();
 	}
 	
-	public String getHttpQuery(CommonQuery q) {
-		QueryBuilder builder = new QueryBuilder("http://zenon.image.ece.ntua.gr/fres/service/dbpedia-with");
-		builder.addSearchParam("type", "Person,Place");
-		builder.addSearchParam("start", "" + ((Integer.parseInt(q.page) - 1) * Integer.parseInt(q.pageSize)));
-		builder.addSearchParam("rows", "" + (Integer.parseInt(q.pageSize) - 1));
-		builder.setQuery("query", q.searchTerm);
-
-		return addfilters(q, builder).getHttp();
-	}
-
 	@Override
 	public SourceResponse getResults(CommonQuery q) {
 		SourceResponse res = new SourceResponse();
 		res.source = getSourceName().toString();
 
-		String httpQuery = getHttpQuery(q);
-		res.query = httpQuery;
-		
 		JsonNode response;
 		if (checkFilters(q)) {
 			try {
 				
-				response = getHttpConnector().getURLContent(httpQuery);
+				response = DBPediaController.doLookup("Person,Place", q.searchTerm, ((Integer.parseInt(q.page) - 1) * Integer.parseInt(q.pageSize)), (Integer.parseInt(q.pageSize) - 1));
 				res.totalCount = Utils.readIntAttr(response, "totalcount", true);
 				
 				int count = 0;
@@ -88,8 +77,6 @@ public class DBPediaSpaceSource extends ISpaceSource {
 				}
 				//TODO: what is the count?
 				res.count = count;
-
-//				res.facets = response.path("facets");
 
 				res.filtersLogic = new ArrayList<>();
 				

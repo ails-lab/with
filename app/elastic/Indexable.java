@@ -14,23 +14,15 @@
  */
 
 
-package annotators.struct;
+package elastic;
 
-import java.util.ArrayList;
+import java.util.Map;
 
-public interface AnnotationRegexExpression {
+import org.bson.types.ObjectId;
 
-	public boolean satisfies(AnnotatedObject ano);
-	
-	public boolean satisfies(AnnotatedObject ano, ArrayList<AnnotationRegexResult> result);
-	
-	public boolean satisfies2(AnnotatedObject ano, AnnotationResult result);
-	
-	public ArrayList<String> getReturnElements();
-	
-	public boolean isStart();
-	
-	public boolean isEnd();
+public interface Indexable {
 
-
+	public ObjectId getDbId();
+	
+	public Map<String, Object> transform();
 }

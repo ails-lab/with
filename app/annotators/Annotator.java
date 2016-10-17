@@ -23,26 +23,31 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.bson.types.ObjectId;
-
 import model.annotations.Annotation;
 import model.annotations.targets.AnnotationTarget;
 import model.basicDataTypes.Language;
-import model.resources.RecordResource;
 
 public abstract class Annotator {
 
 	protected Language lang;
 	
 	public static String LANGUAGE = "lang";
+	public static String TEXT = "text";
+	public static String USERID = "userId";
 	
-	public abstract String getName();
+//	public abstract String getName();
 	
 	public abstract String getService();
 	
-	public abstract List<Annotation> annotate(String text, AnnotationTarget target, Map<String, Object> properties) throws Exception;
+	public abstract List<Annotation> annotate(AnnotationTarget target, Map<String, Object> properties) throws Exception;
 	
 	private Pattern p = Pattern.compile("(<.*?>)");
+	
+	public static enum AnnotatorType {
+		LOOKUP,
+		NER,
+		IMAGE
+	}
 	
 	protected String strip(String text) {
 		Matcher m = p.matcher(text);
@@ -86,15 +91,16 @@ public abstract class Annotator {
 			res.add(ann);
 		}
 		
-		ann = DictionaryAnnotator.getAnnotator(lang, true);
+		ann = LookupAnnotator.getAnnotator(lang, true);
 		if (ann != null) {
 			res.add(ann);
 		}
 
-		ann = NERAnnotator.getAnnotator(lang);
+		ann = NLPAnnotator.getAnnotator(lang);
 		if (ann != null) {
 			res.add(ann);
 		}
+		
 		
 		return res;
 	}
@@ -105,12 +111,12 @@ public abstract class Annotator {
 			return DBPediaAnnotator.getAnnotator(lang);
 		}
 		
-		if (clazz.equals(DictionaryAnnotator.class)) {
-			return DictionaryAnnotator.getAnnotator(lang, true);
+		if (clazz.equals(LookupAnnotator.class)) {
+			return LookupAnnotator.getAnnotator(lang, true);
 		}
 
-		if (clazz.equals(NERAnnotator.class)) {
-			return NERAnnotator.getAnnotator(lang);
+		if (clazz.equals(NLPAnnotator.class)) {
+			return NLPAnnotator.getAnnotator(lang);
 		}
 		
 		return null;

@@ -38,6 +38,7 @@ import org.w3c.dom.ls.LSSerializer;
 import controllers.WithController;
 import model.EmbeddedMediaObject;
 import model.basicDataTypes.Language;
+import model.basicDataTypes.Literal;
 import model.basicDataTypes.LiteralOrResource;
 import model.basicDataTypes.MultiLiteral;
 import model.basicDataTypes.WithAccess;
@@ -227,6 +228,34 @@ public class Serializer {
 				// add to json the languages except unknown
 				if(!e.getKey().equals(Language.UNKNOWN.getDefaultCode()))
 					multiJson.put(e.getKey(), Json.toJson(e.getValue()));
+			}
+			multiJson.put("_all", Json.toJson(all_literals));
+			arg1.writeObject(multiJson);
+		}
+
+	}
+	
+	public static class LiteralSerializerForElastic extends JsonSerializer<Object> {
+
+		@Override
+		public void serialize(Object arg0, JsonGenerator arg1,
+				SerializerProvider arg2) throws IOException,
+				JsonProcessingException {
+
+			Literal multi = (Literal)arg0;
+			ObjectNode multiJson = Json.newObject();
+			List<String> all_literals = new ArrayList<String>();
+
+			for(Entry<String, String> e: multi.entrySet()) {
+
+				// accumulate to _all field all values except uri & default
+				if(!e.getKey().equals(LiteralOrResource.URI) &&
+						!e.getKey().equals(Language.DEFAULT.getDefaultCode()))
+					all_literals.add(e.getValue());
+
+				// add to json the languages except unknown
+				if(!e.getKey().equals(Language.UNKNOWN.getDefaultCode()))
+					multiJson.put(e.getKey(), e.getValue());
 			}
 			multiJson.put("_all", Json.toJson(all_literals));
 			arg1.writeObject(multiJson);

@@ -14,10 +14,10 @@
  */
 
 
-package annotators;
+package utils.annotators;
 
-import annotators.struct.AnnotatedObject;
-import annotators.struct.AnnotationValue;
+import utils.annotators.AnnotatedObject;
+import utils.annotators.AnnotationValue;
 
 public class ComplexAnnotationValue extends AnnotationValue {
 	private Object[] value;

@@ -14,9 +14,9 @@
  */
 
 
-package annotators;
+package utils.annotators;
 
-import annotators.struct.AnnotationValue;
+import utils.annotators.AnnotationValue;
 
 public class SimpleAnnotationValue extends AnnotationValue {
 	private Object value;

@@ -42,17 +42,17 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.HttpClientBuilder;
-import org.bson.types.ObjectId;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.hp.hpl.jena.query.QueryExecution;
-import com.hp.hpl.jena.query.QueryExecutionFactory;
-import com.hp.hpl.jena.query.QueryFactory;
-import com.hp.hpl.jena.query.QuerySolution;
-import com.hp.hpl.jena.query.ResultSet;
-import com.hp.hpl.jena.query.Syntax;
-import com.hp.hpl.jena.rdf.model.Literal;
-import com.hp.hpl.jena.rdf.model.RDFNode;
+
+import org.apache.jena.query.QueryExecution;
+import org.apache.jena.query.QueryExecutionFactory;
+import org.apache.jena.query.QueryFactory;
+import org.apache.jena.query.QuerySolution;
+import org.apache.jena.query.ResultSet;
+import org.apache.jena.query.Syntax;
+import org.apache.jena.rdf.model.Literal;
+import org.apache.jena.rdf.model.RDFNode;
 
 import play.libs.Json;
 
@@ -80,6 +80,14 @@ public class DBPediaAnnotator extends Annotator {
 	
 	private String service;
 	
+	public static AnnotatorType getType() {
+		return AnnotatorType.NER;
+	}
+	
+	public static String getName() {
+		return "DBPedia Spotlight";
+	}
+
     public static DBPediaAnnotator getAnnotator(Language lang) {
 		if (!serverMap.containsKey(lang)) {
 			return null;
@@ -103,15 +111,14 @@ public class DBPediaAnnotator extends Annotator {
     	service = serverMap.get(lang);
     }
 
-	public String getName() {
-		return "DBPediaSpotlight";
-	}
 
 	public String getService() {
 		return service;
 	}
 	
-	public List<Annotation> annotate(String text, AnnotationTarget target, Map<String, Object> props) throws Exception {
+	public List<Annotation> annotate(AnnotationTarget target, Map<String, Object> props) throws Exception {
+		String text = (String)props.get(TEXT);
+		
 		text = strip(text);
 		
 		List<Annotation> res = new ArrayList<>();
@@ -180,7 +187,7 @@ public class DBPediaAnnotator extends Annotator {
 	    		
 	    		AnnotationBodyTagging annBody = new AnnotationBodyTagging();
 	    		annBody.setUri(URI);
-	    		annBody.setUriVocabulary(AnnotationBodyTagging.Vocabulary.DBPEDIA_RESOURCE);
+	    		annBody.setUriVocabulary("dbr");
 	    		
 	    		MultiLiteral ml = new MultiLiteral(lang, label);
 	    		ml.fillDEF();
@@ -197,11 +204,9 @@ public class DBPediaAnnotator extends Annotator {
 
 	    		ArrayList<AnnotationAdmin> admins  = new ArrayList<>();
 	    		AnnotationAdmin admin = new Annotation.AnnotationAdmin();
-	    		admin.setGenerator(service);
+	    		admin.setGenerator(getName());
 	    		admin.setGenerated(new Date());
 	    		admin.setConfidence(score);
-//	    		admin.setWithCreator(withCreator);
-//	    		admin.setCreated(new Date());
 	    		
 	    		admins.add(admin);
 	    		

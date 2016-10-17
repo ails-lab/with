@@ -27,6 +27,7 @@ import utils.MetricsUtils;
 import actors.ApiKeyManager;
 import actors.LockActor;
 import actors.MediaCheckerActor;
+import actors.TokenLoginActor;
 import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
 import akka.actor.Props;
@@ -52,7 +53,7 @@ public class Global extends GlobalSettings {
 		ActorRef apiKeyManager = Akka.system().actorOf( Props.create( ApiKeyManager.class ), "apiKeyManager");
 		ActorRef lockManager = Akka.system().actorOf( Props.create( LockActor.class), "lockManager");
 		ActorRef mediaChecker = Akka.system().actorOf( Props.create( MediaCheckerActor.class), "mediaChecker");
-
+		ActorRef tokenLoginActor = Akka.system().actorOf( Props.create( TokenLoginActor.class), "tokenLoginActor"); 
 
 		Locks.setLockManagerActorRef( lockManager );
 

@@ -133,6 +133,7 @@ public class DB {
 
 			try {
 				ds.ensureIndexes(Notification.class);
+				ds.ensureIndexes(ThesaurusObject.class);
 				ds.ensureIndexes(CollectionObject.class);
 				ds.ensureIndexes(User.class);
 				ds.ensureIndexes(UserGroup.class);

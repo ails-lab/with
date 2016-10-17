@@ -18,9 +18,13 @@ package model.annotations;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Map;
 
 import model.annotations.bodies.AnnotationBody;
 import model.annotations.targets.AnnotationTarget;
+import model.basicDataTypes.Literal;
+import model.basicDataTypes.MultiLiteral;
+import model.basicDataTypes.MultiLiteralOrResource;
 
 import org.bson.types.ObjectId;
 import org.mongodb.morphia.annotations.Embedded;
@@ -32,8 +36,13 @@ import utils.Serializer;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.module.SimpleModule;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
 @SuppressWarnings("unchecked")
 @JsonInclude(value = JsonInclude.Include.NON_NULL)
@@ -282,6 +291,29 @@ public class Annotation<T extends AnnotationBody> {
 		public void setDontKnowBy(ArrayList<ObjectId> dontKnowBy) {
 			this.dontKnowBy = dontKnowBy;
 		}
+	}
+
+	public Map<String, Object> transform() {
+
+		ObjectMapper mapper = new ObjectMapper();
+		SimpleModule module = new SimpleModule();
+		module.addSerializer(MultiLiteral.class, new Serializer.MUltiliteralSerializerForElastic());
+		module.addSerializer(MultiLiteralOrResource.class, new Serializer.MUltiliteralSerializerForElastic());
+		module.addSerializer(Literal.class, new Serializer.LiteralSerializerForElastic());
+		mapper.registerModule(module);
+		mapper.setSerializationInclusion(Include.NON_NULL);
+
+		JsonNode json = mapper.valueToTree(this);
+
+		((ObjectNode)json).remove("annotationWithURI");
+		((ObjectNode)json.get("target")).remove("selector");
+
+//		((ObjectNode)json).remove("narrower");
+//		((ObjectNode)json).remove("topConcepts");
+//		((ObjectNode)json).remove("members");
+//		
+		
+		return mapper.convertValue(json, Map.class);
 	}
 
 }

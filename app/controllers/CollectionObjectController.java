@@ -26,7 +26,6 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import controllers.parameterTypes.MyPlayList;
 import controllers.parameterTypes.StringTuple;
-import controllers.thesaurus.CollectionIndexController;
 import db.DB;
 import elastic.ElasticCoordinator;
 import elastic.ElasticSearcher.SearchOptions;
@@ -47,7 +46,7 @@ import model.resources.collection.CollectionObject;
 import model.resources.collection.CollectionObject.CollectionAdmin;
 import model.resources.collection.SimpleCollection;
 import model.usersAndGroups.*;
-import notifications.Notification;
+import notifications.AnnotationNotification;
 import notifications.Notification.Activity;
 import org.bson.types.ObjectId;
 import org.elasticsearch.action.search.SearchResponse;
@@ -1332,22 +1331,18 @@ public class CollectionObjectController extends WithResourceController {
             if (!response.toString().equals(ok().toString())) {
                 return response;
             } else {
-                QueryBuilder query = CollectionIndexController.getIndexCollectionQuery(colId, json);
 
-                SearchOptions so = new SearchOptions(start, start + count);
-                ElasticCoordinator es = new ElasticCoordinator();
+                List<List<String>> uris = CollectionIndexController.termsRestrictionFromJSON(json);
+                List<RecordResource> res = DB.getRecordResourceDAO().getByCollectionWithTerms(colId, uris, Arrays.asList(CollectionIndexController.lookupFields), Arrays.asList(new String[] {"_id"}), start + count + 1);
 
-                SearchResponse res = es.queryExcecution(query, so);
-                SearchHits sh = res.getHits();
-
-                long totalHits = sh.getTotalHits();
-
+                //Inefficient Pagination
+                int top = Math.min(start + count, res.size());
+                
                 List<String> ids = new ArrayList<>();
-                for (Iterator<SearchHit> iter = sh.iterator(); iter.hasNext(); ) {
-                    SearchHit hit = iter.next();
-                    ids.add(hit.getId());
-                }
-
+    			for (int i = start; i < top; i++) {
+    				ids.add(res.get(i).getDbId().toString());
+    			}
+    			
                 List<RecordResource> records = DB.getRecordResourceDAO().getByCollectionIds(colId, ids);
 
                 if (records == null) {
@@ -1392,7 +1387,7 @@ public class CollectionObjectController extends WithResourceController {
                     recordsList.add(Json.toJson(r));
                 }
 
-                result.put("entryCount", totalHits);
+//              result.put("entryCount", totalHits);
                 result.put("records", recordsList);
                 return ok(result);
             }
@@ -1567,13 +1562,12 @@ public class CollectionObjectController extends WithResourceController {
                         }
                     }
 
-                    Notification notification = new Notification();
-                    notification.setActivity(Activity.MESSAGE);
-                    notification.setMessage("Annotating of collection '" + DB.getCollectionObjectDAO().getById(cid).getDescriptiveData().getLabel().get(Language.DEFAULT).get(0) + "' has finished");
-//					notification.setSender(sender);
+                    AnnotationNotification notification = new AnnotationNotification();
+                    notification.setActivity(Activity.ANNOTATING_COMPLETED);
+					notification.setOpenedAt(new Timestamp(new Date().getTime()));
+                    notification.setResource(cid);
                     notification.setReceiver(uid);
-                    Date now = new Date();
-                    notification.setOpenedAt(new Timestamp(now.getTime()));
+                    
                     DB.getNotificationDAO().makePermanent(notification);
                     NotificationCenter.sendNotification(notification);
 
