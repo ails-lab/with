@@ -17,11 +17,10 @@
 package elastic;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
-
-import model.resources.RecordResource;
-import model.resources.collection.CollectionObject;
 
 import org.bson.types.ObjectId;
 import org.elasticsearch.action.search.SearchResponse;
@@ -29,16 +28,15 @@ import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.aggregations.Aggregation;
 import org.elasticsearch.search.aggregations.Aggregations;
-import org.elasticsearch.search.aggregations.bucket.terms.InternalTerms;
 import org.elasticsearch.search.aggregations.bucket.terms.Terms;
 
-import controllers.WithController.Profile;
 import db.DB;
+import elastic.ElasticSearcher.SearchOptions;
+import model.resources.RecordResource;
+import model.resources.collection.CollectionObject;
 import search.Filter;
 import search.Response.SingleResponse;
-import search.Response.ValueCount;
 import search.Sources;
-import elastic.ElasticSearcher.SearchOptions;
 
 public class ElasticCoordinator {
 
@@ -87,23 +85,25 @@ public class ElasticCoordinator {
 		SingleResponse sresp = new SingleResponse();
 		List<ObjectId> ids = new ArrayList<ObjectId>();
 		String type = null;
+		Map<String, Object> resultMap = new HashMap<String, Object>();
+		
 		for(SearchHit h: elasticresp.getHits()) {
-			type = h.getType();
 			ids.add(new ObjectId(h.getId()));
 		}
-		if((type !=null) && type.contains("object")) {
-			List<RecordResource> it = DB.getRecordResourceDAO().getByIds(ids);
-			if(it!=null)
-				sresp.items = it.stream().map( r -> {return r.getRecordProfile(Profile.BASIC.toString());}).collect(Collectors.toList());
+		for( RecordResource<?> r: DB.getRecordResourceDAO().getByIds(ids)) { 
+			resultMap.put( r.getDbId().toHexString(), r);
 		}
-		else {
-			List<CollectionObject> co = DB.getCollectionObjectDAO().getByIds(ids);
-			if(co!=null)
-				sresp.items = co.stream().map( r -> {return r.getCollectionProfile(Profile.BASIC.toString());}).collect(Collectors.toList());
+		for( CollectionObject<?> co: DB.getCollectionObjectDAO().getByIds(ids)) { 
+			resultMap.put( co.getDbId().toHexString(), co);
 		}
+
+		for(SearchHit h: elasticresp.getHits()) {
+			sresp.items.add( resultMap.get( h.getId()));
+		}
+		
 		sresp.totalCount = (int) elasticresp.getHits().getTotalHits();
 		sresp.source = Sources.WITHin;
-
+		sresp.count = resultMap.size();
 		if(elasticresp.getAggregations() != null)
 			extractFacets(elasticresp.getAggregations(), sresp);
 
