@@ -56,12 +56,12 @@ public class ThesaurusObjectDAO extends DAO<ThesaurusObject> {
 	public void removeAllTermsFromThesaurus(String thesaurus) {
 		ArrayList<String> retrievedFields = new ArrayList<String>(Arrays.asList("_id"));
 		
-		Query<ThesaurusObject> q = this.createQuery().field("semantic.thesaurus").equal(thesaurus);
+		Query<ThesaurusObject> q = this.createQuery().field("semantic.vocabulary.name").equal(thesaurus);
 		q.retrievedFields(true, retrievedFields.toArray(new String[retrievedFields.size()]));
 		
 		List<ThesaurusObject> termRecords = find(q).asList();
 		
-		removeAll("semantic.thesaurus", "=", thesaurus);
+		removeAll("semantic.vocabulary.name", "=", thesaurus);
 		
 		List<ObjectId> termIds = new ArrayList<ObjectId>();
 		termRecords.forEach((r) -> {

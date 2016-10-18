@@ -14,7 +14,7 @@
  */
 
 
-package annotators.struct;
+package utils.annotators;
 
 import java.util.ArrayList;
 import java.util.Set;

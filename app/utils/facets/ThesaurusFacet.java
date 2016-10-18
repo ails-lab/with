@@ -14,7 +14,7 @@
  */
 
 
-package controllers.thesaurus;
+package utils.facets;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -24,49 +24,25 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.jena.atlas.lib.SetUtils;
 import org.bson.types.ObjectId;
 
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import play.libs.Json;
+import utils.Counter;
 import model.basicDataTypes.Language;
 import model.resources.ThesaurusObject;
 import model.resources.ThesaurusObject.SKOSSemantic;
 import model.resources.ThesaurusObject.SKOSTerm;
 import db.DB;
-import db.ThesaurusObjectDAO;
 
 public class ThesaurusFacet {
-	private static boolean precompute = false;
-	private static Map<String, SKOSSemantic> map;
-	private static Map<String, ObjectId> idMap;
-	
-	private static ThesaurusObjectDAO dao;
-	
-	static {
-		dao = DB.getThesaurusDAO();
-		map = new HashMap<>();
-		idMap = new HashMap<>();
-		
-		if (precompute) {
-			System.out.println("READING THESAURUSES");
-			
-			long start = System.currentTimeMillis();
-	
-			for (ThesaurusObject to : dao.getAll()) {
-				idMap.put(to.getSemantic().getUri(), to.getDbId());
-				map.put(to.getSemantic().getUri(), to.getSemantic()); 
-			}
-	
-			System.out.println("INIT TIME: " + (System.currentTimeMillis() - start));
-		}
-	}
+	private static Map<String, SKOSSemantic> map = new HashMap<>();
+	private static Map<String, ObjectId> idMap = new HashMap<>();
 	
 	public ThesaurusFacet() {
 	}
-	
 
 	
 	public SKOSSemantic getSemantic(String term) {
@@ -351,5 +327,4 @@ public class ThesaurusFacet {
 		
 		return used;
 	}
-
 }

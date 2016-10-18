@@ -23,7 +23,7 @@ libraryDependencies ++= Seq(
   filters,
   javaWs,
  "org.mongodb.morphia" % "morphia" % "1.0.1",
- "org.apache.jena" % "apache-jena-libs" % "2.10.1",
+ "org.apache.jena" % "apache-jena-libs" % "3.1.0",
  "commons-io" % "commons-io" % "2.3",
  "com.google.code.gson" % "gson" % "2.2.4",
  "com.google.code.gson" % "gson" % "2.2.4",
@@ -34,7 +34,7 @@ libraryDependencies ++= Seq(
  "org.apache.httpcomponents" % "httpasyncclient" % "4.1.1",
   "org.apache.httpcomponents" % "httpmime" % "4.3.1",
   "org.elasticsearch" % "elasticsearch" % "2.3.3",
-  "net.sourceforge.owlapi" % "owlapi-distribution" % "5.0.1",
+//  "net.sourceforge.owlapi" % "owlapi-distribution" % "5.0.1",
 // "com.yakaz.elasticsearch.plugins" % "elasticsearch-action-updatebyquery" % "2.5.1",
  // validate the token from the login on web browser
  // "com.google.api-client" % "google-api-client" % "1.19.1"
@@ -56,7 +56,10 @@ libraryDependencies ++= Seq(
  "com.google.oauth-client" % "google-oauth-client" % "1.20.0",
  "com.google.api-client" % "google-api-client" % "1.22.0",
  "com.google.apis" % "google-api-services-plus" % "v1-rev413-1.22.0",
- "org.facebook4j" % "facebook4j-core" % "2.4.6"
+ "org.facebook4j" % "facebook4j-core" % "2.4.6",
+  "org.apache.commons" % "commons-compress" % "1.12",
+ "commons-io" % "commons-io" % "2.2",
+ "com.hermit-reasoner" % "org.semanticweb.hermit" % "1.3.8.4"
 )
 
 sources in doc in Compile := List() 

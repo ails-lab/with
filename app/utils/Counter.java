@@ -14,34 +14,51 @@
  */
 
 
-package annotators.struct;
+package utils;
 
-import annotators.struct.AnnotationValue;
+public class Counter {
 
-public class SimpleAnnotationValue extends AnnotationValue {
-	private Object value;
+	private int count;
 	
-	public SimpleAnnotationValue(Object value) {
-		this.value = value;
+	public Counter(int i) {
+		count = i;
+	}
+	
+	public void increase() {
+		count++;
+	}
+
+	public void increase(int c) {
+		count += c;
+	}
+
+	public int increaseUse() {
+		count++;
+		return count - 1;
+	}
+
+	public void decrease() {
+		count--;
+	}
+	
+	public int getValue() {
+		return count;
 	}
 	
 	public int hashCode() {
-		return value.hashCode();
+		return count;
 	}
 	
 	public boolean equals(Object obj) {
-		if (!(obj instanceof SimpleAnnotationValue)) {
+		if (!(obj instanceof Counter)) {
 			return false;
 		}
 		
-		return ((SimpleAnnotationValue)obj).value.equals(value);
+		return count == ((Counter)obj).count;
 	}
 	
 	public String toString() {
-		return value.toString();
+		return count + "";
 	}
-
-	public Object getValue() {
-		return value;
-	}
-}
+	
+}	

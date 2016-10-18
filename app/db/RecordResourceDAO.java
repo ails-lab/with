@@ -41,6 +41,8 @@ import model.resources.collection.CollectionObject;
 import org.apache.commons.beanutils.BeanToPropertyValueTransformer;
 import org.apache.commons.collections.CollectionUtils;
 import org.bson.types.ObjectId;
+import org.mongodb.morphia.query.Criteria;
+import org.mongodb.morphia.query.CriteriaContainer;
 import org.mongodb.morphia.query.Query;
 import org.mongodb.morphia.query.UpdateOperations;
 
@@ -175,7 +177,7 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 		Query<RecordResource> q = this.createQuery();
 		return getByCollection(collection.getCollectedResources(), q);
 	}
-
+	
 	public List<RecordResource> getByCollection(ObjectId collectionId,
 			List<String> retrievedFields) {
 		CollectionObject collection = DB.getCollectionObjectDAO().getById(
@@ -185,7 +187,42 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 				retrievedFields.toArray(new String[retrievedFields.size()]));
 		return getByCollection(collection.getCollectedResources(), q);
 	}
+	
+	
+	public List<RecordResource> getByCollectionWithTerms(ObjectId collectionId, List<List<String>> uris, List<String> lookupFields, List<String> retrievedFields, int max) {
+		
+		Query<RecordResource> q = this.createQuery().disableValidation();
+		if (uris != null) {
+			List<CriteriaContainer> criteria = new ArrayList<>();
+		
+			for (List<String> list : uris) {
+				List<Criteria> c = new ArrayList<>();
+				for (String uri : list) {
+					for (String field : lookupFields) {
+						c.add(q.criteria(field).equal(uri));
+					}
+				}
 
+				criteria.add(q.or(c.toArray(new Criteria[c.size()])));
+			}
+			
+			q.and(criteria.toArray(new CriteriaContainer[criteria.size()]));
+		}
+		
+		q.field("collectedIn").equal(collectionId);
+		
+		if (retrievedFields != null) {
+			q.retrievedFields(true, retrievedFields.toArray(new String[retrievedFields.size()]));
+		}
+		
+		if (max >= 0) {
+			q.limit(max);
+		}
+		
+		return this.find(q).asList();
+
+	}
+	
 	public List<RecordResource> getAnnotatedRecords(ObjectId userId,
 			int offset, int count) {
 		List<Annotation> annotations = DB.getAnnotationDAO()

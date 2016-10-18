@@ -20,8 +20,8 @@ import java.util.ArrayList;
 
 import annotators.Annotator;
 import annotators.DBPediaAnnotator;
-import annotators.DictionaryAnnotator;
-import annotators.NERAnnotator;
+import annotators.LookupAnnotator;
+import annotators.NLPAnnotator;
 import model.basicDataTypes.MultiLiteral;
 
 public class AnnotationBodyTagging extends AnnotationBody {
@@ -52,7 +52,7 @@ public class AnnotationBodyTagging extends AnnotationBody {
 	 * A value taken from an enumeration that includes all the vocabularies used in WITH and by the
 	 * annotator generators.
 	 */
-	private Vocabulary uriVocabulary;
+	private String uriVocabulary;
 	
 	/**
 	 * This should be only populated when the tag of the annotation is not a URI but a text values.
@@ -60,90 +60,6 @@ public class AnnotationBodyTagging extends AnnotationBody {
 	 */
 	/*private MultiLiteral text;*/
 	
-//	public static enum Vocabulary {
-//		DBPEDIA_ONTOLOGY, DBPEDIA_RESOURCE, MIMO, FASHION, GEMET, AAT, PARTAGE, PHOTO, WORDNET30, WORDNET31
-//	}
-
-	public static enum VocabularyType {
-		THESAURUS,
-		NER,
-		CLASS
-	}
-	
-	public static enum Vocabulary {
-		AAT("aat", "Art & Architecture Thesaurus", VocabularyType.THESAURUS, DictionaryAnnotator.class),
-		DBPEDIA_ONTOLOGY("dbpedia", "DBPedia Ontology", VocabularyType.THESAURUS, DictionaryAnnotator.class), 
-		DBPEDIA_RESOURCE("dbr", "DBPedia Linking", VocabularyType.NER, DBPediaAnnotator.class), 
-		GEMET("gemet", "GEMET Thesaurus", VocabularyType.THESAURUS, DictionaryAnnotator.class), 
-		EUSCREENXL("euscreenxl", "EuscreenXL Thesaurus", VocabularyType.THESAURUS, DictionaryAnnotator.class),
-		FASHION("fashion", "Fashion Thesaurus", VocabularyType.THESAURUS, DictionaryAnnotator.class),
-		HORNBOSTEL_SACHS("hornbostelsachs", "Hornbostel Sachs Thesaurus", VocabularyType.THESAURUS, DictionaryAnnotator.class),
-		MIMO("mimo", "MIMO Thesaurus", VocabularyType.THESAURUS, DictionaryAnnotator.class),
-		NERD("nerd", "Named Entity Tagging", VocabularyType.NER, NERAnnotator.class),
-		PHOTOGRAPHY("photography", "Photography Thesaurus", VocabularyType.THESAURUS, DictionaryAnnotator.class),
-		PARTAGE_PLUS("partageplus", "Partage Plus Thesaurus", VocabularyType.THESAURUS, DictionaryAnnotator.class),
-		WORDNET30("wordnet30", "Wordnet 3.0", null, null),
-		WORDNET31("wordnet31", "Wordnet 3.1", null, null);
-		
-		private String name;
-		private String label;
-		private String[] alt;
-		private VocabularyType type;
-		private Class<? extends Annotator> annotator;
-		
-		Vocabulary(String name, String label, VocabularyType type, Class<? extends Annotator> annotator, String... alt) {
-			this.name = name;
-			this.setType(type);
-			this.setLabel(label);
-			this.setAnnotator(annotator);
-			this.alt = alt;
-		}
-		
-		public String getName() {
-			return name;
-		}
-		
-		public static Vocabulary getVocabulary(String name){
-			for (Vocabulary voc : Vocabulary.values()) {
-				if (voc.name.equals(name)) {
-					return voc;
-				} else if (voc.alt != null) {
-					for (String s : voc.alt) {
-						if (s.equals(name)) {
-							return voc;
-						}
-					}
-				}
-			}
-			
-			return null;
-		}
-
-		public Class<? extends Annotator> getAnnotator() {
-			return annotator;
-		}
-
-		public void setAnnotator(Class<? extends Annotator> annotator) {
-			this.annotator = annotator;
-		}
-
-		public String getLabel() {
-			return label;
-		}
-
-		public void setLabel(String label) {
-			this.label = label;
-		}
-
-		public VocabularyType getType() {
-			return type;
-		}
-
-		public void setType(VocabularyType type) {
-			this.type = type;
-		}
-
-	}
 	
 	public String getUri() {
 		return uri;
@@ -177,11 +93,11 @@ public class AnnotationBodyTagging extends AnnotationBody {
 		this.uriType = uriType;
 	}
 
-	public Vocabulary getUriVocabulary() {
+	public String getUriVocabulary() {
 		return uriVocabulary;
 	}
 
-	public void setUriVocabulary(Vocabulary uriVocabulary) {
+	public void setUriVocabulary(String uriVocabulary) {
 		this.uriVocabulary = uriVocabulary;
 	}
 
