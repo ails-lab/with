@@ -25,11 +25,8 @@ import java.util.Map;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-
-import play.libs.F.Promise;
-import play.libs.Json;
-import model.quality.RecordQuality;
-import model.resources.WithResourceType;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 import org.bson.types.ObjectId;
 import org.elasticsearch.action.get.GetRequest;
@@ -43,16 +40,9 @@ import org.mongodb.morphia.query.QueryResults;
 import org.mongodb.morphia.query.UpdateOperations;
 import org.mongodb.morphia.query.UpdateResults;
 
-import play.Logger;
-import play.libs.F.Callback;
-import sources.core.ParallelAPICall;
-import sources.utils.JsonContextRecord;
-import utils.MetricsUtils;
-import utils.Tuple;
-
-import com.codahale.metrics.Timer;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.mongodb.BasicDBObject;
+import com.mongodb.DBCollection;
 import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
 import com.mongodb.MongoException;
@@ -64,6 +54,15 @@ import elastic.Elastic;
 import elastic.ElasticEraser;
 import elastic.ElasticIndexer;
 import elastic.Indexable;
+import model.quality.RecordQuality;
+import model.resources.WithResourceType;
+import play.Logger;
+import play.libs.F.Callback;
+import play.libs.F.Promise;
+import play.libs.Json;
+import sources.core.ParallelAPICall;
+import sources.utils.JsonContextRecord;
+import utils.Tuple;
 
 public class DAO<E> extends BasicDAO<E, ObjectId> {
 
@@ -196,6 +195,26 @@ public class DAO<E> extends BasicDAO<E, ObjectId> {
 		}
 	}
 
+	/**
+	 * Get a stream of ids for this DAOs object class.
+	 * @return
+	 */
+	public Stream<String> listIds() {
+		DBCollection coll = DB.getDs().getCollection(entityClass);
+		DBCursor curs = coll.find( toDBObj( "{}"), toDBObj( "{'_id':1}"));
+		return StreamSupport
+			.stream( curs.spliterator(), false )
+			.map(  (DBObject dbobj )-> {
+				return ((ObjectId) dbobj.get( "_id" )).toHexString();
+			});
+	}
+	
+	
+	public DBObject toDBObj( String json ) {
+		return (DBObject) JSON.parse( json );
+	}
+	
+	
 	/**
 	 * Use this method to save and Object to the database
 	 *
