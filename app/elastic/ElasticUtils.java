@@ -16,43 +16,20 @@
 
 package elastic;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Iterator;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.stream.Collectors;
-
-import model.EmbeddedMediaObject;
-import model.EmbeddedMediaObject.MediaVersion;
-import model.basicDataTypes.MultiLiteral;
-import model.basicDataTypes.MultiLiteralOrResource;
-import model.basicDataTypes.ProvenanceInfo;
-import model.basicDataTypes.WithAccess;
-import model.basicDataTypes.WithAccess.Access;
-import model.basicDataTypes.WithAccess.AccessEntry;
-import model.basicDataTypes.WithDate;
-import model.resources.WithResource;
-import model.resources.WithResourceType;
-import model.DescriptiveData;
-import model.resources.RecordResource;
-import model.resources.RecordResource.RecordDescriptiveData;
-import model.resources.WithAdmin;
 
 import org.bson.types.ObjectId;
 import org.elasticsearch.action.search.SearchResponse;
-import org.elasticsearch.search.SearchHits;
-
-import play.Logger;
-import play.libs.Json;
-import utils.Serializer;
-import utils.Serializer.WithAccessSerializerForElastic;
 
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
@@ -61,7 +38,21 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.net.MediaType;
 
 import db.DB;
-import edu.stanford.nlp.io.EncodingPrintWriter.err;
+import model.DescriptiveData;
+import model.EmbeddedMediaObject;
+import model.EmbeddedMediaObject.MediaVersion;
+import model.basicDataTypes.MultiLiteral;
+import model.basicDataTypes.MultiLiteralOrResource;
+import model.basicDataTypes.ProvenanceInfo;
+import model.basicDataTypes.WithAccess;
+import model.basicDataTypes.WithAccess.Access;
+import model.basicDataTypes.WithAccess.AccessEntry;
+import model.resources.WithAdmin;
+import model.resources.WithResource;
+import model.resources.WithResourceType;
+import play.Logger;
+import play.libs.Json;
+import utils.Serializer;
 
 public class ElasticUtils {
 	static private final Logger.ALogger log = Logger.of(ElasticUtils.class);
@@ -205,4 +196,37 @@ public class ElasticUtils {
 		return jn;
 	}
 
+	
+	/**
+	 * Remove documents from elastic that are not in mongo any more
+	 */
+	public static void purgeIndex() {
+		try {
+			// make a mongo record id set and check all existing elastic ids against it
+			// make a list of the ones that are not in mongo
+			Set<String> mongoIds = DB.getRecordResourceDAO().listIds()
+					.collect( Collectors.toCollection(()->new HashSet<String>() ));
+
+			ElasticDAO e = ElasticDAO.instance();
+			Set<String> elasticIds = new HashSet<String>(e.findAllRecordIds());
+
+			elasticIds.removeAll(mongoIds);
+			log.info( "Found " + elasticIds.size() + " orphaned elastic culturalobject, removing ...");
+			e.removeById(elasticIds, "culturalobject" );
+
+			mongoIds = DB.getCollectionObjectDAO().listIds()
+					.collect( Collectors.toCollection(()->new HashSet<String>() ));
+
+			elasticIds = new HashSet<String>(e.findAllCollectionIds());
+			elasticIds.addAll( e.findAllIdsByType("exhibition"));
+
+			elasticIds.removeAll(mongoIds);
+			log.info( "Found " + elasticIds.size() + " orphaned elastic simplecollection, removing ...");
+			e.removeById(elasticIds, "simplecollection", "exhibition" );
+
+			log.info( "Finished purging elastic");
+		} catch( Exception e ) {
+			log.error( "Purging elastic failed", e );
+		}
+	}
 }

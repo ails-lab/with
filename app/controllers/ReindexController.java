@@ -20,11 +20,13 @@ import java.util.function.Function;
 
 import elastic.Elastic;
 import elastic.ElasticReindexer;
+import elastic.ElasticUtils;
 import play.Logger;
 import play.Logger.ALogger;
 import play.libs.F.Promise;
 import play.mvc.Result;
 import sources.core.ParallelAPICall;
+import sources.core.ParallelAPICall.Priority;
 
 public class ReindexController extends WithController {
 
@@ -100,7 +102,11 @@ public class ReindexController extends WithController {
 		return ok();
 	}
 
-
+	public static Result purgeElastic() {
+		ParallelAPICall.createPromise(()->{ ElasticUtils.purgeIndex(); return true;}, Priority.BACKEND);
+		return ok();
+	}
+	
 	/*
 	 * Api call to reindex all thesaurus resources.
 	 * Mongo and Elastic should be consistent talking
