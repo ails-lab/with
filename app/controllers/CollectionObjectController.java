@@ -459,7 +459,7 @@ public class CollectionObjectController extends WithResourceController {
                 null, Arrays.asList(name));
     }
 
-    private static boolean internalAddCollection(CollectionObject collection,
+    public static boolean internalAddCollection(CollectionObject collection,
                                                  WithResourceType colType, ObjectId creatorDbId, ObjectNode error) {
         if ((collection.getDescriptiveData().getLabel() == null) || collection.getDescriptiveData().getLabel().isEmpty()) {
             error.put("error", "Missing collection title");
