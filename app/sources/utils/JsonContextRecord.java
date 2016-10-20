@@ -279,7 +279,9 @@ public class JsonContextRecord {
 			String[] splits = string.split("=");
 			String name = splits[0];
 			String vals = splits[1];
-			if (!getValue(buildpaths(name), current).asText().matches(vals)) {
+			String asText = getValue(buildpaths(name), current).asText();
+			System.out.println(asText + "??=" + vals);
+			if (!asText.matches(vals)) {
 				return false;
 			}
 		} else {
