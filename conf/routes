@@ -189,8 +189,9 @@ GET     /source/dbpedia/lookup						controllers.DBPediaController.dbpediaLookup(
 
 #Annotations
 GET		/record/:id/listAnnotations				    controllers.RecordResourceController.getAnnotations(id)
-POST		/record/:id/annotate						controllers.RecordResourceController.annotateRecord(id)
-POST		/collection/:id/annotate						controllers.CollectionObjectController.annotateCollection(id)
+POST		/record/:id/annotate					controllers.RecordResourceController.annotateRecord(id)
+POST		/collection/:id/annotate				controllers.CollectionObjectController.annotateCollection(id)
 GET		/record/:id/deleteRejectedAnnotations		controllers.RecordResourceController.deleteRejectedAnnotations(id)
 
+POST	/image/imageAnnotations					controllers.ImageAnnotationController.imageAnnotationResults()	
 GET			/collection/api/removeIdsOfDeletedRecords	controllers.WithResourceController.removeIdsOfDeletedRecords()		

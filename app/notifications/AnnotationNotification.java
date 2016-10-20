@@ -58,7 +58,7 @@ public class AnnotationNotification extends Notification {
 		if (withResource != null)
 			return withResource.getDescriptiveData().getLabel().get(Language.DEFAULT).get(0);
 		else
-			return "DELETED";
+			return "";
 	}
 
 }

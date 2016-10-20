@@ -16,7 +16,12 @@
 
 package controllers;
 
+import akka.actor.ActorRef;
+import akka.actor.ActorSelection;
+import akka.actor.Props;
+import annotators.AnnotationControlActor;
 import annotators.AnnotatorConfig;
+
 import com.codahale.metrics.Histogram;
 import com.codahale.metrics.Timer;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -24,6 +29,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+
 import controllers.parameterTypes.MyPlayList;
 import controllers.parameterTypes.StringTuple;
 import db.DB;
@@ -48,14 +54,17 @@ import model.resources.collection.SimpleCollection;
 import model.usersAndGroups.*;
 import notifications.AnnotationNotification;
 import notifications.Notification.Activity;
+
 import org.bson.types.ObjectId;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
+
 import play.Logger;
 import play.Logger.ALogger;
 import play.data.validation.Validation;
+import play.libs.Akka;
 import play.libs.F;
 import play.libs.F.Function0;
 import play.libs.F.Option;
@@ -77,6 +86,7 @@ import sources.formatreaders.MuseumofModernArtRecordFormatter;
 import utils.*;
 
 import javax.validation.ConstraintViolation;
+
 import java.io.File;
 import java.sql.Timestamp;
 import java.util.*;
@@ -1534,10 +1544,10 @@ public class CollectionObjectController extends WithResourceController {
     public static Result annotateCollection(String id) {
         ObjectNode result = Json.newObject();
         ObjectId colId = new ObjectId(id);
-        Locks locks = null;
+//        Locks locks = null;
 
         try {
-            locks = Locks.create().read("Collection #" + id).acquire();
+//            locks = Locks.create().read("Collection #" + id).acquire();
             Result response = errorIfNoAccessToCollection(Action.EDIT, colId);
             if (!response.toString().equals(ok().toString())) {
                 return response;
@@ -1546,35 +1556,22 @@ public class CollectionObjectController extends WithResourceController {
 
                 ObjectId user = WithController.effectiveUserDbId();
                 List<AnnotatorConfig> annConfigs = AnnotatorConfig.createAnnotationConfigs(json);
+                
+				Random rand = new Random();
+				String requestId = "ac" + (System.currentTimeMillis() + Math.abs(rand.nextLong())) + "" + Math.abs(rand.nextLong());
 
-                BiFunction<ObjectId, ObjectId, Boolean> methodQuery = (ObjectId cid, ObjectId uid) -> {
-                    List<ContextData<ContextDataBody>> rr = DB.getCollectionObjectDAO().getById(cid).getCollectedResources();
+				Akka.system().actorOf( Props.create(AnnotationControlActor.class, requestId, new ObjectId(id), user, false), requestId);
+				ActorSelection ac = Akka.system().actorSelection("user/" + requestId);
 
-                    for (ContextData<ContextDataBody> cd : rr) {
-                        try {
-                            String recordId = cd.getTarget().getRecordId().toHexString();
+                for (ContextData<ContextDataBody> cd : (List<ContextData<ContextDataBody>>)DB.getCollectionObjectDAO().getById(colId).getCollectedResources()) {
+               		String recordId = cd.getTarget().getRecordId().toHexString();
 
-//							if (DB.getRecordResourceDAO().hasAccess(uid, Action.EDIT, new ObjectId(recordId))  || isSuperUser()) {
-                            RecordResourceController.annotateRecord(recordId, user, annConfigs);
-//							}
-                        } catch (Exception e) {
-                            log.error(e.getMessage(), e);
-                        }
-                    }
-
-                    AnnotationNotification notification = new AnnotationNotification();
-                    notification.setActivity(Activity.ANNOTATING_COMPLETED);
-					notification.setOpenedAt(new Timestamp(new Date().getTime()));
-                    notification.setResource(cid);
-                    notification.setReceiver(uid);
-                    
-                    DB.getNotificationDAO().makePermanent(notification);
-                    NotificationCenter.sendNotification(notification);
-
-                    return true;
-                };
-
-                ParallelAPICall.createPromise(methodQuery, colId, user, Priority.BACKEND);
+//					if (DB.getRecordResourceDAO().hasAccess(uid, Action.EDIT, new ObjectId(recordId))  || isSuperUser()) {
+               			RecordResourceController.annotateRecord(recordId, user, annConfigs, ac);
+//					}
+                }
+                
+                ac.tell(new AnnotationControlActor.AnnotateRequestsCompleted(), ActorRef.noSender());
 
                 return ok(result);
             }
@@ -1583,9 +1580,9 @@ public class CollectionObjectController extends WithResourceController {
             result.put("error", e1.getMessage());
             return internalServerError(result);
         } finally {
-            if (locks != null) {
-                locks.release();
-            }
+//            if (locks != null) {
+//                locks.release();
+//            }
         }
     }
 

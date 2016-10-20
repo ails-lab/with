@@ -16,112 +16,82 @@
 
 package annotators;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
+import org.bson.types.ObjectId;
+
+import play.libs.Akka;
+import akka.actor.ActorRef;
+import akka.actor.ActorSelection;
+import akka.actor.UntypedActor;
+import controllers.AnnotationController;
 import model.annotations.Annotation;
-import model.annotations.targets.AnnotationTarget;
-import model.basicDataTypes.Language;
 
-public abstract class Annotator {
+public abstract class Annotator extends UntypedActor {
 
-	protected Language lang;
+	public interface AnnotatorDescriptor {
+
+		public static enum AnnotatorType {
+			LOOKUP,
+			NER,
+			IMAGE
+		}
+		
+		public String getName();
+		
+		public AnnotatorType getType();
+	}
 	
 	public static String LANGUAGE = "lang";
 	public static String TEXT = "text";
-	public static String USERID = "userId";
+	public static String TYPE = "type";
+	public static String TEXT_FIELDS = "text_fields";
+	public static String IMAGE_ANNOTATOR = "image";
+	public static String TEXT_ANNOTATOR = "text";
+	public static String[] textfields = new String[] {"description", "label"};
 	
-//	public abstract String getName();
 	
-	public abstract String getService();
-	
-	public abstract List<Annotation> annotate(AnnotationTarget target, Map<String, Object> properties) throws Exception;
-	
-	private Pattern p = Pattern.compile("(<.*?>)");
-	
-	public static enum AnnotatorType {
-		LOOKUP,
-		NER,
-		IMAGE
-	}
-	
-	protected String strip(String text) {
-		Matcher m = p.matcher(text);
-		
-		StringBuffer sb = new StringBuffer();
-		
-		int prev = -1;
-		while (m.find()) {
-			int s = m.start(1);
-			int e = m.end(1);
-			
-			if (prev == -1) {
-				sb.append(text.substring(0,s));
-			} else {
-				sb.append(text.substring(prev, s));
-			}
-			
-			char[] c = new char[e - s];
-			Arrays.fill(c, ' ');
-			
-			sb.append(c);
-			
-			prev = e;
-		}
-		
-		if (prev == -1) {
-			return text;
-		} else {
-			sb.append(text.substring(prev));
-		
-			return sb.toString();
-		}
-	}
-	
-	public static List<Annotator> getAnnotators(Language lang) {
-		List<Annotator> res = new ArrayList<>();
-		
-		Annotator ann;
-		ann = DBPediaAnnotator.getAnnotator(lang);
-		if (ann != null) {
-			res.add(ann);
-		}
-		
-		ann = LookupAnnotator.getAnnotator(lang, true);
-		if (ann != null) {
-			res.add(ann);
-		}
+	public static class AnnotationsMessage {
+		public List<Annotation> annotations;
 
-		ann = NLPAnnotator.getAnnotator(lang);
-		if (ann != null) {
-			res.add(ann);
+		public AnnotationsMessage(List<Annotation> annotations) {
+			this.annotations = annotations;
 		}
-		
-		
-		return res;
 	}
 	
-	public static Annotator getAnnotator(Class<? extends Annotator> clazz, Language lang) {
-
-		if (clazz.equals(DBPediaAnnotator.class)) {
-			return DBPediaAnnotator.getAnnotator(lang);
+	public void storeAnnotatations(List<Annotation> annotations, ObjectId user) {
+		for (Annotation ann : annotations) {
+			AnnotationController.addAnnotation(ann, user);
 		}
-		
-		if (clazz.equals(LookupAnnotator.class)) {
-			return LookupAnnotator.getAnnotator(lang, true);
-		}
-
-		if (clazz.equals(NLPAnnotator.class)) {
-			return NLPAnnotator.getAnnotator(lang);
-		}
-		
-		return null;
 	}
 	
+	protected void reply(String requestId) {
+		ActorSelection actor = Akka.system().actorSelection("user/" + requestId);
+		actor.tell(new AnnotationControlActor.TextAnnotationsCompleted(), ActorRef.noSender());
+	}
+	
+//	public static List<Annotator> getAnnotators(Language lang) {
+//		List<Annotator> res = new ArrayList<>();
+//		
+//		Annotator ann;
+//		ann = DBPediaAnnotator.getAnnotator(lang);
+//		if (ann != null) {
+//			res.add(ann);
+//		}
+//		
+//		ann = LookupAnnotator.getAnnotator(lang, true);
+//		if (ann != null) {
+//			res.add(ann);
+//		}
+//
+//		ann = NLPAnnotator.getAnnotator(lang);
+//		if (ann != null) {
+//			res.add(ann);
+//		}
+//		
+//		
+//		return res;
+//	}
 
 	
 }

@@ -210,7 +210,7 @@ public class AnnotationController extends Controller {
 	}
 
 	
-	private static Annotation getAnnotationFromJson(JsonNode json) {
+	public static Annotation getAnnotationFromJson(JsonNode json) {
 		try {
 			Annotation annotation = Json.fromJson(json, Annotation.class);
 			Class<?> clazz = Class

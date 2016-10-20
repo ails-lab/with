@@ -19,9 +19,11 @@ package annotators;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.URLEncoder;
@@ -43,6 +45,14 @@ import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.HttpClientBuilder;
 
+import actors.TokenLoginActor;
+import actors.ApiKeyManager.Access;
+import actors.TokenLoginActor.UserIdResponseMessage;
+import akka.actor.ActorRef;
+import akka.actor.ActorSelection;
+import akka.actor.Props;
+import akka.actor.UntypedActor;
+
 import com.fasterxml.jackson.databind.JsonNode;
 
 import org.apache.jena.query.QueryExecution;
@@ -53,16 +63,14 @@ import org.apache.jena.query.ResultSet;
 import org.apache.jena.query.Syntax;
 import org.apache.jena.rdf.model.Literal;
 import org.apache.jena.rdf.model.RDFNode;
+import org.bson.types.ObjectId;
 
+import play.libs.Akka;
 import play.libs.Json;
 
-public class DBPediaAnnotator extends Annotator {
+public class DBPediaAnnotator extends TextAnnotator {
 
-	public static String NAME = "DBPediaSpotlightAnnotator"; 
-	
 	private static String DPBEDIA_ENDPOINT = "http://zenon.image.ece.ntua.gr:8890/sparql";
-	
-	protected static Map<Language, DBPediaAnnotator> annotators = new HashMap<>();
 	
 	public static Map<Language, String> serverMap = new HashMap<>();
 	static {
@@ -78,48 +86,54 @@ public class DBPediaAnnotator extends Annotator {
 		serverMap.put(Language.TR, "http://spotlight.sztaki.hu:2235/rest/annotate");
 	}
 	
-	private String service;
+	public static AnnotatorDescriptor descriptor = new Descriptor();
 	
-	public static AnnotatorType getType() {
-		return AnnotatorType.NER;
-	}
-	
-	public static String getName() {
-		return "DBPedia Spotlight";
-	}
+	public static class Descriptor implements TextAnnotator.Descriptor {
 
-    public static DBPediaAnnotator getAnnotator(Language lang) {
-		if (!serverMap.containsKey(lang)) {
-			return null;
+		@Override
+		public String getName() {
+			return "DBPedia Spotlight";
 		}
 
-    	DBPediaAnnotator ta = annotators.get(lang);
-    	if (ta == null) {
-    		synchronized (DBPediaAnnotator.class) {
-	    		if (ta == null) {
-	    			ta = new DBPediaAnnotator(lang);
-	    			annotators.put(lang, ta);
-	    		}
-    		}
-    	}
-    	
-    	return ta;
-    }  
-    
-    private DBPediaAnnotator(Language lang) {
-    	this.lang = lang;
-    	service = serverMap.get(lang);
-    }
+		@Override
+		public AnnotatorType getType() {
+			return AnnotatorType.NER;
+		}
 
+		private static Set<Language> created = new HashSet<>();
 
-	public String getService() {
-		return service;
+	    public ActorSelection getAnnotator(Language lang, boolean cs) {
+	    	if (!serverMap.containsKey(lang)) {
+				return null;
+			}
+	    	
+	    	String actorName = "DBPediaAnnotator-" + lang.getName();
+
+	    	if (!created.contains(lang)) {
+				synchronized (DBPediaAnnotator.class) {
+			    	if (created.add(lang)) {
+						Akka.system().actorOf( Props.create(DBPediaAnnotator.class, lang), actorName);
+					}
+				}
+			}
+		
+			return Akka.system().actorSelection("user/" + actorName);
+	    }
+		
 	}
 	
-	public List<Annotation> annotate(AnnotationTarget target, Map<String, Object> props) throws Exception {
-		String text = (String)props.get(TEXT);
-		
-		text = strip(text);
+    
+	private String service;
+	private AnnotatorDescriptor descr; 
+    
+    public DBPediaAnnotator(Language lang) {
+    	this.lang = lang;
+    	this.service = serverMap.get(lang);
+    	this.descr = new DBPediaAnnotator.Descriptor();
+    }
+
+	public List<Annotation> annotate(String text, ObjectId user, AnnotationTarget target, Map<String, Object> props) throws Exception {
+		text = TextAnnotator.strip(text);
 		
 		List<Annotation> res = new ArrayList<>();
 		
@@ -134,7 +148,6 @@ public class DBPediaAnnotator extends Annotator {
 		request.setEntity(new StringEntity("text=" + text, ContentType.create("application/x-www-form-urlencoded", Charset.forName("UTF-8"))));
 
 		HttpResponse response = client.execute(request);
-		
 //		int responseCode = response.getStatusLine().getStatusCode();
 		
 		BufferedReader br = new BufferedReader(new InputStreamReader(response.getEntity().getContent(), Charset.forName("UTF-8")));
@@ -204,7 +217,7 @@ public class DBPediaAnnotator extends Annotator {
 
 	    		ArrayList<AnnotationAdmin> admins  = new ArrayList<>();
 	    		AnnotationAdmin admin = new Annotation.AnnotationAdmin();
-	    		admin.setGenerator(getName());
+	    		admin.setGenerator(descr.getName());
 	    		admin.setGenerated(new Date());
 	    		admin.setConfidence(score);
 	    		

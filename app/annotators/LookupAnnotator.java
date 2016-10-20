@@ -20,11 +20,15 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.bson.types.ObjectId;
+
+import play.libs.Akka;
 import play.libs.Json;
 import utils.annotators.AnnotatedObject;
 import utils.annotators.AnnotationIndex;
@@ -41,6 +45,10 @@ import model.basicDataTypes.Language;
 import model.basicDataTypes.MultiLiteral;
 import model.resources.ThesaurusObject;
 import model.resources.ThesaurusObject.SKOSSemantic;
+import akka.actor.ActorSelection;
+import akka.actor.Props;
+import annotators.Annotator.AnnotatorDescriptor;
+import annotators.DBPediaAnnotator.Descriptor;
 
 import com.aliasi.chunk.Chunk;
 import com.aliasi.chunk.Chunking;
@@ -54,39 +62,53 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import db.DB;
 
-public class LookupAnnotator extends Annotator {
-	
-	protected static Map<Language, LookupAnnotator> annotators = new HashMap<>();
-
-	private ExactDictionaryChunker tt;
+public class LookupAnnotator extends TextAnnotator {
 	
 	public static String VOCABULARIES = "VOCABULARIES";
 	
-	public static AnnotatorType getType() {
-		return AnnotatorType.LOOKUP;
-	}
+	public static AnnotatorDescriptor descriptor = new Descriptor();
+	
+	public static class Descriptor implements TextAnnotator.Descriptor {
 
-	public static String getName() {
-		return "WITH Dictionary Annotator";
-	}
+		@Override
+		public String getName() {
+			return "WITH Dictionary Annotator";
+		}
 
-    public static LookupAnnotator getAnnotator(Language lang, boolean cs) {
-    	LookupAnnotator ta = annotators.get(lang);
-    	
-    	if (ta == null) {
-    		synchronized (LookupAnnotator.class) {
-	    		if (ta == null) {
-		   			ta = new LookupAnnotator(lang, cs);
-		   			annotators.put(lang, ta);
+		@Override
+		public AnnotatorType getType() {
+			return AnnotatorType.LOOKUP;
+		}
+		
+		private static Set<Language> created = new HashSet<>();
+		
+		public ActorSelection getAnnotator(Language lang) {
+			return getAnnotator(lang, false);
+		}
+		
+	    public ActorSelection getAnnotator(Language lang, boolean cs) {
+	       	String actorName = "LookupAnnotator-" + lang.getName();
+
+	    	if (!created.contains(lang)) {
+	    		synchronized (LookupAnnotator.class) {
+	    			if (created.add(lang)) {
+	    				Akka.system().actorOf( Props.create(LookupAnnotator.class, lang, cs), actorName);
+	    			}
 	    		}
-    		}
-   		} 
-    	
-    	return ta;
-    } 
-    
+	    	}
+	    	
+	    	return Akka.system().actorSelection("user/" + actorName);
+	    }  
+	}
+
+
+
+    private AnnotatorDescriptor descr;
+	private ExactDictionaryChunker tt;
+
 	private LookupAnnotator(Language lang, boolean caseSensitive) {
 		this.lang = lang;
+		this.descr = new LookupAnnotator.Descriptor();
 		
 		String langField = "semantic.prefLabel." + lang.getDefaultCode();
 		String altLangField = "semantic.altLabel." + lang.getDefaultCode();
@@ -169,27 +191,19 @@ public class LookupAnnotator extends Annotator {
 
 	}
 	
-
 	@Override
-	public String getService() {
-		return "";
-	}
-	
-	@Override
-	public List<Annotation> annotate(AnnotationTarget target, Map<String, Object> props) throws Exception {
-		String text = (String)props.get(TEXT);
-		
+	public List<Annotation> annotate(String text, ObjectId user, AnnotationTarget target, Map<String, Object> props) throws Exception {
 		text = strip(text);
 		
 		List<Annotation> res = new ArrayList<>();
 		
 		Chunking chunking = tt.chunk(text);
 		
-		NLPAnnotator sann = NLPAnnotator.getAnnotator(lang);
+//		NLPAnnotator sann = NLPAnnotator.getAnnotator(lang);
 		AnnotationIndex ai = null;
-		if (sann != null) {
-			ai = sann.analyze(text);
-		}
+//		if (sann != null) {
+//			ai = sann.analyze(text);
+//		}
 		
 		Set<Vocabulary> vocs = (Set<Vocabulary>)props.get(VOCABULARIES);
 		
@@ -252,7 +266,7 @@ public class LookupAnnotator extends Annotator {
 
 	    		ArrayList<AnnotationAdmin> admins  = new ArrayList<>();
 	    		AnnotationAdmin admin = new Annotation.AnnotationAdmin();
-	    		admin.setGenerator(getName());
+	    		admin.setGenerator(descr.getName());
 	    		admin.setGenerated(new Date());
 	    		admin.setConfidence(-1.0f);
 

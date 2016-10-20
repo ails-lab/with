@@ -21,11 +21,19 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
+import org.bson.types.ObjectId;
+
+import play.libs.Akka;
+import akka.actor.ActorSelection;
+import akka.actor.Props;
+import annotators.Annotator.AnnotatorDescriptor;
+import annotators.DBPediaAnnotator.Descriptor;
 import utils.annotators.AnnotatedObject;
 import utils.annotators.AnnotationIndex;
 import utils.annotators.AnnotationValue;
@@ -50,42 +58,45 @@ import edu.stanford.nlp.ling.CoreAnnotations.TokensAnnotation;
 import edu.stanford.nlp.pipeline.StanfordCoreNLP;
 import edu.stanford.nlp.util.CoreMap;
 
-public class NLPAnnotator extends Annotator {
+public class NLPAnnotator extends TextAnnotator {
 
+	public static AnnotatorDescriptor descriptor = new Descriptor();
 	
-	public String getService() {
-		return "";
-	}
-	
-    protected static Map<Language, NLPAnnotator> annotators = new HashMap<>();
+	public static class Descriptor implements TextAnnotator.Descriptor {
 
-	public static AnnotatorType getType() {
-		return AnnotatorType.NER;
+		@Override
+		public String getName() {
+			return "WITH Named Entity Recognizer";
+		}
+
+		@Override
+		public AnnotatorType getType() {
+			return AnnotatorType.NER;
+		}
+		
+		private static Set<Language> created = new HashSet<>();
+
+		public ActorSelection getAnnotator(Language lang, boolean cs) {
+	    	if (lang != Language.EN) {
+	    		return null;
+	    	}
+	      	
+	       	String actorName = "NLPAnnotator-" + lang.getName();
+
+	    	if (!created.contains(lang)) {
+	    		synchronized (NLPAnnotator.class) {
+	    			if (created.add(lang)) {
+	    				Akka.system().actorOf( Props.create(NLPAnnotator.class), actorName);
+	    			}
+	    		}
+	    	}
+	    	
+	    	return Akka.system().actorSelection("user/" + actorName);
+	    }
+	    
 	}
 
-	public static String getName() {
-		return "WITH Named Entity Recognizer";
-	}
-
-    public static NLPAnnotator getAnnotator(Language lang) {
-    	if (lang != Language.EN) {
-    		return null;
-    	}
-    	
-    	NLPAnnotator ta = annotators.get(lang);
-    	if (ta == null) {
-    		synchronized (NLPAnnotator.class) {
-    			ta = annotators.get(lang);
-    			if (ta == null) {
-    				ta  = new NLPAnnotator();
-    				annotators.put(lang, ta);
-    			}
-    		}
-    	}
-    	
-    	return ta;
-    }    	
-    	
+    private AnnotatorDescriptor descr;
     private StanfordCoreNLP pipeline;
     
     private NLPAnnotator() {
@@ -98,12 +109,11 @@ public class NLPAnnotator extends Annotator {
 //    	props.put("annotators", "tokenize, ssplit");
     	
     	pipeline = new StanfordCoreNLP(props);
+    	descr = new NLPAnnotator.Descriptor();
     }
 
 	@Override
-	public List<Annotation> annotate(AnnotationTarget target, Map<String, Object> props) throws Exception {
-		String text = (String)props.get(TEXT);
-		
+	public List<Annotation> annotate(String text, ObjectId user, AnnotationTarget target, Map<String, Object> props) throws Exception {
 		text = strip(text);
 		
 		List<Annotation> res = new ArrayList<>();
@@ -132,7 +142,7 @@ public class NLPAnnotator extends Annotator {
 
 	    		ArrayList<AnnotationAdmin> admins  = new ArrayList<>();
 	    		AnnotationAdmin admin = new Annotation.AnnotationAdmin();
-	    		admin.setGenerator(getName());
+	    		admin.setGenerator(descr.getName());
 	    		admin.setGenerated(new Date());
 	    		admin.setConfidence(-1.0f);
 //	    		admin.setWithCreator(withCreator);
@@ -171,7 +181,7 @@ public class NLPAnnotator extends Annotator {
 
 	    		ArrayList<AnnotationAdmin> admins  = new ArrayList<>();
 	    		AnnotationAdmin admin = new Annotation.AnnotationAdmin();
-	    		admin.setGenerator(getName());
+	    		admin.setGenerator(descr.getName());
 	    		admin.setGenerated(new Date());
 	    		admin.setConfidence(-1.0f);
 //	    		admin.setWithCreator(withCreator);
@@ -210,7 +220,7 @@ public class NLPAnnotator extends Annotator {
 
 	    		ArrayList<AnnotationAdmin> admins  = new ArrayList<>();
 	    		AnnotationAdmin admin = new Annotation.AnnotationAdmin();
-	    		admin.setGenerator(getName());
+	    		admin.setGenerator(descr.getName());
 	    		admin.setGenerated(new Date());
 	    		admin.setConfidence(-1.0f);
 //	    		admin.setWithCreator(withCreator);

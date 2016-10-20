@@ -55,10 +55,9 @@ import elastic.Elastic;
 import elastic.ElasticSearcher;
 import elastic.ElasticSearcher.SearchOptions;
 import annotators.DBPediaAnnotator;
-import annotators.ImageAnnotator;
 import annotators.LookupAnnotator;
-import annotators.Annotator.AnnotatorType;
 import annotators.NLPAnnotator;
+import annotators.WITHImageAnnotator;
 
 /**
  * @author achort
@@ -252,7 +251,7 @@ public class ThesaurusController extends Controller {
 		for (Vocabulary voc : Vocabulary.getVocabularies()) {
 			if (voc.getType() == VocabularyType.THESAURUS) {
 				option = Json.newObject();
-				option.put("name", LookupAnnotator.class.getSimpleName()+"/" + voc.getName());
+				option.put("name", LookupAnnotator.class.getSimpleName() + "/" + voc.getName());
 				option.put("label", voc.getLabel());
 			
 				options.add(option);
@@ -268,29 +267,29 @@ public class ThesaurusController extends Controller {
 		options = Json.newObject().arrayNode();
 		option = Json.newObject();
 		option.put("name", DBPediaAnnotator.class.getSimpleName());
-		option.put("label", DBPediaAnnotator.getName());
+		option.put("label", new DBPediaAnnotator.Descriptor().getName());
 		options.add(option);
 
 		option = Json.newObject();
 		option.put("name", NLPAnnotator.class.getSimpleName());
-		option.put("label",NLPAnnotator.getName());
+		option.put("label", new NLPAnnotator.Descriptor().getName());
 		options.add(option);
 
 		ann.put("options", options);
 		result.add(ann);
 		
-//		ann = Json.newObject();
-//		ann.put("group", "Image Analysis");
-//		ann.put("hint", "Select the image analysis services that will be used");
-//		
-//		options = Json.newObject().arrayNode();
-//		option = Json.newObject();
-//		option.put("name", ImageAnnotator.class.getSimpleName());
-//		option.put("label", ImageAnnotator.getName());
-//		options.add(option);
-//
-//		ann.put("options", options);
-//		result.add(ann);
+		ann = Json.newObject();
+		ann.put("group", "Image Analysis");
+		ann.put("hint", "Select the image analysis services that will be used");
+		
+		options = Json.newObject().arrayNode();
+		option = Json.newObject();
+		option.put("name", WITHImageAnnotator.class.getSimpleName());
+		option.put("label", new WITHImageAnnotator.Descriptor().getName());
+		options.add(option);
+
+		ann.put("options", options);
+		result.add(ann);
 		
 		return ok(Json.toJson(result));
 	}
