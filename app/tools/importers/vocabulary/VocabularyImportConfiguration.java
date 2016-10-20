@@ -52,10 +52,10 @@ public class VocabularyImportConfiguration {
 	public VocabularyImportConfiguration(String folder) {
 		this.folder = folder;
 		
-		File dir  = new File(outdir);
-		if (!dir.exists()) {
-			dir.mkdir();
-		}
+//		File dir  = new File(outdir);
+//		if (!dir.exists()) {
+//			dir.mkdir();
+//		}
 
 	}
 

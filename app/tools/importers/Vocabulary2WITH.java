@@ -43,6 +43,7 @@ import tools.importers.vocabulary.DBPedia2Vocabulary;
 import tools.importers.vocabulary.OWL2Vocabulary;
 import tools.importers.vocabulary.SKOS2Vocabulary;
 import tools.importers.vocabulary.VocabularyImportConfiguration;
+import tools.importers.vocabulary.Wordnet302Vocabulary;
 import elastic.ElasticCoordinator;
 import elastic.ElasticEraser;
 import elastic.ElasticSearcher.SearchOptions;
@@ -57,8 +58,11 @@ public class Vocabulary2WITH {
 		VocabularyImportConfiguration.srcdir = "C:/Users/achort.IPLAB/git/with-vocabularies/resources/vocabulary/src";
 		VocabularyImportConfiguration.outdir = "C:/Users/achort.IPLAB/git/with-vocabularies/resources/vocabulary/json";
 		
+//		deleteVocabularyFromIndex("wn30");
+		
 		// converts sources in srcdir to zipped jsons in outfir
 		//convertSourcesToJSONs();
+//		Wordnet302Vocabulary.doImport(Wordnet302Vocabulary.confs);
 		
 		// import all jsons to WITH
 		//importAll();
@@ -76,6 +80,7 @@ public class Vocabulary2WITH {
 		//importJSONVocabularyToWITH("dbo");
 		//importJSONVocabularyToWITH("dbr-place");
 		//importJSONVocabularyToWITH("dbr-person");
+		importJSONVocabularyToWITH("wn30");
 	}
 	
 	private static void convertSourcesToJSONs() {
@@ -87,6 +92,8 @@ public class Vocabulary2WITH {
 		
 		// import aat thesaurus
 		AAT2Vocabulary.doImport(AAT2Vocabulary.confs);
+		
+		Wordnet302Vocabulary.doImport(Wordnet302Vocabulary.confs);
 		
 		// import dbpedia
 		List<String[]> filters = new ArrayList<>();
@@ -175,7 +182,7 @@ public class Vocabulary2WITH {
 	public static void deleteVocabularyFromIndex(String voc) {
 		TermQueryBuilder query = QueryBuilders.termQuery("vocabulary.name", voc);
 	
-		SearchOptions so = new SearchOptions(0, Integer.MAX_VALUE);
+		SearchOptions so = new SearchOptions(0, 10000);
 		so.isPublic = false;
 		ElasticCoordinator es = new ElasticCoordinator();
 		SearchResponse res = es.queryExcecution(query, so);
