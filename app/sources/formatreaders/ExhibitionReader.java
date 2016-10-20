@@ -46,53 +46,59 @@ import sources.core.HttpConnector;
 import sources.utils.JsonContextRecord;
 
 public class ExhibitionReader {
-	
+
 	static private final Logger.ALogger log = Logger.of(ExhibitionReader.class);
 
-	
 	public static HttpConnector getHttpConnector() {
 		return ApacheHttpConnector.getApacheHttpConnector();
 	}
-	public void importOmeka(ObjectId creatorDbId){
+
+	public void importOmeka(ObjectId creatorDbId, int ncollections) {
 		JsonNode response;
 		try {
 			response = getHttpConnector().getURLContent("http://tellyourphotostory.be/espace_test/api/exhibits");
-			JsonContextRecord rec = new JsonContextRecord(response);
-			fillExhibitionObjectFrom(rec, creatorDbId);
+			if (ncollections < 0)
+				ncollections = response.size();
+			else
+				ncollections = Math.min(ncollections, response.size());
+			for (int i = 0; i < ncollections; i++) {
+				fillExhibitionObjectFrom(new JsonContextRecord(response.get(i)), creatorDbId);
+			}
 		} catch (Exception e) {
-			log.error("Exeption",e);
+			log.error("Exeption", e);
 		}
-		
+
 	}
+
 	protected Exhibition fillExhibitionObjectFrom(JsonContextRecord text, ObjectId creatorDbId) {
-		
+
 		Exhibition exhibition = new Exhibition();
 		exhibition.getAdministrative().getAccess().setIsPublic(true);
 
 		ExhibitionDescriptiveData model = new ExhibitionDescriptiveData();
 		exhibition.setDescriptiveData(model);
 		model.setMetadataRights(new LiteralOrResource("http://creativecommons.org/publicdomain/zero/1.0/"));
-		model.setRdfType(new Resource( "http://www.europeana.eu/schemas/edm/ProvidedCHO"));
+		model.setRdfType(new Resource("http://www.europeana.eu/schemas/edm/ProvidedCHO"));
 		model.setLabel(text.getMultiLiteralValue("title"));
 		model.setDescription(text.getMultiLiteralValue("description"));
 		model.setCredits(text.getStringValue("credits"));
-		ProvenanceInfo provInfo = new ProvenanceInfo("OMECA",  text.getStringValue("id"), text.getStringValue("url"));
+		ProvenanceInfo provInfo = new ProvenanceInfo("OMECA", text.getStringValue("id"), text.getStringValue("url"));
 		exhibition.addToProvenance(provInfo);
 		exhibition.getAdministrative().setExternalId(text.getStringValue("id"));
-        ObjectNode resultInfo = Json.newObject();
+		ObjectNode resultInfo = Json.newObject();
 		boolean success = CollectionObjectController.internalAddCollection(exhibition,
-                WithResourceType.SimpleCollection, creatorDbId, resultInfo);
+				WithResourceType.SimpleCollection, creatorDbId, resultInfo);
 		if (success)
 			importExhibitionPagesObjectFrom(text, exhibition.getDbId());
 		return exhibition;
 	}
-	
+
 	protected void importExhibitionPagesObjectFrom(JsonContextRecord text, ObjectId collectionId) {
 		String url = text.getStringValue("pages.url");
 		try {
-		JsonNode response = getHttpConnector().getURLContent(url);
-		JsonContextRecord rec = new JsonContextRecord(response);
-		List<String> list = rec.getStringArrayValue("[0].page_blocks[.*].attachments[0].item.url");
+			JsonNode response = getHttpConnector().getURLContent(url);
+			JsonContextRecord rec = new JsonContextRecord(response);
+			List<String> list = rec.getStringArrayValue("[0].page_blocks[.*].attachments[0].item.url");
 			for (int i = 0; i < list.size(); i++) {
 
 				JsonNode response1;
@@ -119,4 +125,3 @@ public class ExhibitionReader {
 	}
 
 }
-

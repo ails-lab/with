@@ -87,8 +87,9 @@ POST     /collection/importSearch		        controllers.CollectionObjectControlle
 POST     /collection/uploadCollection		    controllers.CollectionObjectController.uploadCollection()
 POST     /collection/importIDs 					controllers.CollectionObjectController.importIDs(cname, source, ids)
 GET     /collection/importEuropeanaCollection	controllers.CollectionObjectController.createAndFillEuropeanaCollection(id: String, limit:Integer ?=-1)
+GET     /collection/importOmeka					controllers.CollectionObjectController.importOmeka(ncollections:Integer ?=-1)
 GET      /collection/exportToOWL 			    controllers.CollectionObjectController.exportCollectionObjectToOWL(cname)
-GET      /collection/update 			    controllers.CollectionObjectController.updateCollectionObject(collectionId: String)
+GET      /collection/update 			    	controllers.CollectionObjectController.updateCollectionObject(collectionId: String)
 
 GET      /collection/multiple                   controllers.CollectionObjectController.getMultipleCollectionObjects( id: java.util.List[String],profile: String ?="MEDIUM", locale: play.libs.F.Option[java.lang.String])
 GET	     /collection/:id 	        			controllers.CollectionObjectController.getCollectionObject(id, profile: String ?="MEDIUM", locale: play.libs.F.Option[java.lang.String])
