@@ -139,8 +139,10 @@ public class JsonContextRecord {
 	}
 
 	public JsonNode getValue(Collection<String> steps) {
-		JsonNode node = rootInformation;
-		// TODO: if one null, return null?
+		return getValue(steps, rootInformation);
+	}
+
+	public JsonNode getValue(Collection<String> steps, JsonNode node) {
 		for (String string : steps) {
 			node = getPath(node, string);
 			if (node == null)
@@ -277,7 +279,7 @@ public class JsonContextRecord {
 			String[] splits = string.split("=");
 			String name = splits[0];
 			String vals = splits[1];
-			if (!current.path(name).asText().matches(vals)) {
+			if (!getValue(buildpaths(name), current).asText().matches(vals)) {
 				return false;
 			}
 		} else {
