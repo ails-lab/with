@@ -46,8 +46,8 @@ import sources.core.Utils;
 
 public class JsonContextRecord {
 
-	public static final ALogger log = Logger.of( JsonContextRecord.class );
-	
+	public static final ALogger log = Logger.of(JsonContextRecord.class);
+
 	private JsonNode rootInformation;
 	private List<String> context;
 	private Language[] languages;
@@ -65,13 +65,13 @@ public class JsonContextRecord {
 			this.rootInformation = mapper.readTree(jsonString);
 		} catch (JsonProcessingException e) {
 			// TODO Auto-generated catch block
-			log.error("",e);
+			log.error("", e);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
-			log.error("",e);
+			log.error("", e);
 		}
 	}
-	
+
 	public JsonContextRecord(File jsonFile) {
 		// TODO: what us context?
 		context = new ArrayList<>();
@@ -79,9 +79,9 @@ public class JsonContextRecord {
 		try {
 			this.rootInformation = mapper.readTree(jsonFile);
 		} catch (JsonProcessingException e) {
-			log.error("",e);
+			log.error("", e);
 		} catch (IOException e) {
-			log.error("",e);
+			log.error("", e);
 		}
 	}
 
@@ -110,32 +110,32 @@ public class JsonContextRecord {
 
 	private String[] splitPaths(String string) {
 		List<String> res = new ArrayList<>();
-		int d=0;
+		int d = 0;
 		String current = "";
 		for (int i = 0; i < string.length(); i++) {
 			switch (string.charAt(i)) {
 			case '[':
 				d++;
-				current+=string.charAt(i);
+				current += string.charAt(i);
 				break;
 			case ']':
 				d--;
-				current+=string.charAt(i);
+				current += string.charAt(i);
 				break;
 			case '.':
-				if (d==0){ 
+				if (d == 0) {
 					res.add(current);
 					current = "";
 					break;
 				}
 			default:
-				current+=string.charAt(i);
+				current += string.charAt(i);
 				break;
 			}
-			
+
 		}
 		res.add(current);
-		return res.toArray(new String[]{});
+		return res.toArray(new String[] {});
 	}
 
 	public JsonNode getValue(Collection<String> steps) {
@@ -148,16 +148,16 @@ public class JsonContextRecord {
 		}
 		return node;
 	}
-	
+
 	public List<JsonNode> getValues(Collection<String> steps) {
 		List<JsonNode> roots = new ArrayList<>();
 		roots.add(rootInformation);
 		for (String string : steps) {
 			List<JsonNode> next = new ArrayList<>();
-			for (JsonNode n: roots){
+			for (JsonNode n : roots) {
 				getPaths(n, string, next);
 			}
-			roots  = next;
+			roots = next;
 		}
 		return roots;
 	}
@@ -213,7 +213,9 @@ public class JsonContextRecord {
 				return node.path(p).get(index);
 			} catch (NumberFormatException e) {
 				// should be a condition:
-				node = node.path(p);
+				System.out.println(path);
+				if (!p.equals(""))
+					node = node.path(p);
 				for (int i = 0; i < node.size(); i++) {
 					JsonNode current = node.get(i);
 					elements = elements[1].split(",");
@@ -229,7 +231,7 @@ public class JsonContextRecord {
 		}
 		return node.path(path);
 	}
-	
+
 	private List<JsonNode> getPaths(JsonNode node, String path, List<JsonNode> res) {
 		if (path.endsWith("]")) {
 			String[] elements = path.split("\\[|\\]");
@@ -239,12 +241,12 @@ public class JsonContextRecord {
 				int index = Integer.parseInt(elements[1]);
 				if (p.equals("")) {
 					JsonNode e = node.get(index);
-					if (e!=null)
-					res.add(e);
+					if (e != null)
+						res.add(e);
 				} else {
 					JsonNode e = node.path(p).get(index);
-					if (e!=null)
-					res.add(e);
+					if (e != null)
+						res.add(e);
 				}
 			} else {
 				// should be a condition:
@@ -260,19 +262,19 @@ public class JsonContextRecord {
 						String string = elements[h];
 						ok &= checkCondition(i, current, string);
 					}
-					if (ok && current!=null)
+					if (ok && current != null)
 						res.add(current);
 				}
 			}
-		} else{
-			if (node.path(path)!=null)
+		} else {
+			if (node.path(path) != null)
 				res.add(node.path(path));
 		}
 		return res;
 	}
 
 	private boolean checkCondition(int index, JsonNode current, String string) {
-		if (string.matches(".*=.*")){
+		if (string.matches(".*=.*")) {
 			String[] splits = string.split("=");
 			String name = splits[0];
 			String vals = splits[1];
@@ -280,14 +282,12 @@ public class JsonContextRecord {
 				return false;
 			}
 		} else {
-			if (!(""+index).matches(string)) {
+			if (!("" + index).matches(string)) {
 				return false;
 			}
 		}
 		return true;
 	}
-	
-	
 
 	public JsonNode getValue(String... path) {
 		return getValue(buildpaths(path));
@@ -336,7 +336,7 @@ public class JsonContextRecord {
 	 * @return
 	 */
 	public MultiLiteral getMultiLiteralValue(String... path) {
-		return getMultiLiteralValue(true,path);
+		return getMultiLiteralValue(true, path);
 	}
 
 	public MultiLiteral getMultiLiteralValue(boolean merge, String... path) {
@@ -345,9 +345,9 @@ public class JsonContextRecord {
 			List<JsonNode> node = getValues(buildpaths(spath));
 			if (Utils.hasInfo(node)) {
 				for (JsonNode jsonNode : node) {
-					if (Utils.hasInfo(jsonNode)){
+					if (Utils.hasInfo(jsonNode)) {
 						res = merge(res, JsonNodeUtils.asMultiLiteral(jsonNode, languages));
-						
+
 					}
 				}
 			}
@@ -389,7 +389,7 @@ public class JsonContextRecord {
 		MultiLiteralOrResource res = null;
 		for (String spath : path) {
 			List<JsonNode> node = getValues(buildpaths(spath));
-			if (Utils.hasInfo(node)){
+			if (Utils.hasInfo(node)) {
 				for (JsonNode jsonNode : node) {
 					if (Utils.hasInfo(jsonNode)) {
 						res = merge(res, JsonNodeUtils.asMultiLiteralOrResource(jsonNode, languages));
@@ -428,26 +428,26 @@ public class JsonContextRecord {
 		return null;
 	}
 
-	public Resource getResource( String... path ) {
+	public Resource getResource(String... path) {
 		for (String spath : path) {
-			String uri = getStringValue( path );
-			if( org.apache.commons.lang3.StringUtils.isNotBlank(uri))
-				return new Resource( uri );
+			String uri = getStringValue(path);
+			if (org.apache.commons.lang3.StringUtils.isNotBlank(uri))
+				return new Resource(uri);
 		}
-		return null;		
+		return null;
 	}
-	
+
 	public List<String> getStringArrayValue(String... path) {
-		return getStringArrayValue(true,path);
+		return getStringArrayValue(true, path);
 	}
-	
-	public List<String> getStringArrayValue(boolean merge,String... path) {
+
+	public List<String> getStringArrayValue(boolean merge, String... path) {
 		Set<String> res = new TreeSet<>();
 		for (String spath : path) {
 			List<JsonNode> node = getValues(buildpaths(spath));
-			if (Utils.hasInfo(node)){
+			if (Utils.hasInfo(node)) {
 				for (JsonNode jsonNode : node) {
-					if (Utils.hasInfo(jsonNode)){
+					if (Utils.hasInfo(jsonNode)) {
 						List<String> a = JsonNodeUtils.asStringArray(jsonNode);
 						for (String string : a) {
 							res.add(string);
@@ -491,7 +491,7 @@ public class JsonContextRecord {
 
 		System.out.println(Json.toJson(ml).toString());
 		System.out.println(r.getRootInformation().toString());
-		
+
 		System.out.println(r.getValues(r.buildpaths("ages[.*]")));
 	}
 
