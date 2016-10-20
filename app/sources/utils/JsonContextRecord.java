@@ -215,10 +215,9 @@ public class JsonContextRecord {
 				// should be a condition:
 				if (!p.equals(""))
 					node = node.path(p);
+				elements = elements[1].split(",");
 				for (int i = 0; i < node.size(); i++) {
 					JsonNode current = node.get(i);
-					System.out.println(Arrays.asList(elements));
-					elements = elements[1].split(",");
 					boolean ok = true;
 					for (int h = 0; h < elements.length; h++) {
 						String string = elements[h];
