@@ -213,11 +213,11 @@ public class JsonContextRecord {
 				return node.path(p).get(index);
 			} catch (NumberFormatException e) {
 				// should be a condition:
-				System.out.println(path);
 				if (!p.equals(""))
 					node = node.path(p);
 				for (int i = 0; i < node.size(); i++) {
 					JsonNode current = node.get(i);
+					System.out.println(Arrays.asList(elements));
 					elements = elements[1].split(",");
 					boolean ok = true;
 					for (int h = 0; h < elements.length; h++) {
