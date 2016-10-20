@@ -86,8 +86,8 @@ public class ExhibitionReader {
 		exhibition.addToProvenance(provInfo);
 		exhibition.getAdministrative().setExternalId(text.getStringValue("id"));
 		ObjectNode resultInfo = Json.newObject();
-		boolean success = CollectionObjectController.internalAddCollection(exhibition,
-				WithResourceType.SimpleCollection, creatorDbId, resultInfo);
+		boolean success = CollectionObjectController.internalAddCollection(exhibition, WithResourceType.Exhibition,
+				creatorDbId, resultInfo);
 		if (success)
 			importExhibitionPagesObjectFrom(text, exhibition.getDbId());
 		return exhibition;
@@ -107,7 +107,7 @@ public class ExhibitionReader {
 					JsonContextRecord rec1 = new JsonContextRecord(response1);
 					String source = rec1.getStringValue("item_type.name");
 					String id = rec1.getStringValue("element_texts[element.name=Identifier].text");
-
+					System.out.println(source + " id=" + id);
 					CulturalObject record = new CulturalObject();
 					CulturalObjectData descriptiveData = new CulturalObjectData();
 					descriptiveData.setLabel(new MultiLiteral(id).fillDEF());
