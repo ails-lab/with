@@ -27,12 +27,15 @@ import akka.japi.Option;
 import controllers.CollectionObjectController;
 import controllers.WithResourceController;
 import db.DB;
+import model.EmbeddedMediaObject;
+import model.EmbeddedMediaObject.MediaVersion;
 import model.annotations.ContextData;
 import model.annotations.ExhibitionData;
 import model.basicDataTypes.LiteralOrResource;
 import model.basicDataTypes.MultiLiteral;
 import model.basicDataTypes.ProvenanceInfo;
 import model.basicDataTypes.Resource;
+import model.basicDataTypes.WithDate;
 import model.resources.CulturalObject;
 import model.resources.WithResourceType;
 import model.resources.CulturalObject.CulturalObjectData;
@@ -41,9 +44,11 @@ import model.resources.collection.Exhibition.ExhibitionDescriptiveData;
 import play.Logger;
 import play.libs.F;
 import play.libs.Json;
+import search.Sources;
 import sources.core.ApacheHttpConnector;
 import sources.core.HttpConnector;
 import sources.utils.JsonContextRecord;
+import utils.ListUtils;
 
 public class ExhibitionReader {
 
@@ -98,21 +103,57 @@ public class ExhibitionReader {
 		try {
 			JsonNode response = getHttpConnector().getURLContent(url);
 			JsonContextRecord rec = new JsonContextRecord(response);
-			List<String> list = rec.getStringArrayValue("[0].page_blocks[.*].attachments[0].item.url");
+			List<JsonContextRecord> list = ListUtils.transform(rec.getValues("[.*].page_blocks[.*].attachments[.*]"), 
+					(x)-> new JsonContextRecord(x));
+//			.item.url
 			for (int i = 0; i < list.size(); i++) {
 
 				JsonNode response1;
 				try {
-					response1 = getHttpConnector().getURLContent(list.get(i));
+					response1 = getHttpConnector().getURLContent(list.get(i).getStringValue("item.url"));
 					JsonContextRecord rec1 = new JsonContextRecord(response1);
 					String source = rec1.getStringValue("item_type.name");
 					String id = rec1.getStringValue("element_texts[element.name=Identifier].text");
 					System.out.println(source + " id=" + id);
 					CulturalObject record = new CulturalObject();
-					CulturalObjectData descriptiveData = new CulturalObjectData();
-					descriptiveData.setLabel(new MultiLiteral(id).fillDEF());
-					record.setDescriptiveData(descriptiveData);
-					record.addToProvenance(new ProvenanceInfo(source, null, id));
+					CulturalObjectData descData = new CulturalObjectData();
+					record.setDescriptiveData(descData);
+					if (source==null || id==null){
+						source = Sources.UploadedByUser.getID();
+						id = rec1.getStringValue("id");
+						record.addToProvenance(new ProvenanceInfo(source, null, id));
+						
+						descData.setLabel(rec1.getMultiLiteralValue("element_texts[element.name=Title].text"));
+						descData.setDescription(rec1.getMultiLiteralValue("element_texts[element.name=Description].text"));
+						descData.setDccreator(rec1.getMultiLiteralOrResourceValue("element_texts[element.name=Creator].text"));
+						descData.setDates(rec1.getWithDateArrayValue("element_texts[element.name=Date].text"));
+						
+						String rights = rec1.getStringValue("element_texts[element.name=Rights].text");
+						String type = rec1.getStringValue("element_texts[element.name=Type].text");
+						
+						response1 = getHttpConnector().getURLContent(list.get(i).getStringValue("file.url"));
+						JsonContextRecord rec2 = new JsonContextRecord(response1);
+						
+						String original = rec2.getStringValue("file_urls.original");
+						String thumbnail = rec2.getStringValue("file_urls.thumbnail");
+						
+						EmbeddedMediaObject media = new EmbeddedMediaObject();
+						media.setOriginalRights(new LiteralOrResource(rights));
+						media.setUrl(original);
+//						media.setType(type);
+						record.addMedia(MediaVersion.Original, media );
+						
+						media = new EmbeddedMediaObject();
+						media.setOriginalRights(new LiteralOrResource(rights));
+						media.setUrl(thumbnail);
+//						media.setType(type);
+						record.addMedia(MediaVersion.Thumbnail, media );
+						
+						
+					} else {
+						descData.setLabel(new MultiLiteral(id).fillDEF());
+						record.addToProvenance(new ProvenanceInfo(source, null, id));
+					}
 					play.libs.F.Option<Integer> p = play.libs.F.Option.Some(new Integer(i));
 					WithResourceController.addRecordToCollection(Json.toJson(record), collectionId, p, false);
 				} catch (Exception e) {

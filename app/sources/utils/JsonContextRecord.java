@@ -151,6 +151,9 @@ public class JsonContextRecord {
 		return node;
 	}
 
+	public List<JsonNode> getValues(String... path) {
+		return getValues(buildpaths(path));
+	}
 	public List<JsonNode> getValues(Collection<String> steps) {
 		List<JsonNode> roots = new ArrayList<>();
 		roots.add(rootInformation);
