@@ -17,7 +17,10 @@
 package sources.core;
 
 import java.util.Comparator;
-
+/**
+ * Simple String,int pair
+ *
+ */
 public class ValueCount {
 	public String value;
 	public int count = 0;
