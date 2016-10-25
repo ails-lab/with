@@ -42,6 +42,7 @@ public enum Sources {
 	DDB(DDBProxySource.class,"DDB","Deutsche Digitale Bibliothek"),
 	DigitalNZ(DigitalNZProxySource.class,"DigitalNZ"),
 	DPLA(DPLAProxySource.class,"DPLA","Digital Public Library of America"),
+	EuropeanaFashion(EuropeanaFashionProxySource.class,"EuropeanaFashion"),
 	YouTube(YoutubeProxySource.class,"Youtube"),
 	NLA(NLAProxySource.class,"NLA","National Library of Australia"),
 	WITHin(ElasticSource.class,"WITHin"),
