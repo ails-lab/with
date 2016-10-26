@@ -68,7 +68,7 @@ public class ChainedSearchResult {
 	public AtomicInteger finishedPromises = new AtomicInteger();	
 	public RedeemablePromise<Result> pendingPromise = null;
 
-	public FiniteDuration SUICIDE_TIMEOUT = Duration.create(10, TimeUnit.MINUTES);
+	public FiniteDuration SUICIDE_TIMEOUT = Duration.create(10, TimeUnit.SECONDS);
 	
 	public Cancellable suicide;
 	// need to keep track of delivered results, to de-duplicate
