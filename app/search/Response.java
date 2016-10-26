@@ -53,12 +53,6 @@ public class Response {
 		// values are list of values and occurrence counts
 	}
 
-	public static class ValueList extends HashMap<String, List<String>> {
-		// keys are fieldIds
-		// value is list of occurring values in that field
-		// its like facets without counts
-	}
-
 
 	public static class SingleResponse {
 		/**
@@ -163,11 +157,9 @@ public class Response {
 	public List<Sources> sources = new ArrayList<Sources>();
 
 	/**
-	 * Merging facet counts is not very meaningful. This is a merge without the counts. If possible the most
-	 * frequent values are in the front of the list, but no guarantees. AccumulatedValues get updated with continuation,
-	 * representing all the values that were delivered from all requested sources.
+	 * Merging facet counts is not very meaningful. We will still do it here for now.
 	 */
-	public ValueList accumulatedValues = new ValueList();
+	public ValueCounts accumulatedValues = new ValueCounts();
 
 	/**
 	 * If this is a part of multipart response and we expect more parts to come, the next part can be retrieved with this id.
@@ -237,50 +229,70 @@ public class Response {
 
 		// convert the Hash of hash of string count fieldId->value->count
 		// to the list valueList with sorting of values by count downwards
-		accumulatedValues = new ValueList();
 		for( Map.Entry<String, HashMap<String, Integer>> entry: accumulated.entrySet() ) {
 			String fieldId = entry.getKey();
-			List<String> values = entry.getValue().entrySet().stream()
+			List<ValueCount> values = entry.getValue().entrySet().stream()
 			.sorted( (a,b)-> {
 				return (Integer.compare(a.getValue(), b.getValue())*(-1));
 			})
+			.map( (a) -> new ValueCount( a.getKey(), a.getValue()))
 			// here the entries are sorted with more frequent occuring ones first
-			.map( e2 -> e2.getKey())
-			// we collect only the strings into a list
-			.collect( Collectors.toCollection(()->new ArrayList<String>()));
+			.collect( Collectors.toCollection(()->new ArrayList<ValueCount>()));
 			accumulatedValues.put( fieldId, values);
 		}
 	}
 
+
 	/**
-	 * Get value lost for this field or make one if it doesn't exist.
-	 * @param fieldId
+	 * Given two string,count lists, make a merged one and sort it with decreasing count.
+	 * @param a
+	 * @param b
 	 * @return
 	 */
-	private List<String> findOrAddVl( String fieldId ) {
-		List<String> values =  accumulatedValues.get(fieldId );
-		if( values == null ) {
-			values = new ArrayList<String>();
-			accumulatedValues.put( fieldId, values);
+	private List<ValueCount> mergeValueCountLists( List<ValueCount> a, List<ValueCount> b ) {
+		HashMap<String, Integer> merge = new HashMap<String,Integer>();
+		for( ValueCount ac: a ) {
+			merge.put( ac.value, ac.count);
 		}
-
+		for( ValueCount bc: b ) {
+			Integer count = merge.get( bc.value );
+			if( count == null ) {
+				merge.put( bc.value, bc.count);
+			} else {
+				merge.put( bc.value, bc.count+count);
+			}
+		}
+		// and back into a list
+		List<ValueCount> values = merge.entrySet().stream()
+		.sorted( (x,y)-> {
+			return (Integer.compare(x.getValue(), y.getValue())*(-1));
+		})
+		.map( (x) -> new ValueCount( x.getKey(), x.getValue()))
+		// here the entries are sorted with more frequent occuring ones first
+		.collect( Collectors.toCollection(()->new ArrayList<ValueCount>()));
+		
 		return values;
 	}
-
+	
+	
+	
 	/**
-	 * Merge another Response accumulatedValues into this. This will make it impossible to keep count sorted values in accumulated,
-	 * we will just append the values for the same fields (-duplicates).
+	 * Merge another Response accumulatedValues into this. 
 	 * @param sr
 	 */
 	public void mergeAccumulated( Response other) {
 		other.accumulatedValues.entrySet().forEach(
 			entry -> {
-				List<String> thisVl =findOrAddVl( entry.getKey() );
-				HashSet<String> index = new HashSet<String>();
-				index.addAll( thisVl );
-				entry.getValue().forEach(s -> {
-					if(! index.contains(s)) thisVl.add( s );
-				});
+				String fieldId = entry.getKey();
+				List<ValueCount> otherValues = entry.getValue();
+				List<ValueCount> thisValues= accumulatedValues.get( fieldId );
+				if( thisValues == null ) {
+					accumulatedValues.put( fieldId, otherValues );
+				} else {
+					// merging in 
+					List<ValueCount> mergeValues = mergeValueCountLists(thisValues, otherValues );
+					accumulatedValues.put( fieldId, mergeValues );
+				}
 			}
 		);
 	}
