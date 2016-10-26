@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -70,6 +71,13 @@ public class SearchController extends WithController {
 
 	final static Form<CommonQuery> userForm = Form.form(CommonQuery.class);
 	public static final ALogger log = Logger.of(SearchController.class);
+	static final Set<String> excludedFieldnames = new HashSet<String>();
+	static {
+ 		excludedFieldnames.add( "COLOURPALETE" );
+		excludedFieldnames.add( "IMAGE_COLOUR" );
+		excludedFieldnames.add( "IMAGE_SIZE" );
+		excludedFieldnames.add( "anywhere" );
+	}
 
 	public static Promise<Result> search() {
 		JsonNode json = request().body().asJson();
@@ -193,14 +201,17 @@ public class SearchController extends WithController {
 	}
 
 	public static Result searchSources() {
+		
 		List<JsonNode> res = new ArrayList<>();
 		for( Sources source: Sources.values()) {
 			Source s = source.getDriver();
 			ObjectNode jsonSource = Json.newObject();
 			Set<String> fieldIds = s.supportedFieldIds();
 			if( fieldIds == null ) fieldIds = Collections.emptySet();
-			for(String fieldId: fieldIds )
-				jsonSource.withArray("supportedFields").add( fieldId );
+			for(String fieldId: fieldIds ) {
+				if( !excludedFieldnames.contains(fieldId))
+					jsonSource.withArray("supportedFields").add( fieldId );
+			}
 			jsonSource.put("name", source.name());
 			jsonSource.put("apiConsole", s.apiConsole());
 			res.add( jsonSource );
