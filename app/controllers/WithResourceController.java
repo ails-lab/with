@@ -175,6 +175,14 @@ public class WithResourceController extends WithController {
 		addContentToRecord(recordId, source, sourceId);
 	}
 
+	// TODO: Mint import should be no different then user upload?
+	// Mint uses the normal User upload API after all. 
+	// But there is a question, should the upload user be in the provenance chain
+	// when the record is maintained in a mint instance ?
+	// Maybe, when the upload contains provenance, it shouldn't be messed with?
+	// Since the provenance info is some kind of audit, it makes sense to document
+	// the uploading user, even if the source is a mint instance
+	// PS: provenance should potentially contain dates...
 	public static Result addRecordToCollection(JsonNode json,
 			ObjectId collectionDbId, Option<Integer> position, Boolean noDouble) {
 		ObjectNode result = Json.newObject();
