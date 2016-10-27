@@ -196,15 +196,16 @@ public class WithResourceController extends WithController {
 					|| (label.get(Language.DEFAULT).get(0) == ""))
 				return badRequest("A label for the record has to be provided");
 			int last = 0;
-			Sources source = Sources.UploadedByUser;
+			// Sources source = Sources.UploadedByUser;
+			String source = "Upload by User " + effectiveUser().getUsername();
 			if ((record.getProvenance() != null)
 					&& !record.getProvenance().isEmpty()) {
 				last = record.getProvenance().size() - 1;
-				source = Sources.valueOf(((ProvenanceInfo) record
+				source = (((ProvenanceInfo) record
 						.getProvenance().get(last)).getProvider());
 			} else
 				record.setProvenance(new ArrayList<ProvenanceInfo>(Arrays
-						.asList(new ProvenanceInfo(source.toString()))));
+						.asList(new ProvenanceInfo(source))));
 			String externalId = ((ProvenanceInfo) record.getProvenance().get(
 					last)).getResourceId();
 			if (externalId == null)
@@ -248,8 +249,7 @@ public class WithResourceController extends WithController {
 			} else { // create new record in db
 				ObjectNode errors;
 				record.getAdministrative().setCreated(new Date());
-				switch (source) {
-				case UploadedByUser:
+				if( source.startsWith("Upload by User")) {
 					// Fill the EmbeddedMediaObject from the MediaObject
 					// that has been created
 					record.getAdministrative().setWithCreator(userId);
@@ -322,8 +322,7 @@ public class WithResourceController extends WithController {
 									+ recordId, recordId.toString()));
 					DB.getRecordResourceDAO().updateField(recordId,
 							"administrative.externalId", recordId.toString());
-					break;
-				case Mint:
+				} else if ( source.startsWith( "Mint")) {
 					errors = RecordResourceController.validateRecord(record);
 					record.getAdministrative().setWithCreator(userId);
 					List<ProvenanceInfo> provenance = record.getProvenance();
@@ -336,12 +335,12 @@ public class WithResourceController extends WithController {
 					recordId = record.getDbId();
 					DB.getRecordResourceDAO().updateWithURI(record.getDbId(),
 							"/record/" + recordId);
-					break;
-				default:// imported first time from other sources
+				} else {
+					// imported first time from other sources
 					// there is no withCreator and the record is public
 					record.getAdministrative().getAccess().setIsPublic(true);
 					errors = RecordResourceController.validateRecord(record);
-					provenance = record.getProvenance();
+					List<ProvenanceInfo> provenance = record.getProvenance();
 					record.getAdministrative().setExternalId(
 							provenance.get(last).getResourceId());
 					if (errors != null) {
@@ -353,7 +352,6 @@ public class WithResourceController extends WithController {
 							"/record/" + recordId);
 					addContentToRecord(record.getDbId(), source.toString(),
 							externalId);
-					break;
 				}
 				addToCollection(position, recordId, collectionDbId, owns, false);
 			}
