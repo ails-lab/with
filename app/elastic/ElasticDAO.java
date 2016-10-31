@@ -17,13 +17,14 @@
 package elastic;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 import org.elasticsearch.action.delete.DeleteRequest;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.search.SearchHit;
-import org.fest.util.Collections;
 
 import play.Logger;
 import play.Logger.ALogger;
@@ -92,7 +93,7 @@ public class ElasticDAO {
 			if( types.length == 0 ) 
 				typeList = Elastic.allTypes;
 			else 
-				typeList = Collections.list( types );
+				typeList = Arrays.asList( types );
 			
 			for( String singleType: typeList ) {
 				for( String id: ids ) {
