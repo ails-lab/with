@@ -16,9 +16,11 @@
 
 package utils.facets;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
@@ -40,15 +42,13 @@ public class DAGNode<T> implements Comparable<DAGNode<T>> {
 	private Set<String> instances;
 	private int size;
 	
-	public boolean explicit;
-	
-	private Collection<DAGNode<T>> children;
+	private List<DAGNode<T>> children;
 	private Collection<DAGNode<T>> parents;
 
 	public DAGNode() {
 		label = new HashSet<>();
 		
-		children = new TreeSet<>();
+		children = new ArrayList<>();
 		parents = new HashSet<>();
 	}
 	
@@ -56,7 +56,7 @@ public class DAGNode<T> implements Comparable<DAGNode<T>> {
 		label = new HashSet<>();
 		label.add(l);
 		
-		children = new TreeSet<>();
+		children = new ArrayList<>();
 		parents = new HashSet<>();
 	}
 
@@ -64,12 +64,16 @@ public class DAGNode<T> implements Comparable<DAGNode<T>> {
 		label = new HashSet<>();
 		label.add(l);
 		
-		children = new TreeSet<>();
+		children = new ArrayList<>();
 		parents = new HashSet<>();
 		
 		this.size = size; 
 	}
 
+	
+	public void setSize(int size) {
+		this.size = size;
+	}
 	
 	public Set<T> getLabel() {
 		return label;
@@ -84,7 +88,9 @@ public class DAGNode<T> implements Comparable<DAGNode<T>> {
 	}
 
 	public void addChild(DAGNode<T> child) {
-		children.add(child);
+		if (!children.contains(child)) {
+			children.add(child);
+		}
 		child.parents.add(this);
 	}
 	
@@ -126,25 +132,29 @@ public class DAGNode<T> implements Comparable<DAGNode<T>> {
 		return (label !=null?label.toString():"NULL") + "  :  " + size;
 	}
 
-	public ObjectNode toJSON(Map<String, ObjectId> idMap, Map<String, SKOSSemantic> map, Language lang) {
-		return itoJSON(idMap, map, lang, new HashSet<>());
+	public ObjectNode toJSON(Map<String, SKOSSemantic> map, Language lang) {
+		return itoJSON(map, lang, new HashSet<>());
 	}
 
 	
-	private ObjectNode itoJSON(Map<String, ObjectId> idMap, Map<String, SKOSSemantic> map, Language lang, Set<DAGNode<T>> used) {
-		if (!used.add(this)) {
-			return Json.newObject();
-		}
-
+	private ObjectNode itoJSON(Map<String, SKOSSemantic> map, Language lang, Set<DAGNode<T>> used) {
 		T s = label.iterator().next();
 
-		ObjectId id = idMap.get(s);
+		
+//		if (!used.add(this)) {
+//			ObjectNode json = Json.newObject();
+//			json.put("ref", idMap.get(s).toString());
+//			return json;
+//		}
+
+//		ObjectId id = idMap.get(s);
 		
 		ObjectNode element = Json.newObject();
 		
-		if (id != null) {
-			Literal plabel = map.get(s).getPrefLabel();
-			String ss = "";
+		SKOSSemantic sem = map.get(s);
+		String ss = "";
+		if (sem != null) {
+			Literal plabel = sem.getPrefLabel();
 			if (plabel != null) {
 				ss = plabel.getLiteral(lang);
 				if (ss == null && plabel.values().size() > 0) {
@@ -152,22 +162,26 @@ public class DAGNode<T> implements Comparable<DAGNode<T>> {
 				}
 			} else {
 				String sv = s.toString();
-				
-				ss = sv.substring(Math.max(sv.lastIndexOf("/"), sv.lastIndexOf("#")));
+				ss = s.toString().substring(Math.max(sv.lastIndexOf("/"), sv.lastIndexOf("#")) + 1);
 			}
-			
-			element.put("id", idMap.get(s).toString());
+		} else {
+			String sv = s.toString();
+			ss = sv.substring(Math.max(sv.lastIndexOf("/"), sv.lastIndexOf("#")) + 1);
+		}
+		
+		element.put("label", ss);
+		
+		if (sem != null && !sem.isScheme()) {
 			element.put("uri", s.toString());
-			element.put("label", ss);
 			element.put("size", size);
-			
-			ArrayNode jchildren = Json.newObject().arrayNode();
-			
-			element.put("children", jchildren);
-			
-			for (DAGNode<T> node : children) {
-				jchildren.add(node.itoJSON(idMap, map, lang, used));
-			}
+		}
+		
+		ArrayNode jchildren = Json.newObject().arrayNode();
+		
+		element.put("children", jchildren);
+		
+		for (DAGNode<T> node : children) {
+			jchildren.add(node.itoJSON(map, lang, used));
 		}
 		
 		return element;
@@ -180,21 +194,46 @@ public class DAGNode<T> implements Comparable<DAGNode<T>> {
 	
 	public void print(Map<String, SKOSSemantic> map, int depth) {
 		for (int i = 0; i < depth; i++) {
-			System.out.print("   ");
+			System.out.print("    ");
 		}
 		
-		String ss = "";
+		String ssx = "";
 		for (T s : label) {
-			ss += (explicit? "*":" ") + map.get(s).getPrefLabel().getLiteral(Language.EN) + " " + size;// + " " + map.get(s).getUri();
+			String ss = "";
+			if (map.get(s) != null) {
+				Literal plabel = map.get(s).getPrefLabel();
+				
+				if (plabel != null) {
+					ss = plabel.getLiteral(Language.EN);
+					if (ss == null && plabel.values().size() > 0) {
+						ss = plabel.values().iterator().next();
+					}
+				} else {
+					String sv = s.toString();
+					
+					ss = sv.substring(Math.max(sv.lastIndexOf("/"), sv.lastIndexOf("#")) + 1);
+				}
+			} else {
+				String sv = s.toString();
+				
+				ss = sv.substring(Math.max(sv.lastIndexOf("/"), sv.lastIndexOf("#")) + 1);
+			}
+			ssx += ss + (map.get(s) != null ? " <" + map.get(s).getUri() + "> ":" ") + size;// + " " + map.get(s).getUri();
 		}
-		System.out.println(ss);
+		System.out.println(ssx + " " + size);
 		
 		for (DAGNode<T> node : children) {
 			node.print(map, depth + 1);
 		}
 	}
 	public int hashCode() {
-		return label.hashCode();
+		int ret = 0;
+	
+		for (T s : label) {
+			ret += s.hashCode();
+		}
+		
+		return ret;
 	}
 	
 	public boolean equals(Object obj) {
@@ -205,36 +244,37 @@ public class DAGNode<T> implements Comparable<DAGNode<T>> {
 		return false;
 	}
 	
-	public void normalize(Set<T> selected) {
-		normalize(selected, new HashSet<>());
+	public void normalize() {
+		normalize(new HashSet<>());
 	}
 	
-	public void normalize(Set<T> selected, Set<DAGNode<T>> used) {
-		if (!used.add(this)) {
+	public void normalize(Set<DAGNode<T>> used) {
+		if (!used.add(this) || children.size() == 0) {
 			return;
 		}
 		
-		for (Iterator<DAGNode<T>> iter =  children.iterator(); iter.hasNext();) {
-			DAGNode<T> child = iter.next();
-			child.normalize(selected, used);
+		for (DAGNode<T> child : children) {
+			child.normalize(used);
 		}
-		
-	
-		Set<DAGNode<T>> toAdd = new HashSet<>();
 
-		for (Iterator<DAGNode<T>> iter = children.iterator(); iter.hasNext();) {
-			DAGNode<T> child = iter.next();
-			
-			if (child.size() == size) {
-				iter.remove();
-				toAdd.addAll(child.children);
-				label.clear();
-				label.addAll(child.getLabel());
+		for (int i = 0; i < children.size(); i++) {
+			DAGNode<T> child = children.get(i);
+			for (int j = i + 1; j < children.size();) {
+				if (child == children.get(j)) {
+					children.remove(j);
+				} else {
+					j++;
+				}
 			}
 		}
-				
-		for (DAGNode<T> ch : toAdd) {
-			addChild(ch);
+		
+		if (children.size() == 1) {
+			DAGNode<T> child = children.get(0);
+			if (child.size() == size) {
+				for (DAGNode<T> p : parents) {
+					p.children.set(p.children.indexOf(this), child);
+				}
+			}
 		}
 	}
 

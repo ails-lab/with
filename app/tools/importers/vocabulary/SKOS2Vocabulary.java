@@ -434,25 +434,37 @@ public class SKOS2Vocabulary {
 		}
 	}
 	
-	protected ArrayNode makeNodesArray(String queryString, Model model, String var) {
-		ArrayNode array = Json.newObject().arrayNode();
-		
+	protected Set<String> getNodesArray(String queryString, Model model, String var) {
+		Set<String> ret = new HashSet<>();
 		Query query = QueryFactory.create(queryString) ;
 		try (QueryExecution exec = QueryExecutionFactory.create(query, model)) {
 			
 			for (ResultSet res = exec.execSelect(); res.hasNext() ; ) {
 				QuerySolution s = res.next();
 				if (s.get(var) != null) {
-					array.add(makeMainStructure(s.get(var).asResource().getURI(), model));
+					ret.add(s.get(var).asResource().getURI());
 				}
 			}
 		}
 		
-		if (array.size() > 0) {
+		return ret;
+	}
+	
+	protected ArrayNode makeNodesArray(Set<String> res, Model model) {
+		if (res.size() > 0) {
+			ArrayNode array = Json.newObject().arrayNode();
+		
+			for (String s : res) {
+				array.add(makeMainStructure(s, model));
+			}
 			return array;
 		} else {
 			return null;
 		}
+	}
+	
+	protected ArrayNode makeNodesArray(String queryString, Model model, String var) {
+		return makeNodesArray(getNodesArray(queryString, model, var), model);
 	}
 
 	

@@ -1342,8 +1342,8 @@ public class CollectionObjectController extends WithResourceController {
                 return response;
             } else {
 
-                List<List<String>> uris = CollectionIndexController.termsRestrictionFromJSON(json);
-                List<RecordResource> res = DB.getRecordResourceDAO().getByCollectionWithTerms(colId, uris, Arrays.asList(CollectionIndexController.lookupFields), Arrays.asList(new String[] {"_id"}), start + count + 1);
+                List<Set<String>> uris = CollectionIndexController.termsRestrictionFromJSON(json);
+                List<RecordResource> res = DB.getRecordResourceDAO().getByCollectionWithTerms(colId, uris, Arrays.asList(CollectionIndexController.lookupFields), Arrays.asList(new String[] {"_id"}), start + count);
 
                 //Inefficient Pagination
                 int top = Math.min(start + count, res.size());
@@ -1353,7 +1353,27 @@ public class CollectionObjectController extends WithResourceController {
     				ids.add(res.get(i).getDbId().toString());
     			}
     			
-                List<RecordResource> records = DB.getRecordResourceDAO().getByCollectionIds(colId, ids);
+    			if (top < start + count) {
+    				List<RecordResource> all = DB.getRecordResourceDAO().getByCollection(colId, Arrays.asList(new String[] {"_id"}));
+    				Collection<ObjectId> allIds = new HashSet<>();
+    				for (RecordResource rr : all) {
+    					allIds.add(rr.getDbId());
+    				}
+    				
+    				for (RecordResource rr : res) {
+    					allIds.remove(rr.getDbId());
+    				}
+    				
+    				List<RecordResource> res2 = DB.getRecordResourceDAO().getByApprovedTaggingAnnotations(allIds, uris, Arrays.asList(new String[] {"_id"}), start + count - top);
+    				
+    				int top2 = Math.min(start + count - top, res2.size());
+    				
+        			for (int i = start - top; i < top2; i++) {
+        				ids.add(res2.get(i).getDbId().toString());
+        			}
+    			}
+    			
+    			List<RecordResource> records = DB.getRecordResourceDAO().getByCollectionIds(colId, ids);
 
                 if (records == null) {
                     result.put("message",

@@ -18,6 +18,7 @@ package controllers;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -68,11 +69,11 @@ public class CollectionIndexController extends WithResourceController	{
 		"descriptiveData.keywords.uri",
 		"descriptiveData.dctype.uri",
 		"descriptiveData.dcformat.uri",
-		"descriptiveData.dctermsmedium.uri"
+		"descriptiveData.dctermsmedium.uri",
 	};
 	
-	public static List<List<String>> termsRestrictionFromJSON(JsonNode json) {
-		List<List<String>> uris = null;
+	public static List<Set<String>> termsRestrictionFromJSON(JsonNode json) {
+		List<Set<String>> uris = null;
 		
 		if (json != null) {
 			JsonNode terms = json.get("terms");
@@ -82,17 +83,23 @@ public class CollectionIndexController extends WithResourceController	{
 
 				for (Iterator<JsonNode> iter = terms.elements(); iter.hasNext();) {
 					JsonNode inode = iter.next();
-					List<String> list = new ArrayList<>();
+					Set<String> list = new HashSet<>();
 					for (Iterator<JsonNode> iter2 = inode.get("sub").elements(); iter2.hasNext();) {
 						list.add(iter2.next().asText());
 					}
-					
-					uris.add(list);
-				}
 				
+					if (list.size() > 0) {
+						uris.add(list);
+					}
+				}
 			}
 		}
-		return uris;
+		
+		if (uris.size() > 0) {
+			return uris;
+		} else {
+			return null;
+		}
 	}
 	
 	public static Result getCollectionFacets(String id) {
@@ -107,13 +114,17 @@ public class CollectionIndexController extends WithResourceController	{
 			
 			JsonNode json = request().body().asJson();
 			
-			List<List<String>> uris = termsRestrictionFromJSON(json);
+			List<Set<String>> uris = termsRestrictionFromJSON(json);
 			
 			List<String[]> list = new ArrayList<>();
 			
 			List<String> fields = Arrays.asList(lookupFields);
 
+			List<String> ids = new ArrayList<>();            
+			
 			for (RecordResource rr : DB.getRecordResourceDAO().getByCollectionWithTerms(new ObjectId(id), uris, fields, fields, -1)) {
+				ids.add(rr.getDbId().toString());
+				
 				List<Object> olist = new ArrayList<>();
 
 				DescriptiveData dd = rr.getDescriptiveData();
@@ -123,6 +134,15 @@ public class CollectionIndexController extends WithResourceController	{
 			
 					if (k != null) {
 						olist.addAll(k);
+					}
+				}
+				
+				if (rr.getAnnotationIds() != null && rr.getAnnotationIds().size() > 0) {
+					List<Annotation> anns = DB.getAnnotationDAO().getApprovedTaggingByRecordId(rr.getDbId(), Arrays.asList(new String[] {"body"}));
+					if (anns != null) {
+						for (Annotation ann : anns) {
+							olist.add(((AnnotationBodyTagging)ann.getBody()).getUri());
+						}
 					}
 				}
 				
@@ -159,8 +179,36 @@ public class CollectionIndexController extends WithResourceController	{
 					list.add(olist.toArray(new String[olist.size()]));
 				}
 			}
+			
+			List<RecordResource> all = DB.getRecordResourceDAO().getByCollection(new ObjectId(id), Arrays.asList(new String[] {"_id"}));
+			Collection<ObjectId> allIds = new HashSet<>();
+			for (RecordResource rr : all) {
+				allIds.add(rr.getDbId());
+			}
+			
+			for (String rid : ids) {
+				allIds.remove(rid);
+			}
+			
+			if (allIds.size() > 0) {
+				for (RecordResource rr : DB.getRecordResourceDAO().getByApprovedTaggingAnnotations(allIds, uris, Arrays.asList(new String[] {"_id"}), -1)) {
+					List<Object> olist = new ArrayList<>();
+					
+					List<Annotation> anns = DB.getAnnotationDAO().getApprovedTaggingByRecordId(rr.getDbId(), Arrays.asList(new String[] {"body"}));
+					if (anns != null) {
+						for (Annotation ann : anns) {
+							olist.add(((AnnotationBodyTagging)ann.getBody()).getUri());
+						}
+					}
+					
+					if (olist.size() > 0 ) {
+						list.add(olist.toArray(new String[olist.size()]));
+					}
+				}
+			}			
 
 			Set<String> selected = new HashSet<>();
+			
 			if (json != null) {
 				for (Iterator<JsonNode> iter = json.get("terms").elements(); iter.hasNext();) {
 					selected.add(iter.next().get("top").asText());
@@ -179,6 +227,7 @@ public class CollectionIndexController extends WithResourceController	{
 				return ok(tf.toJSON(Language.EN));
 //			}
 		} catch (Exception e) {
+			e.printStackTrace();
 			result.put("error", e.getMessage());
 			return internalServerError(result);
 		}

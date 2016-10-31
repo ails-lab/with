@@ -57,6 +57,16 @@ public class AnnotationDAO extends DAO<Annotation> {
 		}
 	}
 
+	public List<Annotation> getApprovedTaggingByRecordId(ObjectId recordId, List<String> retrievedFields) {
+		Query<Annotation> q = this.createQuery().disableValidation()
+				.field("motivation").equal(Annotation.MotivationType.Tagging)
+				.field("target.recordId").equal(recordId)
+				.field("score.approvedBy").exists()
+				.field("score.approvedBy").notEqual(new String[0])
+				.retrievedFields(true, retrievedFields.toArray(new String[retrievedFields.size()]));
+			return this.find(q).asList();
+	}
+	
 	public Annotation getExistingAnnotation(Annotation annotation) {
 		if (annotation.getDbId() != null)
 			return this.getById(annotation.getDbId());

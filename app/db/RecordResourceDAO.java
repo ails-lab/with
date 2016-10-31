@@ -22,8 +22,10 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 
@@ -32,6 +34,7 @@ import model.EmbeddedMediaObject.MediaVersion;
 import model.annotations.Annotation;
 import model.annotations.ContextData;
 import model.annotations.ContextData.ContextDataBody;
+import model.annotations.bodies.AnnotationBodyTagging;
 import model.basicDataTypes.WithAccess;
 import model.basicDataTypes.WithAccess.Access;
 import model.basicDataTypes.WithAccess.AccessEntry;
@@ -150,8 +153,7 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 		return getByCollectionIds(colId, ids, q);
 	}
 
-	public List<RecordResource> getByCollectionIds(ObjectId colId,
-			List<String> ids, Query<RecordResource> q) {
+	public List<RecordResource> getByCollectionIds(ObjectId colId, List<String> ids, Query<RecordResource> q) {
 		
 		List<ObjectId> oids = new ArrayList<>();
 		for (String s : ids) {
@@ -189,13 +191,13 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 	}
 	
 	
-	public List<RecordResource> getByCollectionWithTerms(ObjectId collectionId, List<List<String>> uris, List<String> lookupFields, List<String> retrievedFields, int max) {
+	public List<RecordResource> getByCollectionWithTerms(ObjectId collectionId, List<Set<String>> uris, List<String> lookupFields, List<String> retrievedFields, int max) {
 		
 		Query<RecordResource> q = this.createQuery().disableValidation();
 		if (uris != null) {
 			List<CriteriaContainer> criteria = new ArrayList<>();
 		
-			for (List<String> list : uris) {
+			for (Set<String> list : uris) {
 				List<Criteria> c = new ArrayList<>();
 				for (String uri : list) {
 					for (String field : lookupFields) {
@@ -220,7 +222,94 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 		}
 		
 		return this.find(q).asList();
+	}
 
+	// very inefficient search ... should be replaced by search in index
+	public List<RecordResource> getByApprovedTaggingAnnotations(Collection<ObjectId> recordIds, List<Set<String>> uris, List<String> retrievedFields, int max) {
+
+		Query<Annotation> q = DB.getAnnotationDAO().createQuery().disableValidation()
+				.field("target.recordId").in(recordIds)
+				.field("motivation").equal(Annotation.MotivationType.Tagging)
+				.field("score.approvedBy").exists()
+				.field("score.approvedBy").notEqual(new String[0]);
+
+		if (uris == null) {
+			List<ObjectId> ma = DB.getAnnotationDAO().findIds(q);
+
+			if (ma.size() > 0) {
+				Query<RecordResource> q2 = this.createQuery().disableValidation()
+						.field("_id").in(recordIds)
+						.field("annotationIds").hasAnyOf(ma);
+				
+				if (retrievedFields != null) {
+					q2.retrievedFields(true, retrievedFields.toArray(new String[retrievedFields.size()]));
+				}
+				
+				if (max >= 0) {
+					q.limit(max);
+				}
+				
+				return this.find(q2).asList();
+			}
+		} else {
+			
+			List<String> c = new ArrayList<>();
+			for (Collection<String> uril : uris) {
+				for (String uri : uril) {
+					c.add(uri);
+				}
+			}
+			
+			q.field("body.uri").in(c);
+			q.retrievedFields(true, new String[] {"body", "target.recordId"});
+			
+			int size = uris.size();
+			Map<ObjectId, Set<Integer>> checkMap = new HashMap<>();
+			
+			List<Annotation> anns = DB.getAnnotationDAO().find(q).asList();
+			
+			for (Annotation ann : anns) {
+				ObjectId oid = ann.getTarget().getRecordId();
+				
+				Set<Integer> set = checkMap.get(oid);
+				if (set == null) {
+					set = new HashSet<>();
+					checkMap.put(oid, set);
+				}
+				
+				if (set.size() == size) {
+					continue;
+				}
+				
+				String uri = ((AnnotationBodyTagging)ann.getBody()).getUri();
+				
+				for (int i = 0; i < size; i++) {
+					if (uris.get(i).contains(uri)) {
+						set.add(i);
+						break;
+					}
+				}
+			}
+			
+			List<ObjectId> ma = new ArrayList<>();
+			
+			for (Map.Entry<ObjectId, Set<Integer>> entry : checkMap.entrySet() ) {
+				if (entry.getValue().size() == size) {
+					ma.add(entry.getKey());
+					
+					if (max >= 0 && ma.size() == max) {
+						break;
+					}
+				}
+			}
+			
+			if (ma.size() > 0) {
+				return DB.getRecordResourceDAO().getByIds(ma);
+			}
+		
+		} 
+
+		return new ArrayList<RecordResource>();
 	}
 	
 	public List<RecordResource> getAnnotatedRecords(ObjectId userId,

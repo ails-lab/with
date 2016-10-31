@@ -72,189 +72,29 @@ public class OWL2Vocabulary {
 
 	public static OWLImportConfiguration[] confs = new OWLImportConfiguration[] { nerd };
 	
-	public static void main(String[] args) {
-		doImport(confs);
-	}
-	
 	public static void doImport(OWLImportConfiguration[] confs) {
+		OWL2Vocabulary o2v = new OWL2Vocabulary();
 		for (OWLImportConfiguration c : confs) {
 			try {
-				doImport(c);
+				o2v.doImport(c);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
 		}
 	}
 	
-	private static void doImport(OWLImportConfiguration conf) throws OWLOntologyCreationException, FileNotFoundException, IOException {
+	OWLOntology ontology;
+	OWLAnnotationProperty ap;
+	
+	private void doImport(OWLImportConfiguration conf) throws OWLOntologyCreationException, FileNotFoundException, IOException {
 		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
 		OWLOntology ontology = manager.loadOntologyFromOntologyDocument(IRI.create(conf.getInputFolder().listFiles()[0].toURI().toString()));
 		
-		Map<OWLClass, ObjectNode> labelMap = new HashMap<>();
-
 		OWLReasoner reasoner = new Reasoner.ReasonerFactory().createReasoner(ontology);
 		
-		OWLAnnotationProperty ap = null;
 		if (conf.labelProperty != null) {
 			ap = df.getOWLAnnotationProperty(IRI.create(conf.labelProperty));
 		}
-		
-		ObjectNode vocabulary = Json.newObject();
-		vocabulary.put("name", conf.prefix);
-		vocabulary.put("version", conf.version);
-		
-		ArrayNode schemes = Json.newObject().arrayNode();
-		schemes.add(conf.mainScheme);
-
-		Set<OWLClass> topConcepts = new HashSet<>();
-		
-		System.out.println("Processing ontology");
-		ArrayList<ObjectNode> jsons = new ArrayList<>();
-		for (OWLClass cz : ontology.getClassesInSignature()) {
-			if (!conf.keep(cz)) {
-				continue;
-			}
-			if (conf.isTop(cz)) {
-				continue;
-			}
-			
-			ObjectNode json = Json.newObject();
-			jsons.add(json);
-				
-			ObjectNode semantic = Json.newObject();
-			json.put("semantic", semantic);
-			semantic.put("uri", cz.getIRI().toString());
-			semantic.put("type", "http://www.w3.org/2004/02/skos/core#Concept");
-				
-			ObjectNode prefLabel = labelMap.get(cz);
-			if (prefLabel == null) {
-				prefLabel = Json.newObject();
-				labelMap.put(cz, prefLabel);
-			}
-			
-			if (ap != null) {
-				for (OWLAnnotation ann : cz.getAnnotations(ontology, ap)) {
-					String label = ann.getValue().toString();
-						
-					Matcher lm = conf.labelMatcher(label);
-					if (lm.find()) {
-						Language lang = Language.getLanguage(lm.group(2));
-						if (lang != null) {
-							prefLabel.put(lang.getDefaultCode(), JSONObject.escape(lm.group(1)));
-						}
-					}
-				}
-			}
-			
-			semantic.put("prefLabel", prefLabel);
-
-			Set<OWLClass> dsc = new HashSet<>();
-			for ( OWLClass c :reasoner.getSuperClasses(cz, true).getFlattened()) {
-				if (!conf.keep(c)) {
-					continue;
-				}
-				if (conf.isTop(c)) {
-					continue;
-				}
-				dsc.add(c);
-			}
-				
-			if (dsc.size() > 0) {
-				ArrayNode arr = Json.newObject().arrayNode();
-				
-				for (OWLClass sc : dsc) {
-					ObjectNode term = Json.newObject();
-					term.put("uri", sc.getIRI().toString());
-					term.put("type", "http://www.w3.org/2004/02/skos/core#Concept");
-						
-					ObjectNode pLabel = labelMap.get(sc);
-					if (pLabel == null) {
-						pLabel = Json.newObject();
-						labelMap.put(sc, pLabel);
-					}
-					
-					term.put("prefLabel", pLabel);
-						
-					arr.add(term);
-				}
-				
-				semantic.put("broader", arr);
-			} else {
-				topConcepts.add(cz);
-			}
-				
-			Set<OWLClass> asc = new HashSet<>();
-			for (OWLClass c :reasoner.getSuperClasses(cz, false).getFlattened()) {
-				if (!conf.keep(c)) {
-					continue;
-				}
-				if (conf.isTop(c)) {
-					continue;
-				}
-
-				
-				asc.add(c);
-			}
-			
-			if (asc.size() > 0) {
-				ArrayNode arr = Json.newObject().arrayNode();
-				
-				for (OWLClass sc : asc) {
-					ObjectNode term = Json.newObject();
-					term.put("uri", sc.getIRI().toString());
-					term.put("type", "http://www.w3.org/2004/02/skos/core#Concept");
-						
-					ObjectNode pLabel = labelMap.get(sc);
-					if (pLabel == null) {
-						pLabel = Json.newObject();
-						labelMap.put(sc, pLabel);
-					}
-					term.put("prefLabel", pLabel);
-						
-					arr.add(term);
-				}
-				semantic.put("broaderTransitive", arr);
-			}
-
-			Set<OWLClass> nar = new HashSet<>();
-			for ( OWLClass c :reasoner.getSubClasses(cz, true).getFlattened()) {
-				if (!conf.keep(c)) {
-					continue;
-				}
-				if (conf.isTop(c)) {
-					continue;
-				}
-
-				nar.add(c);
-			}
-				
-			if (nar.size() > 0) {
-				ArrayNode arr = Json.newObject().arrayNode();
-				
-				for (OWLClass sc : nar) {
-					ObjectNode term = Json.newObject();
-					term.put("uri", sc.getIRI().toString());
-					term.put("type", "http://www.w3.org/2004/02/skos/core#Concept");
-						
-					ObjectNode pLabel = labelMap.get(sc);
-					if (pLabel == null) {
-						pLabel = Json.newObject();
-						labelMap.put(sc, pLabel);
-					}
-					
-					term.put("prefLabel", pLabel);
-						
-					arr.add(term);
-				}
-				
-				semantic.put("narrower", arr);
-			}
-			
-			semantic.put("inSchemes", schemes);
-			semantic.put("vocabulary", vocabulary);
-			
-		}
-
 		
 		File tmpFolder = VocabularyImportConfiguration.getTempFolder();
 		File outFile = new File(tmpFolder + File.separator + conf.folder + ".txt");
@@ -262,83 +102,43 @@ public class OWL2Vocabulary {
 		System.out.println("Creating vocabulary in " + outFile);
 		try (FileWriter fr = new FileWriter(outFile);
 				BufferedWriter br = new BufferedWriter(fr)) {
-			
-			for (ObjectNode on : jsons) {
-				ObjectNode sem = (ObjectNode)on.get("semantic");
-				if (sem.get("prefLabel").size() == 0) {
-					sem.remove("prefLabel");
+
+			ObjectNode vocabulary = Json.newObject();
+			vocabulary.put("name", conf.prefix);
+			vocabulary.put("version", conf.version);
+		
+		
+			System.out.println("Processing ontology");
+			for (OWLClass cz : ontology.getClassesInSignature()) {
+				if (!conf.keep(cz) || conf.isTop(cz)) {
+					continue;
 				}
+			
+				ObjectNode main = makeMainStructure(cz, conf);
 				
-				ArrayNode bro = (ArrayNode)sem.get("broader");
-				if (bro != null) {
-					for (Iterator<JsonNode> iter = bro.elements(); iter.hasNext();) {
-						ObjectNode el = ((ObjectNode)iter.next());
-						if (el.get("prefLabel").size() == 0) {
-							el.remove("prefLabel");
-						}
-					}
+				ArrayNode broader = makeNodesArray(filter(reasoner.getSuperClasses(cz, true).getFlattened(), conf), conf);
+				if (broader != null) {
+					main.put("broader", broader);
+				}
+					
+				ArrayNode broaderTransitive = makeNodesArray(filter(reasoner.getSuperClasses(cz, false).getFlattened(), conf), conf);
+				if (broaderTransitive != null) {
+					main.put("broaderTransitive", broaderTransitive);
 				}
 
-				ArrayNode brt = (ArrayNode)sem.get("broaderTransitive");
-				if (brt != null) {
-					for (Iterator<JsonNode> iter = brt.elements(); iter.hasNext();) {
-						ObjectNode el = ((ObjectNode)iter.next());
-						if (el.get("prefLabel").size() == 0) {
-							el.remove("prefLabel");
-						}
-					}
+				ArrayNode narrower = makeNodesArray(filter(reasoner.getSubClasses(cz, false).getFlattened(), conf), conf);
+				if (narrower != null) {
+					main.put("narrower", narrower);
 				}
-				
-				ArrayNode nar = (ArrayNode)sem.get("narrower");
-				if (nar != null) {
-					for (Iterator<JsonNode> iter = nar.elements(); iter.hasNext();) {
-						ObjectNode el = ((ObjectNode)iter.next());
-						if (el.get("prefLabel").size() == 0) {
-							el.remove("prefLabel");
-						}
-					}
-				}
-				
-				br.write(on.toString());
+	
+				main.put("vocabulary", vocabulary);
+	
+				ObjectNode json = Json.newObject();
+				json.put("semantic", main);
+	
+				br.write(json.toString());
 				br.write(VocabularyImportConfiguration.newLine);
 			}
-			
-			ObjectNode jtop = Json.newObject();
-			ObjectNode topc = Json.newObject();
-			topc.put("uri", conf.mainScheme);
-			topc.put("type", "http://www.w3.org/2004/02/skos/core#ConceptScheme");
-			
-			ObjectNode prefLabel = Json.newObject();
-			prefLabel.put("en", conf.title);
-			topc.put("prefLabel", prefLabel);
-			
-			ArrayNode arr = Json.newObject().arrayNode();
-			for (OWLClass sc : topConcepts) {
-				ObjectNode term = Json.newObject();
-				term.put("uri", sc.getIRI().toString());
-				term.put("type", "http://www.w3.org/2004/02/skos/core#Concept");
-				
-				ObjectNode pLabel = labelMap.get(sc);
-				if (pLabel == null) {
-					pLabel = Json.newObject();
-					labelMap.put(sc, pLabel);
-				}
-				if (pLabel.size() > 0) {
-					term.put("prefLabel", pLabel);
-				}
-				
-				arr.add(term);
-			}
-			
-			topc.put("topConcepts", arr);
-			topc.put("vocabulary", vocabulary);
-
-			jtop.put("semantic", topc);
-			
-			br.write(jtop.toString());
-
-        } catch (IOException e) {
-			e.printStackTrace();
 		}
 	
 		System.out.println("Compressing " + tmpFolder + File.separator + conf.folder + ".txt");
@@ -354,4 +154,61 @@ public class OWL2Vocabulary {
 		tmpFolder.delete();
 	}
 	
+	private Set<OWLClass> filter(Set<OWLClass> set, OWLImportConfiguration conf) {
+		Set<OWLClass> res = new HashSet<>();
+		
+		for (OWLClass cz : set) {
+			if (cz.equals(df.getOWLThing()) || cz.equals(df.getOWLNothing()) || !conf.keep(cz) || conf.isTop(cz)) {
+			} else {
+				res.add(cz);
+			}
+		}
+		
+		return res;
+	}
+	
+	protected ArrayNode makeNodesArray(Set<OWLClass> res, OWLImportConfiguration conf) {
+		if (res.size() > 0) {
+			ArrayNode array = Json.newObject().arrayNode();
+		
+			for (OWLClass s : res) {
+				array.add(makeMainStructure(s, conf));
+			}
+			return array;
+		} else {
+			return null;
+		}
+	}
+	
+	protected ObjectNode makeMainStructure(OWLClass cz, OWLImportConfiguration conf) {
+		ObjectNode prefLabel = Json.newObject();
+		
+		if (ap != null) {
+			for (OWLAnnotation ann : cz.getAnnotations(ontology, ap)) {
+				String label = ann.getValue().toString();
+					
+				Matcher lm = conf.labelMatcher(label);
+				if (lm.find()) {
+					Language lang = Language.getLanguage(lm.group(2));
+					if (lang != null) {
+						prefLabel.put(lang.getDefaultCode(), JSONObject.escape(lm.group(1)));
+					}
+				}
+			}
+		}
+
+		
+		ObjectNode json = Json.newObject();
+		json.put("uri", cz.getIRI().toString());
+		
+		String type = "http://www.w3.org/2004/02/skos/core#Concept";
+		json.put("type", type);
+
+		if (prefLabel.size() > 0) {
+			json.put("prefLabel", Json.toJson(prefLabel));
+		}
+		
+		return json;
+
+	}
 }

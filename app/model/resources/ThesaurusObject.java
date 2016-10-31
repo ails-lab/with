@@ -49,6 +49,7 @@ import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
+import db.DB;
 import elastic.Indexable;
 import model.basicDataTypes.Language;
 import model.basicDataTypes.Literal;
@@ -338,6 +339,23 @@ public class ThesaurusObject implements Indexable {
 
 		public void setVocabulary(SKOSVocabulary vocabulary) {
 			this.vocabulary = vocabulary;
+		}
+		
+		public boolean isScheme() {
+			return this.type.equals("http://www.w3.org/2004/02/skos/core#ConceptScheme");
+		}
+		
+		public boolean isSchemeTopConcept() {
+			if (inSchemes != null) {
+				for (String sc : inSchemes) {
+					ThesaurusObject to = DB.getThesaurusDAO().getByUri(sc);
+					if (to != null && to.semantic.topConcepts.contains(this)) {
+						return true;
+					}
+				}
+			}
+			
+			return false;
 		}
 	}
 

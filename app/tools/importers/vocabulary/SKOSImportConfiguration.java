@@ -33,4 +33,12 @@ public class SKOSImportConfiguration extends VocabularyImportConfiguration {
 		this.mainScheme = mainScheme;
 		this.existingSchemesToKeep = existingSchemesToKeep;
 	}
+	
+	public boolean keep(String cz) {
+		if (URIfilterString != null && !cz.contains(URIfilterString)) {
+			return false;
+		} else {
+			return true;
+		}
+	}
 }
