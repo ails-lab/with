@@ -16,13 +16,9 @@
 
 package model.resources;
 
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.TreeMap;
 
 import org.bson.types.ObjectId;
 import org.mongodb.morphia.annotations.Embedded;
@@ -32,8 +28,6 @@ import org.mongodb.morphia.annotations.Id;
 import org.mongodb.morphia.annotations.Index;
 import org.mongodb.morphia.annotations.IndexOptions;
 import org.mongodb.morphia.annotations.Indexes;
-import org.mongodb.morphia.query.Query;
-import org.mongodb.morphia.query.UpdateOperations;
 import org.mongodb.morphia.utils.IndexType;
 
 import utils.Deserializer;
@@ -46,23 +40,20 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.module.SimpleModule;
-import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
-import db.DB;
 import elastic.Indexable;
-import model.basicDataTypes.Language;
 import model.basicDataTypes.Literal;
 import model.basicDataTypes.MultiLiteral;
 import model.basicDataTypes.MultiLiteralOrResource;
-import model.basicDataTypes.WithAccess;
 
 @JsonInclude(value = JsonInclude.Include.NON_NULL)
 @Indexes({
 	@Index(fields = @Field(value = "administrative.externalId", type = IndexType.ASC), options = @IndexOptions()),
 	@Index(fields = @Field(value = "semantic.vocabulary.name", type = IndexType.ASC), options = @IndexOptions()),
 	@Index(fields = @Field(value = "semantic.uri", type = IndexType.ASC), options = @IndexOptions()),
-	@Index(fields = @Field(value = "semantic.type", type = IndexType.ASC), options = @IndexOptions())
+	@Index(fields = @Field(value = "semantic.type", type = IndexType.ASC), options = @IndexOptions()),
+	@Index(fields = @Field(value = "semantic.exactMatch", type = IndexType.ASC), options = @IndexOptions())
 })
 @Entity("ThesaurusObject")
 public class ThesaurusObject implements Indexable {
@@ -343,19 +334,6 @@ public class ThesaurusObject implements Indexable {
 		
 		public boolean isScheme() {
 			return this.type.equals("http://www.w3.org/2004/02/skos/core#ConceptScheme");
-		}
-		
-		public boolean isSchemeTopConcept() {
-			if (inSchemes != null) {
-				for (String sc : inSchemes) {
-					ThesaurusObject to = DB.getThesaurusDAO().getByUri(sc);
-					if (to != null && to.semantic.topConcepts.contains(this)) {
-						return true;
-					}
-				}
-			}
-			
-			return false;
 		}
 	}
 

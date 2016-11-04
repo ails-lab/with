@@ -145,6 +145,7 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 				}
 			}
 		}
+		
 		return orderedRecords;
 	}
 	
@@ -180,6 +181,21 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 		return getByCollection(collection.getCollectedResources(), q);
 	}
 	
+	public Set<ObjectId> getRecordResourceIdsByCollection(ObjectId collectionId) {
+		CollectionObject collection = DB.getCollectionObjectDAO().getById(
+				collectionId,
+				new ArrayList<String>(Arrays.asList("collectedResources")));
+		
+		try {
+			return (Set<ObjectId>)CollectionUtils
+					.collect(collection.getCollectedResources(),
+							new BeanToPropertyValueTransformer(
+										"target.recordId"), new HashSet<ObjectId>());
+		} catch (Exception e) {
+			return new HashSet<ObjectId>();
+		}
+	}
+	
 	public List<RecordResource> getByCollection(ObjectId collectionId,
 			List<String> retrievedFields) {
 		CollectionObject collection = DB.getCollectionObjectDAO().getById(
@@ -190,6 +206,13 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 		return getByCollection(collection.getCollectedResources(), q);
 	}
 	
+	
+	public RecordResource getByAnnotationId(ObjectId annId) {
+		Query<RecordResource> q = this.createQuery().disableValidation()
+				.field("annotationIds").equal(annId);
+		
+		return this.findOne(q);
+	}
 	
 	public List<RecordResource> getByCollectionWithTerms(ObjectId collectionId, List<Set<String>> uris, List<String> lookupFields, List<String> retrievedFields, int max) {
 		

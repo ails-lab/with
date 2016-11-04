@@ -35,7 +35,9 @@ import controllers.parameterTypes.StringTuple;
 import db.DB;
 import elastic.ElasticCoordinator;
 import elastic.ElasticSearcher.SearchOptions;
+import model.annotations.Annotation;
 import model.annotations.ContextData;
+import model.annotations.Annotation.AnnotationAdmin;
 import model.annotations.ContextData.ContextDataBody;
 import model.basicDataTypes.Language;
 import model.basicDataTypes.MultiLiteral;
@@ -1345,7 +1347,7 @@ public class CollectionObjectController extends WithResourceController {
                 List<Set<String>> uris = CollectionIndexController.termsRestrictionFromJSON(json);
                 List<RecordResource> res = DB.getRecordResourceDAO().getByCollectionWithTerms(colId, uris, Arrays.asList(CollectionIndexController.lookupFields), Arrays.asList(new String[] {"_id"}), start + count);
 
-                //Inefficient Pagination
+                //Very Inefficient Pagination. Should use elastic
                 int top = Math.min(start + count, res.size());
                 
                 List<String> ids = new ArrayList<>();
@@ -1354,12 +1356,7 @@ public class CollectionObjectController extends WithResourceController {
     			}
     			
     			if (top < start + count) {
-    				List<RecordResource> all = DB.getRecordResourceDAO().getByCollection(colId, Arrays.asList(new String[] {"_id"}));
-    				Collection<ObjectId> allIds = new HashSet<>();
-    				for (RecordResource rr : all) {
-    					allIds.add(rr.getDbId());
-    				}
-    				
+    				Set<ObjectId> allIds = DB.getRecordResourceDAO().getRecordResourceIdsByCollection(colId);
     				for (RecordResource rr : res) {
     					allIds.remove(rr.getDbId());
     				}
@@ -1368,7 +1365,7 @@ public class CollectionObjectController extends WithResourceController {
     				
     				int top2 = Math.min(start + count - top, res2.size());
     				
-        			for (int i = start - top; i < top2; i++) {
+        			for (int i = start + top; i < top2; i++) {
         				ids.add(res2.get(i).getDbId().toString());
         			}
     			}
@@ -1560,6 +1557,32 @@ public class CollectionObjectController extends WithResourceController {
         return 0;
     }
 
+    public static Result addAnnotation(String id) {
+    	ObjectNode result = Json.newObject();
+   		JsonNode json = request().body().asJson();
+   		if (json == null) {
+   			result.put("error", "Invalid JSON");
+   			return badRequest();
+   		}
+   		
+   		try {
+	    	ObjectId user = WithController.effectiveUserDbId();
+	    	 
+	    	for (RecordResource record : DB.getRecordResourceDAO().getByCollection(new ObjectId(id), Arrays.asList(new String[] {"_id"}))) {
+	    		Annotation annotation = AnnotationController.getAnnotationFromJson(json);
+	    		
+	   			annotation.getTarget().setRecordId(record.getDbId());
+	   			annotation.getTarget().setWithURI("/record/" + record.getDbId());
+	   			
+	   			AnnotationController.addAnnotation(annotation, user);
+	    	}
+	    	
+	    	return ok();
+   		} catch (Exception e1) {
+            result.put("error", e1.getMessage());
+            return internalServerError(result);
+   		}
+    }
 
     public static Result annotateCollection(String id) {
         ObjectNode result = Json.newObject();
@@ -1593,7 +1616,7 @@ public class CollectionObjectController extends WithResourceController {
                 
                 ac.tell(new AnnotationControlActor.AnnotateRequestsCompleted(), ActorRef.noSender());
 
-                return ok(result);
+                return ok();
             }
 
         } catch (Exception e1) {

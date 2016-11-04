@@ -348,7 +348,6 @@ public class RecordResourceController extends WithResourceController {
 				}
 			
 	    	    ac.tell(new AnnotationControlActor.RequestAnnotateMessage(user, urls.toArray(new String[urls.size()]), target, props, (RequestAnnotator.Descriptor)annConfig.getAnnotatorDesctriptor()), ActorRef.noSender());
-
 				
 			} else if (textAnnotator) {
 				if (dd == null) {
@@ -361,8 +360,14 @@ public class RecordResourceController extends WithResourceController {
 					if (res != null && res instanceof MultiLiteral) {
 						MultiLiteral value = (MultiLiteral)res;
 		
+						value.remove(Language.DEFAULT);
+						if (value.size() == 1 && value.contains(Language.UNKNOWN)) {
+							List<String> unk = value.remove(Language.UNKNOWN);
+							value.addMultiLiteral(Language.EN, unk);
+						}
+						
 						for (Language lang : value.getLanguages()) {
-							if (lang == Language.UNKNOWN || lang == Language.DEFAULT) {
+							if (lang == Language.UNKNOWN) {
 								continue;
 							}
 							
@@ -414,7 +419,7 @@ public class RecordResourceController extends WithResourceController {
 									if (annotators.size() == 1) {
 										DB.getAnnotationDAO().deleteAnnotation(annId);
 									} else {
-										DB.getAnnotationDAO().removeAnnotators(annotation.getDbId(), Arrays.asList(annotator));
+										DB.getAnnotationDAO().removeAnnotators(annId, Arrays.asList(annotator));
 									}
 								}
 							}

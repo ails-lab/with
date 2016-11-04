@@ -17,6 +17,7 @@
 package model.resources;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -186,6 +187,29 @@ public class CulturalObject extends RecordResource<CulturalObject.CulturalObject
 		public void setDccontributor(MultiLiteralOrResource dccontributor) {
 			this.dccontributor = dccontributor;
 		}
+		
+		public Collection<String> collectURIs() {
+			Collection<String> res = super.collectURIs();
+
+			if (dctype != null && dctype.getURI() != null) {
+				res.addAll(dctype.getURI());
+			}
+			
+			if (dctermsspatial != null && dctermsspatial.getURI() != null) {
+				res.addAll(dctermsspatial.getURI());
+			}
+			
+			if (dcformat != null && dcformat.getURI() != null) {
+				res.addAll(dcformat.getURI());
+			}
+			
+			if (dctermsmedium != null && dctermsmedium.getURI() != null) {
+				res.addAll(dctermsmedium.getURI());
+			}
+			
+			return res;
+		} 
+
 
 	}
 

@@ -77,6 +77,10 @@ public class MultiLiteral extends HashMap<String, List<String>> implements
 			this.put(key, new ArrayList<String>(Arrays.asList(value)));
 	}
 
+	public List<String> remove(Language lang) {
+		return remove(lang.getDefaultCode());
+	}
+	
 	public MultiLiteral fillDEF() {
 		return fillDEF(false);
 	}
@@ -113,6 +117,10 @@ public class MultiLiteral extends HashMap<String, List<String>> implements
 	public MultiLiteral merge(MultiLiteral other) {
 		this.putAll(other);
 		return this;
+	}
+	
+	public boolean contains(Language lang) {
+		return containsKey(lang.getDefaultCode());
 	}
 	
 	public Set<Language> getLanguages() {

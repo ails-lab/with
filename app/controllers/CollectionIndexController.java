@@ -72,6 +72,14 @@ public class CollectionIndexController extends WithResourceController	{
 		"descriptiveData.dctermsmedium.uri",
 	};
 	
+	public static String[] retrievedFields = new String[] {
+		"descriptiveData.keywords.uri",
+		"descriptiveData.dctype.uri",
+		"descriptiveData.dcformat.uri",
+		"descriptiveData.dctermsmedium.uri",
+		"annotationIds"
+	};
+	
 	public static List<Set<String>> termsRestrictionFromJSON(JsonNode json) {
 		List<Set<String>> uris = null;
 		
@@ -118,12 +126,10 @@ public class CollectionIndexController extends WithResourceController	{
 			
 			List<String[]> list = new ArrayList<>();
 			
-			List<String> fields = Arrays.asList(lookupFields);
+			Set<ObjectId> allIds = DB.getRecordResourceDAO().getRecordResourceIdsByCollection(new ObjectId(id));
 
-			List<String> ids = new ArrayList<>();            
-			
-			for (RecordResource rr : DB.getRecordResourceDAO().getByCollectionWithTerms(new ObjectId(id), uris, fields, fields, -1)) {
-				ids.add(rr.getDbId().toString());
+			for (RecordResource rr : DB.getRecordResourceDAO().getByCollectionWithTerms(new ObjectId(id), uris, Arrays.asList(lookupFields), Arrays.asList(retrievedFields), -1)) {
+				allIds.remove(rr.getDbId());
 				
 				List<Object> olist = new ArrayList<>();
 
@@ -178,16 +184,6 @@ public class CollectionIndexController extends WithResourceController	{
 				if (olist.size() > 0 ) {
 					list.add(olist.toArray(new String[olist.size()]));
 				}
-			}
-			
-			List<RecordResource> all = DB.getRecordResourceDAO().getByCollection(new ObjectId(id), Arrays.asList(new String[] {"_id"}));
-			Collection<ObjectId> allIds = new HashSet<>();
-			for (RecordResource rr : all) {
-				allIds.add(rr.getDbId());
-			}
-			
-			for (String rid : ids) {
-				allIds.remove(rid);
 			}
 			
 			if (allIds.size() > 0) {
