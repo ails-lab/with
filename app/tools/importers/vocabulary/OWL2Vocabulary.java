@@ -56,23 +56,24 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import db.DB;
 
 
-public class OWL2Vocabulary {
+public class OWL2Vocabulary extends Data2Vocabulary<OWLImportConfiguration> {
 
 	
 	private static OWLDataFactory df = new OWLManager().getOWLDataFactory();
 
-	private static OWLImportConfiguration nerd = new OWLImportConfiguration("nerd", 
+	public static OWLImportConfiguration nerd = new OWLImportConfiguration("nerd", 
 	        "Named Entity Recognition and Disambiguation Ontology", 
 	        "nerd", 
 	        "0.5", 
 	        null,
 	        "nerd.eurecom.fr",
-	        "http://nerd.eurecom.fr/ontology",
+	        null,
+	        null,
 	        "http://nerd.eurecom.fr/ontology#Thing");	
 
 	public static OWLImportConfiguration[] confs = new OWLImportConfiguration[] { nerd };
 	
-	public static void doImport(OWLImportConfiguration[] confs) {
+	public static void doImport(OWLImportConfiguration... confs) {
 		OWL2Vocabulary o2v = new OWL2Vocabulary();
 		for (OWLImportConfiguration c : confs) {
 			try {
@@ -86,7 +87,7 @@ public class OWL2Vocabulary {
 	OWLOntology ontology;
 	OWLAnnotationProperty ap;
 	
-	private void doImport(OWLImportConfiguration conf) throws OWLOntologyCreationException, FileNotFoundException, IOException {
+	protected void doImport(OWLImportConfiguration conf) throws Exception {
 		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
 		OWLOntology ontology = manager.loadOntologyFromOntologyDocument(IRI.create(conf.getInputFolder().listFiles()[0].toURI().toString()));
 		
@@ -141,17 +142,7 @@ public class OWL2Vocabulary {
 			}
 		}
 	
-		System.out.println("Compressing " + tmpFolder + File.separator + conf.folder + ".txt");
-		File cf = VocabularyImportConfiguration.compress(tmpFolder, conf.folder);
-		File tf = new File(VocabularyImportConfiguration.outdir + File.separator + cf.getName());
-		System.out.println("Copying file " + cf + " to " + tf);
-		Files.copy(cf.toPath(), tf.toPath(), StandardCopyOption.REPLACE_EXISTING);
-
-		System.out.println("Clearing " + tmpFolder);
-		for (File f : tmpFolder.listFiles()) {
-			f.delete();
-		}
-		tmpFolder.delete();
+		conf.cleanUp(tmpFolder);
 	}
 	
 	private Set<OWLClass> filter(Set<OWLClass> set, OWLImportConfiguration conf) {

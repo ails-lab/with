@@ -23,6 +23,8 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -30,6 +32,9 @@ import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
+
+import org.apache.jena.rdf.model.Model;
+import org.apache.jena.rdf.model.ModelFactory;
 
 
 public class VocabularyImportConfiguration {
@@ -51,12 +56,6 @@ public class VocabularyImportConfiguration {
 	
 	public VocabularyImportConfiguration(String folder) {
 		this.folder = folder;
-		
-//		File dir  = new File(outdir);
-//		if (!dir.exists()) {
-//			dir.mkdir();
-//		}
-
 	}
 
 	public static File getTempFolder() {
@@ -79,24 +78,11 @@ public class VocabularyImportConfiguration {
 		return new File(srcdir + File.separator + folder);
 	}
 
-
-//	public String getOutputFileName() {
-//		return folder + ".txt";
-//	}
-	
 	public Matcher labelMatcher(String label) {
 		return labelPattern.matcher(label);
 	}
 	
 	static final int BUFFER = 2048;
-	
-//	public void compress() throws FileNotFoundException, IOException {
-//		compress(folder);
-//	}
-	
-//	public void deleteTemp() {
-//		deleteTemp(folder);
-//	}
 	
 	public static File compress(File path, String fileName) throws FileNotFoundException, IOException {
 		File f = new File(path + File.separator + fileName + ".zip");
@@ -162,6 +148,40 @@ public class VocabularyImportConfiguration {
 		if (f.exists()) {
 			f.delete();
 		}
+	}
+	
+	public Model readModel(File tmpFolder) throws FileNotFoundException, IOException {
+		Model model = ModelFactory.createDefaultModel();
+		for (File f : getInputFolder().listFiles()) {
+			System.out.println("Reading: " + f);
+			if (f.getName().endsWith(".zip")) {
+				VocabularyImportConfiguration.uncompress(tmpFolder, f);
+			} else {
+				System.out.println("Importing to Fuseki: " + f);
+				model.read(f.getAbsolutePath());
+			}
+		}
+		
+		for (File f : tmpFolder.listFiles()) {
+			System.out.println("Importing to Fuseki: " + f);
+			model.read(f.getAbsolutePath());
+		}
+		
+		return model;
+	}
+	
+	public void cleanUp(File tmpFolder) throws FileNotFoundException, IOException {
+		System.out.println("Compressing " + tmpFolder + File.separator + folder + ".txt");
+		File cf = VocabularyImportConfiguration.compress(tmpFolder, folder);
+		File tf = new File(VocabularyImportConfiguration.outdir + File.separator + cf.getName());
+		System.out.println("Copying file " + cf + " to " + tf);
+		Files.copy(cf.toPath(), tf.toPath(), StandardCopyOption.REPLACE_EXISTING);
+
+		System.out.println("Clearing " + tmpFolder);
+		for (File f : tmpFolder.listFiles()) {
+			f.delete();
+		}
+		tmpFolder.delete();
 	}
 
 

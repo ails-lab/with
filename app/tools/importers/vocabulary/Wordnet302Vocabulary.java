@@ -20,22 +20,16 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.StandardCopyOption;
-import java.util.HashSet;
-import java.util.Set;
 
 import model.basicDataTypes.Language;
 import model.basicDataTypes.Literal;
 import model.basicDataTypes.MultiLiteral;
 import net.minidev.json.JSONObject;
 
-import org.semanticweb.owlapi.model.OWLClass;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 
 import play.libs.Json;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
@@ -48,7 +42,7 @@ import org.apache.jena.query.ResultSet;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 
-public class Wordnet302Vocabulary {
+public class Wordnet302Vocabulary extends Data2Vocabulary<SKOSImportConfiguration> {
 
 	private static SKOSImportConfiguration wn30 = new SKOSImportConfiguration("wn30", 
 	       	"Wordnet 3.0", 
@@ -56,13 +50,10 @@ public class Wordnet302Vocabulary {
 	        "3.0", 
 	        null,
 	        "http://wordnet-rdf.princeton.edu/wn30/", 
+	        null,
 	        null);
 
 	public static SKOSImportConfiguration[] confs = new SKOSImportConfiguration[] { wn30 };
-	
-	public static void main(String[] args) {
-		doImport(confs);
-	}
 	
 	public static void doImport(SKOSImportConfiguration[] confs) {
 		Wordnet302Vocabulary s2v = new Wordnet302Vocabulary();
@@ -77,33 +68,11 @@ public class Wordnet302Vocabulary {
 	
 	private static String prefix = "http://www.w3.org/2006/03/wn/wn20/schema/";
 	
-	private void doImport(SKOSImportConfiguration conf) throws OWLOntologyCreationException, IOException {
-
-//		Set<String> ks = null;
-//		if (conf.existingSchemesToKeep != null) {
-//			ks = new HashSet<>();
-//			for (String s : conf.existingSchemesToKeep) {
-//				ks.add(s);
-//			}
-//		}
+	protected void doImport(SKOSImportConfiguration conf) throws OWLOntologyCreationException, IOException {
 		
 		File tmpFolder = VocabularyImportConfiguration.getTempFolder();
 		
-		Model model = ModelFactory.createDefaultModel();
-		for (File f : conf.getInputFolder().listFiles()) {
-			System.out.println("Reading: " + f);
-			if (f.getName().endsWith(".zip")) {
-				VocabularyImportConfiguration.uncompress(tmpFolder, f);
-			} else {
-				System.out.println("Importing to Fuseki: " + f);
-				model.read(f.getAbsolutePath());
-			}
-		}
-		
-		for (File f : tmpFolder.listFiles()) {
-			System.out.println("Importing to Fuseki: " + f);
-			model.read(f.getAbsolutePath());
-		}
+		Model model = conf.readModel(tmpFolder);
 
 		File outFile = new File(tmpFolder + File.separator + conf.folder + ".txt");
 //
@@ -214,17 +183,7 @@ public class Wordnet302Vocabulary {
 //			br.write(jtop.toString());
 		}
 		
-		System.out.println("Compressing " + tmpFolder + File.separator + conf.folder + ".txt");
-		File cf = VocabularyImportConfiguration.compress(tmpFolder, conf.folder);
-		File tf = new File(VocabularyImportConfiguration.outdir + File.separator + cf.getName());
-		System.out.println("Copying file " + cf + " to " + tf);
-		Files.copy(cf.toPath(), tf.toPath(), StandardCopyOption.REPLACE_EXISTING);
-
-		System.out.println("Clearing " + tmpFolder);
-		for (File f : tmpFolder.listFiles()) {
-			f.delete();
-		}
-		tmpFolder.delete();
+		conf.cleanUp(tmpFolder);
 		
 	}
 

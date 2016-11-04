@@ -16,22 +16,37 @@
 
 package tools.importers.vocabulary;
 
+import java.util.HashSet;
+import java.util.Set;
+
+import model.basicDataTypes.Language;
+
 public class SKOSImportConfiguration extends VocabularyImportConfiguration {
 	String title;
 	String prefix;
 	String version;
 	String URIfilterString;
 	String mainScheme;
-	String[] existingSchemesToKeep;
+	Set<String> manualSchemes;
+	Language defaultLanguage;
 	
-	public SKOSImportConfiguration(String folder, String title, String prefix, String version, String URIfilterString, String mainScheme, String[] existingSchemesToKeep) {
+	public SKOSImportConfiguration(String folder, String title, String prefix, String version, String URIfilterString, String mainScheme, String[] schemes, Language defLanguage) {
 		super(folder); 
 		this.title = title;
 		this.prefix = prefix;
 		this.version = version;
 		this.URIfilterString = URIfilterString;
 		this.mainScheme = mainScheme;
-		this.existingSchemesToKeep = existingSchemesToKeep;
+		this.defaultLanguage = defLanguage;
+
+		
+		manualSchemes = null;
+		if (schemes != null) {
+			manualSchemes = new HashSet<>();
+			for (String s : schemes) {
+				manualSchemes.add(s);
+			}
+		}
 	}
 	
 	public boolean keep(String cz) {
@@ -41,4 +56,26 @@ public class SKOSImportConfiguration extends VocabularyImportConfiguration {
 			return true;
 		}
 	}
+	
+	public Set<String> getManualSchemes() {
+		return manualSchemes;
+	}
+	
+	public boolean isValidScheme(String uri, String type) {
+		if (type.equals("http://www.w3.org/2004/02/skos/core#ConceptScheme")) {
+			if (manualSchemes != null) {
+				return manualSchemes.contains(uri);
+			} else {
+				return true;
+			}
+		} else {
+			if (manualSchemes != null) {
+				return manualSchemes.contains(uri);
+			} else {
+				return false;
+			}
+		}
+	}
+	
+	
 }

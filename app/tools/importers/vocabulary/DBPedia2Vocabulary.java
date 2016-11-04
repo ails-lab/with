@@ -42,6 +42,11 @@ import model.basicDataTypes.Language;
 import net.minidev.json.JSONObject;
 
 import org.apache.jena.atlas.lib.SetUtils;
+import org.apache.jena.query.QueryExecution;
+import org.apache.jena.query.QueryExecutionFactory;
+import org.apache.jena.query.QueryFactory;
+import org.apache.jena.query.QuerySolution;
+import org.apache.jena.query.ResultSet;
 import org.apache.jena.rdf.model.Model;
 import org.apache.lucene.analysis.core.KeywordAnalyzer;
 import org.apache.lucene.document.Document;
@@ -91,7 +96,7 @@ import db.DB;
 public class DBPedia2Vocabulary {
 
 	private String ontologyFile = VocabularyImportConfiguration.srcdir + File.separator + "dbo";
-	private String inPath = VocabularyImportConfiguration.outdir + File.separator + "dbr";
+	private String inPath = VocabularyImportConfiguration.srcdir + File.separator + "dbr";
 
 	private String labelsFileName = "labels_en.ttl.bz2";
 	private File tmpFolder;
@@ -115,7 +120,8 @@ public class DBPedia2Vocabulary {
 	        "2016-04", 
 	        "http://www.w3.org/2000/01/rdf-schema#label",
 	        "dbpedia.org",
-	        "http://dbpedia.org/ontology",
+	        null,
+	        null,
 	        null);	
 	
 	private static OWLImportConfiguration dbr = new OWLImportConfiguration("dbr", 
@@ -124,7 +130,8 @@ public class DBPedia2Vocabulary {
 	        "2016-04", 
 	        "http://www.w3.org/2000/01/rdf-schema#label",
 	        "dbpedia.org",
-	        "http://dbpedia.org/resource",
+	        null,
+	        null,
 	        null);	
 	
 	
@@ -134,12 +141,12 @@ public class DBPedia2Vocabulary {
 		try {
 			importer.readOntology(dbo);
 
-//			importer.prepareIndex();
-//			importer.readInstances();
-//			
-//			importer.createThesaurus(dbr);
-//			
-//			importer.erase();
+			importer.prepareIndex();
+			importer.readInstances();
+			
+			importer.createThesaurus(dbr);
+			
+			importer.erase();
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -159,7 +166,7 @@ public class DBPedia2Vocabulary {
 				filter[i] = new HashSet<>();
 				filterName[i] = "";
 				for (String s: restrictToType.get(i)) {
-					filter[i].add(df.getOWLClass(IRI.create(conf.mainScheme + "/" + s)));
+					filter[i].add(df.getOWLClass(IRI.create("http://dbpedia.org/ontology/" + s)));
 					
 					if (filterName[i].length() > 0) {
 						filterName[i] += "-";
@@ -208,13 +215,16 @@ public class DBPedia2Vocabulary {
 					continue;
 				}
 	
+				classMap.put(cz, makeMainStructure(cz));
+				
 				ObjectNode main = makeMainStructure(cz);
+				
 				
 				ArrayNode broader = makeNodesArray(filter(reasoner.getSuperClasses(cz, true).getFlattened(), conf));
 				if (broader != null) {
 					main.put("broader", broader);
 				}
-					
+				
 				ArrayNode broaderTransitive = makeNodesArray(filter(reasoner.getSuperClasses(cz, false).getFlattened(), conf));
 				if (broaderTransitive != null) {
 					main.put("broaderTransitive", broaderTransitive);
@@ -224,7 +234,12 @@ public class DBPedia2Vocabulary {
 				if (narrower != null) {
 					main.put("narrower", narrower);
 				}
-	
+				
+				ArrayNode exactMatch = makeURIArrayNode(reasoner.getEquivalentClasses(cz).getEntities());
+				if (exactMatch != null) {
+					main.put("exactMatch", exactMatch);
+				}
+				
 				main.put("vocabulary", vocabulary);
 	
 				ObjectNode json = Json.newObject();
@@ -255,6 +270,19 @@ public class DBPedia2Vocabulary {
 		
 			for (OWLClass s : res) {
 				array.add(makeMainStructure(s));
+			}
+			return array;
+		} else {
+			return null;
+		}
+	}
+	
+	protected ArrayNode makeURIArrayNode(Set<OWLClass> res) {
+		if (res.size() > 0) {
+			ArrayNode array = Json.newObject().arrayNode();
+		
+			for (OWLClass s : res) {
+				array.add(s.getIRI().toString());
 			}
 			return array;
 		} else {
@@ -373,12 +401,9 @@ public class DBPedia2Vocabulary {
 	}
 	
 	private File[] createThesaurus(OWLImportConfiguration conf) throws IOException, CompressorException {
-		ArrayNode schemes = Json.newObject().arrayNode();
-		schemes.add(conf.mainScheme);
-
 		ObjectNode vocabulary = Json.newObject();
-		vocabulary.put("name", "dbr");
-		vocabulary.put("version", "2015-10");
+		vocabulary.put("name", conf.prefix);
+		vocabulary.put("version", conf.version);
 
 		File[] dbrFiles;
 		
@@ -410,7 +435,6 @@ public class DBPedia2Vocabulary {
 
 				try {
 					String line;
-			
 					while ((line = br.readLine()) != null)   {
 						Matcher m = triple.matcher(line);
 						
@@ -432,7 +456,7 @@ public class DBPedia2Vocabulary {
 								
 								String t = doc.getValues("type")[0];
 								String v = doc.getValues("value")[0];
-								
+
 								if (t.equals(dbr.labelProperty)) {
 									labels.add(v);
 								} else if (t.equals("http://www.w3.org/2000/01/rdf-schema#comment")) {
@@ -528,7 +552,6 @@ public class DBPedia2Vocabulary {
 								semantic.put("exactMatch", same);
 							}
 							
-							semantic.put("inSchemes", schemes);
 							semantic.put("vocabulary", vocabulary);
 	
 							for (int f : forFilter) {

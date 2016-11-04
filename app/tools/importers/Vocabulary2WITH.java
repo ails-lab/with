@@ -45,7 +45,9 @@ import db.DB;
 import sources.core.ParallelAPICall;
 import tools.importers.vocabulary.AAT2Vocabulary;
 import tools.importers.vocabulary.DBPedia2Vocabulary;
+import tools.importers.vocabulary.GEMET2Vocabulary;
 import tools.importers.vocabulary.OWL2Vocabulary;
+import tools.importers.vocabulary.RDF2Vocabulary;
 import tools.importers.vocabulary.SKOS2Vocabulary;
 import tools.importers.vocabulary.VocabularyImportConfiguration;
 import tools.importers.vocabulary.Wordnet302Vocabulary;
@@ -59,50 +61,66 @@ public class Vocabulary2WITH {
 
 	public static void main(String[] args) throws FileNotFoundException, IOException {
 
-		// specify configure folders
 		VocabularyImportConfiguration.tmpdir = "C:/Users/achort.IPLAB/git/with-vocabularies/tmp";
 		
 		VocabularyImportConfiguration.srcdir = "C:/Users/achort.IPLAB/git/with-vocabularies/resources/vocabulary/src";
 		VocabularyImportConfiguration.outdir = "C:/Users/achort.IPLAB/git/with-vocabularies/resources/vocabulary/json";
 		
-		deleteVocabularyFromIndex("nerd");
+//		deleteVocabularyFromIndex("fashion");
+//		deleteVocabularyFromIndex("euscreenxl");
+//		deleteVocabularyFromIndex("mimo");
+//		deleteVocabularyFromIndex("partageplus");
+//		deleteVocabularyFromIndex("photo");
+//		deleteVocabularyFromIndex("gemet");
+//		deleteVocabularyFromIndex("aat");
+//		deleteVocabularyFromIndex("nerd");
+//		deleteVocabularyFromIndex("schema");
+//		deleteVocabularyFromIndex("wn30");
+//		deleteVocabularyFromIndex("dbo");
+//		deleteVocabularyFromIndex("dbr");
 		
-		// converts sources in srcdir to zipped jsons in outfir
-		//convertSourcesToJSONs();
-//		Wordnet302Vocabulary.doImport(Wordnet302Vocabulary.confs);
+//		convertSourcesToJSONs();
+		
+//		SKOS2Vocabulary.doImport(SKOS2Vocabulary.fashion);
+//		SKOS2Vocabulary.doImport(SKOS2Vocabulary.euscreenxl);
+//		SKOS2Vocabulary.doImport(SKOS2Vocabulary.mimo);
+//		SKOS2Vocabulary.doImport(SKOS2Vocabulary.partageplus);
+//		SKOS2Vocabulary.doImport(SKOS2Vocabulary.photo);
+//		SKOS2Vocabulary.doImport(SKOS2Vocabulary.gemet);
 //		AAT2Vocabulary.doImport(AAT2Vocabulary.confs);
-//		DBPedia2Vocabulary.doImport(null);
-		OWL2Vocabulary.doImport(OWL2Vocabulary.confs);
+//		OWL2Vocabulary.doImport(OWL2Vocabulary.nerd);
+//		RDF2Vocabulary.doImport(RDF2Vocabulary.schema);
+//		Wordnet302Vocabulary.doImport(Wordnet302Vocabulary.confs);
+
+//		List<String[]> filters = new ArrayList<>();
+//		filters.add(new String[] {"Person"});
+//		filters.add(new String[] {"Place"});
+//		
+//		DBPedia2Vocabulary.doImport(filters);
 		
-		// import all jsons to WITH
-		//importAll();
+//		importAll();
 		
-		// or import one-by-one
-		//importJSONVocabularyToWITH("fashion");
-		//importJSONVocabularyToWITH("photo");
-		//importJSONVocabularyToWITH("euscreenxl");
-		//importJSONVocabularyToWITH("partageplus");
-		//importJSONVocabularyToWITH("mimo");
-		//importJSONVocabularyToWITH("gemet");
-		//importJSONVocabularyToWITH("hornbostelsachs");
-		importJSONVocabularyToWITH("nerd");
+//		importJSONVocabularyToWITH("fashion");
+//		importJSONVocabularyToWITH("euscreenxl");
+//		importJSONVocabularyToWITH("mimo");
+//		importJSONVocabularyToWITH("partageplus");
+//		importJSONVocabularyToWITH("photo");
+//		importJSONVocabularyToWITH("gemet");
 //		importJSONVocabularyToWITH("aat");
-//		importJSONVocabularyToWITH("dbo");
-		//importJSONVocabularyToWITH("dbr-place");
-		//importJSONVocabularyToWITH("dbr-person");
+//		importJSONVocabularyToWITH("nerd");
+//		importJSONVocabularyToWITH("schema");
 //		importJSONVocabularyToWITH("wn30");
+//		importJSONVocabularyToWITH("dbo");
+//		importJSONVocabularyToWITH("dbr-place");
+//		importJSONVocabularyToWITH("dbr-person");
 	}
 	
 	private static void convertSourcesToJSONs() {
 		// import skos vocabularies
 		SKOS2Vocabulary.doImport(SKOS2Vocabulary.confs);
-		
-		// import owl vocabularies
+		RDF2Vocabulary.doImport(RDF2Vocabulary.confs);
 		OWL2Vocabulary.doImport(OWL2Vocabulary.confs);
-		
-		// import aat thesaurus
 		AAT2Vocabulary.doImport(AAT2Vocabulary.confs);
-		
 		Wordnet302Vocabulary.doImport(Wordnet302Vocabulary.confs);
 		
 		// import dbpedia

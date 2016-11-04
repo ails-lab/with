@@ -25,8 +25,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.bson.types.ObjectId;
-
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
@@ -41,11 +39,9 @@ import db.DB;
 
 public class ThesaurusFacet {
 	private static Map<String, SKOSSemantic> map = new HashMap<>();
-	private static Map<String, ObjectId> idMap = new HashMap<>();
 	
 	public ThesaurusFacet() {
 	}
-
 	
 	public SKOSSemantic getSemantic(String term) {
 		SKOSSemantic res = map.get(term);
@@ -54,7 +50,6 @@ public class ThesaurusFacet {
 			if (to != null) {
 				res = to.getSemantic();
 				map.put(res.getUri(), res);
-				idMap.put(res.getUri(), to.getDbId());
 			}
 		}
 		
@@ -76,193 +71,194 @@ public class ThesaurusFacet {
 	}
 
 	private Collection<DAGNode<String>> tops;
-	private Set<DAGNode<String>> schemeTopNodes;
-	private Set<DAGNode<String>> selectedTerms;
+//	private Set<DAGNode<String>> selectedTerms;
+	private Map<String, Counter> counterMap;
 	
-	public static void count(Map<String, Counter> counterMap, String term, Set<String> used) {
-		Counter c = counterMap.get(term);
-		if (c == null) {
-			c = new Counter(0);
-			counterMap.put(term, c);
+	public Set<String> getTopConceptInSchemes(SKOSSemantic sem) {
+		Set<String> res = new HashSet<>();
+		
+		List<String> schemes = sem.getInSchemes();
+		if (schemes != null) {
+			for (String sc : schemes) {
+				SKOSSemantic cc = getSemantic(sc);
+				if (cc != null && cc.getTopConcepts().contains(sem)) {
+					res.add(sc);
+				}
+			}
 		}
-		if (used.add(term)) {
-			c.increase();
-		}
+		
+		return res;
 	}
 	
-	private DAGNode<String> addNode(Map<String, DAGNode<String>> nodeMap, String term, int size,  Set<String> selected) {
+	private DAGNode<String> addNode(Map<String, DAGNode<String>> nodeMap, String term, int size) {
 		DAGNode<String> node = nodeMap.get(term);
 
 		if (node == null) {
 			node = new DAGNode<String>(term, size);
 			nodeMap.put(term, node);
-		
-			tops.add(node);
-	
-			if (selected.contains(term)) {
-				selectedTerms.add(node);
-			}
-			
-			SKOSSemantic sem = getSemantic(term);
-			if (sem != null && sem.isSchemeTopConcept()) {
-				schemeTopNodes.add(node);
-			}
 		}
 
 		return node;
 	}
 	
+	public void count(String term, Set<String> used) {
+		Counter c = counterMap.get(term);
+		if (c == null) {
+			c = new Counter(0);
+			counterMap.put(term, c);
+		}
+		c.increase();
+	}
+	
+	private void add(SKOSSemantic sem, Set<String> selected, Set<String> used) {
+		String term = sem.getUri();
+	
+		if (used.add(term)) {
+			if (!selected.contains(term)) {
+				count(term, used);
+	
+				Set<String> schemes = getTopConceptInSchemes(sem);
+				if (schemes.size() > 0) {
+					for (String scheme : schemes) {
+						if (used.add(scheme)) {
+							count(scheme, used);
+						}
+					}
+				} else {
+					List<SKOSTerm> broader = sem.getBroader();
+					if (broader != null) {
+						for (SKOSTerm br : broader) {
+							add(getSemantic(br.getUri()), selected, used);
+						}
+					}
+				}
+			} else {
+				List<String> schemes = sem.getInSchemes();
+				if (schemes != null) {
+					for (String scheme : schemes) {
+						if (used.add(scheme)) {
+							count(scheme, used);
+						}
+					}
+				}
+			}
+		}
+	}
+	
 	public void create(List<String[]> list, Set<String> selected) {
 
 		tops = new HashSet<>();
-		schemeTopNodes = new HashSet<>();
-		selectedTerms = new HashSet<>();
-		
-		Map<String, Counter> counterMap = new HashMap<>();
+		counterMap = new HashMap<>();
 		
 		for (String[] uris : list) {
 			Set<String> used = new HashSet<>();
 
-			if (uris != null) {
-				for (String uri : uris) {
-					SKOSSemantic semantic = getSemantic(uri);
-
-					if (semantic != null) {
-						count(counterMap, uri, used);
-
-						Collection<SKOSTerm> broader = semantic.getBroaderTransitive();
-						
-						if (broader != null) {
-							for (SKOSTerm term : broader) {
-								count(counterMap, term.getUri(), used);
-							}
-						} 
-					}
+			for (String uri : uris) {
+				SKOSSemantic sem = getSemantic(uri);
+				if (sem != null) {
+					add(sem, selected, used);
 				}
 			}
 		}
 		
 		Map<String, DAGNode<String>> nodeMap = new HashMap<>();
 
-		Set<DAGNode<String>> toRemove = new HashSet<>();
-		
 		for (Map.Entry<String, Counter> entry : counterMap.entrySet()) {
 			String term = entry.getKey();
-			DAGNode<String> node = addNode(nodeMap, term, entry.getValue().getValue(), selected);
-
-			List<SKOSTerm> broaderList = getSemantic(term).getBroader();
+			SKOSSemantic sem = getSemantic(term);
 			
-			if (broaderList != null) {
-				for (SKOSTerm broader : broaderList) {
-					String broaderURI = broader.getUri();
-					
-					DAGNode<String> parent = addNode(nodeMap, broaderURI, counterMap.get(broaderURI).getValue(), selected);
-					
-					parent.addChild(node);
-					toRemove.add(node);
+			DAGNode<String> node = addNode(nodeMap, term, entry.getValue().getValue());
+
+			boolean hasParent = false;			
+
+			Set<String> schemes = getTopConceptInSchemes(sem);
+			if (schemes.size() > 0) {
+				for (String scheme : schemes) {
+					if (counterMap.get(scheme) != null) {
+						DAGNode<String> parent = addNode(nodeMap, scheme, counterMap.get(scheme).getValue());
+						parent.addChild(node);
+						tops.add(parent);
+						parent.isScheme = true;
+						hasParent = true;
+					}
+				}
+			} else {
+				List<SKOSTerm> broaderList = sem.getBroader();
+
+				if (broaderList != null) {
+					for (SKOSTerm broader : broaderList) {
+						String broaderURI = broader.getUri();
+						
+						if (counterMap.get(broaderURI) != null) {
+							DAGNode<String> parent = addNode(nodeMap, broaderURI, counterMap.get(broaderURI).getValue());
+							parent.addChild(node);
+							hasParent = true;
+						} 
+					}
 				}
 			}
+			
+			if (!hasParent) {
+				List<String> sschemes = sem.getInSchemes();
+				if (sschemes != null) {
+					for (String scheme : sschemes) {
+						DAGNode<String> parent = addNode(nodeMap, scheme, counterMap.get(scheme).getValue());
+						parent.addChild(node);
+						tops.add(parent);
+						parent.isScheme = true;
+					}
+				} else {
+					tops.add(node);
+				}
+			}
+
 		}
 		
-		tops.removeAll(toRemove);
-
 //		System.out.println("TOP1");
 //		for (DAGNode t : tops) { 
 //			t.print(map);
 //		}
 		
-		Set<DAGNode<String>> changedParents = new HashSet<>();
-
-		for (DAGNode<String> p : selectedTerms) {
-			for (DAGNode<String> parent : new HashSet<>(p.getParents())) {
-				parent.removeChild(p);
-				changedParents.add(parent);
-			}
-
-//			DAGNode<String> top = p;
+		Map<String, DAGNode<String>> vocabularies = new HashMap<>();
+		
+		for (Iterator<DAGNode<String>> iter = tops.iterator();iter.hasNext();) {
+			DAGNode<String> top = iter.next();
 			
-//			while (top.getParents().size() > 0) {
-//				top = top.getParents().iterator().next();
-//			}
+			String uri = top.getLabel().iterator().next();
+			SKOSSemantic sem = getSemantic(uri);
 			
-			for (DAGNode<String> child : p.getChildren()) {
-				tops.add(child);
-			}
+			if (top.isScheme) {
+				List<String> scs = sem.getInSchemes();
+				if (scs != null) {
+					for (String sc : scs) {
+						nodeMap.get(sc).addChild(top);
+						iter.remove();
+					}
+				}
+			} 
 		}
-
-		for (DAGNode<String> p : schemeTopNodes) {
-			for (DAGNode<String> parent : new HashSet<>(p.getParents())) {
-				parent.removeChild(p);
-				changedParents.add(parent);
-			}
+		
+		for (Iterator<DAGNode<String>> iter = tops.iterator();iter.hasNext();) {
+			DAGNode<String> top = iter.next();
 			
-			tops.add(p);
+			String uri = top.getLabel().iterator().next();
+			SKOSSemantic sem = getSemantic(uri);
+
+			String vocName = sem.getVocabulary().getName();
+			DAGNode<String> voc = vocabularies.get(vocName);
+			if (voc == null) {
+				voc = new DAGNode<String>(Vocabulary.getVocabulary(vocName).getLabel());
+				vocabularies.put(vocName, voc);
+			}
+			voc.addChild(top);
 		}
+		
+		tops = vocabularies.values();
 		
 //		System.out.println("TOP2");
 //		for (DAGNode t : tops) { 
 //			t.print(map);
 //		}
-
-		Map<String, DAGNode<String>> schemes = new HashMap<>(); 
-		Map<String, DAGNode<String>> vocabularies = new HashMap<>();
-		
-		for (DAGNode<String> top : tops) {
-			String uri = top.getLabel().iterator().next();
-
-			SKOSSemantic sem = getSemantic(uri);
-			
-			List<String> scs = sem.getInSchemes();
-			if (scs != null) {
-				for (String sc : scs) {
-					SKOSSemantic schSem = getSemantic(sc);
-					DAGNode<String> dg = schemes.get(sc);
-					System.out.println(sc +  " " + schSem);
-					
-					if (dg == null) {
-						dg = new DAGNode<String>(sc, top.size());
-						schemes.put(sc,dg);
-						
-						String vocName = schSem.getVocabulary().getName();
-						DAGNode<String> voc = vocabularies.get(vocName);
-						if (voc == null) {
-							voc = new DAGNode<String>(Vocabulary.getVocabulary(vocName).getLabel());
-							vocabularies.put(vocName, voc);
-						}
-						voc.addChild(dg);
-					} else {
-						dg.setSize(Math.max(dg.size(), top.size()));
-					}
-					dg.addChild(top);
-				}
-			} else {
-				String vocName = sem.getVocabulary().getName();
-				DAGNode<String> voc = vocabularies.get(vocName);
-				if (voc == null) {
-					voc = new DAGNode<String>(Vocabulary.getVocabulary(vocName).getLabel());
-					vocabularies.put(vocName, voc);
-				}
-				voc.addChild(top);
-				
-			}
-		}
-		
-		while (changedParents.size() > 0) {
-			Set<DAGNode<String>> newChangedParents = new HashSet<>();
-
-			for (DAGNode<String> p : changedParents) {
-				if (p.getChildren().size() == 0) {
-					for (DAGNode<String> parent : new HashSet<>(p.getParents())) {
-						parent.removeChild(p);
-						newChangedParents.add(parent);
-					}
-				}
-			}
-			
-			changedParents = newChangedParents;
-		}
-
-		tops = vocabularies.values();
 		
 		for (Iterator<DAGNode<String>> iter =  tops.iterator(); iter.hasNext();) {
 			DAGNode<String> child = iter.next();
@@ -302,6 +298,5 @@ public class ThesaurusFacet {
 //		for (DAGNode t : tops) { 
 //			t.print(map);
 //		}
-
 	}
 }
