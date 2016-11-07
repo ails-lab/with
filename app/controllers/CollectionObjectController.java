@@ -37,7 +37,6 @@ import elastic.ElasticCoordinator;
 import elastic.ElasticSearcher.SearchOptions;
 import model.annotations.Annotation;
 import model.annotations.ContextData;
-import model.annotations.Annotation.AnnotationAdmin;
 import model.annotations.ContextData.ContextDataBody;
 import model.basicDataTypes.Language;
 import model.basicDataTypes.MultiLiteral;
@@ -54,8 +53,6 @@ import model.resources.collection.CollectionObject;
 import model.resources.collection.CollectionObject.CollectionAdmin;
 import model.resources.collection.SimpleCollection;
 import model.usersAndGroups.*;
-import notifications.AnnotationNotification;
-import notifications.Notification.Activity;
 
 import org.bson.types.ObjectId;
 import org.elasticsearch.action.search.SearchResponse;
@@ -90,9 +87,7 @@ import utils.*;
 import javax.validation.ConstraintViolation;
 
 import java.io.File;
-import java.sql.Timestamp;
 import java.util.*;
-import java.util.function.BiFunction;
 import java.util.function.Function;
 
 
@@ -1343,33 +1338,18 @@ public class CollectionObjectController extends WithResourceController {
             if (!response.toString().equals(ok().toString())) {
                 return response;
             } else {
-
-                List<Set<String>> uris = CollectionIndexController.termsRestrictionFromJSON(json);
-                List<RecordResource> res = DB.getRecordResourceDAO().getByCollectionWithTerms(colId, uris, Arrays.asList(CollectionIndexController.lookupFields), Arrays.asList(new String[] {"_id"}), start + count);
-
-                //Very Inefficient Pagination. Should use elastic
-                int top = Math.min(start + count, res.size());
-                
-                List<String> ids = new ArrayList<>();
-    			for (int i = start; i < top; i++) {
-    				ids.add(res.get(i).getDbId().toString());
-    			}
+    			QueryBuilder query = CollectionIndexController.getIndexCollectionQuery(colId,json);
     			
-    			if (top < start + count) {
-    				Set<ObjectId> allIds = DB.getRecordResourceDAO().getRecordResourceIdsByCollection(colId);
-    				for (RecordResource rr : res) {
-    					allIds.remove(rr.getDbId());
-    				}
-    				
-    				List<RecordResource> res2 = DB.getRecordResourceDAO().getByApprovedTaggingAnnotations(allIds, uris, Arrays.asList(new String[] {"_id"}), start + count - top);
-    				
-    				int top2 = Math.min(start + count - top, res2.size());
-    				
-        			for (int i = start + top; i < top2; i++) {
-        				ids.add(res2.get(i).getDbId().toString());
-        			}
-    			}
+    			SearchOptions so = new SearchOptions(start, count);
+    			so.isPublic = false;
     			
+    			SearchResponse resp = new ElasticCoordinator().queryExcecution(query, so);
+    			
+    			List<String> ids = new ArrayList<>();
+   			    for (SearchHit hit : resp.getHits()) {
+    			    ids.add(hit.getId());
+    			}
+        			
     			List<RecordResource> records = DB.getRecordResourceDAO().getByCollectionIds(colId, ids);
 
                 if (records == null) {

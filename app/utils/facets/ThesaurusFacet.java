@@ -18,6 +18,7 @@ package utils.facets;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -32,6 +33,7 @@ import play.libs.Json;
 import utils.Counter;
 import vocabularies.Vocabulary;
 import model.basicDataTypes.Language;
+import model.basicDataTypes.Literal;
 import model.resources.ThesaurusObject;
 import model.resources.ThesaurusObject.SKOSSemantic;
 import model.resources.ThesaurusObject.SKOSTerm;
@@ -40,7 +42,9 @@ import db.DB;
 public class ThesaurusFacet {
 	private static Map<String, SKOSSemantic> map = new HashMap<>();
 	
-	public ThesaurusFacet() {
+	private Language lang;
+	public ThesaurusFacet(Language lang) {
+		this.lang = lang;
 	}
 	
 	public SKOSSemantic getSemantic(String term) {
@@ -57,13 +61,14 @@ public class ThesaurusFacet {
 	}
 	
 
-	public ObjectNode toJSON(Language lang) {
+	public ObjectNode toJSON() {
 		ObjectNode json = Json.newObject();
 		
 		ArrayNode schemes = Json.newObject().arrayNode();
 		json.put("schemes", schemes);
 		
-		for (DAGNode<String> node : tops) {
+		Collections.sort(treeTops);
+		for (DAGNode<String> node : treeTops) {
 			schemes.add(node.toJSON(map, lang));
 		}
 		
@@ -71,6 +76,7 @@ public class ThesaurusFacet {
 	}
 
 	private Collection<DAGNode<String>> tops;
+	private List<DAGNode<String>> treeTops;
 //	private Set<DAGNode<String>> selectedTerms;
 	private Map<String, Counter> counterMap;
 	
@@ -94,7 +100,7 @@ public class ThesaurusFacet {
 		DAGNode<String> node = nodeMap.get(term);
 
 		if (node == null) {
-			node = new DAGNode<String>(term, size);
+			node = new DAGNode<String>(term, size, map, lang);
 			nodeMap.put(term, node);
 		}
 
@@ -168,6 +174,9 @@ public class ThesaurusFacet {
 			SKOSSemantic sem = getSemantic(term);
 			
 			DAGNode<String> node = addNode(nodeMap, term, entry.getValue().getValue());
+			if (sem.isScheme()) {
+				node.isScheme = true;
+			}
 
 			boolean hasParent = false;			
 
@@ -178,7 +187,7 @@ public class ThesaurusFacet {
 						DAGNode<String> parent = addNode(nodeMap, scheme, counterMap.get(scheme).getValue());
 						parent.addChild(node);
 						tops.add(parent);
-						parent.isScheme = true;
+//						parent.isScheme = true;
 						hasParent = true;
 					}
 				}
@@ -205,39 +214,57 @@ public class ThesaurusFacet {
 						DAGNode<String> parent = addNode(nodeMap, scheme, counterMap.get(scheme).getValue());
 						parent.addChild(node);
 						tops.add(parent);
-						parent.isScheme = true;
+//						parent.isScheme = true;
 					}
 				} else {
 					tops.add(node);
 				}
 			}
-
 		}
 		
 //		System.out.println("TOP1");
-//		for (DAGNode t : tops) { 
+//		for (DAGNode<String> t : tops) { 
 //			t.print(map);
 //		}
 		
-		Map<String, DAGNode<String>> vocabularies = new HashMap<>();
+//		for (Iterator<DAGNode<String>> iter = tops.iterator();iter.hasNext();) {
+//			DAGNode<String> top = iter.next();
+//			
+//			String uri = top.getLabel().iterator().next();
+//			SKOSSemantic sem = getSemantic(uri);
+//			
+//			if (top.isScheme) {
+//				List<String> scs = sem.getInSchemes();
+//				if (scs != null) {
+//					for (String sc : scs) {
+//						nodeMap.get(sc).addChild(top);
+//						iter.remove();
+//					}
+//				}
+//			} 
+//		}
+
+		Set<DAGNode<String>> toAdd = new HashSet<>();
 		
 		for (Iterator<DAGNode<String>> iter = tops.iterator();iter.hasNext();) {
 			DAGNode<String> top = iter.next();
 			
-			String uri = top.getLabel().iterator().next();
-			SKOSSemantic sem = getSemantic(uri);
-			
 			if (top.isScheme) {
-				List<String> scs = sem.getInSchemes();
-				if (scs != null) {
-					for (String sc : scs) {
-						nodeMap.get(sc).addChild(top);
-						iter.remove();
-					}
+				Collection<DAGNode<String>> children = top.getChildren();
+			
+				if (children.size() == 0) {
+					iter.remove();
+				} else if (children.size() == 1) {
+					toAdd.addAll(children);
+					iter.remove();
 				}
 			} 
 		}
 		
+		tops.addAll(toAdd);
+
+		Map<String, DAGNode<String>> vocabularies = new HashMap<>();
+
 		for (Iterator<DAGNode<String>> iter = tops.iterator();iter.hasNext();) {
 			DAGNode<String> top = iter.next();
 			
@@ -247,16 +274,16 @@ public class ThesaurusFacet {
 			String vocName = sem.getVocabulary().getName();
 			DAGNode<String> voc = vocabularies.get(vocName);
 			if (voc == null) {
-				voc = new DAGNode<String>(Vocabulary.getVocabulary(vocName).getLabel());
+				voc = new DAGNode<String>(Vocabulary.getVocabulary(vocName).getLabel(), map, lang);
 				vocabularies.put(vocName, voc);
 			}
 			voc.addChild(top);
 		}
 		
-		tops = vocabularies.values();
+		treeTops = new ArrayList<>(vocabularies.values());
 		
 //		System.out.println("TOP2");
-//		for (DAGNode t : tops) { 
+//		for (DAGNode<String> t : tops) { 
 //			t.print(map);
 //		}
 		
@@ -295,7 +322,7 @@ public class ThesaurusFacet {
 		}
 		
 //		System.out.println("TOP5");
-//		for (DAGNode t : tops) { 
+//		for (DAGNode<String> t : treeTops) { 
 //			t.print(map);
 //		}
 	}

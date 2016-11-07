@@ -46,6 +46,8 @@ import play.mvc.Result;
 import vocabularies.Vocabulary;
 import vocabularies.Vocabulary.VocabularyType;
 
+import com.aliasi.spell.JaccardDistance;
+import com.aliasi.tokenizer.IndoEuropeanTokenizerFactory;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -469,6 +471,8 @@ public class ThesaurusController extends Controller {
 		public double distance;
 		private int selectedLabel;
 		
+		private static JaccardDistance jaccard = new JaccardDistance(IndoEuropeanTokenizerFactory.INSTANCE);
+		
 		public SearchSuggestion (String reference, String id, String enLabel, String[] labels, String uri, String vocabulary, String[] categories) {
 			this.id = id;
 			this.enLabel = enLabel;
@@ -480,8 +484,13 @@ public class ThesaurusController extends Controller {
 			distance = Double.MAX_VALUE;
 			selectedLabel = 0;
 			for (int i = 0; i < labels.length; i++) {
-				double d = jaccardDistance(2, reference, labels[i]);
-				if (d < distance) {
+//				double d = jaccardDistance(2, reference, labels[i]);
+				double d = jaccard.distance(reference.toLowerCase(), labels[i].toLowerCase());
+//				 if (!reference.equals(labels[i])) {
+//					 d += 0.1;
+//				 }
+
+				 if (d < distance) {
 					distance = d;
 					selectedLabel = i;
 				}
@@ -503,32 +512,32 @@ public class ThesaurusController extends Controller {
 			}
 		}
 		
-		 public static double jaccardDistance(int n, String s, String t) {
-			 if (s == null || t == null) {
-				 return 1;
-			 }
-			 
-			 int l1 = s.length() - n + 1;
-			 int l2 = t.length() - n + 1;
-			 
-			 int found = 0;
-			 for (int i = 0; i < l1 ; i++  ){
-				 for (int j = 0; j < l2; j++) {
-					 int k = 0;
-					 for( ; ( k < n ) && ( Character.toLowerCase(s.charAt(i+k)) == Character.toLowerCase(t.charAt(j+k)) ); k++);
-					 if (k == n) {
-						 found++;
-					 }
-				 }
-			 }
-
-			 double dist = 1-(2*((double)found)/((double)(l1+l2)));
-			 if (!s.equals(t)) {
-				 dist += 0.1;
-			 }
-			 
-			 return dist;
-		}
+//		 public static double jaccardDistance(int n, String s, String t) {
+//			 if (s == null || t == null) {
+//				 return 1;
+//			 }
+//			 
+//			 int l1 = s.length() - n + 1;
+//			 int l2 = t.length() - n + 1;
+//			 
+//			 int found = 0;
+//			 for (int i = 0; i < l1 ; i++  ){
+//				 for (int j = 0; j < l2; j++) {
+//					 int k = 0;
+//					 for( ; ( k < n ) && ( Character.toLowerCase(s.charAt(i+k)) == Character.toLowerCase(t.charAt(j+k)) ); k++);
+//					 if (k == n) {
+//						 found++;
+//					 }
+//				 }
+//			 }
+//
+//			 double dist = 1-(2*((double)found)/((double)(l1+l2)));
+//			 if (!s.equals(t)) {
+//				 dist += 0.1;
+//			 }
+//			 
+//			 return dist;
+//		}
 	}
 
 }

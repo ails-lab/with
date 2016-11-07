@@ -18,18 +18,15 @@ package utils.facets;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.TreeSet;
 
 import model.basicDataTypes.Language;
 import model.basicDataTypes.Literal;
 import model.resources.ThesaurusObject.SKOSSemantic;
-
-import org.bson.types.ObjectId;
 
 import play.libs.Json;
 
@@ -45,27 +42,22 @@ public class DAGNode<T> implements Comparable<DAGNode<T>> {
 	private List<DAGNode<T>> children;
 	private Set<DAGNode<T>> childrenSet;
 	private Collection<DAGNode<T>> parents;
+	public String displayLabel;
 	
 	public boolean isScheme;
 
-	public DAGNode() {
-		label = new HashSet<>();
-		
-		children = new ArrayList<>();
-		childrenSet = new HashSet<>();
-		parents = new HashSet<>();
-	}
-	
-	public DAGNode(T l) {
+	public DAGNode(T l, Map<String, SKOSSemantic> map, Language lang) {
 		label = new HashSet<>();
 		label.add(l);
 		
 		children = new ArrayList<>();
 		childrenSet = new HashSet<>();
 		parents = new HashSet<>();
+		
+		setLabel(map, lang);
 	}
 
-	public DAGNode(T l, int size) {
+	public DAGNode(T l, int size, Map<String, SKOSSemantic> map, Language lang) {
 		label = new HashSet<>();
 		label.add(l);
 		
@@ -74,6 +66,30 @@ public class DAGNode<T> implements Comparable<DAGNode<T>> {
 		parents = new HashSet<>();
 		
 		this.size = size; 
+		
+		setLabel(map, lang);
+	}
+
+	private void setLabel(Map<String, SKOSSemantic> map, Language lang) {
+		
+		SKOSSemantic sem = map.get(label.iterator().next());
+		String ss = "";
+		if (sem != null) {
+			Literal plabel = sem.getPrefLabel();
+			if (plabel != null) {
+				ss = plabel.getLiteral(Language.EN);
+				if (ss == null && plabel.values().size() > 0) {
+					ss = plabel.values().iterator().next();
+				}
+			} else {
+				String sv = sem.getUri();
+				ss = sv.toString().substring(Math.max(sv.lastIndexOf("/"), sv.lastIndexOf("#")) + 1);
+			}
+		} else {
+			String sv = label.iterator().next().toString();
+			ss = sv.substring(Math.max(sv.lastIndexOf("/"), sv.lastIndexOf("#")) + 1);
+		}
+		displayLabel = ss;
 	}
 
 	
@@ -190,6 +206,7 @@ public class DAGNode<T> implements Comparable<DAGNode<T>> {
 		
 		element.put("children", jchildren);
 		
+		Collections.sort(children);
 		for (DAGNode<T> node : children) {
 			jchildren.add(node.itoJSON(map, lang, used));
 		}
@@ -232,6 +249,7 @@ public class DAGNode<T> implements Comparable<DAGNode<T>> {
 		}
 		System.out.println(ssx + " " + size);
 		
+		Collections.sort(children);
 		for (DAGNode<T> node : children) {
 			node.print(map, depth + 1);
 		}
@@ -293,12 +311,12 @@ public class DAGNode<T> implements Comparable<DAGNode<T>> {
 
 	@Override
 	public int compareTo(DAGNode<T> o) {
-		if (size < o.size) {
-			return 1;
-		} else if (size > o.size) {
-			return -1;
-		} else {
-			return label.toString().compareTo(o.label.toString());
-		}
+//		if (size < o.size) {
+//			return 1;
+//		} else if (size > o.size) {
+//			return -1;
+//		} else {
+			return displayLabel.toString().compareToIgnoreCase(o.displayLabel.toString());
+//		}
 	}
 }
