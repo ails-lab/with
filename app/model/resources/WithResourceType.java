@@ -17,8 +17,8 @@
 package model.resources;
 
 public enum WithResourceType {
-	WithResource, CollectionObject, SimpleCollection, Exhibition, RecordResource,
-	CulturalObject, EuScreenObject, EventObject,
+	WithResource, CollectionObject, SimpleCollection, Exhibition, NewExhibition, RecordResource,
+	CulturalObject, EuScreenObject, EventObject, 
 	PlaceObject, TimespanObject, ThesaurusObject,
 	AgentObject;
 }
