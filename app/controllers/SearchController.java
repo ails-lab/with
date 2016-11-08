@@ -142,7 +142,7 @@ public class SearchController extends WithController {
 				if( q.containsSource( Sources.WITHin)) {
 					// add conditions for visibility in WITH
 					Query.Clause visible = Query.Clause.create()
-							.add( "administrative.access.isPublic", "true", true );
+							.add( "administrative.isPublic", "true", true );
 					for( String userId: effectiveUserIds()) {
 						visible.add( "administrative.access.READ", userId, true );
 						visible.add( "administrative.access.WRITE", userId, true );
