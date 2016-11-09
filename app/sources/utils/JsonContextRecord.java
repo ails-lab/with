@@ -18,17 +18,23 @@ package sources.utils;
 
 import java.io.File;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
+import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializerProvider;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import model.basicDataTypes.Language;
@@ -43,9 +49,11 @@ import play.Logger.ALogger;
 import play.libs.Json;
 import scala.collection.mutable.HashMap;
 import sources.core.Utils;
+import utils.Serializer.JsonContextRecordSerializer;
 
+@JsonSerialize(using = JsonContextRecordSerializer.class)
 public class JsonContextRecord {
-
+	
 	public static final ALogger log = Logger.of(JsonContextRecord.class);
 
 	private JsonNode rootInformation;

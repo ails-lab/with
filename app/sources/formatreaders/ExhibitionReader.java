@@ -17,12 +17,14 @@
 package sources.formatreaders;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.function.Function;
 
 import org.bson.types.ObjectId;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import akka.japi.Option;
@@ -44,8 +46,10 @@ import model.resources.CulturalObject.CulturalObjectData;
 import model.resources.collection.Exhibition;
 import model.resources.collection.Exhibition.ExhibitionDescriptiveData;
 import play.Logger;
+import play.core.j.JavaResultExtractor;
 import play.libs.F;
 import play.libs.Json;
+import play.mvc.Result;
 import search.Sources;
 import sources.core.ApacheHttpConnector;
 import sources.core.HttpConnector;
@@ -106,20 +110,66 @@ public class ExhibitionReader {
 			JsonNode response = getHttpConnector().getURLContent(url);
 			JsonContextRecord rec = new JsonContextRecord(response);
 			Function<JsonNode, JsonContextRecord> function = (x)-> new JsonContextRecord(x);
+			List<Object> sequences = new ArrayList<>();
 			for (JsonContextRecord page : ListUtils.transform(rec.getValues("[.*]"), function)) {
+				List<Object> blocks = new ArrayList<>();
+				
 				for (JsonContextRecord pageBlock : ListUtils.transform(page.getValues("page_blocks[.*]"), function)) {
-					List<CulturalObject> recs = new ArrayList<>();
+					JsonContextRecord texto = buildTextElement(pageBlock.getStringValue("text"));
+					List<Object> recs = new ArrayList<>();
+					recs.add(texto);
 					for (JsonContextRecord item : ListUtils.transform(pageBlock.getValues("attachments[.*]"), function)) {
-						recs.add(parseTheItem(collectionId, item));
+						CulturalObject parseTheItem = parseTheItem(collectionId, item);
+						if (parseTheItem!=null)
+						recs.add(buildCHOElement(parseTheItem));
 						// TODO check the caption here
 					}
+					blocks.add(buildTogetherElement(recs));
 					// TODO add a together
 				}
+			sequences.add(buildSequenceElement(blocks));
 				// TODO add the group
 			}
+			System.out.println(Json.toJson(buildSequenceElement(sequences)));
 		} catch (Exception e) {
 			log.error("Exeption", e);
 		}
+	}
+
+	private JsonContextRecord buildTextElement(String stringValue) {
+		JsonContextRecord r = new JsonContextRecord("{}");
+		r.setValue("type", "Text");
+		r.setValue("id", "Text1");
+		r.setValue("en", stringValue);
+		return r;
+	}
+	
+	private JsonContextRecord buildSequenceElement(Collection<?> records) {
+		JsonContextRecord r = new JsonContextRecord("{}");
+		r.setValue("type", "Sequence");
+		r.setValue("id", "Seq1");
+		ObjectMapper mapper = new ObjectMapper(); 
+		JsonNode node = mapper.convertValue(records, JsonNode.class);
+		r.setValue("groups", node);
+		return r;
+	}
+	
+	private JsonContextRecord buildTogetherElement(Collection<?> records) {
+		JsonContextRecord r = new JsonContextRecord("{}");
+		r.setValue("type", "Together");
+		r.setValue("id", "Together1");
+		ObjectMapper mapper = new ObjectMapper(); 
+		JsonNode node = mapper.convertValue(records, JsonNode.class);
+		r.setValue("groups", node);
+		return r;
+	}
+	
+	private JsonContextRecord buildCHOElement(CulturalObject o) {
+		JsonContextRecord r = new JsonContextRecord("{}");
+		r.setValue("type", "Cho");
+		r.setValue("id", "Cho1");
+		r.setValue("url", "/record/"+o.getDbId().toString());
+		return r;
 	}
 
 	private CulturalObject parseTheItem(ObjectId collectionId, JsonContextRecord itemJsonContextRecord) {
@@ -171,7 +221,18 @@ public class ExhibitionReader {
 				record.addToProvenance(new ProvenanceInfo(source, null, id));
 			}
 			play.libs.F.Option<Integer> p = play.libs.F.Option.None();
-			WithResourceController.addRecordToCollection(Json.toJson(record), collectionId, p, false);
+			Result result = WithResourceController.addRecordToCollection(Json.toJson(record), collectionId, p, false);
+//			record.setDbId(new ObjectId(r.));
+			byte[] body = JavaResultExtractor.getBody(result, 30000L);
+//			Having a byte array, you can extract charset from Content-Type header and create java.lang.String:
+			String header = JavaResultExtractor.getHeaders(result).get("Content-Type");
+			String charset = "utf-8";
+			if(header != null && header.contains("; charset=")){
+			    charset = header.substring(header.indexOf("; charset=") + 10, header.length()).trim();
+			}
+			String bodyStr = new String(body, charset);
+			JsonContextRecord rr = new JsonContextRecord(bodyStr);
+			record.setDbId(new ObjectId(rr.getStringValue("recordId")));
 			return record;
 		} catch (Exception e) {
 			log.error("Exeption", e);
