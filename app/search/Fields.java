@@ -29,6 +29,8 @@ import java.util.stream.Stream;
  *
  */
 public enum Fields {
+	// do not include this in your supported fields list, its expected to be supported
+	// and its not made for facets
 	anywhere, // when you look for anything, not part of an answer, any source interprets this differently
 	resourceType, // the WITH resource type 
 	// for the within search, this might be useful

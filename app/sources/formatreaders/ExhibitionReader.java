@@ -184,7 +184,7 @@ public class ExhibitionReader {
 			CulturalObjectData descData = new CulturalObjectData();
 			record.setDescriptiveData(descData);
 			if (source==null || id==null){
-				source = Sources.UploadedByUser.getID();
+				source = "UploadedByUser";
 				id = rec1.getStringValue("id");
 				record.addToProvenance(new ProvenanceInfo(source, null, id));
 				

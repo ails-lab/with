@@ -30,27 +30,24 @@ import search.ProxySource.RijksProxySource;
 import search.ProxySource.YoutubeProxySource;
 import sources.ElasticSource;
 
+/**
+ * In here are sources that are backend search engines.
+ * @author stabenau
+ *
+ */
 public enum Sources {
-	// TODO implement it the right way
-	Mint(EmptySource.class,"Mint"),
-	//Europeana(EuropeanaExternalSource.class, "Europeana"),
 	Europeana(EuropeanaProxySource.class, "Europeana"),
-	UploadedByUser(EmptySource.class,"UploadedByUser"),
 	BritishLibrary(BritishLibProxySource.class,"BritishLibrary", "The British Library"),
 	InternetArchive(InternetArchiveProxySource.class,"InternetArchive","Internet Archive"),
 	DDB(DDBProxySource.class,"DDB","Deutsche Digitale Bibliothek"),
 	DigitalNZ(DigitalNZProxySource.class,"DigitalNZ"),
 	DPLA(DPLAProxySource.class,"DPLA","Digital Public Library of America"),
-	// TODO implement it the right way
-	EFashion(EmptySource.class,"EFashion"),
 	EuropeanaFashion(EuropeanaFashionProxySource.class,"EuropeanaFashion"),
 	YouTube(YoutubeProxySource.class,"Youtube"),
 	NLA(NLAProxySource.class,"NLA","National Library of Australia"),
-	// TODO implement it the right way
 	WITHin(ElasticSource.class,"WITHin"),
 	Rijksmuseum(RijksProxySource.class,"Rijksmuseum","Rijksmuseum"),
-	Historypin(HistoryPinProxySource.class,"Historypin"),
-	DBPedia(EmptySource.class,"DBPedia")
+	Historypin(HistoryPinProxySource.class,"Historypin")
 	;
 
 

@@ -301,6 +301,8 @@ public class Query implements IFilterContainer{
 		Map<Sources, Query> res = new HashMap<>();
 		for( Sources source: sources ) {
 			Set<String> supportedFieldIds = source.getDriver().supportedFieldIds();
+			// this is not part of the list any more
+			supportedFieldIds.add( "anywhere");
 			Query newQuery = this.pruneFilters(source, supportedFieldIds);
 			if( newQuery != null )
 				res.put( source, newQuery );

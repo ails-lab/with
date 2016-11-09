@@ -14,7 +14,7 @@
  */
 
 
-package annotators.struct;
+package utils.annotators;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -23,9 +23,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
-
-import annotators.ComplexAnnotationValue;
-import annotators.SimpleAnnotationValue;
 
 public class AnnotationIndex implements Cloneable, Serializable {
 

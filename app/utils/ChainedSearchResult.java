@@ -21,7 +21,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
 
 import org.bson.types.ObjectId;
 
@@ -34,13 +33,9 @@ import play.libs.Json;
 import play.mvc.Controller;
 import play.mvc.Result;
 import scala.concurrent.duration.Duration;
+import scala.concurrent.duration.FiniteDuration;
 import search.Query;
 import search.Response;
-import sources.core.CommonFilterLogic;
-import sources.core.CommonFilterResponse;
-import sources.core.FiltersHelper;
-import sources.core.SearchResponse;
-import sources.core.SourceResponse;
 
 /**
  * 
@@ -72,11 +67,14 @@ public class ChainedSearchResult {
 	
 	public AtomicInteger finishedPromises = new AtomicInteger();	
 	public RedeemablePromise<Result> pendingPromise = null;
+
+	public FiniteDuration SUICIDE_TIMEOUT = Duration.create(10, TimeUnit.SECONDS);
 	
 	public Cancellable suicide;
 	// need to keep track of delivered results, to de-duplicate
 	// need to keep the accumulated filters
 	
+
 	private ChainedSearchResult( String uuid, Iterable<Promise<Response.SingleResponse>> allPromises, Query query ) {
 		this.countPromises = 0;
 		for( Promise<Response.SingleResponse> pr: allPromises ) {
@@ -124,7 +122,7 @@ public class ChainedSearchResult {
 			pendingPromise = null;
 			
 			// install new timeout
-			suicide = Akka.system().scheduler().scheduleOnce(Duration.create(10l, TimeUnit.SECONDS),
+			suicide = Akka.system().scheduler().scheduleOnce(SUICIDE_TIMEOUT,
 					  () -> {
 						  ChainedSearchResult.cache.remove( uuid );
 					  }, Akka.system().dispatcher());
@@ -174,7 +172,7 @@ public class ChainedSearchResult {
 			// respond immediately
 			Response sr = responseFromCurrent();
 			// install new timeout
-			suicide = Akka.system().scheduler().scheduleOnce(Duration.create(10, TimeUnit.SECONDS),
+			suicide = Akka.system().scheduler().scheduleOnce(SUICIDE_TIMEOUT,
 					  () -> {
 						  ChainedSearchResult.cache.remove( uuid );
 					  }, Akka.system().dispatcher());

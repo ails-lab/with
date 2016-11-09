@@ -24,11 +24,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.BiFunction;
 import java.util.function.Function;
-
-import play.libs.F.Promise;
-import play.libs.Json;
-import model.quality.RecordQuality;
-import model.resources.WithResourceType;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 import org.bson.types.ObjectId;
 import org.elasticsearch.action.get.GetRequest;
@@ -42,16 +40,9 @@ import org.mongodb.morphia.query.QueryResults;
 import org.mongodb.morphia.query.UpdateOperations;
 import org.mongodb.morphia.query.UpdateResults;
 
-import play.Logger;
-import play.libs.F.Callback;
-import sources.core.ParallelAPICall;
-import sources.utils.JsonContextRecord;
-import utils.MetricsUtils;
-import utils.Tuple;
-
-import com.codahale.metrics.Timer;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.mongodb.BasicDBObject;
+import com.mongodb.DBCollection;
 import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
 import com.mongodb.MongoException;
@@ -62,6 +53,16 @@ import com.mongodb.util.JSON;
 import elastic.Elastic;
 import elastic.ElasticEraser;
 import elastic.ElasticIndexer;
+import elastic.Indexable;
+import model.quality.RecordQuality;
+import model.resources.WithResourceType;
+import play.Logger;
+import play.libs.F.Callback;
+import play.libs.F.Promise;
+import play.libs.Json;
+import sources.core.ParallelAPICall;
+import sources.utils.JsonContextRecord;
+import utils.Tuple;
 
 public class DAO<E> extends BasicDAO<E, ObjectId> {
 
@@ -195,6 +196,26 @@ public class DAO<E> extends BasicDAO<E, ObjectId> {
 	}
 
 	/**
+	 * Get a stream of ids for this DAOs object class.
+	 * @return
+	 */
+	public Stream<String> listIds() {
+		DBCollection coll = DB.getDs().getCollection(entityClass);
+		DBCursor curs = coll.find( toDBObj( "{}"), toDBObj( "{'_id':1}"));
+		return StreamSupport
+			.stream( curs.spliterator(), false )
+			.map(  (DBObject dbobj )-> {
+				return ((ObjectId) dbobj.get( "_id" )).toHexString();
+			});
+	}
+	
+	
+	public DBObject toDBObj( String json ) {
+		return (DBObject) JSON.parse( json );
+	}
+	
+	
+	/**
 	 * Use this method to save and Object to the database
 	 *
 	 * @param record
@@ -210,10 +231,9 @@ public class DAO<E> extends BasicDAO<E, ObjectId> {
 						ObjectId colId, Map<String, Object> map) -> {
 					return ElasticIndexer.index(type, colId, map);
 				};
-				ParallelAPICall.createPromise(indexResource, (ObjectId) doc
-						.getClass().getMethod("getDbId", new Class<?>[0])
-						.invoke(doc), (Map<String, Object>) doc.getClass()
-						.getMethod("transform", new Class<?>[0]).invoke(doc));
+				ParallelAPICall.createPromise(indexResource, 
+						                      (ObjectId) doc.getClass().getMethod("getDbId", new Class<?>[0]).invoke(doc), 
+						                      (Map<String, Object>) doc.getClass().getMethod("transform", new Class<?>[0]).invoke(doc));
 			}
 			return dbKey;
 		} catch (Exception e) {
@@ -222,6 +242,40 @@ public class DAO<E> extends BasicDAO<E, ObjectId> {
 		return null;
 	}
 
+	/*
+	 * Bulk inserts on MongoDB and Elastic
+	 */
+	public void storeMany(List<? extends Indexable> docs) {
+		if (docs.size() == 0) {
+			return;
+		}
+		
+		try {
+			this.getDatastore().save(docs,WriteConcern.ACKNOWLEDGED);
+			String type = defineInstanceOf(docs.get(0));
+			
+			if (type != null) {
+	
+				BiFunction<List<ObjectId>, List<Map<String, Object>>, String> indexResources = (List<ObjectId> colIds, List<Map<String, Object>> maps) -> {
+					return ElasticIndexer.indexMany(type, colIds, maps);
+				};
+	
+				ParallelAPICall.createPromise(indexResources, 
+						                      docs.stream().map((d) -> { 
+						                    	  return (ObjectId)d.getDbId();
+						                      }).collect(Collectors.toList()), 
+											  docs.stream().map((d) -> { 
+												  return (Map<String, Object>)d.transform();
+										      }).collect(Collectors.toList()));
+	
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			log.error("Cannot save bulky documents");
+		}
+	}
+	
+	
 	/**
 	 * Use this method to delete and Object to the database
 	 *
@@ -312,6 +366,44 @@ public class DAO<E> extends BasicDAO<E, ObjectId> {
 	private String defineInstanceOf(E doc) {
 
 		String instanceName = doc.getClass().getSimpleName();
+		List<String> enumNames = new ArrayList<String>();
+		Arrays.asList(WithResourceType.values()).forEach((t) -> {
+			enumNames.add(t.toString());
+			return;
+		});
+		if (enumNames.contains(instanceName)) {
+			if (!instanceName.equalsIgnoreCase(WithResourceType.WithResource
+					.toString()))
+				return instanceName.toLowerCase();
+			else
+				return WithResourceType.RecordResource.toString().toLowerCase();
+		} else
+			return null;
+
+	}
+	
+	private String defineInstanceOf(Indexable doc) {
+
+		String instanceName = doc.getClass().getSimpleName();
+		List<String> enumNames = new ArrayList<String>();
+		Arrays.asList(WithResourceType.values()).forEach((t) -> {
+			enumNames.add(t.toString());
+			return;
+		});
+		if (enumNames.contains(instanceName)) {
+			if (!instanceName.equalsIgnoreCase(WithResourceType.WithResource
+					.toString()))
+				return instanceName.toLowerCase();
+			else
+				return WithResourceType.RecordResource.toString().toLowerCase();
+		} else
+			return null;
+
+	}
+
+	private String defineInstanceOf(Class cz) {
+
+		String instanceName = cz.getSimpleName();
 		List<String> enumNames = new ArrayList<String>();
 		Arrays.asList(WithResourceType.values()).forEach((t) -> {
 			enumNames.add(t.toString());

@@ -424,6 +424,7 @@ public class UserManager extends WithController {
 			DB.getUserDAO().makePermanent(user);
 			return login(user);
 		} catch (Exception e) {
+			log.error(e.getMessage(), e);
 			return badRequest(Json.parse("{\"error\":\"Invalid credentials\"}"));
 		}
 	}
@@ -487,6 +488,7 @@ public class UserManager extends WithController {
 			DB.getUserDAO().makePermanent(user);
 			return login(user);
 		} catch (Exception e) {
+			log.error(e.getMessage(), e);
 			return badRequest(Json.parse("{\"error\":\"Invalid credentials\"}"));
 		}
 	}

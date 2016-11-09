@@ -24,8 +24,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import model.annotations.bodies.AnnotationBodyTagging;
-import model.annotations.bodies.AnnotationBodyTagging.Vocabulary;
+import vocabularies.Vocabulary;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
@@ -60,46 +59,39 @@ public class AnnotatorConfig {
 	
 	public static List<AnnotatorConfig> createAnnotationConfigs(JsonNode json) {
 		List<AnnotatorConfig> annConfigs = new ArrayList<>();
-		
-		JsonNode vocs = json.get("vocabulary");
-		if (vocs != null) {
-			Map<Class<? extends Annotator>, Set<AnnotationBodyTagging.Vocabulary>> annotatorMap = new HashMap<>();
 
-			for (Iterator<JsonNode> iter = vocs.elements(); iter.hasNext();) {
-				Vocabulary voc = AnnotationBodyTagging.Vocabulary.getVocabulary(iter.next().asText());
-				Class<? extends Annotator> annClass = voc.getAnnotator();
-				
-				Set<AnnotationBodyTagging.Vocabulary> vocSet = annotatorMap.get(annClass);
-				if (vocSet == null) {
-					vocSet = new HashSet<AnnotationBodyTagging.Vocabulary>();
-					annotatorMap.put(annClass, vocSet);
+		Map<Class<? extends Annotator>, Set<Vocabulary>> annotatorMap = new HashMap<>();
+
+		for (Iterator<JsonNode> iter = json.elements(); iter.hasNext();) {
+			String entry = iter.next().textValue();
+			String[] v = entry.split("/");
+			
+			Class<? extends Annotator> annotator;
+			try {
+				annotator = (Class<? extends Annotator>)Class.forName("annotators." + v[0]);
+			
+				if (v.length == 1) {
+					annConfigs.add(new AnnotatorConfig(annotator, null));
+				} else if (v.length == 2) {
+					Vocabulary voc = Vocabulary.getVocabulary(v[1]);
+					
+					Set<Vocabulary> vocSet = annotatorMap.get(annotator);
+					if (vocSet == null) {
+						vocSet = new HashSet<Vocabulary>();
+						annotatorMap.put(annotator, vocSet);
+						
+						Map<String, Object> props = new HashMap<>();
+						props.put(LookupAnnotator.VOCABULARIES, vocSet);
+	
+						annConfigs.add(new AnnotatorConfig(annotator, props));
+					}
+					
+					vocSet.add(voc);
 				}
-				
-				vocSet.add(voc);
+			} catch (ClassNotFoundException e) {
+				e.printStackTrace();
 			}
-			
-			for (Map.Entry<Class<? extends Annotator>, Set<AnnotationBodyTagging.Vocabulary>> entry : annotatorMap.entrySet()) {
-				Map<String, Object> props = new HashMap<>();
-				props.put(DictionaryAnnotator.VOCABULARIES, entry.getValue());
-				
-				annConfigs.add(new AnnotatorConfig(entry.getKey(), props));
-			}
-		}
-		
-		JsonNode ners = json.get("ner");
-		if (ners != null) {
-			Set<Class<? extends Annotator>> annotatorMap = new HashSet<>();
-			
-			for (Iterator<JsonNode> iter = ners.elements(); iter.hasNext();) {
-				Vocabulary voc = AnnotationBodyTagging.Vocabulary.getVocabulary(iter.next().asText());
-				Class<? extends Annotator> annClass = voc.getAnnotator();
-				
-				annotatorMap.add(annClass);
-			}
-			
-			for (Class<? extends Annotator> entry : annotatorMap) {
-				annConfigs.add(new AnnotatorConfig(entry, null));
-			}
+
 		}
 		
 		return annConfigs;

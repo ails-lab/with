@@ -55,6 +55,10 @@ public class MultiLiteralOrResource extends MultiLiteral {
 	public void addURI(String uri) {
 		add(LiteralOrResource.URI, uri);
 	}
+	
+	public List<String> getURI() {
+		return get(LiteralOrResource.URI);
+	}
 
 	public void addURI(List<String> uris) {
 		for (String uri : uris) {

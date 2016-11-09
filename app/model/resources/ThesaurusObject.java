@@ -19,6 +19,7 @@ package model.resources;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -26,25 +27,44 @@ import java.util.TreeMap;
 import org.bson.types.ObjectId;
 import org.mongodb.morphia.annotations.Embedded;
 import org.mongodb.morphia.annotations.Entity;
+import org.mongodb.morphia.annotations.Field;
 import org.mongodb.morphia.annotations.Id;
+import org.mongodb.morphia.annotations.Index;
+import org.mongodb.morphia.annotations.IndexOptions;
+import org.mongodb.morphia.annotations.Indexes;
 import org.mongodb.morphia.query.Query;
 import org.mongodb.morphia.query.UpdateOperations;
+import org.mongodb.morphia.utils.IndexType;
 
 import utils.Deserializer;
 import utils.Serializer;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.module.SimpleModule;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
+import elastic.Indexable;
 import model.basicDataTypes.Language;
 import model.basicDataTypes.Literal;
 import model.basicDataTypes.MultiLiteral;
+import model.basicDataTypes.MultiLiteralOrResource;
+import model.basicDataTypes.WithAccess;
 
 @JsonInclude(value = JsonInclude.Include.NON_NULL)
+@Indexes({
+	@Index(fields = @Field(value = "administrative.externalId", type = IndexType.ASC), options = @IndexOptions()),
+	@Index(fields = @Field(value = "semantic.vocabulary.name", type = IndexType.ASC), options = @IndexOptions()),
+	@Index(fields = @Field(value = "semantic.uri", type = IndexType.ASC), options = @IndexOptions()),
+	@Index(fields = @Field(value = "semantic.type", type = IndexType.ASC), options = @IndexOptions())
+})
 @Entity("ThesaurusObject")
-public class ThesaurusObject {
+public class ThesaurusObject implements Indexable {
 
 	@JsonInclude(value = JsonInclude.Include.NON_NULL)
 	@Embedded
@@ -142,6 +162,38 @@ public class ThesaurusObject {
 
 	@JsonInclude(value = JsonInclude.Include.NON_NULL)
 	@Embedded
+	public static class SKOSVocabulary {
+
+		private String name;
+		private String version;
+		
+		public SKOSVocabulary() {}
+
+		public SKOSVocabulary(String name, String version) {
+			this.name = name;
+			this.version = version;
+		}
+		
+		public String getName() {
+			return name;
+		}
+		
+		public String getVersion() {
+			return version;
+		}
+		
+		public void setName(String name) {
+			this.name = name;
+		}
+		
+		public void setVersion(String version) {
+			this.version = version;
+		}
+		
+	}
+
+	@JsonInclude(value = JsonInclude.Include.NON_NULL)
+	@Embedded
 	public static class SKOSSemantic extends SKOSTerm {
 
 		private Literal scopeNote;
@@ -156,7 +208,10 @@ public class ThesaurusObject {
 		private List<String> inCollections;
 		private List<String> inSchemes;
 		private List<String> exactMatch;
-
+		private List<String> closeMatch;
+		
+		private SKOSVocabulary vocabulary;
+		
 		public String getUri() {
 			return uri;
 		}
@@ -268,6 +323,22 @@ public class ThesaurusObject {
 		public void setExactMatch(List<String> exactMatch) {
 			this.exactMatch = exactMatch;
 		}
+		
+		public List<String> getCloseMatch() {
+			return closeMatch;
+		}
+
+		public void setCloseMatch(List<String> closeMatch) {
+			this.closeMatch = closeMatch;
+		}
+		
+		public SKOSVocabulary getVocabulary() {
+			return vocabulary;
+		}
+
+		public void setVocabulary(SKOSVocabulary vocabulary) {
+			this.vocabulary = vocabulary;
+		}
 	}
 
 
@@ -368,168 +439,24 @@ public class ThesaurusObject {
 
 	public Map<String, Object> transform() {
 
-		Map<String, Object> map = new TreeMap<>();
-		Map<String, List<String>> langAcc = new HashMap<>();
+		ObjectMapper mapper = new ObjectMapper();
+		SimpleModule module = new SimpleModule();
+		module.addSerializer(MultiLiteral.class, new Serializer.MUltiliteralSerializerForElastic());
+		module.addSerializer(MultiLiteralOrResource.class, new Serializer.MUltiliteralSerializerForElastic());
+		module.addSerializer(Literal.class, new Serializer.LiteralSerializerForElastic());
+		mapper.registerModule(module);
+		mapper.setSerializationInclusion(Include.NON_NULL);
 
-		map.put("uri", semantic.uri);
+		JsonNode json = mapper.valueToTree(this.semantic);
+
+		((ObjectNode)json).remove("scopeNote");
+		((ObjectNode)json).remove("narrower");
+		((ObjectNode)json).remove("topConcepts");
+		((ObjectNode)json).remove("members");
+		((ObjectNode)json.get("vocabulary")).remove("version");
 		
-		if (semantic.thesaurus != null) {
-			map.put("thesaurus", semantic.thesaurus);
-		}
-
-		if (semantic.prefLabel != null) {
-			List<String> allPrefLabels = new ArrayList<>();
-
-			Map<String, String> prefLabel = new HashMap<>();
-
-			for (Map.Entry<String, String> entry : semantic.prefLabel.entrySet()) {
-				String k = entry.getKey();
-				String v = entry.getValue();
-				if (!k.equals(Language.DEFAULT) && (v != null) && (v.length() > 0)) {
-					prefLabel.put(k, v);
-					allPrefLabels.add(v);
-					addToLangAll(langAcc, k, v);
-				}
-			}
-
-			if (!prefLabel.isEmpty()) {
-				map.putAll(flattenLiteralMap("prefLabel", prefLabel));
-				map.put("prefLabel_all", allPrefLabels);
-			}
-		}
-
-		if (semantic.altLabel != null) {
-			List<String> allAltLabels = new ArrayList<>();
-
-			Map<String, List<String>> altLabel = new HashMap<>();
-			for (Map.Entry<String, List<String>> entry : semantic.altLabel.entrySet()) {
-				String k = entry.getKey();
-				List<String> v = entry.getValue();
-				if (!k.equals(Language.DEFAULT) && (v != null) && (v.size() > 0)) {
-					ArrayList<String> vc = new ArrayList<>();
-
-					for (String vv : v) {
-						if ((vv != null) && (vv.length() > 0)) {
-							vc.add(vv);
-							allAltLabels.add(vv);
-							addToLangAll(langAcc, k, vv);
-						}
-					}
-
-					if (vc.size() > 0) {
-						altLabel.put(k, vc);
-					}
-				}
-			}
-
-			if (!altLabel.isEmpty()) {
-				map.putAll(flattenMultiLiteralMap("altLabel", altLabel));
-				map.put("altLabel_all", allAltLabels);
-			}
-		}
-
-		if (semantic.broaderTransitive != null) {
-			List<String> broaderUris = new ArrayList<>();
-
-			Map<String, List<String>> broaderPrefLabelAcc = new HashMap<>();
-			Map<String, List<String>> broaderAltLabelAcc = new HashMap<>();
-			List<String> allBroaderPrefLabel = new ArrayList<>();
-			List<String> allBroaderAltLabel = new ArrayList<>();
-
-			for (SKOSTerm broader : semantic.broaderTransitive) {
-				broaderUris.add(broader.getUri());
-
-				if (broader.prefLabel != null) {
-					for (Map.Entry<String, String> e : broader.prefLabel.entrySet()) {
-						String k = e.getKey();
-						String v = e.getValue();
-
-						if (!k.equals(Language.DEFAULT) && (v != null) && (v.length() > 0)) {
-							allBroaderPrefLabel.add(v);
-							addToLangAll(broaderPrefLabelAcc, k, v);
-							addToLangAll(langAcc, k, v);
-						}
-					}
-				}
-
-				if (broader.altLabel != null) {
-					for (Map.Entry<String, List<String>> e : broader.altLabel.entrySet()) {
-						String k = e.getKey();
-						List<String> v = e.getValue();
-
-						if (!k.equals(Language.DEFAULT) && (v != null) && (v.size() > 0)) {
-							for (String vv : e.getValue()) {
-								if ((vv != null) && (vv.length() > 0)) {
-									allBroaderAltLabel.add(vv);
-									addToLangAll(broaderAltLabelAcc, k, vv);
-									addToLangAll(langAcc, k, vv);
-								}
-							}
-						}
-					}
-				}
-			}
-
-			if (broaderUris.size() > 0) {
-				map.put("broaderTransitiveUri", broaderUris);
-			}
-
-			if (broaderAltLabelAcc.size() > 0) {
-				map.putAll(flattenMultiLiteralMap("broaderTransitivePrefLabel", broaderPrefLabelAcc));
-			}
-
-			if (allBroaderPrefLabel.size() > 0) {
-				map.put("broaderTransitivePrefLabel_all", allBroaderPrefLabel);
-			}
-
-			if (broaderAltLabelAcc.size() > 0) {
-				map.putAll(flattenMultiLiteralMap("broaderTransitiveAltLabel", broaderAltLabelAcc));
-			}
-
-			if (allBroaderAltLabel.size() > 0) {
-				map.put("broaderTransitiveAltLabel_all", allBroaderAltLabel);
-			}
-		}
-
-		if ((semantic.inCollections != null) && (semantic.inCollections.size() > 0)) {
-			map.put("inCollections", semantic.inCollections);
-		}
-
-		if ((semantic.inSchemes != null) && (semantic.inSchemes.size() > 0)) {
-			map.put("inSchemes", semantic.inSchemes);
-		}
-
-		return map;
+		return mapper.convertValue(json, Map.class);
 	}
 
-	private Map<String, Object> flattenLiteralMap(String field, Map<String, String> values) {
-		Map<String, Object> res = new HashMap<>();
-		for (Map.Entry<String, String> entry : values.entrySet()) {
-			res.put(field + "." + entry.getKey(), entry.getValue());
-		}
-
-		return res;
-	}
-
-	private Map<String, Object> flattenMultiLiteralMap(String field, Map<String, List<String>> values) {
-		Map<String, Object> res = new HashMap<>();
-		for (Map.Entry<String, List<String>> entry : values.entrySet()) {
-			res.put(field + "." + entry.getKey(), entry.getValue());
-		}
-
-		return res;
-	}
-
-
-	private static void addToLangAll(Map<String, List<String>> map, String lang, String value) {
-		List<String> array = map.get(lang);
-
-		if (array == null) {
-			array = new ArrayList<>();
-			map.put(lang, array);
-		}
-
-		array.add(value);
-	}
 	
 }

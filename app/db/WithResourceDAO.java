@@ -18,6 +18,7 @@ package db;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
@@ -84,14 +85,14 @@ public class WithResourceDAO<T extends WithResource> extends DAO<T> {
 	 * Given a list of ObjectId's (dbId's) return the specified resources
 	 *
 	 * @param ids
-	 * @return
+	 * @return a possibly empty list of objects
 	 */
 	public List<T> getByIds(List<ObjectId> ids) {
 		if((ids!=null) && (ids.size() > 0)) {
 			Query<T> colQuery = this.createQuery().field("_id").hasAnyOf(ids);
 			return find(colQuery).asList();
 		} else
-			return null;
+			return Collections.emptyList();
 	}
 
 	/**
@@ -239,7 +240,7 @@ public class WithResourceDAO<T extends WithResource> extends DAO<T> {
 
 	public boolean isPublic(ObjectId id) {
 		Query<T> q = this.createQuery().field("_id").equal(id).limit(1);
-		q.field("administrative.isPublic").equal(true);
+		q.field("administrative.access.isPublic").equal(true);
 		return (find(q).asList().size() == 0 ? false : true);
 	}
 

@@ -33,7 +33,6 @@ import model.resources.RecordResource;
 import model.resources.WithResourceType;
 
 import org.bson.types.ObjectId;
-import org.elasticsearch.action.search.SearchResponse;
 
 import play.Logger;
 import play.Logger.ALogger;
@@ -50,7 +49,6 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import controllers.RecordResourceController.CollectionAndRecordsCounts;
 import controllers.WithController.Profile;
 import db.DB;
-import elastic.Elastic;
 import elastic.ElasticSearcher;
 import elastic.ElasticSearcher.SearchOptions;
 
@@ -110,6 +108,15 @@ public class AnnotationController extends Controller {
 		}
 	}
 
+	public static Result unscoreAnnotation(String id) {
+		try {			
+			DB.getAnnotationDAO().removeScore(new ObjectId(id), WithController.effectiveUserDbId());
+			return ok();
+		} catch (Exception e) {
+			return internalServerError();
+		}
+	}
+	
 	public static Result rejectAnnotation(String id) {
 		try {			
 			DB.getAnnotationDAO().addReject(new ObjectId(id), WithController.effectiveUserDbId());
@@ -118,7 +125,6 @@ public class AnnotationController extends Controller {
 			return internalServerError();
 		}
 	}
-
 	
 	public static Annotation addAnnotation(Annotation annotation, ObjectId user) {
 		
