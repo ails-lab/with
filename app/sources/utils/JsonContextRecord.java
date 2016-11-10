@@ -195,7 +195,7 @@ public class JsonContextRecord {
 		for (Iterator<String> iterator = steps.iterator(); iterator.hasNext();) {
 			String string = (String) iterator.next();
 			JsonNode path = getPath(node, string);
-			if (!node.has(string)) {
+			if (!node.has(string) || path.isNull()) {
 				ObjectNode n = (ObjectNode) node;
 				n.put(string, buildNewObject(iterator, val, new ObjectMapper()));
 			} else {

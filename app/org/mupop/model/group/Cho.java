@@ -21,5 +21,5 @@ import org.mupop.model.group.Group;
 public class Cho extends Group {
 	// A CHO is a URL and then potentially stuff extracted from the CHO, like title, description, thumbnail
 	// Players will choose what to use to represent the url in the interface. 
-	String url;
+	public String url;
 }

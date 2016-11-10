@@ -365,8 +365,9 @@ public class WithResourceController extends WithController {
 			}
 			fillMissingThumbnailsAsync(recordId);
 			result.put("message", "Record succesfully added to collection");
-			result.put("recordId", recordId.toString());
-			result.put("recordWithURI", "/record/"+recordId.toString());
+			JsonContextRecord rec = new JsonContextRecord(json);
+			rec.setValue("dbId",recordId.toString());
+			rec.setValue("administrative.withURI","/record/" + recordId);
 			return ok(result);
 		} catch (Exception e) {
 			result.put("error", e.getMessage());
