@@ -128,8 +128,11 @@ public class ExhibitionReader {
 					List<Group> recs = new ArrayList<>();
 					for (JsonContextRecord item : records) {
 						JsonContextRecord parseTheItem = parseTheItem(collectionId, item);
-						if (parseTheItem!=null)
-						recs.add(buildCHOElement(parseTheItem));
+						if (parseTheItem != null) {
+							Group cho = buildCHOElement(parseTheItem);
+							recs.add(cho);
+							cho.setTitle(buildTextElement(item.getStringValue("caption")));
+						}
 						// TODO check the caption here
 					}
 					int pi = pageBlock.getIntValue("order")-1;
@@ -157,6 +160,7 @@ public class ExhibitionReader {
 	
 	private Group buildSequenceElement(Collection<? extends Group> records, Text title) {
 		Sequence sq = new Sequence();
+		sq.TOC = true;
 		sq.setTitle(title);
 		for (Group group : records) {
 			sq.addGroup(group);
