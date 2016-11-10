@@ -1,0 +1,260 @@
+These are the classes to represent the MuPoP data model. They are intended to be serialized in either JSON or XML.
+
+The architecture of the MuPoP data model is layered. The bottom layer are media components, with which exhibitions, events, games
+are constructed. Where general concepts are already clear, they will be modelled, where we want flexibility we will be
+unspecific.
+
+The purpose is not to remake an HTML format, the visuals of the exhibition are decided by the player, not by the
+exhibition. If you want total control of visuals, you either make a player specific for this exhibition, configure
+a more general player extensively for this exhibition or just make a website, with full freedom ... no need for a new format
+here.
+
+
+
+
+AudioData, VideoData, ImageData
+--------
+Any binary component is a XXXXdata artefact. They come in:
+ - embedded, the data of this artefact is part of the data model. This is usually the case for textual components,
+   but can be the case for image or audio, less likely for video.
+ - Http download, the data is available at given URL. The URL might contain placeholders to receive components from the
+   rest of the datamodel, be that an authorization component, a user identifying component, this is not clear yet and
+   will be further specified when the model is put to use.
+ - non-http-locator-url, streams or any other url based delivery might need to be distinguished from http.
+
+Media
+-----
+
+There are already quite a few media types that would be important to support. Many have in common, that for the same
+informational content, different representations are available.
+
+1a) Text
+-------
+Any text can be keyed on language. If the datamodel contains multilingual material, it should use the same language keys
+throughout. 2 letter ISO codes are recommended and data model playout systems are required to understand those. Others
+might be used.
+
+1b) Image / ImageData
+---------
+Multiple artefacts with the same visual content together will represent one image. Images are either born digital or
+represent physical things where the image is the main content (like drawings and paintings, book pages, film frames)
+
+
+Audio
+
+If the textual content of the audio is in this model, it should be linked here. When the sound object is used, a single
+text is required, when the speech object is used, a multilingual text is required.
+
+
+1d) Audio / AudioData
+--------
+any sound might come in different quality levels, analogous to image resolution, the artefacts are collected together here.
+
+1e) MultilangAudio
+---------
+Any sound that comes in different languages is classified as MultilangSound. Soundtracks from movies, radio shows, music to some
+degreee. If audio is not available in different languages, use normal sound.
+
+Video
+
+Video material might come in different qualities and with or without audio and potentially with alternative audio tracks.
+Video can be linked to Sound and or text. The linked (potentially multilingual) Sound and Text is belonging to the video,
+its not explanatory, but tightly coupled.
+
+1f) Video / VideoData
+--------
+Different qualities of the same av material are collected in this object. If the video is mute, this should be noted.
+
+
+
+
+All objects above need extra metadata. Open question is, how to represent the quality, is the representation a hashtable,
+what are reasonable API calls ...
+
+Cultural Heritage Items
+
+The objective of the media is, to contextualize and present Cultural Heritage Items. References to those should be
+included where appropriate with the media objects.
+
+=======================================
+
+Arrangement
+-----------
+
+All media will be arranged in some logical form. Most digital exhibitions are sequences of slides, but others give choices
+or interact with the user. The presentation layer is not described here, only the grouping of the artefacts.
+
+2a Together
+-----------
+
+Anything that is grouped in a together object is meant to be shown together. This can be media files or other arrange
+objects. The MuPoP player will decide how to present the object (either based on some clever logic or based on
+a template). Objects that are presented together should have one or more tags by which they are selected out of the
+Together object. While the tags are free and in theory are only relevant to the player of the MuPoP format, use the
+following tags:
+
+description, title, image, video, audio ... or if you have a comparison of two chos this tags might make sense
+ title, title1, title2, description, description1, description2, image1, image2,
+
+There could be an ambienceAudio tag, if you want some background music ... and you might not play it out if there is
+a specific audio in the object as well. (Or you play it via a stationary speaker, while individuals have their own
+playout on their mobile device)
+
+
+2b Choice
+----------
+
+While Together objects group things into ONE, (think of one slide maybe) Choice is more about the general flow. A Choice
+could be realized with an image carousel, their could be random slide player, it could be other ways to interact with
+the user, based on a specific playout mechanic.
+
+
+Special choice objects ...
+
+2b-1 Question
+-------------
+
+This will contain a text (or audio with text) which represents the question. Every possible answer is another text
+object and is associated with a tag. Questions that have Yes/No character should use the tags <yes> and <no>. Answering
+a question will generate an event.
+
+2b-2 Imagemap
+-------------
+
+An imagemap contains an image and a list of locations on the image associated with tags. The playout may visualize those
+as it sees fit and create user events, if the user selects any of the locations. Suggested are 2 ways to specify the
+imagemap.
+A second image is overlayed to the first, and scaled to match the size of the annotated image. Colors that are different
+from 0 / 0,0,0 represetation will be mapped to tags.
+x and y coordinates, starting from bottom left 0,0 are normalized between 0.0 and 1.0 and basic shapes (circle, box,
+triangle) are given in those coordinates and associated with tags.
+
+The tags on the imagemap should be objects that can be referenced, so that a Relation object can be created.
+
+
+2b-3 Videomap
+--------------
+
+The videomap is analogous to the imagemap. It stores a timecode (start:hh:mm:ss.msec - end:hh:mm:ss.msec) and a tag.
+Additionally, an imagemap can be associated with this timecode. Each of these tags need to be an object that can be
+ referenced in a Relation object, as well events have to be generated that show if the tag is visible or selected.
+
+
+
+2c Sequence
+-----------
+
+If Together objects (or Choices?) need to have an implied sequence, they are grouped in this object. Optionally the Sequence
+ should have a representing Together object (which serves as title and description mostly)...
+ It might have the requirement for <next> events to go through the sequence and other metadata.
+
+
+2d Related
+----------
+
+Any playout might have supplementary information at any point. A Related object ties 3 things together. (Its a triple)
+Two subjects, which can be any object in this datamodel, be it an image, a text, a piece of video, a particular stage in a sequence
+ etc. will be made related via a third object (the predicate) that describes the kind of relation. This might just be
+ a text, but could be an icon as well. Its the clue the player needs to give the user to follow and explore the
+ relation. Relations usually go Subject 1 -> Subject 2, but can be indicated to go both ways.
+
+ To be clear, sequences are special cases of Related objects, with the implied relation of Subject2 after Subject1.
+
+
+2d Event
+--------
+
+The datamodel allows you to specify that at certain points in the playout, user events are generated or expected. Wether
+the playout will actually generate or react to them is an implementation detail. The purpose is, that (theoretical) a reader
+of the model document can see where in a certain flow user interaction is happening and what does it do.
+
+Events are described by
+ - the user that created the event, if available (the flow can be played by many users simultaneously
+   either interacting or being completely isolated from another). If every user has his own experience, the user part is
+   probably not mentioned in an event description.
+ - a station where the event happened.
+ - The component that created the event (A together, an image, a choice )
+ - The type of event.
+
+Some events that are expected to matter are:
+ - a general <next> event, the user wants to proceed
+ - <previous> event, if there is a way to go back
+ These might or might not be supported by the playout and should not necessarily be described in the model.
+ - userId:stationId bind
+   A user has arrived at a station and made this fact known to the player.
+ - userId:stationId: leave
+   A user has left a station
+ Choices should usually generate events, if they are needed by any of the components.
+
+
+======================
+
+ The physical world.
+
+ Some elements of the datamodel deal with the physical world.
+
+ 3a Station
+ ----------
+
+Any physical location is a Station object. One important aspect of Station is, that users may arrive at it. This arrival
+may be noted in different ways:
+ - An anonymous user just arrives at a physical location, and this is noted by a button, a lightbarrier etc. A bind
+   event for that station with no user will result.
+ - A user with a mobile arrives and takes a photo, which can be associated with the station.
+ - A url is visited ... either a fixed one or dynamic one
+ - A geolocation is reached (arrive at a monument site)
+ - A rftag or another technical device guarantees physical proximity of user and station
+
+ Stations may contain the physical incarnation of a CHO.
+
+ 3b Device
+ ---------
+
+ Another aspect of a Station is, what is happening there. Stations may just be exhibits in a museum, that can be arrved at,
+ but they may be more interactive. Following devices may be present at a station:
+ - Audio .. some device capable of playing audio ...
+ - Video .. audio and moving images can be played together at station
+ - Touchscreen (audio optional) ... user input via touch is possible
+ - Web .. a desktop compatible experience is possible (keyboard / mouse)
+   maybe we use a selector like this (Video,Audio,Touch,Mouse,Key) so my webbrowser is VAMK .. my mobile VAT a projector
+   is just a V, an ambience speaker is an A ..
+ - It might be useful to add a screen size indicator, so Vs for small Vm and Vl for medium and large. (being phone,
+   tablet, other bigger devices)
+
+============================
+
+The unknown ....
+
+How the material that is contained in the media and arrangement section is presented is so far unknown. For simple
+structures it is conceivable to write a generic web playout, but its doubtful wether this would be attractive.
+ Any device can therefore contain a template section. Its main content is a freeform String. The only requirement is, that
+ an application (another field of the template ) which the player can identify by the given name, understands the template.
+
+ For the curtesy of the reader of the description, a template should also specify which events it is interested in,
+ and if it generates itself events.
+
+ The template should contain information, how the content in the data model is presented on the device. It has therefore
+ access to all the objects of the datamodel. To make it more clear to the reader, what the template and the application are
+ going to do, a "binding" can be specified. This provides aliases (other ids) for objects already described in the datamodel.
+
+ Imagine, the application would be called "web.exhibition.player" and the binding would say that "exhibition" is the same as
+ Sequence "mainSeq" in the datamodel. It should be clear, that when the binding is changed to "otherSeq", the exhibiton
+ player will use this other sequence to present an exhibiton.
+
+Imagine further, the application would be called "com.mywebcompany.findTheCandleGame". The player of the datamodel has code
+for this game included (maybe its a plugin, maybe its a seperate website) and knows how events have to be handled.
+Further, the application knows how the player represents the media in the data model. When everything is coded in the game,
+no further information is needed in the template. But maybe the game just operates on a sequence of Images. In this case,
+a binding "allImages" to the Sequence in the datamodel that says "ImagesWithCandles" would make it clear, which parts
+of the datamodel the application is dealing with and what you have to do if you want other images for the game.
+
+Another usecase for the template (and why its called "template" and not "app-config-section" ) would be the html code to
+present a sequence on the web.
+
+Yet another theoretical application would receive all choice events and presents a statistic on all choices ...
+(Quiz ... Questionair ... Poll )
+
+
+
+
+
