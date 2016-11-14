@@ -129,9 +129,8 @@ public class ExhibitionReader {
 					for (JsonContextRecord item : records) {
 						JsonContextRecord parseTheItem = parseTheItem(collectionId, item);
 						if (parseTheItem != null) {
-							Group cho = buildCHOElement(parseTheItem);
+							Group cho = buildCHOElement(parseTheItem, buildTextElement(item.getStringValue("caption")));
 							recs.add(cho);
-							cho.setTitle(buildTextElement(item.getStringValue("caption")));
 						}
 						// TODO check the caption here
 					}
@@ -146,6 +145,11 @@ public class ExhibitionReader {
 				// TODO add the group
 			}
 			Group o = buildSequenceElement(sequences, buildTextElement(text.getStringValue("title")));
+			
+			o.setTitle(buildTextElement(text.getStringValue("title")));
+			o.setDescription(buildTextElement(text.getStringValue("description")));
+			
+			
 			System.out.println(Json.toJson(o));
 		} catch (Exception e) {
 			log.error("Exeption", e);
@@ -177,12 +181,10 @@ public class ExhibitionReader {
 		return sq;
 	}
 	
-	private Cho buildCHOElement(JsonContextRecord o) {
+	private Cho buildCHOElement(JsonContextRecord o, Text caption) {
 		Cho object = new Cho();
-		object.setDescription(buildTextElement(o.getStringValue("descriptiveData.description.default")));
-		object.setTitle(buildTextElement(o.getStringValue("descriptiveData.label.default")));
+		object.setTitle(caption);
 		object.setThumbnail(Image.create(o.getStringValue("media[0].Thumbnail.url")));
-		object.setImage(Image.create(o.getStringValue("media[0].Thumbnail.url")));
 		object.url = o.getStringValue("administrative.withURI");
 		return object;
 	}
