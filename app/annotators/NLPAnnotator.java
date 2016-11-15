@@ -21,7 +21,6 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -29,11 +28,7 @@ import java.util.Set;
 
 import org.bson.types.ObjectId;
 
-import play.libs.Akka;
-import akka.actor.ActorSelection;
-import akka.actor.Props;
-import annotators.Annotator.AnnotatorDescriptor;
-import annotators.DBPediaAnnotator.Descriptor;
+import akka.routing.RoundRobinRouter;
 import utils.annotators.AnnotatedObject;
 import utils.annotators.AnnotationIndex;
 import utils.annotators.AnnotationValue;
@@ -58,45 +53,28 @@ import edu.stanford.nlp.ling.CoreAnnotations.TokensAnnotation;
 import edu.stanford.nlp.pipeline.StanfordCoreNLP;
 import edu.stanford.nlp.util.CoreMap;
 
-public class NLPAnnotator extends TextAnnotator {
+public class NLPAnnotator implements TextAnnotator {
 
-	public static AnnotatorDescriptor descriptor = new Descriptor();
-	
-	public static class Descriptor implements TextAnnotator.Descriptor {
+    protected static Map<Language, NLPAnnotator> annotators = new HashMap<>();
 
-		@Override
-		public String getName() {
-			return "WITH Named Entity Recognizer";
-		}
-
-		@Override
-		public AnnotatorType getType() {
-			return AnnotatorType.NER;
-		}
-		
-		private static Set<Language> created = new HashSet<>();
-
-		public ActorSelection getAnnotator(Language lang, boolean cs) {
-	    	if (lang != Language.EN) {
-	    		return null;
-	    	}
-	      	
-	       	String actorName = "NLPAnnotator-" + lang.getName();
-
-	    	if (!created.contains(lang)) {
-	    		synchronized (NLPAnnotator.class) {
-	    			if (created.add(lang)) {
-	    				Akka.system().actorOf( Props.create(NLPAnnotator.class), actorName);
-	    			}
-	    		}
-	    	}
-	    	
-	    	return Akka.system().actorSelection("user/" + actorName);
-	    }
-	    
+	public static String getName() {
+		return "WITH Named Entity Recognizer";
 	}
 
-    private AnnotatorDescriptor descr;
+    public static synchronized NLPAnnotator getAnnotator(Language lang) {
+    	if (lang != Language.EN) {
+    		return null;
+    	}
+    	
+    	NLPAnnotator ta = annotators.get(lang);
+    	if (ta == null) {
+			ta  = new NLPAnnotator();
+			annotators.put(lang, ta);
+    	}
+    	
+    	return ta;
+    }    	
+    
     private StanfordCoreNLP pipeline;
     
     private NLPAnnotator() {
@@ -109,7 +87,6 @@ public class NLPAnnotator extends TextAnnotator {
 //    	props.put("annotators", "tokenize, ssplit");
     	
     	pipeline = new StanfordCoreNLP(props);
-    	descr = new NLPAnnotator.Descriptor();
     }
 
 	@Override
@@ -119,6 +96,8 @@ public class NLPAnnotator extends TextAnnotator {
 		List<Annotation> res = new ArrayList<>();
 		
 		AnnotationIndex ai = analyze(text);
+		
+		String generator = getName();
 		
 		ArrayList<Span> locations = ai.getLocations("NE", new SimpleAnnotationValue("LOCATION"));
 		if (locations != null) {
@@ -142,7 +121,7 @@ public class NLPAnnotator extends TextAnnotator {
 
 	    		ArrayList<AnnotationAdmin> admins  = new ArrayList<>();
 	    		AnnotationAdmin admin = new Annotation.AnnotationAdmin();
-	    		admin.setGenerator(descr.getName());
+	    		admin.setGenerator(generator);
 	    		admin.setGenerated(new Date());
 	    		admin.setConfidence(-1.0f);
 //	    		admin.setWithCreator(withCreator);
@@ -181,7 +160,7 @@ public class NLPAnnotator extends TextAnnotator {
 
 	    		ArrayList<AnnotationAdmin> admins  = new ArrayList<>();
 	    		AnnotationAdmin admin = new Annotation.AnnotationAdmin();
-	    		admin.setGenerator(descr.getName());
+	    		admin.setGenerator(generator);
 	    		admin.setGenerated(new Date());
 	    		admin.setConfidence(-1.0f);
 //	    		admin.setWithCreator(withCreator);
@@ -220,7 +199,7 @@ public class NLPAnnotator extends TextAnnotator {
 
 	    		ArrayList<AnnotationAdmin> admins  = new ArrayList<>();
 	    		AnnotationAdmin admin = new Annotation.AnnotationAdmin();
-	    		admin.setGenerator(descr.getName());
+	    		admin.setGenerator(generator);
 	    		admin.setGenerated(new Date());
 	    		admin.setConfidence(-1.0f);
 //	    		admin.setWithCreator(withCreator);

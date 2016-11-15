@@ -22,68 +22,18 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.bson.types.ObjectId;
-
-import play.libs.Akka;
-import akka.actor.ActorRef;
-import akka.actor.ActorSelection;
 import model.annotations.Annotation;
 import model.annotations.targets.AnnotationTarget;
-import model.basicDataTypes.Language;
 
-public abstract class TextAnnotator extends Annotator {
+import org.bson.types.ObjectId;
 
-	protected Language lang;
+public interface TextAnnotator {
 	
-	public interface Descriptor extends AnnotatorDescriptor {
-
-		default ActorSelection getAnnotator(Language lang) {
-			return getAnnotator(lang, false);
-		}
-			
-		public ActorSelection getAnnotator(Language lang, boolean cs);
-	}
-
+	public List<Annotation> annotate(String text, ObjectId user, AnnotationTarget target, Map<String, Object> properties) throws Exception;
 	
-	public static class Annotate {
-		public ObjectId userId;
-		public String text;
-		public AnnotationTarget target;
-		public Map<String, Object> props;
-		public String requestId;
-		public String messageId;
+	static Pattern p = Pattern.compile("(<.*?>)");
 
-		public Annotate(ObjectId userId, String text, AnnotationTarget target, Map<String, Object> props, String requestId, String messageId) {
-			this.userId = userId;
-			this.text = text;
-			this.target = target;
-			this.props = props;
-			this.requestId = requestId;
-			this.messageId = messageId;
-		}
-	}
-	
-	public void onReceive(Object msg) throws Exception {
-		if (msg instanceof Annotate) {
-			Annotate atm = (Annotate)msg;
-			try {
-				storeAnnotatations(annotate(atm.text, atm.userId, atm.target, atm.props), atm.userId);
-			} finally {
-				reply(atm.requestId, atm.messageId);
-			}
-		}
-	}
-	
-	protected void reply(String requestId, String messageId) {
-		ActorSelection actor = Akka.system().actorSelection("user/" + requestId);
-		actor.tell(new AnnotationControlActor.AnnotateTextDone(messageId), ActorRef.noSender());
-	}
-	
-	public abstract List<Annotation> annotate(String text, ObjectId user, AnnotationTarget target, Map<String, Object> properties) throws Exception;
-
-	private static Pattern p = Pattern.compile("(<.*?>)");
-
-	public static String strip(String text) {
+	default String strip(String text) {
 		Matcher m = p.matcher(text);
 		
 		StringBuffer sb = new StringBuffer();
@@ -115,5 +65,6 @@ public abstract class TextAnnotator extends Annotator {
 			return sb.toString();
 		}
 	}
+
 
 }

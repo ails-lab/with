@@ -16,10 +16,10 @@
 
 package controllers;
 
+import actors.annotation.AnnotationControlActor;
 import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
 import akka.actor.Props;
-import annotators.AnnotationControlActor;
 import annotators.AnnotatorConfig;
 
 import com.codahale.metrics.Histogram;

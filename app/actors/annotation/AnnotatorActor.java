@@ -14,20 +14,17 @@
  */
 
 
-package annotators;
+package actors.annotation;
 
 import java.util.List;
 
 import org.bson.types.ObjectId;
 
-import play.libs.Akka;
-import akka.actor.ActorRef;
-import akka.actor.ActorSelection;
 import akka.actor.UntypedActor;
 import controllers.AnnotationController;
 import model.annotations.Annotation;
 
-public abstract class Annotator extends UntypedActor {
+public abstract class AnnotatorActor extends UntypedActor {
 
 	public interface AnnotatorDescriptor {
 

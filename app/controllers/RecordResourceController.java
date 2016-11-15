@@ -54,14 +54,14 @@ import play.libs.Akka;
 import play.libs.Json;
 import play.mvc.Result;
 import utils.Tuple;
+import actors.annotation.TextAnnotatorActor;
+import actors.annotation.AnnotationControlActor;
+import actors.annotation.AnnotatorActor;
+import actors.annotation.RequestAnnotatorActor;
 import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
 import akka.actor.Props;
-import annotators.AnnotationControlActor;
-import annotators.Annotator;
 import annotators.AnnotatorConfig;
-import annotators.RequestAnnotator;
-import annotators.TextAnnotator;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -320,8 +320,8 @@ public class RecordResourceController extends WithResourceController {
 		for (AnnotatorConfig annConfig : annConfigs) {
 			Map<String, Object> props = annConfig.getProps();
 			
-			boolean imageAnnotator = props.get(Annotator.IMAGE_ANNOTATOR) != null && (boolean)props.get(Annotator.IMAGE_ANNOTATOR); 
-			boolean textAnnotator = props.get(Annotator.TEXT_ANNOTATOR) != null && (boolean)props.get(Annotator.TEXT_ANNOTATOR);
+			boolean imageAnnotator = props.get(AnnotatorActor.IMAGE_ANNOTATOR) != null && (boolean)props.get(AnnotatorActor.IMAGE_ANNOTATOR); 
+			boolean textAnnotator = props.get(AnnotatorActor.TEXT_ANNOTATOR) != null && (boolean)props.get(AnnotatorActor.TEXT_ANNOTATOR);
 			
 			if (imageAnnotator) {
 				AnnotationTarget target = new AnnotationTarget();
@@ -335,13 +335,13 @@ public class RecordResourceController extends WithResourceController {
 					}
 				}
 			
-	    	    ac.tell(new AnnotationControlActor.AnnotateRequest(user, urls.toArray(new String[urls.size()]), target, props, (RequestAnnotator.Descriptor)annConfig.getAnnotatorDesctriptor()), ActorRef.noSender());
+	    	    ac.tell(new AnnotationControlActor.AnnotateRequest(user, urls.toArray(new String[urls.size()]), target, props, (RequestAnnotatorActor.Descriptor)annConfig.getAnnotatorDesctriptor()), ActorRef.noSender());
 				
 			} else if (textAnnotator) {
 				if (dd == null) {
 					dd = record.getDescriptiveData();
 				}
-				for (String p : (String[])props.get(Annotator.TEXT_FIELDS)) {
+				for (String p : (String[])props.get(AnnotatorActor.TEXT_FIELDS)) {
 					Method method = dd.getClass().getMethod("get" + p.substring(0,1).toUpperCase() + p.substring(1));
 				
 					Object res = method.invoke(dd);
@@ -371,7 +371,7 @@ public class RecordResourceController extends WithResourceController {
 									
 									target.setSelector(selector);
 	
-									ac.tell(new AnnotationControlActor.AnnotateText(user, text, target, props, (TextAnnotator.Descriptor)annConfig.getAnnotatorDesctriptor(), lang), ActorRef.noSender());
+									ac.tell(new AnnotationControlActor.AnnotateText(user, text, target, props, (TextAnnotatorActor.Descriptor)annConfig.getAnnotatorDesctriptor(), lang), ActorRef.noSender());
 								}
 							}
 						}

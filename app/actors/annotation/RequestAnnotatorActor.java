@@ -14,13 +14,13 @@
  */
 
 
-package annotators;
+package actors.annotation;
 
 import java.util.List;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
-public abstract class RequestAnnotator extends Annotator {
+public abstract class RequestAnnotatorActor extends AnnotatorActor {
 
 	public interface Descriptor extends AnnotatorDescriptor {
 

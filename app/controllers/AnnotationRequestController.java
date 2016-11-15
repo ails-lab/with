@@ -22,9 +22,9 @@ import play.libs.Akka;
 import play.libs.Json;
 import play.mvc.Controller;
 import play.mvc.Result;
+import actors.annotation.AnnotationControlActor;
 import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
-import annotators.AnnotationControlActor;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;

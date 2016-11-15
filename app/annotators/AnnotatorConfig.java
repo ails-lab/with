@@ -16,7 +16,6 @@
 
 package annotators;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -26,9 +25,9 @@ import java.util.Map;
 import java.util.Set;
 
 import vocabularies.Vocabulary;
-import annotators.Annotator.AnnotatorDescriptor;
-import annotators.Annotator.AnnotatorDescriptor.AnnotatorType;
-import annotators.DBPediaAnnotator.Descriptor;
+import actors.annotation.AnnotatorActor;
+import actors.annotation.AnnotatorActor.AnnotatorDescriptor;
+import actors.annotation.AnnotatorActor.AnnotatorDescriptor.AnnotatorType;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
@@ -72,17 +71,17 @@ public class AnnotatorConfig {
 			
 			AnnotatorDescriptor ad;
 			try {
-				ad = (AnnotatorDescriptor)Class.forName("annotators." + v[0]).getField("descriptor").get(null);
+				ad = (AnnotatorDescriptor)Class.forName("actors.annotation." + v[0] + "Actor").getField("descriptor").get(null);
 			
 				Map<String, Object> props = new HashMap<>();
 				try {
 					AnnotatorType type = ad.getType();
 					
 					if (type == AnnotatorType.LOOKUP || type == AnnotatorType.NER) {
-						props.put(Annotator.TEXT_ANNOTATOR, true);
-						props.put(Annotator.TEXT_FIELDS, Annotator.textfields);
+						props.put(AnnotatorActor.TEXT_ANNOTATOR, true);
+						props.put(AnnotatorActor.TEXT_FIELDS, AnnotatorActor.textfields);
 					} else {
-						props.put(Annotator.IMAGE_ANNOTATOR, true);
+						props.put(AnnotatorActor.IMAGE_ANNOTATOR, true);
 					}
 
 				} catch (Exception e) {

@@ -35,10 +35,10 @@ import sources.core.QueryBuilder;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
-public class CultIVMLAnnotator extends RequestAnnotator {
+public class CultIVMLAnnotator {
 	
-	private static String service = "http://ironman.image.ntua.gr:30000/WITH/";
-	private static String reponseApi = "/annotation/annotateRequestResult";
+	public static String service = "http://ironman.image.ntua.gr:30000/WITH/";
+	public static String reponseApi = "/annotation/annotateRequestResult";
 
 	public static String ip = "";
 
@@ -50,95 +50,40 @@ public class CultIVMLAnnotator extends RequestAnnotator {
 		}
 	}
 
-	public static AnnotatorDescriptor descriptor = new Descriptor();
-	
-	public static class Descriptor implements RequestAnnotator.Descriptor {
-	
-		@Override
-		public AnnotatorType getType() {
-			return AnnotatorType.IMAGE;
-		}
-	
-		@Override
-		public String getName() {
-			return "CultIVML";
-		}
-		
-		@Override
-		public String getResponseApi() {
-			return reponseApi;
-		}
-		
-		@Override
-		public String getService() {
-			return service;
-		}
-		
-		@Override
-		public int getDataLimit() {
-			return 2;
-		}
-		
-		@Override
-		public ObjectNode createDataEntry(String imageURL, String recordId, long token) {
-			ObjectNode json = Json.newObject();
-			
-			QueryBuilder qb = new QueryBuilder(imageURL);
-			
-			if (qb.getHttp().startsWith("http://")) {
-				json.put("imageURL", qb.getHttp());
-			} else {
-				qb.addSearchParam("token", token + "");
-				json.put("imageURL", ip + qb.getHttp());
-			}
-			json.put("recordId", recordId);
-			
-			return json;
-		}
-		
-		@Override
-		public ObjectNode createMessage(String rid, List<ObjectNode> list, long token) {
-			ArrayNode array = Json.newObject().arrayNode();
-			for (ObjectNode obj : list) {
-				array.add(obj);
-			}
-
-			ObjectNode json = Json.newObject();
-			json.put("requestId", rid);
-			json.put("annotationURL", ip + getResponseApi() + "?token=" + token);
-
-			json.put("data", array);
-			
-			return json;
-		}
+	public static String getName() {
+		return "CultIVML Annotator";
 	}
 	
-
-	public static HttpResponse sendRequest(String requestId, ArrayNode array) throws ClientProtocolException, IOException {
+	public static ObjectNode createDataEntry(String imageURL, String recordId, long token) {
 		ObjectNode json = Json.newObject();
-		json.put("requestId", requestId);
+			
+		QueryBuilder qb = new QueryBuilder(imageURL);
+			
+		if (qb.getHttp().startsWith("http://")) {
+			json.put("imageURL", qb.getHttp());
+		} else {
+			qb.addSearchParam("token", token + "");
+			json.put("imageURL", ip + qb.getHttp());
+		}
+		json.put("recordId", recordId);
+		
+		return json;
+	}
+		
+	public static ObjectNode createMessage(String rid, List<ObjectNode> list, long token) {
+		ArrayNode array = Json.newObject().arrayNode();
+		for (ObjectNode obj : list) {
+			array.add(obj);
+		}
+
+		ObjectNode json = Json.newObject();
+		json.put("requestId", rid);
+		json.put("annotationURL", ip + reponseApi + "?token=" + token);
+
 		json.put("data", array);
 		
-		HttpClient client = HttpClientBuilder.create().build();
-
-		HttpPost request = new HttpPost(service);
-		request.setHeader("content-type", "application/json");
-//		request.setHeader("accept", "application/json");
-
-		request.setEntity(new StringEntity(json.toString()));
-		
-//		System.out.println(json.toString());
-		return client.execute(request);
-		
-
-
-		
-		
-
+		return json;
 	}
 
 
-	@Override
-	protected void reply(String requestId, String messageId) {
-	}
 }

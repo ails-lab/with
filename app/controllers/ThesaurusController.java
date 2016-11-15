@@ -56,10 +56,11 @@ import db.DB;
 import elastic.Elastic;
 import elastic.ElasticSearcher;
 import elastic.ElasticSearcher.SearchOptions;
+import actors.annotation.CultIVMLAnnotatorActor;
+import annotators.CultIVMLAnnotator;
 import annotators.DBPediaAnnotator;
 import annotators.LookupAnnotator;
 import annotators.NLPAnnotator;
-import annotators.CultIVMLAnnotator;
 
 /**
  * @author achort
@@ -269,12 +270,12 @@ public class ThesaurusController extends Controller {
 		options = Json.newObject().arrayNode();
 		option = Json.newObject();
 		option.put("name", DBPediaAnnotator.class.getSimpleName());
-		option.put("label", new DBPediaAnnotator.Descriptor().getName());
+		option.put("label", DBPediaAnnotator.getName());
 		options.add(option);
 
 		option = Json.newObject();
 		option.put("name", NLPAnnotator.class.getSimpleName());
-		option.put("label", new NLPAnnotator.Descriptor().getName());
+		option.put("label", NLPAnnotator.getName());
 		options.add(option);
 
 		ann.put("options", options);
@@ -287,7 +288,7 @@ public class ThesaurusController extends Controller {
 		options = Json.newObject().arrayNode();
 		option = Json.newObject();
 		option.put("name", CultIVMLAnnotator.class.getSimpleName());
-		option.put("label", new CultIVMLAnnotator.Descriptor().getName());
+		option.put("label", CultIVMLAnnotator.getName());
 		options.add(option);
 
 		ann.put("options", options);

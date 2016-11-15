@@ -14,7 +14,7 @@
  */
 
 
-package annotators;
+package actors.annotation;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -39,10 +39,8 @@ import org.bson.types.ObjectId;
 
 import play.Play;
 import play.libs.Akka;
-import play.libs.Json;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import controllers.AnnotationController;
@@ -62,7 +60,7 @@ import akka.util.Timeout;
 
 public class AnnotationControlActor extends UntypedActor {
 
-	private static Timeout timeout = new Timeout(Duration.create(5, "seconds"));
+	private static Timeout timeout = new Timeout(Duration.create(120, "seconds"));
 	public static String ip = "";
 
 	static {
@@ -78,8 +76,8 @@ public class AnnotationControlActor extends UntypedActor {
 	private ObjectId userId;
 	private boolean record;
 	
-	private Map<RequestAnnotator.Descriptor, List<ObjectNode>> requestMap;
-	private Map<RequestAnnotator.Descriptor, Integer> requestCount;
+	private Map<RequestAnnotatorActor.Descriptor, List<ObjectNode>> requestMap;
+	private Map<RequestAnnotatorActor.Descriptor, Integer> requestCount;
 	private Set<String> requestIds;
 	
 	private Random rand; 
@@ -112,7 +110,7 @@ public class AnnotationControlActor extends UntypedActor {
 			if (annotator != null) {
 				String mid = (System.currentTimeMillis() + Math.abs(rand.nextLong())) + "" + Math.abs(rand.nextLong());
 				requestIds.add(mid);
-				annotator.tell(new TextAnnotator.Annotate(atm.userId, atm.text, atm.target, atm.props, requestId, mid), ActorRef.noSender());
+				annotator.tell(new TextAnnotatorActor.Annotate(atm.userId, atm.text, atm.target, atm.props, requestId, mid), ActorRef.noSender());
 			}
 			
 		} else if (msg instanceof AnnotateTextDone) {
@@ -127,7 +125,6 @@ public class AnnotationControlActor extends UntypedActor {
 			
 		} else if (msg instanceof AnnotateRequestPartialResult) {
 //			System.out.println("***************** AnnotateRequestPartialResult");
-			System.out.println("ANN 1" + Json.toJson(AnnotationController.getAnnotationFromJson(((AnnotateRequestPartialResult) msg).annotation, userId)));
 			AnnotationController.addAnnotation(AnnotationController.getAnnotationFromJson(((AnnotateRequestPartialResult) msg).annotation, userId), userId);
 			
 		} else if (msg instanceof AnnotateRequestsEnd) {
@@ -170,12 +167,12 @@ public class AnnotationControlActor extends UntypedActor {
 	}
 	
 	private void sendPendingRequests() {
-		for (Map.Entry<RequestAnnotator.Descriptor, List<ObjectNode>> entry : requestMap.entrySet()) {
+		for (Map.Entry<RequestAnnotatorActor.Descriptor, List<ObjectNode>> entry : requestMap.entrySet()) {
 			sendRequests(entry.getKey(), entry.getValue());
 		}
 	}
 	
-	private void sendRequests(RequestAnnotator.Descriptor ad, List<ObjectNode> list) {
+	private void sendRequests(RequestAnnotatorActor.Descriptor ad, List<ObjectNode> list) {
 		if (list.size() == 0) {
 			return;
 		}
@@ -248,10 +245,10 @@ public class AnnotationControlActor extends UntypedActor {
 		public String text;
 		public AnnotationTarget target;
 		public Map<String, Object> props;
-		public TextAnnotator.Descriptor annotator;
+		public TextAnnotatorActor.Descriptor annotator;
 		public Language lang;
 
-		public AnnotateText(ObjectId userId, String text, AnnotationTarget target, Map<String, Object> props, TextAnnotator.Descriptor annotator, Language lang) {
+		public AnnotateText(ObjectId userId, String text, AnnotationTarget target, Map<String, Object> props, TextAnnotatorActor.Descriptor annotator, Language lang) {
 			this.userId = userId;
 			this.text = text;
 			this.target = target;
@@ -266,9 +263,9 @@ public class AnnotationControlActor extends UntypedActor {
 		public String[] urls;
 		public AnnotationTarget target;
 		public Map<String, Object> props;
-		public RequestAnnotator.Descriptor annotator;
+		public RequestAnnotatorActor.Descriptor annotator;
 
-		public AnnotateRequest(ObjectId userId, String[] urls, AnnotationTarget target, Map<String, Object> props, RequestAnnotator.Descriptor annotator) {
+		public AnnotateRequest(ObjectId userId, String[] urls, AnnotationTarget target, Map<String, Object> props, RequestAnnotatorActor.Descriptor annotator) {
 			this.userId = userId;
 			this.urls = urls;
 			this.target = target;
