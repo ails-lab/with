@@ -18,11 +18,10 @@ package model.annotations.bodies;
 
 import java.util.ArrayList;
 
-import annotators.Annotator;
-import annotators.DBPediaAnnotator;
-import annotators.LookupAnnotator;
-import annotators.NLPAnnotator;
+import db.DB;
+import model.basicDataTypes.Literal;
 import model.basicDataTypes.MultiLiteral;
+import model.resources.ThesaurusObject;
 
 public class AnnotationBodyTagging extends AnnotationBody {
 	
@@ -109,5 +108,17 @@ public class AnnotationBodyTagging extends AnnotationBody {
 		this.text = text;
 	}*/
 
+	public void adjustLabel() {
+		ThesaurusObject to = DB.getThesaurusDAO().getByUri(uri);
+		if (to != null) {
+			MultiLiteral ml = new MultiLiteral(to.getSemantic().getPrefLabel());
+			ml.fillDEF();
+			
+			setLabel(ml);
+			
+			setUriVocabulary(to.getSemantic().getVocabulary().getName());
+		}
+		
+	}
 	
 }

@@ -16,7 +16,9 @@
 
 package annotators;
 
-import annotators.Annotator.AnnotatorDescriptor.AnnotatorType;
+import java.util.List;
+
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
 public abstract class RequestAnnotator extends Annotator {
 
@@ -27,6 +29,10 @@ public abstract class RequestAnnotator extends Annotator {
 		public String getResponseApi();
 		
 		public int getDataLimit();
+		
+		public ObjectNode createDataEntry(String imageURL, String recordId, long token);
+		
+		public ObjectNode createMessage(String rid, List<ObjectNode> list, long token);
 		
 	}
 	

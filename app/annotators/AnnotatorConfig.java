@@ -72,7 +72,6 @@ public class AnnotatorConfig {
 			
 			AnnotatorDescriptor ad;
 			try {
-				System.out.println(">>>>>>>>>>>>>>>>> annotators." + v[0]);
 				ad = (AnnotatorDescriptor)Class.forName("annotators." + v[0]).getField("descriptor").get(null);
 			
 				Map<String, Object> props = new HashMap<>();

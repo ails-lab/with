@@ -65,33 +65,6 @@ public abstract class Annotator extends UntypedActor {
 		}
 	}
 	
-	protected void reply(String requestId) {
-		ActorSelection actor = Akka.system().actorSelection("user/" + requestId);
-		actor.tell(new AnnotationControlActor.TextAnnotationsCompleted(), ActorRef.noSender());
-	}
-	
-//	public static List<Annotator> getAnnotators(Language lang) {
-//		List<Annotator> res = new ArrayList<>();
-//		
-//		Annotator ann;
-//		ann = DBPediaAnnotator.getAnnotator(lang);
-//		if (ann != null) {
-//			res.add(ann);
-//		}
-//		
-//		ann = LookupAnnotator.getAnnotator(lang, true);
-//		if (ann != null) {
-//			res.add(ann);
-//		}
-//
-//		ann = NLPAnnotator.getAnnotator(lang);
-//		if (ann != null) {
-//			res.add(ann);
-//		}
-//		
-//		
-//		return res;
-//	}
-
+	protected abstract void reply(String requestId, String messageId);
 	
 }

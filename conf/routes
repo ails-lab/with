@@ -181,8 +181,8 @@ GET 	/thesaurus/suggestions						controllers.ThesaurusController.getSuggestions(
 
 #Thesaurus gui
 POST	/collection/:id/facets 	        			controllers.CollectionIndexController.getCollectionFacets(id)
-POST	/collection/:id/selectionlist		   			controllers.CollectionObjectController.facetedListRecordResources(id, format: String ?="noContent", start: Integer ?=0, count: Integer ?=10)
-GET 	/collection/:id/similarlist		   			controllers.CollectionObjectController.similarListRecordResources(id, itemid: java.lang.String, format: String ?="noContent", start: Integer ?=0, count: Integer ?=10)
+POST	/collection/:id/selectionlist		   			controllers.CollectionObjectController.facetedListRecordResources(id, format: String ?="noContent", start: Integer ?=0, count: Integer ?=10, profile: String ?="MEDIUM", locale: play.libs.F.Option[java.lang.String])
+GET 	/collection/:id/similarlist		   			controllers.CollectionObjectController.similarListRecordResources(id, itemid: java.lang.String, format: String ?="noContent", start: Integer ?=0, count: Integer ?=10, profile: String ?="MEDIUM", locale: play.libs.F.Option[java.lang.String])
 #POST	/collection/:id/keywords 	        			controllers.CollectionIndexController.getCollectionKeywords(id)
 #GET		/collection/:id/annotationlist				controllers.CollectionIndexController.getCollectionAnnotations(id)
 
@@ -194,5 +194,8 @@ POST		/record/:id/annotate					controllers.RecordResourceController.annotateReco
 POST		/collection/:id/annotate				controllers.CollectionObjectController.annotateCollection(id)
 GET		/record/:id/deleteRejectedAnnotations		controllers.RecordResourceController.deleteRejectedAnnotations(id)
 
-POST	/image/imageAnnotations					controllers.ImageAnnotationController.imageAnnotationResults()	
+POST	/annotation/annotateRequestResult					controllers.AnnotationRequestController.newAnnotations()	
 GET			/collection/api/removeIdsOfDeletedRecords	controllers.WithResourceController.removeIdsOfDeletedRecords()		
+
+GET	     /collection/:id/annotations 	        			controllers.CollectionObjectController.getAnnotations(id)
+GET	     /collection/:id/annotationSummary 	        			controllers.CollectionObjectController.getAnnotationSummary(id, mode: String ?="FLAT")

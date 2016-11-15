@@ -125,10 +125,10 @@ public class TokenLoginActor extends UntypedActor {
 
 	private static long createToken(ObjectId id) {
 
-		for (JsonNode node : tokenIndex) {
-			if (StringUtils.equals(node.get("user").asText(), id.toString()))
-				return node.get("token").asLong();
-		}
+//		for (JsonNode node : tokenIndex) {
+//			if (StringUtils.equals(node.get("user").asText(), id.toString()))
+//				return node.get("token").asLong();
+//		}
 
 		ObjectNode node = Json.newObject();
 		node.put("user", id.toString());

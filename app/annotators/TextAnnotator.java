@@ -24,8 +24,9 @@ import java.util.regex.Pattern;
 
 import org.bson.types.ObjectId;
 
+import play.libs.Akka;
+import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
-
 import model.annotations.Annotation;
 import model.annotations.targets.AnnotationTarget;
 import model.basicDataTypes.Language;
@@ -44,35 +45,41 @@ public abstract class TextAnnotator extends Annotator {
 	}
 
 	
-	public static class AnnotateTextMessage {
+	public static class Annotate {
 		public ObjectId userId;
 		public String text;
 		public AnnotationTarget target;
 		public Map<String, Object> props;
 		public String requestId;
+		public String messageId;
 
-		public AnnotateTextMessage(ObjectId userId, String text, AnnotationTarget target, Map<String, Object> props, String requestId) {
+		public Annotate(ObjectId userId, String text, AnnotationTarget target, Map<String, Object> props, String requestId, String messageId) {
 			this.userId = userId;
 			this.text = text;
 			this.target = target;
 			this.props = props;
 			this.requestId = requestId;
+			this.messageId = messageId;
 		}
 	}
 	
 	public void onReceive(Object msg) throws Exception {
-		// TODO Auto-generated method stub
-		if (msg instanceof AnnotateTextMessage) {
-			AnnotateTextMessage atm = (AnnotateTextMessage)msg;
-			List<Annotation> annotations = annotate(atm.text, atm.userId, atm.target, atm.props);
-			storeAnnotatations(annotations, atm.userId);
-			reply(atm.requestId);
+		if (msg instanceof Annotate) {
+			Annotate atm = (Annotate)msg;
+			try {
+				storeAnnotatations(annotate(atm.text, atm.userId, atm.target, atm.props), atm.userId);
+			} finally {
+				reply(atm.requestId, atm.messageId);
+			}
 		}
 	}
 	
+	protected void reply(String requestId, String messageId) {
+		ActorSelection actor = Akka.system().actorSelection("user/" + requestId);
+		actor.tell(new AnnotationControlActor.AnnotateTextDone(messageId), ActorRef.noSender());
+	}
+	
 	public abstract List<Annotation> annotate(String text, ObjectId user, AnnotationTarget target, Map<String, Object> properties) throws Exception;
-
-
 
 	private static Pattern p = Pattern.compile("(<.*?>)");
 

@@ -17,7 +17,9 @@
 package annotators;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+import java.util.List;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
@@ -26,16 +28,28 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.HttpClientBuilder;
 
+import play.Play;
 import play.libs.Json;
+import sources.core.QueryBuilder;
 
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
-public class WITHImageAnnotator extends RequestAnnotator {
+public class CultIVMLAnnotator extends RequestAnnotator {
 	
-	private static String service = "http://ironman.image.ece.ntua.gr:50000";
-	private static String reponseApi = "/image/imageAnnotations";
-	
+	private static String service = "http://ironman.image.ntua.gr:30000/WITH/";
+	private static String reponseApi = "/annotation/annotateRequestResult";
+
+	public static String ip = "";
+
+	static {
+		try {
+			ip = "http://" + InetAddress.getLocalHost().getHostAddress() + ":" + Play.application().configuration().getString("http.port");
+		} catch (UnknownHostException e) {
+			e.printStackTrace();
+		}
+	}
+
 	public static AnnotatorDescriptor descriptor = new Descriptor();
 	
 	public static class Descriptor implements RequestAnnotator.Descriptor {
@@ -47,7 +61,7 @@ public class WITHImageAnnotator extends RequestAnnotator {
 	
 		@Override
 		public String getName() {
-			return "Image Analysis Annotator";
+			return "CultIVML";
 		}
 		
 		@Override
@@ -62,7 +76,40 @@ public class WITHImageAnnotator extends RequestAnnotator {
 		
 		@Override
 		public int getDataLimit() {
-			return 100;
+			return 2;
+		}
+		
+		@Override
+		public ObjectNode createDataEntry(String imageURL, String recordId, long token) {
+			ObjectNode json = Json.newObject();
+			
+			QueryBuilder qb = new QueryBuilder(imageURL);
+			
+			if (qb.getHttp().startsWith("http://")) {
+				json.put("imageURL", qb.getHttp());
+			} else {
+				qb.addSearchParam("token", token + "");
+				json.put("imageURL", ip + qb.getHttp());
+			}
+			json.put("recordId", recordId);
+			
+			return json;
+		}
+		
+		@Override
+		public ObjectNode createMessage(String rid, List<ObjectNode> list, long token) {
+			ArrayNode array = Json.newObject().arrayNode();
+			for (ObjectNode obj : list) {
+				array.add(obj);
+			}
+
+			ObjectNode json = Json.newObject();
+			json.put("requestId", rid);
+			json.put("annotationURL", ip + getResponseApi() + "?token=" + token);
+
+			json.put("data", array);
+			
+			return json;
 		}
 	}
 	
@@ -82,6 +129,16 @@ public class WITHImageAnnotator extends RequestAnnotator {
 		
 //		System.out.println(json.toString());
 		return client.execute(request);
+		
 
+
+		
+		
+
+	}
+
+
+	@Override
+	protected void reply(String requestId, String messageId) {
 	}
 }

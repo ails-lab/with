@@ -219,6 +219,10 @@ public class AnnotationController extends Controller {
 
 	
 	public static Annotation getAnnotationFromJson(JsonNode json) {
+		return getAnnotationFromJson(json, WithController.effectiveUserDbId());
+	}
+	
+	public static Annotation getAnnotationFromJson(JsonNode json, ObjectId userId) {
 		try {
 			Annotation annotation = Json.fromJson(json, Annotation.class);
 			Class<?> clazz = Class
@@ -226,12 +230,12 @@ public class AnnotationController extends Controller {
 							+ annotation.getMotivation());
 			AnnotationBody body = (AnnotationBody) Json.fromJson(
 					json.get("body"), clazz);
+			body.adjustLabel();
 			annotation.setBody(body);
 			AnnotationAdmin administrative = new AnnotationAdmin();
-			administrative.setWithCreator(WithController.effectiveUserDbId());
+			administrative.setWithCreator(userId);
 			if (json.has("generated")) {
-				SimpleDateFormat sdf = new SimpleDateFormat(
-						"yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+				SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
 				try {
 					administrative.setGenerated(sdf.parse(json.get("generated")
 							.asText()));

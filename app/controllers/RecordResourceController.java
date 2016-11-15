@@ -40,7 +40,6 @@ import model.annotations.targets.AnnotationTarget;
 import model.basicDataTypes.Language;
 import model.basicDataTypes.MultiLiteral;
 import model.resources.RecordResource;
-import model.resources.WithResourceType;
 import model.resources.collection.CollectionObject;
 import model.resources.collection.CollectionObject.CollectionAdmin;
 import model.usersAndGroups.User;
@@ -54,24 +53,15 @@ import play.libs.F.Option;
 import play.libs.Akka;
 import play.libs.Json;
 import play.mvc.Result;
-import scala.concurrent.Await;
-import scala.concurrent.Future;
-import sources.core.ParallelAPICall;
-import sources.core.ParallelAPICall.Priority;
 import utils.Tuple;
-import actors.TokenLoginActor.TokenResponseMessage;
 import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
 import akka.actor.Props;
-import akka.pattern.Patterns;
 import annotators.AnnotationControlActor;
-import annotators.AnnotationControlActor.AnnotateRequestsCompleted;
 import annotators.Annotator;
 import annotators.AnnotatorConfig;
-import annotators.DBPediaAnnotator;
 import annotators.RequestAnnotator;
 import annotators.TextAnnotator;
-import controllers.WithController.Action;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -81,8 +71,6 @@ import db.DB;
 
 import java.util.Random;
 import java.util.HashSet;
-import java.util.function.BiFunction;
-import java.util.function.Function;
 
 import play.libs.F.Some;
 /**
@@ -306,14 +294,14 @@ public class RecordResourceController extends WithResourceController {
 				ObjectId user = WithController.effectiveUserDbId();
 				
 				Random rand = new Random();
-				String requestId = "ar" + (System.currentTimeMillis() + Math.abs(rand.nextLong())) + "" + Math.abs(rand.nextLong());
+				String requestId = "AR" + (System.currentTimeMillis() + Math.abs(rand.nextLong())) + "" + Math.abs(rand.nextLong());
 
 				Akka.system().actorOf( Props.create(AnnotationControlActor.class, requestId, new ObjectId(recordId), user, true), requestId);
 				ActorSelection ac = Akka.system().actorSelection("user/" + requestId);
 				
 				annotateRecord(recordId, user, annConfigs, ac);
 				
-				ac.tell(new AnnotationControlActor.AnnotateRequestsCompleted(), ActorRef.noSender());
+				ac.tell(new AnnotationControlActor.AnnotateRequestsEnd(), ActorRef.noSender());
 				
 				return ok();
 //			}				
@@ -347,7 +335,7 @@ public class RecordResourceController extends WithResourceController {
 					}
 				}
 			
-	    	    ac.tell(new AnnotationControlActor.RequestAnnotateMessage(user, urls.toArray(new String[urls.size()]), target, props, (RequestAnnotator.Descriptor)annConfig.getAnnotatorDesctriptor()), ActorRef.noSender());
+	    	    ac.tell(new AnnotationControlActor.AnnotateRequest(user, urls.toArray(new String[urls.size()]), target, props, (RequestAnnotator.Descriptor)annConfig.getAnnotatorDesctriptor()), ActorRef.noSender());
 				
 			} else if (textAnnotator) {
 				if (dd == null) {
@@ -371,18 +359,20 @@ public class RecordResourceController extends WithResourceController {
 								continue;
 							}
 							
-							for (String text : value.get(lang)) {
-								AnnotationTarget target = new AnnotationTarget();
-								target.setRecordId(record.getDbId());
-								
-								PropertyTextFragmentSelector selector = new PropertyTextFragmentSelector();
-								selector.setOrigValue(text);
-								selector.setOrigLang(lang);
-								selector.setProperty(p);
-								
-								target.setSelector(selector);
-
-								ac.tell(new AnnotationControlActor.TextAnnotateMessage(user, text, target, props, (TextAnnotator.Descriptor)annConfig.getAnnotatorDesctriptor(), lang), ActorRef.noSender());
+							if (value.get(lang) != null) {
+								for (String text : value.get(lang)) {
+									AnnotationTarget target = new AnnotationTarget();
+									target.setRecordId(record.getDbId());
+									
+									PropertyTextFragmentSelector selector = new PropertyTextFragmentSelector();
+									selector.setOrigValue(text);
+									selector.setOrigLang(lang);
+									selector.setProperty(p);
+									
+									target.setSelector(selector);
+	
+									ac.tell(new AnnotationControlActor.AnnotateText(user, text, target, props, (TextAnnotator.Descriptor)annConfig.getAnnotatorDesctriptor(), lang), ActorRef.noSender());
+								}
 							}
 						}
 					}

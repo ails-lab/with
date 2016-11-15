@@ -23,4 +23,5 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class AnnotationBody {
 
+	public void adjustLabel() {}
 }

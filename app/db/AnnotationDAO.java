@@ -17,6 +17,7 @@
 package db;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -29,6 +30,7 @@ import model.annotations.bodies.AnnotationBodyTagging;
 import model.annotations.selectors.SelectorType;
 import model.annotations.targets.AnnotationTarget;
 import model.basicDataTypes.Language;
+import model.resources.collection.CollectionObject;
 
 import org.apache.commons.beanutils.BeanToPropertyValueTransformer;
 import org.apache.commons.collections.CollectionUtils;
@@ -57,6 +59,21 @@ public class AnnotationDAO extends DAO<Annotation> {
 		}
 	}
 
+	public List<Annotation> getByCollection(ObjectId collectionId) {
+		CollectionObject collection = DB.getCollectionObjectDAO().getById(
+				collectionId,
+				new ArrayList<String>(Arrays.asList("collectedResources")));
+		
+		List<ObjectId> recIds = (List<ObjectId>) CollectionUtils
+				.collect(collection.getCollectedResources(),
+						new BeanToPropertyValueTransformer(
+									"target.recordId"));
+		
+		Query<Annotation> q = this.createQuery().field("target.recordId").in(recIds);
+		
+		return this.find(q).asList();
+	}
+	
 	public List<Annotation> getApprovedTaggingByRecordId(ObjectId recordId, List<String> retrievedFields) {
 		Query<Annotation> q = this.createQuery().disableValidation()
 				.field("motivation").equal(Annotation.MotivationType.Tagging)

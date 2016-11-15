@@ -36,8 +36,11 @@ import db.DB;
 import elastic.ElasticCoordinator;
 import elastic.ElasticSearcher.SearchOptions;
 import model.annotations.Annotation;
+import model.annotations.Annotation.AnnotationAdmin;
+import model.annotations.Annotation.AnnotationScore;
 import model.annotations.ContextData;
 import model.annotations.ContextData.ContextDataBody;
+import model.annotations.bodies.AnnotationBodyTagging;
 import model.basicDataTypes.Language;
 import model.basicDataTypes.MultiLiteral;
 import model.basicDataTypes.ProvenanceInfo;
@@ -83,6 +86,7 @@ import sources.core.*;
 import sources.core.ParallelAPICall.Priority;
 import sources.formatreaders.MuseumofModernArtRecordFormatter;
 import utils.*;
+import vocabularies.Vocabulary;
 
 import javax.validation.ConstraintViolation;
 
@@ -1323,7 +1327,7 @@ public class CollectionObjectController extends WithResourceController {
     /**
      * List all Records from a Collection that have certain thesaurus terms using a start item and a page size
      */
-    public static Result facetedListRecordResources(String collectionId, String contentFormat, int start, int count) {
+    public static Result facetedListRecordResources(String collectionId, String contentFormat, int start, int count, String profile, Option<String> locale) {
         ObjectNode result = Json.newObject();
         ObjectId colId = new ObjectId(collectionId);
         Locks locks = null;
@@ -1346,7 +1350,9 @@ public class CollectionObjectController extends WithResourceController {
     			SearchResponse resp = new ElasticCoordinator().queryExcecution(query, so);
     			
     			List<String> ids = new ArrayList<>();
-   			    for (SearchHit hit : resp.getHits()) {
+    			SearchHits sh = resp.getHits();
+    			
+   			    for (SearchHit hit : sh) {
     			    ids.add(hit.getId());
     			}
         			
@@ -1363,26 +1369,23 @@ public class CollectionObjectController extends WithResourceController {
                     response = errorIfNoAccessToRecord(Action.READ, r.getDbId());
                     if (!response.toString().equals(ok().toString())) {
                         continue;
-                    }
-                    if (contentFormat.equals("contentOnly")) {
-                        if (r.getContent() != null) {
-                            recordsList.add(Json.toJson(r.getContent()));
-                        }
-                        continue;
-                    }
-                    if (contentFormat.equals("noContent")
+                    } else if (contentFormat.equals("contentOnly")) {
+                    	if (r.getContent() != null) {
+                    		recordsList.add(Json.toJson(r.getContent()));
+                    	}
+                    	continue;
+                    } else if (contentFormat.equals("noContent")
                             && (r.getContent() != null)) {
                         r.getContent().clear();
-                        recordsList.add(Json.toJson(r));
+                        RecordResource profiledRecord = r.getRecordProfile(profile);
+                        filterResourceByLocale(locale, profiledRecord);
+                        recordsList.add(Json.toJson(profiledRecord));
                         fillContextData(
                                 DB.getCollectionObjectDAO()
-                                        .getById(
-                                                colId,
-                                                Arrays.asList("collectedResources"))
+                                        .getById(colId, Arrays.asList("collectedResources"))
                                         .getCollectedResources(), recordsList);
                         continue;
-                    }
-                    if ((r.getContent() != null)
+                    } else if ((r.getContent() != null)
                             && r.getContent().containsKey(contentFormat)) {
                         HashMap<String, String> newContent = new HashMap<String, String>(
                                 1);
@@ -1390,11 +1393,18 @@ public class CollectionObjectController extends WithResourceController {
                                 .get(contentFormat));
                         recordsList.add(Json.toJson(newContent));
                         continue;
+                    } else {
+                        RecordResource profiledRecord = r.getRecordProfile(profile);
+                        filterResourceByLocale(locale, profiledRecord);
+                        recordsList.add(Json.toJson(profiledRecord));
+                        fillContextData(
+                                DB.getCollectionObjectDAO()
+                                .getById(colId, Arrays.asList("collectedResources"))
+                                .getCollectedResources(), recordsList);
                     }
-                    recordsList.add(Json.toJson(r));
                 }
 
-//              result.put("entryCount", totalHits);
+              result.put("entryCount", sh.getTotalHits());
                 result.put("records", recordsList);
                 return ok(result);
             }
@@ -1407,7 +1417,7 @@ public class CollectionObjectController extends WithResourceController {
         }
     }
 
-    public static Result similarListRecordResources(String collectionId, String itemid, String contentFormat, int start, int count) {
+    public static Result similarListRecordResources(String collectionId, String itemid, String contentFormat, int start, int count, String profile, Option<String> locale) {
         ObjectNode result = Json.newObject();
         ObjectId colId = new ObjectId(collectionId);
         Locks locks = null;
@@ -1430,8 +1440,6 @@ public class CollectionObjectController extends WithResourceController {
                 SearchResponse res = es.queryExcecution(query, so);
                 SearchHits sh = res.getHits();
 
-                long totalHits = sh.getTotalHits();
-
                 List<String> ids = new ArrayList<>();
                 for (Iterator<SearchHit> iter = sh.iterator(); iter.hasNext(); ) {
                     SearchHit hit = iter.next();
@@ -1446,44 +1454,46 @@ public class CollectionObjectController extends WithResourceController {
                     return internalServerError(result);
                 }
                 ArrayNode recordsList = Json.newObject().arrayNode();
-
                 for (RecordResource r : records) {
                     // filter out records to which the user has no read access
                     response = errorIfNoAccessToRecord(Action.READ, r.getDbId());
                     if (!response.toString().equals(ok().toString())) {
                         continue;
-                    }
-                    if (contentFormat.equals("contentOnly")) {
-                        if (r.getContent() != null) {
-                            recordsList.add(Json.toJson(r.getContent()));
-                        }
-                        continue;
-                    }
-                    if (contentFormat.equals("noContent")
+                    } else if (contentFormat.equals("contentOnly")) {
+                    	if (r.getContent() != null) {
+                    		recordsList.add(Json.toJson(r.getContent()));
+                    	}
+                    	continue;
+                    } else if (contentFormat.equals("noContent")
                             && (r.getContent() != null)) {
                         r.getContent().clear();
-                        recordsList.add(Json.toJson(r));
+                        RecordResource profiledRecord = r.getRecordProfile(profile);
+                        filterResourceByLocale(locale, profiledRecord);
+                        recordsList.add(Json.toJson(profiledRecord));
                         fillContextData(
                                 DB.getCollectionObjectDAO()
-                                        .getById(
-                                                colId,
-                                                Arrays.asList("collectedResources"))
+                                        .getById(colId, Arrays.asList("collectedResources"))
                                         .getCollectedResources(), recordsList);
                         continue;
-                    }
-                    if ((r.getContent() != null)
+                    } else if ((r.getContent() != null)
                             && r.getContent().containsKey(contentFormat)) {
-                        HashMap<String, String> newContent = new HashMap<String, String>(
-                                1);
+                        HashMap<String, String> newContent = new HashMap<String, String>(1);
                         newContent.put(contentFormat, (String) r.getContent()
                                 .get(contentFormat));
                         recordsList.add(Json.toJson(newContent));
                         continue;
+                    } else {
+                        RecordResource profiledRecord = r.getRecordProfile(profile);
+                        filterResourceByLocale(locale, profiledRecord);
+                        recordsList.add(Json.toJson(profiledRecord));
+                        fillContextData(
+                                DB.getCollectionObjectDAO()
+                                .getById(colId, Arrays.asList("collectedResources"))
+                                .getCollectedResources(), recordsList);
                     }
-                    recordsList.add(Json.toJson(r));
                 }
-
-                result.put("entryCount", totalHits);
+                
+                result.put("entryCount", sh.getTotalHits());
                 result.put("records", recordsList);
                 return ok(result);
             }
@@ -1581,7 +1591,7 @@ public class CollectionObjectController extends WithResourceController {
                 List<AnnotatorConfig> annConfigs = AnnotatorConfig.createAnnotationConfigs(json);
                 
 				Random rand = new Random();
-				String requestId = "ac" + (System.currentTimeMillis() + Math.abs(rand.nextLong())) + "" + Math.abs(rand.nextLong());
+				String requestId = "AC" + (System.currentTimeMillis() + Math.abs(rand.nextLong())) + "" + Math.abs(rand.nextLong());
 
 				Akka.system().actorOf( Props.create(AnnotationControlActor.class, requestId, new ObjectId(id), user, false), requestId);
 				ActorSelection ac = Akka.system().actorSelection("user/" + requestId);
@@ -1594,7 +1604,7 @@ public class CollectionObjectController extends WithResourceController {
 //					}
                 }
                 
-                ac.tell(new AnnotationControlActor.AnnotateRequestsCompleted(), ActorRef.noSender());
+                ac.tell(new AnnotationControlActor.AnnotateRequestsEnd(), ActorRef.noSender());
 
                 return ok();
             }
@@ -1608,6 +1618,323 @@ public class CollectionObjectController extends WithResourceController {
 //            }
         }
     }
+    
+//    private static class AnnotationGroup implements Comparable<AnnotationGroup> {
+//    	public String uri;
+//    	public String uriVocabulary;
+//    	public MultiLiteral label;
+//    	public Map<ObjectId, ArrayNode> recMap;
+//    	
+//    	public String showLabel;
+//    	
+//    	public AnnotationGroup(String uri, String uriVocabulary, MultiLiteral label) {
+//    		this.uri = uri;
+//    		this.uriVocabulary = uriVocabulary; 
+//    		this.label = label;
+//    		this.recMap = new HashMap<ObjectId,ArrayNode>();
+//    		
+//    		List<String> def = label.get(Language.DEFAULT);
+//    		if (def != null && def.size()> 0) {
+//    			this.showLabel = def.get(0);
+//    		}
+//    		
+//			if (showLabel == null) {
+//				showLabel = uriVocabulary + " : " + uri;
+//			} else {
+//				showLabel = uriVocabulary + " : " + showLabel;
+//			}
+//    	}
+//    	
+//    	public void add(ObjectId recId, Annotation ann) {
+//    		ArrayNode anns = recMap.get(recId);
+//    		if (anns == null) {
+//				anns = Json.newObject().arrayNode();
+//				recMap.put(recId, anns);
+//			}
+//    		
+//    		ObjectNode node = (ObjectNode)Json.toJson(ann);
+//    		node.remove("body");
+//    		node.remove("motivation");
+//    		anns.add(node);
+//    	}
+//
+//		@Override
+//		public int compareTo(AnnotationGroup arg1) {
+//			return showLabel.compareTo(arg1.showLabel);
+//		}
+//
+//    }
+    
+    private static class ScoreInfo {
+    	public String id;
+    	public boolean approvedByUser;
+    	public boolean rejectedByUser;
+    	public int approved;
+    	public int rejected;
+    	
+    	public ScoreInfo(String id, int approved, int rejected, boolean approvedByUser, boolean rejectedByUser) {
+    		this.id = id;
+    		this.approved = approved;
+    		this.rejected = rejected;
+    		this.approvedByUser = approvedByUser;
+    		this.rejectedByUser = rejectedByUser;
+    	}
+    }
+    
+    private static class AnnotationInfo {
+		public String uri;
+		public String uriVocabulary;
+		public MultiLiteral label;
+		public Map<String, List<ScoreInfo>> recordAnnotationMap;
+		
+		public String showLabel;
+		
+		public AnnotationInfo(String uri, String uriVocabulary, MultiLiteral label) {
+			this.uri = uri;
+			this.uriVocabulary = uriVocabulary; 
+			this.label = label;
+			
+			this.recordAnnotationMap = new HashMap<String, List<ScoreInfo>>();
+			
+			List<String> def = label.get(Language.DEFAULT);
+			if (def != null && def.size()> 0) {
+				this.showLabel = def.get(0);
+			}
+			
+			if (showLabel == null) {
+				showLabel = uriVocabulary + " : " + uri;
+			} else {
+				showLabel = uriVocabulary + " : " + showLabel;
+			}
+		}
+		
+		public void add(ObjectId recordId, Annotation ann, ObjectId userId) {
+			AnnotationScore score = ann.getScore();
+			int approved = 0;
+			int rejected = 0;
+			boolean approvedByUser = false;
+			boolean rejectedByUser = false;
+			
+			if (score != null) {
+				ArrayList<ObjectId> aby = score.getApprovedBy();
+				ArrayList<ObjectId> rby = score.getRejectedBy();
+				
+				if (aby != null) {
+					if (userId != null && aby.contains(userId)) {
+						approvedByUser = true;
+					}
+					approved = aby.size();
+				}
+				if (rby != null) {
+					if (userId != null && rby.contains(userId)) {
+						rejectedByUser = true;
+					}
+					rejected = rby.size();
+				}
+			}
+			
+			List<ScoreInfo> annIds = recordAnnotationMap.get(recordId.toString());
+			if (annIds == null) {
+				annIds = new ArrayList<ScoreInfo>();
+				recordAnnotationMap.put(recordId.toString(), annIds);
+			}
+			annIds.add(new ScoreInfo(ann.getDbId().toString(), approved, rejected, approvedByUser, rejectedByUser));
+		}
+	}
+    
+	public static Result getAnnotationSummary(String colId, String mode) {
+		
+		try {
+			Result response = errorIfNoAccessToCollection(Action.READ, new ObjectId(colId));
+			
+			if (!response.toString().equals(ok().toString())) {
+				return response;
+			}
+	
+			int groupBy = 0;
+			if (mode.equals("ANNOTATOR")) {
+				groupBy = 1;
+			} else if (mode.equals("VOCABULARY")) {
+				groupBy = 2;
+			}
 
+			User user = effectiveUser();
+			ObjectId userId = null;
+			if (user != null) {
+				userId = user.getDbId();
+			}
+
+			Map<String, Map<String, AnnotationInfo>> annMap = new TreeMap<>();
+			
+			for (Annotation ann : DB.getAnnotationDAO().getByCollection(new ObjectId(colId))) {
+				if (!(ann.getBody() instanceof AnnotationBodyTagging)) {
+					continue;
+				}
+				
+				AnnotationBodyTagging body = ((AnnotationBodyTagging)ann.getBody());
+
+				String uri = body.getUri();
+				String uriVocabulary = body.getUriVocabulary();
+				MultiLiteral ml = ((AnnotationBodyTagging)ann.getBody()).getLabel();
+
+				if (groupBy == 0) {
+					Map<String, AnnotationInfo> annGroup = annMap.get("");
+					if (annGroup == null) {
+						annGroup = new HashMap<String, AnnotationInfo>();
+						annMap.put("", annGroup);
+					}
+					
+					AnnotationInfo info = annGroup.get(uri);
+					if (info == null) {
+						info = new AnnotationInfo(uri, uriVocabulary, ml);
+						annGroup.put(uri, info);
+					}
+					
+					info.add(ann.getTarget().getRecordId(), ann, userId);
+					
+				} else if (groupBy == 1) {
+					for (AnnotationAdmin annAd : (ArrayList<AnnotationAdmin>)ann.getAnnotators()) {
+						String generator = annAd.getGenerator();
+					
+						Map<String, AnnotationInfo> annGroup = annMap.get(generator);
+						if (annGroup == null) {
+							annGroup = new HashMap<String, AnnotationInfo>();
+							annMap.put(generator, annGroup);
+						}
+						
+						AnnotationInfo info = annGroup.get(uri);
+						if (info == null) {
+							info = new AnnotationInfo(uri, uriVocabulary, ml);
+							annGroup.put(uri, info);
+						}
+						
+						info.add(ann.getTarget().getRecordId(), ann, userId);
+					}
+				} else if (groupBy == 2) {
+					String name = Vocabulary.getVocabulary(uriVocabulary).getLabel();
+					Map<String, AnnotationInfo> annGroup = annMap.get(name);
+					if (annGroup == null) {
+						annGroup = new HashMap<String, AnnotationInfo>();
+						annMap.put(name, annGroup);
+					}
+					
+					AnnotationInfo info = annGroup.get(uri);
+					if (info == null) {
+						info = new AnnotationInfo(uri, uriVocabulary, ml);
+						annGroup.put(uri, info);
+					}
+					
+					info.add(ann.getTarget().getRecordId(), ann, userId);
+				}
+			}
+
+			ObjectNode res = Json.newObject();
+			ArrayNode groups = Json.newObject().arrayNode();
+			
+			res.put("groups", groups);
+			
+			for (Map.Entry<String, Map<String, AnnotationInfo>> entry : annMap.entrySet()) {
+				ObjectNode groupJson = Json.newObject();
+				groupJson.put("name", entry.getKey());
+				
+				ArrayList<AnnotationInfo> list = new ArrayList<>(entry.getValue().values());
+				Collections.sort(list, new Comparator<AnnotationInfo>() {
+
+					@Override
+					public int compare(AnnotationInfo arg0, AnnotationInfo arg1) {
+						return arg0.showLabel.compareTo(arg1.showLabel);
+					}
+				});
+					
+				ArrayNode recArray = Json.newObject().arrayNode();
+
+				for (AnnotationInfo info : list) {
+					ObjectNode uriJson = Json.newObject();
+					uriJson.put("uri", info.uri);
+					uriJson.put("label", Json.toJson(info.label));
+					uriJson.put("uriVocabulary", Json.toJson(info.uriVocabulary));
+					
+					ArrayNode instances = Json.newObject().arrayNode();
+					for (Map.Entry<String, List<ScoreInfo>> raEntry : info.recordAnnotationMap.entrySet()) {
+						ObjectNode instanceJson = Json.newObject();
+						instanceJson.put("recordId", raEntry.getKey());
+						
+						ArrayNode ids = Json.newObject().arrayNode();
+						for (ScoreInfo si : raEntry.getValue()) {
+							ObjectNode scoreJson = Json.newObject();
+							scoreJson.put("id", si.id);
+							scoreJson.put("approved", si.approved);
+							scoreJson.put("rejected", si.rejected);
+							scoreJson.put("userapproved", si.approvedByUser);
+							scoreJson.put("userrejected", si.rejectedByUser);
+							
+							ids.add(scoreJson);
+						}
+						
+						instanceJson.put("annotations", ids);
+						instances.add(instanceJson);
+					}
+					
+					uriJson.put("instances", instances);
+					
+					recArray.add(uriJson);
+				}
+
+				groupJson.put("annotations", recArray);
+			
+				groups.add(groupJson);
+			}
+			
+			return ok(res);
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+			ObjectNode result = Json.newObject();
+			result.put("error", e.getMessage());
+			return internalServerError(result);
+		}
+	}
+
+//	public static Result getAnnotations(String colId) {
+//		ObjectNode result = Json.newObject();
+//		
+//		try {
+//			Result response = errorIfNoAccessToCollection(Action.READ, new ObjectId(colId));
+//			
+//			if (!response.toString().equals(ok().toString())) {
+//				return response;
+//			}
+//	
+//			List<Annotation> anns = DB.getAnnotationDAO().getByCollection(new ObjectId(colId));
+//			
+//			return ok(Json.toJson(anns));
+//			
+//		} catch (Exception e) {
+//			e.printStackTrace();
+//			result.put("error", e.getMessage());
+//			return internalServerError(result);
+//		}
+//	}
+	
+	public static Result getAnnotations(String colId) {
+		ObjectNode result = Json.newObject();
+		
+		try {
+			Result response = errorIfNoAccessToCollection(Action.READ, new ObjectId(colId));
+			
+			if (!response.toString().equals(ok().toString())) {
+				return response;
+			}
+	
+			List<Annotation> anns = DB.getAnnotationDAO().getByCollection(new ObjectId(colId));
+			
+			return ok(Json.toJson(anns));
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+			result.put("error", e.getMessage());
+			return internalServerError(result);
+		}
+	}
 }
 

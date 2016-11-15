@@ -65,12 +65,12 @@ public class ImageSVGSelector extends SelectorType {
 	}
 
 
-	public String getSvg() {
+	public String getText() {
 		return text;
 	}
 
 
-	public void setSvg(String text) {
+	public void setText(String text) {
 		this.text = text;
 	}
 

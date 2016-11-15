@@ -148,6 +148,7 @@ public class DBPediaAnnotator extends TextAnnotator {
 		request.setEntity(new StringEntity("text=" + text, ContentType.create("application/x-www-form-urlencoded", Charset.forName("UTF-8"))));
 
 		HttpResponse response = client.execute(request);
+		
 //		int responseCode = response.getStatusLine().getStatusCode();
 		
 		BufferedReader br = new BufferedReader(new InputStreamReader(response.getEntity().getContent(), Charset.forName("UTF-8")));
@@ -173,27 +174,32 @@ public class DBPediaAnnotator extends TextAnnotator {
 	    		int offset = resource.get("@offset").asInt();
 	    		double score = resource.get("@similarityScore").asDouble();
 
-	    		String query;
-	    		if (URI.startsWith("http://dbpedia.org")) {
-	    			query = "select ?label where {<" + URI + "> <http://www.w3.org/2000/01/rdf-schema#label> ?label}";
-	    		} else {
-	    			query = "select ?label where { ?x <http://www.w3.org/2000/01/rdf-schema#label> ?label . ?x <http://www.w3.org/2002/07/owl#sameAs> <" + URI + "> }";
-	    		}
-
-	    	    QueryExecution qe = QueryExecutionFactory.sparqlService(DPBEDIA_ENDPOINT, QueryFactory.create(query, Syntax.syntaxSPARQL));
-	    		ResultSet rs = qe.execSelect();
-
 	    		String label = "";
 	    		Language lang = Language.UNKNOWN;
-	    		if (rs.hasNext()) {
-	    			QuerySolution sol = rs.next();
-	    			
-	    			List<String> vars = rs.getResultVars();
-	    			
-	    			RDFNode s = sol.get(vars.get(0));
-	    			Literal literal = s.asLiteral();
-	    			lang = Language.getLanguage(literal.getLanguage());
-	    			label = literal.getString();
+
+	    		try { 
+		    		String query;
+		    		if (URI.startsWith("http://dbpedia.org")) {
+		    			query = "select ?label where {<" + URI + "> <http://www.w3.org/2000/01/rdf-schema#label> ?label}";
+		    		} else {
+		    			query = "select ?label where { ?x <http://www.w3.org/2000/01/rdf-schema#label> ?label . ?x <http://www.w3.org/2002/07/owl#sameAs> <" + URI + "> }";
+		    		}
+	
+		    	    QueryExecution qe = QueryExecutionFactory.sparqlService(DPBEDIA_ENDPOINT, QueryFactory.create(query, Syntax.syntaxSPARQL));
+		    		ResultSet rs = qe.execSelect();
+	
+		    		if (rs.hasNext()) {
+		    			QuerySolution sol = rs.next();
+		    			
+		    			List<String> vars = rs.getResultVars();
+		    			
+		    			RDFNode s = sol.get(vars.get(0));
+		    			Literal literal = s.asLiteral();
+		    			lang = Language.getLanguage(literal.getLanguage());
+		    			label = literal.getString();
+		    		}
+	    		} catch (Exception ex) {
+	    			ex.printStackTrace();
 	    		}
 	    		
 	    		Annotation<AnnotationBodyTagging> ann = new Annotation<>();

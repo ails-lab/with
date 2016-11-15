@@ -374,10 +374,10 @@ public class Deserializer {
 						((PropertySelector)st).setProperty((String)property);
 					}
 				} else if (imageURL != null) {
-					st = new PropertyTextFragmentSelector();
+					st = new ImageSVGSelector();
 					((ImageSVGSelector)st).setImageWithURL((String)imageURL);
 					((ImageSVGSelector)st).setFormat((String)map.get("format"));
-					((ImageSVGSelector)st).setSvg((String)map.get("svg"));
+					((ImageSVGSelector)st).setText((String)map.get("text"));
 				}
 			} catch (Exception e) {
 				e.printStackTrace();

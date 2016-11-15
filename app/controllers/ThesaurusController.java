@@ -59,7 +59,7 @@ import elastic.ElasticSearcher.SearchOptions;
 import annotators.DBPediaAnnotator;
 import annotators.LookupAnnotator;
 import annotators.NLPAnnotator;
-import annotators.WITHImageAnnotator;
+import annotators.CultIVMLAnnotator;
 
 /**
  * @author achort
@@ -286,8 +286,8 @@ public class ThesaurusController extends Controller {
 		
 		options = Json.newObject().arrayNode();
 		option = Json.newObject();
-		option.put("name", WITHImageAnnotator.class.getSimpleName());
-		option.put("label", new WITHImageAnnotator.Descriptor().getName());
+		option.put("name", CultIVMLAnnotator.class.getSimpleName());
+		option.put("label", new CultIVMLAnnotator.Descriptor().getName());
 		options.add(option);
 
 		ann.put("options", options);

@@ -181,21 +181,6 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 		return getByCollection(collection.getCollectedResources(), q);
 	}
 	
-	public Set<ObjectId> getRecordResourceIdsByCollection(ObjectId collectionId) {
-		CollectionObject collection = DB.getCollectionObjectDAO().getById(
-				collectionId,
-				new ArrayList<String>(Arrays.asList("collectedResources")));
-		
-		try {
-			return (Set<ObjectId>)CollectionUtils
-					.collect(collection.getCollectedResources(),
-							new BeanToPropertyValueTransformer(
-										"target.recordId"), new HashSet<ObjectId>());
-		} catch (Exception e) {
-			return new HashSet<ObjectId>();
-		}
-	}
-	
 	public List<RecordResource> getByCollection(ObjectId collectionId,
 			List<String> retrievedFields) {
 		CollectionObject collection = DB.getCollectionObjectDAO().getById(
