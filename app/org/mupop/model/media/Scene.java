@@ -14,11 +14,13 @@
  */
 
 
-package model.resources;
+package org.mupop.model.media;
 
-public enum WithResourceType {
-	WithResource, CollectionObject, SimpleCollection, Exhibition, NewExhibition, RecordResource,
-	CulturalObject, EuScreenObject, EventObject, 
-	PlaceObject, TimespanObject, ThesaurusObject,
-	AgentObject;
+/**
+ * Multiple Pictures from the same physical thing, from different angles or in different Settings are collected in
+ * a scene.
+ * Created by stabenau on 11/2/16.
+ */
+public class Scene {
+    /* Unclear if this is useful, different angles/settings/times would need some explaining metadata */
 }

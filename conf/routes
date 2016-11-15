@@ -88,8 +88,9 @@ POST     /collection/importSearch		        controllers.CollectionObjectControlle
 POST     /collection/uploadCollection		    controllers.CollectionObjectController.uploadCollection()
 POST     /collection/importIDs 					controllers.CollectionObjectController.importIDs(cname, source, ids)
 GET     /collection/importEuropeanaCollection	controllers.CollectionObjectController.createAndFillEuropeanaCollection(id: String, limit:Integer ?=-1)
+GET     /collection/importOmeka					controllers.CollectionObjectController.importOmeka(ncollections:Integer ?=-1)
 GET      /collection/exportToOWL 			    controllers.CollectionObjectController.exportCollectionObjectToOWL(cname)
-GET      /collection/update 			    controllers.CollectionObjectController.updateCollectionObject(collectionId: String)
+GET      /collection/update 			    	controllers.CollectionObjectController.updateCollectionObject(collectionId: String)
 
 GET      /collection/multiple                   controllers.CollectionObjectController.getMultipleCollectionObjects( id: java.util.List[String],profile: String ?="MEDIUM", locale: play.libs.F.Option[java.lang.String])
 GET	     /collection/:id 	        			controllers.CollectionObjectController.getCollectionObject(id, profile: String ?="MEDIUM", locale: play.libs.F.Option[java.lang.String])
@@ -108,7 +109,7 @@ GET      /group/findByGroupName                 controllers.GroupManager.findByG
 GET		/group/descendantGroups/:groupId		controllers.GroupManager.getDescendantGroups(groupId, groupType: String  ?="All", direct: Boolean ?=true, collectionHits:Boolean ?= false)
 GET		/group/descendantOrganizations/:groupId	controllers.GroupManager.getDescendantGroups(groupId, groupType: String  ?="Organization", direct: Boolean ?=true, collectionHits:Boolean ?= false)
 GET		/group/descendantProjects/:groupId		controllers.GroupManager.getDescendantGroups(groupId, groupType: String  ?="Project", direct: Boolean ?=true, collectionHits:Boolean ?= false)
-GET		/group/list								controllers.GroupManager.listUserGroups(groupType: String ?="Project", offset: Integer ?=0, count: Integer ?=10, belongsOnly: Boolean ?=false, prefix: String ?="*")
+GET		/group/list								controllers.GroupManager.listUserGroups(groupType: String ?="All", offset: Integer ?=0, count: Integer ?=10, belongsOnly: Boolean ?=false, prefix: String ?="*")
 
 # Manager the WITH space (mainly for the UI component) editable only for SuperUsers
 GET		/group/with								controllers.GroupManager.getWithSpace()

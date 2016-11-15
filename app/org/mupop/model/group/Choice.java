@@ -14,11 +14,15 @@
  */
 
 
-package model.resources;
+package org.mupop.model.group;
 
-public enum WithResourceType {
-	WithResource, CollectionObject, SimpleCollection, Exhibition, NewExhibition, RecordResource,
-	CulturalObject, EuScreenObject, EventObject, 
-	PlaceObject, TimespanObject, ThesaurusObject,
-	AgentObject;
+/**
+ * Created by stabenau on 11/4/16.
+ * When a Group is not meant to be presented in any particular order. The player can give the user a choice
+ * of the contained groups (via thumbnail or title) and the exhibition will go there.
+ * 
+ * TODO: Needs some fleshing out
+ */
+public class Choice extends Group {
+
 }

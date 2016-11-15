@@ -14,11 +14,24 @@
  */
 
 
-package model.resources;
+package org.mupop.model.media;
 
-public enum WithResourceType {
-	WithResource, CollectionObject, SimpleCollection, Exhibition, NewExhibition, RecordResource,
-	CulturalObject, EuScreenObject, EventObject, 
-	PlaceObject, TimespanObject, ThesaurusObject,
-	AgentObject;
+/**
+ * Basic audio artefact, with some quality metadata
+ * Created by stabenau on 11/2/16.
+ */
+public class AudioData {
+    /**
+     * Embedded audio data comes like this
+     */
+
+    // some metadata about quality
+    public int kbitPerSec, bitsSampled;
+    public String mimetype;
+    public byte[] data;
+
+    /**
+     * If the sound can be played from a URL. This field should be filled, when talking to a browser.
+     */
+    public String url;
 }

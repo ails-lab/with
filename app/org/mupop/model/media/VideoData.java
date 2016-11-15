@@ -14,11 +14,25 @@
  */
 
 
-package model.resources;
+package org.mupop.model.media;
 
-public enum WithResourceType {
-	WithResource, CollectionObject, SimpleCollection, Exhibition, NewExhibition, RecordResource,
-	CulturalObject, EuScreenObject, EventObject, 
-	PlaceObject, TimespanObject, ThesaurusObject,
-	AgentObject;
+/**
+ * Created by stabenau on 11/3/16.
+ * Videodata with some quality related metadata
+ */
+public class VideoData {
+    public String mimeType;
+
+    // optionally contains the data ... for video that should be rare
+    public byte[] data;
+
+    // where to get the video from
+    public String url;
+
+    // format of video
+    public int width, height;
+
+    // bitrate in kilobit / sec
+    // this should be a good measure for the quality
+    public int kbitSec;
 }

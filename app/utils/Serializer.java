@@ -14,6 +14,7 @@
  */
 
 
+
 package utils;
 
 import java.io.IOException;
@@ -48,6 +49,7 @@ import model.usersAndGroups.User;
 import play.Logger;
 import play.Logger.ALogger;
 import play.libs.Json;
+import sources.utils.JsonContextRecord;
 
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.core.JsonGenerationException;
@@ -71,6 +73,16 @@ public class Serializer {
 				SerializerProvider provider) throws IOException,
 				JsonProcessingException {
 			jsonGen.writeString(oid.toString());
+		}
+
+	}
+	
+	public static class JsonContextRecordSerializer extends JsonSerializer<Object> {
+		@Override
+		public void serialize(Object obj, JsonGenerator jsonGen,
+				SerializerProvider provider) throws IOException,
+				JsonProcessingException {
+			jsonGen.writeObject(Json.toJson(((JsonContextRecord)obj).getRootInformation()));
 		}
 
 	}

@@ -14,11 +14,21 @@
  */
 
 
-package model.resources;
+package org.mupop.model.group;
 
-public enum WithResourceType {
-	WithResource, CollectionObject, SimpleCollection, Exhibition, NewExhibition, RecordResource,
-	CulturalObject, EuScreenObject, EventObject, 
-	PlaceObject, TimespanObject, ThesaurusObject,
-	AgentObject;
+import org.mupop.model.media.Audio;
+import org.mupop.model.media.Image;
+import org.mupop.model.media.MultilangAudio;
+import org.mupop.model.media.Video;
+
+/**
+ * Created by stabenau on 11/3/16.
+ * If a group is a Together object, the semantics is, that everything in it (attributes and subgroups) are
+ * visible at once. 	
+ */
+public class Together extends Group {
+	
+
+	
+    public static Together create() { return new Together(); }
 }

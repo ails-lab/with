@@ -14,11 +14,17 @@
  */
 
 
-package model.resources;
+package org.mupop.model.media;
 
-public enum WithResourceType {
-	WithResource, CollectionObject, SimpleCollection, Exhibition, NewExhibition, RecordResource,
-	CulturalObject, EuScreenObject, EventObject, 
-	PlaceObject, TimespanObject, ThesaurusObject,
-	AgentObject;
+import org.mupop.model.Referenceable;
+
+import java.util.List;
+
+/**
+ * Created by stabenau on 11/3/16.
+ *
+ */
+public class Subtitle implements Referenceable {
+    // keep this sorted by TimedText.start
+    public List<TimedText> text;
 }

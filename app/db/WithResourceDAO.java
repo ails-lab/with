@@ -240,7 +240,7 @@ public class WithResourceDAO<T extends WithResource> extends DAO<T> {
 
 	public boolean isPublic(ObjectId id) {
 		Query<T> q = this.createQuery().field("_id").equal(id).limit(1);
-		q.field("administrative.isPublic").equal(true);
+		q.field("administrative.access.isPublic").equal(true);
 		return (find(q).asList().size() == 0 ? false : true);
 	}
 

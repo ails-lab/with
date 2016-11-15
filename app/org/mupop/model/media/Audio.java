@@ -14,11 +14,21 @@
  */
 
 
-package model.resources;
+package org.mupop.model.media;
 
-public enum WithResourceType {
-	WithResource, CollectionObject, SimpleCollection, Exhibition, NewExhibition, RecordResource,
-	CulturalObject, EuScreenObject, EventObject, 
-	PlaceObject, TimespanObject, ThesaurusObject,
-	AgentObject;
+import org.mupop.model.Referenceable;
+
+/**
+ * Created by stabenau on 11/2/16.
+ * Audio is the collector of Sounds in different quality levels.
+ */
+public class Audio implements Referenceable {
+    public AudioData[] sounds;
+    /**
+     * Optionally the audio has a single language transcript
+     */
+    public Text transcript;
+
+    // the text might be time coded, then it is effectively a subtitle
+    public Subtitle subtitle;
 }

@@ -105,21 +105,24 @@ public class EmbeddedMediaObject {
 	// this needs work
 	public static enum WithMediaRights {
 		Public("Attribution Alone"),
+		PublicCC0("CC0"),
 		Restricted("Restricted"),
-		Permission("Permission"),
-		Modify("Allow re-use and modifications"),
-		Commercial("Allow re-use for commercial"),
-		Creative_Commercial_Modify("use for commercial purposes modify, adapt, or build upon"),
-		Creative_Not_Commercial("NOT Comercial"),
-		Creative_Not_Modify("NOT Modify"),
-		Creative_Not_Commercial_Modify("not modify, adapt, or build upon, not for commercial purposes"),
-		Creative_SA("share alike"),
-		Creative_BY("use by attribution"),
-		Creative("Allow re-use"),
+		OUT_OF_COPYRIGHT("Out of Copyright"),
+		
+		// From CC
+		
+		Creative_BY("Use by attribution"),
+		Creative_BY_SA("Share alike"),
+		Creative_BY_NC("NOT Comercial"),
+		Creative_BY_ND("NOT Modify"),
+		Creative_BY_NC_SA("Share alike, not for commercial purposes"),
+		Creative_BY_NC_ND("not modify, adapt, or build upon, not for commercial purposes"),
+		
 		RR("Rights Reserved"),
 		RRPA("Rights Reserved - Paid Access"),
 		RRRA("Rights Reserved - Restricted Access"),
 		RRFA("Rights Reserved - Free Access"),
+		PROVIDER_SPECIFIC("Provider specific rights statement"),
 		UNKNOWN("Unknown");
 
 		private final String text;
@@ -135,7 +138,7 @@ public class EmbeddedMediaObject {
 		public static WithMediaRights getRights(String code){
 			if (Utils.hasInfo(code)){
 				for (WithMediaRights v : WithMediaRights.values()) {
-					if (v.toString().equals(code))
+					if (v.toString().equals(code) || v.name().equals(code))
 						return v;
 				}
 			}

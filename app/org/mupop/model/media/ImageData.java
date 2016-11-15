@@ -14,11 +14,30 @@
  */
 
 
-package model.resources;
+package org.mupop.model.media;
 
-public enum WithResourceType {
-	WithResource, CollectionObject, SimpleCollection, Exhibition, NewExhibition, RecordResource,
-	CulturalObject, EuScreenObject, EventObject, 
-	PlaceObject, TimespanObject, ThesaurusObject,
-	AgentObject;
+/**
+ * Represents single ImageData, either with the data inside or via URL.
+ * Created by stabenau on 11/2/16.
+ */
+public class ImageData {
+    /**
+     * If the image is available as Link, here it goes.
+     */
+    public String url;
+
+    /**
+     * If the data is in a framebuffer, it can be send with this mimetype.
+     */
+    public String mimeType;
+
+    /**
+     * Binary image content
+     */
+    public byte[] framebuffer;
+
+    /**
+     * Dimension of image
+     */
+    public int width, heigth;
 }

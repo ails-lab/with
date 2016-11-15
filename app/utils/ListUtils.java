@@ -148,20 +148,7 @@ public class ListUtils {
 		return res;
 	}
 	
-	/**
-	 * gets the list associated to a key in a map of Key-List structure. If the key is not present it is
-	 * added to the map with an empty list associated. 
-	 * @param key
-	 * @param map
-	 * @return
-	 */
-	public static <K,T> List<T> getOrSet(K key, HashMap<K,List<T>>  map){
-		List<T> result = map.get(key);
-		if (result==null){
-			map.put(key, result = new ArrayList<>());
-		}
-		return result;	
-	}
+	
 
 	/**
 	 * gets the last element of a list.

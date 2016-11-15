@@ -14,11 +14,14 @@
  */
 
 
-package model.resources;
+package org.mupop.model.group;
 
-public enum WithResourceType {
-	WithResource, CollectionObject, SimpleCollection, Exhibition, NewExhibition, RecordResource,
-	CulturalObject, EuScreenObject, EventObject, 
-	PlaceObject, TimespanObject, ThesaurusObject,
-	AgentObject;
+/**
+ * Created by stabenau on 11/4/16.
+ * When you need to point to a Group, in a specific context (because otherwise it would be
+ * ambiguous), then use this class.
+ */
+public class Path extends Group {
+    // groups[0] is the actual Group you want to reference,
+    // group[1..] are parent contexts
 }

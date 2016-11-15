@@ -14,11 +14,20 @@
  */
 
 
-package model.resources;
+package org.mupop.model;
 
-public enum WithResourceType {
-	WithResource, CollectionObject, SimpleCollection, Exhibition, NewExhibition, RecordResource,
-	CulturalObject, EuScreenObject, EventObject, 
-	PlaceObject, TimespanObject, ThesaurusObject,
-	AgentObject;
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * Wrapper class for all contained objects
+ * @author stabenau
+ *
+ */
+public class MuPoP {
+	public List<Referenceable> media = new ArrayList<Referenceable>();
+	public List<Referenceable> groups = new ArrayList<Referenceable>();;
+
+	// events
+	// physical world (stations)
 }

@@ -14,11 +14,15 @@
  */
 
 
-package model.resources;
+package org.mupop.model.media;
 
-public enum WithResourceType {
-	WithResource, CollectionObject, SimpleCollection, Exhibition, NewExhibition, RecordResource,
-	CulturalObject, EuScreenObject, EventObject, 
-	PlaceObject, TimespanObject, ThesaurusObject,
-	AgentObject;
+/**
+ * Created by stabenau on 11/3/16.
+ */
+public class TimedText {
+    // seconds with fractions about the start and end of text
+    public float start, end;
+
+    // this is optionally multilang
+    public Text text;
 }

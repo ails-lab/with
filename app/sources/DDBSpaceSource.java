@@ -53,7 +53,7 @@ public class DDBSpaceSource extends ISpaceSource {
 		
 		addDefaultWriter(FiltersFields.TYPE.getFilterId(), fwriter("type_fct"));
 		addDefaultWriter(FiltersFields.PROVIDER.getFilterId(), fwriter("provider_fct"));
-		addDefaultWriter(FiltersFields.RIGHTS.getFilterId(), fwriter("license_group"));
+		addDefaultWriter(FiltersFields.RIGHTS.getFilterId(), fwriter("license"));
 		addDefaultWriter(FiltersFields.COUNTRY.getFilterId(), fwriter("place_fct"));
 		
 	}
@@ -79,7 +79,7 @@ public class DDBSpaceSource extends ISpaceSource {
 		builder.addSearchParam("facet", "type_fct");
 		builder.addSearchParam("facet", "provider_fct");
 		builder.addSearchParam("facet", "time_fct");
-		builder.addSearchParam("facet", "license_group");
+		builder.addSearchParam("facet", "license");
 //		builder.addSearchParam("isThumbnailFiltered", "true");
 		FashionSearch fq = new FashionSearch();
 		fq.setTerm(q.searchTerm);
@@ -140,7 +140,7 @@ public class DDBSpaceSource extends ISpaceSource {
 				case "provider_fct":
 					countValue(provider, label, false, count);
 					break;
-				case "license_group":
+				case "license":
 					countValue(rights, label, count);
 					break;
 				case "place_fct":
