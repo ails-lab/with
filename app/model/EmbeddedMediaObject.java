@@ -123,8 +123,17 @@ public class EmbeddedMediaObject {
 		RRRA("Rights Reserved - Restricted Access"),
 		RRFA("Rights Reserved - Free Access"),
 		PROVIDER_SPECIFIC("Provider specific rights statement"),
-		UNKNOWN("Unknown");
+		UNKNOWN("Unknown"),
 
+		// database seems to contain other WithMediaRights, temporarily we adding them here to
+		// make it work... We need to find out why this happens
+		Modify("You can do stuff to it??"),
+		Creative_SA("Should probably be BY_SA"),
+		Permission("Permission granted"),
+		
+		Creative("Use as you wish");
+		
+		
 		private final String text;
 
 		private WithMediaRights(final String text) {
