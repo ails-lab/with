@@ -149,7 +149,7 @@ public class MediaObjectDAO {
 			DBObject mediaDbObj = DB.getMorphia().getMapper().toDBObject(media);
 			// remove stuff we don't want on the media object
 			mediaDbObj.removeField("className");
-			mediaDbObj.removeField("data");
+			mediaDbObj.removeField("mediaBytes");
 			mediaDbObj.removeField("_id");
 
 			for (String k : mediaDbObj.keySet()) {
