@@ -93,6 +93,7 @@ import javax.validation.ConstraintViolation;
 
 import java.io.File;
 import java.util.*;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 
 @SuppressWarnings("rawtypes")
@@ -1523,40 +1524,53 @@ public class CollectionObjectController extends WithResourceController {
 
     public static Result annotateCollection(String id) {
         ObjectNode result = Json.newObject();
-        ObjectId colId = new ObjectId(id);
+        ObjectId cid = new ObjectId(id);
 //        Locks locks = null;
 
         try {
 //            locks = Locks.create().read("Collection #" + id).acquire();
-            Result response = errorIfNoAccessToCollection(Action.EDIT, colId);
+            Result response = errorIfNoAccessToCollection(Action.EDIT, cid);
             if (!response.toString().equals(ok().toString())) {
                 return response;
             } else {
+            	
                 JsonNode json = request().body().asJson();
 
-                ObjectId user = WithController.effectiveUserDbId();
-                List<AnnotatorConfig> annConfigs = AnnotatorConfig.createAnnotationConfigs(json);
-                
-				Random rand = new Random();
-				String requestId = "AC" + (System.currentTimeMillis() + Math.abs(rand.nextLong())) + "" + Math.abs(rand.nextLong());
+//				BiFunction<ObjectId, JsonNode, Boolean> methodQuery = (ObjectId cid, JsonNode jsonx) -> {
+	                ObjectId user = WithController.effectiveUserDbId();
+	                List<AnnotatorConfig> annConfigs = AnnotatorConfig.createAnnotationConfigs(json);
+	                
+					Random rand = new Random();
+					String requestId = "AC" + (System.currentTimeMillis() + Math.abs(rand.nextLong())) + "" + Math.abs(rand.nextLong());
 
-				Akka.system().actorOf( Props.create(AnnotationControlActor.class, requestId, new ObjectId(id), user, false), requestId);
-				ActorSelection ac = Akka.system().actorSelection("user/" + requestId);
+					Akka.system().actorOf( Props.create(AnnotationControlActor.class, requestId, cid, user, false), requestId);
+					ActorSelection ac = Akka.system().actorSelection("user/" + requestId);
 
-                for (ContextData<ContextDataBody> cd : (List<ContextData<ContextDataBody>>)DB.getCollectionObjectDAO().getById(colId).getCollectedResources()) {
-               		String recordId = cd.getTarget().getRecordId().toHexString();
+	                for (ContextData<ContextDataBody> cd : (List<ContextData<ContextDataBody>>)DB.getCollectionObjectDAO().getById(cid).getCollectedResources()) {
+	               		String recordId = cd.getTarget().getRecordId().toHexString();
 
-//					if (DB.getRecordResourceDAO().hasAccess(uid, Action.EDIT, new ObjectId(recordId))  || isSuperUser()) {
-               			RecordResourceController.annotateRecord(recordId, user, annConfigs, ac);
-//					}
-                }
-                
-                ac.tell(new AnnotationControlActor.AnnotateRequestsEnd(), ActorRef.noSender());
+//						if (DB.getRecordResourceDAO().hasAccess(uid, Action.EDIT, new ObjectId(recordId))  || isSuperUser()) {
+	               			try {
+								RecordResourceController.annotateRecord(recordId, user, annConfigs, ac);
+							} catch (Exception e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							}
+//						}
+	                }
+	                
+	                ac.tell(new AnnotationControlActor.AnnotateRequestsEnd(), ActorRef.noSender());
+
+//	                return true;
+//				};
+//				
+//				ParallelAPICall.createPromise(methodQuery, colId, json, Priority.BACKEND);
 
                 return ok();
             }
 
         } catch (Exception e1) {
+        	e1.printStackTrace();
             result.put("error", e1.getMessage());
             return internalServerError(result);
         } finally {
@@ -1758,20 +1772,23 @@ public class CollectionObjectController extends WithResourceController {
 						info.add(ann.getTarget().getRecordId(), ann, userId);
 					}
 				} else if (groupBy == 2) {
-					String name = Vocabulary.getVocabulary(uriVocabulary).getLabel();
-					Map<String, AnnotationInfo> annGroup = annMap.get(name);
-					if (annGroup == null) {
-						annGroup = new HashMap<String, AnnotationInfo>();
-						annMap.put(name, annGroup);
+					Vocabulary voc = Vocabulary.getVocabulary(uriVocabulary);
+					if (voc != null) {
+						String name = voc.getLabel();
+						Map<String, AnnotationInfo> annGroup = annMap.get(name);
+						if (annGroup == null) {
+							annGroup = new HashMap<String, AnnotationInfo>();
+							annMap.put(name, annGroup);
+						}
+						
+						AnnotationInfo info = annGroup.get(uri);
+						if (info == null) {
+							info = new AnnotationInfo(uri, uriVocabulary, ml);
+							annGroup.put(uri, info);
+						}
+						
+						info.add(ann.getTarget().getRecordId(), ann, userId);
 					}
-					
-					AnnotationInfo info = annGroup.get(uri);
-					if (info == null) {
-						info = new AnnotationInfo(uri, uriVocabulary, ml);
-						annGroup.put(uri, info);
-					}
-					
-					info.add(ann.getTarget().getRecordId(), ann, userId);
 				}
 			}
 

@@ -31,7 +31,7 @@ import play.libs.Akka;
 
 public class DBPediaAnnotatorActor extends TextAnnotatorActor {
 
-	private static int poolSize = 50;
+	private static int poolSize = 100;
 
 	public static AnnotatorDescriptor descriptor = new Descriptor();
 	

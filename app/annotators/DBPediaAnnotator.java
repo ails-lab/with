@@ -35,6 +35,7 @@ import model.annotations.selectors.PropertyTextFragmentSelector;
 import model.annotations.targets.AnnotationTarget;
 import model.basicDataTypes.Language;
 import model.basicDataTypes.MultiLiteral;
+import model.resources.ThesaurusObject;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
@@ -45,21 +46,24 @@ import org.apache.http.impl.client.HttpClientBuilder;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
-import org.apache.jena.query.QueryExecution;
-import org.apache.jena.query.QueryExecutionFactory;
-import org.apache.jena.query.QueryFactory;
-import org.apache.jena.query.QuerySolution;
-import org.apache.jena.query.ResultSet;
-import org.apache.jena.query.Syntax;
-import org.apache.jena.rdf.model.Literal;
-import org.apache.jena.rdf.model.RDFNode;
+import db.DB;
+import db.ThesaurusObjectDAO;
+
+//import org.apache.jena.query.QueryExecution;
+//import org.apache.jena.query.QueryExecutionFactory;
+//import org.apache.jena.query.QueryFactory;
+//import org.apache.jena.query.QuerySolution;
+//import org.apache.jena.query.ResultSet;
+//import org.apache.jena.query.Syntax;
+//import org.apache.jena.rdf.model.Literal;
+//import org.apache.jena.rdf.model.RDFNode;
 import org.bson.types.ObjectId;
 
 import play.libs.Json;
 
 public class DBPediaAnnotator implements TextAnnotator {
 
-	private static String DPBEDIA_ENDPOINT = "http://zenon.image.ece.ntua.gr:8890/sparql";
+//	private static String DPBEDIA_ENDPOINT = "http://zenon.image.ece.ntua.gr:8890/sparql";
 	
 	public static Map<Language, String> serverMap = new HashMap<>();
 	static {
@@ -135,6 +139,8 @@ public class DBPediaAnnotator implements TextAnnotator {
 	    
 	    JsonNode root = Json.parse(resx.toString());
 	    
+	    ThesaurusObjectDAO dao = DB.getThesaurusDAO();
+	    
 	    JsonNode resources = root.get("Resources");
 	    if (resources != null) {
 	    	for (Iterator<JsonNode> iter = resources.elements(); iter.hasNext();) {
@@ -149,29 +155,48 @@ public class DBPediaAnnotator implements TextAnnotator {
 	    		String label = "";
 	    		Language lang = Language.UNKNOWN;
 
-	    		try { 
-		    		String query;
-		    		if (URI.startsWith("http://dbpedia.org")) {
-		    			query = "select ?label where {<" + URI + "> <http://www.w3.org/2000/01/rdf-schema#label> ?label}";
-		    		} else {
-		    			query = "select ?label where { ?x <http://www.w3.org/2000/01/rdf-schema#label> ?label . ?x <http://www.w3.org/2002/07/owl#sameAs> <" + URI + "> }";
-		    		}
-	
-		    	    QueryExecution qe = QueryExecutionFactory.sparqlService(DPBEDIA_ENDPOINT, QueryFactory.create(query, Syntax.syntaxSPARQL));
-		    		ResultSet rs = qe.execSelect();
-	
-		    		if (rs.hasNext()) {
-		    			QuerySolution sol = rs.next();
-		    			
-		    			List<String> vars = rs.getResultVars();
-		    			
-		    			RDFNode s = sol.get(vars.get(0));
-		    			Literal literal = s.asLiteral();
-		    			lang = Language.getLanguage(literal.getLanguage());
-		    			label = literal.getString();
-		    		}
-	    		} catch (Exception ex) {
-	    			ex.printStackTrace();
+//	    		try { 
+//		    		String query;
+//		    		if (URI.startsWith("http://dbpedia.org")) {
+//		    			query = "select ?label where {<" + URI + "> <http://www.w3.org/2000/01/rdf-schema#label> ?label}";
+//		    		} else {
+//		    			query = "select ?label where { ?x <http://www.w3.org/2000/01/rdf-schema#label> ?label . ?x <http://www.w3.org/2002/07/owl#sameAs> <" + URI + "> }";
+//		    		}
+//	
+//		    	    QueryExecution qe = QueryExecutionFactory.sparqlService(DPBEDIA_ENDPOINT, QueryFactory.create(query, Syntax.syntaxSPARQL));
+//		    		ResultSet rs = qe.execSelect();
+//	
+//		    		if (rs.hasNext()) {
+//		    			QuerySolution sol = rs.next();
+//		    			
+//		    			List<String> vars = rs.getResultVars();
+//		    			
+//		    			RDFNode s = sol.get(vars.get(0));
+//		    			Literal literal = s.asLiteral();
+//		    			lang = Language.getLanguage(literal.getLanguage());
+//		    			label = literal.getString();
+//		    		}
+//	    		} catch (Exception ex) {
+//	    			ex.printStackTrace();
+//	    		}
+	    		
+	    		ThesaurusObject to = dao.getByUri(URI);
+	    		if (to == null) {
+	    			List<ThesaurusObject> tos = dao.getByExactMatch(URI);
+	    			if (tos != null && tos.size() > 0) {
+	    				to = tos.get(0);
+	    			}
+	    		} 
+
+	    		if (to != null) {
+	    			model.basicDataTypes.Literal literal = to.getSemantic().getPrefLabel();
+	    			lang = Language.EN;
+	    			label = literal.getLiteral(Language.EN);
+	    			if (label == null) {
+	    				label = "";
+	    			}
+	    		} else {
+	    			label = URI.substring(URI.lastIndexOf("/") + 1).replaceAll("_", "");
 	    		}
 	    		
 	    		Annotation<AnnotationBodyTagging> ann = new Annotation<>();

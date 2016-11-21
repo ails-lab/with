@@ -81,15 +81,15 @@ public class AnnotationController extends Controller {
 			DB.getAnnotationDAO().makePermanent(annotation);
 			annotation.setAnnotationWithURI("/annotation/"
 					+ annotation.getDbId());
-			DB.getAnnotationDAO().makePermanent(annotation);
+//			DB.getAnnotationDAO().makePermanent(annotation); // is this needed for a second time?
 			DB.getRecordResourceDAO().addAnnotation(
 					annotation.getTarget().getRecordId(), annotation.getDbId());
 		} else {
 			ArrayList<AnnotationAdmin> annotators = existingAnnotation
 					.getAnnotators();
+			ObjectId userId = WithController.effectiveUserDbId();
 			for (AnnotationAdmin a : annotators) {
-				if (a.getWithCreator().equals(
-						WithController.effectiveUserDbId())) {
+				if (a.getWithCreator().equals(userId)) {
 					return ok(Json.toJson(existingAnnotation));
 				}
 			}
@@ -144,7 +144,7 @@ public class AnnotationController extends Controller {
 			DB.getAnnotationDAO().makePermanent(annotation);
 			annotation.setAnnotationWithURI("/annotation/"
 					+ annotation.getDbId());
-			DB.getAnnotationDAO().makePermanent(annotation);
+//			DB.getAnnotationDAO().makePermanent(annotation);
 			DB.getRecordResourceDAO().addAnnotation(
 					annotation.getTarget().getRecordId(), annotation.getDbId());
 		} else {
@@ -253,6 +253,9 @@ public class AnnotationController extends Controller {
 			if (json.has("body") && json.get("body").has("confidence")) {
 				administrative.setConfidence(json.get("body").get("confidence")
 						.asDouble());
+			}
+			if (json.has("confidence")) {
+				administrative.setConfidence(json.get("confidence").asDouble());
 			}
 			annotation.setAnnotators(new ArrayList(Arrays
 					.asList(administrative)));

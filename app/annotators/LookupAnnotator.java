@@ -207,11 +207,14 @@ public class LookupAnnotator implements TextAnnotator {
 		    	boolean accept = false; 
 		    	loop:
 		    	for (AnnotatedObject ao : aos) {
-		    		for (AnnotationValue value : ao.get("POS")) {
-		    			if (value.getValue().toString().startsWith("NN")) {
-		    				accept = true;
-		    				break loop;
-		    			}
+		    		Set<AnnotationValue> av = ao.get("POS");
+		    		if (av != null) {
+			    		for (AnnotationValue value : av) {
+			    			if (value.getValue().toString().startsWith("NN")) {
+			    				accept = true;
+			    				break loop;
+			    			}
+			    		}
 		    		}
 		    	}
 		    	

@@ -44,6 +44,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import controllers.AnnotationController;
+import db.DB;
 import scala.concurrent.Await;
 import scala.concurrent.Future;
 import scala.concurrent.duration.Duration;
@@ -102,8 +103,9 @@ public class AnnotationControlActor extends UntypedActor {
 	
 	@Override
 	public void onReceive(Object msg) {
+try {		
 		if (msg instanceof AnnotateText) {
-//			System.out.println("***************** AnnotateText");
+			System.out.println("***************** AnnotateText " + requestIds.size());
 			AnnotateText atm = (AnnotateText)msg;
 
 			ActorSelection annotator = atm.annotator.getAnnotator(atm.lang);
@@ -114,13 +116,13 @@ public class AnnotationControlActor extends UntypedActor {
 			}
 			
 		} else if (msg instanceof AnnotateTextDone) {
-//			System.out.println("***************** AnnotationTextDone");
+			System.out.println("***************** AnnotationTextDone " + requestIds.size());
 			requestIds.remove(((AnnotateTextDone)msg).messageId);
 			
 			sendFinishNotification();
 
 		} else if (msg instanceof AnnotateRequest) {
-//			System.out.println("***************** AnnotateRequest");
+			System.out.println("***************** AnnotateRequest " + requestIds.size());
 			handleRequestAnnotateMessage((AnnotateRequest)msg);
 			
 		} else if (msg instanceof AnnotateRequestPartialResult) {
@@ -128,7 +130,7 @@ public class AnnotationControlActor extends UntypedActor {
 			AnnotationController.addAnnotation(AnnotationController.getAnnotationFromJson(((AnnotateRequestPartialResult) msg).annotation, userId), userId);
 			
 		} else if (msg instanceof AnnotateRequestsEnd) {
-//			System.out.println("***************** AnnotateRequestsEnd");
+			System.out.println("***************** AnnotateRequestsEnd " + requestIds.size());
 			try {
 				sendPendingRequests();
 			} catch (Exception e) {
@@ -138,11 +140,15 @@ public class AnnotationControlActor extends UntypedActor {
 			sendFinishNotification();
 			
 		} else if (msg instanceof AnnotateRequestBulkAnswered) {
-//			System.out.println("***************** AnnotateRequestAnswered");
+			System.out.println("***************** AnnotateRequestAnswered " + requestIds.size());
 			requestIds.remove(((AnnotateRequestBulkAnswered)msg).requestId);
 			
 			sendFinishNotification();
 		}
+} catch (Exception e) {
+	e.printStackTrace();
+}
+
 	}
 
 	private void sendFinishNotification() {
@@ -158,7 +164,7 @@ public class AnnotationControlActor extends UntypedActor {
 			notification.setOpenedAt(new Timestamp(new Date().getTime()));
 	        notification.setResource(recordId);
 	        notification.setReceiver(userId);
-//	        DB.getNotificationDAO().makePermanent(notification);
+	        DB.getNotificationDAO().makePermanent(notification);
 	        
 	        NotificationCenter.sendNotification(notification);
 	        

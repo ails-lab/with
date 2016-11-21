@@ -43,7 +43,7 @@ public class AnnotationRequestController extends Controller {
 			return badRequest();
 		}
 		
-//		System.out.println("RECEIVED RESPONSE: " + json);
+		System.out.println("RECEIVED RESPONSE: " + json);
 		
 		try {
 			String requestId = json.get("responseTo").asText();

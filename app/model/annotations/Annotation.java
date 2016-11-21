@@ -54,6 +54,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Indexes({
 	@Index(fields = @Field(value = "motivation", type = IndexType.ASC), options = @IndexOptions()),
+//	@Index(fields = @Field(value = "body.uri", type = IndexType.ASC), options = @IndexOptions(disableValidation = true)),
 	@Index(fields = @Field(value = "target.recordId", type = IndexType.ASC), options = @IndexOptions()),
 	@Index(fields = @Field(value = "score.approvedBy", type = IndexType.ASC), options = @IndexOptions()),
 })
