@@ -45,7 +45,6 @@ import db.DB;
 import sources.core.ParallelAPICall;
 import tools.importers.vocabulary.AAT2Vocabulary;
 import tools.importers.vocabulary.DBPedia2Vocabulary;
-import tools.importers.vocabulary.GEMET2Vocabulary;
 import tools.importers.vocabulary.OWL2Vocabulary;
 import tools.importers.vocabulary.RDF2Vocabulary;
 import tools.importers.vocabulary.SKOS2Vocabulary;
