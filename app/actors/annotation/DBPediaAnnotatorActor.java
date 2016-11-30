@@ -26,7 +26,6 @@ import akka.actor.ActorSelection;
 import akka.actor.Props;
 import akka.routing.RoundRobinRouter;
 import annotators.DBPediaAnnotator;
-import annotators.TextAnnotator;
 import play.libs.Akka;
 
 public class DBPediaAnnotatorActor extends TextAnnotatorActor {

@@ -49,6 +49,8 @@ import scala.concurrent.Await;
 import scala.concurrent.Future;
 import scala.concurrent.duration.Duration;
 import utils.NotificationCenter;
+import model.annotations.Annotation;
+import model.annotations.bodies.AnnotationBodyTagging;
 import model.annotations.targets.AnnotationTarget;
 import model.basicDataTypes.Language;
 import actors.TokenLoginActor.TokenCreateMessage;
@@ -84,6 +86,7 @@ public class AnnotationControlActor extends UntypedActor {
 	private Random rand; 
 	
 	private ActorSelection tokenLoginActor;
+	private boolean notificationSent;
 	
 	public AnnotationControlActor(String requestId, ObjectId recordId, ObjectId userId, boolean record) {
 		this.requestId = requestId;
@@ -98,61 +101,62 @@ public class AnnotationControlActor extends UntypedActor {
 		rand = new Random();
 		
 		tokenLoginActor = Akka.system().actorSelection("/user/tokenLoginActor");
+		
+		notificationSent = false;
 	}
 
 	
 	@Override
 	public void onReceive(Object msg) {
-try {		
-		if (msg instanceof AnnotateText) {
-			System.out.println("***************** AnnotateText " + requestIds.size());
-			AnnotateText atm = (AnnotateText)msg;
-
-			ActorSelection annotator = atm.annotator.getAnnotator(atm.lang);
-			if (annotator != null) {
-				String mid = (System.currentTimeMillis() + Math.abs(rand.nextLong())) + "" + Math.abs(rand.nextLong());
-				requestIds.add(mid);
-				annotator.tell(new TextAnnotatorActor.Annotate(atm.userId, atm.text, atm.target, atm.props, requestId, mid), ActorRef.noSender());
+		try {		
+			if (msg instanceof AnnotateText) {
+				AnnotateText atm = (AnnotateText)msg;
+	
+				ActorSelection annotator = atm.annotator.getAnnotator(atm.lang);
+				if (annotator != null) {
+					String mid = (System.currentTimeMillis() + Math.abs(rand.nextLong())) + "" + Math.abs(rand.nextLong());
+					requestIds.add(mid);
+					annotator.tell(new TextAnnotatorActor.Annotate(atm.userId, atm.text, atm.target, atm.props, requestId, mid), ActorRef.noSender());
+				}
+				
+			} else if (msg instanceof AnnotateTextDone) {
+				requestIds.remove(((AnnotateTextDone)msg).messageId);
+				
+				sendFinishNotification();
+	
+			} else if (msg instanceof AnnotateRequest) {
+				handleRequestAnnotateMessage((AnnotateRequest)msg);
+				
+			} else if (msg instanceof AnnotateRequestPartialResult) {
+				Annotation ann = AnnotationController.getAnnotationFromJson(((AnnotateRequestPartialResult) msg).annotation, userId);
+				if (ann.getTarget().getSelector() != null) {
+					ann.getTarget().getSelector().cleanUp();
+				}
+				
+				AnnotationController.addAnnotation(ann, userId);
+				
+			} else if (msg instanceof AnnotateRequestsEnd) {
+				try {
+					sendPendingRequests();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+				
+				sendFinishNotification();
+				
+			} else if (msg instanceof AnnotateRequestBulkAnswered) {
+				requestIds.remove(((AnnotateRequestBulkAnswered)msg).requestId);
+				
+				sendFinishNotification();
 			}
-			
-		} else if (msg instanceof AnnotateTextDone) {
-			System.out.println("***************** AnnotationTextDone " + requestIds.size());
-			requestIds.remove(((AnnotateTextDone)msg).messageId);
-			
-			sendFinishNotification();
-
-		} else if (msg instanceof AnnotateRequest) {
-			System.out.println("***************** AnnotateRequest " + requestIds.size());
-			handleRequestAnnotateMessage((AnnotateRequest)msg);
-			
-		} else if (msg instanceof AnnotateRequestPartialResult) {
-//			System.out.println("***************** AnnotateRequestPartialResult");
-			AnnotationController.addAnnotation(AnnotationController.getAnnotationFromJson(((AnnotateRequestPartialResult) msg).annotation, userId), userId);
-			
-		} else if (msg instanceof AnnotateRequestsEnd) {
-			System.out.println("***************** AnnotateRequestsEnd " + requestIds.size());
-			try {
-				sendPendingRequests();
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-			
-			sendFinishNotification();
-			
-		} else if (msg instanceof AnnotateRequestBulkAnswered) {
-			System.out.println("***************** AnnotateRequestAnswered " + requestIds.size());
-			requestIds.remove(((AnnotateRequestBulkAnswered)msg).requestId);
-			
-			sendFinishNotification();
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
-} catch (Exception e) {
-	e.printStackTrace();
-}
-
 	}
 
-	private void sendFinishNotification() {
-		if (requestIds.size() == 0) {
+	
+	private synchronized void sendFinishNotification() {
+		if (requestIds.size() == 0 && !notificationSent) {
 	        AnnotationNotification notification = new AnnotationNotification();
 	
 			if (record) {
@@ -164,10 +168,11 @@ try {
 			notification.setOpenedAt(new Timestamp(new Date().getTime()));
 	        notification.setResource(recordId);
 	        notification.setReceiver(userId);
-	        DB.getNotificationDAO().makePermanent(notification);
+//	        DB.getNotificationDAO().makePermanent(notification);
 	        
 	        NotificationCenter.sendNotification(notification);
-	        
+	     
+	        notificationSent = true;
 	        getContext().stop(getSelf());
 		}
 	}
@@ -200,9 +205,6 @@ try {
 			request.setHeader("content-type", "application/json");
 			
 			request.setEntity(new StringEntity(json.toString()));
-		
-//			System.out.println(">>>B " + ad.getService());
-//			System.out.println(">>>B " + json.toString());
 		
 			if (client.execute(request).getStatusLine().getStatusCode() == 200) {
 //				System.out.println(">>> SEND OK");

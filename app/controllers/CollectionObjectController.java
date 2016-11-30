@@ -1536,35 +1536,29 @@ public class CollectionObjectController extends WithResourceController {
             	
                 JsonNode json = request().body().asJson();
 
-//				BiFunction<ObjectId, JsonNode, Boolean> methodQuery = (ObjectId cid, JsonNode jsonx) -> {
-	                ObjectId user = WithController.effectiveUserDbId();
-	                List<AnnotatorConfig> annConfigs = AnnotatorConfig.createAnnotationConfigs(json);
-	                
-					Random rand = new Random();
-					String requestId = "AC" + (System.currentTimeMillis() + Math.abs(rand.nextLong())) + "" + Math.abs(rand.nextLong());
+                ObjectId user = WithController.effectiveUserDbId();
+                List<AnnotatorConfig> annConfigs = AnnotatorConfig.createAnnotationConfigs(json);
 
-					Akka.system().actorOf( Props.create(AnnotationControlActor.class, requestId, cid, user, false), requestId);
-					ActorSelection ac = Akka.system().actorSelection("user/" + requestId);
+				Random rand = new Random();
+				String requestId = "AC" + (System.currentTimeMillis() + Math.abs(rand.nextLong())) + "" + Math.abs(rand.nextLong());
 
-	                for (ContextData<ContextDataBody> cd : (List<ContextData<ContextDataBody>>)DB.getCollectionObjectDAO().getById(cid).getCollectedResources()) {
-	               		String recordId = cd.getTarget().getRecordId().toHexString();
+				Akka.system().actorOf( Props.create(AnnotationControlActor.class, requestId, cid, user, false), requestId);
+				ActorSelection ac = Akka.system().actorSelection("user/" + requestId);
 
-//						if (DB.getRecordResourceDAO().hasAccess(uid, Action.EDIT, new ObjectId(recordId))  || isSuperUser()) {
-	               			try {
-								RecordResourceController.annotateRecord(recordId, user, annConfigs, ac);
-							} catch (Exception e) {
-								// TODO Auto-generated catch block
-								e.printStackTrace();
-							}
-//						}
-	                }
-	                
-	                ac.tell(new AnnotationControlActor.AnnotateRequestsEnd(), ActorRef.noSender());
+                for (ContextData<ContextDataBody> cd : (List<ContextData<ContextDataBody>>)DB.getCollectionObjectDAO().getById(cid).getCollectedResources()) {
+               		String recordId = cd.getTarget().getRecordId().toHexString();
 
-//	                return true;
-//				};
-//				
-//				ParallelAPICall.createPromise(methodQuery, colId, json, Priority.BACKEND);
+//					if (DB.getRecordResourceDAO().hasAccess(uid, Action.EDIT, new ObjectId(recordId))  || isSuperUser()) {
+               			try {
+							RecordResourceController.annotateRecord(recordId, user, annConfigs, ac);
+						} catch (Exception e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+//					}
+                }
+                
+                ac.tell(new AnnotationControlActor.AnnotateRequestsEnd(), ActorRef.noSender());
 
                 return ok();
             }
@@ -1756,7 +1750,10 @@ public class CollectionObjectController extends WithResourceController {
 				} else if (groupBy == 1) {
 					for (AnnotationAdmin annAd : (ArrayList<AnnotationAdmin>)ann.getAnnotators()) {
 						String generator = annAd.getGenerator();
-					
+						if (generator == null) {
+							generator = "Unknown Annotator";
+						}
+						
 						Map<String, AnnotationInfo> annGroup = annMap.get(generator);
 						if (annGroup == null) {
 							annGroup = new HashMap<String, AnnotationInfo>();

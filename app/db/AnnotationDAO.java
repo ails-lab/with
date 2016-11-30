@@ -95,11 +95,9 @@ public class AnnotationDAO extends DAO<Annotation> {
 		if (annotation.getMotivation().equals(MotivationType.Tagging)) {
 			AnnotationBodyTagging body = (AnnotationBodyTagging) annotation.getBody();
 			
-			if (body.getUri() != null)
+			if (body.getUri() != null) {
 				q.field("body.uri").equal(body.getUri());
-//			if (body.getLabel() != null)
-//				q.field("body.label.default").equal(
-//						body.getLabel().get(Language.DEFAULT));
+			}
 			
 			AnnotationTarget target = (AnnotationTarget) annotation.getTarget();
 			

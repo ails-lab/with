@@ -42,6 +42,15 @@ public class ImageSVGSelector extends SelectorType {
     }
 	
 	@Override
+	public void cleanUp() {
+		int p = imageWithURL.indexOf("/media/byUrl?url=");
+		if (p >= 0) {
+			imageWithURL = imageWithURL.substring(p);
+		}
+		imageWithURL = imageWithURL.replaceFirst("\\?token=[0-9]+$", "");
+	}
+	
+	@Override
 	public void addToQuery(Query<Annotation> q) {
 		q.field("target.selector.imageWithURL").equal(imageWithURL);
 		

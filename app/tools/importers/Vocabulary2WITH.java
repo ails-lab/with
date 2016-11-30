@@ -22,9 +22,7 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
-import java.util.function.Function;
 
 import model.resources.ThesaurusObject;
 
@@ -34,7 +32,6 @@ import org.elasticsearch.common.unit.TimeValue;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.TermQueryBuilder;
 import org.elasticsearch.search.SearchHit;
-import org.elasticsearch.search.SearchHits;
 import org.mongodb.morphia.query.Query;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -42,7 +39,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import play.libs.Json;
 import controllers.ThesaurusController;
 import db.DB;
-import sources.core.ParallelAPICall;
 import tools.importers.vocabulary.AAT2Vocabulary;
 import tools.importers.vocabulary.DBPedia2Vocabulary;
 import tools.importers.vocabulary.OWL2Vocabulary;
@@ -51,7 +47,6 @@ import tools.importers.vocabulary.SKOS2Vocabulary;
 import tools.importers.vocabulary.VocabularyImportConfiguration;
 import tools.importers.vocabulary.Wordnet302Vocabulary;
 import elastic.Elastic;
-import elastic.ElasticCoordinator;
 import elastic.ElasticEraser;
 import elastic.ElasticSearcher;
 import elastic.ElasticSearcher.SearchOptions;
