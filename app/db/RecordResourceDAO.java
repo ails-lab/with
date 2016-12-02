@@ -48,6 +48,7 @@ import org.mongodb.morphia.query.UpdateOperations;
 
 import play.Logger;
 import play.Logger.ALogger;
+import scala.util.Random;
 import sources.core.ParallelAPICall;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -577,9 +578,16 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 	}
 	
 	public List<RecordResource> getFeaturedRecords() {
+		// Range : rn.nextInt(max-min+1)+min
+		Random rn = new Random();
+		// Random number of annotations between 3 and 7
+		int n = rn.nextInt(5) + 3;
+		// Random offset between 0 and 5
+		int o = rn.nextInt(6);		
+		
 		Query<RecordResource> q = this.createQuery().disableValidation()
 				.field("annotationIds").exists().field("annotationIds")
-				.greaterThanOrEq(5).limit(10);
+				.sizeEq(n).offset(o).limit(10);
 		return this.find(q).asList();
 	}
 

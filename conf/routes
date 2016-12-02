@@ -42,6 +42,7 @@ GET 	/custom/:customName/					controllers.CustomAssets.redirect(customName)
 GET 	/custom/:customName/*file				controllers.CustomAssets.getFile(customName:String, file:String)
 
 GET     /record/randomRecords					controllers.RecordResourceController.getRandomRecords(groupId: String, batchCount: Integer)
+GET		/record/featuredAnnotatedRecords		controllers.RecordResourceController.getFeaturedAnnotatedRecords()
 GET		/record/annotationCount					controllers.AnnotationController.getAnnotationCount(groupId: String)
 POST	/record/annotation						controllers.AnnotationController.addAnnotation()
 PUT		/record/contextData			            controllers.RecordResourceController.editContextData(collectionId)

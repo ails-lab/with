@@ -437,6 +437,22 @@ public class RecordResourceController extends WithResourceController {
 		return ok(recordsList);
 	}
 	
+	public static Result getFeaturedAnnotatedRecords() {
+		List<RecordResource> records = new ArrayList<RecordResource>();
+		ArrayNode recordsList = Json.newObject().arrayNode();
+		
+		records = DB.getRecordResourceDAO().getFeaturedRecords();
+		
+		for (RecordResource record : records) {
+			Some<String> locale = new Some(Language.DEFAULT.toString());
+			RecordResource profiledRecord = record.getRecordProfile(Profile.MEDIUM.toString());
+			filterResourceByLocale(locale, profiledRecord);
+			recordsList.add(Json.toJson(profiledRecord));
+		}
+		
+		return ok(recordsList);
+	}
+	
 	static CollectionAndRecordsCounts getCollsAndCountAccessiblebyGroup(ObjectId groupId) {
 		List<CollectionObject> collections = DB.getCollectionObjectDAO().getAccessibleByGroupAndPublic(groupId);
 		CollectionAndRecordsCounts colAndRecs = new CollectionAndRecordsCounts();
