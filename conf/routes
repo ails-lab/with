@@ -170,6 +170,7 @@ GET	/api/mkconst									controllers.ReindexController.makeConsistent()
 GET	/api/idxres										controllers.ReindexController.reindexAllResources()
 GET	/api/idxcols									controllers.ReindexController.reindexAllCollections()
 GET	/api/idxthes									controllers.ReindexController.reindexAllThesaurus()
+GET /api/purge										controllers.ReindexController.purgeElastic()
 
 #Thesaurus management
 POST	/thesaurus/addTerm	        			    controllers.ThesaurusController.addThesaurusTerm()
