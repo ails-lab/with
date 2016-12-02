@@ -18,16 +18,22 @@ package elastic;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
 import org.bson.types.ObjectId;
+import org.elasticsearch.action.index.IndexResponse;
 import org.elasticsearch.action.search.SearchResponse;
+import org.mongodb.morphia.query.Query;
+import org.mongodb.morphia.query.UpdateOperations;
+import org.mongodb.morphia.query.UpdateResults;
 
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -36,22 +42,29 @@ import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.net.MediaType;
+import com.mongodb.WriteResult;
 
 import db.DB;
 import model.DescriptiveData;
 import model.EmbeddedMediaObject;
 import model.EmbeddedMediaObject.MediaVersion;
+import model.annotations.Annotation;
+import model.annotations.bodies.AnnotationBodyTagging;
 import model.basicDataTypes.MultiLiteral;
 import model.basicDataTypes.MultiLiteralOrResource;
 import model.basicDataTypes.ProvenanceInfo;
 import model.basicDataTypes.WithAccess;
 import model.basicDataTypes.WithAccess.Access;
 import model.basicDataTypes.WithAccess.AccessEntry;
+import model.resources.RecordResource;
+import model.resources.ThesaurusObject;
+import model.resources.ThesaurusObject.SKOSTerm;
 import model.resources.WithAdmin;
 import model.resources.WithResource;
 import model.resources.WithResourceType;
 import play.Logger;
 import play.libs.Json;
+import sources.core.ParallelAPICall;
 import utils.Serializer;
 
 public class ElasticUtils {
@@ -108,17 +121,9 @@ public class ElasticUtils {
 	 */
 	public static <T extends DescriptiveData, A extends WithAdmin> Map<String, Object> toIndex(WithResource<T, A> rr) {
 
-
-		/*
-		 *
-		 */
 		JsonNode m = mediaMapConverter(rr.getMedia());
 		JsonNode jn = withAccessConverter(rr.getAdministrative());
 
-
-		/*
-		 *
-		 */
 
 		ObjectMapper mapper = new ObjectMapper();
 		SimpleModule module = new SimpleModule();
@@ -139,13 +144,110 @@ public class ElasticUtils {
 		((ObjectNode)json).remove("collectedResources");
 		((ObjectNode)json).remove("dbId");
 
+		ObjectNode terms = Json.newObject();
 
-		Map<String, Object> elasticDoc = mapper.convertValue(json, Map.class);
+		JsonNode metaDataTerms = getThesaurusTerms(rr.getDescriptiveData().collectURIs());
+		if (metaDataTerms != null) {
+			terms.put("metadata", metaDataTerms);
+		}
+		
+		List<Annotation> anns = DB.getAnnotationDAO().getApprovedTaggingByRecordId(rr.getDbId(), Arrays.asList(new String[] {"body"}));
+		if (anns != null) {
+			Set<String> uris = new HashSet<>();
+			for (Annotation ann : anns) {
+				uris.add(((AnnotationBodyTagging)ann.getBody()).getUri());
+			}
+			
+			JsonNode annotationTerms = getThesaurusTerms(uris);
+			if (annotationTerms != null) {
+				terms.put("annotations", annotationTerms);
+			}
+		}
+		
+		if (terms.size() > 0) {
+			((ObjectNode)json).put("semantic", terms);
+		}
 
-		return elasticDoc;
+		
+		return mapper.convertValue(json, Map.class);
 	}
-
-
+	
+	private static JsonNode getThesaurusTerms(Collection<String> uris) {
+		Collection<String> broader = new HashSet<>();
+		
+		Collection<String> terms = new HashSet<>();
+		for (String uri : uris) {
+			ThesaurusObject to = DB.getThesaurusDAO().getByUri(uri);
+			if (to != null) {
+				if (terms.add(uri)) {
+					broader.add(uri);
+					if (to.getSemantic().getBroaderTransitive() != null) {
+						for (SKOSTerm t : to.getSemantic().getBroaderTransitive()) {
+							broader.add(t.getUri());
+						}
+					}
+				}
+			} else {
+				List<ThesaurusObject> list = DB.getThesaurusDAO().getByExactMatch(uri);
+				if (list != null) {
+					for (ThesaurusObject tto : list) {
+						if (terms.add(tto.getSemantic().getUri())) {
+							broader.add(tto.getSemantic().getUri());
+							if (tto.getSemantic().getBroaderTransitive() != null) {
+								for (SKOSTerm t : tto.getSemantic().getBroaderTransitive()) {
+									broader.add(t.getUri());
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+		
+		if (terms.size() > 0) {
+			ObjectNode termsNode = Json.newObject();
+			ArrayNode mainTerms = Json.newObject().arrayNode();
+			ArrayNode broaderTerms = Json.newObject().arrayNode();
+			
+			for (String t : terms) {
+				mainTerms.add(t);
+			}
+			
+			for (String t : broader) {
+				broaderTerms.add(t);
+			}
+			
+			termsNode.put("base", mainTerms);
+			termsNode.put("all", broaderTerms);
+			
+			return termsNode;
+		} else {
+			return null;
+		}
+	}
+	
+	public static <E> void update(E doc) {
+		if (doc != null) {
+			String type = defineInstanceOf(doc);
+			try {
+				if (type != null) {
+					/* Index Resource */
+					BiFunction<ObjectId, Map<String, Object>, IndexResponse> indexResource = (
+							ObjectId colId, Map<String, Object> map) -> {
+						return ElasticIndexer.index(type, colId, map);
+					};
+					ParallelAPICall.createPromise(indexResource, (ObjectId) doc
+							.getClass().getMethod("getDbId", new Class<?>[0])
+							.invoke(doc), (Map<String, Object>) doc.getClass()
+							.getMethod("transform", new Class<?>[0])
+							.invoke(doc));
+				}
+			} catch (Exception e) {
+				System.out.println(e.getMessage());
+				log.error(e.getMessage(), e);
+			}
+		}
+	}
 
 	private static JsonNode getDataProvAndSource(List<ProvenanceInfo> pr) {
 		ObjectNode jn = Json.newObject();

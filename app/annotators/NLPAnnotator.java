@@ -26,6 +26,9 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
+import org.bson.types.ObjectId;
+
+import akka.routing.RoundRobinRouter;
 import utils.annotators.AnnotatedObject;
 import utils.annotators.AnnotationIndex;
 import utils.annotators.AnnotationValue;
@@ -50,42 +53,28 @@ import edu.stanford.nlp.ling.CoreAnnotations.TokensAnnotation;
 import edu.stanford.nlp.pipeline.StanfordCoreNLP;
 import edu.stanford.nlp.util.CoreMap;
 
-public class NLPAnnotator extends Annotator {
+public class NLPAnnotator implements TextAnnotator {
 
-	
-	public String getService() {
-		return "";
-	}
-	
     protected static Map<Language, NLPAnnotator> annotators = new HashMap<>();
-
-	public static AnnotatorType getType() {
-		return AnnotatorType.NER;
-	}
 
 	public static String getName() {
 		return "WITH Named Entity Recognizer";
 	}
 
-    public static NLPAnnotator getAnnotator(Language lang) {
+    public static synchronized NLPAnnotator getAnnotator(Language lang) {
     	if (lang != Language.EN) {
     		return null;
     	}
     	
     	NLPAnnotator ta = annotators.get(lang);
     	if (ta == null) {
-    		synchronized (NLPAnnotator.class) {
-    			ta = annotators.get(lang);
-    			if (ta == null) {
-    				ta  = new NLPAnnotator();
-    				annotators.put(lang, ta);
-    			}
-    		}
+			ta  = new NLPAnnotator();
+			annotators.put(lang, ta);
     	}
     	
     	return ta;
     }    	
-    	
+    
     private StanfordCoreNLP pipeline;
     
     private NLPAnnotator() {
@@ -101,14 +90,14 @@ public class NLPAnnotator extends Annotator {
     }
 
 	@Override
-	public List<Annotation> annotate(AnnotationTarget target, Map<String, Object> props) throws Exception {
-		String text = (String)props.get(TEXT);
-		
+	public List<Annotation> annotate(String text, ObjectId user, AnnotationTarget target, Map<String, Object> props) throws Exception {
 		text = strip(text);
 		
 		List<Annotation> res = new ArrayList<>();
 		
 		AnnotationIndex ai = analyze(text);
+		
+		String generator = getName();
 		
 		ArrayList<Span> locations = ai.getLocations("NE", new SimpleAnnotationValue("LOCATION"));
 		if (locations != null) {
@@ -132,7 +121,7 @@ public class NLPAnnotator extends Annotator {
 
 	    		ArrayList<AnnotationAdmin> admins  = new ArrayList<>();
 	    		AnnotationAdmin admin = new Annotation.AnnotationAdmin();
-	    		admin.setGenerator(getName());
+	    		admin.setGenerator(generator);
 	    		admin.setGenerated(new Date());
 	    		admin.setConfidence(-1.0f);
 //	    		admin.setWithCreator(withCreator);
@@ -171,7 +160,7 @@ public class NLPAnnotator extends Annotator {
 
 	    		ArrayList<AnnotationAdmin> admins  = new ArrayList<>();
 	    		AnnotationAdmin admin = new Annotation.AnnotationAdmin();
-	    		admin.setGenerator(getName());
+	    		admin.setGenerator(generator);
 	    		admin.setGenerated(new Date());
 	    		admin.setConfidence(-1.0f);
 //	    		admin.setWithCreator(withCreator);
@@ -210,7 +199,7 @@ public class NLPAnnotator extends Annotator {
 
 	    		ArrayList<AnnotationAdmin> admins  = new ArrayList<>();
 	    		AnnotationAdmin admin = new Annotation.AnnotationAdmin();
-	    		admin.setGenerator(getName());
+	    		admin.setGenerator(generator);
 	    		admin.setGenerated(new Date());
 	    		admin.setConfidence(-1.0f);
 //	    		admin.setWithCreator(withCreator);

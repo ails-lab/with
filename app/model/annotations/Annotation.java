@@ -29,7 +29,12 @@ import model.basicDataTypes.MultiLiteralOrResource;
 import org.bson.types.ObjectId;
 import org.mongodb.morphia.annotations.Embedded;
 import org.mongodb.morphia.annotations.Entity;
+import org.mongodb.morphia.annotations.Field;
 import org.mongodb.morphia.annotations.Id;
+import org.mongodb.morphia.annotations.Index;
+import org.mongodb.morphia.annotations.IndexOptions;
+import org.mongodb.morphia.annotations.Indexes;
+import org.mongodb.morphia.utils.IndexType;
 
 import utils.Deserializer;
 import utils.Serializer;
@@ -47,6 +52,13 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 @SuppressWarnings("unchecked")
 @JsonInclude(value = JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
+@Indexes({
+	@Index(fields = @Field(value = "motivation", type = IndexType.ASC), options = @IndexOptions()),
+//	@Index(fields = @Field(value = "body.uri", type = IndexType.ASC), options = @IndexOptions(disableValidation = true)),
+	@Index(fields = @Field(value = "target.recordId", type = IndexType.ASC), options = @IndexOptions()),
+	@Index(fields = @Field(value = "score.approvedBy", type = IndexType.ASC), options = @IndexOptions()),
+})
+
 @Entity("Annotation")
 public class Annotation<T extends AnnotationBody> {
 

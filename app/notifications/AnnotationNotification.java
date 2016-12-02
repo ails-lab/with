@@ -21,6 +21,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import model.basicDataTypes.Language;
+import model.basicDataTypes.MultiLiteral;
 import model.basicDataTypes.WithAccess.Access;
 import model.resources.WithResource;
 import model.usersAndGroups.User;
@@ -52,13 +53,20 @@ public class AnnotationNotification extends Notification {
 		if (this.resource == null) {
 			return null;
 		}
-		WithResource withResource = DB.getCollectionObjectDAO().getById(resource, new ArrayList<String>() {{ add("descriptiveData.label"); }});
-		if (withResource == null)
+		
+		WithResource<?, ?> withResource = DB.getCollectionObjectDAO().getById(resource, new ArrayList<String>() {{ add("descriptiveData.label"); }});
+		if (withResource == null) {
 			withResource = DB.getRecordResourceDAO().getById(resource, new ArrayList<String>() {{ add("descriptiveData.label"); }});
-		if (withResource != null)
-			return withResource.getDescriptiveData().getLabel().get(Language.DEFAULT).get(0);
-		else
-			return "DELETED";
+		}
+		
+		if (withResource != null) {
+			MultiLiteral ml = withResource.getDescriptiveData().getLabel();
+			if (ml != null) {
+				return withResource.getDescriptiveData().getLabel().get(Language.DEFAULT).get(0);
+			}
+		}
+		
+		return "";
 	}
 
 }

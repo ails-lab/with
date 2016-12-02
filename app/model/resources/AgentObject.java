@@ -17,6 +17,8 @@
 package model.resources;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 
 import org.mongodb.morphia.annotations.Entity;
@@ -65,6 +67,16 @@ public class AgentObject extends RecordResource<AgentObject.AgentData> {
 		public void setGender(Gender g) {
 			this.genderEnum = g;
 		}
+		
+		public Collection<String> collectURIs() {
+			Collection<String> res = super.collectURIs();
+
+			if (birthplace != null && birthplace.getURI() != null) {
+				res.addAll(birthplace.getURI());
+			}
+			
+			return res;
+		} 
 
 	}
 }

@@ -22,8 +22,10 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 
@@ -32,6 +34,7 @@ import model.EmbeddedMediaObject.MediaVersion;
 import model.annotations.Annotation;
 import model.annotations.ContextData;
 import model.annotations.ContextData.ContextDataBody;
+import model.annotations.bodies.AnnotationBodyTagging;
 import model.basicDataTypes.WithAccess;
 import model.basicDataTypes.WithAccess.Access;
 import model.basicDataTypes.WithAccess.AccessEntry;
@@ -142,6 +145,7 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 				}
 			}
 		}
+		
 		return orderedRecords;
 	}
 	
@@ -150,8 +154,7 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 		return getByCollectionIds(colId, ids, q);
 	}
 
-	public List<RecordResource> getByCollectionIds(ObjectId colId,
-			List<String> ids, Query<RecordResource> q) {
+	public List<RecordResource> getByCollectionIds(ObjectId colId, List<String> ids, Query<RecordResource> q) {
 		
 		List<ObjectId> oids = new ArrayList<>();
 		for (String s : ids) {
@@ -189,39 +192,13 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 	}
 	
 	
-	public List<RecordResource> getByCollectionWithTerms(ObjectId collectionId, List<List<String>> uris, List<String> lookupFields, List<String> retrievedFields, int max) {
+	public RecordResource getByAnnotationId(ObjectId annId) {
+		Query<RecordResource> q = this.createQuery().disableValidation()
+				.field("annotationIds").equal(annId);
 		
-		Query<RecordResource> q = this.createQuery().disableValidation();
-		if (uris != null) {
-			List<CriteriaContainer> criteria = new ArrayList<>();
-		
-			for (List<String> list : uris) {
-				List<Criteria> c = new ArrayList<>();
-				for (String uri : list) {
-					for (String field : lookupFields) {
-						c.add(q.criteria(field).equal(uri));
-					}
-				}
-
-				criteria.add(q.or(c.toArray(new Criteria[c.size()])));
-			}
-			
-			q.and(criteria.toArray(new CriteriaContainer[criteria.size()]));
-		}
-		
-		q.field("collectedIn").equal(collectionId);
-		
-		if (retrievedFields != null) {
-			q.retrievedFields(true, retrievedFields.toArray(new String[retrievedFields.size()]));
-		}
-		
-		if (max >= 0) {
-			q.limit(max);
-		}
-		
-		return this.find(q).asList();
-
+		return this.findOne(q);
 	}
+	
 	
 	public List<RecordResource> getAnnotatedRecords(ObjectId userId,
 			int offset, int count) {

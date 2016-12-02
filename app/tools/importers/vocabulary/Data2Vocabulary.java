@@ -14,14 +14,14 @@
  */
 
 
-package model.annotations.bodies;
+package tools.importers.vocabulary;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonInclude;
+import java.io.IOException;
 
-@JsonInclude(value = JsonInclude.Include.NON_NULL)
-@JsonIgnoreProperties(ignoreUnknown = true)
-public class AnnotationBody {
+import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 
-	public void adjustLabel() {}
+public abstract class Data2Vocabulary<T extends VocabularyImportConfiguration> {
+	
+	protected abstract void doImport(T conf) throws Exception;
+
 }

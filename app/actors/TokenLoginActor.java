@@ -47,13 +47,13 @@ public class TokenLoginActor extends UntypedActor {
 	}
 
 	public static class GetUserIdMessage {
-		public int token;
+		public long token;
 
 		public GetUserIdMessage(String token) {
-			this.token = Integer.parseInt(token);
+			this.token = Long.parseLong(token);
 		}
 
-		public GetUserIdMessage(int token) {
+		public GetUserIdMessage(long token) {
 			this.token = token;
 		}
 
@@ -86,9 +86,9 @@ public class TokenLoginActor extends UntypedActor {
 	}
 
 	public static class TokenResponseMessage {
-		public int token;
+		public long token;
 
-		public TokenResponseMessage(int token) {
+		public TokenResponseMessage(long token) {
 			this.token = token;
 		}
 
@@ -123,27 +123,27 @@ public class TokenLoginActor extends UntypedActor {
 		}
 	}
 
-	private static int createToken(ObjectId id) {
+	private static long createToken(ObjectId id) {
 
-		for (JsonNode node : tokenIndex) {
-			if (StringUtils.equals(node.get("user").asText(), id.toString()))
-				return node.get("token").asInt();
-		}
+//		for (JsonNode node : tokenIndex) {
+//			if (StringUtils.equals(node.get("user").asText(), id.toString()))
+//				return node.get("token").asLong();
+//		}
 
 		ObjectNode node = Json.newObject();
 		node.put("user", id.toString());
 		node.put("timestamp", new Date().getTime());
 		// should all be different
-		int token = new Random().nextInt();
+		long token = Math.abs(new Random().nextLong());
 		node.put("token", token);
 		tokenIndex.add(node);
 		return token;
 	}
 
-	private static String parseToken(int token) {
+	private static String parseToken(long token) {
 
 		for (JsonNode node : tokenIndex) {
-			if (node.get("token").asInt() == token) {
+			if (node.get("token").asLong() == token) {
 
 				long timestamp = node.get("timestamp").asLong();
 

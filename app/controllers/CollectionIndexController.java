@@ -17,20 +17,13 @@
 package controllers;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.TreeSet;
 
 import model.DescriptiveData;
-import model.annotations.Annotation;
-import model.annotations.ContextData;
-import model.annotations.ContextData.ContextDataBody;
-import model.annotations.bodies.AnnotationBodyTagging;
 import model.basicDataTypes.Language;
 import model.basicDataTypes.LiteralOrResource;
 import model.basicDataTypes.MultiLiteral;
@@ -38,13 +31,16 @@ import model.basicDataTypes.MultiLiteralOrResource;
 import model.resources.CulturalObject.CulturalObjectData;
 import model.resources.PlaceObject.PlaceData;
 import model.resources.AgentObject.AgentData;
-import model.resources.RecordResource;
 import model.resources.ThesaurusObject.SKOSTerm;
 
 import org.bson.types.ObjectId;
+import org.elasticsearch.action.search.SearchResponse;
+import org.elasticsearch.common.unit.TimeValue;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.search.SearchHit;
+import org.elasticsearch.search.SearchHitField;
 
 import play.Logger;
 import play.Logger.ALogger;
@@ -52,48 +48,28 @@ import play.libs.Json;
 import play.mvc.Result;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
-import utils.Counter;
 import utils.facets.ThesaurusFacet;
 import db.DB;
 import db.ThesaurusObjectDAO;
+import elastic.Elastic;
+import elastic.ElasticSearcher;
+import elastic.ElasticSearcher.SearchOptions;
 
 public class CollectionIndexController extends WithResourceController	{
 
 	public static final ALogger log = Logger.of(CollectionObjectController.class);
 
-	public static String[] lookupFields = new String[] {
-		"descriptiveData.keywords.uri",
-		"descriptiveData.dctype.uri",
-		"descriptiveData.dcformat.uri",
-		"descriptiveData.dctermsmedium.uri"
+	public static String[] retrievedFields = new String[] {
+		"semantic.metadata.base",
+		"semantic.annotations.base",
 	};
 	
-	public static List<List<String>> termsRestrictionFromJSON(JsonNode json) {
-		List<List<String>> uris = null;
-		
-		if (json != null) {
-			JsonNode terms = json.get("terms");
-			
-			if (terms != null) {
-				uris = new ArrayList<>();
-
-				for (Iterator<JsonNode> iter = terms.elements(); iter.hasNext();) {
-					JsonNode inode = iter.next();
-					List<String> list = new ArrayList<>();
-					for (Iterator<JsonNode> iter2 = inode.get("sub").elements(); iter2.hasNext();) {
-						list.add(iter2.next().asText());
-					}
-					
-					uris.add(list);
-				}
-				
-			}
-		}
-		return uris;
-	}
+	public static String[] lookupFields = new String[] {
+		"semantic.metadata.all.string",
+		"semantic.annotations.all.string",
+	};
 	
 	public static Result getCollectionFacets(String id) {
 		ObjectNode result = Json.newObject();
@@ -107,67 +83,54 @@ public class CollectionIndexController extends WithResourceController	{
 			
 			JsonNode json = request().body().asJson();
 			
-			List<List<String>> uris = termsRestrictionFromJSON(json);
+			QueryBuilder query = CollectionIndexController.getIndexCollectionQuery(new ObjectId(id),json);
+			
+			SearchOptions so = new SearchOptions(0, 10000);
+			so.isPublic = false;
+			
+			SearchResponse scrollResp = new ElasticSearcher().getSearchRequestBuilder(query, so)
+			        .setScroll(new TimeValue(60000))
+			        .setQuery(query)
+			        .addFields(CollectionIndexController.retrievedFields)
+
+			        .setSize(10000).execute().actionGet(); 
 			
 			List<String[]> list = new ArrayList<>();
-			
-			List<String> fields = Arrays.asList(lookupFields);
 
-			for (RecordResource rr : DB.getRecordResourceDAO().getByCollectionWithTerms(new ObjectId(id), uris, fields, fields, -1)) {
-				List<Object> olist = new ArrayList<>();
-
-				DescriptiveData dd = rr.getDescriptiveData();
-				
-				if (dd.getKeywords() != null) {
-					List<String> k = dd.getKeywords().getURI();
-			
-					if (k != null) {
-						olist.addAll(k);
+			while (true) {
+			    for (SearchHit hit : scrollResp.getHits().getHits()) {
+			    	List<Object> olist = new ArrayList<>();
+			    	
+			    	for (String field : CollectionIndexController.retrievedFields) {
+			    		SearchHitField shf = hit.field(field);
+			    		if (shf != null) {
+			    			List<Object> values = shf.getValues();
+			    			if (values != null) {
+					    		olist.addAll(values);
+					    	}
+			    		}
+			    	}
+			    	
+					if (olist.size() > 0 ) {
+						list.add(olist.toArray(new String[olist.size()]));
 					}
-				}
-				
-				if (dd instanceof CulturalObjectData) {
-					CulturalObjectData cdd = (CulturalObjectData)dd;
-					
-					if (cdd.getDctermsmedium() != null) {
-						List<String> k = cdd.getDctermsmedium().getURI();
-						
-						if (k != null) {
-							olist.addAll(k);
-						}
-					}
-					
-					if (cdd.getDcformat() != null) {
-						List<String> k = cdd.getDcformat().getURI();
-						
-						if (k != null) {
-							olist.addAll(k);
-						}
-					}
-
-					if (cdd.getDctype() != null) {
-						List<String> k = cdd.getDctype().getURI();
-						
-						if (k != null) {
-							olist.addAll(k);
-						}
-					}
-				}
-
-				
-				if (olist.size() > 0 ) {
-					list.add(olist.toArray(new String[olist.size()]));
-				}
+			    }
+			    
+			    scrollResp = Elastic.getTransportClient().prepareSearchScroll(scrollResp.getScrollId()).setScroll(new TimeValue(60000)).execute().actionGet();
+			    if (scrollResp.getHits().getHits().length == 0) {
+			        break;
+			    }
 			}
-
+	
 			Set<String> selected = new HashSet<>();
+
 			if (json != null) {
 				for (Iterator<JsonNode> iter = json.get("terms").elements(); iter.hasNext();) {
-					selected.add(iter.next().get("top").asText());
+					selected.add(iter.next().asText());
 				}
 			}
 			
-			ThesaurusFacet tf = new ThesaurusFacet();
+			ThesaurusFacet tf = new ThesaurusFacet(Language.EN);
 			tf.create(list, selected);
 			
 //			ObjectId collectionDbId = new ObjectId(id);
@@ -176,81 +139,82 @@ public class CollectionIndexController extends WithResourceController	{
 //			if (!response.toString().equals(ok().toString())) {
 //				return response;
 //			} else {
-				return ok(tf.toJSON(Language.EN));
+				return ok(tf.toJSON());
 //			}
 		} catch (Exception e) {
+			e.printStackTrace();
 			result.put("error", e.getMessage());
 			return internalServerError(result);
 		}
 	}
 
 
-	public static Result getCollectionAnnotations(String cid) {
-		ObjectNode result = Json.newObject();
-		
-		try {
-			Result response = errorIfNoAccessToCollection(Action.READ, new ObjectId(cid));
-			
-			if (!response.toString().equals(ok().toString())) {
-				return response;
-			}
-			
-			List<ContextData<ContextDataBody>> rr = DB.getCollectionObjectDAO().getById(new ObjectId(cid)).getCollectedResources();
-			
-			Map<BodyClass, Counter> annMap = new HashMap<>();
-			
-			for (ContextData<ContextDataBody> cd : rr) {
-				ObjectId rid = cd.getTarget().getRecordId();
-
-				RecordResource<RecordResource.RecordDescriptiveData> rec = DB.getRecordResourceDAO().getById(rid);
-				rec.fillAnnotations();
-					
-				Set<BodyClass> uris = new HashSet<>();
-					
-				for (Annotation ann : rec.getAnnotations()) {
-					AnnotationBodyTagging body = (AnnotationBodyTagging)ann.getBody();
-					if (body.getUri() != null) {
-						uris.add(new BodyClass(body.getUri(), body.getLabel()));
-					}
-				}
-				
-				for (BodyClass bc : uris) {
-					Counter cc = annMap.get(bc);
-					if (cc == null) {
-						cc = new Counter(0);
-						annMap.put(bc, cc);
-					}
-					
-					cc.increase();
-				}
-			}
-			
-			Set<SortClass> sorted = new TreeSet<>();
-			
-			for (Map.Entry<BodyClass, Counter> entry : annMap.entrySet()) {
-				sorted.add(new SortClass(entry.getKey().uri, entry.getKey().label, entry.getValue().getValue()));
-			}
-			
-			ArrayNode array = Json.newObject().arrayNode();
-
-			for (SortClass sc : sorted) {
-				ObjectNode entry = Json.newObject();
-				entry.put("uri", sc.uri);
-				entry.put("label", Json.toJson(sc.label));
-				entry.put("count", sc.count);
-				
-				array.add(entry);
-			}
-
-			result.put("annotations", array);
-			
-			return ok(result);
-			
-		} catch (Exception e) {
-			result.put("error", e.getMessage());
-			return internalServerError(result);
-		}
-	}
+//	public static Result getCollectionAnnotations(String cid) {
+//		ObjectNode result = Json.newObject();
+//		
+//		try {
+//			Result response = errorIfNoAccessToCollection(Action.READ, new ObjectId(cid));
+//			
+//			if (!response.toString().equals(ok().toString())) {
+//				return response;
+//			}
+//			
+//			List<ContextData<ContextDataBody>> rr = DB.getCollectionObjectDAO().getById(new ObjectId(cid)).getCollectedResources();
+//			
+//			Map<BodyClass, Counter> annMap = new HashMap<>();
+//			
+//			for (ContextData<ContextDataBody> cd : rr) {
+//				ObjectId rid = cd.getTarget().getRecordId();
+//
+//				RecordResource<RecordResource.RecordDescriptiveData> rec = DB.getRecordResourceDAO().getById(rid);
+//				rec.fillAnnotations();
+//					
+//				Set<BodyClass> uris = new HashSet<>();
+//					
+//				for (Annotation ann : rec.getAnnotations()) {
+//					AnnotationBodyTagging body = (AnnotationBodyTagging)ann.getBody();
+//					if (body.getUri() != null) {
+//						uris.add(new BodyClass(body.getUri(), body.getLabel()));
+//					}
+//				}
+//				
+//				for (BodyClass bc : uris) {
+//					Counter cc = annMap.get(bc);
+//					if (cc == null) {
+//						cc = new Counter(0);
+//						annMap.put(bc, cc);
+//					}
+//					
+//					cc.increase();
+//				}
+//			}
+//			
+//			Set<SortClass> sorted = new TreeSet<>();
+//			
+//			for (Map.Entry<BodyClass, Counter> entry : annMap.entrySet()) {
+//				sorted.add(new SortClass(entry.getKey().uri, entry.getKey().label, entry.getValue().getValue()));
+//			}
+//			
+//			ArrayNode array = Json.newObject().arrayNode();
+//
+//			for (SortClass sc : sorted) {
+//				ObjectNode entry = Json.newObject();
+//				entry.put("uri", sc.uri);
+//				entry.put("label", Json.toJson(sc.label));
+//				entry.put("count", sc.count);
+//				
+//				array.add(entry);
+//			}
+//
+//			result.put("annotations", array);
+//			
+//			return ok(result);
+//			
+//		} catch (Exception e) {
+//			result.put("error", e.getMessage());
+//			return internalServerError(result);
+//		}
+//	}
 	
 	public static QueryBuilder getSimilarItemsIndexCollectionQuery(ObjectId colId, DescriptiveData dd) {
 		BoolQueryBuilder query = QueryBuilders.boolQuery();
@@ -404,6 +368,32 @@ public class CollectionIndexController extends WithResourceController	{
 			
 			return uri.equals(((BodyClass)obj).uri);
 		}
+	}
+	
+	public static QueryBuilder getIndexCollectionQuery(ObjectId colId, JsonNode json) {
+		BoolQueryBuilder query = QueryBuilders.boolQuery();
+		query.must(QueryBuilders.termQuery("collectedIn", colId));
+
+		if (json != null) {
+			JsonNode terms = json.get("terms");
+			
+			if (terms != null) {
+				for (Iterator<JsonNode> iter = terms.elements(); iter.hasNext();) {
+					BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
+
+					String s = iter.next().asText();
+
+					for (String f : lookupFields) {
+						boolQuery = boolQuery.should(QueryBuilders.termQuery(f, s));
+					}
+					
+					query.must(boolQuery);
+				}
+			}
+
+		}
+
+		return query;
 	}
 
 }

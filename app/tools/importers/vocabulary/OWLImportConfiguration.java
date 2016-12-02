@@ -16,6 +16,8 @@
 
 package tools.importers.vocabulary;
 
+import model.basicDataTypes.Language;
+
 import org.semanticweb.owlapi.model.OWLClass;
 
 public class OWLImportConfiguration extends VocabularyImportConfiguration {
@@ -25,9 +27,10 @@ public class OWLImportConfiguration extends VocabularyImportConfiguration {
 	String labelProperty;
 	private String URIfilterString;
 	String mainScheme;
-	private String top;
+	public Language defaultLanguage;
+	public String top;
 	
-	public OWLImportConfiguration(String folder, String title, String prefix, String version, String labelProperty, String URIfilterString, String mainScheme, String top) {
+	public OWLImportConfiguration(String folder, String title, String prefix, String version, String labelProperty, String URIfilterString, String mainScheme, Language defLanguage, String top) {
 		super(folder); 
 		this.title = title;
 		this.prefix = prefix;
@@ -35,6 +38,7 @@ public class OWLImportConfiguration extends VocabularyImportConfiguration {
 		this.labelProperty = labelProperty;
 		this.URIfilterString = URIfilterString;
 		this.mainScheme = mainScheme;
+		this.defaultLanguage = defLanguage;
 		this.top = top;
 	}
 	

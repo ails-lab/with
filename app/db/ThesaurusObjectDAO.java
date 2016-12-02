@@ -43,6 +43,12 @@ public class ThesaurusObjectDAO extends DAO<ThesaurusObject> {
 	public ThesaurusObject getByUri(String uri) {
 		return this.findOne("semantic.uri", uri);
 	}
+	
+	public List<ThesaurusObject> getByExactMatch(String uri) {
+		Query<ThesaurusObject> q = this.createQuery().field("semantic.exactMatch").equal(uri);
+		
+		return this.find(q).asList();
+	}
 
 	public void editRecord(String root, ObjectId dbId, JsonNode json) {
 		Query<ThesaurusObject> q = this.createQuery().field("_id").equal(dbId);

@@ -68,7 +68,10 @@ import elastic.ElasticUtils;
 		@Index(fields = @Field(value = "provenance.provider", type = IndexType.ASC), options = @IndexOptions()),
 		@Index(fields = @Field(value = "provenance.resourceId", type = IndexType.ASC), options = @IndexOptions()),
 		@Index(fields = @Field(value = "descriptiveData.label", type = IndexType.ASC), options = @IndexOptions()),
-		@Index(fields = @Field(value = "collectedIn", type = IndexType.ASC), options = @IndexOptions()) })
+		@Index(fields = @Field(value = "annotationIds", type = IndexType.ASC), options = @IndexOptions()),
+		@Index(fields = @Field(value = "collectedIn", type = IndexType.ASC), options = @IndexOptions()) 
+		})
+
 @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
 public class WithResource<T extends DescriptiveData, U extends WithAdmin> {
 

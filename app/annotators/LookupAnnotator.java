@@ -25,7 +25,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.bson.types.ObjectId;
+
 import play.libs.Json;
+import scala.concurrent.Await;
+import scala.concurrent.Future;
+import scala.concurrent.duration.Duration;
 import utils.annotators.AnnotatedObject;
 import utils.annotators.AnnotationIndex;
 import utils.annotators.AnnotationValue;
@@ -41,6 +46,10 @@ import model.basicDataTypes.Language;
 import model.basicDataTypes.MultiLiteral;
 import model.resources.ThesaurusObject;
 import model.resources.ThesaurusObject.SKOSSemantic;
+import actors.annotation.NLPAnnotatorActor;
+import akka.actor.ActorSelection;
+import akka.pattern.Patterns;
+import akka.util.Timeout;
 
 import com.aliasi.chunk.Chunk;
 import com.aliasi.chunk.Chunking;
@@ -54,37 +63,31 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import db.DB;
 
-public class LookupAnnotator extends Annotator {
+public class LookupAnnotator implements TextAnnotator {
+	
+	protected Language lang;
+
+	public static String VOCABULARIES = "VOCABULARIES";
 	
 	protected static Map<Language, LookupAnnotator> annotators = new HashMap<>();
 
 	private ExactDictionaryChunker tt;
 	
-	public static String VOCABULARIES = "VOCABULARIES";
-	
-	public static AnnotatorType getType() {
-		return AnnotatorType.LOOKUP;
-	}
-
 	public static String getName() {
 		return "WITH Dictionary Annotator";
 	}
 
-    public static LookupAnnotator getAnnotator(Language lang, boolean cs) {
+    public static synchronized LookupAnnotator getAnnotator(Language lang, boolean cs) {
     	LookupAnnotator ta = annotators.get(lang);
     	
     	if (ta == null) {
-    		synchronized (LookupAnnotator.class) {
-	    		if (ta == null) {
-		   			ta = new LookupAnnotator(lang, cs);
-		   			annotators.put(lang, ta);
-	    		}
-    		}
+   			ta = new LookupAnnotator(lang, cs);
+   			annotators.put(lang, ta);
    		} 
     	
     	return ta;
     } 
-    
+
 	private LookupAnnotator(Language lang, boolean caseSensitive) {
 		this.lang = lang;
 		
@@ -169,29 +172,28 @@ public class LookupAnnotator extends Annotator {
 
 	}
 	
+	
+	private static Timeout timeout = new Timeout(Duration.create(10000, "seconds"));
 
 	@Override
-	public String getService() {
-		return "";
-	}
-	
-	@Override
-	public List<Annotation> annotate(AnnotationTarget target, Map<String, Object> props) throws Exception {
-		String text = (String)props.get(TEXT);
-		
+	public List<Annotation> annotate(String text, ObjectId user, AnnotationTarget target, Map<String, Object> props) throws Exception {
 		text = strip(text);
 		
 		List<Annotation> res = new ArrayList<>();
 		
 		Chunking chunking = tt.chunk(text);
-		
-		NLPAnnotator sann = NLPAnnotator.getAnnotator(lang);
+
 		AnnotationIndex ai = null;
-		if (sann != null) {
-			ai = sann.analyze(text);
+
+		ActorSelection nlpAnnotator = ((NLPAnnotatorActor.Descriptor)NLPAnnotatorActor.descriptor).getAnnotator(lang, false);
+		if (nlpAnnotator != null) {
+			Future<Object> future2 = Patterns.ask(nlpAnnotator, new NLPAnnotatorActor.ComputeAnnotationIndex(text), timeout);
+			ai = ((NLPAnnotatorActor.AnnotationIndexResult)Await.result(future2, timeout.duration())).ai;
 		}
 		
 		Set<Vocabulary> vocs = (Set<Vocabulary>)props.get(VOCABULARIES);
+		
+		String generator = getName();
 		
 	    for (Chunk chunk : chunking.chunkSet()) {
 	    	JsonNode array = Json.parse(chunk.type());
@@ -205,11 +207,14 @@ public class LookupAnnotator extends Annotator {
 		    	boolean accept = false; 
 		    	loop:
 		    	for (AnnotatedObject ao : aos) {
-		    		for (AnnotationValue value : ao.get("POS")) {
-		    			if (value.getValue().toString().startsWith("NN")) {
-		    				accept = true;
-		    				break loop;
-		    			}
+		    		Set<AnnotationValue> av = ao.get("POS");
+		    		if (av != null) {
+			    		for (AnnotationValue value : av) {
+			    			if (value.getValue().toString().startsWith("NN")) {
+			    				accept = true;
+			    				break loop;
+			    			}
+			    		}
 		    		}
 		    	}
 		    	
@@ -252,7 +257,7 @@ public class LookupAnnotator extends Annotator {
 
 	    		ArrayList<AnnotationAdmin> admins  = new ArrayList<>();
 	    		AnnotationAdmin admin = new Annotation.AnnotationAdmin();
-	    		admin.setGenerator(getName());
+	    		admin.setGenerator(generator);
 	    		admin.setGenerated(new Date());
 	    		admin.setConfidence(-1.0f);
 

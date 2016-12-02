@@ -25,24 +25,27 @@ import java.util.Map;
 import java.util.Set;
 
 import vocabularies.Vocabulary;
+import actors.annotation.AnnotatorActor;
+import actors.annotation.AnnotatorActor.AnnotatorDescriptor;
+import actors.annotation.AnnotatorActor.AnnotatorDescriptor.AnnotatorType;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
 public class AnnotatorConfig {
-	private Class<? extends Annotator> annotator;
+	private AnnotatorDescriptor ad;
 	private Map<String, Object> props;
 	
-	public AnnotatorConfig(Class<? extends Annotator> annotator, Map<String, Object> props) {
-		this.setAnnotatorClass(annotator);
+	public AnnotatorConfig(AnnotatorDescriptor ad, Map<String, Object> props) {
+		this.setAnnotatorDescriptor(ad);
 		this.setProps(props);
 	}
 
-	public Class<? extends Annotator> getAnnotatorClass() {
-		return annotator;
+	public AnnotatorDescriptor getAnnotatorDesctriptor() {
+		return ad;
 	}
 
-	public void setAnnotatorClass(Class<? extends Annotator> annotator) {
-		this.annotator = annotator;
+	public void setAnnotatorDescriptor(AnnotatorDescriptor ad) {
+		this.ad = ad;
 	}
 
 	public Map<String, Object> getProps() {
@@ -54,41 +57,56 @@ public class AnnotatorConfig {
 	}
 	
 	public String toString() {
-		return annotator.getName() + " -- " + (props != null ? props.toString() : "null");
+		return ad.getName() + " -- " + (props != null ? props.toString() : "null");
 	}
 	
 	public static List<AnnotatorConfig> createAnnotationConfigs(JsonNode json) {
 		List<AnnotatorConfig> annConfigs = new ArrayList<>();
 
-		Map<Class<? extends Annotator>, Set<Vocabulary>> annotatorMap = new HashMap<>();
+		Map<AnnotatorDescriptor, Set<Vocabulary>> annotatorMap = new HashMap<>();
 
 		for (Iterator<JsonNode> iter = json.elements(); iter.hasNext();) {
 			String entry = iter.next().textValue();
 			String[] v = entry.split("/");
 			
-			Class<? extends Annotator> annotator;
+			AnnotatorDescriptor ad;
 			try {
-				annotator = (Class<? extends Annotator>)Class.forName("annotators." + v[0]);
+				ad = (AnnotatorDescriptor)Class.forName("actors.annotation." + v[0] + "Actor").getField("descriptor").get(null);
 			
+				Map<String, Object> props = new HashMap<>();
+				try {
+					AnnotatorType type = ad.getType();
+					
+					if (type == AnnotatorType.LOOKUP || type == AnnotatorType.NER) {
+						props.put(AnnotatorActor.TEXT_ANNOTATOR, true);
+						props.put(AnnotatorActor.TEXT_FIELDS, AnnotatorActor.textfields);
+					} else {
+						props.put(AnnotatorActor.IMAGE_ANNOTATOR, true);
+					}
+
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				
 				if (v.length == 1) {
-					annConfigs.add(new AnnotatorConfig(annotator, null));
+					annConfigs.add(new AnnotatorConfig(ad, props));
 				} else if (v.length == 2) {
 					Vocabulary voc = Vocabulary.getVocabulary(v[1]);
 					
-					Set<Vocabulary> vocSet = annotatorMap.get(annotator);
+					Set<Vocabulary> vocSet = annotatorMap.get(ad);
 					if (vocSet == null) {
 						vocSet = new HashSet<Vocabulary>();
-						annotatorMap.put(annotator, vocSet);
+						annotatorMap.put(ad, vocSet);
 						
-						Map<String, Object> props = new HashMap<>();
 						props.put(LookupAnnotator.VOCABULARIES, vocSet);
 	
-						annConfigs.add(new AnnotatorConfig(annotator, props));
+						annConfigs.add(new AnnotatorConfig(ad, props));
 					}
 					
 					vocSet.add(voc);
 				}
-			} catch (ClassNotFoundException e) {
+			} catch (Exception e) {
 				e.printStackTrace();
 			}
 

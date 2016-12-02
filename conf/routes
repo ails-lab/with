@@ -97,6 +97,7 @@ GET	     /collection/:id 	        			controllers.CollectionObjectController.getC
 PUT		 /collection/:id 						controllers.CollectionObjectController.editCollectionObject(id)
 DELETE   /collection/:id	                    controllers.CollectionObjectController.deleteCollectionObject(id)
 
+POST	/collection/:id/annotation						controllers.CollectionObjectController.addAnnotation(id)
 # Exhibition Controller
 POST	 /exhibition/:id/addBackgroundImg		controllers.ExhibitionObjectController.addBackgroundImg(id)
 
@@ -182,17 +183,21 @@ GET 	/thesaurus/suggestions						controllers.ThesaurusController.getSuggestions(
 
 #Thesaurus gui
 POST	/collection/:id/facets 	        			controllers.CollectionIndexController.getCollectionFacets(id)
-POST	/collection/:id/selectionlist		   			controllers.CollectionObjectController.facetedListRecordResources(id, format: String ?="noContent", start: Integer ?=0, count: Integer ?=10)
-GET 	/collection/:id/similarlist		   			controllers.CollectionObjectController.similarListRecordResources(id, itemid: java.lang.String, format: String ?="noContent", start: Integer ?=0, count: Integer ?=10)
+POST	/collection/:id/selectionlist		   			controllers.CollectionObjectController.facetedListRecordResources(id, format: String ?="noContent", start: Integer ?=0, count: Integer ?=10, profile: String ?="MEDIUM", locale: play.libs.F.Option[java.lang.String])
+GET 	/collection/:id/similarlist		   			controllers.CollectionObjectController.similarListRecordResources(id, itemid: java.lang.String, format: String ?="noContent", start: Integer ?=0, count: Integer ?=10, profile: String ?="MEDIUM", locale: play.libs.F.Option[java.lang.String])
 #POST	/collection/:id/keywords 	        			controllers.CollectionIndexController.getCollectionKeywords(id)
-GET		/collection/:id/annotationlist				controllers.CollectionIndexController.getCollectionAnnotations(id)
+#GET		/collection/:id/annotationlist				controllers.CollectionIndexController.getCollectionAnnotations(id)
 
 GET     /source/dbpedia/lookup						controllers.DBPediaController.dbpediaLookup(type: java.lang.String, query: java.lang.String, start: Integer ?=0, count: Integer ?=10)
 
 #Annotations
 GET		/record/:id/listAnnotations				    controllers.RecordResourceController.getAnnotations(id)
-POST		/record/:id/annotate						controllers.RecordResourceController.annotateRecord(id)
-POST		/collection/:id/annotate						controllers.CollectionObjectController.annotateCollection(id)
+POST		/record/:id/annotate					controllers.RecordResourceController.annotateRecord(id)
+POST		/collection/:id/annotate				controllers.CollectionObjectController.annotateCollection(id)
 GET		/record/:id/deleteRejectedAnnotations		controllers.RecordResourceController.deleteRejectedAnnotations(id)
 
+POST	/annotation/annotateRequestResult					controllers.AnnotationRequestController.newAnnotations()	
 GET			/collection/api/removeIdsOfDeletedRecords	controllers.WithResourceController.removeIdsOfDeletedRecords()		
+
+GET	     /collection/:id/annotations 	        			controllers.CollectionObjectController.getAnnotations(id)
+GET	     /collection/:id/annotationSummary 	        			controllers.CollectionObjectController.getAnnotationSummary(id, mode: String ?="FLAT")

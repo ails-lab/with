@@ -16,6 +16,8 @@
 
 package model;
 
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -204,4 +206,27 @@ public class DescriptiveData {
 	public void setMetadataQuality(Quality metadataQuality) {
 		this.metadataQuality = metadataQuality;
 	}
+	
+	public Collection<String> collectURIs() {
+		Collection<String> res = new HashSet<>();
+
+		if (keywords != null && keywords.getURI() != null ) {
+			res.addAll(keywords.getURI());
+		}
+		
+		if (country != null && country.getURI() != null) {
+			res.addAll(country.getURI());
+		}
+		
+		if (city != null && city.getURI() != null) {
+			res.addAll(city.getURI());
+		}
+
+//		if (rdfType != null) {
+//			res.add(rdfType.toString());
+//		}
+		
+		return res;
+	} 
+	
 }
