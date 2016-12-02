@@ -575,6 +575,13 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 		}
 		return count;
 	}
+	
+	public List<RecordResource> getFeaturedRecords() {
+		Query<RecordResource> q = this.createQuery().disableValidation()
+				.field("annotationIds").exists().field("annotationIds")
+				.greaterThanOrEq(5).limit(10);
+		return this.find(q).asList();
+	}
 
 	public List<RecordResource> getByMedia(String mediaUrl) {
 		Query<RecordResource> q = this.createQuery().disableValidation()
