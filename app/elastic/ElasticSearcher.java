@@ -22,13 +22,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 
-import play.Logger;
-import play.Logger.ALogger;
-import search.Filter;
-import utils.Tuple;
-
+import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.search.SearchType;
@@ -44,24 +39,29 @@ import org.elasticsearch.index.query.GeoDistanceQueryBuilder;
 import org.elasticsearch.index.query.MatchQueryBuilder;
 import org.elasticsearch.index.query.MoreLikeThisQueryBuilder;
 import org.elasticsearch.index.query.NestedQueryBuilder;
-import org.elasticsearch.index.query.OrQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.QueryStringQueryBuilder;
-import org.elasticsearch.index.query.TermQueryBuilder;
 import org.elasticsearch.index.query.QueryStringQueryBuilder.Operator;
+import org.elasticsearch.index.query.RangeQueryBuilder;
+import org.elasticsearch.index.query.TermQueryBuilder;
 import org.elasticsearch.index.query.TermsQueryBuilder;
 import org.elasticsearch.index.query.functionscore.FunctionScoreQueryBuilder;
 import org.elasticsearch.index.query.functionscore.ScoreFunctionBuilder;
 import org.elasticsearch.index.query.functionscore.ScoreFunctionBuilders;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
 import org.elasticsearch.search.aggregations.bucket.terms.TermsBuilder;
-import org.elasticsearch.search.suggest.SuggestBuilders;
 import org.elasticsearch.search.suggest.SuggestBuilder.SuggestionBuilder;
+import org.elasticsearch.search.suggest.SuggestBuilders;
 import org.elasticsearch.search.suggest.completion.CompletionSuggestionBuilder;
 import org.elasticsearch.search.suggest.completion.CompletionSuggestionFuzzyBuilder;
 import org.elasticsearch.search.suggest.phrase.PhraseSuggestionBuilder;
 import org.elasticsearch.search.suggest.term.TermSuggestionBuilder;
+
+import play.Logger;
+import play.Logger.ALogger;
+import search.Filter;
+import utils.Tuple;
 
 public class ElasticSearcher {
 	public static final int DEFAULT_RESPONSE_COUNT = 10;
@@ -168,14 +168,30 @@ public class ElasticSearcher {
 
 		BoolQueryBuilder bool = QueryBuilders.boolQuery();
 		for(Filter f: filters) {
-			if(!f.exact)
-				bool.should(funcScoreQuery(f.fieldId, f.value));
-			else
-				bool.should(termQuery(f.fieldId, f.value));
+			if( StringUtils.isNotEmpty(f.from) || StringUtils.isNotEmpty(f.to)) {
+				bool.should( rangeQuery( f.fieldId+".string", f.from, f.to ));
+			} else {
+				if(!f.exact)
+					bool.should(funcScoreQuery(f.fieldId, f.value));
+				else
+					bool.should(termQuery(f.fieldId, f.value));
+			}
 		}
 		return bool;
 		}
 
+	public QueryBuilder rangeQuery( String field, String from, String to ) {
+		RangeQueryBuilder q = QueryBuilders.rangeQuery( field );
+		if( StringUtils.isNotEmpty(from )) {
+			q.from( from );
+			q.includeLower(true);
+		}
+		if( StringUtils.isNotEmpty( to )) {
+			q.to( to );
+			q.includeUpper(true);
+		}
+		return q;
+	}
 
 	/* Bool Must NOT query */
 	public QueryBuilder boolMustNotQuery(List<Filter> filters) {
