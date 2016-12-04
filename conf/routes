@@ -180,7 +180,7 @@ DELETE  /thesaurus/deleteThesaurus/:name	        controllers.ThesaurusController
 GET 	/thesaurus/getTerm		   					controllers.ThesaurusController.getThesaurusTerm(uri: String)
 GET 	/thesaurus/listVocabularies		   				controllers.ThesaurusController.listVocabularies()
 GET 	/thesaurus/listAnnotators		   				controllers.ThesaurusController.listAnnotators()
-GET 	/thesaurus/suggestions						controllers.ThesaurusController.getSuggestions(word: String)
+GET 	/thesaurus/suggestions						controllers.ThesaurusController.getSuggestions(word: String, namespaces: String ?= "")
 
 #Thesaurus gui
 POST	/collection/:id/facets 	        			controllers.CollectionIndexController.getCollectionFacets(id)
