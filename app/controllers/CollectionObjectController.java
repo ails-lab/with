@@ -1731,7 +1731,7 @@ public class CollectionObjectController extends WithResourceController {
 				AnnotationBodyTagging body = ((AnnotationBodyTagging)ann.getBody());
 
 				String uri = body.getUri();
-				String uriVocabulary = body.getUriVocabulary();
+				String uriVocabulary = body.getUriVocabulary().toLowerCase();
 				MultiLiteral ml = ((AnnotationBodyTagging)ann.getBody()).getLabel();
 
 				if (groupBy == 0) {
