@@ -329,6 +329,9 @@ public class ThesaurusController extends Controller {
 	
 	public static Result getSuggestions(String word, String namespaces) {
 		
+		ObjectNode response = Json.newObject();
+		response.put("request", word);
+
 		try {
 			ArrayNode terms = Json.newObject().arrayNode();
 			
@@ -447,7 +450,10 @@ public class ThesaurusController extends Controller {
 				
 				Collections.sort(suggestions);
 				
-				for (SearchSuggestion ss : suggestions) {
+				int limit = Math.min(100, suggestions.size());
+				for (int i = 0; i < limit; i++) {
+					SearchSuggestion ss = suggestions.get(i);
+					
 					ObjectNode element = Json.newObject();
 					element.put("id", ss.id);
 
@@ -470,7 +476,9 @@ public class ThesaurusController extends Controller {
 				}
 			}
 			
-			return ok(terms);
+			response.put("results", terms);
+			
+			return ok(response);
 
 		} catch (Exception e) {
 			e.printStackTrace();
