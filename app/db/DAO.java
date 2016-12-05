@@ -209,6 +209,28 @@ public class DAO<E> extends BasicDAO<E, ObjectId> {
 			});
 	}
 	
+	/**
+	 * Get a Stream of objects that are partly filled, not including all of them into memory.
+	 * @param q
+	 * @param fieldlist
+	 * @return
+	 */
+	public Stream<E> find( Query<E> q, String... includedFields ) {
+		return StreamSupport.stream( super.find(
+				q.retrievedFields(true, includedFields)).spliterator(), false );
+	}
+	
+	
+	/**
+	 * Get a Stream of objects that are partly filled, not including all of them into memory.
+	 * @param fieldlist
+	 * @return
+	 */
+	public Stream<E> findAll( String... includedFields ) {
+		Query<E> q = createQuery();
+		return StreamSupport.stream( super.find( 
+				q .retrievedFields(true, includedFields)).spliterator(), false );
+	}
 	
 	public DBObject toDBObj( String json ) {
 		return (DBObject) JSON.parse( json );

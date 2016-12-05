@@ -21,27 +21,11 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
-
-import model.annotations.Annotation;
-import model.annotations.Annotation.AnnotationAdmin;
-import model.annotations.bodies.AnnotationBody;
-import model.annotations.bodies.AnnotationBodyTagging;
-import model.basicDataTypes.Language;
-import model.basicDataTypes.WithAccess;
-import model.basicDataTypes.WithAccess.Access;
-import model.resources.RecordResource;
-import model.resources.WithResourceType;
+import java.util.Set;
 
 import org.bson.types.ObjectId;
-
-import play.Logger;
-import play.Logger.ALogger;
-import play.libs.F.Some;
-import play.libs.Json;
-import play.mvc.Controller;
-import play.mvc.Result;
-import utils.Tuple;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -53,6 +37,23 @@ import db.DB;
 import elastic.ElasticSearcher;
 import elastic.ElasticSearcher.SearchOptions;
 import elastic.ElasticUtils;
+import model.annotations.Annotation;
+import model.annotations.Annotation.AnnotationAdmin;
+import model.annotations.bodies.AnnotationBody;
+import model.basicDataTypes.Language;
+import model.basicDataTypes.WithAccess;
+import model.basicDataTypes.WithAccess.Access;
+import model.resources.RecordResource;
+import model.resources.WithResourceType;
+import play.Logger;
+import play.Logger.ALogger;
+import play.libs.F.Promise;
+import play.libs.F.Some;
+import play.libs.Json;
+import play.mvc.Controller;
+import play.mvc.Result;
+import sources.core.ParallelAPICall;
+import utils.Tuple;
 
 @SuppressWarnings({ "rawtypes", "unchecked", "deprecation" })
 public class AnnotationController extends Controller {
@@ -193,6 +194,48 @@ public class AnnotationController extends Controller {
 		return ok(result);
 	}
 
+	public static Promise<Result> getDeepAnnotationCount(String groupId) {
+		ObjectNode result = Json.newObject();
+		// everything on the frontend thread queue
+		return ParallelAPICall.createPromise(()-> {
+			try {
+				ObjectId group = new ObjectId(groupId);
+				List<ObjectId> allSharedRecords = DB.getRecordResourceDAO().allIdsSharedWithGroup(group);
+				
+				// iterate ove all Annotations and filter for records in this list
+				// first make it a set
+				Set<ObjectId> allIds = new HashSet<ObjectId>();
+				allIds.addAll(allSharedRecords);
+				
+				// get an all annotation iterator (ideally project to the fields you want
+				utils.Counter  count= new utils.Counter(0), approved = new utils.Counter(0),
+						rejected = new utils.Counter(0);
+				
+				DB.getAnnotationDAO().findAll("target.recordId","score")
+					.filter( 
+							 annotation -> allIds.contains(annotation.getTarget().getRecordId() ) )
+					.forEach( annotation -> {
+						count.increase();
+						if( annotation.getScore() != null ) {
+							if( annotation.getScore().getApprovedBy() != null ) 
+								approved.increase(annotation.getScore().getApprovedBy().size());
+							if( annotation.getScore().getRejectedBy() != null ) 
+								rejected.increase(annotation.getScore().getRejectedBy().size());					
+						}
+					});
+				
+				result.put( "all", count.getValue())
+					.put( "approvals", approved.getValue())
+					.put( "rejects", rejected.getValue());
+				
+				return ok(result);
+			} catch(Exception e) {
+				log.error( "Annotation counter failed", e );
+				return badRequest();
+			}			
+		}, ParallelAPICall.Priority.FRONTEND);			
+	}
+	
 	
 	public static Result getUserAnnotations(int offset, int count) {
 		ObjectId withUser = WithController.effectiveUserDbId();

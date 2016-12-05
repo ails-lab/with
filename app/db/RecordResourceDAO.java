@@ -534,6 +534,19 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 
 	}
 
+	/**
+	 * Any records shared in anyway with this group is returned in the id list.
+	 * @param groupId
+	 * @return
+	 */
+	public List<ObjectId> allIdsSharedWithGroup( ObjectId   groupId ) {
+		Query<RecordResource> q = this.createQuery().disableValidation()
+				.field( "administrative.collectedBy.user").equal(groupId);
+		List<ObjectId> res = findIds(q);
+		return res;
+	}
+	
+	
 	public long countAnnotations(ObjectId collectionId) {
 		int count = 0;
 		Query<RecordResource> q = this.createQuery().disableValidation()
