@@ -19,7 +19,7 @@ dependencyOverrides += "io.netty" % "netty" % "3.9.9.Final"
 libraryDependencies ++= Seq(
 //  javaJdbc,
 //  javaEbean,
-//  cache,
+  cache,
   filters,
   javaWs,
  "org.mongodb.morphia" % "morphia" % "1.0.1",

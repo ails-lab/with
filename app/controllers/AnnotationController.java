@@ -47,6 +47,7 @@ import model.resources.RecordResource;
 import model.resources.WithResourceType;
 import play.Logger;
 import play.Logger.ALogger;
+import play.cache.Cached;
 import play.libs.F.Promise;
 import play.libs.F.Some;
 import play.libs.Json;
@@ -194,6 +195,8 @@ public class AnnotationController extends Controller {
 		return ok(result);
 	}
 
+	// caching 5 minutes should be ok
+	@Cached(key = "annotationCounts", duration=300 )
 	public static Promise<Result> getDeepAnnotationCount(String groupId) {
 		ObjectNode result = Json.newObject();
 		// everything on the frontend thread queue
