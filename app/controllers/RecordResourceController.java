@@ -465,7 +465,16 @@ public class RecordResourceController extends WithResourceController {
 		return ok(recordsList);
 	}
 	
-	public static Result getRandomAnnotatedRecords( String groupId, int count ) {
+	/**
+	 * Get records from this group (read write owned doesnt matter )
+	 * How many and how many annotations they have to have minimally.
+	 * The minimum can only be 1,2,3 as each needs a different index to work.
+	 * @param groupId
+	 * @param count
+	 * @param minimum
+	 * @return
+	 */
+	public static Result getRandomAnnotatedRecords( String groupId, int count, int minimum ) {
 		List<RecordResource> records = new ArrayList<RecordResource>();
 		ArrayNode recordsList = Json.newObject().arrayNode();
 		
@@ -474,7 +483,7 @@ public class RecordResourceController extends WithResourceController {
 			 groupObjId = new ObjectId( groupId );
 		}
 		
-		records = DB.getRecordResourceDAO().getRandomAnnotatedRecords( groupObjId, count );
+		records = DB.getRecordResourceDAO().getRandomAnnotatedRecords( groupObjId, count, minimum );
 		
 		for (RecordResource record : records) {
 			Some<String> locale = new Some(Language.DEFAULT.toString());
