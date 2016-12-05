@@ -42,6 +42,7 @@ import model.resources.collection.CollectionObject;
 import model.resources.collection.CollectionObject.CollectionAdmin;
 import model.usersAndGroups.User;
 
+import org.apache.commons.lang3.StringUtils;
 import org.bson.types.ObjectId;
 
 import play.Logger;
@@ -437,11 +438,16 @@ public class RecordResourceController extends WithResourceController {
 		return ok(recordsList);
 	}
 	
-	public static Result getFeaturedAnnotatedRecords() {
+	public static Result getRandomAnnotatedRecords( String groupId, int count ) {
 		List<RecordResource> records = new ArrayList<RecordResource>();
 		ArrayNode recordsList = Json.newObject().arrayNode();
 		
-		records = DB.getRecordResourceDAO().getFeaturedRecords();
+		ObjectId groupObjId = null;
+		if( StringUtils.isNotEmpty(groupId)) {
+			 groupObjId = new ObjectId( groupId );
+		}
+		
+		records = DB.getRecordResourceDAO().getRandomAnnotatedRecords( groupObjId, count );
 		
 		for (RecordResource record : records) {
 			Some<String> locale = new Some(Language.DEFAULT.toString());

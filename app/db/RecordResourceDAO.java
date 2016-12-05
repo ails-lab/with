@@ -27,6 +27,19 @@ import java.util.List;
 import java.util.Set;
 import java.util.function.Function;
 
+import org.apache.commons.beanutils.BeanToPropertyValueTransformer;
+import org.apache.commons.collections.CollectionUtils;
+import org.bson.types.ObjectId;
+import org.mongodb.morphia.query.Criteria;
+import org.mongodb.morphia.query.CriteriaContainer;
+import org.mongodb.morphia.query.Query;
+import org.mongodb.morphia.query.UpdateOperations;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.mongodb.BasicDBObject;
+
+import controllers.WithController.Action;
+import elastic.ElasticEraser;
 import model.EmbeddedMediaObject;
 import model.EmbeddedMediaObject.MediaVersion;
 import model.annotations.Annotation;
@@ -37,25 +50,10 @@ import model.basicDataTypes.WithAccess.Access;
 import model.basicDataTypes.WithAccess.AccessEntry;
 import model.resources.RecordResource;
 import model.resources.collection.CollectionObject;
-
-import org.apache.commons.beanutils.BeanToPropertyValueTransformer;
-import org.apache.commons.collections.CollectionUtils;
-import org.bson.types.ObjectId;
-import org.mongodb.morphia.query.Criteria;
-import org.mongodb.morphia.query.CriteriaContainer;
-import org.mongodb.morphia.query.Query;
-import org.mongodb.morphia.query.UpdateOperations;
-
 import play.Logger;
 import play.Logger.ALogger;
 import scala.util.Random;
 import sources.core.ParallelAPICall;
-
-import com.fasterxml.jackson.databind.JsonNode;
-import com.mongodb.BasicDBObject;
-
-import controllers.WithController.Action;
-import elastic.ElasticEraser;
 
 /*
  * This class is the aggregator of methods
@@ -577,18 +575,23 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 		return count;
 	}
 	
-	public List<RecordResource> getFeaturedRecords() {
-		// Range : rn.nextInt(max-min+1)+min
-		Random rn = new Random();
-		// Random number of annotations between 3 and 7
-		int n = rn.nextInt(5) + 3;
-		// Random offset between 0 and 5
-		int o = rn.nextInt(6);		
-		
+	public List<RecordResource> getRandomAnnotatedRecords( ObjectId groupId, int count ) {
+		ArrayList<RecordResource> res =  new ArrayList<RecordResource>();
+		// TODO: better random choice here
+
 		Query<RecordResource> q = this.createQuery().disableValidation()
-				.field("annotationIds").exists().field("annotationIds")
-				.sizeEq(n).offset(o).limit(10);
-		return this.find(q).asList();
+			.field("annotationIds.2").notEqual(null)
+			.field("administrative.collectedBy.user").equal( groupId )
+			.field( "administrative.access.isPublic").equal( Boolean.TRUE );
+		
+		int offset = (int) q.countAll();
+		Random rn = new Random();
+		
+		offset = rn.nextInt( offset - count );
+		
+			// TODO: Only public records would be a good choice here
+
+		return this.find(q.offset( offset).limit(count)).asList();
 	}
 
 	public List<RecordResource> getByMedia(String mediaUrl) {
