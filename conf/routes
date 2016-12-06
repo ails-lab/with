@@ -51,6 +51,7 @@ GET     /record/multiple						controllers.RecordResourceController.getMultipleRe
 GET		/record/:id							    controllers.RecordResourceController.getRecordResource(id, format: play.libs.F.Option[String], profile: String ?="MEDIUM", locale: play.libs.F.Option[java.lang.String])
 PUT		/record/:id								controllers.RecordResourceController.editRecordResource(id)
 
+GET 	/annotation/leaderboard					controllers.AnnotationController.leaderboard( groupId: String )
 GET		/annotation/:id							controllers.AnnotationController.getAnnotation(id)
 DELETE	/annotation/:id							controllers.AnnotationController.deleteAnnotation(id)
 GET		/annotation/:id/approve					controllers.AnnotationController.approveAnnotation(id)

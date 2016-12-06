@@ -37,6 +37,7 @@ import db.DB;
 import elastic.ElasticSearcher;
 import elastic.ElasticSearcher.SearchOptions;
 import elastic.ElasticUtils;
+import model.EmbeddedMediaObject.MediaVersion;
 import model.annotations.Annotation;
 import model.annotations.Annotation.AnnotationAdmin;
 import model.annotations.bodies.AnnotationBody;
@@ -45,6 +46,7 @@ import model.basicDataTypes.WithAccess;
 import model.basicDataTypes.WithAccess.Access;
 import model.resources.RecordResource;
 import model.resources.WithResourceType;
+import model.usersAndGroups.User;
 import play.Logger;
 import play.Logger.ALogger;
 import play.cache.Cached;
@@ -239,6 +241,29 @@ public class AnnotationController extends Controller {
 		}, ParallelAPICall.Priority.FRONTEND);			
 	}
 	
+	public static Result leaderboard( String groupId ) {
+		try {
+			ArrayNode result = Json.newObject().arrayNode();
+			// exampleusers
+			String[] userIds = new String[]{ "55ba1683e4b0b5e8f207703d", "55bb25a2e4b053916b9b43ae", "55bb7a16e4b0eb4a3e2459d9", "56f30bbf4c747947f70bae66", "5704e12a4c7479787943b72c" };
+			int count = 100;
+			for( String uid: userIds ) {
+				User u = DB.getUserDAO().get( new ObjectId( uid ));
+				ObjectNode unode = Json.newObject();
+				unode.put( "userId", u.getDbId().toHexString());
+				unode.put( "annotationCount", count );
+				unode.put("avatar", u.getAvatar().get( MediaVersion.Square ));
+				unode.put("username", u.getUsername());
+				result.add( unode);
+				count -= 15;
+			}
+
+			return ok(result);
+		} catch( Exception e ) {
+			log.error( "Problem with leaderboard", e );
+			return badRequest(e.getMessage());
+		}
+	}
 	
 	public static Result getUserAnnotations(int offset, int count) {
 		ObjectId withUser = WithController.effectiveUserDbId();
