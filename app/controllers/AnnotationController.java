@@ -22,7 +22,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.Hashtable;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.bson.types.ObjectId;
@@ -216,7 +218,7 @@ public class AnnotationController extends Controller {
 				utils.Counter  count= new utils.Counter(0), approved = new utils.Counter(0),
 						rejected = new utils.Counter(0);
 				
-				DB.getAnnotationDAO().findAll("target.recordId","score")
+				DB.getAnnotationDAO().findAll("target.recordId","score","annotators.withCreator")
 					.filter( 
 							 annotation -> allIds.contains(annotation.getTarget().getRecordId() ) )
 					.forEach( annotation -> {
@@ -241,28 +243,85 @@ public class AnnotationController extends Controller {
 		}, ParallelAPICall.Priority.FRONTEND);			
 	}
 	
-	public static Result leaderboard( String groupId ) {
-		try {
+	@Cached(key = "leaderBoard", duration=10 )
+	public static Promise<Result> leaderboard( String groupId ) {
 			ArrayNode result = Json.newObject().arrayNode();
-			// exampleusers
-			String[] userIds = new String[]{ "55ba1683e4b0b5e8f207703d", "55bb25a2e4b053916b9b43ae", "55bb7a16e4b0eb4a3e2459d9", "56f30bbf4c747947f70bae66", "5704e12a4c7479787943b72c" };
-			int count = 100;
-			for( String uid: userIds ) {
-				User u = DB.getUserDAO().get( new ObjectId( uid ));
-				ObjectNode unode = Json.newObject();
-				unode.put( "userId", u.getDbId().toHexString());
-				unode.put( "annotationCount", count );
-				unode.put("avatar", u.getAvatar().get( MediaVersion.Square ));
-				unode.put("username", u.getUsername());
-				result.add( unode);
-				count -= 15;
-			}
 
-			return ok(result);
-		} catch( Exception e ) {
-			log.error( "Problem with leaderboard", e );
-			return badRequest(e.getMessage());
-		}
+			// everything on the frontend thread queue
+			return  ParallelAPICall.createPromise(()-> {
+				try {
+					ObjectId group = new ObjectId(groupId);
+					List<ObjectId> allSharedRecords = DB.getRecordResourceDAO().allIdsSharedWithGroup(group);
+					
+					// iterate ove all Annotations and filter for records in this list
+					// first make it a set
+					Set<ObjectId> allIds = new HashSet<ObjectId>();
+					allIds.addAll(allSharedRecords);
+					
+					Hashtable<String,utils.Counter> counts = new Hashtable<String,utils.Counter>() {
+						public utils.Counter get( Object key) {
+							utils.Counter c = super.get( key );
+							if( c == null ) {
+								c = new utils.Counter(0);
+								put( key.toString(), c );
+							}
+							return c;
+						}
+					};
+					
+					// get an all annotation iterator (ideally project to the fields you want
+					
+					DB.getAnnotationDAO().findAll("target.recordId","score","annotators.withCreator")
+						.filter( 
+								 annotation -> allIds.contains(annotation.getTarget().getRecordId() ) )
+						.forEach( annotation -> {
+							for( Object obj : annotation.getAnnotators()) {
+								AnnotationAdmin aa = (AnnotationAdmin) obj;
+								if( aa.getWithCreator() != null ) {
+									String userId = aa.getWithCreator().toHexString();
+									counts.get( userId ).increase();
+								}
+							}
+							if( annotation.getScore() != null ) {
+								if( annotation.getScore().getApprovedBy() != null ) {
+									for(ObjectId userId:  annotation.getScore().getApprovedBy())
+										counts.get( userId.toHexString()).increase();
+								}
+								if( annotation.getScore().getRejectedBy() != null ) {
+									for(ObjectId userId:  annotation.getScore().getRejectedBy())
+										counts.get( userId.toHexString()).increase();
+								}
+							}
+						});
+
+					// now find the 10 most active
+					ArrayList<Map.Entry<String,utils.Counter>> resList = new ArrayList<Map.Entry<String,utils.Counter>>();
+					resList.addAll( counts.entrySet());
+					resList.sort((Map.Entry<String,utils.Counter> a, Map.Entry<String,utils.Counter> b) -> {
+						return Integer.compare( b.getValue().getValue(), a.getValue().getValue()); 
+					} );
+				
+					int count = 10;
+					for( Map.Entry<String, utils.Counter> e: resList ) {
+						User u = DB.getUserDAO().get( new ObjectId(e.getKey() ));
+						if( u != null ) {
+							ObjectNode unode = Json.newObject();
+							unode.put( "userId", u.getDbId().toHexString());
+							unode.put( "annotationCount", e.getValue().getValue() );
+							if(( u.getAvatar() != null) && (u.getAvatar().get( MediaVersion.Square) != null ))
+								unode.put("avatar", u.getAvatar().get( MediaVersion.Square ));
+							unode.put("username", u.getUsername());
+							result.add( unode);
+							count--;
+							if( count == 0 ) break;
+						}
+					}
+					return ok( result );
+				} catch(Exception e) {
+					log.error( "Annotation leaderboard failed", e );
+					return badRequest();
+				}			
+			}, ParallelAPICall.Priority.FRONTEND);			
 	}
 	
 	public static Result getUserAnnotations(int offset, int count) {
