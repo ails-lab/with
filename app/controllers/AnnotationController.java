@@ -243,7 +243,7 @@ public class AnnotationController extends Controller {
 		}, ParallelAPICall.Priority.FRONTEND);			
 	}
 	
-	@Cached(key = "leaderBoard", duration=10 )
+	@Cached(key = "leaderBoard", duration=300 )
 	public static Promise<Result> leaderboard( String groupId ) {
 			ArrayNode result = Json.newObject().arrayNode();
 
