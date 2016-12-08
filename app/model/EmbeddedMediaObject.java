@@ -82,7 +82,11 @@ public class EmbeddedMediaObject {
 			}
 
 
-		};
+		},
+		// WEBPAGE indicates a media that is only playable in given URL
+		// it could be because of restricted access or players not 
+		// generally available. The recommended way is an iframe ... 
+		WEBPAGE;
 
 		public static WithMediaType getType(String string) {
 			for (WithMediaType v : WithMediaType.values()) {
