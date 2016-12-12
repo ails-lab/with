@@ -17,13 +17,14 @@
 package model;
 
 import java.util.Date;
-
-import org.bson.types.ObjectId;
+import java.util.List;
+import model.resources.collection.CollectionObject;
+import vocabularies.Vocabulary;
 
 public class Campaign {
 
 	public static enum BadgeType {
-		Bronze, Silver, Gold
+		None, Bronze, Silver, Gold
 	}
 	
 	
@@ -33,18 +34,9 @@ public class Campaign {
 	private String description;
 	private long target;
 	private BadgeType badge;
+	private List<Vocabulary> vocabularies;
+	private List<CollectionObject> collections;
 	
-	
-	public BadgeType getBadge(long points) {
-		if (points < 50)
-			badge = BadgeType.Bronze;
-		else if (points < 100)
-			badge = BadgeType.Silver;
-		else
-			badge = BadgeType.Gold;
-		
-		return badge;		
-	}
 	
 	public Boolean getActive() {
 		return active;
@@ -84,6 +76,35 @@ public class Campaign {
 
 	public void setTarget(long target) {
 		this.target = target;
+	}
+	
+	public BadgeType getBadge(int points) {
+		if (points >= 150)
+			badge = BadgeType.Gold;
+		else if (points >= 100)
+			badge = BadgeType.Silver;
+		else if (points >= 50)
+			badge = BadgeType.Bronze;
+		else
+			badge = BadgeType.None;
+		
+		return badge;		
+	}
+
+	public List<Vocabulary> getVocabularies() {
+		return vocabularies;
+	}
+
+	public void setVocabularies(List<Vocabulary> vocabularies) {
+		this.vocabularies = vocabularies;
+	}
+
+	public List<CollectionObject> getCollections() {
+		return collections;
+	}
+
+	public void setCollections(List<CollectionObject> collections) {
+		this.collections = collections;
 	}
 	
 }
