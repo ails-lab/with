@@ -14,29 +14,36 @@
  */
 
 
-package model.usersAndGroups;
+package model;
 
 import java.util.Date;
 
 import org.bson.types.ObjectId;
 
-public class Campaign extends UserGroup {
+public class Campaign {
 
-	public static enum Badge {
+	public static enum BadgeType {
 		Bronze, Silver, Gold
 	}
 	
-	private Badge badge;
 	
 	private Boolean active; 
 	private Date startDate;
 	private Date endDate;
-	
 	private String description;
 	private long target;
+	private BadgeType badge;
 	
-	public Badge getBadge() {
-		return badge;
+	
+	public BadgeType getBadge(long points) {
+		if (points < 50)
+			badge = BadgeType.Bronze;
+		else if (points < 100)
+			badge = BadgeType.Silver;
+		else
+			badge = BadgeType.Gold;
+		
+		return badge;		
 	}
 	
 	public Boolean getActive() {
