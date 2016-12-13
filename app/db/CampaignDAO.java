@@ -31,12 +31,7 @@ public class CampaignDAO extends DAO<Campaign> {
 		super(Campaign.class);
 	}
 	
-	public List<Campaign> getActiveCampaigns(String group) {
-		
-		ObjectId groupId = null;
-		if (StringUtils.isNotEmpty(group)) {
-			groupId = new ObjectId(group);
-		}
+	public List<Campaign> getActiveCampaigns(ObjectId groupId) {
 		
 		Query<Campaign> q = this.createQuery().field("space").equal(groupId);
 		
@@ -50,7 +45,7 @@ public class CampaignDAO extends DAO<Campaign> {
 			}
 		}
 		
-		return campaigns;		
+		return campaigns;
 	}
 	
 }
