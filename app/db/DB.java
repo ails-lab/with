@@ -34,6 +34,7 @@ import db.converters.MultiLiteralConverter;
 import db.converters.MultiLiteralOrResourceConverter;
 import db.converters.ResourceConverter;
 import model.ApiKey;
+import model.Campaign;
 import model.annotations.Annotation;
 import model.resources.RecordResource;
 import model.resources.ThesaurusObject;
@@ -209,6 +210,10 @@ public class DB {
 
 	public static NotificationDAO getNotificationDAO() {
 		return (NotificationDAO) getDAO(Notification.class);
+	}
+	
+	public static CampaignDAO getCampaignDAO() {
+		return (CampaignDAO) getDAO(Campaign.class);
 	}
 
 	/*
