@@ -18,25 +18,90 @@ package model;
 
 import java.util.Date;
 import java.util.List;
+import model.annotations.Annotation.MotivationType;
 import model.resources.collection.CollectionObject;
+import model.usersAndGroups.UserGroup;
 import vocabularies.Vocabulary;
+
 
 public class Campaign {
 
 	public static enum BadgeType {
 		None, Bronze, Silver, Gold
 	}
+
 	
 	
-	private Boolean active; 
-	private Date startDate;
-	private Date endDate;
-	private String description;
-	private long target;
+	/**
+	 * The badge that each user is awarded, depending on his earned points (based on the number/type of his annotations).
+	 * Badge types are: [None, Bronze, Silver, Gold].
+	 */
 	private BadgeType badge;
-	private List<Vocabulary> vocabularies;
-	private List<CollectionObject> collections;
 	
+	/**
+	 * A flag that shows if the campaign is currently active.
+	 */
+	private Boolean active;
+	
+	/**
+	 * The date the campaign begins.
+	 */
+	private Date startDate;
+	
+	/**
+	 * The date the campaign finishes.
+	 */
+	private Date endDate;
+	
+	/**
+	 * A short description of the campaign's aim.
+	 */
+	private String description;
+	
+	/**
+	 * The user group which launches the campaign.
+	 */
+	private UserGroup space;
+	
+	/**
+	 * The purpose of campaign's annotations [Tagging, Linking, Commenting, Editing].
+	 */
+	private MotivationType campaignMotivation;
+	
+	/**
+	 * The goal (number of annotations) of the campaign.
+	 */
+	private long annotationTarget;
+	
+	/**
+	 * The list of supported thesauri for the annotations.
+	 */
+	private List<Vocabulary> vocabularies;
+	
+	/**
+	 * The list of item collections to be annotated in this campaign.
+	 */
+	private List<CollectionObject> targetCollections;
+	
+	/**
+	 * The list of item collections that appear in the front page.
+	 */
+	private List<CollectionObject> featuredCollections;
+	
+	
+	
+	public BadgeType getBadge(int points) {
+		if (points >= 150)
+			badge = BadgeType.Gold;
+		else if (points >= 100)
+			badge = BadgeType.Silver;
+		else if (points >= 50)
+			badge = BadgeType.Bronze;
+		else
+			badge = BadgeType.None;
+		
+		return badge;		
+	}
 	
 	public Boolean getActive() {
 		return active;
@@ -69,28 +134,31 @@ public class Campaign {
 	public void setDescription(String description) {
 		this.description = description;
 	}
-
-	public long getTarget() {
-		return target;
+	
+	public UserGroup getSpace() {
+		return space;
 	}
 
-	public void setTarget(long target) {
-		this.target = target;
+	public void setSpace(UserGroup space) {
+		this.space = space;
 	}
 	
-	public BadgeType getBadge(int points) {
-		if (points >= 150)
-			badge = BadgeType.Gold;
-		else if (points >= 100)
-			badge = BadgeType.Silver;
-		else if (points >= 50)
-			badge = BadgeType.Bronze;
-		else
-			badge = BadgeType.None;
-		
-		return badge;		
+	public MotivationType getCampaignMotivation() {
+		return campaignMotivation;
 	}
 
+	public void setCampaignMotivation(MotivationType campaignMotivation) {
+		this.campaignMotivation = campaignMotivation;
+	}
+
+	public long getAnnotationTarget() {
+		return annotationTarget;
+	}
+
+	public void setAnnotationTarget(long annotationTarget) {
+		this.annotationTarget = annotationTarget;
+	}
+	
 	public List<Vocabulary> getVocabularies() {
 		return vocabularies;
 	}
@@ -99,12 +167,20 @@ public class Campaign {
 		this.vocabularies = vocabularies;
 	}
 
-	public List<CollectionObject> getCollections() {
-		return collections;
+	public List<CollectionObject> getTargetCollections() {
+		return targetCollections;
 	}
 
-	public void setCollections(List<CollectionObject> collections) {
-		this.collections = collections;
+	public void setTargetCollections(List<CollectionObject> targetCollections) {
+		this.targetCollections = targetCollections;
 	}
-	
+
+	public List<CollectionObject> getFeaturedCollections() {
+		return featuredCollections;
+	}
+
+	public void setFeaturedCollections(List<CollectionObject> featuredCollections) {
+		this.featuredCollections = featuredCollections;
+	}
+
 }
