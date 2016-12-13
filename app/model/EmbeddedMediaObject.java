@@ -134,8 +134,9 @@ public class EmbeddedMediaObject {
 		Modify("You can do stuff to it??"),
 		Creative_SA("Should probably be BY_SA"),
 		Permission("Permission granted"),
-		
-		Creative("Use as you wish");
+		Creative_Not_Commercial_Modify("should Creative By nc "),
+		Creative("Use as you wish"),
+		Creative_Not_Commercial("And another right");
 		
 		
 		private final String text;
