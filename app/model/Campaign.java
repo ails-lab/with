@@ -18,39 +18,44 @@ package model;
 
 import java.util.Date;
 import java.util.List;
+import org.bson.types.ObjectId;
+import org.mongodb.morphia.annotations.Entity;
+import org.mongodb.morphia.annotations.Id;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import model.annotations.Annotation.MotivationType;
-import model.resources.collection.CollectionObject;
-import model.usersAndGroups.UserGroup;
-import vocabularies.Vocabulary;
+import utils.Deserializer;
+import utils.Serializer;
 
 
+@Entity("Campaign")
 public class Campaign {
 
+	/**
+	 * The badge that each user is awarded, depending on his earned points (based on the number/type of his annotations).
+	 */
 	public static enum BadgeType {
 		None, Bronze, Silver, Gold
 	}
 
 	
 	
-	/**
-	 * The badge that each user is awarded, depending on his earned points (based on the number/type of his annotations).
-	 * Badge types are: [None, Bronze, Silver, Gold].
-	 */
-	private BadgeType badge;
-	
-	/**
-	 * A flag that shows if the campaign is currently active.
-	 */
-	private Boolean active;
-	
+	@Id
+	@JsonSerialize(using = Serializer.ObjectIdSerializer.class)
+	private ObjectId dbId;
+
 	/**
 	 * The date the campaign begins.
 	 */
+	@JsonSerialize(using = Serializer.DateSerializer.class)
+	@JsonDeserialize(using = Deserializer.DateDeserializer.class)
 	private Date startDate;
 	
 	/**
 	 * The date the campaign finishes.
 	 */
+	@JsonSerialize(using = Serializer.DateSerializer.class)
+	@JsonDeserialize(using = Deserializer.DateDeserializer.class)
 	private Date endDate;
 	
 	/**
@@ -61,7 +66,8 @@ public class Campaign {
 	/**
 	 * The user group which launches the campaign.
 	 */
-	private UserGroup space;
+	@JsonSerialize(using = Serializer.ObjectIdSerializer.class)
+	private ObjectId space;
 	
 	/**
 	 * The purpose of campaign's annotations [Tagging, Linking, Commenting, Editing].
@@ -76,41 +82,33 @@ public class Campaign {
 	/**
 	 * The list of supported thesauri for the annotations.
 	 */
-	private List<Vocabulary> vocabularies;
+	private List<String> vocabularies;
 	
 	/**
 	 * The list of item collections to be annotated in this campaign.
 	 */
-	private List<CollectionObject> targetCollections;
+	@JsonSerialize(using = Serializer.ObjectIdArraySerializer.class)
+	private List<ObjectId> targetCollections;
 	
 	/**
-	 * The list of item collections that appear in the front page.
+	 * The list of record items that appear in the front page.
 	 */
-	private List<CollectionObject> featuredCollections;
+	@JsonSerialize(using = Serializer.ObjectIdArraySerializer.class)
+	private List<ObjectId> featuredRecords;
 	
 	
 	
 	public BadgeType getBadge(int points) {
 		if (points >= 150)
-			badge = BadgeType.Gold;
+			return  BadgeType.Gold;
 		else if (points >= 100)
-			badge = BadgeType.Silver;
+			return  BadgeType.Silver;
 		else if (points >= 50)
-			badge = BadgeType.Bronze;
+			return  BadgeType.Bronze;
 		else
-			badge = BadgeType.None;
-		
-		return badge;		
+			return  BadgeType.None;		
 	}
 	
-	public Boolean getActive() {
-		return active;
-	}
-
-	public void setActive(Boolean active) {
-		this.active = active;
-	}
-
 	public Date getStartDate() {
 		return startDate;
 	}
@@ -135,11 +133,11 @@ public class Campaign {
 		this.description = description;
 	}
 	
-	public UserGroup getSpace() {
+	public ObjectId getSpace() {
 		return space;
 	}
 
-	public void setSpace(UserGroup space) {
+	public void setSpace(ObjectId space) {
 		this.space = space;
 	}
 	
@@ -158,29 +156,30 @@ public class Campaign {
 	public void setAnnotationTarget(long annotationTarget) {
 		this.annotationTarget = annotationTarget;
 	}
-	
-	public List<Vocabulary> getVocabularies() {
+
+	public List<String> getVocabularies() {
 		return vocabularies;
 	}
 
-	public void setVocabularies(List<Vocabulary> vocabularies) {
+	public void setVocabularies(List<String> vocabularies) {
 		this.vocabularies = vocabularies;
 	}
 
-	public List<CollectionObject> getTargetCollections() {
+	public List<ObjectId> getTargetCollections() {
 		return targetCollections;
 	}
 
-	public void setTargetCollections(List<CollectionObject> targetCollections) {
+	public void setTargetCollections(List<ObjectId> targetCollections) {
 		this.targetCollections = targetCollections;
 	}
 
-	public List<CollectionObject> getFeaturedCollections() {
-		return featuredCollections;
+	public List<ObjectId> getFeaturedRecords() {
+		return featuredRecords;
 	}
 
-	public void setFeaturedCollections(List<CollectionObject> featuredCollections) {
-		this.featuredCollections = featuredCollections;
+	public void setFeaturedRecords(List<ObjectId> featuredRecords) {
+		this.featuredRecords = featuredRecords;
 	}
+
 
 }
