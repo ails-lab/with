@@ -148,8 +148,13 @@ public class AnnotationDAO extends DAO<Annotation> {
 	}
 	
 	public long countUserAnnotations(ObjectId userId) {
-		long count = this.createQuery().field("annotators.withCreator")
-				.equal(userId).countAll();
+		Query<Annotation> q = this.createQuery();
+		q.or (
+			q.criteria("annotators.withCreator").equal(userId),
+			q.criteria("score.approvedBy").equal(userId),
+			q.criteria("score.rejectedBy").equal(userId)
+		);
+		long count = q.countAll();
 		return count;
 	}
 

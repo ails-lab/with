@@ -32,6 +32,12 @@ public class Filter implements Cloneable {
 	public String value;
 
 	/**
+	 * In case the fields supports range queries, the inclusive boundaries go here. Range queries should
+	 * not work on tokenized fields (so they assume exact, whether you specify it or not)
+	 */
+	public String from, to;
+	
+	/**
 	 * Optionally, at some point a Filter should allow to be true/valid if the value is not part of the field.
 	 */
 	// public boolean not;

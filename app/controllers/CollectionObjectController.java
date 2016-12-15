@@ -1619,15 +1619,17 @@ public class CollectionObjectController extends WithResourceController {
 			
 			this.recordAnnotationMap = new HashMap<String, List<ScoreInfo>>();
 			
-			List<String> def = label.get(Language.DEFAULT);
-			if (def != null && def.size()> 0) {
-				this.showLabel = def.get(0);
+			if (label != null) {
+				List<String> def = label.get(Language.DEFAULT);
+				if (def != null && def.size()> 0) {
+					this.showLabel = def.get(0);
+				}
 			}
 			
 			if (showLabel == null) {
-				showLabel = uriVocabulary + " : " + uri;
+				showLabel = (uriVocabulary != null ? uriVocabulary : "unknown") + " : " + uri;
 			} else {
-				showLabel = uriVocabulary + " : " + showLabel;
+				showLabel = (uriVocabulary != null ? uriVocabulary : "unknown") + " : " + showLabel;
 			}
 		}
 		
@@ -1697,7 +1699,7 @@ public class CollectionObjectController extends WithResourceController {
 				AnnotationBodyTagging body = ((AnnotationBodyTagging)ann.getBody());
 
 				String uri = body.getUri();
-				String uriVocabulary = body.getUriVocabulary();
+				String uriVocabulary = body.getUriVocabulary().toLowerCase();
 				MultiLiteral ml = ((AnnotationBodyTagging)ann.getBody()).getLabel();
 
 				if (groupBy == 0) {
@@ -1738,22 +1740,27 @@ public class CollectionObjectController extends WithResourceController {
 					}
 				} else if (groupBy == 2) {
 					Vocabulary voc = Vocabulary.getVocabulary(uriVocabulary);
+					String name; 
 					if (voc != null) {
-						String name = voc.getLabel();
-						Map<String, AnnotationInfo> annGroup = annMap.get(name);
-						if (annGroup == null) {
-							annGroup = new HashMap<String, AnnotationInfo>();
-							annMap.put(name, annGroup);
-						}
-						
-						AnnotationInfo info = annGroup.get(uri);
-						if (info == null) {
-							info = new AnnotationInfo(uri, uriVocabulary, ml);
-							annGroup.put(uri, info);
-						}
-						
-						info.add(ann.getTarget().getRecordId(), ann, userId);
+						name = voc.getLabel();
+					} else {
+						name = "Unknown";
 					}
+					
+					Map<String, AnnotationInfo> annGroup = annMap.get(name);
+					if (annGroup == null) {
+						annGroup = new HashMap<String, AnnotationInfo>();
+						annMap.put(name, annGroup);
+					}
+					
+					AnnotationInfo info = annGroup.get(uri);
+					if (info == null) {
+						info = new AnnotationInfo(uri, uriVocabulary, ml);
+						annGroup.put(uri, info);
+					}
+					
+					info.add(ann.getTarget().getRecordId(), ann, userId);
+				
 				}
 			}
 

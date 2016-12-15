@@ -19,11 +19,11 @@ package elastic;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 
 import org.elasticsearch.action.delete.DeleteRequest;
 import org.elasticsearch.action.search.SearchResponse;
+import org.elasticsearch.common.unit.TimeValue;
 import org.elasticsearch.search.SearchHit;
 
 import play.Logger;
@@ -70,16 +70,33 @@ public class ElasticDAO {
 	 */
 	public List<String> findAllIdsByType( String type ) {
 		List<String> res = new ArrayList<String>();
-		 SearchResponse searchResponse = Elastic.getTransportClient()
-		 	.prepareSearch()
-		 	.setTypes( type )
-		 	.setNoFields()
-		 	.execute().actionGet();
-		 
-		 for( SearchHit h:searchResponse.getHits()) {
-			 res.add( h.getId());
-		 }
-		 return res;
+
+		SearchResponse response = null;
+		response = Elastic.getTransportClient()
+				.prepareSearch()
+				.setTypes( type )
+				.setScroll(new TimeValue(60000))
+				.setNoFields()
+				.setSize(100)
+				.execute()
+				.actionGet();
+
+		while (true) {
+		    for (SearchHit hit : response.getHits().getHits()) {
+				res.add(hit.getId());
+		    }
+		    response = Elastic.getTransportClient()
+		    		.prepareSearchScroll(response.getScrollId())
+		    		.setScroll(new TimeValue(60000))
+		    		.execute()
+		    		.actionGet();
+		    
+		    //Break condition: No hits are returned
+		    if (response.getHits().getHits().length == 0) {
+		        break;
+		    }
+		}
+		return res;
 	}
 	
 	/**

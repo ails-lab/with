@@ -34,11 +34,15 @@ import db.DB;
 import elastic.ElasticSearcher.SearchOptions;
 import model.resources.RecordResource;
 import model.resources.collection.CollectionObject;
+import play.Logger;
+import play.Logger.ALogger;
 import search.Filter;
 import search.Response.SingleResponse;
 import search.Sources;
 
 public class ElasticCoordinator {
+
+	public static final ALogger log = Logger.of(ElasticCoordinator.class);
 
 	private SearchOptions options;
 
@@ -98,7 +102,11 @@ public class ElasticCoordinator {
 		}
 
 		for(SearchHit h: elasticresp.getHits()) {
-			sresp.items.add( resultMap.get( h.getId()));
+			Object obj = resultMap.get( h.getId());
+			if( obj == null ) {
+				log.warn( h.getId() + " was in index but not in Mongo?");
+			}
+			sresp.items.add( obj );
 		}
 		
 		sresp.totalCount = (int) elasticresp.getHits().getTotalHits();

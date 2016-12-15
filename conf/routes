@@ -42,13 +42,16 @@ GET 	/custom/:customName/					controllers.CustomAssets.redirect(customName)
 GET 	/custom/:customName/*file				controllers.CustomAssets.getFile(customName:String, file:String)
 
 GET     /record/randomRecords					controllers.RecordResourceController.getRandomRecords(groupId: String, batchCount: Integer)
+GET		/record/randomAnnotatedRecords		controllers.RecordResourceController.getRandomAnnotatedRecords( groupId: String, count: Integer, minimum:Integer ?= 3 )
 GET		/record/annotationCount					controllers.AnnotationController.getAnnotationCount(groupId: String)
-POST	/record/annotation						controllers.AnnotationController.addAnnotation()
+GET		/record/deepAnnotationCount					controllers.AnnotationController.getDeepAnnotationCount(groupId: String)
+POST 	/record/annotation						controllers.AnnotationController.addAnnotation()
 PUT		/record/contextData			            controllers.RecordResourceController.editContextData(collectionId)
 GET     /record/multiple						controllers.RecordResourceController.getMultipleRecordResources( id: java.util.List[String], profile: String ?="MEDIUM", locale: play.libs.F.Option[java.lang.String])
 GET		/record/:id							    controllers.RecordResourceController.getRecordResource(id, format: play.libs.F.Option[String], profile: String ?="MEDIUM", locale: play.libs.F.Option[java.lang.String])
 PUT		/record/:id								controllers.RecordResourceController.editRecordResource(id)
 
+GET 	/annotation/leaderboard					controllers.AnnotationController.leaderboard( groupId: String )
 GET		/annotation/:id							controllers.AnnotationController.getAnnotation(id)
 DELETE	/annotation/:id							controllers.AnnotationController.deleteAnnotation(id)
 GET		/annotation/:id/approve					controllers.AnnotationController.approveAnnotation(id)
@@ -173,6 +176,7 @@ GET	/api/mkconst									controllers.ReindexController.makeConsistent()
 GET	/api/idxres										controllers.ReindexController.reindexAllResources()
 GET	/api/idxcols									controllers.ReindexController.reindexAllCollections()
 GET	/api/idxthes									controllers.ReindexController.reindexAllThesaurus()
+GET /api/purge										controllers.ReindexController.purgeElastic()
 
 #Thesaurus management
 POST	/thesaurus/addTerm	        			    controllers.ThesaurusController.addThesaurusTerm()
@@ -180,7 +184,7 @@ DELETE  /thesaurus/deleteThesaurus/:name	        controllers.ThesaurusController
 GET 	/thesaurus/getTerm		   					controllers.ThesaurusController.getThesaurusTerm(uri: String)
 GET 	/thesaurus/listVocabularies		   				controllers.ThesaurusController.listVocabularies()
 GET 	/thesaurus/listAnnotators		   				controllers.ThesaurusController.listAnnotators()
-GET 	/thesaurus/suggestions						controllers.ThesaurusController.getSuggestions(word: String)
+GET 	/thesaurus/suggestions						controllers.ThesaurusController.getSuggestions(word: String, namespaces: String ?= "")
 
 #Thesaurus gui
 POST	/collection/:id/facets 	        			controllers.CollectionIndexController.getCollectionFacets(id)

@@ -22,42 +22,36 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
+import java.util.Random;
 import java.util.Set;
 import java.util.function.Function;
-
-import model.EmbeddedMediaObject;
-import model.EmbeddedMediaObject.MediaVersion;
-import model.annotations.Annotation;
-import model.annotations.ContextData;
-import model.annotations.ContextData.ContextDataBody;
-import model.annotations.bodies.AnnotationBodyTagging;
-import model.basicDataTypes.WithAccess;
-import model.basicDataTypes.WithAccess.Access;
-import model.basicDataTypes.WithAccess.AccessEntry;
-import model.resources.RecordResource;
-import model.resources.collection.CollectionObject;
 
 import org.apache.commons.beanutils.BeanToPropertyValueTransformer;
 import org.apache.commons.collections.CollectionUtils;
 import org.bson.types.ObjectId;
-import org.mongodb.morphia.query.Criteria;
-import org.mongodb.morphia.query.CriteriaContainer;
 import org.mongodb.morphia.query.Query;
 import org.mongodb.morphia.query.UpdateOperations;
-
-import play.Logger;
-import play.Logger.ALogger;
-import sources.core.ParallelAPICall;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.mongodb.BasicDBObject;
 
 import controllers.WithController.Action;
 import elastic.ElasticEraser;
+import model.EmbeddedMediaObject;
+import model.EmbeddedMediaObject.MediaVersion;
+import model.annotations.Annotation;
+import model.annotations.ContextData;
+import model.annotations.ContextData.ContextDataBody;
+import model.basicDataTypes.WithAccess;
+import model.basicDataTypes.WithAccess.Access;
+import model.basicDataTypes.WithAccess.AccessEntry;
+import model.resources.RecordResource;
+import model.resources.collection.CollectionObject;
+import play.Logger;
+import play.Logger.ALogger;
+import sources.core.ParallelAPICall;
 
 /*
  * This class is the aggregator of methods
@@ -540,6 +534,19 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 
 	}
 
+	/**
+	 * Any records shared in anyway with this group is returned in the id list.
+	 * @param groupId
+	 * @return
+	 */
+	public List<ObjectId> allIdsSharedWithGroup( ObjectId   groupId ) {
+		Query<RecordResource> q = this.createQuery().disableValidation()
+				.field( "administrative.collectedBy.user").equal(groupId);
+		List<ObjectId> res = findIds(q);
+		return res;
+	}
+	
+	
 	public long countAnnotations(ObjectId collectionId) {
 		int count = 0;
 		Query<RecordResource> q = this.createQuery().disableValidation()
@@ -551,6 +558,38 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 			count += record.getAnnotationIds().size();
 		}
 		return count;
+	}
+	
+	/**
+	 * Retrieve count random records with minimum annotations from database.
+	 * They need to be shared with groupId and they need to be public.
+	 * @param groupId
+	 * @param count
+	 * @param minimum
+	 * @return
+	 */
+	public List<RecordResource> getRandomAnnotatedRecords( ObjectId groupId, int count, int minimum ) {
+		
+		if( minimum > 3 ) minimum = 3;
+		if( minimum < 1 ) minimum = 1;
+		minimum -= 1;
+		
+		ArrayList<RecordResource> res =  new ArrayList<RecordResource>();
+		// TODO: better random choice here
+
+		Query<RecordResource> q = this.createQuery().disableValidation()
+			.field("annotationIds." + minimum).notEqual(null)
+			.field("administrative.collectedBy.user").equal( groupId )
+			.field( "administrative.access.isPublic").equal( Boolean.TRUE );
+		
+		int offset = (int) q.countAll();
+		Random rn = new Random();
+		
+		offset = rn.nextInt( offset - count );
+		
+			// TODO: Only public records would be a good choice here
+
+		return this.find(q.offset( offset).limit(count)).asList();
 	}
 
 	public List<RecordResource> getByMedia(String mediaUrl) {

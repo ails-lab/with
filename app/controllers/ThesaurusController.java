@@ -29,6 +29,7 @@ import model.basicDataTypes.Language;
 import model.resources.ThesaurusObject;
 import model.resources.WithResourceType;
 
+import org.apache.commons.lang3.StringUtils;
 import org.bson.types.ObjectId;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
@@ -326,8 +327,11 @@ public class ThesaurusController extends Controller {
 	};
 	
 	
-	public static Result getSuggestions(String word) {
+	public static Result getSuggestions(String word, String namespaces) {
 		
+		ObjectNode response = Json.newObject();
+		response.put("request", word);
+
 		try {
 			ArrayNode terms = Json.newObject().arrayNode();
 			
@@ -347,7 +351,11 @@ public class ThesaurusController extends Controller {
 					ok = true;
 				}
 			}
-		
+			String[] namespaceArray = new String[0];
+			if( StringUtils.isNotBlank(namespaces)) {
+				namespaceArray = namespaces.split(",");
+			}
+			
 			if (ok) {
 				for (int i = 0; i < words.length; i++) {
 					StringBuffer trWord = new StringBuffer();
@@ -382,6 +390,18 @@ public class ThesaurusController extends Controller {
 				
 				if (prefix != null) {
 					query.must(QueryBuilders.termQuery("vocabulary.name", prefix));
+				}
+			
+				if( namespaceArray.length > 0 ) {
+					if( namespaceArray.length == 1 ) {
+						query.must(QueryBuilders.termQuery("vocabulary.name", namespaceArray[0]));
+					} else {
+						BoolQueryBuilder vocabNameQuery = QueryBuilders.boolQuery();
+						for( String voc: namespaceArray ) {
+							vocabNameQuery.should(QueryBuilders.termQuery("vocabulary.name", voc));
+						}
+						query.must( vocabNameQuery);
+					}
 				}
 				
 //				System.out.println("QUERY" + query);
@@ -430,7 +450,10 @@ public class ThesaurusController extends Controller {
 				
 				Collections.sort(suggestions);
 				
-				for (SearchSuggestion ss : suggestions) {
+				int limit = Math.min(100, suggestions.size());
+				for (int i = 0; i < limit; i++) {
+					SearchSuggestion ss = suggestions.get(i);
+					
 					ObjectNode element = Json.newObject();
 					element.put("id", ss.id);
 
@@ -453,7 +476,9 @@ public class ThesaurusController extends Controller {
 				}
 			}
 			
-			return ok(terms);
+			response.put("results", terms);
+			
+			return ok(response);
 
 		} catch (Exception e) {
 			e.printStackTrace();
