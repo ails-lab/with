@@ -42,6 +42,7 @@ import model.basicDataTypes.Language;
 import model.basicDataTypes.MultiLiteral;
 import model.basicDataTypes.ProvenanceInfo;
 import model.quality.RecordQuality;
+import model.resources.CulturalObject;
 import model.resources.CulturalObject.CulturalObjectData;
 import model.resources.RecordResource;
 import model.resources.WithResourceType;
@@ -645,31 +646,25 @@ public class WithResourceController extends WithController {
 						recordId);
 				List<RecordJSONMetadata> recordsData = s.getRecordFromSource(
 						sourceId, fullRecord);
+				
+				
 				for (RecordJSONMetadata data : recordsData) {
 					if (data.getFormat().equals("JSON-WITH")) {
+						
+						ObjectMapper mapper = new ObjectMapper();
+						JsonNode json = mapper.readTree(data.getJsonContent());
+						CulturalObject cho = Json.fromJson(json, CulturalObject.class);
 						
 						DB.getWithResourceDAO().computeAndUpdateQuality(recordId);
 						log.debug(data.getJsonContent());
 						
-						ObjectMapper mapper = new ObjectMapper();
-						JsonNode json = mapper.readTree(data.getJsonContent())
-								.get("descriptiveData");
-						DescriptiveData descriptiveData = Json.fromJson(json,
-								CulturalObjectData.class);
 						DB.getWithResourceDAO().updateDescriptiveData(recordId,
-								descriptiveData);
+								cho.getDescriptiveData());
 						
-						
-						String mediaString = mapper
-								.readTree(data.getJsonContent()).get("media")
-								.toString();
-						List<HashMap<MediaVersion, EmbeddedMediaObject>> media = new ObjectMapper()
-								.readValue(
-										mediaString,
-										new TypeReference<List<HashMap<MediaVersion, EmbeddedMediaObject>>>() {
-										});
 						DB.getWithResourceDAO().updateEmbeddedMedia(recordId,
-								media);
+								cho.getMedia());
+						
+						DB.getWithResourceDAO().updateProvenance(recordId, cho.getProvenance());
 						
 //						DB.getWithResourceDAO().computeAndUpdateQuality(recordId);
 					} else {
