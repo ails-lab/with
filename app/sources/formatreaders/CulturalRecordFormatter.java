@@ -16,6 +16,7 @@
 
 package sources.formatreaders;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -100,6 +101,7 @@ public abstract class CulturalRecordFormatter extends JsonContextRecordFormatRea
 			return readObjectFrom(text);
 		} else
 		this.object = (CulturalObject)object;
+		object.setProvenance(new ArrayList<ProvenanceInfo>());
 		return internalOverwriteObjectFrom(new JsonContextRecord(text));
 	}
 
