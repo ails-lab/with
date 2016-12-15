@@ -20,29 +20,103 @@ import java.util.ArrayList;
 import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.bson.types.ObjectId;
-
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import db.DB;
 import model.Campaign;
 import play.Logger;
 import play.Logger.ALogger;
+import play.libs.Json;
+import play.mvc.Result;
 
 
 public class CampaignController extends WithController {
 	
 	public static final ALogger log = Logger.of(AnnotationController.class);
 	
-	public static Result getActiveCampaigns(String group) {
+	public static Result getActiveCampaigns(String groupId) {
 		
-		ObjectId groupId = null;
-		if (StringUtils.isNotEmpty(group)) {
-			groupId = new ObjectId(group);
+		ObjectNode result = Json.newObject();
+		
+		ObjectId groupDbId = null;
+		if (StringUtils.isNotEmpty(groupId)) {
+			groupDbId = new ObjectId(groupId);
 		}
 		
 		List<Campaign> campaigns = new ArrayList<Campaign>();
-		campaigns = DB.getCampaignDAO().getActiveCampaigns(groupId);
+		campaigns = DB.getCampaignDAO().getActiveCampaigns(groupDbId);
 		
-		for (Campaign campaign : campaigns) {
-			
+		if (campaigns == null) {
+			result.put("error", "There are not any active campaigns for this UserGroup.");
+			return internalServerError(result);
 		}
+		
+		return ok(Json.toJson(campaigns));
 	}
+	
+	/*
+	private static ObjectNode validateCampaign(JsonNode json) {
+		
+		ObjectNode result = Json.newObject();
+		ObjectNode error = Json.newObject();
+		
+		String startDate = null;
+		if (!json.has("startDate")) {
+			error.put("startDate", "Starting date is empty.");
+		}
+		
+		String endDate = null;
+		if (!json.has("endDate")) {
+			error.put("endDate", "Ending date is empty.");
+		}
+		
+		String description = null;
+		if (!json.has("description")) {
+			error.put("description", "Description is empty.");
+		}
+		
+		String space = null;
+		if (!json.has("space")) {
+			error.put("space", "UserGroup is empty.");
+		}
+		
+		String campaignMotivation = null;
+		if (!json.has("campaignMotivation")) {
+			error.put("campaignMotivation", "Campaign motivation is empty.");
+		}
+		
+		String annotationTarget = null;
+		if (!json.has("annotationTarget")) {
+			error.put("annotationTarget", "Annotation target is empty.");
+		}
+		
+		String vocabularies = null;
+		if (!json.has("vocabularies")) {
+			error.put("vocabularies", "Vocabulary list is empty.");
+		}
+		
+		String targetCollections = null;
+		if (!json.has("targetCollections")) {
+			error.put("targetCollections", "List of target collection is empty.");
+		}
+		
+		String featuredCollections = null;
+		if (!json.has("featuredCollections")) {
+			error.put("featuredCollections", "List of featured collections is empty.");
+		}
+		
+		if (error.size() != 0) {
+			result.put("error", error);
+		}
+		
+		return result;
+	}
+	
+	public static Result createCampaign() {
+		
+		JsonNode json = request().body().asJson();
+		ObjectNode result = Json.newObject();
+		
+	}
+	*/
 }
