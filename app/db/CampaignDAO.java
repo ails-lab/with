@@ -19,7 +19,6 @@ package db;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import org.apache.commons.lang3.StringUtils;
 import org.bson.types.ObjectId;
 import org.mongodb.morphia.query.Query;
 import model.Campaign;
@@ -39,13 +38,14 @@ public class CampaignDAO extends DAO<Campaign> {
 		campaigns = this.find(q).asList();
 		
 		Date today = new Date();
+		List<Campaign> campaignList = new ArrayList<Campaign>();
 		for (Campaign campaign : campaigns) {
-			if ( (campaign.getStartDate().after(today)) || (campaign.getEndDate().before(today)) ) {
-				campaigns.remove(campaign);
+			if ( (campaign.getStartDate().before(today)) && (campaign.getEndDate().after(today)) ) {
+				campaignList.add(campaign);
 			}
 		}
 		
-		return campaigns;
+		return campaignList;
 	}
 	
 }
