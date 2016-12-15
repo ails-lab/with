@@ -21,6 +21,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.mongodb.morphia.annotations.Converters;
@@ -46,6 +47,12 @@ public class MultiLiteral extends HashMap<String, List<String>> implements
 		addLiteral(lang, label);
 	}
 
+	public MultiLiteral(Literal lit) {
+		for (Map.Entry<String, String> entry : lit.entrySet()) {
+			add(entry.getKey(), entry.getValue());
+		}
+	}
+	
 	@Override
 	public void addLiteral(Language lang, String value) {
 		add(lang.getDefaultCode(), value);
@@ -77,6 +84,10 @@ public class MultiLiteral extends HashMap<String, List<String>> implements
 			this.put(key, new ArrayList<String>(Arrays.asList(value)));
 	}
 
+	public List<String> remove(Language lang) {
+		return remove(lang.getDefaultCode());
+	}
+	
 	public MultiLiteral fillDEF() {
 		return fillDEF(false);
 	}
@@ -113,6 +124,10 @@ public class MultiLiteral extends HashMap<String, List<String>> implements
 	public MultiLiteral merge(MultiLiteral other) {
 		this.putAll(other);
 		return this;
+	}
+	
+	public boolean contains(Language lang) {
+		return containsKey(lang.getDefaultCode());
 	}
 	
 	public Set<Language> getLanguages() {

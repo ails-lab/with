@@ -19,10 +19,9 @@ package tools.importers.vocabulary;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.StandardCopyOption;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import model.basicDataTypes.Language;
@@ -30,14 +29,13 @@ import model.basicDataTypes.Literal;
 import model.basicDataTypes.MultiLiteral;
 import net.minidev.json.JSONObject;
 
-import org.semanticweb.owlapi.model.OWLOntologyCreationException;
-
 import play.libs.Json;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
+import org.apache.jena.atlas.lib.SetUtils;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryExecution;
 import org.apache.jena.query.QueryExecutionFactory;
@@ -45,11 +43,10 @@ import org.apache.jena.query.QueryFactory;
 import org.apache.jena.query.QuerySolution;
 import org.apache.jena.query.ResultSet;
 import org.apache.jena.rdf.model.Model;
-import org.apache.jena.rdf.model.ModelFactory;
 
-public class SKOS2Vocabulary {
+public class SKOS2Vocabulary extends Data2Vocabulary<SKOSImportConfiguration> {
 
-	private static SKOSImportConfiguration fashion = new SKOSImportConfiguration("fashion", 
+	public static SKOSImportConfiguration fashion = new SKOSImportConfiguration("fashion", 
 	       	"Fashion Thesaurus", 
 	        "fashion", 
 	        "2014-12-10", 
@@ -58,63 +55,57 @@ public class SKOS2Vocabulary {
 	        new String[] { "http://thesaurus.europeanafashion.eu/thesaurus/Techniques", 
 	                       "http://thesaurus.europeanafashion.eu/thesaurus/Colours",
 	                       "http://thesaurus.europeanafashion.eu/thesaurus/Type",
-	        	           "http://thesaurus.europeanafashion.eu/thesaurus/Materials" });
+	        	           "http://thesaurus.europeanafashion.eu/thesaurus/Materials" },
+	        null);
 	
-	private static SKOSImportConfiguration gemet = new SKOSImportConfiguration("gemet", 
+	public static SKOSImportConfiguration gemet = new SKOSImportConfiguration("gemet", 
 	        "GEMET Thesaurus", 
 	        "gemet", 
 	        "3.1", 
 	        "www.eionet.europa.eu",
             null, 
-	        null);	
-
-	private static SKOSImportConfiguration euscreenxl = new SKOSImportConfiguration("euscreenxl", 
+            new String[] {},
+			null);
+	
+	public static SKOSImportConfiguration euscreenxl = new SKOSImportConfiguration("euscreenxl", 
 	        "EUScreenXL Thesaurus", 
 	        "euscreenxl", 
 	        "v1", 
 	        "thesaurus.euscreen.eu",
             null, 
-	        null);	
+            new String[] {},
+            null);	
 	
-	private static SKOSImportConfiguration photo = new SKOSImportConfiguration("photo", 
+	public static SKOSImportConfiguration photo = new SKOSImportConfiguration("photo", 
 	        "Photography Thesaurus", 
 	        "photo", 
 	        "0", 
 	        "bib.arts.kuleuven.be",
             null, 
+	        null,
 	        null);	
 	
-	private static SKOSImportConfiguration partageplus = new SKOSImportConfiguration("partageplus", 
+	public static SKOSImportConfiguration partageplus = new SKOSImportConfiguration("partageplus", 
 	        "Partage Plus Thesaurus", 
 	        "partageplus", 
 	        "0", 
 	        "partage.vocnet.org",
             null, 
+	        null,
 	        null);
 	
-	private static SKOSImportConfiguration mimo = new SKOSImportConfiguration("mimo", 
+	public static SKOSImportConfiguration mimo = new SKOSImportConfiguration("mimo", 
 	        "MIMO Thesaurus", 
 	        "mimo", 
 	        "0", 
 	        "www.mimo-db.eu",
             null, 
+	        null,
 	        null);	
 
-	private static SKOSImportConfiguration hornbostelsachs = new SKOSImportConfiguration("hornbostelsachs", 
-	        "Hornbostel-Sachs Thesaurus", 
-	        "hornbostelsachs", 
-	        "0", 
-	        "www.mimo-db.eu",
-            null, 
-	        null);	
-
-	public static SKOSImportConfiguration[] confs = new SKOSImportConfiguration[] { fashion, gemet, euscreenxl, photo, partageplus, mimo, hornbostelsachs };
+	public static SKOSImportConfiguration[] confs = new SKOSImportConfiguration[] { fashion, gemet, euscreenxl, photo, partageplus, mimo };
 	
-	public static void main(String[] args) {
-		doImport(confs);
-	}
-	
-	public static void doImport(SKOSImportConfiguration[] confs) {
+	public static void doImport(SKOSImportConfiguration... confs) {
 		SKOS2Vocabulary s2v = new SKOS2Vocabulary();
 		for (SKOSImportConfiguration c : confs) {
 			try {
@@ -125,33 +116,15 @@ public class SKOS2Vocabulary {
 		}
 	}
 	
-	private void doImport(SKOSImportConfiguration conf) throws OWLOntologyCreationException, IOException {
+	protected SKOSImportConfiguration conf;
 
-		Set<String> ks = null;
-		if (conf.existingSchemesToKeep != null) {
-			ks = new HashSet<>();
-			for (String s : conf.existingSchemesToKeep) {
-				ks.add(s);
-			}
-		}
-		
+	
+	protected void doImport(SKOSImportConfiguration confx) throws Exception {
+		this.conf = confx;
+
 		File tmpFolder = VocabularyImportConfiguration.getTempFolder();
 		
-		Model model = ModelFactory.createDefaultModel();
-		for (File f : conf.getInputFolder().listFiles()) {
-			System.out.println("Reading: " + f);
-			if (f.getName().endsWith(".zip")) {
-				VocabularyImportConfiguration.uncompress(tmpFolder, f);
-			} else {
-				System.out.println("Importing to Fuseki: " + f);
-				model.read(f.getAbsolutePath());
-			}
-		}
-		
-		for (File f : tmpFolder.listFiles()) {
-			System.out.println("Importing to Fuseki: " + f);
-			model.read(f.getAbsolutePath());
-		}
+		Model model = conf.readModel(tmpFolder);
 
 		File outFile = new File(tmpFolder + File.separator + conf.folder + ".txt");
 
@@ -160,32 +133,86 @@ public class SKOS2Vocabulary {
 		vocabulary.put("version", conf.version);
 		
 		System.out.println("Creating vocabulary in " + outFile);
-		try (FileWriter fr = new FileWriter(outFile);
-				BufferedWriter br = new BufferedWriter(fr)) {
+		try (FileWriter fr = new FileWriter(outFile); 
+		      BufferedWriter br = new BufferedWriter(fr)) {
 	
 			String queryString;
 			Query query;
 			
-			queryString = "PREFIX skos: <http://www.w3.org/2004/02/skos/core#> SELECT ?subject  WHERE {?subject a <http://www.w3.org/2004/02/skos/core#ConceptScheme>}" ;
-			query = QueryFactory.create(queryString) ; 
-			
-	
-			try (QueryExecution qexec = QueryExecutionFactory.create(query, model)) {
-				for (ResultSet results = qexec.execSelect(); results.hasNext() ; ) {
-					QuerySolution qs = results.next();
-					
-					String uri = qs.get("subject").asResource().getURI();
-					if (conf.existingSchemesToKeep != null && !ks.contains(uri)) {
-						continue;
+			Map<String, ArrayNode> schemes = new HashMap<>();
+			Map<String, Set<String>> schemeTopConcepts = new HashMap<>();
+
+			Set<String> manualSchemes = conf.getManualSchemes();
+			if (manualSchemes == null) {
+				queryString = "PREFIX skos: <http://www.w3.org/2004/02/skos/core#> SELECT ?subject  WHERE {?subject a skos:ConceptScheme}" ;
+				query = QueryFactory.create(queryString) ; 
+				
+				try (QueryExecution qexec = QueryExecutionFactory.create(query, model)) {
+					for (ResultSet results = qexec.execSelect(); results.hasNext() ; ) {
+						QuerySolution qs = results.next();
+						
+						String uri = qs.get("subject").asResource().getURI();
+						String turi = "<" + uri + ">";
+						
+						Set<String> withBroader = new HashSet<>();
+						
+						queryString = "PREFIX skos: <http://www.w3.org/2004/02/skos/core#> SELECT ?z WHERE {?z skos:inScheme " + turi + " . ?z skos:broader ?q . ?q skos:inScheme " + turi + " .}" ;
+						query = QueryFactory.create(queryString) ; 
+						try (QueryExecution exec = QueryExecutionFactory.create(query, model)) {
+							for (ResultSet res = exec.execSelect(); res.hasNext() ; ) {
+								QuerySolution q = res.next();
+								withBroader.add(q.get("z").asResource().getURI());
+							}
+						}
+						
+						Set<String> keep = new HashSet<>();
+						
+						queryString = "PREFIX skos: <http://www.w3.org/2004/02/skos/core#> SELECT ?uri WHERE {?uri skos:inScheme " + turi + "}" ;
+						query = QueryFactory.create(queryString) ; 
+						try (QueryExecution exec = QueryExecutionFactory.create(query, model)) {
+							for (ResultSet res = exec.execSelect(); res.hasNext() ; ) {
+								QuerySolution q = res.next();
+								
+								String curi = q.get("uri").asResource().getURI();
+								if (!withBroader.contains(curi)) {
+									keep.add(curi);
+								}
+							}
+						}
+
+						queryString = "PREFIX skos: <http://www.w3.org/2004/02/skos/core#> SELECT ?uri WHERE {?uri skos:topConceptOf " + turi + "}" ;
+						query = QueryFactory.create(queryString) ; 
+						try (QueryExecution exec = QueryExecutionFactory.create(query, model)) {
+							for (ResultSet res = exec.execSelect(); res.hasNext() ; ) {
+								QuerySolution q = res.next();
+								
+								keep.add(q.get("uri").asResource().getURI());
+							}
+						}
+						
+						ArrayNode array = Json.newObject().arrayNode();
+						
+						Set<String> concepts = new HashSet<>();
+						for (String muri : keep) {
+							array.add(makeMainStructure(muri, model));
+							concepts.add(muri);
+						}
+						
+						if (array.size() > 0) {
+							schemes.put(uri, array);
+							schemeTopConcepts.put(uri, concepts);
+						}
+
 					}
-					
-					ObjectNode main = makeMainStructure(uri, model);
-					
-					uri = "<" + uri + ">";
+				}
+			} else {
+				for (String scheme : manualSchemes) {
+					String uri = scheme;
+					String turi = "<" + uri + ">";
 					
 					Set<String> withBroader = new HashSet<>();
 					
-					queryString = "PREFIX skos: <http://www.w3.org/2004/02/skos/core#> SELECT ?z WHERE {?z skos:inScheme " + uri + " . ?z skos:broader ?q . ?q skos:inScheme " + uri + " .}" ;
+					queryString = "PREFIX skos: <http://www.w3.org/2004/02/skos/core#> SELECT ?z WHERE {?z skos:inScheme " + turi + " . ?z skos:broader ?q . ?q skos:inScheme " + turi + " .}" ;
 					query = QueryFactory.create(queryString) ; 
 					try (QueryExecution exec = QueryExecutionFactory.create(query, model)) {
 						for (ResultSet res = exec.execSelect(); res.hasNext() ; ) {
@@ -196,7 +223,7 @@ public class SKOS2Vocabulary {
 					
 					Set<String> keep = new HashSet<>();
 					
-					queryString = "PREFIX skos: <http://www.w3.org/2004/02/skos/core#> SELECT ?uri WHERE {?uri skos:inScheme " + uri + "}" ;
+					queryString = "PREFIX skos: <http://www.w3.org/2004/02/skos/core#> SELECT ?uri WHERE {?uri skos:inScheme " + turi + "}" ;
 					query = QueryFactory.create(queryString) ; 
 					try (QueryExecution exec = QueryExecutionFactory.create(query, model)) {
 						for (ResultSet res = exec.execSelect(); res.hasNext() ; ) {
@@ -209,7 +236,7 @@ public class SKOS2Vocabulary {
 						}
 					}
 
-					queryString = "PREFIX skos: <http://www.w3.org/2004/02/skos/core#> SELECT ?uri WHERE {?uri skos:topConceptOf " + uri + "}" ;
+					queryString = "PREFIX skos: <http://www.w3.org/2004/02/skos/core#> SELECT ?uri WHERE {?uri skos:topConceptOf " + turi + "}" ;
 					query = QueryFactory.create(queryString) ; 
 					try (QueryExecution exec = QueryExecutionFactory.create(query, model)) {
 						for (ResultSet res = exec.execSelect(); res.hasNext() ; ) {
@@ -221,62 +248,91 @@ public class SKOS2Vocabulary {
 					
 					ArrayNode array = Json.newObject().arrayNode();
 					
+					Set<String> concepts = new HashSet<>();
 					for (String muri : keep) {
 						array.add(makeMainStructure(muri, model));
+						concepts.add(muri);
 					}
 					
 					if (array.size() > 0) {
-						main.put("topConcepts", array);
+						schemes.put(uri, array);
+						schemeTopConcepts.put(uri, concepts);
 					}
-
-					
-					main.put("vocabulary", vocabulary);
-
-					ObjectNode json = Json.newObject();
-					json.put("semantic", main);
-
-					br.write(json.toString());
-					br.write(VocabularyImportConfiguration.newLine);
 				}
 			}
-	
-			queryString = "PREFIX skos: <http://www.w3.org/2004/02/skos/core#> SELECT ?subject  WHERE {?subject a <http://www.w3.org/2004/02/skos/core#Concept>}" ;
+			
+			queryString = "PREFIX skos: <http://www.w3.org/2004/02/skos/core#> SELECT ?subject WHERE {" +
+					   "{SELECT ?subject WHERE {?subject a skos:Concept }} UNION " +
+					   "{SELECT ?subject WHERE {?subject a skos:ConceptScheme }}}";
 			query = QueryFactory.create(queryString) ; 
 	
 			try (QueryExecution qexec = QueryExecutionFactory.create(query, model)) {
 				for (ResultSet results = qexec.execSelect(); results.hasNext() ; ) {
 					QuerySolution qs = results.next();
 					
-					String uri = qs.get("subject").asResource().getURI();
+					String xuri = qs.get("subject").asResource().getURI();
 					
-					ObjectNode main = makeMainStructure(uri, model);
+					ObjectNode main = makeMainStructure(xuri, model, schemes.containsKey(xuri) ? "http://www.w3.org/2004/02/skos/core#ConceptScheme" : null);
 					
-					uri = "<" + uri + ">";
+					if (manualSchemes != null && main.get("type").asText().equals("http://www.w3.org/2004/02/skos/core#ConceptScheme") && !manualSchemes.contains(xuri)) {
+						continue;
+					}
+					
+					String uri = "<" + xuri + ">";
+					
+					Set<String> sc = null;
 							
 					JsonNode scopeNote = makeLiteralNode("PREFIX skos: <http://www.w3.org/2004/02/skos/core#> SELECT ?literal WHERE {" + uri + " skos:scopeNote ?literal}", model, "literal");
 					if (scopeNote != null) {
 						main.put("scopeNote", scopeNote);
 					}
 					
-					ArrayNode broader = makeNodesArray("PREFIX skos: <http://www.w3.org/2004/02/skos/core#> SELECT DISTINCT ?q WHERE {{SELECT ?q WHERE {" + uri + " skos:broader ?q}} UNION {SELECT ?q WHERE {?q skos:narrower " + uri + "}}}", model, "q");
-					if (broader != null) {
-						main.put("broader", broader);
+					if (schemes.containsKey(xuri)) {
+						ArrayNode array = schemes.get(xuri);
+						
+						if (array.size() > 0) {
+							main.put("topConcepts", schemes.get(xuri));
+						}
+						
+					} else {
+						Set<String> b = getNodesArray("PREFIX skos: <http://www.w3.org/2004/02/skos/core#> SELECT ?q WHERE {" + uri + " skos:broader ?q }", model, "q");
+						b.removeAll(schemes.keySet());
+							
+						ArrayNode broader = makeNodesArray(b, model);
+						if (broader != null) {
+							main.put("broader", broader);
+						}
+					
+						Set<String> bt = getNodesArray("PREFIX skos: <http://www.w3.org/2004/02/skos/core#> SELECT ?q WHERE {" + uri + " skos:broader+ ?q }", model, "q");
+							
+//						sc = SetUtils.intersection(schemes.keySet(), bt);
+						for (Map.Entry<String, Set<String>> entry : schemeTopConcepts.entrySet()) {
+							if (SetUtils.intersection(entry.getValue(), bt).size() > 0 || entry.getValue().contains(xuri)) {
+								if (sc == null) {
+									sc = new HashSet<>();
+								}
+								
+								sc.add(entry.getKey());
+							}
+						}
+							
+						bt.removeAll(schemes.keySet());
+						
+						ArrayNode broaderTransitive = makeNodesArray(bt, model);
+						if (broaderTransitive != null) {
+							main.put("broaderTransitive", broaderTransitive);
+						}
+					
+						ArrayNode narrower = makeNodesArray("PREFIX skos: <http://www.w3.org/2004/02/skos/core#> SELECT ?q WHERE {?q skos:broader " + uri + "}", model, "q");
+						if (narrower != null) {
+							main.put("narrower", narrower);
+						}
 					}
 					
-					ArrayNode narrower = makeNodesArray("PREFIX skos: <http://www.w3.org/2004/02/skos/core#> SELECT DISTINCT ?q WHERE {{SELECT ?q WHERE {" + uri + " skos:narrower ?q}} UNION {SELECT ?q WHERE {?q skos:broader " + uri + "}}}", model, "q");
-					if (narrower != null) {
-						main.put("narrower", narrower);
-					}
-					
-					ArrayNode broaderTransitive = makeNodesArray("PREFIX skos: <http://www.w3.org/2004/02/skos/core#> SELECT DISTINCT ?q WHERE {{SELECT ?q WHERE {" + uri + " skos:broader+ ?q}} UNION {SELECT ?q WHERE {?q skos:narrower+ " + uri + "}}}", model, "q");
-					if (broaderTransitive != null) {
-						main.put("broaderTransitive", broaderTransitive);
-					}
-					
-					ArrayNode inCollections = makeURIArrayNode("PREFIX skos: <http://www.w3.org/2004/02/skos/core#> SELECT ?uri WHERE {?uri skos:member " + uri + "}", model, "uri");
-					if (inCollections != null) {
-						main.put("inCollections", inCollections);
-					}
+//					ArrayNode inCollections = makeURIArrayNode("PREFIX skos: <http://www.w3.org/2004/02/skos/core#> SELECT ?uri WHERE {?uri skos:member " + uri + "}", model, "uri");
+//					if (inCollections != null) {
+//						main.put("inCollections", inCollections);
+//					}
 	
 					ArrayNode related = makeNodesArray("PREFIX skos: <http://www.w3.org/2004/02/skos/core#> SELECT DISTINCT ?q WHERE {{SELECT ?q WHERE {" + uri + " skos:related ?q}} UNION {SELECT ?q WHERE {?q skos:related " + uri + "}}}", model, "q");
 					if (related != null) {
@@ -293,73 +349,57 @@ public class SKOS2Vocabulary {
 						main.put("closeMatch", closeMatch);
 					}
 					
-					ArrayNode inSchemes = makeFilteredURIArrayNode("PREFIX skos: <http://www.w3.org/2004/02/skos/core#> SELECT ?uri WHERE { {" + uri + " skos:inScheme ?uri} UNION {" + uri + " skos:topConceptOf ?uri} }", model, "uri", ks);
-					if (inSchemes != null) {
-						main.put("inSchemes", inSchemes);
-					} else if (conf.mainScheme != null){ 
-						ArrayNode schemes = Json.newObject().arrayNode();
-						schemes.add(conf.mainScheme);
-						main.put("inSchemes", schemes);
+					if (sc != null && sc.size() > 0) {
+						ArrayNode array = Json.newObject().arrayNode();
+						for (String ss : sc) {
+							array.add(ss);
+						}
+						
+						main.put("inSchemes", array);
 					}
 					
-//					ArrayNode topConceptOf = makeURIArrayNode("PREFIX skos: <http://www.w3.org/2004/02/skos/core#> SELECT ?uri WHERE {" + uri + " skos:topConceptOf ?uri}", model, "uri");
-//					if (topConceptOf != null) {
-//						main.put("topConceptOf", topConceptOf);
+					main.put("vocabulary", vocabulary);
+
+					ObjectNode json = Json.newObject();
+					json.put("semantic", main);
+
+					br.write(json.toString());
+					br.write(VocabularyImportConfiguration.newLine);
+
+				}
+			}
+			
+//			queryString = "PREFIX skos: <http://www.w3.org/2004/02/skos/core#> SELECT ?subject  WHERE {?subject a <http://www.w3.org/2004/02/skos/core#Collection>}" ;
+//			query = QueryFactory.create(queryString) ; 
+//			
+//	
+//			try (QueryExecution qexec = QueryExecutionFactory.create(query, model)) {
+//				for (ResultSet results = qexec.execSelect(); results.hasNext() ; ) {
+//					QuerySolution qs = results.next();
+//					
+//					String uri = qs.get("subject").asResource().getURI();
+//					
+//					ObjectNode main = makeMainStructure(uri, model);
+//					
+//					uri = "<" + uri + ">";
+//							
+//					ArrayNode members = makeNodesArray("PREFIX skos: <http://www.w3.org/2004/02/skos/core#> SELECT ?uri WHERE {" + uri + " skos:member ?uri}", model, "uri");
+//					if (members != null) {
+//						main.put("members", members);
 //					}
-	
-					main.put("vocabulary", vocabulary);
-
-					ObjectNode json = Json.newObject();
-					json.put("semantic", main);
-
-					br.write(json.toString());
-					br.write(VocabularyImportConfiguration.newLine);
-
-				}
-			}
-			
-			queryString = "PREFIX skos: <http://www.w3.org/2004/02/skos/core#> SELECT ?subject  WHERE {?subject a <http://www.w3.org/2004/02/skos/core#Collection>}" ;
-			query = QueryFactory.create(queryString) ; 
-			
-	
-			try (QueryExecution qexec = QueryExecutionFactory.create(query, model)) {
-				for (ResultSet results = qexec.execSelect(); results.hasNext() ; ) {
-					QuerySolution qs = results.next();
-					
-					String uri = qs.get("subject").asResource().getURI();
-					
-					ObjectNode main = makeMainStructure(uri, model);
-					
-					uri = "<" + uri + ">";
-							
-					ArrayNode members = makeNodesArray("PREFIX skos: <http://www.w3.org/2004/02/skos/core#> SELECT ?uri WHERE {" + uri + " skos:member ?uri}", model, "uri");
-					if (members != null) {
-						main.put("members", members);
-					}
-	
-					main.put("vocabulary", vocabulary);
-					
-					ObjectNode json = Json.newObject();
-					json.put("semantic", main);
-
-					br.write(json.toString());
-					br.write(VocabularyImportConfiguration.newLine);
-				}
-			}
+//	
+//					main.put("vocabulary", vocabulary);
+//					
+//					ObjectNode json = Json.newObject();
+//					json.put("semantic", main);
+//
+//					br.write(json.toString());
+//					br.write(VocabularyImportConfiguration.newLine);
+//				}
+//			}
 		}
 		
-		System.out.println("Compressing " + tmpFolder + File.separator + conf.folder + ".txt");
-		File cf = VocabularyImportConfiguration.compress(tmpFolder, conf.folder);
-		File tf = new File(VocabularyImportConfiguration.outdir + File.separator + cf.getName());
-		System.out.println("Copying file " + cf + " to " + tf);
-		Files.copy(cf.toPath(), tf.toPath(), StandardCopyOption.REPLACE_EXISTING);
-
-		System.out.println("Clearing " + tmpFolder);
-		for (File f : tmpFolder.listFiles()) {
-			f.delete();
-		}
-		tmpFolder.delete();
-		
+		conf.cleanUp(tmpFolder);
 	}
 
 	protected JsonNode makeLiteralNode(String queryString, Model model, String var) {
@@ -374,11 +414,10 @@ public class SKOS2Vocabulary {
 				Language ll = null;
 				if (lang != null) {
 					ll = Language.getLanguage(lang);
-					if (ll == null) {
-						ll = Language.UNKNOWN;
-					}
-				} else {
-					ll = Language.UNKNOWN;
+				}
+				
+				if ((ll == null || ll == Language.UNKNOWN) && conf.defaultLanguage != null) {
+					ll = conf.defaultLanguage;
 				}
 				
 				literal.addLiteral(ll, lit.getString());
@@ -434,29 +473,44 @@ public class SKOS2Vocabulary {
 		}
 	}
 	
-	protected ArrayNode makeNodesArray(String queryString, Model model, String var) {
-		ArrayNode array = Json.newObject().arrayNode();
-		
+	protected Set<String> getNodesArray(String queryString, Model model, String var) {
+		Set<String> ret = new HashSet<>();
 		Query query = QueryFactory.create(queryString) ;
 		try (QueryExecution exec = QueryExecutionFactory.create(query, model)) {
 			
 			for (ResultSet res = exec.execSelect(); res.hasNext() ; ) {
 				QuerySolution s = res.next();
 				if (s.get(var) != null) {
-					array.add(makeMainStructure(s.get(var).asResource().getURI(), model));
+					ret.add(s.get(var).asResource().getURI());
 				}
 			}
 		}
 		
-		if (array.size() > 0) {
+		return ret;
+	}
+	
+	protected ArrayNode makeNodesArray(Set<String> res, Model model) {
+		if (res.size() > 0) {
+			ArrayNode array = Json.newObject().arrayNode();
+		
+			for (String s : res) {
+				array.add(makeMainStructure(s, model));
+			}
 			return array;
 		} else {
 			return null;
 		}
 	}
-
 	
+	protected ArrayNode makeNodesArray(String queryString, Model model, String var) {
+		return makeNodesArray(getNodesArray(queryString, model, var), model);
+	}
+
 	protected ObjectNode makeMainStructure(String urit, Model model) {
+		return makeMainStructure(urit, model, null);
+	}
+	
+	protected ObjectNode makeMainStructure(String urit, Model model, String manualType) {
 		Literal prefLabel = new Literal();
 		MultiLiteral altLabel = new MultiLiteral();
 		
@@ -478,12 +532,12 @@ public class SKOS2Vocabulary {
 				Language ll = null;
 				if (lang != null) {
 					ll = Language.getLanguage(lang);
-					if (ll == null) {
-						ll = Language.UNKNOWN;
-					}
-				} else {
-					ll = Language.UNKNOWN;
 				}
+				
+				if ((ll == null || ll == Language.UNKNOWN) && conf.defaultLanguage != null) {
+					ll = conf.defaultLanguage;
+				}
+
 				
 				prefLabel.addLiteral(ll, JSONObject.escape(lit.getString()));
 			}
@@ -500,12 +554,12 @@ public class SKOS2Vocabulary {
 				Language ll = null;
 				if (lang != null) {
 					ll = Language.getLanguage(lang);
-					if (ll == null) {
-						ll = Language.UNKNOWN;
-					}
-				} else {
-					ll = Language.UNKNOWN;
 				}
+				
+				if ((ll == null || ll == Language.UNKNOWN) && conf.defaultLanguage != null) {
+					ll = conf.defaultLanguage;
+				}
+
 				
 				if (prefLabel.getLiteral(ll) == null) {
 					prefLabel.addLiteral(ll, JSONObject.escape(lit.getString()));
@@ -527,12 +581,12 @@ public class SKOS2Vocabulary {
 				Language ll = null;
 				if (lang != null) {
 					ll = Language.getLanguage(lang);
-					if (ll == null) {
-						ll = Language.UNKNOWN;
-					}
-				} else {
-					ll = Language.UNKNOWN;
 				}
+				
+				if ((ll == null || ll == Language.UNKNOWN) && conf.defaultLanguage != null) {
+					ll = conf.defaultLanguage;
+				}
+
 				
 				if (prefLabel.getLiteral(ll) == null) {
 					prefLabel.addLiteral(ll, JSONObject.escape(lit.getString()));
@@ -544,19 +598,23 @@ public class SKOS2Vocabulary {
 		}
 
 		String type = null;
-
-		queryString = "SELECT ?type WHERE {" + uri + " a ?type}";
-		query = QueryFactory.create(queryString) ;
-		
-		try (QueryExecution exec = QueryExecutionFactory.create(query, model)) {
-			for (ResultSet res = exec.execSelect(); res.hasNext() ; ) {
-				QuerySolution s = res.next();
-				String t = s.get("type").asResource().getURI();
-				if (t.contains("skos/core#")) {
-					type = t;
-					break;
+		if (manualType == null) {
+	
+			queryString = "SELECT ?type WHERE {" + uri + " a ?type}";
+			query = QueryFactory.create(queryString) ;
+			
+			try (QueryExecution exec = QueryExecutionFactory.create(query, model)) {
+				for (ResultSet res = exec.execSelect(); res.hasNext() ; ) {
+					QuerySolution s = res.next();
+					String t = s.get("type").asResource().getURI();
+					if (t.contains("skos/core#")) {
+						type = t;
+						break;
+					}
 				}
 			}
+		} else {
+			type = manualType;
 		}
 		
 		ObjectNode json = Json.newObject();
@@ -576,4 +634,5 @@ public class SKOS2Vocabulary {
 
 		return json;
 	}
+
 }

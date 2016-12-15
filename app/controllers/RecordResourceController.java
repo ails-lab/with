@@ -28,6 +28,8 @@ import java.util.Set;
 import javax.validation.ConstraintViolation;
 
 import model.DescriptiveData;
+import model.EmbeddedMediaObject;
+import model.EmbeddedMediaObject.MediaVersion;
 import model.annotations.Annotation;
 import model.annotations.Annotation.AnnotationAdmin;
 import model.annotations.Annotation.AnnotationScore;
@@ -48,14 +50,18 @@ import play.Logger;
 import play.Logger.ALogger;
 import play.data.validation.Validation;
 import play.libs.F.Option;
+import play.libs.Akka;
 import play.libs.Json;
 import play.mvc.Result;
-import sources.core.ParallelAPICall;
-import sources.core.ParallelAPICall.Priority;
 import utils.Tuple;
-import annotators.Annotator;
+import actors.annotation.TextAnnotatorActor;
+import actors.annotation.AnnotationControlActor;
+import actors.annotation.AnnotatorActor;
+import actors.annotation.RequestAnnotatorActor;
+import akka.actor.ActorRef;
+import akka.actor.ActorSelection;
+import akka.actor.Props;
 import annotators.AnnotatorConfig;
-import controllers.WithController.Action;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -65,8 +71,6 @@ import db.DB;
 
 import java.util.Random;
 import java.util.HashSet;
-import java.util.function.BiFunction;
-import java.util.function.Function;
 
 import play.libs.F.Some;
 /**
@@ -289,62 +293,85 @@ public class RecordResourceController extends WithResourceController {
 				List<AnnotatorConfig> annConfigs = AnnotatorConfig.createAnnotationConfigs(json);
 				ObjectId user = WithController.effectiveUserDbId();
 				
-				annotateRecord(recordId, user, annConfigs);
+				Random rand = new Random();
+				String requestId = "AR" + (System.currentTimeMillis() + Math.abs(rand.nextLong())) + "" + Math.abs(rand.nextLong());
+
+				Akka.system().actorOf( Props.create(AnnotationControlActor.class, requestId, new ObjectId(recordId), user, true), requestId);
+				ActorSelection ac = Akka.system().actorSelection("user/" + requestId);
+				
+				annotateRecord(recordId, user, annConfigs, ac);
+				
+				ac.tell(new AnnotationControlActor.AnnotateRequestsEnd(), ActorRef.noSender());
 				
 				return ok();
 //			}				
 		} catch (Exception e) {
+			e.printStackTrace();
 			result.put("error", e.getMessage());
 			return internalServerError(result);
 		}
 	}
 
-	public static void annotateRecord(String recordId, ObjectId user, List<AnnotatorConfig> annConfigs) throws Exception {
-		String[] fields = new String[] {"description", "label"};
-		
-		RecordResource record = DB.getRecordResourceDAO().get(new ObjectId(recordId));
-		DescriptiveData dd = record.getDescriptiveData();
-		
-		for (String p : fields) {
-			Method method = dd.getClass().getMethod("get" + p.substring(0,1).toUpperCase() + p.substring(1));
-		
-			Object res = method.invoke(dd);
-			if (res != null && res instanceof MultiLiteral) {
-				MultiLiteral value = (MultiLiteral)res;
+	public static void annotateRecord(String recordId, ObjectId user, List<AnnotatorConfig> annConfigs, ActorSelection ac) throws Exception {
 
-				for (Language lang : value.getLanguages()) {
-					if (lang == Language.UNKNOWN || lang == Language.DEFAULT) {
-						continue;
+		RecordResource record = DB.getRecordResourceDAO().get(new ObjectId(recordId));
+		DescriptiveData dd = null;
+		
+		for (AnnotatorConfig annConfig : annConfigs) {
+			Map<String, Object> props = annConfig.getProps();
+			
+			boolean imageAnnotator = props.get(AnnotatorActor.IMAGE_ANNOTATOR) != null && (boolean)props.get(AnnotatorActor.IMAGE_ANNOTATOR); 
+			boolean textAnnotator = props.get(AnnotatorActor.TEXT_ANNOTATOR) != null && (boolean)props.get(AnnotatorActor.TEXT_ANNOTATOR);
+			
+			if (imageAnnotator) {
+				AnnotationTarget target = new AnnotationTarget();
+				target.setRecordId(record.getDbId());
+				
+				List<String> urls = new ArrayList<String>();
+				for (HashMap<MediaVersion, EmbeddedMediaObject> t : (List<HashMap<MediaVersion, EmbeddedMediaObject>>)record.getMedia()) {
+					EmbeddedMediaObject emo = t.get(MediaVersion.Original);
+					if (emo != null) {
+						urls.add(emo.getWithUrl());
 					}
-					
-					for (String text : value.get(lang)) {
-						AnnotationTarget target = new AnnotationTarget();
-						target.setRecordId(record.getDbId());
+				}
+			
+	    	    ac.tell(new AnnotationControlActor.AnnotateRequest(user, urls.toArray(new String[urls.size()]), target, props, (RequestAnnotatorActor.Descriptor)annConfig.getAnnotatorDesctriptor()), ActorRef.noSender());
+				
+			} else if (textAnnotator) {
+				if (dd == null) {
+					dd = record.getDescriptiveData();
+				}
+				for (String p : (String[])props.get(AnnotatorActor.TEXT_FIELDS)) {
+					Method method = dd.getClass().getMethod("get" + p.substring(0,1).toUpperCase() + p.substring(1));
+				
+					Object res = method.invoke(dd);
+					if (res != null && res instanceof MultiLiteral) {
+						MultiLiteral value = (MultiLiteral)res;
+		
+						value.remove(Language.DEFAULT);
+						if (value.size() == 1 && value.contains(Language.UNKNOWN)) {
+							List<String> unk = value.remove(Language.UNKNOWN);
+							value.addMultiLiteral(Language.EN, unk);
+						}
 						
-						PropertyTextFragmentSelector selector = new PropertyTextFragmentSelector();
-						selector.setOrigValue(text);
-						selector.setOrigLang(lang);
-						selector.setProperty(p);
-						
-						target.setSelector(selector);
-						
-						for (AnnotatorConfig annConfig : annConfigs) {
-							Annotator annotator = Annotator.getAnnotator(annConfig.getAnnotatorClass(), lang);
-							if (annotator != null) {
-								try {
-									Map<String, Object> props = new HashMap<>();
-									if (annConfig.getProps() != null) {
-										props.putAll(annConfig.getProps());
-									}
-									props.put(Annotator.TEXT, text);
-									props.put(Annotator.USERID, user);
+						for (Language lang : value.getLanguages()) {
+							if (lang == Language.UNKNOWN) {
+								continue;
+							}
+							
+							if (value.get(lang) != null) {
+								for (String text : value.get(lang)) {
+									AnnotationTarget target = new AnnotationTarget();
+									target.setRecordId(record.getDbId());
 									
-									for (Annotation ann : annotator.annotate(target, props)) {
-										AnnotationController.addAnnotation(ann, user);
-									}
-								} catch (Exception e) {
-									e.printStackTrace();
-									log.error(e.getMessage());
+									PropertyTextFragmentSelector selector = new PropertyTextFragmentSelector();
+									selector.setOrigValue(text);
+									selector.setOrigLang(lang);
+									selector.setProperty(p);
+									
+									target.setSelector(selector);
+	
+									ac.tell(new AnnotationControlActor.AnnotateText(user, text, target, props, (TextAnnotatorActor.Descriptor)annConfig.getAnnotatorDesctriptor(), lang), ActorRef.noSender());
 								}
 							}
 						}
@@ -382,7 +409,7 @@ public class RecordResourceController extends WithResourceController {
 									if (annotators.size() == 1) {
 										DB.getAnnotationDAO().deleteAnnotation(annId);
 									} else {
-										DB.getAnnotationDAO().removeAnnotators(annotation.getDbId(), Arrays.asList(annotator));
+										DB.getAnnotationDAO().removeAnnotators(annId, Arrays.asList(annotator));
 									}
 								}
 							}

@@ -28,4 +28,6 @@ public abstract class SelectorType implements Cloneable {
 	}
 	
 	public abstract void addToQuery(Query<Annotation> q);
+	
+	public void cleanUp() {}
 }

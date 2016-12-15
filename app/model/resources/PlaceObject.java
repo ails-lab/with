@@ -17,6 +17,7 @@
 package model.resources;
 
 import java.util.ArrayList;
+import java.util.Collection;
 
 import org.mongodb.morphia.annotations.Entity;
 
@@ -68,6 +69,24 @@ public class PlaceObject extends RecordResource<PlaceObject.PlaceData> {
 		public void setPartOfPlace(MultiLiteralOrResource partOfPlace) {
 			this.partOfPlace = partOfPlace;
 		}
+
+		public Collection<String> collectURIs() {
+			Collection<String> res = super.collectURIs();
+
+			if (nation != null && nation.getURI() != null) {
+				res.addAll(nation.getURI());
+			}
+			
+			if (continent != null && continent.getURI() != null) {
+				res.addAll(continent.getURI());
+			}
+			
+			if (partOfPlace != null && partOfPlace.getURI() != null) {
+				res.addAll(partOfPlace.getURI());
+			}
+			
+			return res;
+		} 
 
 	}
 }

@@ -105,6 +105,25 @@ public class ElasticReindexer {
 		return true;
 	}
 
+	public static boolean reindexCollectionRecordResources(ObjectId colId) {
+		BulkProcessor bulk = Elastic.getBulkProcessor();
+		List<RecordResource> list = DB.getRecordResourceDAO().getByCollection(colId);
+
+		/* Index all RecordResources */
+		try {
+			for (RecordResource rr : list) {
+				bulk.add(new IndexRequest(Elastic.index, ElasticUtils.defineInstanceOf(rr), rr.getDbId().toString())
+							.source(rr.transform()));
+			}
+			bulk.flush();
+
+		} catch (Exception e) {
+			log.error(e.getMessage(), e);
+		}
+		
+		return true;
+	}
+		
 	/*
 	 * FAST RE-INDEX
 	 *

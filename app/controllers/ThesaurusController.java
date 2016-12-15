@@ -46,6 +46,8 @@ import play.mvc.Result;
 import vocabularies.Vocabulary;
 import vocabularies.Vocabulary.VocabularyType;
 
+import com.aliasi.spell.JaccardDistance;
+import com.aliasi.tokenizer.IndoEuropeanTokenizerFactory;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -54,10 +56,10 @@ import db.DB;
 import elastic.Elastic;
 import elastic.ElasticSearcher;
 import elastic.ElasticSearcher.SearchOptions;
+import actors.annotation.CultIVMLAnnotatorActor;
+import annotators.CultIVMLAnnotator;
 import annotators.DBPediaAnnotator;
-import annotators.ImageAnnotator;
 import annotators.LookupAnnotator;
-import annotators.Annotator.AnnotatorType;
 import annotators.NLPAnnotator;
 
 /**
@@ -252,7 +254,7 @@ public class ThesaurusController extends Controller {
 		for (Vocabulary voc : Vocabulary.getVocabularies()) {
 			if (voc.getType() == VocabularyType.THESAURUS) {
 				option = Json.newObject();
-				option.put("name", LookupAnnotator.class.getSimpleName()+"/" + voc.getName());
+				option.put("name", LookupAnnotator.class.getSimpleName() + "/" + voc.getName());
 				option.put("label", voc.getLabel());
 			
 				options.add(option);
@@ -273,24 +275,24 @@ public class ThesaurusController extends Controller {
 
 		option = Json.newObject();
 		option.put("name", NLPAnnotator.class.getSimpleName());
-		option.put("label",NLPAnnotator.getName());
+		option.put("label", NLPAnnotator.getName());
 		options.add(option);
 
 		ann.put("options", options);
 		result.add(ann);
 		
-//		ann = Json.newObject();
-//		ann.put("group", "Image Analysis");
-//		ann.put("hint", "Select the image analysis services that will be used");
-//		
-//		options = Json.newObject().arrayNode();
-//		option = Json.newObject();
-//		option.put("name", ImageAnnotator.class.getSimpleName());
-//		option.put("label", ImageAnnotator.getName());
-//		options.add(option);
-//
-//		ann.put("options", options);
-//		result.add(ann);
+		ann = Json.newObject();
+		ann.put("group", "Image Analysis");
+		ann.put("hint", "Select the image analysis services that will be used");
+		
+		options = Json.newObject().arrayNode();
+		option = Json.newObject();
+		option.put("name", CultIVMLAnnotator.class.getSimpleName());
+		option.put("label", CultIVMLAnnotator.getName());
+		options.add(option);
+
+		ann.put("options", options);
+		result.add(ann);
 		
 		return ok(Json.toJson(result));
 	}
@@ -470,6 +472,8 @@ public class ThesaurusController extends Controller {
 		public double distance;
 		private int selectedLabel;
 		
+		private static JaccardDistance jaccard = new JaccardDistance(IndoEuropeanTokenizerFactory.INSTANCE);
+		
 		public SearchSuggestion (String reference, String id, String enLabel, String[] labels, String uri, String vocabulary, String[] categories) {
 			this.id = id;
 			this.enLabel = enLabel;
@@ -481,8 +485,13 @@ public class ThesaurusController extends Controller {
 			distance = Double.MAX_VALUE;
 			selectedLabel = 0;
 			for (int i = 0; i < labels.length; i++) {
-				double d = jaccardDistance(2, reference, labels[i]);
-				if (d < distance) {
+//				double d = jaccardDistance(2, reference, labels[i]);
+				double d = jaccard.distance(reference.toLowerCase(), labels[i].toLowerCase());
+//				 if (!reference.equals(labels[i])) {
+//					 d += 0.1;
+//				 }
+
+				 if (d < distance) {
 					distance = d;
 					selectedLabel = i;
 				}
@@ -504,32 +513,32 @@ public class ThesaurusController extends Controller {
 			}
 		}
 		
-		 public static double jaccardDistance(int n, String s, String t) {
-			 if (s == null || t == null) {
-				 return 1;
-			 }
-			 
-			 int l1 = s.length() - n + 1;
-			 int l2 = t.length() - n + 1;
-			 
-			 int found = 0;
-			 for (int i = 0; i < l1 ; i++  ){
-				 for (int j = 0; j < l2; j++) {
-					 int k = 0;
-					 for( ; ( k < n ) && ( Character.toLowerCase(s.charAt(i+k)) == Character.toLowerCase(t.charAt(j+k)) ); k++);
-					 if (k == n) {
-						 found++;
-					 }
-				 }
-			 }
-
-			 double dist = 1-(2*((double)found)/((double)(l1+l2)));
-			 if (!s.equals(t)) {
-				 dist += 0.1;
-			 }
-			 
-			 return dist;
-		}
+//		 public static double jaccardDistance(int n, String s, String t) {
+//			 if (s == null || t == null) {
+//				 return 1;
+//			 }
+//			 
+//			 int l1 = s.length() - n + 1;
+//			 int l2 = t.length() - n + 1;
+//			 
+//			 int found = 0;
+//			 for (int i = 0; i < l1 ; i++  ){
+//				 for (int j = 0; j < l2; j++) {
+//					 int k = 0;
+//					 for( ; ( k < n ) && ( Character.toLowerCase(s.charAt(i+k)) == Character.toLowerCase(t.charAt(j+k)) ); k++);
+//					 if (k == n) {
+//						 found++;
+//					 }
+//				 }
+//			 }
+//
+//			 double dist = 1-(2*((double)found)/((double)(l1+l2)));
+//			 if (!s.equals(t)) {
+//				 dist += 0.1;
+//			 }
+//			 
+//			 return dist;
+//		}
 	}
 
 }

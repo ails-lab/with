@@ -26,6 +26,7 @@ import java.util.List;
 import model.annotations.Annotation;
 import model.annotations.Annotation.AnnotationAdmin;
 import model.annotations.bodies.AnnotationBody;
+import model.annotations.bodies.AnnotationBodyTagging;
 import model.basicDataTypes.Language;
 import model.basicDataTypes.WithAccess;
 import model.basicDataTypes.WithAccess.Access;
@@ -51,6 +52,7 @@ import controllers.WithController.Profile;
 import db.DB;
 import elastic.ElasticSearcher;
 import elastic.ElasticSearcher.SearchOptions;
+import elastic.ElasticUtils;
 
 @SuppressWarnings({ "rawtypes", "unchecked", "deprecation" })
 public class AnnotationController extends Controller {
@@ -79,15 +81,15 @@ public class AnnotationController extends Controller {
 			DB.getAnnotationDAO().makePermanent(annotation);
 			annotation.setAnnotationWithURI("/annotation/"
 					+ annotation.getDbId());
-			DB.getAnnotationDAO().makePermanent(annotation);
+//			DB.getAnnotationDAO().makePermanent(annotation); // is this needed for a second time?
 			DB.getRecordResourceDAO().addAnnotation(
 					annotation.getTarget().getRecordId(), annotation.getDbId());
 		} else {
 			ArrayList<AnnotationAdmin> annotators = existingAnnotation
 					.getAnnotators();
+			ObjectId userId = WithController.effectiveUserDbId();
 			for (AnnotationAdmin a : annotators) {
-				if (a.getWithCreator().equals(
-						WithController.effectiveUserDbId())) {
+				if (a.getWithCreator().equals(userId)) {
 					return ok(Json.toJson(existingAnnotation));
 				}
 			}
@@ -100,8 +102,10 @@ public class AnnotationController extends Controller {
 	}
 	
 	public static Result approveAnnotation(String id) {
-		try {			
+		try {
+			ObjectId oid = new ObjectId(id);
 			DB.getAnnotationDAO().addApprove(new ObjectId(id), WithController.effectiveUserDbId());
+			ElasticUtils.update(DB.getRecordResourceDAO().getByAnnotationId(oid));
 			return ok();
 		} catch (Exception e) {
 			return internalServerError();
@@ -110,7 +114,9 @@ public class AnnotationController extends Controller {
 
 	public static Result unscoreAnnotation(String id) {
 		try {			
-			DB.getAnnotationDAO().removeScore(new ObjectId(id), WithController.effectiveUserDbId());
+			ObjectId oid = new ObjectId(id);
+			DB.getAnnotationDAO().removeScore(oid, WithController.effectiveUserDbId());
+			ElasticUtils.update(DB.getRecordResourceDAO().getByAnnotationId(oid));
 			return ok();
 		} catch (Exception e) {
 			return internalServerError();
@@ -119,7 +125,9 @@ public class AnnotationController extends Controller {
 	
 	public static Result rejectAnnotation(String id) {
 		try {			
+			ObjectId oid = new ObjectId(id);
 			DB.getAnnotationDAO().addReject(new ObjectId(id), WithController.effectiveUserDbId());
+			ElasticUtils.update(DB.getRecordResourceDAO().getByAnnotationId(oid));
 			return ok();
 		} catch (Exception e) {
 			return internalServerError();
@@ -136,7 +144,7 @@ public class AnnotationController extends Controller {
 			DB.getAnnotationDAO().makePermanent(annotation);
 			annotation.setAnnotationWithURI("/annotation/"
 					+ annotation.getDbId());
-			DB.getAnnotationDAO().makePermanent(annotation);
+//			DB.getAnnotationDAO().makePermanent(annotation);
 			DB.getRecordResourceDAO().addAnnotation(
 					annotation.getTarget().getRecordId(), annotation.getDbId());
 		} else {
@@ -210,7 +218,11 @@ public class AnnotationController extends Controller {
 	}
 
 	
-	private static Annotation getAnnotationFromJson(JsonNode json) {
+	public static Annotation getAnnotationFromJson(JsonNode json) {
+		return getAnnotationFromJson(json, WithController.effectiveUserDbId());
+	}
+	
+	public static Annotation getAnnotationFromJson(JsonNode json, ObjectId userId) {
 		try {
 			Annotation annotation = Json.fromJson(json, Annotation.class);
 			Class<?> clazz = Class
@@ -218,12 +230,12 @@ public class AnnotationController extends Controller {
 							+ annotation.getMotivation());
 			AnnotationBody body = (AnnotationBody) Json.fromJson(
 					json.get("body"), clazz);
+			body.adjustLabel();
 			annotation.setBody(body);
 			AnnotationAdmin administrative = new AnnotationAdmin();
-			administrative.setWithCreator(WithController.effectiveUserDbId());
+			administrative.setWithCreator(userId);
 			if (json.has("generated")) {
-				SimpleDateFormat sdf = new SimpleDateFormat(
-						"yyyy-MM-dd'T'HH:mm:ss'Z'");
+				SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
 				try {
 					administrative.setGenerated(sdf.parse(json.get("generated")
 							.asText()));
@@ -241,6 +253,9 @@ public class AnnotationController extends Controller {
 			if (json.has("body") && json.get("body").has("confidence")) {
 				administrative.setConfidence(json.get("body").get("confidence")
 						.asDouble());
+			}
+			if (json.has("confidence")) {
+				administrative.setConfidence(json.get("confidence").asDouble());
 			}
 			annotation.setAnnotators(new ArrayList(Arrays
 					.asList(administrative)));

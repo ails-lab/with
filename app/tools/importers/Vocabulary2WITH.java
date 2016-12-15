@@ -22,71 +22,100 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
-import java.util.function.Function;
+
+import model.resources.ThesaurusObject;
 
 import org.bson.types.ObjectId;
 import org.elasticsearch.action.search.SearchResponse;
+import org.elasticsearch.common.unit.TimeValue;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.TermQueryBuilder;
 import org.elasticsearch.search.SearchHit;
-import org.elasticsearch.search.SearchHits;
+import org.mongodb.morphia.query.Query;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
 import play.libs.Json;
 import controllers.ThesaurusController;
-import sources.core.ParallelAPICall;
+import db.DB;
 import tools.importers.vocabulary.AAT2Vocabulary;
 import tools.importers.vocabulary.DBPedia2Vocabulary;
 import tools.importers.vocabulary.OWL2Vocabulary;
+import tools.importers.vocabulary.RDF2Vocabulary;
 import tools.importers.vocabulary.SKOS2Vocabulary;
 import tools.importers.vocabulary.VocabularyImportConfiguration;
-import elastic.ElasticCoordinator;
+import tools.importers.vocabulary.Wordnet302Vocabulary;
+import elastic.Elastic;
 import elastic.ElasticEraser;
+import elastic.ElasticSearcher;
 import elastic.ElasticSearcher.SearchOptions;
 
 public class Vocabulary2WITH {
 
 	public static void main(String[] args) throws FileNotFoundException, IOException {
 
-		// specify configure folders
 		VocabularyImportConfiguration.tmpdir = "C:/Users/achort.IPLAB/git/with-vocabularies/tmp";
 		
 		VocabularyImportConfiguration.srcdir = "C:/Users/achort.IPLAB/git/with-vocabularies/resources/vocabulary/src";
 		VocabularyImportConfiguration.outdir = "C:/Users/achort.IPLAB/git/with-vocabularies/resources/vocabulary/json";
 		
-		// converts sources in srcdir to zipped jsons in outfir
-		//convertSourcesToJSONs();
+//		deleteVocabularyFromIndex("fashion");
+//		deleteVocabularyFromIndex("euscreenxl");
+//		deleteVocabularyFromIndex("mimo");
+//		deleteVocabularyFromIndex("partageplus");
+//		deleteVocabularyFromIndex("photo");
+//		deleteVocabularyFromIndex("gemet");
+//		deleteVocabularyFromIndex("aat");
+//		deleteVocabularyFromIndex("nerd");
+//		deleteVocabularyFromIndex("schema");
+//		deleteVocabularyFromIndex("wn30");
+//		deleteVocabularyFromIndex("dbo");
+//		deleteVocabularyFromIndex("dbr");
 		
-		// import all jsons to WITH
-		//importAll();
+//		convertSourcesToJSONs();
 		
-		// or import one-by-one
-		//importJSONVocabularyToWITH("fashion");
-		//importJSONVocabularyToWITH("photo");
-		//importJSONVocabularyToWITH("euscreenxl");
-		//importJSONVocabularyToWITH("partageplus");
-		//importJSONVocabularyToWITH("mimo");
-		//importJSONVocabularyToWITH("gemet");
-		//importJSONVocabularyToWITH("hornbostelsachs");
-		//importJSONVocabularyToWITH("nerd");
-		//importJSONVocabularyToWITH("aat");
-		//importJSONVocabularyToWITH("dbo");
-		//importJSONVocabularyToWITH("dbr-place");
-		//importJSONVocabularyToWITH("dbr-person");
+//		SKOS2Vocabulary.doImport(SKOS2Vocabulary.fashion);
+//		SKOS2Vocabulary.doImport(SKOS2Vocabulary.euscreenxl);
+//		SKOS2Vocabulary.doImport(SKOS2Vocabulary.mimo);
+//		SKOS2Vocabulary.doImport(SKOS2Vocabulary.partageplus);
+//		SKOS2Vocabulary.doImport(SKOS2Vocabulary.photo);
+//		SKOS2Vocabulary.doImport(SKOS2Vocabulary.gemet);
+//		AAT2Vocabulary.doImport(AAT2Vocabulary.confs);
+//		OWL2Vocabulary.doImport(OWL2Vocabulary.nerd);
+//		RDF2Vocabulary.doImport(RDF2Vocabulary.schema);
+//		Wordnet302Vocabulary.doImport(Wordnet302Vocabulary.confs);
+
+//		List<String[]> filters = new ArrayList<>();
+//		filters.add(new String[] {"Person"});
+//		filters.add(new String[] {"Place"});
+//		
+//		DBPedia2Vocabulary.doImport(filters);
+		
+//		importAll();
+		
+//		importJSONVocabularyToWITH("fashion");
+//		importJSONVocabularyToWITH("euscreenxl");
+//		importJSONVocabularyToWITH("mimo");
+//		importJSONVocabularyToWITH("partageplus");
+//		importJSONVocabularyToWITH("photo");
+//		importJSONVocabularyToWITH("gemet");
+//		importJSONVocabularyToWITH("aat");
+//		importJSONVocabularyToWITH("nerd");
+//		importJSONVocabularyToWITH("schema");
+//		importJSONVocabularyToWITH("wn30");
+//		importJSONVocabularyToWITH("dbo");
+//		importJSONVocabularyToWITH("dbr-place");
+//		importJSONVocabularyToWITH("dbr-person");
 	}
 	
 	private static void convertSourcesToJSONs() {
 		// import skos vocabularies
 		SKOS2Vocabulary.doImport(SKOS2Vocabulary.confs);
-		
-		// import owl vocabularies
+		RDF2Vocabulary.doImport(RDF2Vocabulary.confs);
 		OWL2Vocabulary.doImport(OWL2Vocabulary.confs);
-		
-		// import aat thesaurus
 		AAT2Vocabulary.doImport(AAT2Vocabulary.confs);
+		Wordnet302Vocabulary.doImport(Wordnet302Vocabulary.confs);
 		
 		// import dbpedia
 		List<String[]> filters = new ArrayList<>();
@@ -173,24 +202,39 @@ public class Vocabulary2WITH {
 	}
 	
 	public static void deleteVocabularyFromIndex(String voc) {
+		
+		Query<ThesaurusObject> q = DB.getThesaurusDAO().createQuery().disableValidation().field("semantic.vocabulary.name").equal(voc);
+		
+		DB.getThesaurusDAO().deleteByQuery(q);
+		
 		TermQueryBuilder query = QueryBuilders.termQuery("vocabulary.name", voc);
 	
-		SearchOptions so = new SearchOptions(0, Integer.MAX_VALUE);
+		SearchOptions so = new SearchOptions(0, 10000);
 		so.isPublic = false;
-		ElasticCoordinator es = new ElasticCoordinator();
-		SearchResponse res = es.queryExcecution(query, so);
-		SearchHits sh = res.getHits();
 		
-		System.out.println(sh.getTotalHits());
+		ElasticSearcher searcher = new ElasticSearcher();
+		
+		SearchResponse scrollResp = searcher.getSearchRequestBuilder(query, so)
+		        .setScroll(new TimeValue(60000))
+		        .setQuery(query)
+		        .setSize(10000).execute().actionGet(); 
 		
 		List<ObjectId> tids = new ArrayList<>();
-		for (Iterator<SearchHit> iter = sh.iterator(); iter.hasNext();) {
-			SearchHit hit = iter.next();
-			tids.add(new ObjectId(hit.getId()));
+		
+		while (true) {
+		    for (SearchHit hit : scrollResp.getHits().getHits()) {
+		        tids.add(new ObjectId(hit.getId()));
+		    }
+		    scrollResp = Elastic.getTransportClient().prepareSearchScroll(scrollResp.getScrollId()).setScroll(new TimeValue(60000)).execute().actionGet();
+		    //Break condition: No hits are returned
+		    if (scrollResp.getHits().getHits().length == 0) {
+		        break;
+		    }
 		}
 		
-		Function<List<ObjectId>, Boolean> deleteResources = (List<ObjectId> ids) -> (ElasticEraser.deleteManyTermsFromThesaurus(ids));
-		ParallelAPICall.createPromise(deleteResources, tids);
+//		System.out.println(tids.size());
+		
+		ElasticEraser.deleteManyTermsFromThesaurus(tids);
 
 	}
 	
