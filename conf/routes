@@ -94,6 +94,8 @@ POST     /collection/uploadCollection		    controllers.CollectionObjectControlle
 POST     /collection/importIDs 					controllers.CollectionObjectController.importIDs(cname, source, ids)
 GET     /collection/importEuropeanaCollection	controllers.CollectionObjectController.createAndFillEuropeanaCollection(id: String, limit:Integer ?=-1)
 GET     /collection/importOmeka					controllers.CollectionObjectController.importOmeka(ncollections:Integer ?=-1)
+POST     /collection/importExhibition 					controllers.CollectionObjectController.importExhibition(source)
+
 GET      /collection/exportToOWL 			    controllers.CollectionObjectController.exportCollectionObjectToOWL(cname)
 GET      /collection/update 			    	controllers.CollectionObjectController.updateCollectionObject(collectionId: String)
 
