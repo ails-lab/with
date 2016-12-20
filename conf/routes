@@ -121,6 +121,11 @@ GET		/group/list								controllers.GroupManager.listUserGroups(groupType: Strin
 GET		/group/with								controllers.GroupManager.getWithSpace()
 PUT		/group/with								controllers.GroupManager.editWithSpace()
 
+# manage UI settings
+GET		 /group/:groupId/uiSettings				controllers.GroupManager.getUiSettings( groupId, key: String ?= null )
+PUT		/group/:groupId/uiSettings				controllers.GroupManager.updateUiSettings( groupId,  key:String )
+DELETE	/group/:groupId/uiSettings				controllers.GroupManager.deleteUiSettings( groupId, key:String )
+
 GET		 /group/space							controllers.GroupManager.getSpace(name)
 PUT      /group/:id                             controllers.GroupManager.editGroup(id)
 DELETE   /group/:id                             controllers.GroupManager.deleteGroup(id)
