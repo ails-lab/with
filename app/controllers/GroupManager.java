@@ -644,7 +644,8 @@ public class GroupManager extends WithController {
 			return null;
 		}
 		// any of the effective users is an admin?
-		if( effectiveUser().isSuperUser()) return ug;
+		if( effectiveUser() != null )
+			if( effectiveUser().isSuperUser()) return ug;
 		
 		// read access
 		if( acc == Access.READ ) {
