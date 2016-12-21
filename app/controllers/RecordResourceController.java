@@ -511,19 +511,29 @@ public class RecordResourceController extends WithResourceController {
 		int totalRecordsCount = 0;
 	}
 	
-	public static Result getAnnotations(String id) {
+	public static Result getAnnotations(String id, String motivation) {
 		ObjectNode result = Json.newObject();
 		try {
-			RecordResource record = DB.getRecordResourceDAO().get(new ObjectId(id));
-			Result response = errorIfNoAccessToRecord(Action.READ,
-					new ObjectId(id));
-			if (!response.toString().equals(ok().toString()))
-				return response;
-			else {
+//			RecordResource record = DB.getRecordResourceDAO().get(new ObjectId(id));
+//			Result response = errorIfNoAccessToRecord(Action.READ, new ObjectId(id));
+//			if (!response.toString().equals(ok().toString()))
+//				return response;
+//			else {
 				ArrayNode array = result.arrayNode();
-				record.fillAnnotations();
+//				record.fillAnnotations();
 				
-				List<Annotation> anns = record.getAnnotations();
+				List<Annotation.MotivationType> motivations = new ArrayList<>();
+				if (motivation != null && motivation.length() > 0) {
+					for (String s : motivation.split(",")) {
+						try {
+							motivations.add(Annotation.MotivationType.valueOf(s.trim()));
+						} catch (Exception ex) {
+							
+						}
+					}
+				}
+				
+				List<Annotation> anns = DB.getAnnotationDAO().getByRecordId(new ObjectId(id), motivations);
 				
 				for (Annotation ann : anns) {
 					JsonNode json = Json.toJson(ann);
@@ -540,7 +550,7 @@ public class RecordResourceController extends WithResourceController {
 					array.add(json);
 				}
 				return ok(array);
-			}				
+//			}				
 		} catch (Exception e) {
 			result.put("error", e.getMessage());
 			return internalServerError(result);

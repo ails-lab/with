@@ -228,7 +228,7 @@ public class Wordnet302Vocabulary extends Data2Vocabulary<SKOSImportConfiguratio
 				String lang = lit.getLanguage();
 				Language ll = null;
 				if (lang != null) {
-					ll = Language.getLanguage(lang);
+					ll = Language.getLanguageByCode(lang);
 					if (ll == null) {
 						ll = Language.UNKNOWN;
 					}

@@ -174,7 +174,7 @@ public class Deserializer {
 			}
 			for (Entry<String, String[]> e : map.entrySet()) {
 				if (Language.isLanguage(e.getKey())) {
-					out.addMultiLiteral(Language.getLanguage(e.getKey()),
+					out.addMultiLiteral(Language.getLanguageByCode(e.getKey()),
 							Arrays.asList(e.getValue()));
 				}
 			}
@@ -201,7 +201,7 @@ public class Deserializer {
 			}
 			for (Entry<String, String[]> e : map.entrySet()) {
 				if (Language.isLanguage(e.getKey())) {
-					out.addMultiLiteral(Language.getLanguage(e.getKey()),
+					out.addMultiLiteral(Language.getLanguageByCode(e.getKey()),
 							Arrays.asList(e.getValue()));
 				} else if (e.getKey().equals(LiteralOrResource.URI)) {
 					out.addURI(Arrays.asList(e.getValue()));
@@ -236,7 +236,7 @@ public class Deserializer {
 			}
 			for (Entry<String, String> e : map.entrySet()) {
 				if (Language.isLanguage(e.getKey())) {
-					out.addLiteral(Language.getLanguage(e.getKey()),
+					out.addLiteral(Language.getLanguageByCode(e.getKey()),
 							e.getValue());
 				}
 			}
@@ -270,7 +270,7 @@ public class Deserializer {
 			}
 			for (Entry<String, String> e : map.entrySet()) {
 				if (Language.isLanguage(e.getKey())) {
-					out.addLiteral(Language.getLanguage(e.getKey()),
+					out.addLiteral(Language.getLanguageByCode(e.getKey()),
 							e.getValue());
 				} else if (e.getKey().equals(LiteralOrResource.URI)) {
 					out.addURI(e.getValue());
@@ -368,7 +368,7 @@ public class Deserializer {
 						((PropertyTextFragmentSelector)st).setStart((Integer)start);
 						((PropertyTextFragmentSelector)st).setEnd((Integer)end);
 						((PropertyTextFragmentSelector)st).setOrigValue((String)origValue);
-						((PropertyTextFragmentSelector)st).setOrigLang(Language.getLanguage((String)origLang));
+						((PropertyTextFragmentSelector)st).setOrigLang(Language.getLanguageByCode((String)origLang));
 					} else {
 						st = new PropertySelector();
 						((PropertySelector)st).setProperty((String)property);

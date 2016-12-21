@@ -19,7 +19,6 @@ package model.annotations.bodies;
 import java.util.ArrayList;
 
 import db.DB;
-import model.basicDataTypes.Literal;
 import model.basicDataTypes.MultiLiteral;
 import model.resources.ThesaurusObject;
 

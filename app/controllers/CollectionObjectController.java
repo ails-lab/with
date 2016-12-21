@@ -1796,10 +1796,7 @@ public class CollectionObjectController extends WithResourceController {
 				}
 			}
 
-			ObjectNode res = Json.newObject();
-			ArrayNode groups = Json.newObject().arrayNode();
-			
-			res.put("groups", groups);
+			List<ObjectNode> groupList = new ArrayList<>();
 			
 			for (Map.Entry<String, Map<String, AnnotationInfo>> entry : annMap.entrySet()) {
 				ObjectNode groupJson = Json.newObject();
@@ -1850,8 +1847,27 @@ public class CollectionObjectController extends WithResourceController {
 
 				groupJson.put("annotations", recArray);
 			
-				groups.add(groupJson);
+				groupList.add(groupJson);
 			}
+			
+			Collections.sort(groupList, new Comparator<ObjectNode>() {
+				@Override
+				public int compare(ObjectNode o1, ObjectNode o2) {
+					return o1.get("name").asText().compareTo(o2.get("name").asText());
+				}
+				
+			});
+			
+			ArrayNode groups = Json.newObject().arrayNode();
+
+			for (ObjectNode on : groupList) {
+				groups.add(on);
+			}
+			
+			ObjectNode res = Json.newObject();
+			res.put("groups", groups);
+			
+
 			
 			return ok(res);
 			

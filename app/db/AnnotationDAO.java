@@ -26,6 +26,7 @@ import java.util.Set;
 import model.annotations.Annotation;
 import model.annotations.Annotation.AnnotationAdmin;
 import model.annotations.Annotation.MotivationType;
+import model.annotations.bodies.AnnotationBodyGeoTagging;
 import model.annotations.bodies.AnnotationBodyTagging;
 import model.annotations.selectors.SelectorType;
 import model.annotations.targets.AnnotationTarget;
@@ -69,28 +70,40 @@ public class AnnotationDAO extends DAO<Annotation> {
 						new BeanToPropertyValueTransformer(
 									"target.recordId"));
 		
-		Query<Annotation> q = this.createQuery().field("target.recordId").in(recIds);
-		
-		return this.find(q).asList();
+		if (recIds.size() > 0) {
+			Query<Annotation> q = this.createQuery().field("target.recordId").in(recIds);
+			return this.find(q).asList();
+		} else {
+			return new ArrayList<Annotation>();
+		}
 	}
 	
-	public List<Annotation> getApprovedTaggingByRecordId(ObjectId recordId, List<String> retrievedFields) {
+	public List<Annotation> getApprovedByRecordId(ObjectId recordId, List<Annotation.MotivationType> motivations, List<String> retrievedFields) {
 		Query<Annotation> q = this.createQuery().disableValidation()
-				.field("motivation").equal(Annotation.MotivationType.Tagging)
 				.field("target.recordId").equal(recordId)
+				.field("motivation").hasAnyOf(motivations)
 				.field("score.approvedBy").exists()
 				.field("score.approvedBy").notEqual(new String[0])
 				.retrievedFields(true, retrievedFields.toArray(new String[retrievedFields.size()]));
-			return this.find(q).asList();
+		return this.find(q).asList();
+	}
+	
+	public List<Annotation> getByRecordId(ObjectId recordId, List<Annotation.MotivationType> motivations) {
+		Query<Annotation> q = this.createQuery().disableValidation()
+				.field("target.recordId").equal(recordId)
+				.field("motivation").hasAnyOf(motivations);
+		return this.find(q).asList();
 	}
 	
 	public Annotation getExistingAnnotation(Annotation annotation) {
 		if (annotation.getDbId() != null)
 			return this.getById(annotation.getDbId());
 
+		AnnotationTarget target = (AnnotationTarget) annotation.getTarget();
+
 		Query<Annotation> q = this.createQuery().disableValidation()
 				.field("target.recordId")
-				.equal(annotation.getTarget().getRecordId());
+				.equal(target.getRecordId());
 		
 		if (annotation.getMotivation().equals(MotivationType.Tagging)) {
 			AnnotationBodyTagging body = (AnnotationBodyTagging) annotation.getBody();
@@ -98,19 +111,19 @@ public class AnnotationDAO extends DAO<Annotation> {
 			if (body.getUri() != null) {
 				q.field("body.uri").equal(body.getUri());
 			}
+		} else if (annotation.getMotivation().equals(MotivationType.GeoTagging)) {
+			AnnotationBodyGeoTagging body = (AnnotationBodyGeoTagging) annotation.getBody();
+				
+			q.field("body.coordinates").equal(body.getCoordinates());
+		}			
 			
-			AnnotationTarget target = (AnnotationTarget) annotation.getTarget();
-			
-			SelectorType selector = target.getSelector();
-			if (selector != null) {
-				selector.addToQuery(q);
-			} else {
-				q.field("target.selector").doesNotExist();
-			}
-
+		SelectorType selector = target.getSelector();
+		if (selector != null) {
+			selector.addToQuery(q);
 		} else {
-			return null;
+			q.field("target.selector").doesNotExist();
 		}
+
 		return this.findOne(q);
 	}
 

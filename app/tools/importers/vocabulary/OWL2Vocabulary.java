@@ -180,7 +180,7 @@ public class OWL2Vocabulary extends Data2Vocabulary<OWLImportConfiguration> {
 					
 				Matcher lm = conf.labelMatcher(label);
 				if (lm.find()) {
-					Language lang = Language.getLanguage(lm.group(2));
+					Language lang = Language.getLanguageByCode(lm.group(2));
 					if (lang != null) {
 						prefLabel.put(lang.getDefaultCode(), JSONObject.escape(lm.group(1)));
 					}

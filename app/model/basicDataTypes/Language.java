@@ -1995,7 +1995,9 @@ public enum Language {
 	UNKNOWN("Unknown", "unknown","un", "unk");
 
 	
-	
+	public static Language[] EuropeanLanguages = new Language[] {
+		SQ,BE,BS,BG,CA,HR,CS,DA,NL,EN,ET,FI,FR,DE,EL,HU,GA,IS,IT,MK,MT,PL,PT,RO,SR,SK,SL,ES,SV,UK,RU
+	};
 	
 	private String name;
 	private String[] codes;
@@ -2017,6 +2019,7 @@ public enum Language {
 		return name;
 	}
 
+	// Erroneous function: USES SHOULD BY CHECKED AND REPLACED BY getLanguageByCode
 	public static Language getLanguage(String code){
 		for (Language lang : Language.values()) {
 			if (lang.belongsTo(code) || match(code, lang))
@@ -2026,6 +2029,16 @@ public enum Language {
 		return UNKNOWN;
 	}
 
+	public static Language getLanguageByCode(String code){
+		for (Language lang : Language.values()) {
+			if (lang.belongsTo(code))
+				return lang;
+		}
+		Logger.of( Language.class ).warn("unkown language "+code);
+		return UNKNOWN;
+	}
+
+	
 	private static boolean match(String code, Language lang) {
 		return lang.name.toLowerCase().equals(code.toLowerCase());
 	}

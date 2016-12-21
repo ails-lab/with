@@ -66,21 +66,14 @@ public class ThesaurusObject implements Indexable {
 
 		protected Literal prefLabel;
 		protected MultiLiteral altLabel;
-		
-		protected String thesaurus;
-		protected String version;
 
 		public SKOSTerm() {	}
 
-		public SKOSTerm(String uri, String type, Literal prefLabel, MultiLiteral altLabel, String thesaurus, String version) {
+		public SKOSTerm(String uri, String type, Literal prefLabel, MultiLiteral altLabel) {
 			this.uri = uri;
 			this.type = type;
 			this.prefLabel = prefLabel;
 			this.altLabel = altLabel;
-			
-			this.thesaurus = thesaurus;
-			this.version = version;
-
 		}
 
 		public String getUri() {
@@ -97,22 +90,6 @@ public class ThesaurusObject implements Indexable {
 
 		public void setType(String type) {
 			this.type = type;
-		}
-		
-		public String getThesaurus() {
-			return thesaurus;
-		}
-
-		public void setThesaurus(String thesaurus) {
-			this.thesaurus = thesaurus;
-		}
-
-		public String getVersion() {
-			return version;
-		}
-
-		public void setVersion(String version) {
-			this.version = version;
 		}
 
 		public Literal getPrefLabel() {
@@ -183,6 +160,33 @@ public class ThesaurusObject implements Indexable {
 		}
 		
 	}
+	
+	@JsonInclude(value = JsonInclude.Include.NON_NULL)
+	@Embedded
+	public static class ObjectProperty {
+
+		private String name;
+		private List<SKOSTerm> values;
+		
+		public ObjectProperty() {}
+
+		public String getName() {
+			return name;
+		}
+
+		public void setName(String name) {
+			this.name = name;
+		}
+
+		public List<SKOSTerm> getValues() {
+			return values;
+		}
+
+		public void setValues(List<SKOSTerm> values) {
+			this.values = values;
+		}
+		
+	}
 
 	@JsonInclude(value = JsonInclude.Include.NON_NULL)
 	@Embedded
@@ -201,6 +205,8 @@ public class ThesaurusObject implements Indexable {
 		private List<String> inSchemes;
 		private List<String> exactMatch;
 		private List<String> closeMatch;
+		
+		private List<ObjectProperty> properties;
 		
 		private SKOSVocabulary vocabulary;
 		
@@ -334,6 +340,14 @@ public class ThesaurusObject implements Indexable {
 		
 		public boolean isScheme() {
 			return this.type.equals("http://www.w3.org/2004/02/skos/core#ConceptScheme");
+		}
+
+		public List<ObjectProperty> getProperties() {
+			return properties;
+		}
+
+		public void setProperties(List<ObjectProperty> properties) {
+			this.properties = properties;
 		}
 	}
 

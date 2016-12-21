@@ -41,6 +41,7 @@ import controllers.ThesaurusController;
 import db.DB;
 import tools.importers.vocabulary.AAT2Vocabulary;
 import tools.importers.vocabulary.DBPedia2Vocabulary;
+import tools.importers.vocabulary.Geonames2Vocabulary;
 import tools.importers.vocabulary.OWL2Vocabulary;
 import tools.importers.vocabulary.RDF2Vocabulary;
 import tools.importers.vocabulary.SKOS2Vocabulary;
@@ -72,6 +73,8 @@ public class Vocabulary2WITH {
 //		deleteVocabularyFromIndex("wn30");
 //		deleteVocabularyFromIndex("dbo");
 //		deleteVocabularyFromIndex("dbr");
+		deleteVocabularyFromIndex("gno");
+		deleteVocabularyFromIndex("gnr");
 		
 //		convertSourcesToJSONs();
 		
@@ -92,6 +95,8 @@ public class Vocabulary2WITH {
 //		
 //		DBPedia2Vocabulary.doImport(filters);
 		
+		Geonames2Vocabulary.doImport();
+		
 //		importAll();
 		
 //		importJSONVocabularyToWITH("fashion");
@@ -107,6 +112,8 @@ public class Vocabulary2WITH {
 //		importJSONVocabularyToWITH("dbo");
 //		importJSONVocabularyToWITH("dbr-place");
 //		importJSONVocabularyToWITH("dbr-person");
+		importJSONVocabularyToWITH("gno");
+		importJSONVocabularyToWITH("gnr");
 	}
 	
 	private static void convertSourcesToJSONs() {
@@ -123,6 +130,7 @@ public class Vocabulary2WITH {
 		filters.add(new String[] {"Place"});
 		
 		DBPedia2Vocabulary.doImport(filters);
+		Geonames2Vocabulary.doImport();
 	}
 	
 	

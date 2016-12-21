@@ -151,7 +151,10 @@ public class ElasticUtils {
 			terms.put("metadata", metaDataTerms);
 		}
 		
-		List<Annotation> anns = DB.getAnnotationDAO().getApprovedTaggingByRecordId(rr.getDbId(), Arrays.asList(new String[] {"body"}));
+		List<Annotation.MotivationType> motivations = new ArrayList<>();
+		motivations.add(Annotation.MotivationType.Tagging);
+		
+		List<Annotation> anns = DB.getAnnotationDAO().getApprovedByRecordId(rr.getDbId(), motivations, Arrays.asList(new String[] {"body"}));
 		if (anns != null) {
 			Set<String> uris = new HashSet<>();
 			for (Annotation ann : anns) {

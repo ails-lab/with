@@ -297,7 +297,7 @@ public class DBPedia2Vocabulary {
 			
 			Matcher lm = labelPattern.matcher(label);
 			if (lm.find()) {
-				Language lang = Language.getLanguage(lm.group(2));
+				Language lang = Language.getLanguageByCode(lm.group(2));
 				if (lang != null) {
 					prefLabel.put(lang.getDefaultCode(), JSONObject.escape(lm.group(1)));
 				}
@@ -336,6 +336,7 @@ public class DBPedia2Vocabulary {
 		for (File f : tmpFolder.listFiles()) {
 			f.delete();
 		}
+		tmpFolder.delete();
 	}
 
 	private void readInstances() throws IOException, CompressorException {
@@ -479,7 +480,7 @@ public class DBPedia2Vocabulary {
 							for (String label : labels) {
 								Matcher lm = labelPattern.matcher(label);
 								if (lm.find()) {
-									Language lang = Language.getLanguage(lm.group(2));
+									Language lang = Language.getLanguageByCode(lm.group(2));
 									if (lang != null) {
 										prefLabel.put(lang.getDefaultCode(), JSONObject.escape(lm.group(1)));
 									}
