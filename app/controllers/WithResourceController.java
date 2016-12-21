@@ -42,6 +42,7 @@ import model.basicDataTypes.Language;
 import model.basicDataTypes.MultiLiteral;
 import model.basicDataTypes.ProvenanceInfo;
 import model.quality.RecordQuality;
+import model.resources.CulturalObject;
 import model.resources.CulturalObject.CulturalObjectData;
 import model.resources.RecordResource;
 import model.resources.WithResourceType;
@@ -172,7 +173,7 @@ public class WithResourceController extends WithController {
 	}
 	public static void updateRecord(ObjectId recordId, String source, String sourceId ){
 //		DB.getRecordResourceDAO().editRecord("", recordId, json);
-		addContentToRecord(recordId, source, sourceId);
+		addContentToRecord(recordId, source, sourceId,false);
 	}
 
 	// TODO: Mint import should be no different then user upload?
@@ -359,7 +360,7 @@ public class WithResourceController extends WithController {
 					DB.getRecordResourceDAO().updateWithURI(recordId,
 							"/record/" + recordId);
 					addContentToRecord(record.getDbId(), source.toString(),
-							externalId);
+							externalId, true);
 				}
 				addToCollection(position, recordId, collectionDbId, owns, false);
 			}
@@ -635,7 +636,7 @@ public class WithResourceController extends WithController {
 	 * @param sourceId
 	 */
 	private static void addContentToRecord(ObjectId recordId, String source,
-			String sourceId) {
+			String sourceId, boolean later) {
 		BiFunction<RecordResource, String, Boolean> methodQuery = (
 				RecordResource record, String sourceClassName) -> {
 			try {
@@ -645,31 +646,25 @@ public class WithResourceController extends WithController {
 						recordId);
 				List<RecordJSONMetadata> recordsData = s.getRecordFromSource(
 						sourceId, fullRecord);
+				
+				
 				for (RecordJSONMetadata data : recordsData) {
 					if (data.getFormat().equals("JSON-WITH")) {
+						
+						ObjectMapper mapper = new ObjectMapper();
+						JsonNode json = mapper.readTree(data.getJsonContent());
+						CulturalObject cho = Json.fromJson(json, CulturalObject.class);
 						
 						DB.getWithResourceDAO().computeAndUpdateQuality(recordId);
 						log.debug(data.getJsonContent());
 						
-						ObjectMapper mapper = new ObjectMapper();
-						JsonNode json = mapper.readTree(data.getJsonContent())
-								.get("descriptiveData");
-						DescriptiveData descriptiveData = Json.fromJson(json,
-								CulturalObjectData.class);
 						DB.getWithResourceDAO().updateDescriptiveData(recordId,
-								descriptiveData);
+								cho.getDescriptiveData());
 						
-						
-						String mediaString = mapper
-								.readTree(data.getJsonContent()).get("media")
-								.toString();
-						List<HashMap<MediaVersion, EmbeddedMediaObject>> media = new ObjectMapper()
-								.readValue(
-										mediaString,
-										new TypeReference<List<HashMap<MediaVersion, EmbeddedMediaObject>>>() {
-										});
 						DB.getWithResourceDAO().updateEmbeddedMedia(recordId,
-								media);
+								cho.getMedia());
+						
+						DB.getWithResourceDAO().updateProvenance(recordId, cho.getProvenance());
 						
 //						DB.getWithResourceDAO().computeAndUpdateQuality(recordId);
 					} else {
@@ -685,8 +680,12 @@ public class WithResourceController extends WithController {
 		};
 		RecordResource record = DB.getRecordResourceDAO().getById(recordId);
 		String sourceClassName = "sources." + source + "SpaceSource";
+		if (later)
 		ParallelAPICall.createPromise(methodQuery, record, sourceClassName,
 				Priority.BACKEND);
+		else{
+			methodQuery.apply(record, sourceClassName);
+		}
 	}
 
 	/**

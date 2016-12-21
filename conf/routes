@@ -42,9 +42,10 @@ GET 	/custom/:customName/					controllers.CustomAssets.redirect(customName)
 GET 	/custom/:customName/*file				controllers.CustomAssets.getFile(customName:String, file:String)
 
 GET     /record/randomRecords					controllers.RecordResourceController.getRandomRecords(groupId: String, batchCount: Integer)
-GET		/record/randomAnnotatedRecords		controllers.RecordResourceController.getRandomAnnotatedRecords( groupId: String, count: Integer, minimum:Integer ?= 3 )
+GET		/record/randomAnnotatedRecords			controllers.RecordResourceController.getRandomAnnotatedRecords( groupId: String, count: Integer, minimum:Integer ?= 3 )
+GET		/record/randomRecordsFromCollections	controllers.RecordResourceController.getRandomRecordsFromCollections( collectionIds: java.util.List[String], count: Integer )
 GET		/record/annotationCount					controllers.AnnotationController.getAnnotationCount(groupId: String)
-GET		/record/deepAnnotationCount					controllers.AnnotationController.getDeepAnnotationCount(groupId: String)
+GET		/record/deepAnnotationCount				controllers.AnnotationController.getDeepAnnotationCount(groupId: String)
 POST 	/record/annotation						controllers.AnnotationController.addAnnotation()
 PUT		/record/contextData			            controllers.RecordResourceController.editContextData(collectionId)
 GET     /record/multiple						controllers.RecordResourceController.getMultipleRecordResources( id: java.util.List[String], profile: String ?="MEDIUM", locale: play.libs.F.Option[java.lang.String])
@@ -92,6 +93,8 @@ POST     /collection/uploadCollection		    controllers.CollectionObjectControlle
 POST     /collection/importIDs 					controllers.CollectionObjectController.importIDs(cname, source, ids)
 GET     /collection/importEuropeanaCollection	controllers.CollectionObjectController.createAndFillEuropeanaCollection(id: String, limit:Integer ?=-1)
 GET     /collection/importOmeka					controllers.CollectionObjectController.importOmeka(ncollections:Integer ?=-1)
+POST     /collection/importExhibition 					controllers.CollectionObjectController.importExhibition(source)
+
 GET      /collection/exportToOWL 			    controllers.CollectionObjectController.exportCollectionObjectToOWL(cname)
 GET      /collection/update 			    	controllers.CollectionObjectController.updateCollectionObject(collectionId: String)
 
@@ -117,6 +120,11 @@ GET		/group/list								controllers.GroupManager.listUserGroups(groupType: Strin
 # Manager the WITH space (mainly for the UI component) editable only for SuperUsers
 GET		/group/with								controllers.GroupManager.getWithSpace()
 PUT		/group/with								controllers.GroupManager.editWithSpace()
+
+# manage UI settings
+GET		 /group/:groupId/uiSettings				controllers.GroupManager.getUiSettings( groupId, key: String ?= null )
+PUT		/group/:groupId/uiSettings				controllers.GroupManager.updateUiSettings( groupId,  key:String )
+DELETE	/group/:groupId/uiSettings				controllers.GroupManager.deleteUiSettings( groupId, key:String )
 
 GET		 /group/space							controllers.GroupManager.getSpace(name)
 PUT      /group/:id                             controllers.GroupManager.editGroup(id)

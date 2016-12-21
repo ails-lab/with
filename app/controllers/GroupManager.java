@@ -24,6 +24,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 
+import org.apache.commons.lang3.StringUtils;
 import org.bson.types.ObjectId;
 import org.mongodb.morphia.geo.GeoJson;
 import org.mongodb.morphia.geo.Point;
@@ -48,6 +49,8 @@ import model.usersAndGroups.UserGroup;
 import model.usersAndGroups.UserOrGroup;
 import play.Logger;
 import play.Logger.ALogger;
+import play.libs.F.Promise;
+import play.libs.F.RedeemablePromise;
 import play.libs.Json;
 import play.mvc.Result;
 import sources.core.HttpConnector;
@@ -631,7 +634,119 @@ public class GroupManager extends WithController {
 		result.put("groups", groups);
 		return ok(result);
 	}
+	
+	private static UserGroup checkGroupAccess( String groupId, Access acc, RedeemablePromise<Result> res ) {
+		UserGroup ug = DB.getUserGroupDAO().get(new ObjectId(groupId));
+		if( ug == null ) { 
+			ObjectNode on = Json.newObject()
+					.put( "error", "Unknown Group");
+			res.success(badRequest(on));
+			return null;
+		}
+		// any of the effective users is an admin?
+		if( effectiveUser() != null )
+			if( effectiveUser().isSuperUser()) return ug;
+		
+		// read access
+		if( acc == Access.READ ) {
+			if( !ug.isPrivateGroup()) return ug;
+			// need to hav the effectiveId
+			for( ObjectId effId: effectiveUserDbIds() ) {
+				if( effId.equals(ug.getDbId())) return ug;
+			}
+			ObjectNode on = Json.newObject()
+					.put( "error", "Read access needs membership.");
+			res.success(badRequest(on));
+			
+			return null;
+		}
 
+		// write or own access
+		if( ug.getAdminIds().contains(effectiveUserDbId())) return ug;
+		ObjectNode on = Json.newObject()
+				.put( "error", "No write access to this group.");
+		res.success(badRequest(on));
+		return null;
+	}
+	
+//	DELETE	/group/:groupId/uiSettings				controllers.GroupManager.deleteUiSettings( groupId, key:String )
+	/**
+	 * Delete the key from uiSettings. Doesnt complain when key is not there, only when there is
+	 * no access. Logic is, if the key is not there, after this operation it is not there, exactly as expected.
+	 * @param groupId
+	 * @param key
+	 * @return
+	 */
+	public static Promise<Result> deleteUiSettings( String groupId, String key ) {
+		try {
+			RedeemablePromise<Result> res = RedeemablePromise.empty();
+			UserGroup gr = checkGroupAccess( groupId, Access.WRITE, res );
+			if( gr == null ) return res;
+			Project pr = (Project) gr;
+
+			ObjectNode uiSettings= pr.getUiSettings();
+			if( uiSettings == null  ) {
+				return	Promise.pure( ok() );
+			}
+			// remove from uisettings
+			uiSettings.remove( key );
+			// and back to db
+			DB.getUserGroupDAO().makePermanent( pr );
+			return Promise.pure( ok());
+		} catch( Exception e ) {
+			log.error( "Problem during deleteUiSettings!", e );
+			throw e;
+		}
+	}
+	
+//	GET		 /group/:groupId/uiSettings				controllers.GroupManager.getUiSettings( groupId, key )
+	/**
+	 * Return part of uiSettings or if key is empty, return all of uiSettings
+	 * @param groupId
+	 * @param key
+	 * @return
+	 */
+	public static Promise<Result> getUiSettings( String groupId, String key ) {
+		RedeemablePromise<Result> res = RedeemablePromise.empty();
+		UserGroup gr = checkGroupAccess( groupId, Access.READ, res );
+		if( gr == null ) return res;
+		Project pr = (Project) gr;
+		
+		ObjectNode uiSettings= pr.getUiSettings();
+		if( StringUtils.isEmpty(key)) return Promise.pure( ok( uiSettings ));
+		if( uiSettings == null  ) return Promise.pure( ok( Json.newObject()));
+
+		JsonNode jn = uiSettings.get( key );
+		return Promise.pure(ok( jn ));
+	}
+
+//	PUT		/group/:groupId/uiSettings				controllers.GroupManager.updateUiSettings( groupId,  key:String )
+	public static Promise<Result> updateUiSettings( String groupId, String key ) {
+		try {
+			JsonNode json = request().body().asJson();
+
+			RedeemablePromise<Result> res = RedeemablePromise.empty();
+			UserGroup gr = checkGroupAccess( groupId, Access.WRITE, res );
+			if( gr == null ) return res;
+			Project pr = (Project) gr;
+
+			ObjectNode uiSettings= pr.getUiSettings();
+			if( uiSettings == null  ) {
+				pr.setUiSettings( Json.newObject());
+				uiSettings = pr.getUiSettings();
+			}
+			// store in uisettings
+			uiSettings.put( key,  json );
+			// and back to db
+			DB.getUserGroupDAO().makePermanent( pr );
+			return Promise.pure( ok());
+		} catch( Exception e ) {
+			log.error( "Problem during updateUiSettings!", e );
+			throw e;
+		}
+	}
+	
+	
 	private static ObjectNode userOrGroupJson(UserOrGroup user) {
 		ObjectNode userJSON = Json.newObject();
 		userJSON.put("userId", user.getDbId().toString());
