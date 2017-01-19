@@ -54,6 +54,7 @@ import play.libs.F.RedeemablePromise;
 import play.libs.Json;
 import play.mvc.Result;
 import sources.core.HttpConnector;
+import utils.Locks;
 import utils.Tuple;
 
 @SuppressWarnings({ "unchecked", "rawtypes" })
@@ -677,8 +678,13 @@ public class GroupManager extends WithController {
 	 * @param key
 	 * @return
 	 */
-	public static Promise<Result> deleteUiSettings( String groupId, String key ) {
+	public static Promise<Result> deleteUiSettings( String groupId, String key ) throws Exception {
+		// we want to updat the groupid ... write lock it
+		Locks l = null;
 		try {
+			l  = Locks.create()
+					.write( groupId )
+					.acquire();
 			RedeemablePromise<Result> res = RedeemablePromise.empty();
 			UserGroup gr = checkGroupAccess( groupId, Access.WRITE, res );
 			if( gr == null ) return res;
@@ -696,6 +702,10 @@ public class GroupManager extends WithController {
 		} catch( Exception e ) {
 			log.error( "Problem during deleteUiSettings!", e );
 			throw e;
+		} finally {
+			if( l != null ) {
+				l.release();
+			}
 		}
 	}
 	
@@ -706,7 +716,12 @@ public class GroupManager extends WithController {
 	 * @param key
 	 * @return
 	 */
-	public static Promise<Result> getUiSettings( String groupId, String key ) {
+	public static Promise<Result> getUiSettings( String groupId, String key ) throws Exception {
+		Locks l = null;
+		try {
+			l  = Locks.create()
+					.read( groupId )
+					.acquire();
 		RedeemablePromise<Result> res = RedeemablePromise.empty();
 		UserGroup gr = checkGroupAccess( groupId, Access.READ, res );
 		if( gr == null ) return res;
@@ -718,11 +733,18 @@ public class GroupManager extends WithController {
 
 		JsonNode jn = uiSettings.get( key );
 		return Promise.pure(ok( jn ));
+		}  finally {
+			if( l != null ) l.release();
+		}
 	}
 
 //	PUT		/group/:groupId/uiSettings				controllers.GroupManager.updateUiSettings( groupId,  key:String )
-	public static Promise<Result> updateUiSettings( String groupId, String key ) {
+	public static Promise<Result> updateUiSettings( String groupId, String key ) throws Exception {
+		Locks l = null;
 		try {
+			l  = Locks.create()
+					.write( groupId )
+					.acquire();
 			JsonNode json = request().body().asJson();
 
 			RedeemablePromise<Result> res = RedeemablePromise.empty();
@@ -743,6 +765,8 @@ public class GroupManager extends WithController {
 		} catch( Exception e ) {
 			log.error( "Problem during updateUiSettings!", e );
 			throw e;
+		} finally {
+			if( l!= null ) l.release();
 		}
 	}
 	
