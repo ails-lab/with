@@ -1470,7 +1470,10 @@ public class CollectionObjectController extends WithResourceController {
    			result.put("error", "Invalid JSON");
    			return badRequest();
    		}
-   		
+   		if (WithController.effectiveUserDbId() == null) {
+			result.put("error", "User not logged in");
+			return badRequest();
+		}
    		try {
 	    	ObjectId user = WithController.effectiveUserDbId();
 	    	 

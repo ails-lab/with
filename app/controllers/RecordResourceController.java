@@ -603,11 +603,12 @@ public class RecordResourceController extends WithResourceController {
 					for (Iterator<JsonNode> iter = json.get("annotators").elements(); iter.hasNext();) {
 						JsonNode annotator = iter.next();
 						
-						String userId = annotator.get("withCreator").asText();
-						
-						User user = DB.getUserDAO().getById(new ObjectId(userId));
-						((ObjectNode)annotator).put("username", user.getUsername());
-						
+						if (annotator.has("withCreator")) {
+							String userId = annotator.get("withCreator").asText();
+							
+							User user = DB.getUserDAO().getById(new ObjectId(userId));
+							((ObjectNode)annotator).put("username", user.getUsername());
+						}						
 					}
 					
 					array.add(json);
@@ -615,6 +616,7 @@ public class RecordResourceController extends WithResourceController {
 				return ok(array);
 //			}				
 		} catch (Exception e) {
+			e.printStackTrace();
 			result.put("error", e.getMessage());
 			return internalServerError(result);
 		}

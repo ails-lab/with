@@ -72,6 +72,10 @@ public class AnnotationController extends Controller {
 			error.put("error", "Invalid JSON");
 			return badRequest();
 		}
+		if (WithController.effectiveUserDbId() == null) {
+			error.put("error", "User not logged in");
+			return badRequest();
+		}
 		Annotation annotation = getAnnotationFromJson(json);
 		if (annotation.getTarget().getRecordId() == null) {
 			RecordResource record = DB.getRecordResourceDAO().getByExternalId(
@@ -355,6 +359,7 @@ public class AnnotationController extends Controller {
 	public static Annotation getAnnotationFromJson(JsonNode json, ObjectId userId) {
 		try {
 			Annotation annotation = Json.fromJson(json, Annotation.class);
+
 			Class<?> clazz = Class
 					.forName("model.annotations.bodies.AnnotationBody"
 							+ annotation.getMotivation());
