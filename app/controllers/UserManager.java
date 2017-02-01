@@ -431,12 +431,13 @@ public class UserManager extends WithController {
 			return login(user);
 		} catch (Exception e) {
 			log.error(e.getMessage(), e);
-			return badRequest(Json.parse("{\"error\":\""+e.getStackTrace()+"\"}"));
+			return badRequest(Json.parse("{\"error\":\""+e.getMessage()+"\"}"));
 		}
 	}
 
-	private static Result register(Person profile) {
+	private static Result register(Person profile) throws IOException {
 		User user = new User();
+		log.error(profile.toPrettyString());
 		user.setFirstName(profile.getName().getGivenName());
 		user.setLastName(profile.getName().getFamilyName());
 		String email = profile.getEmails().get(0).getValue();
