@@ -431,7 +431,7 @@ public class UserManager extends WithController {
 			return login(user);
 		} catch (Exception e) {
 			log.error(e.getMessage(), e);
-			return badRequest(Json.parse("{\"error\":\""+e.getMessage()+"\"}"));
+			return badRequest(Json.parse("{\"error\":\""+e.getStackTrace()+"\"}"));
 		}
 	}
 
