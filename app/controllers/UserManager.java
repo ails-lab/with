@@ -437,8 +437,6 @@ public class UserManager extends WithController {
 
 	private static Result register(Person profile) {
 		User user = new User();
-		log.error(profile.getName().toString());
-		log.error(profile.getEmails().toString());
 		user.setFirstName(profile.getName().getGivenName());
 		user.setLastName(profile.getName().getFamilyName());
 		String email = profile.getEmails().get(0).getValue();
@@ -455,6 +453,9 @@ public class UserManager extends WithController {
 	
 	private static Result register(facebook4j.User facebookUser) {
 		User user = new User();
+		log.error(facebookUser.getFirstName());
+		log.error(facebookUser.getLastName());
+		log.error(facebookUser.getEmail());
 		user.setFirstName(facebookUser.getFirstName());
 		user.setLastName(facebookUser.getLastName());
 		String email = facebookUser.getEmail();
