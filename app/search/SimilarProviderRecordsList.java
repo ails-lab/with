@@ -16,9 +16,22 @@
 
 package search;
 
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+import org.apache.commons.lang3.StringUtils;
+
 import model.basicDataTypes.Language;
 import model.basicDataTypes.Literal;
 import model.resources.RecordResource;
+import play.libs.Json;
+import play.libs.F.Function;
+import play.libs.F.Promise;
+import play.mvc.Result;
+import search.Response.SingleResponse;
+import sources.core.ParallelAPICall;
+import utils.ChainedSearchResult;
 
 public class SimilarProviderRecordsList extends SimilarRecordsList {
 
@@ -34,6 +47,13 @@ public class SimilarProviderRecordsList extends SimilarRecordsList {
 		String prov = r.getProvenance().get(r.getProvenance().size()-1).getProvider();
 		Query iq = new Query();
 		iq.addClause(new Filter(Fields.provenance_provider.fieldId(), prov));
+		// just to make sure its ok
+		Query newQ = iq.splitForSource(Sources.WITHin);
+		Promise<SingleResponse> res = Sources.WITHin.getDriver().execute(newQ);
+		res.map((SingleResponse x)->{
+			this.addRecords(x.items);
+			return x;
+		});
 	}
 
 }
