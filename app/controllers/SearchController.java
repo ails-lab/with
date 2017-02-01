@@ -49,8 +49,11 @@ import play.libs.F.Promise;
 import play.libs.Json;
 import play.mvc.Result;
 import search.Query;
+import search.RecordsList;
 import search.Response;
 import search.Response.SingleResponse;
+import search.SimilarProviderRecordsList;
+import search.SimilarsQuery;
 import search.Source;
 import search.Sources;
 import sources.core.CommonFilterLogic;
@@ -109,6 +112,34 @@ public class SearchController extends WithController {
 				return Promise.pure((Result) badRequest(e.getMessage()));
 			}
 		}
+	}
+	
+	public static Promise<Result> similarSearch(){
+		JsonNode json = request().body().asJson();
+		if (log.isDebugEnabled()) {
+			StringBuilder sb = new StringBuilder();
+			for (Map.Entry<String, String> e : session().entrySet()) {
+				sb.append(e.getKey() + " = " + "'" + e.getValue() + "'\n");
+			}
+			log.debug(sb.toString());
+		}
+
+		if (json == null) {
+			return Promise.pure((Result) badRequest("Expecting Json query"));
+		} else {
+			// Parse the query.
+			try {
+				final search.SimilarsQuery q = Json.fromJson(json, search.SimilarsQuery.class );
+				List<RecordsList> groups = new ArrayList<>();
+				groups.add(new SimilarProviderRecordsList(q));
+				return Promise.pure(ok(Json.toJson(groups)));
+			} catch (Exception e) {
+				log.error("",e);
+				return Promise.pure((Result) badRequest(e.getMessage()));
+			}
+		}
+
+		// return Promise.pure( badRequest( "Not implemented yet"));
 	}
 
 	/**
