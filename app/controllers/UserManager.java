@@ -435,9 +435,10 @@ public class UserManager extends WithController {
 		}
 	}
 
-	private static Result register(Person profile) throws IOException {
+	private static Result register(Person profile) {
 		User user = new User();
-		log.error(profile.toPrettyString());
+		log.error(profile.getName().toString());
+		log.error(profile.getEmails().toString());
 		user.setFirstName(profile.getName().getGivenName());
 		user.setLastName(profile.getName().getFamilyName());
 		String email = profile.getEmails().get(0).getValue();
