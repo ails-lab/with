@@ -81,8 +81,9 @@ public class UserManager extends WithController {
 
 	public static final ALogger log = Logger.of(UserManager.class);
 	private static final long TOKENTIMEOUT = 10 * 1000l /* 10 sec */;
-	private static final String facebookAccessTokenUrl = "https://graph.facebook.com/v2.3/oauth/access_token";
-	private static final String facebookSecret = "52a97ef61e923a7853eb7e12f60fe0a6";
+	private static final String facebookAccessTokenUrl = "https://graph.facebook.com/v2.8/oauth/access_token";
+	private static final String facebookSecretWith = "52a97ef61e923a7853eb7e12f60fe0a6";
+	private static final String facebookSecretEspace = "6e3c81104a1a69aa235da76e6fbfdd2e";
 	private static final String googleSecret = "aGOCP6xGZ_ylm389OAf15mTy";
 
 	/**
@@ -388,6 +389,11 @@ public class UserManager extends WithController {
 	public static Result facebookLogin() {
 		try {
 			JsonNode json = request().body().asJson();
+			String facebookSecret;
+			if (json.get("redirectUri").asText().contains("espaceportal"))
+				facebookSecret = facebookSecretEspace;
+			else
+				facebookSecret = facebookSecretWith;
 			// Exchange authorization code for access token.
 			String params = "code=" + json.get("code").asText() + "&client_id=" + json.get("clientId").asText()
 					+ "&redirect_uri=" + json.get("redirectUri").asText() + "&client_secret="
