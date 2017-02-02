@@ -60,6 +60,7 @@ import akka.util.Timeout;
 import db.DB;
 import facebook4j.Facebook;
 import facebook4j.FacebookFactory;
+import facebook4j.Reading;
 import facebook4j.conf.Configuration;
 import facebook4j.conf.ConfigurationBuilder;
 import model.ApiKey;
@@ -417,7 +418,7 @@ public class UserManager extends WithController {
 			Configuration configuration = configurationBuilder.build();
 			FacebookFactory ff = new FacebookFactory(configuration);
 			Facebook facebook = ff.getInstance();
-			facebook4j.User facebookUser = facebook.getMe();
+			facebook4j.User facebookUser = facebook.getMe(new Reading().fields("email","id","name","first_name", "last_name", "generic"));
 			User user = DB.getUserDAO().getByFacebookId(facebookUser.getId());
 			if (user != null)
 				return login(user);
