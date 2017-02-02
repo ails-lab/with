@@ -453,6 +453,7 @@ public class UserManager extends WithController {
 	
 	private static Result register(facebook4j.User facebookUser) {
 		User user = new User();
+		log.error(facebookUser.toString());
 		log.error(facebookUser.getId());
 		log.error(facebookUser.getFirstName());
 		log.error(facebookUser.getLastName());
