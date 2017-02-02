@@ -410,7 +410,7 @@ public class UserManager extends WithController {
 			configurationBuilder.setOAuthAppSecret(facebookSecret);
 			configurationBuilder.setOAuthAccessToken(accessToken);
 			configurationBuilder
-					.setOAuthPermissions("email, id, name, first_name, last_name, generic");
+					.setOAuthPermissions("email, id, name, first_name, last_name");
 			configurationBuilder.setUseSSL(true);
 			configurationBuilder.setJSONStoreEnabled(true);
 
@@ -418,7 +418,7 @@ public class UserManager extends WithController {
 			Configuration configuration = configurationBuilder.build();
 			FacebookFactory ff = new FacebookFactory(configuration);
 			Facebook facebook = ff.getInstance();
-			facebook4j.User facebookUser = facebook.getMe(new Reading().fields("email","id","name","first_name", "last_name", "generic"));
+			facebook4j.User facebookUser = facebook.getMe(new Reading().fields("email","id","name","first_name", "last_name"));
 			User user = DB.getUserDAO().getByFacebookId(facebookUser.getId());
 			if (user != null)
 				return login(user);
