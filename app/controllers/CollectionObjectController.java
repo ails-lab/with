@@ -1670,7 +1670,7 @@ public class CollectionObjectController extends WithResourceController {
 		}
 	}
     
-	public static Result getAnnotationSummary(String colId, String mode) {
+	public static Result getAnnotationSummary(String colId, String mode, boolean userOnly) {
 		
 		try {
 			Result response = errorIfNoAccessToCollection(Action.READ, new ObjectId(colId));
@@ -1686,8 +1686,8 @@ public class CollectionObjectController extends WithResourceController {
 				groupBy = 2;
 			}
 
-			User user = effectiveUser();
 			ObjectId userId = null;
+			User user = effectiveUser();
 			if (user != null) {
 				userId = user.getDbId();
 			}
@@ -1695,42 +1695,36 @@ public class CollectionObjectController extends WithResourceController {
 			Map<String, Map<String, AnnotationInfo>> annMap = new TreeMap<>();
 			
 			for (Annotation ann : DB.getAnnotationDAO().getByCollection(new ObjectId(colId))) {
-				if (!(ann.getBody() instanceof AnnotationBodyTagging)) {
-					continue;
-				}
-				
-				AnnotationBodyTagging body = ((AnnotationBodyTagging)ann.getBody());
-
-				String uri = body.getUri();
-				String uriVocabulary = body.getUriVocabulary().toLowerCase();
-				MultiLiteral ml = ((AnnotationBodyTagging)ann.getBody()).getLabel();
-
-				if (groupBy == 0) {
-					Map<String, AnnotationInfo> annGroup = annMap.get("");
-					if (annGroup == null) {
-						annGroup = new HashMap<String, AnnotationInfo>();
-						annMap.put("", annGroup);
-					}
-					
-					AnnotationInfo info = annGroup.get(uri);
-					if (info == null) {
-						info = new AnnotationInfo(uri, uriVocabulary, ml);
-						annGroup.put(uri, info);
-					}
-					
-					info.add(ann.getTarget().getRecordId(), ann, userId);
-					
-				} else if (groupBy == 1) {
-					for (AnnotationAdmin annAd : (ArrayList<AnnotationAdmin>)ann.getAnnotators()) {
-						String generator = annAd.getGenerator();
-						if (generator == null) {
-							generator = "Unknown Annotator";
+				if (userOnly) {
+					boolean include = false;
+					if (userId != null) {
+						List<AnnotationAdmin> admins = ann.getAnnotators();
+	
+						for (AnnotationAdmin admin : admins) {
+							if (admin.getWithCreator() != null && admin.getWithCreator().equals(userId)) {
+								include = true;
+								break;
+							}
 						}
+					}
+					
+					if (!include) {
+						continue;
+					}
+				}
 						
-						Map<String, AnnotationInfo> annGroup = annMap.get(generator);
+				if (ann.getBody() instanceof AnnotationBodyTagging) {
+					AnnotationBodyTagging body = ((AnnotationBodyTagging)ann.getBody());
+	
+					String uri = body.getUri();
+					String uriVocabulary = body.getUriVocabulary().toLowerCase();
+					MultiLiteral ml = ((AnnotationBodyTagging)ann.getBody()).getLabel();
+	
+					if (groupBy == 0) {
+						Map<String, AnnotationInfo> annGroup = annMap.get("");
 						if (annGroup == null) {
 							annGroup = new HashMap<String, AnnotationInfo>();
-							annMap.put(generator, annGroup);
+							annMap.put("", annGroup);
 						}
 						
 						AnnotationInfo info = annGroup.get(uri);
@@ -1740,30 +1734,52 @@ public class CollectionObjectController extends WithResourceController {
 						}
 						
 						info.add(ann.getTarget().getRecordId(), ann, userId);
-					}
-				} else if (groupBy == 2) {
-					Vocabulary voc = Vocabulary.getVocabulary(uriVocabulary);
-					String name; 
-					if (voc != null) {
-						name = voc.getLabel();
-					} else {
-						name = "Unknown";
-					}
+						
+					} else if (groupBy == 1) {
+						for (AnnotationAdmin annAd : (ArrayList<AnnotationAdmin>)ann.getAnnotators()) {
+							String generator = annAd.getGenerator();
+							if (generator == null) {
+								generator = "Unknown Annotator";
+							}
+							
+							Map<String, AnnotationInfo> annGroup = annMap.get(generator);
+							if (annGroup == null) {
+								annGroup = new HashMap<String, AnnotationInfo>();
+								annMap.put(generator, annGroup);
+							}
+							
+							AnnotationInfo info = annGroup.get(uri);
+							if (info == null) {
+								info = new AnnotationInfo(uri, uriVocabulary, ml);
+								annGroup.put(uri, info);
+							}
+							
+							info.add(ann.getTarget().getRecordId(), ann, userId);
+						}
+					} else if (groupBy == 2) {
+						Vocabulary voc = Vocabulary.getVocabulary(uriVocabulary);
+						String name; 
+						if (voc != null) {
+							name = voc.getLabel();
+						} else {
+							name = "Unknown";
+						}
+						
+						Map<String, AnnotationInfo> annGroup = annMap.get(name);
+						if (annGroup == null) {
+							annGroup = new HashMap<String, AnnotationInfo>();
+							annMap.put(name, annGroup);
+						}
+						
+						AnnotationInfo info = annGroup.get(uri);
+						if (info == null) {
+							info = new AnnotationInfo(uri, uriVocabulary, ml);
+							annGroup.put(uri, info);
+						}
+						
+						info.add(ann.getTarget().getRecordId(), ann, userId);
 					
-					Map<String, AnnotationInfo> annGroup = annMap.get(name);
-					if (annGroup == null) {
-						annGroup = new HashMap<String, AnnotationInfo>();
-						annMap.put(name, annGroup);
 					}
-					
-					AnnotationInfo info = annGroup.get(uri);
-					if (info == null) {
-						info = new AnnotationInfo(uri, uriVocabulary, ml);
-						annGroup.put(uri, info);
-					}
-					
-					info.add(ann.getTarget().getRecordId(), ann, userId);
-				
 				}
 			}
 
