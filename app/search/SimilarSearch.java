@@ -19,21 +19,24 @@ package search;
 import org.bson.types.ObjectId;
 
 import db.DB;
-import model.basicDataTypes.Literal;
 import model.resources.RecordResource;
+import play.libs.F.Promise;
+import search.Response.SingleResponse;
 
-public abstract class SimilarRecordsList extends RecordsList {
+public abstract class SimilarSearch {
 
-	public SimilarRecordsList(String identifier, Literal title) {
-		super(identifier,title);
-	}
-
-	public SimilarRecordsList(String identifier, Literal title, Literal description) {
-		super(identifier,title, description);
-	}
-
-	public SimilarRecordsList() {
-		super();
+	public SimilarSearch() {
+		// TODO Auto-generated constructor stub
 	}
 	
+
+	public RecordResource<?> getTheRecord(SimilarsQuery q){
+		RecordResource record = DB.getRecordResourceDAO().get(
+				new ObjectId(q.getRecordId()));
+		return record;
+	}
+	
+	public abstract Promise<SingleResponse> query(SimilarsQuery q);
+
+
 }

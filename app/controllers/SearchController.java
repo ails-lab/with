@@ -42,17 +42,20 @@ import elastic.Elastic;
 import elastic.ElasticCoordinator;
 import elastic.ElasticSearcher;
 import elastic.ElasticSearcher.SearchOptions;
+import model.basicDataTypes.Language;
+import model.basicDataTypes.Literal;
 import play.Logger;
 import play.Logger.ALogger;
 import play.data.Form;
 import play.libs.F.Promise;
 import play.libs.Json;
 import play.mvc.Result;
+import search.Fields;
 import search.Query;
 import search.RecordsList;
 import search.Response;
 import search.Response.SingleResponse;
-import search.SimilarProviderRecordsList;
+import search.SimilarProviderSearch;
 import search.SimilarsQuery;
 import search.Source;
 import search.Sources;
@@ -114,7 +117,7 @@ public class SearchController extends WithController {
 		}
 	}
 	
-	public static Promise<Result> similarSearch(){
+	public static Promise<Result> relatedSearch(){
 		JsonNode json = request().body().asJson();
 		if (log.isDebugEnabled()) {
 			StringBuilder sb = new StringBuilder();
@@ -130,9 +133,20 @@ public class SearchController extends WithController {
 			// Parse the query.
 			try {
 				final search.SimilarsQuery q = Json.fromJson(json, search.SimilarsQuery.class );
-				List<RecordsList> groups = new ArrayList<>();
-				groups.add(new SimilarProviderRecordsList(q));
-				return Promise.pure(ok(Json.toJson(groups)));
+				List<Promise<RecordsList>> groups = new ArrayList<>();
+				groups.add(new SimilarProviderSearch().query(q).map((SingleResponse r)->{
+					RecordsList recordsList = new RecordsList(Fields.provenance_provider.fieldId(), 
+							new Literal(Language.EN,"Same Provider"));
+					recordsList.addRecords(r.items);
+					return recordsList;
+				}));
+				
+				// TODO here make a list of promises and then a promise of the list... then return it
+				
+				return ParallelAPICall.<RecordsList> combineResponses(r -> {
+					return true;
+				} , groups, Priority.FRONTEND);
+				
 			} catch (Exception e) {
 				log.error("",e);
 				return Promise.pure((Result) badRequest(e.getMessage()));

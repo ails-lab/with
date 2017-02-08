@@ -189,7 +189,7 @@ public class Query implements IFilterContainer{
 	public final Query addClause( Filter... filters ) {
 		List<Filter> newTerm = new ArrayList<Filter>();
 		newTerm.addAll( Arrays.asList( filters ));
-		return this;
+		return addClause(newTerm);
 	}
 
 	/**

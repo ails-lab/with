@@ -18,6 +18,7 @@ package search;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 
 import model.basicDataTypes.Literal;
@@ -71,6 +72,19 @@ public class RecordsList {
 	}
 	
 	public void addRecords(Collection<? extends RecordResource<?>> records) {
+		this.records.addAll(records);
+		count = this.records.size();
+	}
+	
+	public void addRecords(Collection<? extends RecordResource<?>> records, int size) {
+		if (size<=0)
+			addRecords(records);
+		else {
+			Iterator<? extends RecordResource<?>> it = records.iterator();
+			for (int i = 0 ; i < Math.min(size, records.size()) && it.hasNext(); i++) {
+				this.records.add(it.next());
+			}
+		}
 		this.records.addAll(records);
 		count = this.records.size();
 	}

@@ -33,27 +33,25 @@ import search.Response.SingleResponse;
 import sources.core.ParallelAPICall;
 import utils.ChainedSearchResult;
 
-public class SimilarProviderRecordsList extends SimilarRecordsList {
+public class SimilarProviderSearch extends SimilarSearch {
 
-	public SimilarProviderRecordsList(SimilarsQuery q) {
-		super("same.provider",new Literal(Language.EN, "Same Provider"));
-		query(q);
+	public SimilarProviderSearch() {
 	}
 
 	@Override
-	public void query(SimilarsQuery q) {
+	public Promise<SingleResponse> query(SimilarsQuery q) {
 		RecordResource<?> r = getTheRecord(q);
 //		prov = ((RecordResource.RecordDescriptiveData)r.getDescriptiveData()).;
-		String prov = r.getProvenance().get(r.getProvenance().size()-1).getProvider();
+		String prov = r.getProvenance().get(0).getProvider();
 		Query iq = new Query();
+		iq.setPageAndSize(1, 10);
+		iq.addSource(Sources.WITHin);
 		iq.addClause(new Filter(Fields.provenance_provider.fieldId(), prov));
+		iq.addClause(new Filter(Fields.resourceType.fieldId(),"CulturalObject"));
 		// just to make sure its ok
 		Query newQ = iq.splitForSource(Sources.WITHin);
 		Promise<SingleResponse> res = Sources.WITHin.getDriver().execute(newQ);
-		res.map((SingleResponse x)->{
-			this.addRecords(x.items);
-			return x;
-		});
+		return res;
 	}
 
 }
