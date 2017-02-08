@@ -60,6 +60,7 @@ import akka.util.Timeout;
 import db.DB;
 import facebook4j.Facebook;
 import facebook4j.FacebookFactory;
+import facebook4j.Reading;
 import facebook4j.conf.Configuration;
 import facebook4j.conf.ConfigurationBuilder;
 import model.ApiKey;
@@ -81,8 +82,9 @@ public class UserManager extends WithController {
 
 	public static final ALogger log = Logger.of(UserManager.class);
 	private static final long TOKENTIMEOUT = 10 * 1000l /* 10 sec */;
-	private static final String facebookAccessTokenUrl = "https://graph.facebook.com/v2.3/oauth/access_token";
-	private static final String facebookSecret = "52a97ef61e923a7853eb7e12f60fe0a6";
+	private static final String facebookAccessTokenUrl = "https://graph.facebook.com/v2.8/oauth/access_token";
+	private static final String facebookSecretWith =   "52a97ef61e923a7853eb7e12f60fe0a6";
+	private static final String facebookSecretEspace = "6e3c81104a1a69aa235da76e6fbfdd2e";
 	private static final String googleSecret = "aGOCP6xGZ_ylm389OAf15mTy";
 
 	/**
@@ -388,6 +390,11 @@ public class UserManager extends WithController {
 	public static Result facebookLogin() {
 		try {
 			JsonNode json = request().body().asJson();
+			String facebookSecret;
+			if (json.get("redirectUri").asText().contains("espaceportal"))
+				facebookSecret = facebookSecretEspace;
+			else
+				facebookSecret = facebookSecretWith;
 			// Exchange authorization code for access token.
 			String params = "code=" + json.get("code").asText() + "&client_id=" + json.get("clientId").asText()
 					+ "&redirect_uri=" + json.get("redirectUri").asText() + "&client_secret="
@@ -403,7 +410,7 @@ public class UserManager extends WithController {
 			configurationBuilder.setOAuthAppSecret(facebookSecret);
 			configurationBuilder.setOAuthAccessToken(accessToken);
 			configurationBuilder
-					.setOAuthPermissions("email, id, name, first_name, last_name, generic");
+					.setOAuthPermissions("email, id, name, first_name, last_name");
 			configurationBuilder.setUseSSL(true);
 			configurationBuilder.setJSONStoreEnabled(true);
 
@@ -411,7 +418,7 @@ public class UserManager extends WithController {
 			Configuration configuration = configurationBuilder.build();
 			FacebookFactory ff = new FacebookFactory(configuration);
 			Facebook facebook = ff.getInstance();
-			facebook4j.User facebookUser = facebook.getMe();
+			facebook4j.User facebookUser = facebook.getMe(new Reading().fields("email","id","name","first_name", "last_name"));
 			User user = DB.getUserDAO().getByFacebookId(facebookUser.getId());
 			if (user != null)
 				return login(user);
@@ -425,7 +432,7 @@ public class UserManager extends WithController {
 			return login(user);
 		} catch (Exception e) {
 			log.error(e.getMessage(), e);
-			return badRequest(Json.parse("{\"error\":\"Invalid credentials\"}"));
+			return badRequest(Json.parse("{\"error\":\""+e.getMessage()+"\"}"));
 		}
 	}
 
@@ -447,6 +454,11 @@ public class UserManager extends WithController {
 	
 	private static Result register(facebook4j.User facebookUser) {
 		User user = new User();
+		log.error(facebookUser.toString());
+		log.error(facebookUser.getId());
+		log.error(facebookUser.getFirstName());
+		log.error(facebookUser.getLastName());
+		log.error(facebookUser.getEmail());
 		user.setFirstName(facebookUser.getFirstName());
 		user.setLastName(facebookUser.getLastName());
 		String email = facebookUser.getEmail();
