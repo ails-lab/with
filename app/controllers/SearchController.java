@@ -134,12 +134,7 @@ public class SearchController extends WithController {
 			try {
 				final search.SimilarsQuery q = Json.fromJson(json, search.SimilarsQuery.class );
 				List<Promise<RecordsList>> groups = new ArrayList<>();
-				groups.add(new SimilarProviderSearch().query(q).map((SingleResponse r)->{
-					RecordsList recordsList = new RecordsList(Fields.provenance_provider.fieldId(), 
-							new Literal(Language.EN,"Same Provider"));
-					recordsList.addRecords(r.items);
-					return recordsList;
-				}));
+				groups.add(new SimilarProviderSearch().query(q));
 				
 				// TODO here make a list of promises and then a promise of the list... then return it
 				

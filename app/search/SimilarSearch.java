@@ -16,12 +16,19 @@
 
 package search;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
 import org.bson.types.ObjectId;
 
+import controllers.WithController;
 import db.DB;
 import model.resources.RecordResource;
 import play.libs.F.Promise;
 import search.Response.SingleResponse;
+import sources.core.ParallelAPICall;
 
 public abstract class SimilarSearch {
 
@@ -36,7 +43,50 @@ public abstract class SimilarSearch {
 		return record;
 	}
 	
-	public abstract Promise<SingleResponse> query(SimilarsQuery q);
+	public abstract Promise<RecordsList> query(SimilarsQuery q);
 
 
+	public static Promise<Map<Sources,SingleResponse>> executeQuery(Query q){
+		if( q.getPage() > 0 ) {
+			q.setPageAndSize( q.getPage(), q.getPageSize());
+		} else {
+			q.setStartCount( q.getStart(), q.getCount());
+		}
+		// check if the query needs readability additions for WITHin
+		if( q.containsSource( Sources.WITHin)) {
+			// add conditions for visibility in WITH
+			Query.Clause visible = Query.Clause.create()
+					.add( "administrative.isPublic", "true", true );
+			for( String userId: WithController.effectiveUserIds()) {
+				visible.add( "administrative.access.READ", userId, true );
+				visible.add( "administrative.access.WRITE", userId, true );
+				visible.add( "administrative.access.OWN", userId, true );
+			}
+			q.addClause( visible.filters());
+		}
+		// print warnings in the log for fields not known
+		q.validateFieldIds();
+
+		// split the query
+		Map<Sources, Query> queries = q.splitBySource();
+		// create promises
+		Iterable<Promise<Response.SingleResponse>> promises =
+				queries.entrySet().stream()
+				.map( 
+						entry -> 
+						entry.getKey().getDriver().execute(entry.getValue())
+					)
+				.collect( Collectors.toList());
+
+			// normal query
+			Promise<List<SingleResponse>> allResponses  =
+					Promise.sequence(promises, ParallelAPICall.Priority.FRONTEND.getExcecutionContext());
+			return allResponses.map((List<SingleResponse> list)->{
+				Map<Sources, SingleResponse> res = new HashMap<>();
+				for (SingleResponse r : list) {
+					res.put(r.source, r);
+				}
+				return res;
+			});
+	}
 }
