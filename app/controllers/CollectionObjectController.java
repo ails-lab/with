@@ -26,7 +26,10 @@ import com.codahale.metrics.Histogram;
 import com.codahale.metrics.Timer;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
@@ -40,6 +43,7 @@ import model.annotations.Annotation.AnnotationAdmin;
 import model.annotations.Annotation.AnnotationScore;
 import model.annotations.ContextData;
 import model.annotations.ContextData.ContextDataBody;
+import model.annotations.bodies.AnnotationBodyGeoTagging;
 import model.annotations.bodies.AnnotationBodyTagging;
 import model.basicDataTypes.Language;
 import model.basicDataTypes.MultiLiteral;
@@ -62,6 +66,7 @@ import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
+import org.mongodb.morphia.geo.Point;
 
 import play.Logger;
 import play.Logger.ALogger;
@@ -89,6 +94,8 @@ import sources.formatreaders.ExhibitionReader;
 import sources.formatreaders.MuseumofModernArtRecordFormatter;
 import sources.utils.JsonContextRecord;
 import utils.*;
+import utils.Deserializer.PointDeserializer;
+import utils.Serializer.PointSerializer;
 import vocabularies.Vocabulary;
 
 import javax.validation.ConstraintViolation;
@@ -1607,35 +1614,13 @@ public class CollectionObjectController extends WithResourceController {
     	}
     }
     
-    private static class AnnotationInfo {
-		public String uri;
-		public String uriVocabulary;
-		public MultiLiteral label;
-		public Map<String, List<ScoreInfo>> recordAnnotationMap;
-		
-		public String showLabel;
-		
-		public AnnotationInfo(String uri, String uriVocabulary, MultiLiteral label) {
-			this.uri = uri;
-			this.uriVocabulary = uriVocabulary; 
-			this.label = label;
-			
+    private static abstract class AnnotationInfo {
+    	public Map<String, List<ScoreInfo>> recordAnnotationMap;
+    	
+    	public AnnotationInfo() {
 			this.recordAnnotationMap = new HashMap<String, List<ScoreInfo>>();
-			
-			if (label != null) {
-				List<String> def = label.get(Language.DEFAULT);
-				if (def != null && def.size()> 0) {
-					this.showLabel = def.get(0);
-				}
-			}
-			
-			if (showLabel == null) {
-				showLabel = (uriVocabulary != null ? uriVocabulary : "unknown") + " : " + uri;
-			} else {
-				showLabel = (uriVocabulary != null ? uriVocabulary : "unknown") + " : " + showLabel;
-			}
-		}
-		
+    	}
+    	
 		public void add(ObjectId recordId, Annotation ann, ObjectId userId) {
 			AnnotationScore score = ann.getScore();
 			int approved = 0;
@@ -1668,6 +1653,45 @@ public class CollectionObjectController extends WithResourceController {
 			}
 			annIds.add(new ScoreInfo(ann.getDbId().toString(), approved, rejected, approvedByUser, rejectedByUser));
 		}
+    }
+    
+    private static class VocAnnotationInfo extends AnnotationInfo {
+		public String uri;
+		public String uriVocabulary;
+		public MultiLiteral label;
+		
+		public String showLabel;
+		
+		public VocAnnotationInfo(String uri, String uriVocabulary, MultiLiteral label) {
+			super();
+			this.uri = uri;
+			this.uriVocabulary = uriVocabulary; 
+			this.label = label;
+			
+			if (label != null) {
+				List<String> def = label.get(Language.DEFAULT);
+				if (def != null && def.size()> 0) {
+					this.showLabel = def.get(0);
+				}
+			}
+			
+			if (showLabel == null) {
+				showLabel = (uriVocabulary != null ? uriVocabulary : "unknown") + " : " + uri;
+			} else {
+				showLabel = (uriVocabulary != null ? uriVocabulary : "unknown") + " : " + showLabel;
+			}
+		}
+	}
+    
+    private static class GeoAnnotationInfo extends AnnotationInfo {
+    	@JsonDeserialize(using = PointDeserializer.class)
+    	@JsonSerialize(using = PointSerializer.class)
+    	public Point coordinates;
+		
+		public GeoAnnotationInfo(Point coordinates) {
+			super();
+			this.coordinates = coordinates;
+		}
 	}
     
 	public static Result getAnnotationSummary(String colId, String mode, boolean userOnly) {
@@ -1692,7 +1716,8 @@ public class CollectionObjectController extends WithResourceController {
 				userId = user.getDbId();
 			}
 
-			Map<String, Map<String, AnnotationInfo>> annMap = new TreeMap<>();
+			Map<String, Map<String, VocAnnotationInfo>> annMap = new TreeMap<>();
+			Map<Point, GeoAnnotationInfo> geoGroup = new HashMap<>();
 			
 			for (Annotation ann : DB.getAnnotationDAO().getByCollection(new ObjectId(colId))) {
 				if (userOnly) {
@@ -1721,15 +1746,15 @@ public class CollectionObjectController extends WithResourceController {
 					MultiLiteral ml = ((AnnotationBodyTagging)ann.getBody()).getLabel();
 	
 					if (groupBy == 0) {
-						Map<String, AnnotationInfo> annGroup = annMap.get("");
+						Map<String, VocAnnotationInfo> annGroup = annMap.get("");
 						if (annGroup == null) {
-							annGroup = new HashMap<String, AnnotationInfo>();
+							annGroup = new HashMap<String, VocAnnotationInfo>();
 							annMap.put("", annGroup);
 						}
 						
-						AnnotationInfo info = annGroup.get(uri);
+						VocAnnotationInfo info = annGroup.get(uri);
 						if (info == null) {
-							info = new AnnotationInfo(uri, uriVocabulary, ml);
+							info = new VocAnnotationInfo(uri, uriVocabulary, ml);
 							annGroup.put(uri, info);
 						}
 						
@@ -1742,15 +1767,15 @@ public class CollectionObjectController extends WithResourceController {
 								generator = "Unknown Annotator";
 							}
 							
-							Map<String, AnnotationInfo> annGroup = annMap.get(generator);
+							Map<String, VocAnnotationInfo> annGroup = annMap.get(generator);
 							if (annGroup == null) {
-								annGroup = new HashMap<String, AnnotationInfo>();
+								annGroup = new HashMap<String, VocAnnotationInfo>();
 								annMap.put(generator, annGroup);
 							}
 							
-							AnnotationInfo info = annGroup.get(uri);
+							VocAnnotationInfo info = annGroup.get(uri);
 							if (info == null) {
-								info = new AnnotationInfo(uri, uriVocabulary, ml);
+								info = new VocAnnotationInfo(uri, uriVocabulary, ml);
 								annGroup.put(uri, info);
 							}
 							
@@ -1765,42 +1790,56 @@ public class CollectionObjectController extends WithResourceController {
 							name = "Unknown";
 						}
 						
-						Map<String, AnnotationInfo> annGroup = annMap.get(name);
+						Map<String, VocAnnotationInfo> annGroup = annMap.get(name);
 						if (annGroup == null) {
-							annGroup = new HashMap<String, AnnotationInfo>();
+							annGroup = new HashMap<String, VocAnnotationInfo>();
 							annMap.put(name, annGroup);
 						}
 						
-						AnnotationInfo info = annGroup.get(uri);
+						VocAnnotationInfo info = annGroup.get(uri);
 						if (info == null) {
-							info = new AnnotationInfo(uri, uriVocabulary, ml);
+							info = new VocAnnotationInfo(uri, uriVocabulary, ml);
 							annGroup.put(uri, info);
 						}
 						
 						info.add(ann.getTarget().getRecordId(), ann, userId);
 					
 					}
+				} else if (ann.getBody() instanceof AnnotationBodyGeoTagging) {
+					AnnotationBodyGeoTagging body = ((AnnotationBodyGeoTagging)ann.getBody());
+					
+					Point point = body.getCoordinates();
+	
+					GeoAnnotationInfo info = geoGroup.get(point);
+					if (info == null) {
+						info = new GeoAnnotationInfo(point);
+						geoGroup.put(point, info);
+					}
+					
+					info.add(ann.getTarget().getRecordId(), ann, userId);
+
+
 				}
 			}
 
 			List<ObjectNode> groupList = new ArrayList<>();
 			
-			for (Map.Entry<String, Map<String, AnnotationInfo>> entry : annMap.entrySet()) {
+			for (Map.Entry<String, Map<String, VocAnnotationInfo>> entry : annMap.entrySet()) {
 				ObjectNode groupJson = Json.newObject();
 				groupJson.put("name", entry.getKey());
 				
-				ArrayList<AnnotationInfo> list = new ArrayList<>(entry.getValue().values());
-				Collections.sort(list, new Comparator<AnnotationInfo>() {
+				ArrayList<VocAnnotationInfo> list = new ArrayList<>(entry.getValue().values());
+				Collections.sort(list, new Comparator<VocAnnotationInfo>() {
 
 					@Override
-					public int compare(AnnotationInfo arg0, AnnotationInfo arg1) {
+					public int compare(VocAnnotationInfo arg0, VocAnnotationInfo arg1) {
 						return arg0.showLabel.compareTo(arg1.showLabel);
 					}
 				});
 					
 				ArrayNode recArray = Json.newObject().arrayNode();
 
-				for (AnnotationInfo info : list) {
+				for (VocAnnotationInfo info : list) {
 					ObjectNode uriJson = Json.newObject();
 					uriJson.put("uri", info.uri);
 					uriJson.put("label", Json.toJson(info.label));
@@ -1850,9 +1889,79 @@ public class CollectionObjectController extends WithResourceController {
 			for (ObjectNode on : groupList) {
 				groups.add(on);
 			}
+
 			
+			List<ObjectNode> geoGroupList = new ArrayList<>();
+			
+//			for (Map.Entry<String, Map<String, VocAnnotationInfo>> entry : annMap.entrySet()) {
+				ObjectNode groupJson = Json.newObject();
+				groupJson.put("name", "Coordinates");
+				
+				ArrayList<GeoAnnotationInfo> list = new ArrayList<>(geoGroup.values());
+//				Collections.sort(list, new Comparator<GeoAnnotationInfo>() {
+//
+//					@Override
+//					public int compare(GeoAnnotationInfo arg0, GeoAnnotationInfo arg1) {
+//						return arg0.showLabel.compareTo(arg1.showLabel);
+//					}
+//				});
+					
+				ArrayNode recArray = Json.newObject().arrayNode();
+
+				for (GeoAnnotationInfo info : list) {
+					ObjectNode uriJson = Json.newObject();
+					JsonNode coord = Json.toJson(info.coordinates);
+					((ObjectNode)coord).remove("coordinates");
+					uriJson.put("coordinates", coord);
+					
+					ArrayNode instances = Json.newObject().arrayNode();
+					for (Map.Entry<String, List<ScoreInfo>> raEntry : info.recordAnnotationMap.entrySet()) {
+						ObjectNode instanceJson = Json.newObject();
+						instanceJson.put("recordId", raEntry.getKey());
+						
+						ArrayNode ids = Json.newObject().arrayNode();
+						for (ScoreInfo si : raEntry.getValue()) {
+							ObjectNode scoreJson = Json.newObject();
+							scoreJson.put("id", si.id);
+							scoreJson.put("approved", si.approved);
+							scoreJson.put("rejected", si.rejected);
+							scoreJson.put("userapproved", si.approvedByUser);
+							scoreJson.put("userrejected", si.rejectedByUser);
+							
+							ids.add(scoreJson);
+						}
+						
+						instanceJson.put("annotations", ids);
+						instances.add(instanceJson);
+					}
+					
+					uriJson.put("instances", instances);
+					
+					recArray.add(uriJson);
+				}
+
+				groupJson.put("annotations", recArray);
+			
+				geoGroupList.add(groupJson);
+//			}
+			
+//			Collections.sort(groupList, new Comparator<ObjectNode>() {
+//				@Override
+//				public int compare(ObjectNode o1, ObjectNode o2) {
+//					return o1.get("name").asText().compareTo(o2.get("name").asText());
+//				}
+//				
+//			});
+			
+			ArrayNode geoGroups = Json.newObject().arrayNode();
+
+			for (ObjectNode on : geoGroupList) {
+				geoGroups.add(on);
+			}
+
 			ObjectNode res = Json.newObject();
 			res.put("groups", groups);
+			res.put("geo", geoGroups);
 			
 
 			
