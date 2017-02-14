@@ -23,6 +23,11 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
+import org.bson.types.ObjectId;
+
+import com.fasterxml.jackson.databind.node.ObjectNode;
+
+import db.DB;
 import model.EmbeddedMediaObject.MediaVersion;
 import model.basicDataTypes.WithAccess;
 import model.basicDataTypes.WithAccess.Access;
@@ -33,22 +38,15 @@ import model.usersAndGroups.User;
 import model.usersAndGroups.UserGroup;
 import notifications.Notification;
 import notifications.Notification.Activity;
-import notifications.ResourceNotification.ShareInfo;
 import notifications.ResourceNotification;
-
-import org.bson.types.ObjectId;
-
+import notifications.ResourceNotification.ShareInfo;
 import play.Logger;
 import play.Logger.ALogger;
+import play.libs.F.RedeemablePromise;
 import play.libs.Json;
 import play.mvc.Result;
-import play.mvc.Results.Status;
+import sources.core.ParallelAPICall;
 import utils.NotificationCenter;
-
-import com.fasterxml.jackson.databind.node.ObjectNode;
-
-import controllers.WithController.Action;
-import db.DB;
 
 public class RightsController extends WithResourceController {
 	public static final ALogger log = Logger.of(RightsController.class);
@@ -67,9 +65,13 @@ public class RightsController extends WithResourceController {
 				List<ObjectId> effectiveIds = effectiveUserDbIds();
 				DB.getCollectionObjectDAO().updateField(colDbId, "administrative.access.isPublic", isPublic);
 				if (isPublic) //upgrade
-					DB.getRecordResourceDAO().updateMembersToNewPublicity(colDbId, isPublic, effectiveIds);
+					ParallelAPICall.Priority.BACKEND.getExcecutionContext().execute(() -> {
+						DB.getRecordResourceDAO().updateMembersToNewPublicity(colDbId, isPublic, effectiveIds);
+					});
 				else
+				ParallelAPICall.Priority.BACKEND.getExcecutionContext().execute(() -> {
 					changePublicity(colDbId, isPublic, effectiveIds, isPublic == false, membersDowngrade);			
+				});
 			}
 			return ok(result);
 		}
@@ -91,61 +93,50 @@ public class RightsController extends WithResourceController {
 			UserGroup userGroup = null;
 			User user = null;
 			// the receiver can be either a User or a UserGroup
-			ObjectId userOrGroupId = null;
-			if (username != null) {
-				user = DB.getUserDAO().getUniqueByFieldAndValue("username", username, new ArrayList<String>(Arrays.asList("_id")));
-				if (user != null) {
-					userOrGroupId = user.getDbId();
-				} else {
-					userGroup = DB.getUserGroupDAO().getUniqueByFieldAndValue("username", username, new ArrayList<String>(Arrays.asList("_id", "adminIds")));
-					if (userGroup != null) {
-						userOrGroupId = userGroup.getDbId();
-					}
-				}
+			RedeemablePromise<Result> err = RedeemablePromise.empty();
+			ObjectId userOrGroupId = UserAndGroupManager.findUserByUsername( username , err );
+			if( userOrGroupId == null ) return err.get(1000l);
+
+			//check whether the newAccess entails a downgrade or upgrade of the current access of the collection
+			CollectionObject collection = DB.getCollectionObjectDAO().
+					getUniqueByFieldAndValue("_id", colDbId, new ArrayList<String>(Arrays.asList("administrative.access")));
+			WithAccess oldColAccess = collection.getAdministrative().getAccess();
+			int downgrade = isDowngrade(oldColAccess.getAcl(), userOrGroupId, newAccess);
+			//the logged in user has the right to downgrade his own access level (unshare)
+			boolean hasDowngradeRight = loggedIn.equals(userOrGroupId);
+			List<ObjectId> effectiveIds = effectiveUserDbIds();
+			if (userGroup != null) {
+				hasDowngradeRight = userGroup.getAdminIds().contains(loggedIn);
 			}
-			if (userOrGroupId == null) {
-				result.put("error",
-						"No user or userGroup with given username");
-				return badRequest(result);
+			if (downgrade == 1 && hasDowngradeRight) {
+				ParallelAPICall.Priority.BACKEND.getExcecutionContext().execute(() -> {
+					changeAccess(colDbId, userOrGroupId, newAccess, effectiveIds, true, membersDowngrade);
+				});
+				return sendShareCollectionNotification(userOrGroupId, colDbId, loggedIn, Access.NONE, newAccess, effectiveIds, 
+						true, membersDowngrade);
 			}
-			else {
-				//check whether the newAccess entails a downgrade or upgrade of the current access of the collection
-				CollectionObject collection = DB.getCollectionObjectDAO().
-						getUniqueByFieldAndValue("_id", colDbId, new ArrayList<String>(Arrays.asList("administrative.access")));
-				WithAccess oldColAccess = collection.getAdministrative().getAccess();
-				int downgrade = isDowngrade(oldColAccess.getAcl(), userOrGroupId, newAccess);
-				//the logged in user has the right to downgrade his own access level (unshare)
-				boolean hasDowngradeRight = loggedIn.equals(userOrGroupId);
-				List<ObjectId> effectiveIds = effectiveUserDbIds();
-				if (userGroup != null) {
-					hasDowngradeRight = userGroup.getAdminIds().contains(loggedIn);
-				}
-				if (downgrade == 1 && hasDowngradeRight) {
-						changeAccess(colDbId, userOrGroupId, newAccess, effectiveIds, true, membersDowngrade);
-						return sendShareCollectionNotification(userOrGroupId, colDbId, loggedIn, Access.NONE, newAccess, effectiveIds, 
-								true, membersDowngrade);
-				}
-				else if (downgrade > -1){//downgrade and no downgradeRights or upgrade
-					Result response = errorIfNoAccessToCollection(Action.DELETE, colDbId);
-					if (!response.toString().equals(ok().toString()))
-						return response;
-					else {
-						Access oldAccess = Access.NONE;
-						for (AccessEntry ae: oldColAccess.getAcl()) {
-							if (ae.getUser().equals(userOrGroupId)) {
-								oldAccess = ae.getLevel();
-							    break;
-							}
+			else if (downgrade > -1){//downgrade and no downgradeRights or upgrade
+				Result response = errorIfNoAccessToCollection(Action.DELETE, colDbId);
+				if (!response.toString().equals(ok().toString()))
+					return response;
+				else {
+					Access oldAccess = Access.NONE;
+					for (AccessEntry ae: oldColAccess.getAcl()) {
+						if (ae.getUser().equals(userOrGroupId)) {
+							oldAccess = ae.getLevel();
+							break;
 						}
-						changeAccess(colDbId, userOrGroupId, newAccess, effectiveIds, downgrade == 1, membersDowngrade);
-						return sendShareCollectionNotification(userOrGroupId, colDbId, loggedIn, oldAccess, newAccess, effectiveIds, 
-								downgrade == 1, membersDowngrade);
 					}
+					ParallelAPICall.Priority.BACKEND.getExcecutionContext().execute(() -> {
+						changeAccess(colDbId, userOrGroupId, newAccess, effectiveIds, downgrade == 1, membersDowngrade);
+					});
+					return sendShareCollectionNotification(userOrGroupId, colDbId, loggedIn, oldAccess, newAccess, effectiveIds, 
+							downgrade == 1, membersDowngrade);
 				}
-				else {//if downgrade == -1, the rights are not changed, do nothing
-					result.put("mesage", "The user already has the required access to the collection.");
-					return ok(result);
-				}
+			}
+			else {//if downgrade == -1, the rights are not changed, do nothing
+				result.put("mesage", "The user already has the required access to the collection.");
+				return ok(result);
 			}
 		}
 	}
@@ -153,21 +144,27 @@ public class RightsController extends WithResourceController {
 	public static void changePublicity(ObjectId colId, boolean isPublic, List<ObjectId> effectiveIds, boolean downgrade, boolean membersDowngrade) {
 		DB.getCollectionObjectDAO().updateField(colId, "administrative.access.isPublic", isPublic);
 		if (downgrade && membersDowngrade) {//the publicity of all records that belong to the collection is downgraded
+			ParallelAPICall.Priority.BACKEND.getExcecutionContext().execute(() -> {
 			DB.getRecordResourceDAO().updateMembersToNewPublicity(colId, isPublic, effectiveIds);
-		}
+		});}
 		else {//if upgrade, or downgrade but !membersDowngrade the new rights of the collection are merged to all records that belong to the collection. 
+			ParallelAPICall.Priority.BACKEND.getExcecutionContext().execute(() -> {
 			DB.getRecordResourceDAO().updateMembersToMergedPublicity(colId, isPublic, effectiveIds);
-		}	
+			});}
 	}
 	
 	public static void changeAccess(ObjectId colId, ObjectId userOrGroupId, Access newAccess, List<ObjectId> effectiveIds, 
 			boolean downgrade, boolean membersDowngrade) {
 		Access oldAccess = DB.getCollectionObjectDAO().changeAccess(colId, userOrGroupId, newAccess);
 		if (downgrade && membersDowngrade) {//the rights of all records that belong to the collection are downgraded
-			DB.getRecordResourceDAO().updateMembersToNewAccess(colId, userOrGroupId, oldAccess, newAccess, effectiveIds);
+			ParallelAPICall.Priority.BACKEND.getExcecutionContext().execute(() -> {
+				DB.getRecordResourceDAO().updateMembersToNewAccess(colId, userOrGroupId, oldAccess, newAccess, effectiveIds);
+			});
 		}
 		else {//if upgrade, or downgrade but !membersDowngrade the new rights of the collection are merged to all records that belong to the collection. 
-			DB.getRecordResourceDAO().updateMembersToMergedRights(colId, oldAccess, new AccessEntry(userOrGroupId, newAccess), effectiveIds);
+			ParallelAPICall.Priority.BACKEND.getExcecutionContext().execute(() -> {
+				DB.getRecordResourceDAO().updateMembersToMergedRights(colId, oldAccess, new AccessEntry(userOrGroupId, newAccess), effectiveIds);
+			});
 		}		
 	}
 	
