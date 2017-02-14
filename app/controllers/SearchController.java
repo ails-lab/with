@@ -135,6 +135,7 @@ public class SearchController extends WithController {
 				final search.SimilarsQuery q = Json.fromJson(json, search.SimilarsQuery.class );
 				List<Promise<RecordsList>> groups = new ArrayList<>();
 				groups.add(new SimilarProviderSearch().query(q));
+				groups.add(new SimilarCreatorSearch().query(q));
 				
 				// TODO here make a list of promises and then a promise of the list... then return it
 				
