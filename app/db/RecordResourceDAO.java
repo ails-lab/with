@@ -441,8 +441,7 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 		List<RecordResource> memberRecords = getByCollection(collectionId,
 				retrievedFields);
 		for (RecordResource r : memberRecords) {
-			if (DB.getRecordResourceDAO().hasAccess(effectiveIds,
-					Action.DELETE, r.getDbId()))
+			if( r.getAdministrative().getAccess().canDelete(effectiveIds.toArray(new ObjectId[0])) ) 
 				changeAccess(r.getDbId(), userId, newAccess);
 			retrievedFields = new ArrayList<String>(Arrays.asList("administrative.access"));
 			updateCollectedBy(r.getDbId(), userId, oldAccess, newAccess);
