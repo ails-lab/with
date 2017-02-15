@@ -109,9 +109,7 @@ public class RightsController extends WithResourceController {
 				hasDowngradeRight = userGroup.getAdminIds().contains(loggedIn);
 			}
 			if (downgrade == 1 && hasDowngradeRight) {
-				ParallelAPICall.Priority.BACKEND.getExcecutionContext().execute(() -> {
 					changeAccess(colDbId, userOrGroupId, newAccess, effectiveIds, true, membersDowngrade);
-				});
 				return sendShareCollectionNotification(userOrGroupId, colDbId, loggedIn, Access.NONE, newAccess, effectiveIds, 
 						true, membersDowngrade);
 			}
@@ -127,9 +125,7 @@ public class RightsController extends WithResourceController {
 							break;
 						}
 					}
-					ParallelAPICall.Priority.BACKEND.getExcecutionContext().execute(() -> {
-						changeAccess(colDbId, userOrGroupId, newAccess, effectiveIds, downgrade == 1, membersDowngrade);
-					});
+					changeAccess(colDbId, userOrGroupId, newAccess, effectiveIds, downgrade == 1, membersDowngrade);
 					return sendShareCollectionNotification(userOrGroupId, colDbId, loggedIn, oldAccess, newAccess, effectiveIds, 
 							downgrade == 1, membersDowngrade);
 				}
