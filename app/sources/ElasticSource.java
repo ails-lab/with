@@ -51,7 +51,7 @@ public class ElasticSource implements Source {
 
 		ElasticCoordinator coord = new ElasticCoordinator(elasticoptions);
 		Function<List<List<Filter>>, SingleResponse> recordSearch = ( (filters) -> ( coord.federatedSearch(filters)));
-		return ParallelAPICall.createPromise(recordSearch, query.filters);
+		return ParallelAPICall.createPromise(recordSearch, query.filters, ParallelAPICall.Priority.FRONTEND);
 	}
 
 	@Override
