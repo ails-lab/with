@@ -75,7 +75,7 @@ public class AnnotationControlActor extends UntypedActor {
 	}
 	
 	private String requestId;
-	private ObjectId recordId; 
+	private ObjectId resourceId; 
 	private ObjectId userId;
 	private boolean record;
 	
@@ -88,9 +88,9 @@ public class AnnotationControlActor extends UntypedActor {
 	private ActorSelection tokenLoginActor;
 	private boolean notificationSent;
 	
-	public AnnotationControlActor(String requestId, ObjectId recordId, ObjectId userId, boolean record) {
+	public AnnotationControlActor(String requestId, ObjectId resourceId, ObjectId userId, boolean record) {
 		this.requestId = requestId;
-		this.recordId = recordId;
+		this.resourceId = resourceId;
 		this.userId = userId;
 		this.record = record;
 		
@@ -166,7 +166,7 @@ public class AnnotationControlActor extends UntypedActor {
 			}
 	
 			notification.setOpenedAt(new Timestamp(new Date().getTime()));
-	        notification.setResource(recordId);
+	        notification.setResource(resourceId);
 	        notification.setReceiver(userId);
 //	        DB.getNotificationDAO().makePermanent(notification);
 	        
