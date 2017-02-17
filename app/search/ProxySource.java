@@ -67,7 +67,7 @@ public class ProxySource extends EmptySource {
 			SourceResponse oldresult = spaceSource.getResults(new CommonQuery(q));
 			return oldresult.exportToSingleSource();
 		};
-		return ParallelAPICall.createPromise(f , query);
+		return ParallelAPICall.createPromise(f , query, ParallelAPICall.Priority.FRONTEND);
 	}
 	
 	@Override

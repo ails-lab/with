@@ -64,6 +64,11 @@ public class AnnotationNotification extends Notification {
 			if (ml != null) {
 				return withResource.getDescriptiveData().getLabel().get(Language.DEFAULT).get(0);
 			}
+		} else {
+			UserGroup ug = DB.getUserGroupDAO().getById(resource, new ArrayList<String>() {{ add("friendlyName"); }});
+			if (ug != null) {
+				return ug.getFriendlyName();
+			}
 		}
 		
 		return "";

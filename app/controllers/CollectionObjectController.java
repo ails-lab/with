@@ -1499,20 +1499,72 @@ public class CollectionObjectController extends WithResourceController {
             return internalServerError(result);
    		}
     }
+    
+    public static Result annotateCollectionsByGroupId(String id) {
+        ObjectNode result = Json.newObject();
+        ObjectId gid = new ObjectId(id);
+        
+    	try {
+            JsonNode json = request().body().asJson();
+            
+            ObjectId user = WithController.effectiveUserDbId();
+            List<AnnotatorConfig> annConfigs = AnnotatorConfig.createAnnotationConfigs(json);
+
+    		Random rand = new Random();
+    		String requestId = "AG" + (System.currentTimeMillis() + Math.abs(rand.nextLong())) + "" + Math.abs(rand.nextLong());
+
+    		Akka.system().actorOf( Props.create(AnnotationControlActor.class, requestId, gid, user, false), requestId);
+    		ActorSelection ac = Akka.system().actorSelection("user/" + requestId);
+
+    		Set<String> annotated = new HashSet<>();
+    		for (CollectionObject co : DB.getCollectionObjectDAO().getAccessibleByGroup(gid)) {
+    			ObjectId cid = co.getDbId();
+    			
+        		Result response = errorIfNoAccessToCollection(Action.EDIT, cid);
+        		if (response.toString().equals(ok().toString())) {
+	            	
+	                for (ContextData<ContextDataBody> cd : (List<ContextData<ContextDataBody>>)DB.getCollectionObjectDAO().getById(cid).getCollectedResources()) {
+	               		String recordId = cd.getTarget().getRecordId().toHexString();
+	               		if (!annotated.add(recordId)) {
+	               			continue;
+	               		}
+	
+	//					if (DB.getRecordResourceDAO().hasAccess(uid, Action.EDIT, new ObjectId(recordId))  || isSuperUser()) {
+	               			try {
+								RecordResourceController.annotateRecord(recordId, user, annConfigs, ac);
+							} catch (Exception e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							}
+	//					}
+	                }
+	            }
+    		}
+    		
+            ac.tell(new AnnotationControlActor.AnnotateRequestsEnd(), ActorRef.noSender());
+        	
+            return ok();
+
+        } catch (Exception e1) {
+        	e1.printStackTrace();
+            result.put("error", e1.getMessage());
+            return internalServerError(result);
+        }
+    }
+
 
     public static Result annotateCollection(String id) {
         ObjectNode result = Json.newObject();
         ObjectId cid = new ObjectId(id);
-//        Locks locks = null;
 
         try {
-//            locks = Locks.create().read("Collection #" + id).acquire();
             Result response = errorIfNoAccessToCollection(Action.EDIT, cid);
             if (!response.toString().equals(ok().toString())) {
                 return response;
             } else {
             	
                 JsonNode json = request().body().asJson();
+                System.out.println(">>>>>>>>> " + json);
 
                 ObjectId user = WithController.effectiveUserDbId();
                 List<AnnotatorConfig> annConfigs = AnnotatorConfig.createAnnotationConfigs(json);
@@ -1545,59 +1597,10 @@ public class CollectionObjectController extends WithResourceController {
         	e1.printStackTrace();
             result.put("error", e1.getMessage());
             return internalServerError(result);
-        } finally {
-//            if (locks != null) {
-//                locks.release();
-//            }
         }
     }
     
-//    private static class AnnotationGroup implements Comparable<AnnotationGroup> {
-//    	public String uri;
-//    	public String uriVocabulary;
-//    	public MultiLiteral label;
-//    	public Map<ObjectId, ArrayNode> recMap;
-//    	
-//    	public String showLabel;
-//    	
-//    	public AnnotationGroup(String uri, String uriVocabulary, MultiLiteral label) {
-//    		this.uri = uri;
-//    		this.uriVocabulary = uriVocabulary; 
-//    		this.label = label;
-//    		this.recMap = new HashMap<ObjectId,ArrayNode>();
-//    		
-//    		List<String> def = label.get(Language.DEFAULT);
-//    		if (def != null && def.size()> 0) {
-//    			this.showLabel = def.get(0);
-//    		}
-//    		
-//			if (showLabel == null) {
-//				showLabel = uriVocabulary + " : " + uri;
-//			} else {
-//				showLabel = uriVocabulary + " : " + showLabel;
-//			}
-//    	}
-//    	
-//    	public void add(ObjectId recId, Annotation ann) {
-//    		ArrayNode anns = recMap.get(recId);
-//    		if (anns == null) {
-//				anns = Json.newObject().arrayNode();
-//				recMap.put(recId, anns);
-//			}
-//    		
-//    		ObjectNode node = (ObjectNode)Json.toJson(ann);
-//    		node.remove("body");
-//    		node.remove("motivation");
-//    		anns.add(node);
-//    	}
-//
-//		@Override
-//		public int compareTo(AnnotationGroup arg1) {
-//			return showLabel.compareTo(arg1.showLabel);
-//		}
-//
-//    }
-    
+  
     private static class ScoreInfo {
     	public String id;
     	public boolean approvedByUser;
