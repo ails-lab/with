@@ -16,25 +16,10 @@
 
 package search;
 
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-
-import org.apache.commons.lang3.StringUtils;
-
-import controllers.WithController;
 import model.basicDataTypes.Language;
 import model.basicDataTypes.Literal;
 import model.resources.RecordResource;
-import play.libs.Json;
-import play.libs.F.Function;
 import play.libs.F.Promise;
-import play.mvc.Result;
-import rationals.properties.Similar;
-import scalaz.std.java.util.map;
-import search.Response.SingleResponse;
-import sources.core.ParallelAPICall;
-import utils.ChainedSearchResult;
 
 public class SimilarProviderSearch extends SimilarSearch {
 
@@ -47,20 +32,17 @@ public class SimilarProviderSearch extends SimilarSearch {
 //		prov = ((RecordResource.RecordDescriptiveData)r.getDescriptiveData()).;
 		String prov = r.getProvenance().get(0).getProvider();
 		Query iq = new Query();
-		iq.setPageAndSize(1, 10);
-		iq.addSource(Sources.WITHin);
+		iq.setPageAndSize(1, q.getSize());
+		addSources(r, iq);
 		iq.addClause(new Filter(Fields.provenance_provider.fieldId(), prov));
 		iq.addClause(new Filter(Fields.resourceType.fieldId(),"CulturalObject"));
 		// just to make sure its ok
 		return SimilarSearch.executeQuery(iq).map((mapSR)->{
 			RecordsList recordsList = new RecordsList(Fields.provenance_provider.fieldId(), 
-					new Literal(Language.EN,"Same Provider"));
-			SingleResponse loc = mapSR.get(Sources.WITHin);
-			if (loc.count>0){
-				recordsList.addRecords(loc.items);
-			} else {
-//				one of the rest?
-			}
+					new Literal(Language.EN,"Same Provider"), 
+					new Literal(Language.EN, "Items provided from "+prov));
+			buildResults(mapSR, recordsList);
+			recordsList.setQuery(iq);
 			return recordsList;
 		});
 	}

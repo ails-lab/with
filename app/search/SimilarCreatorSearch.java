@@ -16,26 +16,13 @@
 
 package search;
 
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-
-import org.apache.commons.lang3.StringUtils;
-
-import controllers.WithController;
 import model.basicDataTypes.Language;
 import model.basicDataTypes.Literal;
+import model.basicDataTypes.MultiLiteralOrResource;
 import model.resources.CulturalObject.CulturalObjectData;
 import model.resources.RecordResource;
-import play.libs.Json;
-import play.libs.F.Function;
 import play.libs.F.Promise;
 import play.mvc.Result;
-import rationals.properties.Similar;
-import scalaz.std.java.util.map;
-import search.Response.SingleResponse;
-import sources.core.ParallelAPICall;
-import utils.ChainedSearchResult;
 
 public class SimilarCreatorSearch extends SimilarSearch {
 
@@ -48,23 +35,26 @@ public class SimilarCreatorSearch extends SimilarSearch {
 //		prov = ((RecordResource.RecordDescriptiveData)r.getDescriptiveData()).;
 		String prov = r.getProvenance().get(0).getProvider();
 		Query iq = new Query();
-		iq.setPageAndSize(1, 10);
-		iq.addSource(Sources.WITHin);
-		String creator = ((CulturalObjectData)r.getDescriptiveData()).getDccreator().get(Language.DEFAULT).get(0);
-		iq.addClause(new Filter(Fields.descriptiveData_dccreator.fieldId(), creator));
-		iq.addClause(new Filter(Fields.resourceType.fieldId(),"CulturalObject"));
-		// just to make sure its ok
-		return SimilarSearch.executeQuery(iq).map((mapSR)->{
-			RecordsList recordsList = new RecordsList(Fields.descriptiveData_dccreator.fieldId(), 
-					new Literal(Language.EN,"Same Creator"));
-			SingleResponse loc = mapSR.get(Sources.WITHin);
-			if (loc.count>0){
-				recordsList.addRecords(loc.items);
-			} else {
-//				one of the rest?
-			}
-			return recordsList;
-		});
+		iq.setPageAndSize(1, q.getSize());
+		addSources(r, iq);
+		MultiLiteralOrResource dccreator = ((CulturalObjectData)r.getDescriptiveData()).getDccreator();
+		RecordsList recordsList = new RecordsList(Fields.descriptiveData_dccreator.fieldId(), 
+				new Literal(Language.EN,"Same Creator"));
+		if (dccreator!=null){
+			String creator = dccreator.get(Language.DEFAULT).get(0);
+			iq.addClause(new Filter(Fields.descriptiveData_dccreator.fieldId(), creator));
+			iq.addClause(new Filter(Fields.resourceType.fieldId(),"CulturalObject"));
+			// just to make sure its ok
+			recordsList.setDescription(new Literal(Language.EN, "Items with creator "+creator));
+			return SimilarSearch.executeQuery(iq).map((mapSR)->{
+				buildResults(mapSR, recordsList);
+				recordsList.setQuery(iq);
+				return recordsList;
+			});
+		} else {
+			recordsList.setDescription(new Literal(Language.EN, "No creator Found"));
+			return Promise.pure(recordsList);
+		}
 	}
 	
 	

@@ -25,6 +25,7 @@ import org.bson.types.ObjectId;
 
 import controllers.WithController;
 import db.DB;
+import model.basicDataTypes.ProvenanceInfo;
 import model.resources.RecordResource;
 import play.libs.F.Promise;
 import search.Response.SingleResponse;
@@ -44,6 +45,36 @@ public abstract class SimilarSearch {
 	}
 	
 	public abstract Promise<RecordsList> query(SimilarsQuery q);
+
+
+	protected void buildResults(Map<Sources, SingleResponse> mapSR, RecordsList recordsList) {
+			SingleResponse loc = mapSR.get(Sources.WITHin);
+			if (loc.count>0){
+				recordsList.addRecords(loc.items);
+			} else {
+	//				one of the rest?
+				for (SingleResponse sr : mapSR.values()) {
+					if (sr.count>0)
+						recordsList.addRecords(sr.items);
+				}
+			}
+		}
+
+
+	protected void addSources(RecordResource<?> r, Query iq) {
+		boolean withIn = false;
+		for (ProvenanceInfo p : r.getProvenance()) {
+			Sources s = Sources.getSourceByID(p.getProvider());
+			if (s!=null){
+				iq.addSource(s);
+				if (s.equals(Sources.WITHin))
+					withIn = true;
+			}
+		}
+		if (!withIn)
+			iq.addSource(Sources.WITHin);
+		
+	}
 
 
 	public static Promise<Map<Sources,SingleResponse>> executeQuery(Query q){

@@ -31,6 +31,7 @@ public class RecordsList {
 	private Literal title;
 	private Literal description;
 	private List<RecordResource<?>> records;
+	private Query query;
 	
 	public RecordsList(String identifier,Literal title) {
 		this(identifier,title,title);
@@ -96,6 +97,15 @@ public class RecordsList {
 	public void setIdentifier(String identifier) {
 		this.identifier = identifier;
 	}
+
+	public Query getQuery() {
+		return query;
+	}
+
+	public void setQuery(Query query) {
+		this.query = query;
+	}
+	
 	
 	
 	

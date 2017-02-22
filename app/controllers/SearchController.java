@@ -55,6 +55,7 @@ import search.Query;
 import search.RecordsList;
 import search.Response;
 import search.Response.SingleResponse;
+import search.SimilarCreatorSearch;
 import search.SimilarProviderSearch;
 import search.SimilarsQuery;
 import search.Source;
