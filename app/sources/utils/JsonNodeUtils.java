@@ -16,13 +16,16 @@
 
 package sources.utils;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import model.basicDataTypes.Language;
 import model.basicDataTypes.Literal;
@@ -36,8 +39,8 @@ import sources.core.Utils;
 
 public class JsonNodeUtils {
 
-	public static final ALogger log = Logger.of( JsonNodeUtils.class );
-	
+	public static final ALogger log = Logger.of(JsonNodeUtils.class);
+
 	public static String asString(JsonNode node) {
 		if (node != null && !node.isMissingNode()) {
 			if (node.isArray()) {
@@ -65,6 +68,12 @@ public class JsonNodeUtils {
 				}
 				return res.fillDEF(true);
 			}
+			if (node.has("@language") && node.has("@value")) {
+				String code = node.get("@language").asText();
+				String text = node.get("@value").asText();
+				res.addLiteral(Language.getLanguage(code), text);
+				return res.fillDEF();
+			}
 			for (Iterator<Entry<String, JsonNode>> iterator = node.fields(); iterator.hasNext();) {
 				Entry<String, JsonNode> next = iterator.next();
 				Language language = Language.getLanguage(next.getKey());
@@ -75,7 +84,7 @@ public class JsonNodeUtils {
 						if (Utils.hasInfo(asText))
 							res.addLiteral(language, asText);
 					}
-					if (Language.DEFAULT.equals(language)){
+					if (Language.DEFAULT.equals(language)) {
 						for (int i = 0; i < value.size(); i++) {
 							String asText = value.get(i).asText();
 							if (Utils.hasInfo(asText))
@@ -106,22 +115,34 @@ public class JsonNodeUtils {
 				res.addSmartLiteral(node.asText());
 				return res.fillDEF();
 			}
+			// if (node.isArray()) {
+			// res.addSmartLiteral(node.get(0).asText(), suggestedLanguages);
+			// return res.fillDEF();
+			// }
+			// TODO check if works properly
 			if (node.isArray()) {
-				res.addSmartLiteral(node.get(0).asText(), suggestedLanguages);
+				for (int i = 0; i < node.size(); i++) {
+					readLiteral(res, node.get(i), suggestedLanguages);
+				}
+				return res.fillDEF();
+			}
+			if (node.has("@language") && node.has("@value")) {
+				String code = node.get("@language").asText();
+				String text = node.get("@value").asText();
+				res.addLiteral(Language.getLanguage(code), text);
 				return res.fillDEF();
 			}
 			for (Iterator<Entry<String, JsonNode>> iterator = node.fields(); iterator.hasNext();) {
 				Entry<String, JsonNode> next = iterator.next();
 				Language language = Language.getLanguage(next.getKey());
 				JsonNode value = next.getValue();
-				if (language != null){
+				if (language != null) {
 					if (value.isArray())
-					res.addLiteral(language, value.get(0).asText());
+						res.addLiteral(language, value.get(0).asText());
 					else
 						res.addLiteral(language, value.asText());
-					
-				}
-				else
+
+				} else
 					res.addSmartLiteral(asString(value), suggestedLanguages);
 			}
 			return res.fillDEF();
@@ -145,7 +166,7 @@ public class JsonNodeUtils {
 		ArrayList<WithDate> res = new ArrayList<>();
 		if (Utils.hasInfo(list)) {
 			for (String string : list) {
-				if (Utils.hasInfo(string)){
+				if (Utils.hasInfo(string)) {
 					res.add(new WithDate(string));
 				}
 			}
@@ -186,6 +207,27 @@ public class JsonNodeUtils {
 			return res;
 		}
 		return null;
+	}
+
+	public static void main(String[] args) {
+		ObjectMapper mapper = new ObjectMapper();
+		try {
+			String t = "";
+			t += "[";
+			t += "{\"@language\":\"fr\",\"@value\":\"anglish\"}";
+			t += ",";
+			t += "{\"@language\":\"en\",\"@value\":\"English\"}";
+			t += "]";
+			JsonNode n = mapper.readTree(t);
+			Literal l = asLiteral(n);
+			System.out.println(l);
+		} catch (JsonProcessingException e) {
+			// TODO Auto-generated catch block
+			log.error("", e);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			log.error("", e);
+		}
 	}
 
 }

@@ -53,16 +53,31 @@ import utils.Serializer.JsonContextRecordSerializer;
 
 @JsonSerialize(using = JsonContextRecordSerializer.class)
 public class JsonContextRecord {
-	
+
 	public static final ALogger log = Logger.of(JsonContextRecord.class);
 
 	private JsonNode rootInformation;
 	private List<String> context;
 	private Language[] languages;
 
+	/**
+	 * could also be '$'
+	 */
+	private char separator = '.';
+
 	public JsonContextRecord(JsonNode rootInformation) {
 		this.context = new ArrayList<>();
 		this.rootInformation = rootInformation;
+	}
+
+	public JsonContextRecord(JsonNode rootInformation, char pathSeparator) {
+		this(rootInformation);
+		this.separator = pathSeparator;
+	}
+
+	public JsonContextRecord(String jsonString, char pathSeparator) {
+		this(jsonString);
+		this.separator = pathSeparator;
 	}
 
 	public JsonContextRecord(String jsonString) {
@@ -121,24 +136,26 @@ public class JsonContextRecord {
 		int d = 0;
 		String current = "";
 		for (int i = 0; i < string.length(); i++) {
-			switch (string.charAt(i)) {
-			case '[':
-				d++;
-				current += string.charAt(i);
-				break;
-			case ']':
-				d--;
-				current += string.charAt(i);
-				break;
-			case '.':
+			if (string.charAt(i) == separator) {
 				if (d == 0) {
 					res.add(current);
 					current = "";
 					break;
 				}
-			default:
-				current += string.charAt(i);
-				break;
+			} else {
+				switch (string.charAt(i)) {
+				case '[':
+					d++;
+					current += string.charAt(i);
+					break;
+				case ']':
+					d--;
+					current += string.charAt(i);
+					break;
+				default:
+					current += string.charAt(i);
+					break;
+				}
 			}
 
 		}
@@ -162,6 +179,7 @@ public class JsonContextRecord {
 	public List<JsonNode> getValues(String... path) {
 		return getValues(buildpaths(path));
 	}
+
 	public List<JsonNode> getValues(Collection<String> steps) {
 		List<JsonNode> roots = new ArrayList<>();
 		roots.add(rootInformation);
