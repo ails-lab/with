@@ -22,6 +22,8 @@ import utils.Deserializer.LiteralDesiarilizer;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
+import play.libs.Json;
+
 @JsonDeserialize(using = LiteralDesiarilizer.class)
 public class Literal extends HashMap<String, String> implements ILiteral {
 
@@ -36,15 +38,21 @@ public class Literal extends HashMap<String, String> implements ILiteral {
 		this.put(lang.getDefaultCode(), label);
 	}
 
-	/* (non-Javadoc)
-	 * @see model.basicDataTypes.ILiteral#addLiteral(model.basicDataTypes.Language, java.lang.String)
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * model.basicDataTypes.ILiteral#addLiteral(model.basicDataTypes.Language,
+	 * java.lang.String)
 	 */
 	@Override
 	public void addLiteral(Language lang, String value) {
 		this.put(lang.getDefaultCode(), value);
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see model.basicDataTypes.ILiteral#addLiteral(java.lang.String)
 	 */
 	@Override
@@ -77,5 +85,15 @@ public class Literal extends HashMap<String, String> implements ILiteral {
 			}
 		}
 		return this;
+	}
+
+	public Literal merge(Literal other) {
+		this.putAll(other);
+		return this;
+	}
+
+	@Override
+	public String toString() {
+		return Json.toJson(this).toString();
 	}
 }

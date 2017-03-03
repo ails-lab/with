@@ -140,7 +140,6 @@ public class JsonContextRecord {
 				if (d == 0) {
 					res.add(current);
 					current = "";
-					break;
 				}
 			} else {
 				switch (string.charAt(i)) {
@@ -395,15 +394,23 @@ public class JsonContextRecord {
 	 * @return
 	 */
 	public Literal getLiteralValue(String... path) {
+		return getLiteralValue(false, path);
+	}
+
+	public Literal getLiteralValue(boolean merge, String... path) {
+		// TODO implement the merge option to take all the languages
+		Literal res = null;
 		for (String spath : path) {
-			JsonNode node = getValue(buildpaths(spath));
-			if (node != null) {
-				Literal res = JsonNodeUtils.asLiteral(node, languages);
-				if (Utils.hasInfo(res))
+			List<JsonNode> nodes = getValues(buildpaths(spath));
+			for (JsonNode jsonNode : nodes) {
+				if (Utils.hasInfo(jsonNode)) {
+					res = merge(res, JsonNodeUtils.asLiteral(jsonNode, languages));
+				}
+				if (!merge && Utils.hasInfo(res))
 					return res;
 			}
 		}
-		return null;
+		return res;
 	}
 
 	/**
@@ -434,6 +441,14 @@ public class JsonContextRecord {
 	}
 
 	private <T extends MultiLiteral> T merge(T res, T other) {
+		if (!Utils.hasInfo(res))
+			res = other;
+		else
+			res.merge(other);
+		return res;
+	}
+
+	private <T extends Literal> T merge(T res, T other) {
 		if (!Utils.hasInfo(res))
 			res = other;
 		else

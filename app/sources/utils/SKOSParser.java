@@ -19,6 +19,8 @@ package sources.utils;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.fasterxml.jackson.databind.JsonNode;
+
 import model.basicDataTypes.*;
 import sources.core.ApacheHttpConnector;
 import sources.core.HttpConnector;
@@ -29,12 +31,19 @@ public class SKOSParser {
 		List<Literal> res = new ArrayList<>();
 		HttpConnector con = ApacheHttpConnector.getApacheHttpConnector();
 		try {
-			JsonContextRecord tj = new JsonContextRecord(con.getURLContent(url));
-			tj.getLiteralValue("http://www.w3.org/2004/02/skos/core#prefLabel");
+			JsonNode urlContent = con.getURLContent(url);
+			JsonContextRecord tj = new JsonContextRecord(urlContent, '$');
+			res.add(tj.getLiteralValue(true, "[.*]$http://www.w3.org/2004/02/skos/core#prefLabel"));
 		} catch (Exception e) {
 
 		}
 		return res;
+	}
+
+	public static void main(String[] args) {
+		SKOSParser p = new SKOSParser();
+		List<Literal> l = p.parseConcept("http://id.loc.gov/vocabulary/iso639-1/en");
+		System.out.println(l);
 	}
 
 }
