@@ -85,7 +85,7 @@ public class UserManager extends WithController {
 	private static final String facebookAccessTokenUrl = "https://graph.facebook.com/v2.8/oauth/access_token";
 	private static final String facebookSecretWith =   "52a97ef61e923a7853eb7e12f60fe0a6";
 	private static final String facebookSecretEspace = "6e3c81104a1a69aa235da76e6fbfdd2e";
-	private static final String googleSecret = "aGOCP6xGZ_ylm389OAf15mTy";
+	private static final String googleSecret = "kXfPrEXZaaytG00LDhKWX540";
 
 	/**
 	 * Propose new username when it is already in use.
