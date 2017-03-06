@@ -83,7 +83,7 @@ public class UserManager extends WithController {
 	public static final ALogger log = Logger.of(UserManager.class);
 	private static final long TOKENTIMEOUT = 10 * 1000l /* 10 sec */;
 	private static final String facebookAccessTokenUrl = "https://graph.facebook.com/v2.8/oauth/access_token";
-	private static final String facebookSecretWith =   "52a97ef61e923a7853eb7e12f60fe0a6";
+	private static final String facebookSecretWith =   "SECRET_KEY";
 	private static final String facebookSecretEspace = "SECRET_KEY";
 	private static final String facebookSecretLocalhost = "SECRET_KEY";
 	
