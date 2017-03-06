@@ -140,6 +140,8 @@ public class JsonContextRecord {
 				if (d == 0) {
 					res.add(current);
 					current = "";
+				} else {
+					current += string.charAt(i);
 				}
 			} else {
 				switch (string.charAt(i)) {
