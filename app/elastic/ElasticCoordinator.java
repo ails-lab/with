@@ -32,10 +32,12 @@ import org.elasticsearch.search.aggregations.bucket.terms.Terms;
 
 import db.DB;
 import elastic.ElasticSearcher.SearchOptions;
+import model.EmbeddedMediaObject;
 import model.resources.RecordResource;
 import model.resources.collection.CollectionObject;
 import play.Logger;
 import play.Logger.ALogger;
+import search.Fields;
 import search.Filter;
 import search.Response.SingleResponse;
 import search.Sources;
@@ -176,8 +178,12 @@ public class ElasticCoordinator {
 					for (int i=0; i< aggTerm.getBuckets().size(); i++) {
 						// omit the last character of aggregation name
 						// in order to take the exact name of the field name
-						sresp.addFacet(aggTerm.getName().substring(0, aggTerm.getName().length()-1),
-								aggTerm.getBuckets().get(i).getKeyAsString(),
+						String id = aggTerm.getName().substring(0, aggTerm.getName().length()-1);
+						String value = aggTerm.getBuckets().get(i).getKeyAsString();
+						if (Fields.media_withRights.fieldId().equals(id)){
+							value = EmbeddedMediaObject.WithMediaRights.getRights(value).toString();
+						}
+						sresp.addFacet(id,value,
 								(int)aggTerm.getBuckets().get(i).getDocCount());
 					}
 				}
