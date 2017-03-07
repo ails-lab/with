@@ -34,7 +34,7 @@ import utils.Deserializer.PointDeserializer;
 import utils.Serializer.PointSerializer;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-@JsonInclude(value = JsonInclude.Include.NON_NULL)
+@JsonInclude(JsonInclude.Include.NON_DEFAULT)
 
 //TODO: check how to index MultiLiteral in mongo. Actually only need to query based on the "default" value.
 @DescriptiveDataAnnotation
