@@ -67,21 +67,26 @@ public class ElasticCoordinator {
 
 		List<List<Filter>> newFilters = filters.stream().map(
 				clause -> {
-				return clause.stream().map(
-					filter-> {
-					Filter newFilter = (Filter) filter.clone();
-					if(newFilter.fieldId.equals("anywhere")) newFilter.fieldId = "";
-					return newFilter;
-					}
-				).collect( Collectors.toList()); }
-			).collect( Collectors.toList());
+					return clause.stream().map(filter -> {
+						Filter newFilter = (Filter) filter.clone();
+						if (newFilter.fieldId.equals("anywhere"))
+							newFilter.fieldId = "";
+						if (Fields.media_withRights.fieldId().equals(newFilter.fieldId))
+							newFilter.value = EmbeddedMediaObject.WithMediaRights.getRights(newFilter.value).name();
+						return newFilter;
+					}).collect(Collectors.toList());
+				}).collect(Collectors.toList());
 
 		List<QueryBuilder> musts = new ArrayList<QueryBuilder>();
-		for(List<Filter> ors: newFilters) {
+		for (List<Filter> ors : newFilters) {
 			musts.add(searcher.boolShouldQuery(ors));
 		}
 		List<QueryBuilder> must_not = new ArrayList<QueryBuilder>();
-		must_not.add(searcher.boolShouldQuery(new ArrayList<Filter>() {{ add(new Filter("descriptiveData.label.default", "_favorites", true)); }}));
+		must_not.add(searcher.boolShouldQuery(new ArrayList<Filter>() {
+			{
+				add(new Filter("descriptiveData.label.default", "_favorites", true));
+			}
+		}));
 
 		SearchResponse elasticresp = searcher.executeWithAggs(musts, must_not, options);
 				/*searcher.getBoolSearchRequestBuilder(musts, null, null, options)

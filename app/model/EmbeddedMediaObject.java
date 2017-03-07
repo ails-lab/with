@@ -30,6 +30,7 @@ import com.google.common.net.MediaType;
 import model.basicDataTypes.LiteralOrResource;
 import play.Logger;
 import play.Logger.ALogger;
+import search.Fields;
 import sources.core.Utils;
 import utils.Deserializer;
 import utils.MediaTypeConverter;
@@ -158,6 +159,7 @@ public class EmbeddedMediaObject {
 			}
 			return UNKNOWN;
 		}
+
 	}
 
 	private int width, height;
