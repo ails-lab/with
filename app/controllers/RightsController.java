@@ -132,7 +132,7 @@ public class RightsController extends WithResourceController {
 			}
 			else {//if downgrade == -1, the rights are not changed, do nothing
 				result.put("mesage", "The user already has the required access to the collection.");
-				return ok(result);
+				return badRequest(result);
 			}
 		}
 	}
