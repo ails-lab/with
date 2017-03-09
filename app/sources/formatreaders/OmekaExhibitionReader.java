@@ -17,7 +17,9 @@
 package sources.formatreaders;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.function.Function;
 
@@ -26,33 +28,36 @@ import org.mupop.model.group.Group;
 import org.mupop.model.media.Text;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
-import akka.japi.Option;
 import controllers.CollectionObjectController;
 import controllers.WithResourceController;
 import db.DB;
 import model.EmbeddedMediaObject;
 import model.EmbeddedMediaObject.MediaVersion;
+import model.EmbeddedMediaObject.WithMediaType;
 import model.annotations.ContextData;
+import model.annotations.ContextData.ContextDataBody;
+import model.annotations.ContextData.ContextDataTarget;
+import model.annotations.ContextData.ContextDataType;
 import model.annotations.ExhibitionData;
+import model.annotations.ExhibitionData.ExhibitionAnnotationBody;
+import model.annotations.ExhibitionData.MediaType;
+import model.annotations.ExhibitionData.TextPosition;
+import model.basicDataTypes.Language;
+import model.basicDataTypes.Literal;
 import model.basicDataTypes.LiteralOrResource;
 import model.basicDataTypes.MultiLiteral;
 import model.basicDataTypes.ProvenanceInfo;
 import model.basicDataTypes.Resource;
-import model.basicDataTypes.WithDate;
 import model.resources.CulturalObject;
-import model.resources.WithResourceType;
 import model.resources.CulturalObject.CulturalObjectData;
+import model.resources.WithResourceType;
 import model.resources.collection.Exhibition;
 import model.resources.collection.Exhibition.ExhibitionDescriptiveData;
 import play.Logger;
-import play.core.j.JavaResultExtractor;
-import play.libs.F;
 import play.libs.Json;
 import play.mvc.Result;
-import search.Sources;
 import sources.core.ApacheHttpConnector;
 import sources.core.HttpConnector;
 import sources.utils.JsonContextRecord;
@@ -89,16 +94,16 @@ public class OmekaExhibitionReader extends ExhibitionReader {
 		return null;
 	}
 
-	public void importOmeka(ObjectId creatorDbId, int ncollections) {
+	public void importOmeka(ObjectId creatorDbId, String colid) {
 		JsonNode response;
 		try {
 			response = getHttpConnector().getURLContent("http://tellyourphotostory.be/espace_test/api/exhibits");
-			if (ncollections < 0)
-				ncollections = response.size();
-			else
-				ncollections = Math.min(ncollections, response.size());
+			int ncollections = response.size();
 			for (int i = 0; i < ncollections; i++) {
-				importExhibitionObjectFrom(new JsonContextRecord(response.get(i)), creatorDbId);
+				JsonContextRecord colobject = new JsonContextRecord(response.get(i));
+				String stringValue = colobject.getStringValue("id");
+				if (stringValue.matches(colid))
+					importExhibitionObjectFrom(colobject, creatorDbId);
 			}
 		} catch (Exception e) {
 			log.error("Exeption", e);
@@ -108,38 +113,26 @@ public class OmekaExhibitionReader extends ExhibitionReader {
 
 	protected Object importExhibitionPagesObjectFrom(JsonContextRecord text, ObjectId collectionId) {
 		String url = text.getStringValue("pages.url");
+		int position = 0;
 		try {
 			JsonNode response = getHttpConnector().getURLContent(url);
 			JsonContextRecord rec = new JsonContextRecord(response);
 			Function<JsonNode, JsonContextRecord> function = (x) -> new JsonContextRecord(x);
 			List<JsonContextRecord> pages = ListUtils.transform(rec.getValues("[.*]"), function);
 			List<Group> sequences = new ArrayList<>(Collections.nCopies(pages.size(), null));
-			for (JsonContextRecord page : pages) {
-				List<JsonContextRecord> pageBlocks = ListUtils.transform(page.getValues("page_blocks[.*]"), function);
-				List<Group> blocks = new ArrayList<>(Collections.nCopies(pageBlocks.size(), null));
-				for (JsonContextRecord pageBlock : pageBlocks) {
-					Text texto = buildTextElement(pageBlock.getStringValue("text"));
-					List<JsonContextRecord> records = ListUtils.transform(pageBlock.getValues("attachments[.*]"),
-							function);
-					List<Group> recs = new ArrayList<>();
-					for (JsonContextRecord item : records) {
-						JsonContextRecord parseTheItem = parseTheItem(collectionId, item);
-						if (parseTheItem != null) {
-							Group cho = buildCHOElement(parseTheItem, buildTextElement(item.getStringValue("caption")));
-							recs.add(cho);
-						}
-						// TODO check the caption here
-					}
-					int pi = pageBlock.getIntValue("order") - 1;
-					System.out.println("block " + pi);
-					blocks.set(pi, buildTogetherElement(recs, texto));
-					// TODO add a together
+			Comparator<JsonContextRecord> c = new Comparator<JsonContextRecord>() {
+				@Override
+				public int compare(JsonContextRecord o1, JsonContextRecord o2) {
+					// TODO Auto-generated method stub
+					return o1.getIntValue("order")-o2.getIntValue("order");
 				}
-				int si = Math.max(0, page.getIntValue("order") - 1);
-				System.out.println("page " + si);
-				sequences.set(si, buildSequenceElement(blocks, buildTextElement(page.getStringValue("title"))));
-				// TODO add the group
+				
+			};
+			pages.sort(c);
+			for (JsonContextRecord page : pages) {
+				position = parsePage(collectionId, position, sequences, page);
 			}
+			
 			Group o = buildSequenceElement(sequences, buildTextElement(text.getStringValue("title")));
 
 			o.setTitle(buildTextElement(text.getStringValue("title")));
@@ -152,56 +145,163 @@ public class OmekaExhibitionReader extends ExhibitionReader {
 		return null;
 	}
 
-	private JsonContextRecord parseTheItem(ObjectId collectionId, JsonContextRecord itemJsonContextRecord) {
+	private int parsePage(ObjectId collectionId, int position,
+			List<Group> sequences, JsonContextRecord page) throws Exception {
+		Function<JsonNode, JsonContextRecord> function = (x) -> new JsonContextRecord(x);
+		List<JsonContextRecord> pageBlocks = ListUtils.transform(page.getValues("page_blocks[.*]"), function);
+		List<Group> blocks = new ArrayList<>(Collections.nCopies(pageBlocks.size(), null));
+		Comparator<JsonContextRecord> c = new Comparator<JsonContextRecord>() {
+			@Override
+			public int compare(JsonContextRecord o1, JsonContextRecord o2) {
+				// TODO Auto-generated method stub
+				return o1.getIntValue("order") - o2.getIntValue("order");
+			}
+		};
+		pageBlocks.sort(c);
+		for (JsonContextRecord pageBlock : pageBlocks) {
+			String blocktext = pageBlock.getStringValue("text");
+			Text texto = buildTextElement(blocktext);
+			List<JsonContextRecord> records = ListUtils.transform(pageBlock.getValues("attachments[.*]"),
+					function);
+			List<Group> recs = new ArrayList<>();
+			for (JsonContextRecord item : records) {
+				String caption = item.getStringValue("caption");
+				if (caption==null)
+					caption = page.getStringValue("title");
+				JsonContextRecord parseTheItem = parseTheItem(collectionId, item, caption);
+				if (parseTheItem != null) {
+					Group cho = buildCHOElement(parseTheItem, buildTextElement(caption));
+					recs.add(cho);
+				}
+				
+				
+				if (blocktext!=null){
+					ObjectId recordId = new ObjectId(parseTheItem.getStringValue("dbId"));
+					System.out.println(position+"). Update ===>  " +recordId);
+					ExhibitionAnnotationBody body;
+					// TODO check the caption here
+					ExhibitionData newContextData = new ExhibitionData();
+					body = newContextData.getBody();
+					body.setText(new Literal(Language.DEFAULT,blocktext));
+					body.setTextPosition(TextPosition.RIGHT);
+					body.setMediaType(MediaType.VIDEO);
+					ContextDataTarget target = new ContextDataTarget();
+					target.setRecordId(recordId);
+					newContextData.setTarget(target);
+					DB.getCollectionObjectDAO()
+					.updateContextData(collectionId, newContextData,
+							position);
+				}
+				position++;
+					
+			}
+			// TODO take the items in order
+			int pi = pageBlock.getIntValue("order") - 1;
+			System.out.println("block " + pi);
+			blocks.set(pi, buildTogetherElement(recs, texto));
+			// TODO add a together
+		}
+		int si = Math.max(0, page.getIntValue("order") - 1);
+		System.out.println("page " + si);
+		sequences.set(si, buildSequenceElement(blocks, buildTextElement(page.getStringValue("title"))));
+		// TODO add the group
+		return position;
+	}
+
+	private JsonContextRecord parseTheItem(ObjectId collectionId, JsonContextRecord itemJsonContextRecord, String caption) {
 		JsonNode response1;
 		try {
 			response1 = getHttpConnector().getURLContent(itemJsonContextRecord.getStringValue("item.url"));
 			JsonContextRecord rec1 = new JsonContextRecord(response1);
 			String source = rec1.getStringValue("item_type.name");
 			String id = rec1.getStringValue("element_texts[element.name=Identifier].text");
-			System.out.println(source + " id=" + id);
 			CulturalObject record = new CulturalObject();
 			CulturalObjectData descData = new CulturalObjectData();
 			record.setDescriptiveData(descData);
 			if (source == null || id == null) {
 				source = "UploadedByUser";
 				id = rec1.getStringValue("id");
+				id+=("-"+itemJsonContextRecord.getStringValue("file.id"));
+				
 				record.addToProvenance(new ProvenanceInfo(source, null, id));
 
-				descData.setLabel(rec1.getMultiLiteralValue("element_texts[element.name=Title].text"));
+				descData.setLabel(((caption!=null)?new MultiLiteral(caption):rec1.getMultiLiteralValue("element_texts[element.name=Title].text")));
+				descData.setAltLabels(rec1.getMultiLiteralValue("element_texts[element.name=Title].text"));
 				descData.setDescription(rec1.getMultiLiteralValue("element_texts[element.name=Description].text"));
 				descData.setDccreator(rec1.getMultiLiteralOrResourceValue("element_texts[element.name=Creator].text"));
 				descData.setDates(rec1.getWithDateArrayValue("element_texts[element.name=Date].text"));
 
 				String rights = rec1.getStringValue("element_texts[element.name=Rights].text");
 				String type = rec1.getStringValue("element_texts[element.name=Type].text");
+				String fileurl = itemJsonContextRecord.getStringValue("file.url");
+				
+				if (fileurl!=null){
+					response1 = getHttpConnector().getURLContent(fileurl);
+					JsonContextRecord rec2 = new JsonContextRecord(response1);
+				
+					String original = rec2.getStringValue("file_urls.original");
+					String thumbnail = rec2.getStringValue("file_urls.thumbnail");
 
-				response1 = getHttpConnector().getURLContent(itemJsonContextRecord.getStringValue("file.url"));
-				JsonContextRecord rec2 = new JsonContextRecord(response1);
+					EmbeddedMediaObject media = new EmbeddedMediaObject();
+					LiteralOrResource originalRights = rights != null ? new LiteralOrResource(rights) : null;
+					media.setOriginalRights(originalRights);
+					media.setUrl(original);
+					// media.setType(type);
+					media.setType(WithMediaType.IMAGE);
+					record.addMedia(MediaVersion.Original, media);
 
-				String original = rec2.getStringValue("file_urls.original");
-				String thumbnail = rec2.getStringValue("file_urls.thumbnail");
-
-				EmbeddedMediaObject media = new EmbeddedMediaObject();
-				LiteralOrResource originalRights = rights != null ? new LiteralOrResource(rights) : null;
-				media.setOriginalRights(originalRights);
-				media.setUrl(original);
-				// media.setType(type);
-				record.addMedia(MediaVersion.Original, media);
-
-				media = new EmbeddedMediaObject();
-				media.setOriginalRights(originalRights);
-				media.setUrl(thumbnail);
-				// media.setType(type);
-				record.addMedia(MediaVersion.Thumbnail, media);
+					media = new EmbeddedMediaObject();
+					media.setOriginalRights(originalRights);
+					media.setUrl(thumbnail);
+					media.setType(WithMediaType.IMAGE);
+					// media.setType(type);
+					record.addMedia(MediaVersion.Thumbnail, media);
+				}
 
 			} else {
-				descData.setLabel(new MultiLiteral(id).fillDEF());
+
+				descData.setLabel(((caption!=null)?new MultiLiteral(caption):rec1.getMultiLiteralValue("element_texts[element.name=Title].text")));
+				descData.setAltLabels(rec1.getMultiLiteralValue("element_texts[element.name=Title].text"));
+				descData.setDescription(rec1.getMultiLiteralValue("element_texts[element.name=Description].text"));
+				descData.setDccreator(rec1.getMultiLiteralOrResourceValue("element_texts[element.name=Creator].text"));
+				descData.setDates(rec1.getWithDateArrayValue("element_texts[element.name=Date].text"));
+
+				
 				record.addToProvenance(new ProvenanceInfo(source, null, id));
+
+				String rights = rec1.getStringValue("element_texts[element.name=Rights].text");
+				String fileurl = itemJsonContextRecord.getStringValue("file.url");
+				
+				if (fileurl!=null){
+					response1 = getHttpConnector().getURLContent(fileurl);
+					JsonContextRecord rec2 = new JsonContextRecord(response1);
+				
+					String original = rec2.getStringValue("file_urls.original");
+					String thumbnail = rec2.getStringValue("file_urls.thumbnail");
+
+					EmbeddedMediaObject media = new EmbeddedMediaObject();
+					LiteralOrResource originalRights = rights != null ? new LiteralOrResource(rights) : null;
+					media.setOriginalRights(originalRights);
+					media.setUrl(original);
+					// media.setType(type);
+					media.setType(WithMediaType.IMAGE);
+					record.addMedia(MediaVersion.Original, media);
+
+					media = new EmbeddedMediaObject();
+					media.setOriginalRights(originalRights);
+					media.setUrl(thumbnail);
+					media.setType(WithMediaType.IMAGE);
+					// media.setType(type);
+					record.addMedia(MediaVersion.Thumbnail, media);
+				}
+				
 			}
 			play.libs.F.Option<Integer> p = play.libs.F.Option.None();
+			// TODO check how it is added for WITHin source
 			JsonNode ojson = Json.toJson(record);
 			Result result = WithResourceController.addRecordToCollection(ojson, collectionId, p, false);
+			log.debug(result.toString());
+			// TODO put the text somewhere
 			return new JsonContextRecord(ojson);
 		} catch (Exception e) {
 			log.error("Exeption", e);

@@ -541,6 +541,8 @@ public class JsonContextRecord {
 		System.out.println(r.getRootInformation().toString());
 
 		System.out.println(r.getValues(r.buildpaths("ages[.*]")));
+		r = new JsonContextRecord("[{\"a\":\"b\",\"ages\":[1,2], \"f\":{\"size\":\"4\"}}]");
+		System.out.println(r.getStringValue("[.*].a"));
 	}
 
 }

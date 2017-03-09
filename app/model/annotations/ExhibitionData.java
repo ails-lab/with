@@ -81,6 +81,13 @@ public class ExhibitionData extends ContextData<ExhibitionData.ExhibitionAnnotat
 		public MediaType getMediaType() {
 			return mediaType;
 		}
+		@Override
+		public String toString() {
+			return "ExhibitionAnnotationBody [text=" + text + ", mediaUrl=" + mediaUrl + ", mediaDescription="
+					+ mediaDescription + ", textPosition=" + textPosition + ", mediaType=" + mediaType + "]";
+		}
+		
+		
 	}
 
 }
