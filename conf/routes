@@ -187,6 +187,7 @@ GET	/api/idxres										controllers.ReindexController.reindexAllResources()
 GET	/api/idxcols									controllers.ReindexController.reindexAllCollections()
 GET	/api/idxthes									controllers.ReindexController.reindexAllThesaurus()
 GET /api/purge										controllers.ReindexController.purgeElastic()
+GET /api/collection/:id/reindex							controllers.ReindexController.reindexCollection(id)
 
 #Thesaurus management
 POST	/thesaurus/addTerm	        			    controllers.ThesaurusController.addThesaurusTerm()

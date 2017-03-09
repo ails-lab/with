@@ -1372,22 +1372,30 @@ public class CollectionObjectController extends WithResourceController {
                 }
 
                 List<RecordResource> records = DB.getRecordResourceDAO().getByCollectionIds(colId, ids);
+                Map<ObjectId, RecordResource> orderedMap = new HashMap<>();
+                for (RecordResource r : records) {
+                	orderedMap.put(r.getDbId(), r);
+                }
                 
+                records.clear();
                 if (start == 0) {
                 	records.add(0, rr);
                 }
+
+                for (int i = 0; i < ids.size(); i++) {
+                	RecordResource r = orderedMap.get(new ObjectId(ids.get(i)));
+                	if (!r.getDbId().equals(rid)) {
+                		records.add(r);
+                	}
+                }
+                
 
                 if (records == null) {
                     result.put("message", "Cannot retrieve records from database!");
                     return internalServerError(result);
                 }
                 ArrayNode recordsList = Json.newObject().arrayNode();
-                int c = -1;
                 for (RecordResource r : records) {
-                	c++;
-                	if ((start != 0 || (start == 0 && c != 0)) && r.getDbId().equals(rid)) {
-                		continue;
-                	}
                     // filter out records to which the user has no read access
                     response = errorIfNoAccessToRecord(Action.READ, r.getDbId());
                     if (!response.toString().equals(ok().toString())) {
@@ -1431,6 +1439,7 @@ public class CollectionObjectController extends WithResourceController {
                 return ok(result);
             }
         } catch (Exception e1) {
+//        	e1.printStackTrace();
             result.put("error", e1.getMessage());
             return internalServerError(result);
         } finally {
