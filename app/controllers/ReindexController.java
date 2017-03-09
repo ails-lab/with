@@ -18,6 +18,8 @@ package controllers;
 
 import java.util.function.Function;
 
+import org.bson.types.ObjectId;
+
 import elastic.Elastic;
 import elastic.ElasticReindexer;
 import elastic.ElasticUtils;
@@ -94,6 +96,18 @@ public class ReindexController extends WithController {
 
 		try {
 			Promise<Boolean> p = Promise.promise(() -> ElasticReindexer.reindexAllDbCollections());
+		} catch(Exception e) {
+			log.error(e.getMessage(), e);
+			return internalServerError(e.getMessage());
+		}
+
+		return ok();
+	}
+	
+	public static Result reindexCollection(String id) {
+
+		try {
+			Promise<Boolean> p = Promise.promise(() -> ElasticReindexer.reindexCollectionRecordResources(new ObjectId(id)));
 		} catch(Exception e) {
 			log.error(e.getMessage(), e);
 			return internalServerError(e.getMessage());

@@ -283,7 +283,7 @@ public class CollectionIndexController extends WithResourceController	{
 		} else if (dd instanceof AgentData) {
 			addMultiLiteralOrResource(((AgentData)dd).getBirthPlace(), "descriptiveData.birthplace", thesaurusDAO, query);
 		}
-		
+
 		return query;
 	}
 	
