@@ -1354,7 +1354,9 @@ public class CollectionObjectController extends WithResourceController {
             if (!response.toString().equals(ok().toString())) {
                 return response;
             } else {
-                RecordResource rr = DB.getRecordResourceDAO().getById(new ObjectId(itemid));
+            	
+            	ObjectId rid = new ObjectId(itemid);
+                RecordResource rr = DB.getRecordResourceDAO().getById(rid);
 
                 QueryBuilder query = CollectionIndexController.getSimilarItemsIndexCollectionQuery(colId, rr.getDescriptiveData());
 
@@ -1370,14 +1372,22 @@ public class CollectionObjectController extends WithResourceController {
                 }
 
                 List<RecordResource> records = DB.getRecordResourceDAO().getByCollectionIds(colId, ids);
+                
+                if (start == 0) {
+                	records.add(0, rr);
+                }
 
                 if (records == null) {
-                    result.put("message",
-                            "Cannot retrieve records from database!");
+                    result.put("message", "Cannot retrieve records from database!");
                     return internalServerError(result);
                 }
                 ArrayNode recordsList = Json.newObject().arrayNode();
+                int c = -1;
                 for (RecordResource r : records) {
+                	c++;
+                	if ((start != 0 || (start == 0 && c != 0)) && r.getDbId().equals(rid)) {
+                		continue;
+                	}
                     // filter out records to which the user has no read access
                     response = errorIfNoAccessToRecord(Action.READ, r.getDbId());
                     if (!response.toString().equals(ok().toString())) {
