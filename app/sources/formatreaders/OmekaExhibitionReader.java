@@ -164,6 +164,7 @@ public class OmekaExhibitionReader extends ExhibitionReader {
 			List<JsonContextRecord> records = ListUtils.transform(pageBlock.getValues("attachments[.*]"),
 					function);
 			List<Group> recs = new ArrayList<>();
+			if (records.size()>0)
 			for (JsonContextRecord item : records) {
 				String caption = item.getStringValue("caption");
 				if (caption==null)
@@ -177,7 +178,6 @@ public class OmekaExhibitionReader extends ExhibitionReader {
 				
 				if (blocktext!=null){
 					ObjectId recordId = new ObjectId(parseTheItem.getStringValue("dbId"));
-					System.out.println(position+"). Update ===>  " +recordId);
 					ExhibitionAnnotationBody body;
 					// TODO check the caption here
 					ExhibitionData newContextData = new ExhibitionData();
@@ -194,15 +194,53 @@ public class OmekaExhibitionReader extends ExhibitionReader {
 				}
 				position++;
 					
+			} else {
+				// Add a dummy record with the text
+				if (blocktext!=null){
+					String source = "UploadedByUser";
+					String id = System.currentTimeMillis()+"";
+					CulturalObject record = new CulturalObject();
+					CulturalObjectData descData = new CulturalObjectData();
+					record.setDescriptiveData(descData);
+					record.addToProvenance(new ProvenanceInfo(source, null, id));
+					descData.setLabel(new MultiLiteral(page.getStringValue("title")));
+					descData.setDescription(new MultiLiteral(blocktext));
+					
+					play.libs.F.Option<Integer> p = play.libs.F.Option.None();
+					// TODO check how it is added for WITHin source
+					JsonNode ojson = Json.toJson(record);
+					Result result = WithResourceController.addRecordToCollection(ojson, collectionId, p, false);
+					log.debug(result.toString());
+					
+					ObjectId recordId = new ObjectId(new JsonContextRecord(ojson).getStringValue("dbId"));
+					ExhibitionAnnotationBody body;
+					// TODO check the caption here
+					ExhibitionData newContextData = new ExhibitionData();
+					body = newContextData.getBody();
+					body.setText(new Literal(Language.DEFAULT,blocktext));
+					body.setTextPosition(TextPosition.RIGHT);
+					body.setMediaType(MediaType.VIDEO);
+					ContextDataTarget target = new ContextDataTarget();
+					target.setRecordId(recordId);
+					newContextData.setTarget(target);
+					DB.getCollectionObjectDAO()
+					.updateContextData(collectionId, newContextData,
+							position);
+					
+					
+					position++;
+					
+					
+				}
 			}
 			// TODO take the items in order
 			int pi = pageBlock.getIntValue("order") - 1;
-			System.out.println("block " + pi);
+//			System.out.println("block " + pi);
 			blocks.set(pi, buildTogetherElement(recs, texto));
 			// TODO add a together
 		}
 		int si = Math.max(0, page.getIntValue("order") - 1);
-		System.out.println("page " + si);
+//		System.out.println("page " + si);
 		sequences.set(si, buildSequenceElement(blocks, buildTextElement(page.getStringValue("title"))));
 		// TODO add the group
 		return position;
@@ -218,7 +256,7 @@ public class OmekaExhibitionReader extends ExhibitionReader {
 			CulturalObject record = new CulturalObject();
 			CulturalObjectData descData = new CulturalObjectData();
 			record.setDescriptiveData(descData);
-			if (source == null || id == null) {
+//			if (source == null || id == null) {
 				source = "UploadedByUser";
 				id = rec1.getStringValue("id");
 				id+=("-"+itemJsonContextRecord.getStringValue("file.id"));
@@ -258,44 +296,44 @@ public class OmekaExhibitionReader extends ExhibitionReader {
 					record.addMedia(MediaVersion.Thumbnail, media);
 				}
 
-			} else {
-
-				descData.setLabel(((caption!=null)?new MultiLiteral(caption):rec1.getMultiLiteralValue("element_texts[element.name=Title].text")));
-				descData.setAltLabels(rec1.getMultiLiteralValue("element_texts[element.name=Title].text"));
-				descData.setDescription(rec1.getMultiLiteralValue("element_texts[element.name=Description].text"));
-				descData.setDccreator(rec1.getMultiLiteralOrResourceValue("element_texts[element.name=Creator].text"));
-				descData.setDates(rec1.getWithDateArrayValue("element_texts[element.name=Date].text"));
-
-				
-				record.addToProvenance(new ProvenanceInfo(source, null, id));
-
-				String rights = rec1.getStringValue("element_texts[element.name=Rights].text");
-				String fileurl = itemJsonContextRecord.getStringValue("file.url");
-				
-				if (fileurl!=null){
-					response1 = getHttpConnector().getURLContent(fileurl);
-					JsonContextRecord rec2 = new JsonContextRecord(response1);
-				
-					String original = rec2.getStringValue("file_urls.original");
-					String thumbnail = rec2.getStringValue("file_urls.thumbnail");
-
-					EmbeddedMediaObject media = new EmbeddedMediaObject();
-					LiteralOrResource originalRights = rights != null ? new LiteralOrResource(rights) : null;
-					media.setOriginalRights(originalRights);
-					media.setUrl(original);
-					// media.setType(type);
-					media.setType(WithMediaType.IMAGE);
-					record.addMedia(MediaVersion.Original, media);
-
-					media = new EmbeddedMediaObject();
-					media.setOriginalRights(originalRights);
-					media.setUrl(thumbnail);
-					media.setType(WithMediaType.IMAGE);
-					// media.setType(type);
-					record.addMedia(MediaVersion.Thumbnail, media);
-				}
-				
-			}
+//			} else {
+//
+//				descData.setLabel(((caption!=null)?new MultiLiteral(caption):rec1.getMultiLiteralValue("element_texts[element.name=Title].text")));
+//				descData.setAltLabels(rec1.getMultiLiteralValue("element_texts[element.name=Title].text"));
+//				descData.setDescription(rec1.getMultiLiteralValue("element_texts[element.name=Description].text"));
+//				descData.setDccreator(rec1.getMultiLiteralOrResourceValue("element_texts[element.name=Creator].text"));
+//				descData.setDates(rec1.getWithDateArrayValue("element_texts[element.name=Date].text"));
+//
+//				
+//				record.addToProvenance(new ProvenanceInfo(source, null, id));
+//
+//				String rights = rec1.getStringValue("element_texts[element.name=Rights].text");
+//				String fileurl = itemJsonContextRecord.getStringValue("file.url");
+//				
+//				if (fileurl!=null){
+//					response1 = getHttpConnector().getURLContent(fileurl);
+//					JsonContextRecord rec2 = new JsonContextRecord(response1);
+//				
+//					String original = rec2.getStringValue("file_urls.original");
+//					String thumbnail = rec2.getStringValue("file_urls.thumbnail");
+//
+//					EmbeddedMediaObject media = new EmbeddedMediaObject();
+//					LiteralOrResource originalRights = rights != null ? new LiteralOrResource(rights) : null;
+//					media.setOriginalRights(originalRights);
+//					media.setUrl(original);
+//					// media.setType(type);
+//					media.setType(WithMediaType.IMAGE);
+//					record.addMedia(MediaVersion.Original, media);
+//
+//					media = new EmbeddedMediaObject();
+//					media.setOriginalRights(originalRights);
+//					media.setUrl(thumbnail);
+//					media.setType(WithMediaType.IMAGE);
+//					// media.setType(type);
+//					record.addMedia(MediaVersion.Thumbnail, media);
+//				}
+//				
+//			}
 			play.libs.F.Option<Integer> p = play.libs.F.Option.None();
 			// TODO check how it is added for WITHin source
 			JsonNode ojson = Json.toJson(record);
