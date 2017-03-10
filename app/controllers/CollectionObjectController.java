@@ -1355,7 +1355,9 @@ public class CollectionObjectController extends WithResourceController {
             if (!response.toString().equals(ok().toString())) {
                 return response;
             } else {
-                RecordResource rr = DB.getRecordResourceDAO().getById(new ObjectId(itemid));
+            	
+            	ObjectId rid = new ObjectId(itemid);
+                RecordResource rr = DB.getRecordResourceDAO().getById(rid);
 
                 QueryBuilder query = CollectionIndexController.getSimilarItemsIndexCollectionQuery(colId, rr.getDescriptiveData());
 
@@ -1371,10 +1373,26 @@ public class CollectionObjectController extends WithResourceController {
                 }
 
                 List<RecordResource> records = DB.getRecordResourceDAO().getByCollectionIds(colId, ids);
+                Map<ObjectId, RecordResource> orderedMap = new HashMap<>();
+                for (RecordResource r : records) {
+                	orderedMap.put(r.getDbId(), r);
+                }
+                
+                records.clear();
+                if (start == 0) {
+                	records.add(0, rr);
+                }
+
+                for (int i = 0; i < ids.size(); i++) {
+                	RecordResource r = orderedMap.get(new ObjectId(ids.get(i)));
+                	if (!r.getDbId().equals(rid)) {
+                		records.add(r);
+                	}
+                }
+                
 
                 if (records == null) {
-                    result.put("message",
-                            "Cannot retrieve records from database!");
+                    result.put("message", "Cannot retrieve records from database!");
                     return internalServerError(result);
                 }
                 ArrayNode recordsList = Json.newObject().arrayNode();
@@ -1422,6 +1440,7 @@ public class CollectionObjectController extends WithResourceController {
                 return ok(result);
             }
         } catch (Exception e1) {
+//        	e1.printStackTrace();
             result.put("error", e1.getMessage());
             return internalServerError(result);
         } finally {
