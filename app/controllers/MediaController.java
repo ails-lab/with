@@ -18,16 +18,15 @@ package controllers;
 
 import java.awt.image.BufferedImage;
 import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.PipedInputStream;
+import java.io.PipedOutputStream;
 import java.net.URLConnection;
-import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -44,7 +43,6 @@ import java.util.zip.ZipOutputStream;
 
 import javax.imageio.ImageIO;
 
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -87,7 +85,6 @@ import play.libs.Json;
 import play.mvc.Http;
 import play.mvc.Http.MultipartFormData.FilePart;
 import play.mvc.Result;
-import play.twirl.api.Content;
 import sources.core.ApacheHttpConnector;
 import sources.core.ApacheHttpConnector.FileAndType;
 import sources.core.HttpConnector;
@@ -180,29 +177,45 @@ public class MediaController extends WithController {
 			ObjectId collectionDbId = new ObjectId(collectionId);
 			List<RecordResource> records = DB.getRecordResourceDAO().getByCollection(collectionDbId,
 					Arrays.asList("media"));
-			Set<String> originals = new HashSet<String>();
+			Set<String> urls = new HashSet<String>();
 			for (RecordResource record : records) {
-				originals.addAll(((List<HashMap<MediaVersion, EmbeddedMediaObject>>) record.getMedia()).stream()
+				if (urls.size() >= 100)
+					break;
+				urls.addAll(((List<HashMap<MediaVersion, EmbeddedMediaObject>>) record.getMedia()).stream()
 						.filter(m -> m.containsKey(MediaVersion.Original)
 								&& m.get(MediaVersion.Original).getType() != null
 								&& m.get(MediaVersion.Original).getType().equals(WithMediaType.IMAGE))
 						.map(m -> m.get(MediaVersion.Original).getUrl()).collect(Collectors.toSet()));
 			}
-			List<byte[]> images = originals.stream()
-					.map(url -> downloadMedia(url, MediaVersion.Original).getMediaBytes()).collect(Collectors.toList());
-			File imagesFile = new File("collectionImages.zip");
-			BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(imagesFile));
-			ZipOutputStream out = new ZipOutputStream(bos);
-			int i = 0;
-			for (byte[] imageBytes : images) {
-				File file = new File("Image"+i++);
-				FileUtils.writeByteArrayToFile(file, imageBytes);
-				out.putNextEntry(new ZipEntry(file.getName()));
-		        Files.copy(file.toPath(), out);
-		        out.closeEntry();
-			}
-			out.close();
-			return ok(imagesFile).as("application/zip");
+			PipedOutputStream out = new PipedOutputStream();
+			InputStream in = new PipedInputStream(out);
+			ZipOutputStream zipout = new ZipOutputStream(out);
+			new Thread(new Runnable() {
+				public void run() {
+					MediaObject image;
+					byte[] imageBytes;
+					int i = 0;
+					for (String url : urls) {
+						if (((image = downloadMedia(url, MediaVersion.Original)) != null)
+								&& (imageBytes = image.getMediaBytes()) != null) {
+							try {
+								zipout.putNextEntry(new ZipEntry("Image" + i++));
+								zipout.write(imageBytes);
+								zipout.closeEntry();
+							} catch (IOException e) {
+								log.error(e.getMessage(), e);
+							}
+						}
+					}
+					try {
+						zipout.close();
+					} catch (IOException e) {
+						log.error(e.getMessage(), e);
+					}
+				}
+			}).start();
+			response().setHeader( "content-disposition", "attachment; filename=\"images.zip\"");
+			return ok(in).as("application/zip");
 		} catch (Exception e) {
 			log.error("Couldn't get images ", e);
 			return internalServerError();
