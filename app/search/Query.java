@@ -189,7 +189,7 @@ public class Query implements IFilterContainer{
 	public final Query addClause( Filter... filters ) {
 		List<Filter> newTerm = new ArrayList<Filter>();
 		newTerm.addAll( Arrays.asList( filters ));
-		return this;
+		return addClause(newTerm);
 	}
 
 	/**
@@ -300,13 +300,19 @@ public class Query implements IFilterContainer{
 	public Map<Sources, Query> splitBySource() {
 		Map<Sources, Query> res = new HashMap<>();
 		for( Sources source: sources ) {
-			Set<String> supportedFieldIds = source.getDriver().supportedFieldIds();
-			// this is not part of the list any more
-			supportedFieldIds.add( "anywhere");
-			Query newQuery = this.pruneFilters(source, supportedFieldIds);
+			Query newQuery = splitForSource(source);
 			if( newQuery != null )
 				res.put( source, newQuery );
 		}
 		return res;
 	}
+	
+	public Query splitForSource(Sources source) {
+		Set<String> supportedFieldIds = source.getDriver().supportedFieldIds();
+		// this is not part of the list any more
+		supportedFieldIds.add("anywhere");
+		Query newQuery = this.pruneFilters(source, supportedFieldIds);
+		return newQuery;
+	}
+
 }

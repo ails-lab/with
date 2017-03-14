@@ -316,14 +316,15 @@ public class ThesaurusController extends Controller {
 	
 	static {
 		searchLanguages = new Language[searchLangCodes.length];
-		retrievedFields = new String[searchLangCodes.length + 3];
+		retrievedFields = new String[searchLangCodes.length + 4];
 		retrievedFields[0] = "uri";
 		retrievedFields[1] = "vocabulary.name";
 		retrievedFields[2] = "broader.prefLabel.en";
 		for (int i = 0; i < searchLangCodes.length; i++) {
-			retrievedFields[i + 3] = "prefLabel." + searchLangCodes[i];
-			searchLanguages[i] = Language.getLanguage(searchLangCodes[i]);
+			retrievedFields[3 + i] = "prefLabel." + searchLangCodes[i];
+			searchLanguages[i] = Language.getLanguageByCode(searchLangCodes[i]);
 		}
+		retrievedFields[3 + searchLangCodes.length] = "properties.values.prefLabel.en";
 	};
 	
 	
@@ -335,13 +336,13 @@ public class ThesaurusController extends Controller {
 		try {
 			ArrayNode terms = Json.newObject().arrayNode();
 			
-			Matcher m = p.matcher(word);
+//			Matcher m = p.matcher(word);
 
-			String prefix = null;
-			if (m.find()) {
-				prefix = m.group(1);
-				word = m.group(2);
-			}
+//			String prefix = null;
+//			if (m.find()) {
+//				prefix = m.group(1);
+//				word = m.group(2);
+//			}
 			
 			boolean ok =  false;
 			
@@ -382,15 +383,20 @@ public class ThesaurusController extends Controller {
 					
 					for (String s : words) {
 //						ilangQuery.must(QueryBuilders.prefixQuery("prefLabel." + lang.getDefaultCode(), s.toLowerCase()));
-						ilangQuery.must(QueryBuilders.regexpQuery("prefLabel." + lang.getDefaultCode(), s.toString()));
+						BoolQueryBuilder labQuery = QueryBuilders.boolQuery();
+						labQuery.should(QueryBuilders.regexpQuery("prefLabel." + lang.getDefaultCode(), s.toString()));
+						labQuery.should(QueryBuilders.regexpQuery("altLabel." + lang.getDefaultCode(), s.toString()));
+						
+//						ilangQuery.must(QueryBuilders.regexpQuery("prefLabel." + lang.getDefaultCode(), s.toString()));
+						ilangQuery.must(labQuery);
 					}
 					langQuery.should(ilangQuery);
 				}
 				query.must(langQuery);
 				
-				if (prefix != null) {
-					query.must(QueryBuilders.termQuery("vocabulary.name", prefix));
-				}
+//				if (prefix != null) {
+//					query.must(QueryBuilders.termQuery("vocabulary.name", prefix));
+//				}
 			
 				if( namespaceArray.length > 0 ) {
 					if( namespaceArray.length == 1 ) {
@@ -402,77 +408,91 @@ public class ThesaurusController extends Controller {
 						}
 						query.must( vocabNameQuery);
 					}
-				}
-				
-//				System.out.println("QUERY" + query);
-				SearchOptions so = new SearchOptions(0, 1000);
-				so.isPublic = false;
-				so.scroll = true;
-				so.searchFields = retrievedFields;
-				
-				ArrayList<SearchSuggestion> suggestions = new ArrayList<SearchSuggestion>();
-
-				ElasticSearcher searcher = new ElasticSearcher();
-				searcher.setTypes(new ArrayList<String>() {
-					{
-						add(WithResourceType.ThesaurusObject.toString().toLowerCase()); 
+					
+//					System.out.println("QUERY" + query);
+					SearchOptions so = new SearchOptions(0, 1000);
+					so.isPublic = false;
+					so.scroll = true;
+					so.searchFields = retrievedFields;
+					
+					ArrayList<SearchSuggestion> suggestions = new ArrayList<SearchSuggestion>();
+	
+					ElasticSearcher searcher = new ElasticSearcher();
+					searcher.setTypes(new ArrayList<String>() {
+						{
+							add(WithResourceType.ThesaurusObject.toString().toLowerCase()); 
+						}
+					});
+					SearchRequestBuilder srb = searcher.getSearchRequestBuilder(query, so);
+					
+					
+					SearchResponse sr = srb.execute().actionGet();
+					while (true) {
+						for (SearchHit hit : sr.getHits().getHits()) {
+							SearchHitField categories = hit.field("broader.prefLabel.en");
+							
+							SearchHitField props = hit.field("properties.values.prefLabel.en");
+							
+							List<String> labels = new ArrayList<>();
+							for (int i = 0; i < searchLangCodes.length; i++) {
+								SearchHitField label = hit.field("prefLabel." + searchLangCodes[i]);
+								if (label != null) {
+									labels.add((String)label.getValues().get(0));
+								}
+							}
+							
+							suggestions.add(new SearchSuggestion(word, hit.getId(),
+									(String)hit.field("prefLabel.en").getValues().get(0),
+	                                labels.toArray(new String[labels.size()]), 
+	                                (String)hit.field("uri").getValues().get(0),
+	                                (String)hit.field("vocabulary.name").getValues().get(0),
+	                                categories != null ? categories.getValues().toArray(new String[] {}) : null,
+	                                props != null ? props.getValues().toArray(new String[] {}) : null));
+	
+					    }
+					    sr = Elastic.getTransportClient().prepareSearchScroll(sr.getScrollId()).setScroll(new TimeValue(60000)).execute().actionGet();
+					    
+					    if (sr.getHits().getHits().length == 0) {
+					        break;
+					    }
 					}
-				});
-				SearchRequestBuilder srb = searcher.getSearchRequestBuilder(query, so);
-				
-				SearchResponse sr = srb.execute().actionGet();
-				while (true) {
-					for (SearchHit hit : sr.getHits().getHits()) {
-						SearchHitField categories = hit.field("broader.prefLabel.en");
+					
+					Collections.sort(suggestions);
+					
+					int limit = Math.min(100, suggestions.size());
+					for (int i = 0; i < limit; i++) {
+						SearchSuggestion ss = suggestions.get(i);
 						
-						List<String> labels = new ArrayList<>();
-						for (int i = 0; i < searchLangCodes.length; i++) {
-							SearchHitField label = hit.field("prefLabel." + searchLangCodes[i]);
-							if (label != null) {
-								labels.add((String)label.getValues().get(0));
+						ObjectNode element = Json.newObject();
+						element.put("id", ss.id);
+	
+						element.put("label", ss.enLabel);
+						element.put("matchedLabel", ss.getSelectedLabel());
+						element.put("uri", ss.uri);
+						element.put("vocabulary", ss.vocabulary);
+						
+						ArrayNode array = Json.newObject().arrayNode();
+						if (ss.categories != null) {
+							for (String c : ss.categories) {
+								array.add(c);
+							}
+						}
+
+						if (ss.properties != null) {
+							for (String c : ss.properties) {
+								array.add(c);
 							}
 						}
 						
-						suggestions.add(new SearchSuggestion(word, hit.getId(),
-								(String)hit.field("prefLabel.en").getValues().get(0),
-                                labels.toArray(new String[labels.size()]), 
-                                (String)hit.field("uri").getValues().get(0),
-                                (String)hit.field("vocabulary.name").getValues().get(0),
-                                categories != null ? categories.getValues().toArray(new String[] {}) : null));
-
-				    }
-				    sr = Elastic.getTransportClient().prepareSearchScroll(sr.getScrollId()).setScroll(new TimeValue(60000)).execute().actionGet();
-				    
-				    if (sr.getHits().getHits().length == 0) {
-				        break;
-				    }
-				}
-				
-				Collections.sort(suggestions);
-				
-				int limit = Math.min(100, suggestions.size());
-				for (int i = 0; i < limit; i++) {
-					SearchSuggestion ss = suggestions.get(i);
-					
-					ObjectNode element = Json.newObject();
-					element.put("id", ss.id);
-
-					element.put("label", ss.enLabel);
-					element.put("matchedLabel", ss.getSelectedLabel());
-					element.put("uri", ss.uri);
-					element.put("vocabulary", ss.vocabulary);
-					
-					if (ss.categories != null) {
-						ArrayNode array = Json.newObject().arrayNode();
-						for (String c : ss.categories) {
-							array.add(c);
+						if (array.size() > 0) {
+							element.put("categories", array);
 						}
-						element.put("categories", array);
+
+//						element.put("exact", ss.getSelectedLabel().equals(word) && prefix != null && prefix.equals(ss.vocabulary));
+						element.put("exact", ss.getSelectedLabel().equals(word));
+						
+						terms.add(element);
 					}
-					
-					element.put("exact", ss.getSelectedLabel().equals(word) && prefix != null && prefix.equals(ss.vocabulary));
-					
-					terms.add(element);
 				}
 			}
 			
@@ -493,19 +513,21 @@ public class ThesaurusController extends Controller {
 		public String uri;
 		public String vocabulary;
 		public String[] categories;
+		public String[] properties;
 		
 		public double distance;
 		private int selectedLabel;
 		
 		private static JaccardDistance jaccard = new JaccardDistance(IndoEuropeanTokenizerFactory.INSTANCE);
 		
-		public SearchSuggestion (String reference, String id, String enLabel, String[] labels, String uri, String vocabulary, String[] categories) {
+		public SearchSuggestion (String reference, String id, String enLabel, String[] labels, String uri, String vocabulary, String[] categories, String[] properties) {
 			this.id = id;
 			this.enLabel = enLabel;
 			this.labels = labels;
 			this.uri = uri;
 			this.vocabulary = vocabulary;
 			this.categories = categories;
+			this.properties = properties;
 			
 			distance = Double.MAX_VALUE;
 			selectedLabel = 0;

@@ -121,14 +121,16 @@ public class EuropeanaItemRecordFormatter extends CulturalRecordFormatter {
 		object.addToProvenance(provInfo);
 		
 		
+		
+		List<String> theViews = rec.getStringArrayValue("hasView");
+		
+		rec.exitContext();
+		
 		String recID = rec.getStringValue("about");
 		String uri = "http://www.europeana.eu/portal/record"+recID+".html";
 		object.addToProvenance(
 				new ProvenanceInfo(Sources.Europeana.toString(),  uri,recID));
 
-		List<String> theViews = rec.getStringArrayValue("hasView");
-		
-		rec.exitContext();
 
 		model.getDates().addAll(rec.getWithDateArrayValue("year"));
 		Resource isShownBy = model.getIsShownBy();

@@ -19,14 +19,33 @@ package controllers;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.Set;
 
 import javax.validation.ConstraintViolation;
 
+import org.apache.commons.lang3.StringUtils;
+import org.bson.types.ObjectId;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+
+import actors.annotation.AnnotationControlActor;
+import actors.annotation.AnnotatorActor;
+import actors.annotation.RequestAnnotatorActor;
+import actors.annotation.TextAnnotatorActor;
+import akka.actor.ActorRef;
+import akka.actor.ActorSelection;
+import akka.actor.Props;
+import annotators.AnnotatorConfig;
+import db.DB;
 import model.DescriptiveData;
 import model.EmbeddedMediaObject;
 import model.EmbeddedMediaObject.MediaVersion;
@@ -42,38 +61,17 @@ import model.basicDataTypes.MultiLiteral;
 import model.resources.RecordResource;
 import model.resources.collection.CollectionObject;
 import model.resources.collection.CollectionObject.CollectionAdmin;
+import model.resources.collection.SimpleCollection;
 import model.usersAndGroups.User;
-
-import org.apache.commons.lang3.StringUtils;
-import org.bson.types.ObjectId;
-
 import play.Logger;
 import play.Logger.ALogger;
 import play.data.validation.Validation;
-import play.libs.F.Option;
 import play.libs.Akka;
+import play.libs.F.Option;
+import play.libs.F.Some;
 import play.libs.Json;
 import play.mvc.Result;
 import utils.Tuple;
-import actors.annotation.TextAnnotatorActor;
-import actors.annotation.AnnotationControlActor;
-import actors.annotation.AnnotatorActor;
-import actors.annotation.RequestAnnotatorActor;
-import akka.actor.ActorRef;
-import akka.actor.ActorSelection;
-import akka.actor.Props;
-import annotators.AnnotatorConfig;
-
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-
-import db.DB;
-
-import java.util.Random;
-import java.util.HashSet;
-
-import play.libs.F.Some;
 /**
  * @author mariaral
  *
@@ -136,6 +134,71 @@ public class RecordResourceController extends WithResourceController {
 		}
 	}
 
+	/**
+	 * From the given List of collection ids retrieve count random records. There can be an error if one of the 
+	 * collections is not public. If there are not count records in the given collections, fewer are 
+	 * returned.
+	 * @param collectionIds
+	 * @param count
+	 * @return
+	 */
+	public static Result getRandomRecordsFromCollections( List<String> collectionIds, int count) {
+		Random r = new Random();
+		ArrayList<String> collectionIdCopy = new ArrayList<String>();
+		// allow for comma separated list of ids
+		String[] commaSplit = collectionIds.get(0).split(",");
+		if( commaSplit != null ) {
+			collectionIdCopy.addAll(Arrays.asList(commaSplit));			
+		}
+		// if there are more than one element, its made from standard parameters
+		if( collectionIds.size() > 1 ) {
+			collectionIdCopy.addAll(collectionIds.subList( 1, collectionIds.size()) );
+		}
+		
+		Collections.shuffle(collectionIdCopy, r);
+		ArrayNode res = Json.newObject().arrayNode();
+		// get a random Collection
+		// check access
+		// is size big enough for remaining count, then shuffle the first count entries around with other entries
+		// else get them all
+		while(( count > 0 ) && collectionIdCopy.size() > 0 ) {
+			String collectionId = collectionIdCopy.remove(0);
+			CollectionObject sc = DB.getCollectionObjectDAO().getById(new ObjectId( collectionId ));
+			if(! sc.getAdministrative().getAccess().getIsPublic()) return badRequest("Access to collection " + collectionId + " which is not public.");
+			List<ContextData<?>> resList = sc.getCollectedResources();
+			
+
+			// mini optimization, dont shuffle huge lists if you only want few records
+			if( count < (resList.size()/10)) {
+				HashSet<ObjectId> pickedRecordIds = new HashSet<ObjectId>();
+				while( count > 0 ) {
+					int idx = r.nextInt(resList.size());
+					ObjectId recId = resList.get( idx ).getTarget().getRecordId();
+					if( ! pickedRecordIds.contains(recId)) {
+						pickedRecordIds.add(recId );
+						RecordResource rec = DB.getRecordResourceDAO().get(recId );
+						res.add( (ObjectNode) Json.toJson(rec ));
+						count--;						
+					}
+				}
+			} else {
+				// when you retrieve a lot of records, this should be the right method
+				Collections.shuffle( resList ,r );
+
+				for( ContextData elem: resList ) {
+					if( count == 0 ) break;
+					ObjectId recId = elem.getTarget().getRecordId();
+					RecordResource rec = DB.getRecordResourceDAO().get(recId );
+					res.add( (ObjectNode) Json.toJson(rec ));
+					count--;
+				}
+			}
+		}
+			
+		return ok( res );
+	}
+	
+	
 	/**
 	 * Edits the WITH resource according to the JSON body. For every field
 	 * mentioned in the JSON body it either edits the existing one or it adds it
@@ -511,37 +574,49 @@ public class RecordResourceController extends WithResourceController {
 		int totalRecordsCount = 0;
 	}
 	
-	public static Result getAnnotations(String id) {
+	public static Result getAnnotations(String id, String motivation) {
 		ObjectNode result = Json.newObject();
 		try {
-			RecordResource record = DB.getRecordResourceDAO().get(new ObjectId(id));
-			Result response = errorIfNoAccessToRecord(Action.READ,
-					new ObjectId(id));
-			if (!response.toString().equals(ok().toString()))
-				return response;
-			else {
+//			RecordResource record = DB.getRecordResourceDAO().get(new ObjectId(id));
+//			Result response = errorIfNoAccessToRecord(Action.READ, new ObjectId(id));
+//			if (!response.toString().equals(ok().toString()))
+//				return response;
+//			else {
 				ArrayNode array = result.arrayNode();
-				record.fillAnnotations();
+//				record.fillAnnotations();
 				
-				List<Annotation> anns = record.getAnnotations();
+				List<Annotation.MotivationType> motivations = new ArrayList<>();
+				if (motivation != null && motivation.length() > 0) {
+					for (String s : motivation.split(",")) {
+						try {
+							motivations.add(Annotation.MotivationType.valueOf(s.trim()));
+						} catch (Exception ex) {
+							
+						}
+					}
+				}
+				
+				List<Annotation> anns = DB.getAnnotationDAO().getByRecordId(new ObjectId(id), motivations);
 				
 				for (Annotation ann : anns) {
 					JsonNode json = Json.toJson(ann);
 					for (Iterator<JsonNode> iter = json.get("annotators").elements(); iter.hasNext();) {
 						JsonNode annotator = iter.next();
 						
-						String userId = annotator.get("withCreator").asText();
-						
-						User user = DB.getUserDAO().getById(new ObjectId(userId));
-						((ObjectNode)annotator).put("username", user.getUsername());
-						
+						if (annotator.has("withCreator")) {
+							String userId = annotator.get("withCreator").asText();
+							
+							User user = DB.getUserDAO().getById(new ObjectId(userId));
+							((ObjectNode)annotator).put("username", user.getUsername());
+						}						
 					}
 					
 					array.add(json);
 				}
 				return ok(array);
-			}				
+//			}				
 		} catch (Exception e) {
+			e.printStackTrace();
 			result.put("error", e.getMessage());
 			return internalServerError(result);
 		}

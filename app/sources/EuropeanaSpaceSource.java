@@ -393,6 +393,7 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 
 	@Override
 	public ArrayList<RecordJSONMetadata> getRecordFromSource(String recordId, RecordResource fullRecord) {
+		recordId = clean(recordId);
 		String key = "SECRET_KEY";
 		ArrayList<RecordJSONMetadata> jsonMetadata = new ArrayList<RecordJSONMetadata>();
 		JsonNode response;
@@ -420,6 +421,12 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 		} catch (Exception e) {
 			return jsonMetadata;
 		}
+	}
+
+	private String clean(String recordId) {
+		if (recordId.contains("/aggregation/provider/"))
+		return recordId.replace("/aggregation/provider/", "/");
+		else return recordId;
 	}
 
 	public boolean isUsingCursor() {

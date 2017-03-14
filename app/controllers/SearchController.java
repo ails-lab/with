@@ -42,15 +42,22 @@ import elastic.Elastic;
 import elastic.ElasticCoordinator;
 import elastic.ElasticSearcher;
 import elastic.ElasticSearcher.SearchOptions;
+import model.basicDataTypes.Language;
+import model.basicDataTypes.Literal;
 import play.Logger;
 import play.Logger.ALogger;
 import play.data.Form;
 import play.libs.F.Promise;
 import play.libs.Json;
 import play.mvc.Result;
+import search.Fields;
 import search.Query;
+import search.RecordsList;
 import search.Response;
 import search.Response.SingleResponse;
+import search.SimilarCreatorSearch;
+import search.SimilarProviderSearch;
+import search.SimilarsQuery;
 import search.Source;
 import search.Sources;
 import sources.core.CommonFilterLogic;
@@ -109,6 +116,41 @@ public class SearchController extends WithController {
 				return Promise.pure((Result) badRequest(e.getMessage()));
 			}
 		}
+	}
+	
+	public static Promise<Result> relatedSearch(){
+		JsonNode json = request().body().asJson();
+		if (log.isDebugEnabled()) {
+			StringBuilder sb = new StringBuilder();
+			for (Map.Entry<String, String> e : session().entrySet()) {
+				sb.append(e.getKey() + " = " + "'" + e.getValue() + "'\n");
+			}
+			log.debug(sb.toString());
+		}
+
+		if (json == null) {
+			return Promise.pure((Result) badRequest("Expecting Json query"));
+		} else {
+			// Parse the query.
+			try {
+				final search.SimilarsQuery q = Json.fromJson(json, search.SimilarsQuery.class );
+				List<Promise<RecordsList>> groups = new ArrayList<>();
+				groups.add(new SimilarProviderSearch().query(q));
+				groups.add(new SimilarCreatorSearch().query(q));
+				
+				// TODO here make a list of promises and then a promise of the list... then return it
+				
+				return ParallelAPICall.<RecordsList> combineResponses(r -> {
+					return true;
+				} , groups, Priority.FRONTEND);
+				
+			} catch (Exception e) {
+				log.error("",e);
+				return Promise.pure((Result) badRequest(e.getMessage()));
+			}
+		}
+
+		// return Promise.pure( badRequest( "Not implemented yet"));
 	}
 
 	/**

@@ -175,7 +175,7 @@ public class RDF2Vocabulary extends OWL2Vocabulary {
 				String lang = lit.getLanguage();
 				Language ll = null;
 				if (lang != null) {
-					ll = Language.getLanguage(lang);
+					ll = Language.getLanguageByCode(lang);
 				}
 				
 				if ((ll == null || ll == Language.UNKNOWN) && conf.defaultLanguage != null) {
@@ -212,7 +212,7 @@ public class RDF2Vocabulary extends OWL2Vocabulary {
 				String lang = lit.getLanguage();
 				Language ll = null;
 				if (lang != null) {
-					ll = Language.getLanguage(lang);
+					ll = Language.getLanguageByCode(lang);
 				}
 				
 				if ((ll == null || ll == Language.UNKNOWN) && conf.defaultLanguage != null) {

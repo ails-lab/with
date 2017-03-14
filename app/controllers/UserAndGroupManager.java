@@ -17,6 +17,7 @@
 package controllers;
 
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -44,6 +45,7 @@ import model.EmbeddedMediaObject;
 import play.Logger;
 import play.Logger.ALogger;
 import play.libs.F.Option;
+import play.libs.F.RedeemablePromise;
 import play.libs.Json;
 import play.mvc.Result;
 import utils.NotificationCenter;
@@ -653,6 +655,26 @@ public class UserAndGroupManager extends WithController {
 			return internalServerError(result);
 		}
 
+	}
+
+	public static ObjectId findUserByUsername(String username, RedeemablePromise<Result> err) {
+		ObjectId result = null;
+		
+		if (username != null) {
+			User user = DB.getUserDAO().getUniqueByFieldAndValue("username", username, new ArrayList<String>(Arrays.asList("_id")));
+			if (user != null) {
+				result = user.getDbId();
+			} else {
+				UserGroup userGroup = DB.getUserGroupDAO().getUniqueByFieldAndValue("username", username, new ArrayList<String>(Arrays.asList("_id", "adminIds")));
+				if (userGroup != null) {
+					result = userGroup.getDbId();
+				}
+			}
+		}
+		if (result == null) {
+			err.success( badRequest(Json.parse("{\"error\":\"No user or userGroup with given username\"}")));
+		}
+		return result;
 	}
 
 }

@@ -170,6 +170,27 @@ public class VocabularyImportConfiguration {
 		return model;
 	}
 	
+	public Model readModel(File tmpFolder, String... files) throws FileNotFoundException, IOException {
+		Model model = ModelFactory.createDefaultModel();
+		for (String fname : files) {
+			File f = new File(getInputFolder().getAbsolutePath() + File.separator + fname);
+			System.out.println("Reading: " + f);
+			if (f.getName().endsWith(".zip")) {
+				VocabularyImportConfiguration.uncompress(tmpFolder, f);
+			} else {
+				System.out.println("Importing to Fuseki: " + f);
+				model.read(f.getAbsolutePath());
+			}
+		}
+		
+		for (File f : tmpFolder.listFiles()) {
+			System.out.println("Importing to Fuseki: " + f);
+			model.read(f.getAbsolutePath());
+		}
+		
+		return model;
+	}
+	
 	public void cleanUp(File tmpFolder) throws FileNotFoundException, IOException {
 		System.out.println("Compressing " + tmpFolder + File.separator + folder + ".txt");
 		File cf = VocabularyImportConfiguration.compress(tmpFolder, folder);

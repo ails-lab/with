@@ -275,6 +275,16 @@ public class CollectionObjectDAO extends WithResourceDAO<CollectionObject> {
 		q.and(formAccessLevelQuery(new Tuple(groupId, Access.READ), QueryOperator.GTE));
 		return this.find(q).asList();
 	}
+	
+	public List<CollectionObject> getAccessibleByGroup(ObjectId groupId) {
+		Query<CollectionObject> q = this.createQuery().disableValidation()
+				.retrievedFields(true, "_id", "administrative.entryCount")
+				.field("descriptiveData.label.default.0")
+				.notEqual("_favorites");
+		q.field("resourceType").equal(WithResourceType.SimpleCollection);
+		q.and(formAccessLevelQuery(new Tuple(groupId, Access.READ), QueryOperator.GTE));
+		return this.find(q).asList();
+	}
 
 	public Tuple<List<CollectionObject>, Tuple<Integer, Integer>> getSharedAndByAcl(
 			List<List<Tuple<ObjectId, Access>>> accessedByUserOrGroup,

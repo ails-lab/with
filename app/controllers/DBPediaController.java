@@ -221,7 +221,7 @@ public class DBPediaController extends WithResourceController {
 			String l = t.asLiteral().getLanguage();
 				
 			if (l != null) {
-				ml.addLiteral(Language.getLanguage(l), s);
+				ml.addLiteral(Language.getLanguageByCode(l), s);
 			} else {
 				ml.addLiteral(Language.UNKNOWN, s);
 			}

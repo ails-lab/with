@@ -34,6 +34,7 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import controllers.RecordResourceController.CollectionAndRecordsCounts;
+import controllers.WithController.Action;
 import controllers.WithController.Profile;
 import db.DB;
 import elastic.ElasticSearcher;
@@ -70,6 +71,10 @@ public class AnnotationController extends Controller {
 		JsonNode json = request().body().asJson();
 		if (json == null) {
 			error.put("error", "Invalid JSON");
+			return badRequest();
+		}
+		if (WithController.effectiveUserDbId() == null) {
+			error.put("error", "User not logged in");
 			return badRequest();
 		}
 		Annotation annotation = getAnnotationFromJson(json);
@@ -110,14 +115,25 @@ public class AnnotationController extends Controller {
 	public static Result approveAnnotation(String id) {
 		try {
 			ObjectId oid = new ObjectId(id);
-			DB.getAnnotationDAO().addApprove(new ObjectId(id), WithController.effectiveUserDbId());
+			DB.getAnnotationDAO().addApprove(oid, WithController.effectiveUserDbId());
 			ElasticUtils.update(DB.getRecordResourceDAO().getByAnnotationId(oid));
 			return ok();
 		} catch (Exception e) {
 			return internalServerError();
 		}
 	}
-
+	
+	public static Result rejectAnnotation(String id) {
+		try {			
+			ObjectId oid = new ObjectId(id);
+			DB.getAnnotationDAO().addReject(oid, WithController.effectiveUserDbId());
+			ElasticUtils.update(DB.getRecordResourceDAO().getByAnnotationId(oid));
+			return ok();
+		} catch (Exception e) {
+			return internalServerError();
+		}
+	}
+	
 	public static Result unscoreAnnotation(String id) {
 		try {			
 			ObjectId oid = new ObjectId(id);
@@ -129,17 +145,66 @@ public class AnnotationController extends Controller {
 		}
 	}
 	
-	public static Result rejectAnnotation(String id) {
-		try {			
-			ObjectId oid = new ObjectId(id);
-			DB.getAnnotationDAO().addReject(new ObjectId(id), WithController.effectiveUserDbId());
-			ElasticUtils.update(DB.getRecordResourceDAO().getByAnnotationId(oid));
-			return ok();
-		} catch (Exception e) {
+	public static Result approveMultipleAnnotations(List<String> id) {
+		boolean ok = true;
+		ObjectId user = WithController.effectiveUserDbId();
+		for (String singleId : id) {
+			try {
+				ObjectId oid = new ObjectId(singleId);
+				DB.getAnnotationDAO().addApprove(oid, user);
+				ElasticUtils.update(DB.getRecordResourceDAO().getByAnnotationId(oid));
+			} catch (Exception e) {
+				ok = false;
+				log.error( e.getMessage(), e );
+			}
+		}
+		if (ok) {
+			return(ok());
+		} else {
 			return internalServerError();
 		}
 	}
 	
+	public static Result rejectMultipleAnnotations(List<String> id) {
+		boolean ok = true;
+		ObjectId user = WithController.effectiveUserDbId();
+		for (String singleId : id) {
+			try {
+				ObjectId oid = new ObjectId(singleId);
+				DB.getAnnotationDAO().addReject(oid, user);
+				ElasticUtils.update(DB.getRecordResourceDAO().getByAnnotationId(oid));
+			} catch (Exception e) {
+				ok = false;
+				log.error( e.getMessage(), e );
+			}
+		}
+		if (ok) {
+			return(ok());
+		} else {
+			return internalServerError();
+		}
+	}
+	
+	public static Result unscoreMultipleAnnotations(List<String> id) {
+		boolean ok = true;
+		ObjectId user = WithController.effectiveUserDbId();
+		for (String singleId : id) {
+			try {
+				ObjectId oid = new ObjectId(singleId);
+				DB.getAnnotationDAO().removeScore(oid, user);
+				ElasticUtils.update(DB.getRecordResourceDAO().getByAnnotationId(oid));
+			} catch (Exception e) {
+				ok = false;
+				log.error( e.getMessage(), e );
+			}
+		}
+		if (ok) {
+			return(ok());
+		} else {
+			return internalServerError();
+		}
+	}
+
 	public static Annotation addAnnotation(Annotation annotation, ObjectId user) {
 		
 		annotation = updateAnnotationAdmin(annotation, user);
@@ -355,6 +420,7 @@ public class AnnotationController extends Controller {
 	public static Annotation getAnnotationFromJson(JsonNode json, ObjectId userId) {
 		try {
 			Annotation annotation = Json.fromJson(json, Annotation.class);
+
 			Class<?> clazz = Class
 					.forName("model.annotations.bodies.AnnotationBody"
 							+ annotation.getMotivation());

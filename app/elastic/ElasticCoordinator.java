@@ -32,10 +32,12 @@ import org.elasticsearch.search.aggregations.bucket.terms.Terms;
 
 import db.DB;
 import elastic.ElasticSearcher.SearchOptions;
+import model.EmbeddedMediaObject;
 import model.resources.RecordResource;
 import model.resources.collection.CollectionObject;
 import play.Logger;
 import play.Logger.ALogger;
+import search.Fields;
 import search.Filter;
 import search.Response.SingleResponse;
 import search.Sources;
@@ -65,21 +67,26 @@ public class ElasticCoordinator {
 
 		List<List<Filter>> newFilters = filters.stream().map(
 				clause -> {
-				return clause.stream().map(
-					filter-> {
-					Filter newFilter = (Filter) filter.clone();
-					if(newFilter.fieldId.equals("anywhere")) newFilter.fieldId = "";
-					return newFilter;
-					}
-				).collect( Collectors.toList()); }
-			).collect( Collectors.toList());
+					return clause.stream().map(filter -> {
+						Filter newFilter = (Filter) filter.clone();
+						if (newFilter.fieldId.equals("anywhere"))
+							newFilter.fieldId = "";
+						if (Fields.media_withRights.fieldId().equals(newFilter.fieldId))
+							newFilter.value = EmbeddedMediaObject.WithMediaRights.getRights(newFilter.value).name();
+						return newFilter;
+					}).collect(Collectors.toList());
+				}).collect(Collectors.toList());
 
 		List<QueryBuilder> musts = new ArrayList<QueryBuilder>();
-		for(List<Filter> ors: newFilters) {
+		for (List<Filter> ors : newFilters) {
 			musts.add(searcher.boolShouldQuery(ors));
 		}
 		List<QueryBuilder> must_not = new ArrayList<QueryBuilder>();
-		must_not.add(searcher.boolShouldQuery(new ArrayList<Filter>() {{ add(new Filter("descriptiveData.label.default", "_favorites", true)); }}));
+		must_not.add(searcher.boolShouldQuery(new ArrayList<Filter>() {
+			{
+				add(new Filter("descriptiveData.label.default", "_favorites", true));
+			}
+		}));
 
 		SearchResponse elasticresp = searcher.executeWithAggs(musts, must_not, options);
 				/*searcher.getBoolSearchRequestBuilder(musts, null, null, options)
@@ -176,8 +183,12 @@ public class ElasticCoordinator {
 					for (int i=0; i< aggTerm.getBuckets().size(); i++) {
 						// omit the last character of aggregation name
 						// in order to take the exact name of the field name
-						sresp.addFacet(aggTerm.getName().substring(0, aggTerm.getName().length()-1),
-								aggTerm.getBuckets().get(i).getKeyAsString(),
+						String id = aggTerm.getName().substring(0, aggTerm.getName().length()-1);
+						String value = aggTerm.getBuckets().get(i).getKeyAsString();
+						if (Fields.media_withRights.fieldId().equals(id)){
+							value = EmbeddedMediaObject.WithMediaRights.getRights(value).toString();
+						}
+						sresp.addFacet(id,value,
 								(int)aggTerm.getBuckets().get(i).getDocCount());
 					}
 				}

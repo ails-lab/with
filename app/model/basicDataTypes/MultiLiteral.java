@@ -133,7 +133,7 @@ public class MultiLiteral extends HashMap<String, List<String>> implements
 	public Set<Language> getLanguages() {
 		Set<Language> res = new HashSet<>();
 		for (String s : keySet()) {
-			res.add(Language.getLanguage(s));
+			res.add(Language.getLanguageByCode(s));
 		}
 		
 		return res;

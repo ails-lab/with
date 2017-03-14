@@ -54,7 +54,7 @@ public abstract class FlickrSpaceSource extends ISpaceSource {
 		return licences.get(id);
 	}
 
-	protected static void setLicences() {
+	protected synchronized static void setLicences() {
 		if (licences==null){
 			String url = "https://api.flickr.com/services/rest/?method=flickr.photos.licenses.getInfo&"
 					+ "api_key=SECRET_KEY&format=json&nojsoncallback=1";
@@ -73,6 +73,7 @@ public abstract class FlickrSpaceSource extends ISpaceSource {
 			} catch (Exception e) {
 				log.error("",e);
 			}
+			System.out.println(licences);
 		}
 	}
 
