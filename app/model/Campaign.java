@@ -17,12 +17,16 @@
 package model;
 
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Hashtable;
 import java.util.List;
 import org.bson.types.ObjectId;
 import org.mongodb.morphia.annotations.Entity;
 import org.mongodb.morphia.annotations.Id;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+
+import model.EmbeddedMediaObject.MediaVersion;
 import model.annotations.Annotation.MotivationType;
 import utils.Deserializer;
 import utils.Serializer;
@@ -38,41 +42,58 @@ public class Campaign {
 		None, Bronze, Silver, Gold
 	}
 
+	public static class AnnotationCount {
+		private long createdCount;
+		private long approvedCount;
+		private long rejectedCount;
+		
+		public long getCreatedCount() {
+			return createdCount;
+		}
+		public void setCreatedCount(long createdCount) {
+			this.createdCount = createdCount;
+		}
+		public long getApprovedCount() {
+			return approvedCount;
+		}
+		public void setApprovedCount(long approvedCount) {
+			this.approvedCount = approvedCount;
+		}
+		public long getRejectedCount() {
+			return rejectedCount;
+		}
+		public void setRejectedCount(long rejectedCount) {
+			this.rejectedCount = rejectedCount;
+		}
+	}
 	
 	
 	@Id
 	@JsonSerialize(using = Serializer.ObjectIdSerializer.class)
 	private ObjectId dbId;
 
-	/**
-	 * The date the campaign begins.
-	 */
 	@JsonSerialize(using = Serializer.DateSerializer.class)
 	@JsonDeserialize(using = Deserializer.DateDeserializer.class)
 	private Date startDate;
 	
-	/**
-	 * The date the campaign finishes.
-	 */
 	@JsonSerialize(using = Serializer.DateSerializer.class)
 	@JsonDeserialize(using = Deserializer.DateDeserializer.class)
 	private Date endDate;
 	
-	/**
-	 * A short description of the campaign's aim.
-	 */
+
+	private String campaignTitle;
+	
 	private String description;
 	
-	/**
-	 * The user group which launches the campaign.
-	 */
+	private HashMap<MediaVersion, EmbeddedMediaObject> campaignBanner;
+	
 	@JsonSerialize(using = Serializer.ObjectIdSerializer.class)
 	private ObjectId space;
 	
 	/**
-	 * The purpose of campaign's annotations [Tagging, Linking, Commenting, Editing].
+	 * The purpose of campaign's annotations [Tagging, GeoTagging, Linking, Commenting, Editing].
 	 */
-	private MotivationType campaignMotivation;
+	private List<MotivationType> campaignMotivation;
 	
 	/**
 	 * The goal (number of annotations) of the campaign.
@@ -91,13 +112,12 @@ public class Campaign {
 	private List<ObjectId> targetCollections;
 	
 	/**
-	 * The list of record items that appear in the front page.
+	 * Hashtable with the campaign's contributors and the points they've earned
 	 */
-	@JsonSerialize(using = Serializer.ObjectIdArraySerializer.class)
-	private List<ObjectId> featuredRecords;
-	
-	
-	
+	private Hashtable<ObjectId, Integer> contributorsPoints;
+		
+		
+
 	public BadgeType getBadge(int points) {
 		if (points >= 150)
 			return  BadgeType.Gold;
@@ -141,11 +161,11 @@ public class Campaign {
 		this.space = space;
 	}
 	
-	public MotivationType getCampaignMotivation() {
+	public List<MotivationType> getCampaignMotivation() {
 		return campaignMotivation;
 	}
 
-	public void setCampaignMotivation(MotivationType campaignMotivation) {
+	public void setCampaignMotivation(List<MotivationType> campaignMotivation) {
 		this.campaignMotivation = campaignMotivation;
 	}
 
@@ -173,13 +193,28 @@ public class Campaign {
 		this.targetCollections = targetCollections;
 	}
 
-	public List<ObjectId> getFeaturedRecords() {
-		return featuredRecords;
+	public String getCampaignTitle() {
+		return campaignTitle;
 	}
 
-	public void setFeaturedRecords(List<ObjectId> featuredRecords) {
-		this.featuredRecords = featuredRecords;
+	public void setCampaignTitle(String campaignTitle) {
+		this.campaignTitle = campaignTitle;
 	}
 
+	public Hashtable<ObjectId, Integer> getContributorsPoints() {
+		return contributorsPoints;
+	}
+
+	public void setContributorsPoints(Hashtable<ObjectId, Integer> contributorsPoints) {
+		this.contributorsPoints = contributorsPoints;
+	}
+
+	public HashMap<MediaVersion, EmbeddedMediaObject> getCampaignBanner() {
+		return campaignBanner;
+	}
+
+	public void setCampaignBanner(HashMap<MediaVersion, EmbeddedMediaObject> campaignBanner) {
+		this.campaignBanner = campaignBanner;
+	}
 
 }
