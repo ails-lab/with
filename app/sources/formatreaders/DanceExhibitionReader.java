@@ -126,10 +126,12 @@ public class DanceExhibitionReader extends ExhibitionReader {
 		int position = 0;
 		try {
 			Function<JsonNode, JsonContextRecord> function = (x) -> new JsonContextRecord(x);
+			String  caption = text.getStringValue("children[0].title");
 			List<JsonContextRecord> pages = ListUtils.transform(text.getValues("children[.*]"), function);
 			List<Group> sequences = new ArrayList<>(Collections.nCopies(pages.size(), null));
 			for (JsonContextRecord page : pages) {
-				position = parsePage(collectionId, position, sequences, page);
+				JsonContextRecord parseTheItem = parseTheItem(collectionId, page, caption);
+				position++;
 			}
 			Group o = buildSequenceElement(sequences, buildTextElement(text.getStringValue("title")));
 			// o.setTitle(buildTextElement(text.getStringValue("title")));
@@ -142,18 +144,6 @@ public class DanceExhibitionReader extends ExhibitionReader {
 		return null;
 	}
 
-	private int parsePage(ObjectId collectionId, int position, List<Group> sequences, JsonContextRecord page)
-			throws Exception {
-		JsonContextRecord parseTheItem = parseTheItem(collectionId, page, null);
-		// if (parseTheItem != null) {
-		// Group cho = buildCHOElement(parseTheItem, buildTextElement(caption));
-		// recs.add(cho);
-		// }
-
-		position++;
-
-		return position;
-	}
 
 	private JsonContextRecord parseTheItem(ObjectId collectionId, JsonContextRecord itemJsonContextRecord,
 			String caption) {
