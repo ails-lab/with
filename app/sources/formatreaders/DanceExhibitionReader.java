@@ -61,6 +61,7 @@ import play.libs.Json;
 import play.mvc.Result;
 import sources.core.ApacheHttpConnector;
 import sources.core.HttpConnector;
+import sources.core.Utils;
 import sources.utils.JsonContextRecord;
 import utils.ListUtils;
 
@@ -157,9 +158,9 @@ public class DanceExhibitionReader extends ExhibitionReader {
 			source = "UploadedByUser";
 
 			record.addToProvenance(new ProvenanceInfo(source, id, id));
-
-			descData.setLabel(((caption != null) ? new MultiLiteral(caption)
-					: itemJsonContextRecord.getMultiLiteralValue("title")));
+			MultiLiteral t = itemJsonContextRecord.getMultiLiteralValue("title");
+			descData.setLabel(((!Utils.hasInfo(t)) ? new MultiLiteral(caption)
+					: t));
 			descData.setDescription(itemJsonContextRecord.getMultiLiteralValue("description"));
 			descData.setDccreator(itemJsonContextRecord.getMultiLiteralOrResourceValue("tags"));
 			descData.setDates(itemJsonContextRecord.getWithDateArrayValue("pubDate"));
