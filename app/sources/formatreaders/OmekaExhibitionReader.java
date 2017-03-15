@@ -91,6 +91,8 @@ public class OmekaExhibitionReader extends ExhibitionReader {
 				creatorDbId, resultInfo);
 		if (success)
 			return importExhibitionPagesObjectFrom(text, exhibition.getDbId());
+		else
+			log.error(resultInfo.toString());
 		return null;
 	}
 
@@ -103,7 +105,7 @@ public class OmekaExhibitionReader extends ExhibitionReader {
 				JsonContextRecord colobject = new JsonContextRecord(response.get(i));
 				String stringValue = colobject.getStringValue("id");
 				if (stringValue.matches(colid))
-					importExhibitionObjectFrom(colobject, creatorDbId);
+					importExhibitionObjectFrom(colobject, creatorDbId); 
 			}
 		} catch (Exception e) {
 			log.error("Exeption", e);
@@ -112,6 +114,7 @@ public class OmekaExhibitionReader extends ExhibitionReader {
 	}
 
 	protected Object importExhibitionPagesObjectFrom(JsonContextRecord text, ObjectId collectionId) {
+//		log.debug("loading pages");
 		String url = text.getStringValue("pages.url");
 		int position = 0;
 		try {
