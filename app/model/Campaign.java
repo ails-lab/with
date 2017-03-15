@@ -43,27 +43,52 @@ public class Campaign {
 	}
 
 	public static class AnnotationCount {
-		private long createdCount;
-		private long approvedCount;
-		private long rejectedCount;
+		private long created;
+		private long approved;
+		private long rejected;
 		
-		public long getCreatedCount() {
-			return createdCount;
+		public long getCreated() {
+			return created;
 		}
-		public void setCreatedCount(long createdCount) {
-			this.createdCount = createdCount;
+		public void setCreated(long created) {
+			this.created = created;
 		}
-		public long getApprovedCount() {
-			return approvedCount;
+		public long getApproved() {
+			return approved;
 		}
-		public void setApprovedCount(long approvedCount) {
-			this.approvedCount = approvedCount;
+		public void setApproved(long approved) {
+			this.approved = approved;
 		}
-		public long getRejectedCount() {
-			return rejectedCount;
+		public long getRejected() {
+			return rejected;
 		}
-		public void setRejectedCount(long rejectedCount) {
-			this.rejectedCount = rejectedCount;
+		public void setRejected(long rejected) {
+			this.rejected = rejected;
+		}
+	}
+	
+	public static class BadgeRanges {
+		private int bronze;
+		private int silver;
+		private int gold;
+		
+		public int getBronze() {
+			return bronze;
+		}
+		public void setBronze(int bronze) {
+			this.bronze = bronze;
+		}
+		public int getSilver() {
+			return silver;
+		}
+		public void setSilver(int silver) {
+			this.silver = silver;
+		}
+		public int getGold() {
+			return gold;
+		}
+		public void setGold(int gold) {
+			this.gold = gold;
 		}
 	}
 	
@@ -81,11 +106,11 @@ public class Campaign {
 	private Date endDate;
 	
 
-	private String campaignTitle;
+	private String title;
 	
 	private String description;
 	
-	private HashMap<MediaVersion, EmbeddedMediaObject> campaignBanner;
+	private HashMap<MediaVersion, EmbeddedMediaObject> banner;
 	
 	@JsonSerialize(using = Serializer.ObjectIdSerializer.class)
 	private ObjectId space;
@@ -95,10 +120,14 @@ public class Campaign {
 	 */
 	private List<MotivationType> campaignMotivation;
 	
+	private BadgeRanges badges;
+	
 	/**
 	 * The goal (number of annotations) of the campaign.
 	 */
 	private long annotationTarget;
+	
+	private AnnotationCount annotationCurrent;
 	
 	/**
 	 * The list of supported thesauri for the annotations.
@@ -114,16 +143,16 @@ public class Campaign {
 	/**
 	 * Hashtable with the campaign's contributors and the points they've earned
 	 */
-	private Hashtable<ObjectId, Integer> contributorsPoints;
-		
-		
+	private Hashtable<ObjectId, AnnotationCount> contributorsPoints;
+
+
 
 	public BadgeType getBadge(int points) {
-		if (points >= 150)
+		if (points >= badges.gold)
 			return  BadgeType.Gold;
-		else if (points >= 100)
+		else if (points >= badges.silver)
 			return  BadgeType.Silver;
-		else if (points >= 50)
+		else if (points >= badges.bronze)
 			return  BadgeType.Bronze;
 		else
 			return  BadgeType.None;		
@@ -132,7 +161,6 @@ public class Campaign {
 	public Date getStartDate() {
 		return startDate;
 	}
-
 	public void setStartDate(Date startDate) {
 		this.startDate = startDate;
 	}
@@ -140,7 +168,6 @@ public class Campaign {
 	public Date getEndDate() {
 		return endDate;
 	}
-
 	public void setEndDate(Date endDate) {
 		this.endDate = endDate;
 	}
@@ -148,7 +175,6 @@ public class Campaign {
 	public String getDescription() {
 		return description;
 	}
-
 	public void setDescription(String description) {
 		this.description = description;
 	}
@@ -156,7 +182,6 @@ public class Campaign {
 	public ObjectId getSpace() {
 		return space;
 	}
-
 	public void setSpace(ObjectId space) {
 		this.space = space;
 	}
@@ -164,7 +189,6 @@ public class Campaign {
 	public List<MotivationType> getCampaignMotivation() {
 		return campaignMotivation;
 	}
-
 	public void setCampaignMotivation(List<MotivationType> campaignMotivation) {
 		this.campaignMotivation = campaignMotivation;
 	}
@@ -172,7 +196,6 @@ public class Campaign {
 	public long getAnnotationTarget() {
 		return annotationTarget;
 	}
-
 	public void setAnnotationTarget(long annotationTarget) {
 		this.annotationTarget = annotationTarget;
 	}
@@ -180,7 +203,6 @@ public class Campaign {
 	public List<String> getVocabularies() {
 		return vocabularies;
 	}
-
 	public void setVocabularies(List<String> vocabularies) {
 		this.vocabularies = vocabularies;
 	}
@@ -188,33 +210,46 @@ public class Campaign {
 	public List<ObjectId> getTargetCollections() {
 		return targetCollections;
 	}
-
 	public void setTargetCollections(List<ObjectId> targetCollections) {
 		this.targetCollections = targetCollections;
 	}
 
 	public String getCampaignTitle() {
-		return campaignTitle;
+		return title;
 	}
-
 	public void setCampaignTitle(String campaignTitle) {
-		this.campaignTitle = campaignTitle;
+		this.title = campaignTitle;
 	}
 
-	public Hashtable<ObjectId, Integer> getContributorsPoints() {
+	public Hashtable<ObjectId, AnnotationCount> getContributorsPoints() {
 		return contributorsPoints;
 	}
-
-	public void setContributorsPoints(Hashtable<ObjectId, Integer> contributorsPoints) {
+	public void setContributorsPoints(Hashtable<ObjectId, AnnotationCount> contributorsPoints) {
 		this.contributorsPoints = contributorsPoints;
 	}
 
 	public HashMap<MediaVersion, EmbeddedMediaObject> getCampaignBanner() {
-		return campaignBanner;
+		return banner;
+	}
+	public void setCampaignBanner(HashMap<MediaVersion, EmbeddedMediaObject> campaignBanner) {
+		this.banner = campaignBanner;
 	}
 
-	public void setCampaignBanner(HashMap<MediaVersion, EmbeddedMediaObject> campaignBanner) {
-		this.campaignBanner = campaignBanner;
+	
+	public AnnotationCount getAnnotationCurrent() {
+		return annotationCurrent;
+	}
+	public void setAnnotationCurrent(AnnotationCount annotationCurrent) {
+		this.annotationCurrent = annotationCurrent;
+	}
+	
+
+	public BadgeRanges getBadges() {
+		return badges;
+	}
+
+	public void setBadges(BadgeRanges badges) {
+		this.badges = badges;
 	}
 
 }

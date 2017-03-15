@@ -44,7 +44,7 @@ public class CampaignController extends WithController {
 		}
 		
 		List<Campaign> campaigns = new ArrayList<Campaign>();
-		campaigns = DB.getCampaignDAO().getActiveCampaigns(groupDbId);
+		campaigns = DB.getCampaignDAO().getCampaigns(groupDbId, true);
 		
 		if (campaigns == null) {
 			result.put("error", "There are not any active campaigns for this UserGroup.");

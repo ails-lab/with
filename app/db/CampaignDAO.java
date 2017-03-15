@@ -30,22 +30,58 @@ public class CampaignDAO extends DAO<Campaign> {
 		super(Campaign.class);
 	}
 	
-	public List<Campaign> getActiveCampaigns(ObjectId groupId) {
+	public List<Campaign> getCampaigns(ObjectId groupId, boolean active) {
 		
-		Query<Campaign> q = this.createQuery().field("space").equal(groupId);
+		Query<Campaign> q = this.createQuery();
+		
+		if (groupId != null) {
+			q = q.field("space").equal(groupId);
+		}
 		
 		List<Campaign> campaigns = new ArrayList<Campaign>();
 		campaigns = this.find(q).asList();
 		
 		Date today = new Date();
 		List<Campaign> campaignList = new ArrayList<Campaign>();
-		for (Campaign campaign : campaigns) {
-			if ( (campaign.getStartDate().before(today)) && (campaign.getEndDate().after(today)) ) {
-				campaignList.add(campaign);
+		
+		if (active) {
+			for (Campaign campaign : campaigns) {
+				if ( (campaign.getStartDate().before(today)) && (campaign.getEndDate().after(today)) ) {
+					campaignList.add(campaign);
+				}
+			}
+		}
+		else {
+			for (Campaign campaign : campaigns) {
+				if ( (campaign.getStartDate().after(today)) || (campaign.getEndDate().before(today)) ) {
+					campaignList.add(campaign);
+				}
 			}
 		}
 		
 		return campaignList;
+	}
+	
+	public Campaign getCampaign(ObjectId campaignId) {
+		
+		if (campaignId == null) {
+			return null;
+		}
+		
+		Query<Campaign> q = this.createQuery().field("_id").equal(campaignId);
+		
+		return this.findOne(q);
+	}
+	
+	public long getCampaignsCount(ObjectId groupId) {
+		
+		Query<Campaign> q = this.createQuery();
+		
+		if (groupId != null) {
+			q = q.field("space").equal(groupId);
+		}
+		
+		return q.countAll();
 	}
 	
 }
