@@ -90,6 +90,7 @@ import sources.OWLExporter.CulturalItemOWLExporter;
 import sources.core.*;
 import sources.core.ParallelAPICall.Priority;
 import sources.formatreaders.OmekaExhibitionReader;
+import sources.formatreaders.DanceExhibitionReader;
 import sources.formatreaders.ExhibitionReader;
 import sources.formatreaders.MuseumofModernArtRecordFormatter;
 import sources.utils.JsonContextRecord;
@@ -169,6 +170,8 @@ public class CollectionObjectController extends WithResourceController {
 		switch (source.toLowerCase()) {
 		case "omeka":
 			r = new OmekaExhibitionReader();
+		case "dance":
+			r = new DanceExhibitionReader();
 			break;
 		default:
 			break;

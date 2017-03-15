@@ -94,7 +94,11 @@ public class OmekaExhibitionReader extends ExhibitionReader {
 		return null;
 	}
 
-	public void importOmeka(ObjectId creatorDbId, String colid) {
+	public void importExhibitions(ObjectId creatorDbId, String exhibitionID){
+		importOmeka(creatorDbId, exhibitionID);
+	}
+
+	public void importOmeka(ObjectId creatorDbId, String exhibitionID) {
 		JsonNode response;
 		try {
 			response = getHttpConnector().getURLContent("http://tellyourphotostory.be/espace_test/api/exhibits");
@@ -102,7 +106,7 @@ public class OmekaExhibitionReader extends ExhibitionReader {
 			for (int i = 0; i < ncollections; i++) {
 				JsonContextRecord colobject = new JsonContextRecord(response.get(i));
 				String stringValue = colobject.getStringValue("id");
-				if (stringValue.matches(colid))
+				if (stringValue.matches(exhibitionID))
 					importExhibitionObjectFrom(colobject, creatorDbId);
 			}
 		} catch (Exception e) {

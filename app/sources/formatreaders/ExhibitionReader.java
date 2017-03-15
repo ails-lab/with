@@ -45,6 +45,7 @@ public abstract class ExhibitionReader {
 	}
 
 	public abstract Object importExhibitionObjectFrom(JsonContextRecord text, ObjectId creatorDbId);
+	public abstract void importExhibitions(ObjectId creatorDbId, String exhibitionID);
 
 	protected Text buildTextElement(String stringValue) {
 		Text text = new Text();
