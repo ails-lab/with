@@ -108,13 +108,9 @@ public class OmekaExhibitionReader extends ExhibitionReader {
 			for (int i = 0; i < ncollections; i++) {
 				JsonContextRecord colobject = new JsonContextRecord(response.get(i));
 				String stringValue = colobject.getStringValue("id");
-<<<<<<< HEAD
-				if (stringValue.matches(colid))
-					importExhibitionObjectFrom(colobject, creatorDbId); 
-=======
+
 				if (stringValue.matches(exhibitionID))
 					importExhibitionObjectFrom(colobject, creatorDbId);
->>>>>>> 7d64b06f0befa1c4a12199edfe2f5bd690e5ff97
 			}
 		} catch (Exception e) {
 			log.error("Exeption", e);
