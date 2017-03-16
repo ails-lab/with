@@ -339,6 +339,7 @@ public class RecordResourceController extends WithResourceController {
 						+ "\":\"" + cv.getMessage() + "\"}"));
 			}
 			result.put("error", properties);
+			log.error(properties.toString());
 			return result;
 		} else {
 			return null;

@@ -59,6 +59,7 @@ import model.resources.collection.Exhibition.ExhibitionDescriptiveData;
 import play.Logger;
 import play.libs.Json;
 import play.mvc.Result;
+import play.mvc.Results.Status;
 import sources.core.ApacheHttpConnector;
 import sources.core.HttpConnector;
 import sources.core.Utils;
@@ -83,8 +84,8 @@ public class DanceExhibitionReader extends ExhibitionReader {
 		model.setRdfType(new Resource("http://www.europeana.eu/schemas/edm/ProvidedCHO"));
 		model.setLabel(text.getMultiLiteralValue("children[0].title"));
 		model.setDescription(text.getMultiLiteralValue("children[0].description"));
-		model.setCredits(text.getStringValue("children[0].tags"));
-
+		model.setCredits(text.getStringValue("children[0].who"));
+		model.setKeywords(text.getMultiLiteralOrResourceValue("children[0].tags"));
 		EmbeddedMediaObject media = new EmbeddedMediaObject();
 		LiteralOrResource originalRights = null;
 		media.setOriginalRights(originalRights);
@@ -128,6 +129,7 @@ public class DanceExhibitionReader extends ExhibitionReader {
 		try {
 			Function<JsonNode, JsonContextRecord> function = (x) -> new JsonContextRecord(x);
 			String  caption = text.getStringValue("children[0].title");
+//			System.out.println("Caption "+caption);
 			List<JsonContextRecord> pages = ListUtils.transform(text.getValues("children[.*]"), function);
 			List<Group> sequences = new ArrayList<>(Collections.nCopies(pages.size(), null));
 			for (JsonContextRecord page : pages) {
@@ -159,6 +161,7 @@ public class DanceExhibitionReader extends ExhibitionReader {
 
 			record.addToProvenance(new ProvenanceInfo(source, id, id));
 			MultiLiteral t = itemJsonContextRecord.getMultiLiteralValue("title");
+//			System.out.println("label "+t);
 			descData.setLabel(((!Utils.hasInfo(t)) ? new MultiLiteral(caption)
 					: t));
 			descData.setDescription(itemJsonContextRecord.getMultiLiteralValue("description"));

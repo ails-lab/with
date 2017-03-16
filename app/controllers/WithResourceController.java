@@ -202,8 +202,10 @@ public class WithResourceController extends WithController {
 			MultiLiteral label = record.getDescriptiveData().getLabel();
 			if ((label == null) || (label.get(Language.DEFAULT) == null)
 					|| label.get(Language.DEFAULT).isEmpty()
-					|| (label.get(Language.DEFAULT).get(0) == ""))
+					|| (label.get(Language.DEFAULT).get(0) == "")){
+				log.error("A label for the record has to be provided");
 				return badRequest("A label for the record has to be provided");
+			}
 			int last = 0;
 			// Sources source = Sources.UploadedByUser;
 			String source = "Upload by User " + effectiveUser().getUsername();
@@ -243,6 +245,7 @@ public class WithResourceController extends WithController {
 									collectionDbId);
 					if (noDouble && existsInSameCollection) {
 						result.put("error", "double");
+						log.error("Record is in the collection already "+externalId);
 						return forbidden(result);
 					}
 					if (DB.getRecordResourceDAO()
@@ -371,6 +374,7 @@ public class WithResourceController extends WithController {
 			rec.setValue("administrative.withURI","/record/" + recordId);
 			return ok(result);
 		} catch (Exception e) {
+			log.error(e.getMessage());
 			result.put("error", e.getMessage());
 			return internalServerError(result);
 		}

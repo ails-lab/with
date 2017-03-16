@@ -58,7 +58,7 @@ public class JsonNodeUtils {
 
 	public static MultiLiteral readMultiLiteral(MultiLiteral res, JsonNode node, Language... suggestedLanguages) {
 		if (node != null && !node.isMissingNode()) {
-			if (node.isTextual()) {
+			if (node.isTextual() && Utils.hasInfo(node.asText())) {
 				res.addSmartLiteral(node.asText(), suggestedLanguages);
 				return res.fillDEF();
 			}
