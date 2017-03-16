@@ -34,8 +34,7 @@ public class CampaignController extends WithController {
 	
 	public static final ALogger log = Logger.of(AnnotationController.class);
 	
-	public static Result getActiveCampaigns(String groupId) {
-		
+	public static Result getActiveCampaigns(String groupId, int offset, int count) {
 		ObjectNode result = Json.newObject();
 		
 		ObjectId groupDbId = null;
@@ -44,7 +43,7 @@ public class CampaignController extends WithController {
 		}
 		
 		List<Campaign> campaigns = new ArrayList<Campaign>();
-		campaigns = DB.getCampaignDAO().getCampaigns(groupDbId, true);
+		campaigns = DB.getCampaignDAO().getCampaigns(groupDbId, true, offset, count);
 		
 		if (campaigns == null) {
 			result.put("error", "There are not any active campaigns for this UserGroup.");
@@ -52,6 +51,30 @@ public class CampaignController extends WithController {
 		}
 		
 		return ok(Json.toJson(campaigns));
+	}
+	
+	public static Result incUserPoints(String campaignId, String userId, String annotationType) {
+		
+		ObjectId campaignDbId = null;
+		if (StringUtils.isNotEmpty(campaignId)) {
+			campaignDbId = new ObjectId(campaignId);
+		}
+		
+		DB.getCampaignDAO().incUserPoints(campaignDbId, userId, annotationType);
+		
+		return ok();
+	}
+	
+	public static Result decUserPoints(String campaignId, String userId, String annotationType) {
+		
+		ObjectId campaignDbId = null;
+		if (StringUtils.isNotEmpty(campaignId)) {
+			campaignDbId = new ObjectId(campaignId);
+		}
+		
+		DB.getCampaignDAO().decUserPoints(campaignDbId, userId, annotationType);
+		
+		return ok();
 	}
 	
 	/*

@@ -21,7 +21,10 @@ import java.util.Date;
 import java.util.List;
 import org.bson.types.ObjectId;
 import org.mongodb.morphia.query.Query;
+import org.mongodb.morphia.query.UpdateOperations;
+
 import model.Campaign;
+import model.resources.collection.CollectionObject;
 
 
 public class CampaignDAO extends DAO<Campaign> {
@@ -30,7 +33,7 @@ public class CampaignDAO extends DAO<Campaign> {
 		super(Campaign.class);
 	}
 	
-	public List<Campaign> getCampaigns(ObjectId groupId, boolean active) {
+	public List<Campaign> getCampaigns(ObjectId groupId, boolean active, int offset, int count) {
 		
 		Query<Campaign> q = this.createQuery();
 		
@@ -38,39 +41,23 @@ public class CampaignDAO extends DAO<Campaign> {
 			q = q.field("space").equal(groupId);
 		}
 		
-		List<Campaign> campaigns = new ArrayList<Campaign>();
-		campaigns = this.find(q).asList();
-		
 		Date today = new Date();
-		List<Campaign> campaignList = new ArrayList<Campaign>();
-		
 		if (active) {
-			for (Campaign campaign : campaigns) {
-				if ( (campaign.getStartDate().before(today)) && (campaign.getEndDate().after(today)) ) {
-					campaignList.add(campaign);
-				}
-			}
+			q = q.field("startDate").lessThanOrEq(today).field("endDate").greaterThanOrEq(today);
 		}
 		else {
-			for (Campaign campaign : campaigns) {
-				if ( (campaign.getStartDate().after(today)) || (campaign.getEndDate().before(today)) ) {
-					campaignList.add(campaign);
-				}
-			}
+			q.or(
+				q.criteria("startDate").greaterThanOrEq(today),
+				q.criteria("endDate").lessThanOrEq(today)
+			);
 		}
+
+		q = q.offset(offset).limit(count);
 		
-		return campaignList;
-	}
-	
-	public Campaign getCampaign(ObjectId campaignId) {
-		
-		if (campaignId == null) {
-			return null;
-		}
-		
-		Query<Campaign> q = this.createQuery().field("_id").equal(campaignId);
-		
-		return this.findOne(q);
+		List<Campaign> campaigns = new ArrayList<Campaign>();
+		campaigns = this.find(q).asList();
+
+		return campaigns;
 	}
 	
 	public long getCampaignsCount(ObjectId groupId) {
@@ -80,8 +67,25 @@ public class CampaignDAO extends DAO<Campaign> {
 		if (groupId != null) {
 			q = q.field("space").equal(groupId);
 		}
-		
 		return q.countAll();
+	}
+		
+	public void incUserPoints(ObjectId campaignId, String userid, String annotType) {
+		Query<Campaign> q = this.createQuery().field("_id").equal(campaignId);
+		UpdateOperations<Campaign> updateOps = this
+				.createUpdateOperations().disableValidation();
+		updateOps.inc("contributorsPoints."+userid+"."+annotType);
+		
+		this.update(q, updateOps);
+	}
+	
+	public void decUserPoints(ObjectId campaignId, String userid, String annotType) {
+		Query<Campaign> q = this.createQuery().field("_id").equal(campaignId);
+		UpdateOperations<Campaign> updateOps = this
+				.createUpdateOperations().disableValidation();
+		updateOps.dec("contributorsPoints."+userid+"."+annotType);
+		
+		this.update(q, updateOps);
 	}
 	
 }
