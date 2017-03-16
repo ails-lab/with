@@ -219,7 +219,9 @@ GET		/collection/api/removeIdsOfDeletedRecords	controllers.WithResourceControlle
 
 GET	     /collection/:id/annotations 	        			controllers.CollectionObjectController.getAnnotations(id)
 
-GET	     /collection/:id/annotationSummary 	        			controllers.CollectionObjectController.getAnnotationSummary(id, mode: String ?="FLAT")
+#GET	     /collection/:id/annotationSummary 	        			controllers.CollectionObjectController.getAnnotationSummary(id, mode: String ?="FLAT")
 
 #Campaign Controller
-GET		/campaign/activeCampaigns					controllers.CampaignController.getActiveCampaigns(groupId: String)
+GET		/campaign/activeCampaigns					controllers.CampaignController.getActiveCampaigns(groupId: String ?= "", offset: Integer ?=0, count: Integer ?=10)
+GET		/campaign/incUserPoints						controllers.CampaignController.incUserPoints(campaignId: String, userId: String, annotationType: String)
+GET		/campaign/decUserPoints						controllers.CampaignController.decUserPoints(campaignId: String, userId: String, annotationType: String)
