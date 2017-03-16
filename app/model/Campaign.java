@@ -41,6 +41,10 @@ public class Campaign {
 	public static enum BadgeType {
 		None, Bronze, Silver, Gold
 	}
+	
+	public static enum CampaignPurpose {
+		Annotate, Validate
+	}
 
 	public static class AnnotationCount {
 		private long created;
@@ -110,7 +114,7 @@ public class Campaign {
 	
 	private String description;
 	
-	private HashMap<MediaVersion, EmbeddedMediaObject> banner;
+	private HashMap<MediaVersion, String> banner;
 	
 	@JsonSerialize(using = Serializer.ObjectIdSerializer.class)
 	private ObjectId space;
@@ -121,6 +125,8 @@ public class Campaign {
 	private List<MotivationType> campaignMotivation;
 	
 	private BadgeRanges badges;
+	
+	private CampaignPurpose purpose;
 	
 	/**
 	 * The goal (number of annotations) of the campaign.
@@ -228,10 +234,10 @@ public class Campaign {
 		this.contributorsPoints = contributorsPoints;
 	}
 
-	public HashMap<MediaVersion, EmbeddedMediaObject> getCampaignBanner() {
+	public HashMap<MediaVersion, String> getCampaignBanner() {
 		return banner;
 	}
-	public void setCampaignBanner(HashMap<MediaVersion, EmbeddedMediaObject> campaignBanner) {
+	public void setCampaignBanner(HashMap<MediaVersion, String> campaignBanner) {
 		this.banner = campaignBanner;
 	}
 
@@ -247,9 +253,15 @@ public class Campaign {
 	public BadgeRanges getBadges() {
 		return badges;
 	}
-
 	public void setBadges(BadgeRanges badges) {
 		this.badges = badges;
+	}
+
+	public CampaignPurpose getPurpose() {
+		return purpose;
+	}
+	public void setPurpose(CampaignPurpose purpose) {
+		this.purpose = purpose;
 	}
 
 }
