@@ -296,6 +296,7 @@ public class EmbeddedMediaObject {
 		}
 		else {
 			try {
+			url = url.startsWith("http:https:") ? url.replaceFirst("http:", "") : url;
 			return "/media/byUrl?url=" + URLEncoder.encode(url,"UTF-8") + "&version=" + mediaVersion.toString();
 			} catch( Exception e ) {
 				log.error( "UTF-8 not known ...");
