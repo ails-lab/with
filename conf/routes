@@ -38,6 +38,11 @@ GET		/api/autocompleteExt		controllers.AutocompleteController.autocompleteExt(te
 # Map static resources from the /public folder to the /assets URL path
 GET 	/assets/headers.js						filters.FilterUtils.withAjaxScript
 GET     /assets/*file               			controllers.Assets.at(path="/public", file)
+
+
+GET		/code									controllers.CodeController.jarList()
+GET		/code/*file								controllers.CodeController.downloadJar( file )
+
 GET 	/custom/:customName					    controllers.CustomAssets.redirect(customName)
 GET 	/custom/:customName/					controllers.CustomAssets.redirect(customName)
 GET 	/custom/:customName/*file				controllers.CustomAssets.getFile(customName:String, file:String)
