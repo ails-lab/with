@@ -131,8 +131,8 @@ public class RightsController extends WithResourceController {
 				}
 			}
 			else {//if downgrade == -1, the rights are not changed, do nothing
-				result.put("mesage", "The user already has the required access to the collection.");
-				return ok(result);
+				result.put("error", "The user already has the required access to the collection.");
+				return badRequest(result);
 			}
 		}
 	}
@@ -203,7 +203,7 @@ public class RightsController extends WithResourceController {
 			notification.setShareInfo(shareInfo);
 			DB.getNotificationDAO().makePermanent(notification);
 			NotificationCenter.sendNotification(notification);
-			result.put("mesage", "Access of user or group to collection has been downgraded.");
+			result.put("message", "Access of user or group to collection has been downgraded.");
 			return ok(result);
 		}
 		else {//upgrade

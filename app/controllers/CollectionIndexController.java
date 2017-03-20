@@ -31,6 +31,7 @@ import model.basicDataTypes.MultiLiteralOrResource;
 import model.resources.CulturalObject.CulturalObjectData;
 import model.resources.PlaceObject.PlaceData;
 import model.resources.AgentObject.AgentData;
+import model.resources.ThesaurusObject;
 import model.resources.ThesaurusObject.SKOSTerm;
 
 import org.bson.types.ObjectId;
@@ -232,8 +233,8 @@ public class CollectionIndexController extends WithResourceController	{
 				lang = lang.toLowerCase();
 				
 				for (String v : entry.getValue()) {
-					query.should(QueryBuilders.matchQuery("label." + lang, v));	
-					query.should(QueryBuilders.matchQuery("altLabels." + lang, v));
+					query.should(QueryBuilders.matchQuery("descriptiveData.label." + lang, v));	
+					query.should(QueryBuilders.matchQuery("descriptiveData.altLabels." + lang, v));
 				}
 			}
 		}
@@ -248,8 +249,8 @@ public class CollectionIndexController extends WithResourceController	{
 				lang = lang.toLowerCase();
 				
 				for (String v : entry.getValue()) {
-					query.should(QueryBuilders.matchQuery("label." + lang, v));	
-					query.should(QueryBuilders.matchQuery("altLabels." + lang, v));
+					query.should(QueryBuilders.matchQuery("descriptiveData.label." + lang, v));	
+					query.should(QueryBuilders.matchQuery("descriptiveData.altLabels." + lang, v));
 				}
 			}
 		}
@@ -264,26 +265,24 @@ public class CollectionIndexController extends WithResourceController	{
 				lang = lang.toLowerCase();
 
 				for (String v : entry.getValue()) {
-					query.should(QueryBuilders.matchQuery("description." + lang, v));
+					query.should(QueryBuilders.matchQuery("descriptiveData.description." + lang, v));
 				}
 			}
 		}
 		
-		addMultiLiteralOrResource(dd.getKeywords(), "keywords", thesaurusDAO, query);
+		addMultiLiteralOrResource(dd.getKeywords(), "descriptiveData.keywords", thesaurusDAO, query);
 		
 		if (dd instanceof CulturalObjectData) {
-			addMultiLiteralOrResource(((CulturalObjectData)dd).getDctype(), "dctype", thesaurusDAO, query);
-			addMultiLiteralOrResource(((CulturalObjectData)dd).getDcformat(), "dcformat", thesaurusDAO, query);
-			addMultiLiteralOrResource(((CulturalObjectData)dd).getDctermsmedium(), "dctermsmedium", thesaurusDAO, query);
+			addMultiLiteralOrResource(((CulturalObjectData)dd).getDctype(), "descriptiveData.dctype", thesaurusDAO, query);
+			addMultiLiteralOrResource(((CulturalObjectData)dd).getDcformat(), "descriptiveData.dcformat", thesaurusDAO, query);
+			addMultiLiteralOrResource(((CulturalObjectData)dd).getDctermsmedium(), "descriptiveData.dctermsmedium", thesaurusDAO, query);
 		} else if (dd instanceof PlaceData) {
-			addMultiLiteralOrResource(((PlaceData)dd).getNation(), "nation", thesaurusDAO, query);
-			addMultiLiteralOrResource(((PlaceData)dd).getContinent(), "continent", thesaurusDAO, query);
-			addMultiLiteralOrResource(((PlaceData)dd).getPartOfPlace(), "partofplace", thesaurusDAO, query);
+			addMultiLiteralOrResource(((PlaceData)dd).getNation(), "descriptiveData.nation", thesaurusDAO, query);
+			addMultiLiteralOrResource(((PlaceData)dd).getContinent(), "descriptiveData.continent", thesaurusDAO, query);
+			addMultiLiteralOrResource(((PlaceData)dd).getPartOfPlace(), "descriptiveData.partofplace", thesaurusDAO, query);
 		} else if (dd instanceof AgentData) {
-			addMultiLiteralOrResource(((AgentData)dd).getBirthPlace(), "birthplace", thesaurusDAO, query);
+			addMultiLiteralOrResource(((AgentData)dd).getBirthPlace(), "descriptiveData.birthplace", thesaurusDAO, query);
 		}
-		
-//		System.out.println(query);
 
 		return query;
 	}
@@ -294,20 +293,23 @@ public class CollectionIndexController extends WithResourceController	{
 			if (uris != null) {
 				Set<String> broader = new HashSet<>();
 				for (String uri : uris) {
-					List<SKOSTerm> terms = thesaurusDAO.getByUri(uri).getSemantic().getBroaderTransitive();
-					if (terms != null) {
-						for (SKOSTerm t : terms) {
-							broader.add(t.getUri());
+					ThesaurusObject to = thesaurusDAO.getByUri(uri);
+					if (to != null && thesaurusDAO.getByUri(uri).getSemantic() != null) {
+						List<SKOSTerm> terms = to.getSemantic().getBroaderTransitive();
+						if (terms != null) {
+							for (SKOSTerm t : terms) {
+								broader.add(t.getUri());
+							}
 						}
 					}
 				}
 				
 				for (String f : uris) {
-					query.should(QueryBuilders.termQuery(field + ".uri.all", f).boost(4));
+					query.should(QueryBuilders.termQuery(field + ".uri.string", f).boost(4));
 				}
 				
 				for (String f : broader) {
-					query.should(QueryBuilders.termQuery(field + ".uri.all", f).boost(2));
+					query.should(QueryBuilders.termQuery(field + ".uri.string", f).boost(2));
 				}
 			}
 			

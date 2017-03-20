@@ -53,16 +53,31 @@ import utils.Serializer.JsonContextRecordSerializer;
 
 @JsonSerialize(using = JsonContextRecordSerializer.class)
 public class JsonContextRecord {
-	
+
 	public static final ALogger log = Logger.of(JsonContextRecord.class);
 
 	private JsonNode rootInformation;
 	private List<String> context;
 	private Language[] languages;
 
+	/**
+	 * could also be '$'
+	 */
+	private char separator = '.';
+
 	public JsonContextRecord(JsonNode rootInformation) {
 		this.context = new ArrayList<>();
 		this.rootInformation = rootInformation;
+	}
+
+	public JsonContextRecord(JsonNode rootInformation, char pathSeparator) {
+		this(rootInformation);
+		this.separator = pathSeparator;
+	}
+
+	public JsonContextRecord(String jsonString, char pathSeparator) {
+		this(jsonString);
+		this.separator = pathSeparator;
 	}
 
 	public JsonContextRecord(String jsonString) {
@@ -121,24 +136,27 @@ public class JsonContextRecord {
 		int d = 0;
 		String current = "";
 		for (int i = 0; i < string.length(); i++) {
-			switch (string.charAt(i)) {
-			case '[':
-				d++;
-				current += string.charAt(i);
-				break;
-			case ']':
-				d--;
-				current += string.charAt(i);
-				break;
-			case '.':
+			if (string.charAt(i) == separator) {
 				if (d == 0) {
 					res.add(current);
 					current = "";
+				} else {
+					current += string.charAt(i);
+				}
+			} else {
+				switch (string.charAt(i)) {
+				case '[':
+					d++;
+					current += string.charAt(i);
+					break;
+				case ']':
+					d--;
+					current += string.charAt(i);
+					break;
+				default:
+					current += string.charAt(i);
 					break;
 				}
-			default:
-				current += string.charAt(i);
-				break;
 			}
 
 		}
@@ -162,6 +180,7 @@ public class JsonContextRecord {
 	public List<JsonNode> getValues(String... path) {
 		return getValues(buildpaths(path));
 	}
+
 	public List<JsonNode> getValues(Collection<String> steps) {
 		List<JsonNode> roots = new ArrayList<>();
 		roots.add(rootInformation);
@@ -377,15 +396,23 @@ public class JsonContextRecord {
 	 * @return
 	 */
 	public Literal getLiteralValue(String... path) {
+		return getLiteralValue(false, path);
+	}
+
+	public Literal getLiteralValue(boolean merge, String... path) {
+		// TODO implement the merge option to take all the languages
+		Literal res = null;
 		for (String spath : path) {
-			JsonNode node = getValue(buildpaths(spath));
-			if (node != null) {
-				Literal res = JsonNodeUtils.asLiteral(node, languages);
-				if (Utils.hasInfo(res))
+			List<JsonNode> nodes = getValues(buildpaths(spath));
+			for (JsonNode jsonNode : nodes) {
+				if (Utils.hasInfo(jsonNode)) {
+					res = merge(res, JsonNodeUtils.asLiteral(jsonNode, languages));
+				}
+				if (!merge && Utils.hasInfo(res))
 					return res;
 			}
 		}
-		return null;
+		return res;
 	}
 
 	/**
@@ -416,6 +443,14 @@ public class JsonContextRecord {
 	}
 
 	private <T extends MultiLiteral> T merge(T res, T other) {
+		if (!Utils.hasInfo(res))
+			res = other;
+		else
+			res.merge(other);
+		return res;
+	}
+
+	private <T extends Literal> T merge(T res, T other) {
 		if (!Utils.hasInfo(res))
 			res = other;
 		else

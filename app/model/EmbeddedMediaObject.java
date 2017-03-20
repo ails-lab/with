@@ -30,6 +30,7 @@ import com.google.common.net.MediaType;
 import model.basicDataTypes.LiteralOrResource;
 import play.Logger;
 import play.Logger.ALogger;
+import search.Fields;
 import sources.core.Utils;
 import utils.Deserializer;
 import utils.MediaTypeConverter;
@@ -109,7 +110,7 @@ public class EmbeddedMediaObject {
 	// this needs work
 	public static enum WithMediaRights {
 		Public("Attribution Alone"),
-		PublicCC0("CC0"),
+		PublicCC0("Public Domain Dedication CC0"),
 		Restricted("Restricted"),
 		OUT_OF_COPYRIGHT("Out of Copyright"),
 		
@@ -120,7 +121,7 @@ public class EmbeddedMediaObject {
 		Creative_BY_NC("NOT Comercial"),
 		Creative_BY_ND("NOT Modify"),
 		Creative_BY_NC_SA("Share alike, not for commercial purposes"),
-		Creative_BY_NC_ND("not modify, adapt, or build upon, not for commercial purposes"),
+		Creative_BY_NC_ND("Not modify, adapt, or build upon, not for commercial purposes"),
 		
 		RR("Rights Reserved"),
 		RRPA("Rights Reserved - Paid Access"),
@@ -131,12 +132,12 @@ public class EmbeddedMediaObject {
 
 		// database seems to contain other WithMediaRights, temporarily we adding them here to
 		// make it work... We need to find out why this happens
-		Modify("You can do stuff to it??"),
-		Creative_SA("Should probably be BY_SA"),
+		Modify("Modify"),
+		Creative_SA("Creative SA"),
 		Permission("Permission granted"),
-		Creative_Not_Commercial_Modify("should Creative By nc "),
-		Creative("Use as you wish"),
-		Creative_Not_Commercial("And another right");
+		Creative_Not_Commercial_Modify("NOT comercial modify"),
+		Creative("Creative"),
+		Creative_Not_Commercial("Not Comercial");
 		
 		
 		private final String text;
@@ -158,6 +159,7 @@ public class EmbeddedMediaObject {
 			}
 			return UNKNOWN;
 		}
+
 	}
 
 	private int width, height;
