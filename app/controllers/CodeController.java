@@ -49,7 +49,7 @@ public class CodeController extends Controller {
 			// String strClassPath = System.getProperty("java.class.path");
 			File libDir = new File( Play.application().path(), LIBDIR );
 			List<String> jarUrls = fileChecksum( libDir );	
-			String baseUrl = request().uri();
+			String baseUrl = "http://"+request().host()+request().uri();
 			JsonNode res = buildResultJson(jarUrls, baseUrl);
 			return ok( res );
 		} catch( Exception e ) {
@@ -83,7 +83,7 @@ public class CodeController extends Controller {
 			
 			jarNodes.add(singleJar);
 		}
-		root.set( "jars", jarNodes );
+		root.set( "resources", jarNodes );
 		
 		// add relevant settings
 		ObjectNode settings = root.objectNode();
