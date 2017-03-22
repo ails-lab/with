@@ -57,6 +57,7 @@ import search.Response;
 import search.Response.SingleResponse;
 import search.SimilarCreatorSearch;
 import search.SimilarProviderSearch;
+import search.SimilarSearchTerm;
 import search.SimilarsQuery;
 import search.Source;
 import search.Sources;
@@ -135,6 +136,7 @@ public class SearchController extends WithController {
 			try {
 				final search.SimilarsQuery q = Json.fromJson(json, search.SimilarsQuery.class );
 				List<Promise<RecordsList>> groups = new ArrayList<>();
+				groups.add(new SimilarSearchTerm().query(q));
 				groups.add(new SimilarProviderSearch().query(q));
 				groups.add(new SimilarCreatorSearch().query(q));
 				
