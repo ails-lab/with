@@ -212,6 +212,17 @@ public class ElasticSearcher {
 	 * Not exact match
 	 *  */
 	public QueryBuilder funcScoreQuery(String field, String term) {
+		// sanitize the term
+		// it will not support the query string syntax of lucene
+		// no fields (thats handled somewhere else
+		// no ranges (again somewhere else)
+		term = term
+				.replaceAll("[:\\[\\]+-~()!\"^]", " ")
+				.replaceAll(" OR ", " or ")
+				.replaceAll(" AND ", " and ")
+				.replaceAll("^NOT ", "not ")
+				.replaceAll(" NOT ", " not ");
+				
 		QueryStringQueryBuilder qstr = QueryBuilders.queryStringQuery(term);
 		if(!field.equals("")) {
 			qstr.field(field);
