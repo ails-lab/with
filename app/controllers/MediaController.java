@@ -151,6 +151,7 @@ public class MediaController extends WithController {
 			FileAndType img = ((ApacheHttpConnector) ApacheHttpConnector.getApacheHttpConnector())
 					.getContentAndType(url);
 			byte[] mediaBytes = IOUtils.toByteArray(new FileInputStream(img.data));
+			img.data.delete(); 
 			media.setUrl(url);
 			media.setMediaBytes(mediaBytes);
 			if (version != null) {
