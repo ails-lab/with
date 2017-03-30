@@ -217,7 +217,7 @@ public class ElasticSearcher {
 		// no fields (thats handled somewhere else
 		// no ranges (again somewhere else)
 		term = term
-				.replaceAll("[:\\[\\]+-~()!\"^]", " ")
+				.replaceAll("[:\\[\\]+\\-~()!\"^]", " ")
 				.replaceAll(" OR ", " or ")
 				.replaceAll(" AND ", " and ")
 				.replaceAll("^NOT ", "not ")
