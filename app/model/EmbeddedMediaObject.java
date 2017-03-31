@@ -137,6 +137,7 @@ public class EmbeddedMediaObject {
 		Permission("Permission granted"),
 		Creative_Not_Commercial_Modify("NOT comercial modify"),
 		Creative("Creative"),
+		Creative_Not_Modify("Not Modify"),
 		Creative_Not_Commercial("Not Comercial");
 		
 		

@@ -66,13 +66,19 @@ public class ElasticReindexer {
 		/* Index all RecordResources */
 		try {
 			for (int i = 0; i <= (countAllRR / 1000); i++) {
-				log.error("index "+ i + " records");
+				log.error("indexed "+ i + "000 records.");
 				Query<RecordResource> q = DB.getDs().createQuery(RecordResource.class).offset(i * 1000).limit(1000);
 				Iterator<RecordResource> resourceCursor = DB.getRecordResourceDAO().find(q).iterator();
 				while (resourceCursor.hasNext()) {
-					RecordResource rr = resourceCursor.next();
-					bulk.add(new IndexRequest(Elastic.index, ElasticUtils.defineInstanceOf(rr), rr.getDbId().toString())
-							.source(rr.transform()));
+					RecordResource rr = null;
+					try {
+						rr = resourceCursor.next();
+						bulk.add(new IndexRequest(Elastic.index, ElasticUtils.defineInstanceOf(rr), rr.getDbId().toString())
+								.source(rr.transform()));
+					} catch( Exception e ) {
+						if( rr != null )
+							log.error( "Record cant be indexed " + rr.getDbId());
+					}
 				}
 				bulk.flush();
 			}
@@ -91,9 +97,15 @@ public class ElasticReindexer {
 					if (j % 100 == 0)
 						log.error("index " + j + " collections");
 					j++;
-					CollectionObject co = collectionCursor.next();
-					bulk.add(new IndexRequest(Elastic.index, ElasticUtils.defineInstanceOf(co), co.getDbId().toString())
-							.source(co.transform()));
+					CollectionObject co = null;
+					try {
+						co = collectionCursor.next();
+						bulk.add(new IndexRequest(Elastic.index, ElasticUtils.defineInstanceOf(co), co.getDbId().toString())
+								.source(co.transform()));
+					} catch( Exception e ) {
+						if( co != null )
+							log.error( "Error during CollectionObject " + co.getDbId());
+					}
 				}
 				bulk.flush();
 			}
