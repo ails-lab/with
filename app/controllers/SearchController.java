@@ -196,7 +196,11 @@ public class SearchController extends WithController {
 				}
 				// print warnings in the log for fields not known
 				q.validateFieldIds();
-
+				
+				// remove facet requests that are not relevant
+				q.pruneFacets();
+				final Set<String> commonSupportedFields = q.commonSupportedFields();
+				
 				// split the query
 				Map<Sources, Query> queries = q.splitBySource();
 				// create promises
@@ -222,6 +226,7 @@ public class SearchController extends WithController {
 						Response r = new Response();
 						r.query = q;
 						for(Response.SingleResponse sr: singleResponses ) {
+							sr.pruneFacets(commonSupportedFields);
 							r.addSingleResponse(sr);
 						}
 						r.createAccumulated();

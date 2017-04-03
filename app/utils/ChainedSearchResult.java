@@ -114,6 +114,10 @@ public class ChainedSearchResult {
 	public synchronized void collectSourceResponse( Response.SingleResponse sr ) {
 		// if there is a SearchResult promise, fullfill it
 		// else just add the response to the ChainedSearchResponse
+		
+		// results sometimes come with unwanted stuff ...
+		sr.pruneFacets(query.commonSupportedFields());
+		
 		currentResponses.add( sr );
 		
 		if( pendingPromise != null ) {

@@ -18,9 +18,10 @@ package search;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -143,6 +144,17 @@ public class Response {
 				vcs.add(vc);
 				facets.put(fieldId, vcs);
 			}
+		}
+		/**
+		 * Only leave given fields in the response facets
+		 * @param ids
+		 */
+		
+		public void pruneFacets( Set<String> ids ) {
+			Iterator<Map.Entry<String, List<ValueCount>>> e = facets.entrySet().iterator();
+			while( e.hasNext())
+				if( !ids.contains(e.next().getKey())) e.remove();
+			
 		}
 	}
 

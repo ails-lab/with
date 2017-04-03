@@ -315,4 +315,32 @@ public class Query implements IFilterContainer{
 		return newQuery;
 	}
 
+	public HashSet<String> commonSupportedFields() {
+		HashSet<String> commonFields = new HashSet<String>();		
+		if( !sources.isEmpty()) {
+			boolean first = true;
+			for( Sources s:sources) {
+				if( first ) {
+					commonFields.addAll( s.getDriver().supportedFieldIds());
+					first = false;
+				} else {
+					Iterator<String> i = commonFields.iterator();
+					Set<String> newFields =  s.getDriver().supportedFieldIds();
+					while( i.hasNext()) {
+						if( ! newFields.contains(i.next())) i.remove();
+					}
+				}
+			}
+		}
+		return commonFields;
+	}
+	
+	/**
+	 * Optionally remove facet requests from fields that are not supported.
+	 */
+	public void pruneFacets() {
+		Set<String> common = commonSupportedFields();
+		Iterator<String> i = facets.iterator();
+		while( i.hasNext()) if( !common.contains(i.next())) i.remove();
+	}
 }
