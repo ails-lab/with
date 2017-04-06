@@ -102,11 +102,9 @@ public class Campaign {
 	private ObjectId dbId;
 
 	@JsonSerialize(using = Serializer.DateSerializer.class)
-	@JsonDeserialize(using = Deserializer.DateDeserializer.class)
 	private Date startDate;
 	
 	@JsonSerialize(using = Serializer.DateSerializer.class)
-	@JsonDeserialize(using = Deserializer.DateDeserializer.class)
 	private Date endDate;
 	
 
@@ -114,7 +112,7 @@ public class Campaign {
 	
 	private String description;
 	
-	private HashMap<MediaVersion, String> banner;
+	private String banner;
 	
 	@JsonSerialize(using = Serializer.ObjectIdSerializer.class)
 	private ObjectId space;
@@ -234,10 +232,10 @@ public class Campaign {
 		this.contributorsPoints = contributorsPoints;
 	}
 
-	public HashMap<MediaVersion, String> getCampaignBanner() {
+	public String getCampaignBanner() {
 		return banner;
 	}
-	public void setCampaignBanner(HashMap<MediaVersion, String> campaignBanner) {
+	public void setCampaignBanner(String campaignBanner) {
 		this.banner = campaignBanner;
 	}
 

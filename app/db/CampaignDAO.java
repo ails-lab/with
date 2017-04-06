@@ -33,6 +33,12 @@ public class CampaignDAO extends DAO<Campaign> {
 		super(Campaign.class);
 	}
 	
+	public Campaign getCampaign(ObjectId campaignId) {
+		
+		Query<Campaign> q = this.createQuery().field("_id").equal(campaignId);
+		return this.findOne(q);		
+	}
+	
 	public List<Campaign> getCampaigns(ObjectId groupId, boolean active, int offset, int count) {
 		
 		Query<Campaign> q = this.createQuery();
