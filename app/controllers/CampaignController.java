@@ -34,7 +34,14 @@ public class CampaignController extends WithController {
 	
 	public static final ALogger log = Logger.of(AnnotationController.class);
 	
-	public static Result getCampaign (String campaignId) {
+	public static Result getCampaignCount() {
+		
+		long count = DB.getCampaignDAO().campaignCount();
+		
+		return ok(Json.toJson(count));
+	}
+	
+	public static Result getCampaign(String campaignId) {
 
 		ObjectId campaignDbId = new ObjectId(campaignId);
 		Campaign campaign = DB.getCampaignDAO().getCampaign(campaignDbId);
