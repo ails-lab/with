@@ -45,6 +45,12 @@ public class CampaignDAO extends DAO<Campaign> {
 		return this.findOne(q);		
 	}
 	
+	public Campaign getCampaignByName(String cname) {
+		
+		Query<Campaign> q = this.createQuery().field("name").equal(cname);
+		return this.findOne(q);		
+	}
+	
 	public List<Campaign> getCampaigns(ObjectId groupId, boolean active, int offset, int count) {
 		
 		Query<Campaign> q = this.createQuery();

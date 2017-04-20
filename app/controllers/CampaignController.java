@@ -49,6 +49,13 @@ public class CampaignController extends WithController {
 		return ok(Json.toJson(campaign));
 	}
 	
+	public static Result getCampaignByName(String cname) {
+
+		Campaign campaign = DB.getCampaignDAO().getCampaignByName(cname);
+		
+		return ok(Json.toJson(campaign));
+	}	
+	
 	public static Result getActiveCampaigns(String groupId, int offset, int count) {
 		ObjectNode result = Json.newObject();
 		
