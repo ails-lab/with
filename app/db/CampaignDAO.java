@@ -47,7 +47,7 @@ public class CampaignDAO extends DAO<Campaign> {
 	
 	public Campaign getCampaignByName(String cname) {
 		
-		Query<Campaign> q = this.createQuery().field("name").equal(cname);
+		Query<Campaign> q = this.createQuery().field("username").equal(cname);
 		return this.findOne(q);		
 	}
 	
