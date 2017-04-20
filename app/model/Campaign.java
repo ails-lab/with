@@ -108,6 +108,8 @@ public class Campaign {
 	private Date endDate;
 	
 
+	private String username;
+	
 	private String title;
 	
 	private String description;
@@ -260,6 +262,14 @@ public class Campaign {
 	}
 	public void setPurpose(CampaignPurpose purpose) {
 		this.purpose = purpose;
+	}
+
+	public String getUsername() {
+		return username;
+	}
+
+	public void setUsername(String username) {
+		this.username = username;
 	}
 
 }
