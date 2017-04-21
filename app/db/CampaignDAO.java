@@ -33,10 +33,15 @@ public class CampaignDAO extends DAO<Campaign> {
 		super(Campaign.class);
 	}
 	
-	public long campaignCount() {
-		
+	public long campaignCount(String groupName) {
+				
 		Query<Campaign> q = this.createQuery();
-		return this.count();
+		
+		if (!groupName.isEmpty()) {
+			q = q.field("spacename").equal(groupName);
+		}
+		
+		return q.countAll();
 	}
 	
 	public Campaign getCampaign(ObjectId campaignId) {
@@ -51,12 +56,12 @@ public class CampaignDAO extends DAO<Campaign> {
 		return this.findOne(q);		
 	}
 	
-	public List<Campaign> getCampaigns(ObjectId groupId, boolean active, int offset, int count) {
+	public List<Campaign> getCampaigns(String groupName, boolean active, int offset, int count) {
 		
 		Query<Campaign> q = this.createQuery();
 		
-		if (groupId != null) {
-			q = q.field("space").equal(groupId);
+		if (!groupName.isEmpty()) {
+			q = q.field("spacename").equal(groupName);
 		}
 		
 		Date today = new Date();

@@ -34,9 +34,9 @@ public class CampaignController extends WithController {
 	
 	public static final ALogger log = Logger.of(AnnotationController.class);
 	
-	public static Result getCampaignCount() {
+	public static Result getCampaignCount(String group) {
 		
-		long count = DB.getCampaignDAO().campaignCount();
+		long count = DB.getCampaignDAO().campaignCount(group);
 		
 		return ok(Json.toJson(count));
 	}
@@ -56,16 +56,11 @@ public class CampaignController extends WithController {
 		return ok(Json.toJson(campaign));
 	}	
 	
-	public static Result getActiveCampaigns(String groupId, int offset, int count) {
+	public static Result getActiveCampaigns(String group, int offset, int count) {
 		ObjectNode result = Json.newObject();
-		
-		ObjectId groupDbId = null;
-		if (StringUtils.isNotEmpty(groupId)) {
-			groupDbId = new ObjectId(groupId);
-		}
-		
+				
 		List<Campaign> campaigns = new ArrayList<Campaign>();
-		campaigns = DB.getCampaignDAO().getCampaigns(groupDbId, true, offset, count);
+		campaigns = DB.getCampaignDAO().getCampaigns(group, true, offset, count);
 		
 		if (campaigns == null) {
 			result.put("error", "There are not any active campaigns for this UserGroup.");

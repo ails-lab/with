@@ -119,6 +119,8 @@ public class Campaign {
 	@JsonSerialize(using = Serializer.ObjectIdSerializer.class)
 	private ObjectId space;
 	
+	private String spacename;
+	
 	/**
 	 * The purpose of campaign's annotations [Tagging, GeoTagging, Linking, Commenting, Editing].
 	 */
@@ -270,6 +272,14 @@ public class Campaign {
 
 	public void setUsername(String username) {
 		this.username = username;
+	}
+
+	public String getSpacename() {
+		return spacename;
+	}
+
+	public void setSpacename(String spacename) {
+		this.spacename = spacename;
 	}
 
 }

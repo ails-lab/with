@@ -222,9 +222,9 @@ GET	     /collection/:id/annotations 	        			controllers.CollectionObjectCon
 #GET	     /collection/:id/annotationSummary 	        			controllers.CollectionObjectController.getAnnotationSummary(id, mode: String ?="FLAT")
 
 #Campaign Controller
-GET		/campaign/count								controllers.CampaignController.getCampaignCount()
+GET		/campaign/count								controllers.CampaignController.getCampaignCount(group: String ?= "")
 GET		/campaign/getCampaign						controllers.CampaignController.getCampaign(campaignId: String)
 GET		/campaign/getCampaignByName					controllers.CampaignController.getCampaignByName(cname: String)
-GET		/campaign/activeCampaigns					controllers.CampaignController.getActiveCampaigns(groupId: String ?= "", offset: Integer ?=0, count: Integer ?=10)
+GET		/campaign/activeCampaigns					controllers.CampaignController.getActiveCampaigns(group: String ?= "", offset: Integer ?=0, count: Integer ?=10)
 GET		/campaign/incUserPoints						controllers.CampaignController.incUserPoints(campaignId: String, userId: String, annotationType: String)
 GET		/campaign/decUserPoints						controllers.CampaignController.decUserPoints(campaignId: String, userId: String, annotationType: String)
