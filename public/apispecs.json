@@ -6,13 +6,54 @@
         "description": "Welcome to the WITH API documentation! \n If you are completely new to the API, please visit ```link available soon``` for an introduction to the model and basic functionalities. \n We are still in a development phase, so expect changes. We will keep this documentation updated and this text will include a memo of the latest changes. \n \n NEW: \n \n (since v. 0.68) Many changes, added calls for annotations and various others. Added calls for internal search within and among user collections. Documentation will be further updated once a couple of things have finished.\n \n (since v. 0.6) Added a new call in search that merges filters, updated responses in record, collections with context data. ~ LAST UPDATE(v. 0.68): July 26, 2016"
     },
     "paths": {
+        "/api/search2": {
+            "post": {
+                "tags": [
+                    "Search"
+                ],
+                "summary": "Advanced search with filters (faceted sarch).",
+                "description": "This is the new search call that the frontend uses. It contains some extra utility fields, as well as a results array which contains items similar to the response of the old search calls but NOT identical (differences exist in some field names). Boolean search supports use of AND, OR and NOT operators. Terms seperated without an operator (using a space) are treated as an AND. Use of quotes will perform exact term or phrase searches. For example, ```\"Olympian Zeus\"``` will search for the exact phrase, whereas ```Olympian Zeus``` will equate to ```Olympian AND Zeus```. Some search sources reply faster than others. The call can be used with the flag continuation set to true, so that whenever a source has finished, its results will be returned. The continuationID can be used in the request to ask for results from the other sources (for the same query!). Search supports filters for search with facets. The values of the filters are NOT preset. To see what filters you can use, for each source, you should use the ```/api/searchsources``` call. After an initial search you can send another query with some values of all the possible filters.  Try a test call and experiment to see exactly how it works, or use your browser's object inspector while performing a search in the WITH frontend.",
+                "parameters": [
+                    {
+                        "in": "body",
+                        "name": "body",
+                        "required": true,
+                        "description": "Search parameters.",
+                        "schema": {
+                            "$ref": "#/definitions/SearchQuery"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/Search2"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request (invalid json)",
+                        "schema": {
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/api/search": {
             "post": {
                 "tags": [
                     "Search"
                 ],
                 "summary": "General search in external resources and the WITH database.",
-                "description": "Body contains search parameters, response is a JSON array of records that match the search term. Boolean search supports use of AND, OR and NOT operators. Terms seperated without an operator (using a space) are treated as an AND. Use of quotes will perform exact term or phrase searches. For example, ```\"Olympian Zeus\"``` will search for the exact phrase, whereas ```Olympian Zeus``` will equate to ```Olympian AND Zeus```. For more search options use advanced search.",
+                "description": "This call is deprecated but kept for developers already using it, and as a simple test tool. For all purposes, please use the new search call ```/api/search2```. Body contains search parameters, response is a JSON array of records that match the search term. Boolean search supports use of AND, OR and NOT operators. Terms seperated without an operator (using a space) are treated as an AND. Use of quotes will perform exact term or phrase searches. For example, ```\"Olympian Zeus\"``` will search for the exact phrase, whereas ```Olympian Zeus``` will equate to ```Olympian AND Zeus```. For more search options use advanced search.",
                 "parameters": [
                     {
                         "in": "body",
@@ -41,18 +82,18 @@
                                         "type": "string",
                                         "enum": [
                                             "Europeana",
+                                            "EuropeanaFashion",
                                             "DPLA",
                                             "NLA",
                                             "DigitalNZ",
-                                            "Youtube",
+                                            "YouTube",
                                             "Rijksmuseum",
                                             "DDB",
                                             "BritishLibrary",
                                             "InternetArchive",
                                             "WITHin",
                                             "DBPedia",
-                                            "Historypin",
-                                            "WITHinASpace"
+                                            "Historypin"
                                         ]
                                     }
                                 }
@@ -86,7 +127,7 @@
                     "Search"
                 ],
                 "summary": "Advanced search with filters (faceted sarch).",
-                "description": "An extension of the simple search to include filters for search with facets. The values of the filters are NOT preset. To see what filters you can use, you should use the ```/api/intialfeatures``` call. Then you can send another query with some values of all the possible filters. To get a better understanding we suggest you use the inspector console of your favourite browser and observe the network activity while performing a search from the frontend, using different filter values.",
+                "description": "This call is deprecated but kept for developers already using it. For all purposes, please use the new search call ```/api/search2```. Advanced search is an extension of the simple search to include filters for search with facets. The values of the filters are NOT preset. To see what filters you can use, you should use the ```/api/intialfeatures``` call. Then you can send another query with some values of all the possible filters. To get a better understanding we suggest you use the inspector console of your favourite browser and observe the network activity while performing a search from the frontend, using different filter values.",
                 "parameters": [
                     {
                         "in": "body",
@@ -115,18 +156,18 @@
                                         "type": "string",
                                         "enum": [
                                             "Europeana",
+                                            "EuropeanaFashion",
                                             "DPLA",
                                             "NLA",
                                             "DigitalNZ",
-                                            "Youtube",
+                                            "YouTube",
                                             "Rijksmuseum",
                                             "DDB",
                                             "BritishLibrary",
                                             "InternetArchive",
                                             "WITHin",
                                             "DBPedia",
-                                            "Historypin",
-                                            "WITHinASpace"
+                                            "Historypin"
                                         ]
                                     }
                                 },
@@ -197,18 +238,18 @@
                                         "type": "string",
                                         "enum": [
                                             "Europeana",
+                                            "EuropeanaFashion",
                                             "DPLA",
                                             "NLA",
                                             "DigitalNZ",
-                                            "Youtube",
+                                            "YouTube",
                                             "Rijksmuseum",
                                             "DDB",
                                             "BritishLibrary",
                                             "InternetArchive",
                                             "WITHin",
                                             "DBPedia",
-                                            "Historypin",
-                                            "WITHinASpace"
+                                            "Historypin"
                                         ]
                                     }
                                 }
@@ -241,8 +282,8 @@
         },
         "/api/searchsources": {
             "get": {
-                "summary": "Retrieve the list of available search sources.",
-                "description": "Retrieve a JSON with the list of sources that WITH currently supports for federated searches.",
+                "summary": "Retrieve a list of available search sources, as well as all possible supported fields (of the WITH model), for each source. The supported fields populate the record of the item once it has been collected.",
+                "description": "Retrieve a JSON with the list of sources that WITH currently supports  for federated searches.",
                 "tags": [
                     "Search"
                 ],
@@ -252,7 +293,36 @@
                         "schema": {
                             "type": "array",
                             "items": {
-                                "type": "string"
+                                "type": "object",
+                                "properties": {
+                                    "supportedFields": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "name": {
+                                        "type": "string",
+                                        "enum": [
+                                            "Europeana",
+                                            "EuropeanaFashion",
+                                            "DPLA",
+                                            "NLA",
+                                            "DigitalNZ",
+                                            "YouTube",
+                                            "Rijksmuseum",
+                                            "DDB",
+                                            "BritishLibrary",
+                                            "InternetArchive",
+                                            "WITHin",
+                                            "DBPedia",
+                                            "Historypin"
+                                        ]
+                                    },
+                                    "apiConsole": {
+                                        "type": "string"
+                                    }
+                                }
                             }
                         }
                     },
@@ -1111,118 +1181,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "properties": {
-                                "results": {
-                                    "type": "array",
-                                    "items": {
-                                        "type": "object",
-                                        "properties": {
-                                            "source": {
-                                                "type": "string"
-                                            },
-                                            "totalCount": {
-                                                "type": "integer"
-                                            },
-                                            "start": {
-                                                "type": "integer"
-                                            },
-                                            "count": {
-                                                "type": "integer"
-                                            },
-                                            "page": {
-                                                "type": "integer"
-                                            },
-                                            "pageSize": {
-                                                "type": "integer"
-                                            },
-                                            "items": {
-                                                "type": "array",
-                                                "items": {
-                                                    "$ref": "#/definitions/Collection"
-                                                }
-                                            }
-                                        }
-                                    }
-                                },
-                                "sources": {
-                                    "description": "Different values such as Europeana, DPLA, DigitalNZ, Rijksmuseum, WITHin, and others.  Results from WITHin correspond to internal records.",
-                                    "type": "array",
-                                    "items": {
-                                        "type": "string",
-                                        "enum": [
-                                            "Europeana",
-                                            "DPLA",
-                                            "NLA",
-                                            "DigitalNZ",
-                                            "Youtube",
-                                            "Rijksmuseum",
-                                            "DDB",
-                                            "BritishLibrary",
-                                            "InternetArchive",
-                                            "WITHin",
-                                            "DBPedia",
-                                            "Historypin",
-                                            "WITHinASpace"
-                                        ]
-                                    }
-                                },
-                                "continuationId": {
-                                    "type": "string"
-                                },
-                                "query": {
-                                    "type": "object",
-                                    "properties": {
-                                        "sources": {
-                                            "type": "array",
-                                            "items": {
-                                                "type": "string",
-                                                "enum": [
-                                                    "Europeana",
-                                                    "DPLA",
-                                                    "NLA",
-                                                    "DigitalNZ",
-                                                    "Youtube",
-                                                    "Rijksmuseum",
-                                                    "DDB",
-                                                    "BritishLibrary",
-                                                    "InternetArchive",
-                                                    "WITHin",
-                                                    "DBPedia",
-                                                    "Historypin",
-                                                    "WITHinASpace"
-                                                ]
-                                            }
-                                        },
-                                        "filters": {
-                                            "type": "array",
-                                            "items": {
-                                                "$ref": "#/definitions/Filters"
-                                            }
-                                        },
-                                        "start": {
-                                            "type": "integer"
-                                        },
-                                        "count": {
-                                            "type": "integer"
-                                        },
-                                        "page": {
-                                            "type": "integer"
-                                        },
-                                        "pageSize": {
-                                            "type": "integer"
-                                        },
-                                        "responseLanguage": {
-                                            "type": "string"
-                                        },
-                                        "continuationId": {
-                                            "type": "string"
-                                        },
-                                        "continuation": {
-                                            "type": "boolean"
-                                        }
-                                    }
-                                }
-                            }
+                            "$ref": "#/definitions/CollectionSearch"
                         }
                     },
                     "403": {
@@ -1276,118 +1235,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "properties": {
-                                "results": {
-                                    "type": "array",
-                                    "items": {
-                                        "type": "object",
-                                        "properties": {
-                                            "source": {
-                                                "type": "string"
-                                            },
-                                            "totalCount": {
-                                                "type": "integer"
-                                            },
-                                            "start": {
-                                                "type": "integer"
-                                            },
-                                            "count": {
-                                                "type": "integer"
-                                            },
-                                            "page": {
-                                                "type": "integer"
-                                            },
-                                            "pageSize": {
-                                                "type": "integer"
-                                            },
-                                            "items": {
-                                                "type": "array",
-                                                "items": {
-                                                    "$ref": "#/definitions/Collection"
-                                                }
-                                            }
-                                        }
-                                    }
-                                },
-                                "sources": {
-                                    "description": "Different values such as Europeana, DPLA, DigitalNZ, Rijksmuseum, WITHin, and others.  Results from WITHin correspond to internal records.",
-                                    "type": "array",
-                                    "items": {
-                                        "type": "string",
-                                        "enum": [
-                                            "Europeana",
-                                            "DPLA",
-                                            "NLA",
-                                            "DigitalNZ",
-                                            "Youtube",
-                                            "Rijksmuseum",
-                                            "DDB",
-                                            "BritishLibrary",
-                                            "InternetArchive",
-                                            "WITHin",
-                                            "DBPedia",
-                                            "Historypin",
-                                            "WITHinASpace"
-                                        ]
-                                    }
-                                },
-                                "continuationId": {
-                                    "type": "string"
-                                },
-                                "query": {
-                                    "type": "object",
-                                    "properties": {
-                                        "sources": {
-                                            "type": "array",
-                                            "items": {
-                                                "type": "string",
-                                                "enum": [
-                                                    "Europeana",
-                                                    "DPLA",
-                                                    "NLA",
-                                                    "DigitalNZ",
-                                                    "Youtube",
-                                                    "Rijksmuseum",
-                                                    "DDB",
-                                                    "BritishLibrary",
-                                                    "InternetArchive",
-                                                    "WITHin",
-                                                    "DBPedia",
-                                                    "Historypin",
-                                                    "WITHinASpace"
-                                                ]
-                                            }
-                                        },
-                                        "filters": {
-                                            "type": "array",
-                                            "items": {
-                                                "$ref": "#/definitions/Filters"
-                                            }
-                                        },
-                                        "start": {
-                                            "type": "integer"
-                                        },
-                                        "count": {
-                                            "type": "integer"
-                                        },
-                                        "page": {
-                                            "type": "integer"
-                                        },
-                                        "pageSize": {
-                                            "type": "integer"
-                                        },
-                                        "responseLanguage": {
-                                            "type": "string"
-                                        },
-                                        "continuationId": {
-                                            "type": "string"
-                                        },
-                                        "continuation": {
-                                            "type": "boolean"
-                                        }
-                                    }
-                                }
-                            }
+                            "$ref": "#/definitions/CollectionSearch"
                         }
                     },
                     "403": {
@@ -1452,118 +1300,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "properties": {
-                                "results": {
-                                    "type": "array",
-                                    "items": {
-                                        "type": "object",
-                                        "properties": {
-                                            "source": {
-                                                "type": "string"
-                                            },
-                                            "totalCount": {
-                                                "type": "integer"
-                                            },
-                                            "start": {
-                                                "type": "integer"
-                                            },
-                                            "count": {
-                                                "type": "integer"
-                                            },
-                                            "page": {
-                                                "type": "integer"
-                                            },
-                                            "pageSize": {
-                                                "type": "integer"
-                                            },
-                                            "items": {
-                                                "type": "array",
-                                                "items": {
-                                                    "$ref": "#/definitions/InternalRecord"
-                                                }
-                                            }
-                                        }
-                                    }
-                                },
-                                "sources": {
-                                    "description": "Different values such as Europeana, DPLA, DigitalNZ, Rijksmuseum, WITHin, and others.  Results from WITHin correspond to internal records.",
-                                    "type": "array",
-                                    "items": {
-                                        "type": "string",
-                                        "enum": [
-                                            "Europeana",
-                                            "DPLA",
-                                            "NLA",
-                                            "DigitalNZ",
-                                            "Youtube",
-                                            "Rijksmuseum",
-                                            "DDB",
-                                            "BritishLibrary",
-                                            "InternetArchive",
-                                            "WITHin",
-                                            "DBPedia",
-                                            "Historypin",
-                                            "WITHinASpace"
-                                        ]
-                                    }
-                                },
-                                "continuationId": {
-                                    "type": "string"
-                                },
-                                "query": {
-                                    "type": "object",
-                                    "properties": {
-                                        "sources": {
-                                            "type": "array",
-                                            "items": {
-                                                "type": "string",
-                                                "enum": [
-                                                    "Europeana",
-                                                    "DPLA",
-                                                    "NLA",
-                                                    "DigitalNZ",
-                                                    "Youtube",
-                                                    "Rijksmuseum",
-                                                    "DDB",
-                                                    "BritishLibrary",
-                                                    "InternetArchive",
-                                                    "WITHin",
-                                                    "DBPedia",
-                                                    "Historypin",
-                                                    "WITHinASpace"
-                                                ]
-                                            }
-                                        },
-                                        "filters": {
-                                            "type": "array",
-                                            "items": {
-                                                "$ref": "#/definitions/Filters"
-                                            }
-                                        },
-                                        "start": {
-                                            "type": "integer"
-                                        },
-                                        "count": {
-                                            "type": "integer"
-                                        },
-                                        "page": {
-                                            "type": "integer"
-                                        },
-                                        "pageSize": {
-                                            "type": "integer"
-                                        },
-                                        "responseLanguage": {
-                                            "type": "string"
-                                        },
-                                        "continuationId": {
-                                            "type": "string"
-                                        },
-                                        "continuation": {
-                                            "type": "boolean"
-                                        }
-                                    }
-                                }
-                            }
+                            "$ref": "#/definitions/Search2"
                         }
                     },
                     "403": {
@@ -3716,7 +3453,7 @@
                     },
                     {
                         "name": "id",
-                        "in": "path",
+                        "in": "query",
                         "required": true,
                         "description": "Id of a user.",
                         "type": "string"
@@ -3782,7 +3519,7 @@
                     },
                     {
                         "name": "id",
-                        "in": "path",
+                        "in": "query",
                         "required": true,
                         "description": "Id of a user.",
                         "type": "string"
@@ -4488,22 +4225,31 @@
                 "tags": [
                     "User"
                 ],
-                "summary": "User login.",
-                "description": "Log an user in with their facebook id.",
+                "summary": "User login with facebook*.",
+                "description": "Log an user in with their facebook account. To do this, you need to create an appropriate dialog that redirects to your app's url, using the WITH application's Id. Then, use this call to forward the two parameters plus the code that facebook sent to your redirect url. In order for this to work, you should also contact us in order to whitelist your app's redirect url. For more information about the process, please see ```https://developers.facebook.com/docs/facebook-login/manually-build-a-login-flow```. ",
                 "parameters": [
                     {
-                        "in": "query",
-                        "name": "accessToken",
-                        "description": "Facebook access token",
+                        "in": "body",
+                        "name": "body",
+                        "description": "Facebook login parameters.",
                         "required": true,
-                        "type": "string"
-                    },
-                    {
-                        "in": "query",
-                        "name": "facebookId",
-                        "description": "Facebook id",
-                        "required": true,
-                        "type": "string"
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "code": {
+                                    "type": "string",
+                                    "description": "The code generated by facebook."
+                                },
+                                "redirectUri": {
+                                    "description": "Uri that captured the code (your app).",
+                                    "type": "string"
+                                },
+                                "clientId": {
+                                    "type": "string",
+                                    "description": "The facebook client Id for the WITH application."
+                                }
+                            }
+                        }
                     }
                 ],
                 "responses": {
@@ -4531,22 +4277,31 @@
                 "tags": [
                     "User"
                 ],
-                "summary": "User login.",
-                "description": "Log an user in with their facebook id.",
+                "summary": "User login with google.",
+                "description": "Log an user in with their google account. To use this, you need to create an appropriate login dialog in your app. Then, you have to contact us to register your app's endpoint url that will handle the login. Google will generate a unique client Id for this url, associated with WITH. Then you can use this call for your app. For more information about the process, please see ```https://developers.google.com/+/web/signin/```. ",
                 "parameters": [
                     {
-                        "in": "query",
-                        "name": "accessToken",
-                        "description": "Facebook access token",
+                        "in": "body",
+                        "name": "body",
+                        "description": "Contains google client Id.",
                         "required": true,
-                        "type": "string"
-                    },
-                    {
-                        "in": "query",
-                        "name": "facebookId",
-                        "description": "Facebook id",
-                        "required": true,
-                        "type": "string"
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "code": {
+                                    "type": "string",
+                                    "description": "The code generated by google."
+                                },
+                                "redirectUri": {
+                                    "description": "Uri that captured the code (your app).",
+                                    "type": "string"
+                                },
+                                "clientId": {
+                                    "type": "string",
+                                    "description": "The google clientId for the WITH application."
+                                }
+                            }
+                        }
                     }
                 ],
                 "responses": {
@@ -5607,6 +5362,9 @@
                 },
                 "qualityMeasure": {
                     "type": "integer"
+                },
+                "annotationCount": {
+                    "type": "integer"
                 }
             }
         },
@@ -5643,6 +5401,9 @@
                         "$ref": "#/definitions/MediaRecord"
                     }
                 },
+                "qualityMeasure": {
+                    "type": "integer"
+                },
                 "withCreatorInfo": {
                     "$ref": "#/definitions/UserEmbedded"
                 },
@@ -5657,6 +5418,12 @@
                 },
                 "descriptiveData": {
                     "$ref": "#/definitions/CollectionDescriptiveData"
+                },
+                "collectedIn": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
                 }
             }
         },
@@ -5752,9 +5519,6 @@
                 },
                 "target": {
                     "$ref": "#/definitions/ContextDataTarget"
-                },
-                "body": {
-                    "$ref": "#/definitions/ContextDataTarget"
                 }
             }
         },
@@ -5782,6 +5546,20 @@
                 },
                 "parentResourceID": {
                     "type": "string"
+                },
+                "collectedBy": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "level": {
+                                "type": "string"
+                            },
+                            "user": {
+                                "type": "string"
+                            }
+                        }
+                    }
                 }
             }
         },
@@ -6397,6 +6175,27 @@
                                 }
                             }
                         }
+                    },
+                    "sources": {
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "enum": [
+                                "Europeana",
+                                "EuropeanaFashion",
+                                "DPLA",
+                                "NLA",
+                                "DigitalNZ",
+                                "YouTube",
+                                "Rijksmuseum",
+                                "DDB",
+                                "BritishLibrary",
+                                "InternetArchive",
+                                "WITHin",
+                                "DBPedia",
+                                "Historypin"
+                            ]
+                        }
                     }
                 }
             }
@@ -6476,6 +6275,354 @@
                 }
             }
         },
+        "CollectionSearch": {
+            "description": "This is the response of calls that search collections and exhibitions. ",
+            "type": "object",
+            "properties": {
+                "results": {
+                    "$ref": "#/definitions/CollectionResponses"
+                },
+                "sources": {
+                    "type": "array",
+                    "items": {
+                        "type": "string",
+                        "enum": [
+                            "Europeana",
+                            "EuropeanaFashion",
+                            "DPLA",
+                            "NLA",
+                            "DigitalNZ",
+                            "YouTube",
+                            "Rijksmuseum",
+                            "DDB",
+                            "BritishLibrary",
+                            "InternetArchive",
+                            "WITHin",
+                            "DBPedia",
+                            "Historypin"
+                        ]
+                    }
+                },
+                "accumulatedValues": {
+                    "type": "object",
+                    "properties": {
+                        "fieldName": {
+                            "type": "array",
+                            "items": {
+                                "type": "object",
+                                "properties": {
+                                    "value": {
+                                        "type": "string"
+                                    },
+                                    "count": {
+                                        "type": "integer"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "description": "Contains a list of fields that correspond to different metadata present in the results, and their respective counts. These are structured like facets, but for the whole results."
+                },
+                "continuationId": {
+                    "type": "string",
+                    "description": "This value is used to show more results from the same query, after results from the first source have been returned."
+                },
+                "query": {
+                    "$ref": "#/definitions/SearchQueryResp"
+                }
+            }
+        },
+        "Search2": {
+            "description": "This is the new search response, used in all calls. Depending on the call, some fields may be unused or be substituted by others.",
+            "type": "object",
+            "properties": {
+                "results": {
+                    "$ref": "#/definitions/Responses2"
+                },
+                "sources": {
+                    "type": "array",
+                    "items": {
+                        "type": "string",
+                        "enum": [
+                            "Europeana",
+                            "EuropeanaFashion",
+                            "DPLA",
+                            "NLA",
+                            "DigitalNZ",
+                            "YouTube",
+                            "Rijksmuseum",
+                            "DDB",
+                            "BritishLibrary",
+                            "InternetArchive",
+                            "WITHin",
+                            "DBPedia",
+                            "Historypin"
+                        ]
+                    }
+                },
+                "accumulatedValues": {
+                    "type": "object",
+                    "properties": {
+                        "fieldName": {
+                            "type": "array",
+                            "items": {
+                                "type": "object",
+                                "properties": {
+                                    "value": {
+                                        "type": "string"
+                                    },
+                                    "count": {
+                                        "type": "integer"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "description": "Contains a list of fields that correspond to different metadata present in the results, and their respective counts. These are structured like facets, but for the whole results."
+                },
+                "continuationId": {
+                    "type": "string",
+                    "description": "This value is used to show more results from the same query, after results from the first source have been returned."
+                },
+                "query": {
+                    "$ref": "#/definitions/SearchQueryResp"
+                }
+            }
+        },
+        "SearchQuery": {
+            "description": "The search query used in the ```/api/search2``` call.",
+            "type": "object",
+            "properties": {
+                "filters": {
+                    "type": "array",
+                    "items": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "fieldId": {
+                                    "type": "string"
+                                },
+                                "value": {
+                                    "type": "string"
+                                },
+                                "exact": {
+                                    "type": "boolean"
+                                },
+                                "from": {
+                                    "type": "integer"
+                                },
+                                "to": {
+                                    "type": "integer"
+                                },
+                                "lang": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                },
+                "sources": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "facets": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "continuation": {
+                    "type": "boolean"
+                },
+                "page": {
+                    "type": "integer"
+                },
+                "pageSize": {
+                    "type": "integer"
+                },
+                "continuationId": {
+                    "type": "string"
+                }
+            }
+        },
+        "SearchQueryResp": {
+            "description": "The query field contained in the response of the ```/api/search2``` call.",
+            "type": "object",
+            "properties": {
+                "filters": {
+                    "type": "array",
+                    "items": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "fieldId": {
+                                    "type": "string"
+                                },
+                                "value": {
+                                    "type": "string"
+                                },
+                                "exact": {
+                                    "type": "boolean"
+                                },
+                                "from": {
+                                    "type": "integer"
+                                },
+                                "to": {
+                                    "type": "integer"
+                                },
+                                "lang": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                },
+                "sources": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "facets": {
+                    "type": "string"
+                },
+                "continuation": {
+                    "type": "boolean"
+                },
+                "page": {
+                    "type": "integer"
+                },
+                "pageSize": {
+                    "type": "integer"
+                },
+                "continuationId": {
+                    "type": "string"
+                },
+                "start": {
+                    "type": "integer"
+                },
+                "count": {
+                    "type": "integer"
+                },
+                "responseLanguage": {
+                    "type": "string"
+                }
+            }
+        },
+        "Responses2": {
+            "description": "This Array contains results that contain records in the WITH model. This schema can appear in the results array of many calls, including internal and external searches.",
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "source": {
+                        "type": "string"
+                    },
+                    "totalCount": {
+                        "type": "integer"
+                    },
+                    "start": {
+                        "type": "integer"
+                    },
+                    "count": {
+                        "type": "integer"
+                    },
+                    "page": {
+                        "type": "integer"
+                    },
+                    "pageSize": {
+                        "type": "integer"
+                    },
+                    "items": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/definitions/InternalRecord"
+                        }
+                    },
+                    "facets": {
+                        "type": "object",
+                        "properties": {
+                            "facetName": {
+                                "type": "array",
+                                "items": {
+                                    "type": "object",
+                                    "properties": {
+                                        "value": {
+                                            "type": "string"
+                                        },
+                                        "count": {
+                                            "type": "integer"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "errorMessage": {
+                        "type": "boolean"
+                    }
+                }
+            }
+        },
+        "CollectionResponses": {
+            "description": "This Array contains results from each external source, seperated in respecting objects, as they appear in the results array of the ```/api/search2``` call. Note that the facets field is NOT used in the faceted search. The filters field contains filters seperated for the corresponding source.",
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "source": {
+                        "type": "string"
+                    },
+                    "totalCount": {
+                        "type": "integer"
+                    },
+                    "start": {
+                        "type": "integer"
+                    },
+                    "count": {
+                        "type": "integer"
+                    },
+                    "page": {
+                        "type": "integer"
+                    },
+                    "pageSize": {
+                        "type": "integer"
+                    },
+                    "items": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/definitions/Collection"
+                        }
+                    },
+                    "facets": {
+                        "type": "object",
+                        "properties": {
+                            "facetName": {
+                                "type": "array",
+                                "items": {
+                                    "type": "object",
+                                    "properties": {
+                                        "value": {
+                                            "type": "string"
+                                        },
+                                        "count": {
+                                            "type": "integer"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "errorMessage": {
+                        "type": "boolean"
+                    }
+                }
+            }
+        },
         "Search": {
             "description": "The search response contains two JSON array objects. Responses contains objects corresponding to each external source queried for the search. Filters contains aggregated filters from all the available sources. Inside the response array objects however, there are filter objects that contain the filters for each individual source.",
             "type": "object",
@@ -6509,415 +6656,6 @@
                 },
                 "thumbnail": {
                     "$ref": "#/definitions/MediaObjectEmbedded"
-                }
-            }
-        },
-        "SampleMediaObjectEmbedded": {
-            "description": "Holds metadata for media objects, i.e. images, video, text or audio files that are the basis of records.",
-            "type": "object",
-            "properties": {
-                "Original": {
-                    "type": "string",
-                    "default": "uri: /media/569f78d6590b1966cdeb3443?file=true"
-                },
-                "Tiny": {
-                    "type": "string",
-                    "default": "uri: /media/569f78de590b1966cdeb3450?file=true"
-                },
-                "Square": {
-                    "type": "string",
-                    "default": "uri: /media/569f78de590b1966cdeb3452?file=true"
-                },
-                "Thumbnail": {
-                    "type": "string",
-                    "default": "uri: /media/569f78de590b1966cdeb3454?file=true"
-                },
-                "Medium": {
-                    "type": "string",
-                    "default": "uri: /media/569f78de590b1966cdeb3456?file=true"
-                }
-            }
-        },
-        "SampleInternalRecord": {
-            "description": "An individual record description and metadata. The fields exhibition and position are used only for records in exhibitions. This object schema is used for internal search responses (records stored in the WITH database).",
-            "type": "object",
-            "properties": {
-                "resourceType": {
-                    "type": "string",
-                    "default": "CulturalObject"
-                },
-                "collectedIn": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/SampleExternalCollection"
-                    }
-                },
-                "media": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/SampleMediaObjectEmbedded"
-                    }
-                },
-                "descriptiveData": {
-                    "$ref": "#/definitions/SampleDescriptiveData"
-                },
-                "provenance": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/SampleProvenance"
-                    }
-                }
-            }
-        },
-        "SampleEUROPEANARecord": {
-            "description": "An individual record description and metadata. The fields exhibition and position are used only for records in exhibitions. This object schema is used for internal search responses (records stored in the WITH database).",
-            "type": "object",
-            "properties": {
-                "provenance": {
-                    "type": "array",
-                    "items": {
-                        "type": "object",
-                        "properties": {
-                            "provider": {
-                                "type": "string",
-                                "default": "Europeana"
-                            },
-                            "resourceId": {
-                                "type": "string",
-                                "default": "http://ipa.image.ntua.gr:9030/assets/apispecs.json"
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "SampleMINTRecord": {
-            "description": "An individual record description and metadata. The fields exhibition and position are used only for records in exhibitions. This object schema is used for internal search responses (records stored in the WITH database).",
-            "type": "object",
-            "properties": {
-                "resourceType": {
-                    "type": "string",
-                    "default": "CulturalObject"
-                },
-                "collectedIn": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/SampleExternalCollection"
-                    }
-                },
-                "media": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/SampleMediaObjectEmbedded"
-                    }
-                },
-                "descriptiveData": {
-                    "$ref": "#/definitions/SampleDescriptiveData"
-                },
-                "provenance": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/SampleProvenance"
-                    }
-                }
-            }
-        },
-        "SampleMEDIARecord": {
-            "description": "An individual record description and metadata. The fields exhibition and position are used only for records in exhibitions. This object schema is used for internal search responses (records stored in the WITH database).",
-            "type": "object",
-            "properties": {
-                "resourceType": {
-                    "type": "string",
-                    "default": "CulturalObject"
-                },
-                "collectedIn": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/SampleExternalCollection"
-                    }
-                },
-                "media": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/SampleMediaObjectEmbedded"
-                    }
-                },
-                "descriptiveData": {
-                    "$ref": "#/definitions/SampleDescriptiveData"
-                },
-                "provenance": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/SampleProvenance"
-                    }
-                }
-            }
-        },
-        "SamplePUBLICRecord": {
-            "description": "An individual record description and metadata. The fields exhibition and position are used only for records in exhibitions. This object schema is used for internal search responses (records stored in the WITH database).",
-            "type": "object",
-            "properties": {
-                "administrative": {
-                    "type": "object",
-                    "properties": {
-                        "access": {
-                            "type": "object",
-                            "properties": {
-                                "isPublic": {
-                                    "type": "boolean",
-                                    "default": true
-                                },
-                                "acl": {
-                                    "type": "array",
-                                    "items": {
-                                        "type": "object",
-                                        "properties": {
-                                            "user": {
-                                                "type": "string",
-                                                "default": "eirini1"
-                                            },
-                                            "level": {
-                                                "type": "string",
-                                                "default": "READ"
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                },
-                "descriptiveData": {
-                    "type": "object",
-                    "properties": {
-                        "label": {
-                            "type": "object",
-                            "properties": {
-                                "default": {
-                                    "type": "array",
-                                    "items": {
-                                        "type": "string"
-                                    }
-                                }
-                            }
-                        }
-                    }
-                },
-                "provenance": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/SampleProvenance"
-                    }
-                }
-            }
-        },
-        "SampleCollection": {
-            "description": "Collection metadata.",
-            "type": "object",
-            "properties": {
-                "resourceType": {
-                    "type": "string",
-                    "default": "SimpleCollection"
-                },
-                "descriptiveData": {
-                    "$ref": "#/definitions/SampleCollectionDescriptiveData"
-                },
-                "access": {
-                    "$ref": "#/definitions/SampleAccess"
-                }
-            }
-        },
-        "SampleExhibition": {
-            "description": "Exhibition metadata.",
-            "type": "object",
-            "properties": {
-                "resourceType": {
-                    "type": "string",
-                    "default": "Exhibition"
-                },
-                "descriptiveData": {
-                    "$ref": "#/definitions/SampleCollectionDescriptiveData"
-                },
-                "access": {
-                    "$ref": "#/definitions/SampleAccess"
-                }
-            }
-        },
-        "SampleAccess": {
-            "description": "Sample acces object.",
-            "type": "object",
-            "properties": {
-                "isPublic": {
-                    "type": "boolean",
-                    "default": false
-                }
-            }
-        },
-        "SampleExternalCollection": {
-            "description": "Metadata related to external collections an object may belong to.",
-            "type": "object",
-            "properties": {
-                "collectionId": {
-                    "type": "string",
-                    "default": "569f78d6590b1966cdeb3443"
-                },
-                "position": {
-                    "type": "integer",
-                    "default": 16
-                }
-            }
-        },
-        "SampleExternalCollectionNoId": {
-            "description": "Metadata related to external collections an object may belong to.",
-            "type": "object",
-            "properties": {
-                "position": {
-                    "type": "integer",
-                    "default": 16
-                }
-            }
-        },
-        "SampleProvenance": {
-            "description": "Holds provenance metadata about a collected resource.",
-            "type": "object",
-            "properties": {
-                "provider": {
-                    "type": "string",
-                    "default": "Europeana"
-                },
-                "uri": {
-                    "type": "string",
-                    "default": "uri@uri//uri"
-                },
-                "resourceId": {
-                    "type": "string",
-                    "default": "569f78d6590b1966cdeb3443"
-                }
-            }
-        },
-        "SampleCollectionDescriptiveData": {
-            "description": "Extends DescriptiveData with fields unique to CollectionObjects.",
-            "type": "object",
-            "properties": {
-                "label": {
-                    "type": "object",
-                    "properties": {
-                        "default": {
-                            "type": "array",
-                            "items": {
-                                "type": "string",
-                                "default": "label1"
-                            }
-                        }
-                    }
-                },
-                "description": {
-                    "type": "object",
-                    "properties": {
-                        "default": {
-                            "type": "array",
-                            "items": {
-                                "type": "string",
-                                "default": "description1"
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "SampleDescriptiveData": {
-            "description": "Descriptive metadata vary depending on the type of the collected resource. The basic data structures of all the different types are: ```LiteralType, ResourceType, ResourceOrLiteralType```",
-            "type": "object",
-            "properties": {
-                "label": {
-                    "type": "string",
-                    "default": {
-                        "en": [
-                            "label1",
-                            "label2"
-                        ]
-                    }
-                },
-                "description": {
-                    "type": "string",
-                    "default": {
-                        "en": [
-                            "desc1",
-                            "desc2"
-                        ]
-                    }
-                },
-                "keywords": {
-                    "type": "string",
-                    "default": {
-                        "en": [
-                            "keyword1",
-                            "keyword1"
-                        ]
-                    }
-                },
-                "isShownAt": {
-                    "type": "string",
-                    "default": {
-                        "en": "somewhere"
-                    }
-                },
-                "rdfType": {
-                    "type": "string",
-                    "default": "type1orSomething"
-                },
-                "altlabels": {
-                    "type": "string",
-                    "default": {
-                        "en": [
-                            "altlabel1",
-                            "altlabel1"
-                        ]
-                    }
-                }
-            }
-        },
-        "SampleMultiLiteralOrResource": {
-            "description": "Can either be a multiliteral or a resource.",
-            "type": "array",
-            "items": {
-                "$ref": "#/definitions/ResourceOrLiteral"
-            }
-        },
-        "SampleMultiLiteral": {
-            "description": "More than one RDF literal types.",
-            "type": "array",
-            "items": {
-                "$ref": "#/definitions/Literal"
-            }
-        },
-        "SampleLiteral": {
-            "description": "An RDF literal type.",
-            "type": "object",
-            "properties": {
-                "key": {
-                    "type": "string",
-                    "default": "value"
-                }
-            }
-        },
-        "SampleResource": {
-            "description": "An RDF resource type.",
-            "type": "object",
-            "properties": {
-                "key": {
-                    "type": "string",
-                    "default": "value"
-                }
-            }
-        },
-        "SampleResourceOrLiteral": {
-            "description": "Either an RDF literal or a resource.",
-            "type": "object",
-            "properties": {
-                "key": {
-                    "type": "string",
-                    "default": "value"
                 }
             }
         }
