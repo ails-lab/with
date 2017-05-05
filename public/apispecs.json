@@ -1,9 +1,9 @@
 {
     "swagger": "2.0",
     "info": {
-        "version": "v0.6",
+        "version": "v0.8",
         "title": "WITH API",
-        "description": "Welcome to the WITH API documentation! \n If you are completely new to the API, please visit ```link available soon``` for an introduction to the model and basic functionalities. \n We are still in a development phase, so expect changes. We will keep this documentation updated and this text will include a memo of the latest changes. \n \n NEW: \n \n (since v. 0.68) Many changes, added calls for annotations and various others. Added calls for internal search within and among user collections. Documentation will be further updated once a couple of things have finished.\n \n (since v. 0.6) Added a new call in search that merges filters, updated responses in record, collections with context data. ~ LAST UPDATE(v. 0.68): July 26, 2016"
+        "description": "Welcome to the WITH API documentation! \n If you are completely new to the API, please visit ```link available soon``` for an introduction to the model and basic functionalities. \n We are still in a development phase, so expect changes. We will keep this documentation updated and this text will include a memo of the latest changes. \n \n NEW: \n \n (since v.0.7) Major update in search calls, see the new search2 call for details. Updated facebook and google login calls. Minor updates here and there and a few new utility calls added, further updates soon. \n \n (since v. 0.68) Many changes, added calls for annotations and various others. Added calls for internal search within and among user collections. Documentation will be further updated once a couple of things have finished.\n \n (since v. 0.6) Added a new call in search that merges filters, updated responses in record, collections with context data.\n \n \n ~ LAST UPDATE(v. 0.8): May 5, 2017"
     },
     "paths": {
         "/api/search2": {
@@ -415,6 +415,82 @@
                 }
             }
         },
+        "/record/randomAnnotatedRecords": {
+            "get": {
+                "parameters": [
+                    {
+                        "name": "groupId",
+                        "in": "query",
+                        "description": "This group will have read access to these records.",
+                        "type": "string"
+                    },
+                    {
+                        "name": "count",
+                        "in": "query",
+                        "description": "How many records to be fetched.",
+                        "type": "integer"
+                    },
+                    {
+                        "name": "minimum",
+                        "in": "query",
+                        "description": "Minimum number of records, must be over 3.",
+                        "type": "integer"
+                    }
+                ],
+                "summary": "Get some random annotated records.",
+                "description": "Fetch a specified amount of randomly selected records that have annotations and are visible to a group.",
+                "tags": [
+                    "Record",
+                    "Group"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/InternalRecord"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/record/randomRecordsFromCollections": {
+            "get": {
+                "parameters": [
+                    {
+                        "name": "collectionIds",
+                        "in": "query",
+                        "description": "A list that contains collectionIds.",
+                        "type": "string"
+                    },
+                    {
+                        "name": "count",
+                        "in": "query",
+                        "description": "How many records to be fetched.",
+                        "type": "integer"
+                    }
+                ],
+                "summary": "Get some random records that belong in collections.",
+                "description": "Fetch a specified amount of randomly selected records that have annotations and belong to the collections specified. The collectionIds parameter should be a list with comma seperated values.",
+                "tags": [
+                    "Record",
+                    "Group"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/InternalRecord"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/record/annotationCount": {
             "get": {
                 "parameters": [
@@ -489,6 +565,73 @@
                     },
                     "400": {
                         "description": "Bad Request (invalid json)",
+                        "schema": {
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error (database error)",
+                        "schema": {
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/record/multiple": {
+            "get": {
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "query",
+                        "required": true,
+                        "description": "A list of comma seperated record ids.",
+                        "type": "string"
+                    },
+                    {
+                        "name": "profile",
+                        "in": "query",
+                        "type": "string",
+                        "default": "MEDIUM",
+                        "enum": [
+                            "BASIC",
+                            "MEDIUM",
+                            "FULL"
+                        ],
+                        "description": "Set to FULL to get all available metadata on the record, MEDIUM to remove some, and BASIC for the lightest version possible. "
+                    },
+                    {
+                        "name": "locale",
+                        "in": "query",
+                        "type": "string",
+                        "description": "Only shows a specific locale (language codes similar to the alpha2 country codes)."
+                    }
+                ],
+                "summary": "Retrieve multiple record.",
+                "description": "Retrieve a JSON with the metadata of the records specified in the path, by its Id. To retrieve the Ids of records in collections, you can use the ```collection/{collectionId}/list``` call see the ```dbid``` field in the response. Many different serializations are available for the record's metadata. To select one, or more of them, use the \"format\" parameter. The different serializations will appear in the \"content\" field in the record response. The profile parameter regulates the verbosity of the response. Use FULL to get all available metadata on the record, MEDIUM to remove some, and BASIC for the lightest version possible. ",
+                "tags": [
+                    "Record"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/InternalRecord"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not found (format not found)",
                         "schema": {
                             "properties": {
                                 "error": {
@@ -1229,6 +1372,66 @@
                 "description": "This call will return an array of your exhibitions that match the search term. The results can be filtered by count, offset and shared status.",
                 "tags": [
                     "Exhibition",
+                    "Search"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/CollectionSearch"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden (no logged in user)",
+                        "schema": {
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/searchPublicCollections/": {
+            "get": {
+                "parameters": [
+                    {
+                        "name": "term",
+                        "in": "query",
+                        "description": "A search term.",
+                        "type": "string"
+                    },
+                    {
+                        "name": "isExhibition",
+                        "in": "query",
+                        "type": "boolean",
+                        "description": "Search among exhibitions."
+                    },
+                    {
+                        "name": "offset",
+                        "in": "query",
+                        "description": "offset",
+                        "type": "integer"
+                    },
+                    {
+                        "name": "count",
+                        "in": "query",
+                        "description": "Limits number of results.",
+                        "type": "integer"
+                    },
+                    {
+                        "name": "spaceId",
+                        "in": "query",
+                        "type": "string",
+                        "description": "Id of a space to search in."
+                    }
+                ],
+                "summary": "Search public collections.",
+                "description": "This call will return an array of public collections that search term. ",
+                "tags": [
+                    "Collection",
                     "Search"
                 ],
                 "responses": {
@@ -2206,7 +2409,7 @@
             }
         },
         "/collection/importEuropeanaCollection": {
-            "post": {
+            "get": {
                 "summary": "Import a collection from Europeana.",
                 "description": "Creates a new collection and imports records from an existing Europeana collection. Take notice that the id parameter refers to Europeana's id. The limit parameter can be set to -1 to import all items.",
                 "tags": [
@@ -2226,6 +2429,52 @@
                         "required": true,
                         "description": "Limits number of items",
                         "type": "integer"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/Collection"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request (bad id)",
+                        "schema": {
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error(database error)",
+                        "schema": {
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/collection/importOmeka": {
+            "get": {
+                "summary": "Import a collection from Omeka.",
+                "description": "Creates a new collection and imports records from an existing Omeka collection. Take notice that the id parameter refers to Omeka's id. The limit parameter can be set to -1 to import all items.",
+                "tags": [
+                    "Collection"
+                ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "query",
+                        "required": true,
+                        "description": "Omeka's Id of the collection",
+                        "type": "string"
                     }
                 ],
                 "responses": {
@@ -5428,7 +5677,7 @@
             }
         },
         "InternalRecord": {
-            "description": "An individual record description and metadata. The fields exhibition and position are used only for records in exhibitions. This object schema is used for internal search responses (records stored in the WITH database).",
+            "description": "An individual record description and metadata. The fields exhibition and position are used only for records in exhibitions. This object schema is used for internal search responses (records stored in the WITH database). The withCreatorInfo field will not appear without appropriate privileges.",
             "type": "object",
             "properties": {
                 "dbId": {
