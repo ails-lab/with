@@ -50,6 +50,7 @@ public class Campaign {
 		private long created;
 		private long approved;
 		private long rejected;
+		private long records;
 		
 		public long getCreated() {
 			return created;
@@ -68,6 +69,12 @@ public class Campaign {
 		}
 		public void setRejected(long rejected) {
 			this.rejected = rejected;
+		}
+		public long getRecords() {
+			return records;
+		}
+		public void setRecords(long records) {
+			this.records = records;
 		}
 	}
 	
