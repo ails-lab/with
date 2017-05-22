@@ -76,6 +76,8 @@ public class CampaignDAO extends DAO<Campaign> {
 		}
 
 		q = q.offset(offset).limit(count);
+		//q = q.order("title").offset(offset).limit(count);
+		//q = q.order("endDate").offset(offset).limit(count);
 		
 		List<Campaign> campaigns = new ArrayList<Campaign>();
 		campaigns = this.find(q).asList();
@@ -101,10 +103,12 @@ public class CampaignDAO extends DAO<Campaign> {
 		updateOps1.inc("contributorsPoints."+userid+"."+annotType);
 		this.update(q, updateOps1);
 		
-		UpdateOperations<Campaign> updateOps2 = this
-				.createUpdateOperations().disableValidation();
-		updateOps2.inc("annotationCurrent."+annotType);
-		this.update(q, updateOps2);
+		if (!annotType.equals("records")) {
+			UpdateOperations<Campaign> updateOps2 = this
+					.createUpdateOperations().disableValidation();
+			updateOps2.inc("annotationCurrent."+annotType);
+			this.update(q, updateOps2);
+		}
 	}
 	
 	public void decUserPoints(ObjectId campaignId, String userid, String annotType) {
@@ -115,10 +119,12 @@ public class CampaignDAO extends DAO<Campaign> {
 		updateOps1.dec("contributorsPoints."+userid+"."+annotType);
 		this.update(q, updateOps1);
 		
-		UpdateOperations<Campaign> updateOps2 = this
-				.createUpdateOperations().disableValidation();
-		updateOps2.dec("annotationCurrent."+annotType);
-		this.update(q, updateOps2);
+		if (!annotType.equals("records")) {
+			UpdateOperations<Campaign> updateOps2 = this
+					.createUpdateOperations().disableValidation();
+			updateOps2.dec("annotationCurrent."+annotType);
+			this.update(q, updateOps2);
+		}
 	}
 	
 }
