@@ -17,6 +17,7 @@
 package db;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import org.bson.types.ObjectId;
@@ -56,7 +57,7 @@ public class CampaignDAO extends DAO<Campaign> {
 		return this.findOne(q);		
 	}
 	
-	public List<Campaign> getCampaigns(String groupName, boolean active, int offset, int count) {
+	public List<Campaign> getCampaigns(String groupName, boolean active, String sortBy, int offset, int count) {
 		
 		Query<Campaign> q = this.createQuery();
 		
@@ -75,9 +76,15 @@ public class CampaignDAO extends DAO<Campaign> {
 			);
 		}
 
-		q = q.offset(offset).limit(count);
-		//q = q.order("title").offset(offset).limit(count);
-		//q = q.order("endDate").offset(offset).limit(count);
+		if (sortBy.equals("Date")) {
+			q = q.order("endDate").offset(offset).limit(count);
+		}
+		else if (sortBy.equals("Alphabetical")) {
+			q = q.order("title").offset(offset).limit(count);
+		}
+		else {
+			q = q.offset(offset).limit(count);
+		}
 		
 		List<Campaign> campaigns = new ArrayList<Campaign>();
 		campaigns = this.find(q).asList();

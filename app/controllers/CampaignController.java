@@ -56,11 +56,11 @@ public class CampaignController extends WithController {
 		return ok(Json.toJson(campaign));
 	}	
 	
-	public static Result getActiveCampaigns(String group, int offset, int count) {
+	public static Result getActiveCampaigns(String group, String sortBy, int offset, int count) {
 		ObjectNode result = Json.newObject();
 				
 		List<Campaign> campaigns = new ArrayList<Campaign>();
-		campaigns = DB.getCampaignDAO().getCampaigns(group, true, offset, count);
+		campaigns = DB.getCampaignDAO().getCampaigns(group, true, sortBy, offset, count);
 		
 		if (campaigns == null) {
 			result.put("error", "There are not any active campaigns for this UserGroup.");
