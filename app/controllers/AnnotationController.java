@@ -123,6 +123,31 @@ public class AnnotationController extends Controller {
 		}
 	}
 	
+	public static Result approveAnnotationObject(String id) {
+		try {
+			ObjectNode error = Json.newObject();
+			
+			JsonNode json = request().body().asJson();
+			if (json == null) {
+				error.put("error", "Invalid JSON");
+				return badRequest();
+			}
+			if (WithController.effectiveUserDbId() == null) {
+				error.put("error", "User not logged in");
+				return badRequest();
+			}
+			AnnotationAdmin administrative = getAnnotationAdminFromJson(json, WithController.effectiveUserDbId());
+			
+			ObjectId oid = new ObjectId(id);
+			DB.getAnnotationDAO().addApproveObject(oid, WithController.effectiveUserDbId(), administrative);
+			ElasticUtils.update(DB.getRecordResourceDAO().getByAnnotationId(oid));
+			return ok();
+		} catch (Exception e) {
+			log.error("", e);
+			return internalServerError();
+		}
+	}
+	
 	public static Result rejectAnnotation(String id) {
 		try {			
 			ObjectId oid = new ObjectId(id);
@@ -459,6 +484,32 @@ public class AnnotationController extends Controller {
 		} catch (ClassNotFoundException e) {
 			return new Annotation();
 		}
+	}
+	
+	public static AnnotationAdmin getAnnotationAdminFromJson(JsonNode json, ObjectId userId) {
+		AnnotationAdmin administrative = new AnnotationAdmin();
+		administrative.setWithCreator(userId);
+		if (json.has("generated")) {
+			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+			try {
+				administrative.setGenerated(sdf.parse(json.get("generated")
+						.asText()));
+			} catch (ParseException e) {
+				log.error(e.getMessage());
+				administrative.setGenerated(new Date());
+			}
+		} else {
+			administrative.setGenerated(new Date());
+		}
+		administrative.setCreated(administrative.getGenerated());
+		administrative.setLastModified(new Date());
+		if (json.has("generator"))
+			administrative.setGenerator(json.get("generator").asText());
+		if (json.has("confidence")) {
+			administrative.setConfidence(json.get("confidence").asDouble());
+		}
+
+		return administrative;
 	}
 	
 	private static Annotation updateAnnotationAdmin(Annotation annotation, ObjectId user) {

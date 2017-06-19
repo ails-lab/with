@@ -262,45 +262,42 @@ public class Annotation<T extends AnnotationBody> {
 	public static class AnnotationScore {
 
 		/**
-		 * An arrayList with the user ids who approved this annotation body.
+		 * An arrayList with the users who approved this annotation body.
 		 */
-		@JsonSerialize(using = Serializer.ObjectIdArraySerializer.class)
-		private ArrayList<ObjectId> approvedBy;
+		private ArrayList<AnnotationAdmin> approvedBy;
 
 		/**
-		 * An arrayList with the user ids who rejected this annotation body.
+		 * An arrayList with the users who rejected this annotation body.
 		 */
-		@JsonSerialize(using = Serializer.ObjectIdArraySerializer.class)
-		private ArrayList<ObjectId> rejectedBy;
+		private ArrayList<AnnotationAdmin> rejectedBy;
 
 		/**
-		 * An arrayList with the user ids who didn't comment on this annotation
+		 * An arrayList with the users who didn't comment on this annotation
 		 * body.
 		 */
-		@JsonSerialize(using = Serializer.ObjectIdArraySerializer.class)
-		private ArrayList<ObjectId> dontKnowBy;
+		private ArrayList<AnnotationAdmin> dontKnowBy;
 
-		public ArrayList<ObjectId> getApprovedBy() {
+		public ArrayList<AnnotationAdmin> getApprovedBy() {
 			return approvedBy;
 		}
 
-		public void setApprovedBy(ArrayList<ObjectId> approvedBy) {
+		public void setApprovedBy(ArrayList<AnnotationAdmin> approvedBy) {
 			this.approvedBy = approvedBy;
 		}
 
-		public ArrayList<ObjectId> getRejectedBy() {
+		public ArrayList<AnnotationAdmin> getRejectedBy() {
 			return rejectedBy;
 		}
 
-		public void setRejectedBy(ArrayList<ObjectId> rejectedBy) {
+		public void setRejectedBy(ArrayList<AnnotationAdmin> rejectedBy) {
 			this.rejectedBy = rejectedBy;
 		}
 
-		public ArrayList<ObjectId> getDontKnowByBy() {
+		public ArrayList<AnnotationAdmin> getDontKnowByBy() {
 			return dontKnowBy;
 		}
 
-		public void setDontKnowBy(ArrayList<ObjectId> dontKnowBy) {
+		public void setDontKnowBy(ArrayList<AnnotationAdmin> dontKnowBy) {
 			this.dontKnowBy = dontKnowBy;
 		}
 	}

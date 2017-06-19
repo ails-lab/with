@@ -202,6 +202,14 @@ public class AnnotationDAO extends DAO<Annotation> {
 		this.update(q, updateOps);
 	}
 	
+	public void addApproveObject(ObjectId id, ObjectId userId, AnnotationAdmin user) {
+		Query<Annotation> q = this.createQuery().field("_id").equal(id);
+		UpdateOperations<Annotation> updateOps = this.createUpdateOperations();
+		updateOps.add("score.approvedBy", user, false);		
+		updateOps.removeAll("score.rejectedBy.withCreator", userId);
+		this.update(q, updateOps);
+	}
+	
 	public void removeScore(ObjectId id, ObjectId userId) {
 		Query<Annotation> q = this.createQuery().field("_id").equal(id);
 		UpdateOperations<Annotation> updateOps = this.createUpdateOperations();
@@ -217,7 +225,14 @@ public class AnnotationDAO extends DAO<Annotation> {
 		updateOps.removeAll("score.approvedBy", userId);
 		this.update(q, updateOps);
 	}
-
+	
+	public void addRejectObject(ObjectId id, ObjectId userId, AnnotationAdmin user) {
+		Query<Annotation> q = this.createQuery().field("_id").equal(id);
+		UpdateOperations<Annotation> updateOps = this.createUpdateOperations();
+		updateOps.add("score.rejectedBy", user, false);
+		updateOps.removeAll("score.approvedBy.withCreator", userId);
+		this.update(q, updateOps);
+	}
 
 	public void removeAnnotators(ObjectId id, List<AnnotationAdmin> annotators) {
 		Query<Annotation> q = this.createQuery().field("_id").equal(id);
