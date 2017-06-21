@@ -159,6 +159,31 @@ public class AnnotationController extends Controller {
 		}
 	}
 	
+	public static Result rejectAnnotationObject(String id) {
+		try {
+			ObjectNode error = Json.newObject();
+			
+			JsonNode json = request().body().asJson();
+			if (json == null) {
+				error.put("error", "Invalid JSON");
+				return badRequest();
+			}
+			if (WithController.effectiveUserDbId() == null) {
+				error.put("error", "User not logged in");
+				return badRequest();
+			}
+			AnnotationAdmin administrative = getAnnotationAdminFromJson(json, WithController.effectiveUserDbId());
+			
+			ObjectId oid = new ObjectId(id);
+			DB.getAnnotationDAO().addRejectObject(oid, WithController.effectiveUserDbId(), administrative);
+			ElasticUtils.update(DB.getRecordResourceDAO().getByAnnotationId(oid));
+			return ok();
+		} catch (Exception e) {
+			log.error("", e);
+			return internalServerError();
+		}
+	}
+	
 	public static Result unscoreAnnotation(String id) {
 		try {			
 			ObjectId oid = new ObjectId(id);
@@ -374,12 +399,30 @@ public class AnnotationController extends Controller {
 							}
 							if( annotation.getScore() != null ) {
 								if( annotation.getScore().getApprovedBy() != null ) {
+									for( Object obj : annotation.getScore().getApprovedBy()) {
+										AnnotationAdmin aa = (AnnotationAdmin) obj;
+										if( aa.getWithCreator() != null ) {
+											String userId = aa.getWithCreator().toHexString();
+											counts.get( userId ).increase();
+										}
+									}
+									/*
 									for(ObjectId userId:  annotation.getScore().getApprovedBy())
 										counts.get( userId.toHexString()).increase();
+									*/
 								}
 								if( annotation.getScore().getRejectedBy() != null ) {
+									for( Object obj : annotation.getScore().getRejectedBy()) {
+										AnnotationAdmin aa = (AnnotationAdmin) obj;
+										if( aa.getWithCreator() != null ) {
+											String userId = aa.getWithCreator().toHexString();
+											counts.get( userId ).increase();
+										}
+									}
+									/*
 									for(ObjectId userId:  annotation.getScore().getRejectedBy())
 										counts.get( userId.toHexString()).increase();
+									*/
 								}
 							}
 						});

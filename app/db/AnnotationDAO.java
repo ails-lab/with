@@ -206,7 +206,7 @@ public class AnnotationDAO extends DAO<Annotation> {
 		Query<Annotation> q = this.createQuery().field("_id").equal(id);
 		UpdateOperations<Annotation> updateOps = this.createUpdateOperations();
 		updateOps.add("score.approvedBy", user, false);		
-		updateOps.removeAll("score.rejectedBy.withCreator", userId);
+		//updateOps.removeAll("score.rejectedBy.withCreator", userId);
 		this.update(q, updateOps);
 	}
 	
@@ -230,7 +230,7 @@ public class AnnotationDAO extends DAO<Annotation> {
 		Query<Annotation> q = this.createQuery().field("_id").equal(id);
 		UpdateOperations<Annotation> updateOps = this.createUpdateOperations();
 		updateOps.add("score.rejectedBy", user, false);
-		updateOps.removeAll("score.approvedBy.withCreator", userId);
+		//updateOps.removeAll("score.approvedBy.withCreator", userId);
 		this.update(q, updateOps);
 	}
 

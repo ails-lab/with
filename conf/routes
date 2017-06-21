@@ -62,6 +62,7 @@ DELETE	/annotation/:id							controllers.AnnotationController.deleteAnnotation(i
 GET		/annotation/:id/approve					controllers.AnnotationController.approveAnnotation(id)
 POST	/annotation/:id/approveObj				controllers.AnnotationController.approveAnnotationObject(id)
 GET		/annotation/:id/reject					controllers.AnnotationController.rejectAnnotation(id)
+POST	/annotation/:id/rejectObj				controllers.AnnotationController.rejectAnnotationObject(id)
 GET		/annotation/:id/unscore					controllers.AnnotationController.unscoreAnnotation(id)
 
 # Collection Controller
