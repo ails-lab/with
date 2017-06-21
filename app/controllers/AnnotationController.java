@@ -195,6 +195,17 @@ public class AnnotationController extends Controller {
 		}
 	}
 	
+	public static Result unscoreAnnotationObject(String id) {
+		try {			
+			ObjectId oid = new ObjectId(id);
+			DB.getAnnotationDAO().removeScoreObject(oid, WithController.effectiveUserDbId());
+			ElasticUtils.update(DB.getRecordResourceDAO().getByAnnotationId(oid));
+			return ok();
+		} catch (Exception e) {
+			return internalServerError();
+		}
+	}
+	
 	public static Result approveMultipleAnnotations(List<String> id) {
 		boolean ok = true;
 		ObjectId user = WithController.effectiveUserDbId();
