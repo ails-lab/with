@@ -463,10 +463,10 @@ public class RecordResourceController extends WithResourceController {
 				for (Annotation annotation : DB.getAnnotationDAO().getUserAnnotations(userId, new ObjectId(rid), Arrays.asList("annotators", "score.rejectedBy"))) {
 					AnnotationScore as = annotation.getScore();
 					if (as != null) {
-						ArrayList<ObjectId> rej = as.getRejectedBy();
+						ArrayList<AnnotationAdmin> rej = as.getRejectedBy();
 						if (rej != null) {
-							for (ObjectId id : rej) {
-								if (id.equals(userId)) {
+							for (AnnotationAdmin id : rej) {
+								if (id.getWithCreator().equals(userId)) {
 									ArrayList<AnnotationAdmin> annotators = annotation.getAnnotators();
 									AnnotationAdmin annotator = null;
 									for (AnnotationAdmin a : annotators) {
