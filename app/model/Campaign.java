@@ -17,23 +17,25 @@
 package model;
 
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
+
 import org.bson.types.ObjectId;
 import org.mongodb.morphia.annotations.Entity;
 import org.mongodb.morphia.annotations.Id;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
-import model.EmbeddedMediaObject.MediaVersion;
 import model.annotations.Annotation.MotivationType;
-import utils.Deserializer;
 import utils.Serializer;
 
 
 @Entity("Campaign")
 public class Campaign {
+
+	public Campaign() {
+		this.contributorsPoints = new Hashtable<ObjectId, AnnotationCount>();
+	}
 
 	/**
 	 * The badge that each user is awarded, depending on his earned points (based on the number/type of his annotations).
