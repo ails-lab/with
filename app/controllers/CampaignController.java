@@ -32,15 +32,16 @@ import play.mvc.Result;
 
 public class CampaignController extends WithController {
 	
-	public static final ALogger log = Logger.of(AnnotationController.class);
+	public static final ALogger log = Logger.of(CampaignController.class);
 	
-	public static Result getCampaignCount(String group) {
+	public static Result getCampaignCount(String group, boolean active) {
 		
-		long count = DB.getCampaignDAO().campaignCount(group);
+		long count = DB.getCampaignDAO().campaignCount(group, active);
 		
 		return ok(Json.toJson(count));
 	}
-	
+
+
 	public static Result getCampaign(String campaignId) {
 
 		ObjectId campaignDbId = new ObjectId(campaignId);

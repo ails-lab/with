@@ -225,7 +225,7 @@ GET	     /collection/:id/annotations 	        			controllers.CollectionObjectCon
 #GET	     /collection/:id/annotationSummary 	        			controllers.CollectionObjectController.getAnnotationSummary(id, mode: String ?="FLAT")
 
 #Campaign Controller
-GET		/campaign/count								controllers.CampaignController.getCampaignCount(group: String ?= "")
+GET		/campaign/count								controllers.CampaignController.getCampaignCount(group: String ?= "", active: Boolean ?= true)
 GET		/campaign/getCampaign						controllers.CampaignController.getCampaign(campaignId: String)
 GET		/campaign/getCampaignByName					controllers.CampaignController.getCampaignByName(cname: String)
 GET		/campaign/activeCampaigns					controllers.CampaignController.getActiveCampaigns(group: String ?= "", sortBy: String ?= "Alphabetical", offset: Integer ?=0, count: Integer ?=10)

@@ -34,12 +34,17 @@ public class CampaignDAO extends DAO<Campaign> {
 		super(Campaign.class);
 	}
 	
-	public long campaignCount(String groupName) {
+	public long campaignCount(String groupName, boolean active) {
 				
 		Query<Campaign> q = this.createQuery();
 		
 		if (!groupName.isEmpty()) {
 			q = q.field("spacename").equal(groupName);
+		}
+		
+		Date today = new Date();
+		if (active) {
+			q = q.field("startDate").lessThanOrEq(today).field("endDate").greaterThanOrEq(today);
 		}
 		
 		return q.countAll();
