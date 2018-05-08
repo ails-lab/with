@@ -567,16 +567,4 @@ public class SearchController extends WithController {
 	}
 
 
-	public static Result reindex_some(String idsString) {
-		List<String> ids =  Arrays.asList(idsString.split(","));
-		Promise.promise(new Function0<String>() {
-			public String apply() throws Exception {
-				log.info("Reindex started");
-				Elastic.reindex_some(ids);
-				log.info("Reindex finished");
-				return "ok";
-			}
-		});
-		return (ok());
-	}
 }
