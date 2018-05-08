@@ -22,10 +22,9 @@ import general.TestUtils;
 import java.util.List;
 
 import model.Collection;
-import model.CollectionMetadata;
 import model.CollectionRecord;
 import model.Media;
-import model.User;
+import model.usersAndGroups.User;
 
 import org.bson.types.ObjectId;
 import org.junit.Test;
@@ -54,23 +53,20 @@ public class CollectionDAOTest {
 		}
 		collection.setThumbnail(thumb);
 
-		// metadata for connection with user
-		CollectionMetadata colMeta = new CollectionMetadata();
-		colMeta.setDescription(collection.getDescription());
-		colMeta.setTitle(collection.getTitle());
+		
 
 		User user = DB.getUserDAO().getByEmail("heres42@mongo.gr");
-		collection.setOwnerId(user);
+		collection.setCreatorId(user);
 
 		// save the new created collection
 		Key<Collection> colKey = DB.getCollectionDAO()
 				.makePermanent(collection);
-		System.out.println(colKey.getId());
+		System.out.println(colKey.getFilterId());
 		assertThat(colKey).isNotNull();
 
 		// get by id
 		Collection a = DB.getCollectionDAO().getById(
-				new ObjectId(colKey.getId().toString()));
+				new ObjectId(colKey.getFilterId().toString()));
 		assertThat(a).isNotNull().overridingErrorMessage(
 				"Test collection not found using db id.");
 
@@ -82,7 +78,7 @@ public class CollectionDAOTest {
 
 		// get collection owner
 		User u = DB.getCollectionDAO().getCollectionOwner(
-				new ObjectId(colKey.getId().toString()));
+				new ObjectId(colKey.getFilterId().toString()));
 		assertThat(u).isNotNull().overridingErrorMessage(
 				"User not found using db id.");
 
@@ -95,19 +91,19 @@ public class CollectionDAOTest {
 
 		// get, modify, save again
 		Collection e = DB.getCollectionDAO().getById(
-				new ObjectId(colKey.getId().toString()));
+				new ObjectId(colKey.getFilterId().toString()));
 		e.setTitle("DbId test");
 		colKey = DB.getCollectionDAO().makePermanent(e);
-		System.out.println(colKey.getId());
+		System.out.println(colKey.getFilterId());
 
 		// remove from db
 		DB.getCollectionDAO().makeTransient(b);
 		DB.getCollectionDAO().deleteById(
-				new ObjectId(colKey.getId().toString()));
+				new ObjectId(colKey.getFilterId().toString()));
 
 		// check its gone
 		Collection d = DB.getCollectionDAO().getById(
-				new ObjectId(colKey.getId().toString()));
+				new ObjectId(colKey.getFilterId().toString()));
 		assertThat(d).overridingErrorMessage("User not deleted!").isNull();
 	}
 
@@ -137,10 +133,10 @@ public class CollectionDAOTest {
 
 			if (i == 42) {
 				user = DB.getUserDAO().getByEmail("heres42@mongo.gr");
-				collection.setOwnerId(user);
+				collection.setCreatorId(user);
 			} else {
 				user = DB.getUserDAO().find().asList().get(i);
-				collection.setOwnerId(user);
+				collection.setCreatorId(user);
 			}
 
 			// save the new created collection

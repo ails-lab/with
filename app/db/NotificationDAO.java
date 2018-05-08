@@ -19,13 +19,14 @@ package db;
 import java.util.List;
 import java.util.Set;
 
+import notifications.Notification;
+import notifications.Notification.Activity;
+
 import org.bson.types.ObjectId;
 import org.mongodb.morphia.query.Criteria;
 import org.mongodb.morphia.query.Query;
 
-import model.Notification;
-import model.Notification.Activity;
-import model.Rights.Access;
+import model.basicDataTypes.WithAccess.Access;
 import play.Logger;
 import play.Logger.ALogger;
 
@@ -80,30 +81,30 @@ public class NotificationDAO extends DAO<Notification> {
 	}
 
 	public List<Notification> getPendingByReceiver(ObjectId receiverId) {
-		Query<Notification> q = this.createQuery().field("receiver").equal(receiverId).order("-openedAt");
+		Query<Notification> q = this.createQuery().field("receiver").equal(receiverId).order("-openedAt").disableValidation();
 		q.and(q.criteria("pendingResponse").equal(true));
 		return find(q).asList();
 	}
 
 	public List<Notification> getPendingGroupNotifications(ObjectId receiverId, ObjectId groupId, Activity activity) {
-		Query<Notification> q = this.createQuery().field("receiver").equal(receiverId).order("-openedAt");
+		Query<Notification> q = this.createQuery().field("receiver").equal(receiverId).order("-openedAt").disableValidation();
 		q.and(q.criteria("pendingResponse").equal(true), q.criteria("group").equal(groupId),
 				q.criteria("activity").equal(activity));
 		return find(q).asList();
 	}
 
-	public List<Notification> getPendingCollectionNotifications(ObjectId receiverId, ObjectId collectionId,
+	public List<Notification> getPendingResourceNotifications(ObjectId receiverId, ObjectId collectionId,
 			Activity activity, Access access) {
-		Query<Notification> q = this.createQuery().field("receiver").equal(receiverId).order("-openedAt");
-		q.and(q.criteria("pendingResponse").equal(true), q.criteria("collection").equal(collectionId),
+		Query<Notification> q = this.createQuery().field("receiver").equal(receiverId).order("-openedAt").disableValidation();
+		q.and(q.criteria("pendingResponse").equal(true), q.criteria("resource").equal(collectionId),
 				q.criteria("activity").equal(activity), q.criteria("access").equal(access));
 		return find(q).asList();
 	}
 
-	public List<Notification> getPendingCollectionNotifications(ObjectId receiverId, ObjectId collectionId,
+	public List<Notification> getPendingResourceNotifications(ObjectId receiverId, ObjectId collectionId,
 			Activity activity) {
-		Query<Notification> q = this.createQuery().field("receiver").equal(receiverId).order("-openedAt");
-		q.and(q.criteria("pendingResponse").equal(true), q.criteria("collection").equal(collectionId),
+		Query<Notification> q = this.createQuery().field("receiver").equal(receiverId).order("-openedAt").disableValidation();
+		q.and(q.criteria("pendingResponse").equal(true), q.criteria("resource").equal(collectionId),
 				q.criteria("activity").equal(activity));
 		return find(q).asList();
 	}

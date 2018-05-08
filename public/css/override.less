@@ -1,0 +1,351 @@
+// Imports main.less file (along with anything that imports)
+@import "main.less";
+
+// Add any modifications here
+#uploaded-image > input
+{
+    display: none;
+}
+
+// Validation Decoration
+.has-error {
+	color: #a94442!important;
+}
+a.redheart {
+	color: #ec5a62!important;
+}
+
+.closemedia{
+    cursor: pointer;
+}
+
+// Loading Icon
+body div[role='main'] .more {
+	bottom: 100px;
+	right: 40px;
+	padding: 5px;
+	position: fixed;
+	z-index: 1032;
+	font-size: 25px;
+}
+
+body div[role="main"] .wrapper main section.collection .list-body.grids li .meta .other-info { 
+	display: inline;
+}
+
+body div[role="main"] .wrapper main section.collection .list-body.grids li .meta .description { 
+	display: inline;
+}
+
+body div[role="main"] .wrapper main section.collection .list-body li .thumbnails .category { 
+	right: 0;
+	left: unset;
+}
+
+body div[role="main"] .wrapper main section.collection .list-body.list li .thumbnails .category {
+	left: unset;
+}
+
+body div[role="main"] .wrapper main section.collection .list-body li .thumbnails .counter { 
+	background: #4f7979;
+	color: #fff;
+	font-size: 1.1rem;
+	font-weight: 500;
+	text-transform: uppercase;
+	padding: 5px 15px;
+	position: absolute;
+	top: 0;
+	left: 0;
+	z-index: 5;
+}
+
+/* Collection View
+body div[role="main"] .wrapper main section.collection .list-head .upload,
+body div[role="main"] .wrapper main section.exhibition .list-head .upload,
+body div[role="main"] .wrapper main section.favorite .list-head .upload,
+body div[role="main"] .wrapper main section.project .list-head .upload {
+    padding-left: 10px;
+	cursor: pointer;
+}
+
+body div[role='main'] .wrapper main section.favorite .list-head .list-control .fa {
+	cursor:pointer
+}
+body div[role='main'] .wrapper main section.collection .list-body.grids li.sizer {
+	width: 25%; margin-left:0;
+}
+
+body div[role='main'] .wrapper main section.collection .list-body.grids li.item {
+	width: 25%; padding: 0 15px 0 15px;float:none;margin-left:0;
+}
+*/
+body div[role='main'] .wrapper section.action .button-group,
+.list-control a,
+.action-group a {
+	cursor: pointer;
+}
+
+// My Groups
+body div[role="main"] .wrapper main section.project section.project-list .list-body.list li .thumbnails .wrap.small {
+	width: 100px;
+}
+
+body div[role="main"] .wrapper main section.collection .list-body.list li .thumbnails .wrap,
+body div[role="main"] .wrapper main section.exhibition .list-body.list li .thumbnails .wrap   {
+  overflow: hidden;
+}
+
+// Remove dummy map
+body div[role="main"] .wrapper main section.collection section.hero .map,
+body div[role="main"] .wrapper main section.exhibition section.hero .map,
+body div[role="main"] .wrapper main section.favorite section.hero .map,
+body div[role="main"] .wrapper main section.project section.hero .map {
+	background: none;
+}
+body div[role='main'] .wrapper .search .searchlabel .label{
+    font-weight: 400!important;
+    cursor: pointer;
+}
+#uploaded-logo img {
+	cursor: pointer;
+}
+
+.hiddenfile {
+	width: 0px;
+	height: 0px;
+	overflow: hidden;
+}
+
+.autocomplete-suggestions {
+  border: 1px solid #ccc;
+  -webkit-box-shadow: 2px 2px 2px 0px rgba(128,128,128,0.75);
+  -moz-box-shadow: 2px 2px 2px 0px rgba(128,128,128,0.75);
+  box-shadow: 2px 2px 2px 0px rgba(128,128,128,0.75);
+  background: white;
+}
+
+.autocomplete-suggestions > .autocomplete-selected {
+  background-color: #cccccc;
+}
+.autocomplete-suggestions-extra {
+  font-size: 12pt;
+}
+.autocomplete-suggestion-extra {
+  background-color: #FAFAFA;
+  cursor: default;
+  padding: 2px 4px 2px 8px;
+}
+-
+.autocomplete-suggestion-extra .label {
+  background-color: #ec5a62;
+  margin: 2px 0;
+}
+
+/* Validation Errors */
+.errormsg {
+  color: #9c3b3b;
+  display: block;
+  font-style: italic;
+  line-height: 1.3em;
+  padding: 3px 0 0;
+  text-align: right;
+}
+
+
+
+body div[role='main'].homepage .featured .featured-box .featured-meta .img-exhibition li img {
+    max-width: 90%;
+    max-height: 90px;
+}
+
+/* Collections / Exhibitions */
+.truncate {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: 90%;
+  display: block;
+}
+
+/* About */
+body div.about[role="main"] .aboutlink .left ul li a {
+  color: #4f7979;
+  text-decoration: none;
+}
+
+.about-desc {
+  font-size: 1.3em;
+  width: 75%;
+  text-align: center;
+  margin: 20px auto;
+}
+
+body div[role=main] .wrapper main section.exhibition .assets .assetlisting ul li a img {
+}
+
+.rightscr {
+    width: 40px;
+    right: 0;
+    position: fixed;
+    height: 100%;
+    z-index: 10;
+    top:0;
+}
+
+.leftscr
+ {   top:0;
+    width: 40px;
+    position: fixed;
+    height: 100%;
+    z-index: 10;
+}
+
+
+body div[role=main] .wrapper main section.exhibition .assets {
+    position: fixed;
+    bottom: 0;
+    background-color: #FFFFFF;
+    z-index: 1;
+    overflow: visible;
+    width: 90%;
+    height: 160px;
+}
+
+body div[role=main] .wrapper main section.exhibition .assets .assetlisting{
+	position: absolute;
+    display: inline-block;
+    height: 100px;
+    background-color: #FFF;
+ }
+ 
+body div[role=main] .wrapper main section.exhibition .editorbox{
+ 	margin-top:5px;
+     margin-bottom: 2em;
+}
+ 
+body div[role=main] .wrapper main section.exhibition .assets .actions .notification {
+    float: left;
+    padding-left:10px;
+    padding-right:0;
+}
+ 
+ 
+body div[role=main] .wrapper section.exhibitionviewer .exhibitionplayer .carouselexhibition .item .container {
+  overflow: hidden; 
+  padding-top: 50px;
+  padding-left: 0px;
+  padding-right: 0px;
+  height: 100%;
+  width: 80%;
+}
+
+body div[role=main] .wrapper section.exhibitionviewer .exhibitionplayer .carouselexhibition .item.style1 .textbox, body div[role=main] .wrapper section.exhibitionviewer .exhibitionplayer .carouselexhibition .item.style2 .textbox, body div[role=main] .wrapper section.exhibitionviewer .exhibitionplayer .carouselexhibition .item.style3 .textbox{
+    overflow: auto;
+}
+
+body div[role='main'] .wrapper section.exhibitionviewer .exhibitionplayer .carouselexhibition .item.style1 .container .imagewrap {
+  float: left;
+  padding: 0 30px 0 0;
+  width: 75%;
+}
+
+body div[role='main'] .wrapper section.exhibitionviewer .exhibitionplayer .carouselexhibition .item.style1 .container .imagewrapvideo  {
+  float: left;
+  padding: 0 30px 0 0;
+  width: 40%;
+}
+
+body div[role='main'] .wrapper section.exhibitionviewer .exhibitionplayer .carouselexhibition .item.style1 .container .imagewrapaudio  {
+  float: left;
+  padding: 0 30px 0 0;
+  width: 50%;
+}
+
+
+body div[role='main'] .wrapper section.exhibitionviewer .exhibitionplayer .carouselexhibition .item.style1 .container .imagewrap img,
+body div[role='main'] .wrapper section.exhibitionviewer .exhibitionplayer .carouselexhibition .item.style1 .container .imagewrapvideo img,
+body div[role='main'] .wrapper section.exhibitionviewer .exhibitionplayer .carouselexhibition .item.style1 .container .imagewrapaudio img {
+  max-width: 100%;
+  max-height: 100%;
+  height: auto;
+}
+
+
+body div[role='main'] .wrapper section.exhibitionviewer .exhibitionplayer .carouselexhibition .item.style1 .imagewrapvideo ul.action,
+body div[role='main'] .wrapper section.exhibitionviewer .exhibitionplayer .carouselexhibition .item.style1 .imagewrapaudio ul.action {
+  margin: 0;
+  padding: 0;
+  position: static;
+  margin: 10px 0 0 0;
+  bottom: 15px;
+  left: 0px;
+}
+body div[role='main'] .wrapper section.exhibitionviewer .exhibitionplayer .carouselexhibition .item.style1 .imagewrapvideo ul.action li,
+body div[role='main'] .wrapper section.exhibitionviewer .exhibitionplayer .carouselexhibition .item.style1 .imagewrapaudio ul.action li {
+  list-style: none;
+  float: left;
+  margin-left: 1px;
+}
+body div[role='main'] .wrapper section.exhibitionviewer .exhibitionplayer .carouselexhibition .item.style1 .imagewrapvideo ul.action li a,
+body div[role='main'] .wrapper section.exhibitionviewer .exhibitionplayer .carouselexhibition .item.style1 .imagewrapaudio ul.action li a {
+  width: 34px;
+  height: 34px;
+  background: rgba(0, 0, 0, 0.7);
+  display: block;
+  padding-top: 7px;
+  color: #fff;
+  text-align: center;
+}
+body div[role='main'] .wrapper section.exhibitionviewer .exhibitionplayer .carouselexhibition .item.style1 .imagewrapvideo ul.action li:first-child a,
+body div[role='main'] .wrapper section.exhibitionviewer .exhibitionplayer .carouselexhibition .item.style1 .imagewrapaudio ul.action li:first-child a {
+  border-top-left-radius: 3px;
+  border-bottom-left-radius: 3px;
+}
+body div[role='main'] .wrapper section.exhibitionviewer .exhibitionplayer .carouselexhibition .item.style1 .imagewrapvideo ul.action li:last-child a,
+body div[role='main'] .wrapper section.exhibitionviewer .exhibitionplayer .carouselexhibition .item.style1 .imagewrapaudio ul.action li:last-child a {
+  border-top-right-radius: 3px;
+  border-bottom-right-radius: 3px;
+}
+
+
+body div[role='main'] .wrapper section.exhibitionviewer .exhibitionplayer .carouselexhibition .item.style1 .container .textbox {
+  float: left;
+  width: 25%;
+  padding: 0 0 0 0;
+}
+
+body div[role='main'] .wrapper section.exhibitionviewer .exhibitionplayer .carouselexhibition .item.style1 .container .videowrap {
+  width: 35%;
+  float: right;
+}
+
+body div[role='main'] .wrapper section.exhibitionviewer .exhibitionplayer .carouselexhibition .item.style1 .container .audiowrap {
+  width: 25%;
+  float: right;
+}
+
+body div[role='main'] .wrapper section.exhibitionviewer .exhibitionplayer .carouselexhibition .item.style1 .container .mediadescription {
+  background: none;
+  color: #fff;
+  display:block;
+  word-wrap:break-word;
+}
+
+body div[role=main] .wrapper .itemview .mediacontent .container-fluid .wrap .metadata .infowrap {
+    height: 90%;
+}
+
+body [role='main'] .itemview .annotatebox .answers li {
+    margin: 0 5px 5px 0 !important;
+}
+
+div.loading{
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    left: 0;
+    top: 0;
+    z-index: 10001;
+    background: lightgrey url('../img/loader.gif') no-repeat 88%;
+    opacity: 0.7;
+}

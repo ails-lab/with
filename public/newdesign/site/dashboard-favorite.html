@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html>
+  <!-- head-->
+  <head>
+    <!-- meta-->
+    <title>WITH - My Favorite</title>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="description" content="WITH">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#454545">
+    <!-- icons-->
+    <link rel="apple-touch-icon" href="apple-touch-icon.png">
+    <link rel="icon" type="image/png" href="favicon.png">
+    <meta name="msapplication-TileImage" content="tile.png">
+    <meta name="msapplication-TileColor" content="#454545">
+    <!-- stylesheets-->
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="js/vendor/bootstrap/css/bootstrap.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="js/vendor/slick.js/slick/slick.css">
+    <link rel="stylesheet" href="js/vendor/magnific-popup/dist/magnific-popup.css">
+    <!-- script-->
+    <script src="js/vendor/modernizr/modernizr.js"></script>
+  </head>
+  <!-- body-->
+  <body>
+    <!-- head-->
+    <header>
+      <div class="wrap">
+        <div class="container-fluid">
+          <!-- logo--><a href="index.html" class="logo"><img src="img/ui/logo.png"></a>
+          <!-- sign in-->
+          <section class="login-section">
+            <!-- profile picture--><a id="profilebutton" href="#" data-toggle="dropdown" class="profile"><span class="picture"><img src="img/content/img-profile.jpg"><img src="img/ui/ic-profile-frame.png" class="frame"></span><span class="name">Megan Mullaly</span><span class="arrow"></span></a>
+            <!-- dropdown menu-->
+            <ul aria-labelledby="profilebutton" class="dropdown-menu">
+              <li><a href="#" class="showprofile">My profile</a></li>
+              <li><a href="#">Sign out</a></li>
+            </ul>
+          </section>
+          <!-- notification-->
+          <section class="notification">
+            <!-- button--><a id="notificationbutton" href="#" title="Notification" data-toggle="dropdown"><img src="img/ui/ic-notification.png"><span class="counter">12</span></a>
+            <!-- dropdown menu-->
+            <div aria-labelledby="notificationbutton" class="dropdown-menu">
+              <!-- header-->
+              <h3>WITH Notifications</h3>
+              <!-- activity list-->
+              <ul class="list">
+                <li><a href="#"><img src="img/content/img-profile.jpg" class="thumb">
+                    <div class="news">Lorem ipsum dolor sit amet consectetur adipiscing.</div></a></li>
+                <li><a href="#"><img src="img/content/img-profile.jpg" class="thumb">
+                    <div class="news">Lorem ipsum dolor sit amet consectetur adipiscing.</div></a></li>
+              </ul>
+              <!-- view all--><a href="#" class="viewall">View all activities </a>
+            </div>
+          </section>
+          <!-- home-->
+          <section class="home"><a href="dashboard.html" title="Dashboard Home"><img src="img/ui/ic-home.png" alt="Home"></a></section>
+          <!-- explore-->
+          <section class="explore">
+            <!-- input search-->
+            <input type="text" placeholder="Search">
+            <!-- icon--><img src="img/ui/ic-mag.png" class="icon">
+          </section>
+        </div>
+      </div>
+    </header>
+    <!-- main-->
+    <div role="main">
+      <div class="container-fluid">
+        <!-- wrapper-->
+        <div class="wrapper">
+          <!-- sidebar-->
+          <aside>
+            <!-- nav-->
+            <!-- header-->
+            <label class="header">NAVIGATE</label>
+            <!-- nav-->
+            <nav class="app">
+              <ul>
+                <li><a href="dashboard.html"><span class="icon"><i class="fa fa-home"></i></span><span class="text">Dashboard</span></a></li>
+                <li><a href="dashboard-collection.html"><span class="counter">7</span><span class="icon"><i class="fa fa-clone"></i></span><span class="text">My Collection</span></a></li>
+                <li><a href="dashboard-exhibition.html"><span class="counter">10</span><span class="icon"><i class="fa fa-television"></i></span><span class="text">My Exhibition</span></a></li>
+                <li class="active"><a href="dashboard-favorite.html"><span class="counter">5</span><span class="icon"><i class="fa fa-heart-o"></i></span><span class="text">My Favorite</span></a></li>
+                <!-- li( class=page === "annotation" ? "active" : "" )
+                a(href='dashboard-annotation.html')
+                 span.icon
+                  i.fa.fa-edit
+                 span.text My Annotation
+                -->
+                <li><a href="dashboard-organizations.html"><span class="icon"><i class="fa fa-bookmark-o"></i></span><span class="text">Organizations</span></a></li>
+                <li><a href="dashboard-projects.html"><span class="icon"><i class="fa fa-comment-o"></i></span><span class="text">Projects</span></a></li>
+              </ul>
+            </nav>
+            <!-- nav-->
+            <nav class="site">
+              <ul>
+                <li><a href="about.html">About WITH</a></li>
+                <li><a href="faq.html">Frequently Asked Questions</a></li>
+                <li><a href="#">WITH API</a></li>
+                <li><a href="privacy.html">Privacy Policy</a></li>
+                <li><a href="terms.html">Terms of Condition</a></li>
+                <li><a href="feedback.html">Feedback &amp; Contact</a></li>
+              </ul>
+            </nav>
+          </aside>
+          <!-- main-->
+          <main>
+            <!-- collection section-->
+            <section class="favorite">
+              <!-- message-->
+              <section class="message"><img src="img/ui/ic-heart.png" class="hero">
+                <div class="message-body">
+                  <div class="header">Welcome to My Favorite</div>
+                  <div class="description">This is <b> my favorite </b>, a collaborative place where you can work on thins lorem ipsum dolor sit amet.</div><a href="#"><span class="cross"></span><span class="text">Hide welcome message</span></a>
+                </div>
+              </section>
+              <!-- collection main-->
+              <section class="collection-list favorite-list">
+                <!-- collection main header-->
+                <div class="list-head">
+                  <!-- item count--><span class="item-count">7 items</span>
+                  <div class="filtertype"><img src="img/ui/ic-mag.png" class="mag">
+                    <input type="text" placeholder="Search favorite" class="filtertext">
+                  </div>
+                  <!-- control-->
+                  <div class="list-control"><a href="#" data-toggle="tooltip" data-placement="top" title="API Calls" class="fa fa-rss detail-control single"></a></div>
+                </div>
+              </section>
+              <!-- isotope section-->
+              <section class="isotope">
+                <section class="listing">
+                  <div class="grid">
+                    <div class="sizer"></div>
+                    <div class="item">
+                      <div class="wrap"><a href="#" title="Lorem ipsum">
+                          <div class="thumb"><img src="img/content/content-1.png" alt="Lorem ipsum"></div></a>
+                        <div class="info">
+                          <h2 class="title">Lorem ipsum dolor sit amet conceptus</h2><span class="source">National Library of Latvia</span><span class="provider"><a href="#" class="links">digitainz.org</a></span>
+                        </div>
+                        <div class="action-group">
+                          <div class="wrap">
+                            <ul>
+                              <li><a href="#" data-toggle="tooltip" data-placement="top" title="Delete media" class="fa fa-trash-o"></a></li>
+                              <li><a href="#" data-toggle="tooltip" data-placement="top" title="Add to favorite" class="fa fa-heart"></a></li>
+                              <li><a href="#" data-toggle="tooltip" data-placement="top" title="Collect it" class="fa fa-download collectbutton"></a></li>
+                            </ul>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="item">
+                      <div class="wrap"><a href="#" title="Lorem ipsum">
+                          <div class="thumb"><img src="img/content/content-1.png" alt="Lorem ipsum"></div></a>
+                        <div class="info">
+                          <h2 class="title">Lorem ipsum dolor sit amet conceptus</h2><span class="source">National Library of Latvia</span><span class="provider"><a href="#" class="links">digitainz.org</a></span>
+                        </div>
+                        <div class="action-group">
+                          <div class="wrap">
+                            <ul>
+                              <li><a href="#" data-toggle="tooltip" data-placement="top" title="Delete media" class="fa fa-trash-o"></a></li>
+                              <li><a href="#" data-toggle="tooltip" data-placement="top" title="Add to favorite" class="fa fa-heart"></a></li>
+                              <li><a href="#" data-toggle="tooltip" data-placement="top" title="Collect it" class="fa fa-download collectbutton"></a></li>
+                            </ul>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="item">
+                      <div class="wrap"><a href="#" title="Lorem ipsum">
+                          <div class="thumb"><img src="img/content/content-3.png" alt="Lorem ipsum"></div></a>
+                        <div class="info">
+                          <h2 class="title">Lorem ipsum dolor sit amet conceptus</h2><span class="source">National Library of Latvia</span><span class="provider"><a href="#" class="links">digitainz.org</a></span>
+                        </div>
+                        <div class="action-group">
+                          <div class="wrap">
+                            <ul>
+                              <li><a href="#" data-toggle="tooltip" data-placement="top" title="Delete media" class="fa fa-trash-o"></a></li>
+                              <li><a href="#" data-toggle="tooltip" data-placement="top" title="Add to favorite" class="fa fa-heart"></a></li>
+                              <li><a href="#" data-toggle="tooltip" data-placement="top" title="Collect it" class="fa fa-download collectbutton"></a></li>
+                            </ul>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="item">
+                      <div class="wrap"><a href="#" title="Lorem ipsum">
+                          <div class="thumb"><img src="img/content/content-2.png" alt="Lorem ipsum"></div></a>
+                        <div class="info">
+                          <h2 class="title">Lorem ipsum dolor sit amet conceptus</h2><span class="source">National Library of Latvia</span><span class="provider"><a href="#" class="links">digitainz.org</a></span>
+                        </div>
+                        <div class="action-group">
+                          <div class="wrap">
+                            <ul>
+                              <li><a href="#" data-toggle="tooltip" data-placement="top" title="Delete media" class="fa fa-trash-o"></a></li>
+                              <li><a href="#" data-toggle="tooltip" data-placement="top" title="Add to favorite" class="fa fa-heart"></a></li>
+                              <li><a href="#" data-toggle="tooltip" data-placement="top" title="Collect it" class="fa fa-download collectbutton"></a></li>
+                            </ul>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </section>
+              </section><a href="#" class="loadmore">load more
+                <div class="left"></div>
+                <div class="right"></div>
+                <div class="top"></div>
+                <div class="bot"></div></a>
+              <!-- collection api-->
+              <section class="action api">
+                <div class="action-header">
+                  <div class="title">API Calls</div>
+                </div>
+                <div class="action-body">
+                  <div class="input-style"><span class="get">GET</span>
+                    <input type="text" value="http://ipa.image.ntua.gr:9010/collection/53">
+                  </div>
+                  <div class="input-style"><span class="post">POST</span>
+                    <input type="text" value="http://ipa.image.ntua.gr:9010/collection/53">
+                  </div>
+                </div>
+                <div class="button-group"><a href="#" class="btn-green cancel">close</a></div>
+              </section>
+              <!-- collection give access-->
+              <section class="action collect">
+                <div class="action-header">
+                  <div class="title">Collect an item</div>
+                </div>
+                <div class="action-body">
+                  <select class="form-control">
+                    <option>Select a collection</option>
+                    <option>Select a collection</option>
+                    <option>Select a collection</option>
+                  </select>
+                  <div class="group">
+                    <div class="title">Media info</div>
+                    <p>Lorem ipsum dolor sit amet conceptuas</p>
+                    <textarea disabled>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip.</textarea>
+                  </div>
+                </div>
+                <div class="button-group"><a href="#" class="btn-green-o cancel">Cancel</a><a href="#" class="btn-green">Add to collection</a></div>
+              </section>
+              <!-- item view-->
+              <section class="itemview">
+                <!-- header-->
+                <div class="header">
+                  <div class="container-fluid">
+                    <!-- head-->
+                    <h3>Media Viewer</h3>
+                    <!-- actions-->
+                    <div class="actions"><a href="#" data-toggle="tooltip" data-placement="bottom" title="Visit item site" class="medialink"><i class="fa fa-external-link"></i></a><a href="#" data-toggle="tooltip" data-placement="bottom" title="Close media viewer" class="closemedia"><img src="img/ui/ic-close.png"></a></div>
+                  </div>
+                </div>
+                <!-- media content-->
+                <div class="mediacontent">
+                  <div class="container-fluid">
+                    <!-- wrap-->
+                    <div class="wrap">
+                      <!-- item-->
+                      <div class="media"><img src="img/content/img-item.jpg"></div>
+                      <!-- metadata-->
+                      <div class="metadata">
+                        <div class="infowrap">
+                          <!-- title-->
+                          <h1>Avenue de l'Observatoire , 1932-34</h1>
+                          <div class="owner"><a href="#" title="#">National Gallery Athens</a></div>
+                          <!-- metadata-->
+                          <ul role="tablist" class="nav nav-tabs">
+                            <li class="active"><a href="#information" title="" data-toggle="tab">Info</a></li>
+                            <li><a href="#related" title="" data-toggle="tab">Related</a></li>
+                            <li><a href="#comment" title="" data-toggle="tab">Comments</a></li>
+                            <li><a href="#share" title="" data-toggle="tab">Share</a></li>
+                          </ul>
+                          <!-- panes-->
+                          <div class="tab-content">
+                            <div id="information" class="tab-pane active">
+                              <!-- description-->
+                              <ul class="meta">
+                                <li>
+                                  <div class="title">
+                                    <div class="titlewrap">Description</div>
+                                  </div>
+                                  <div class="field">
+                                    George Brassaï (pseudonym of Gyula Halász) (9 September 1899 — 8 July 1984) was a Hungarian photographer, 
+                                    sculptor, and filmmaker who rose to international fame in France in the 20th century. He was one of the numerous 
+                                    Hungarian artists who flourished in Paris beginning between the World Wars. In the early 21st century, the discovery 
+                                    of more than 200 letters and hundreds of drawings and other items from the period 1940–1984 has provided scholars with 
+                                    material for understanding his later life and career.
+                                  </div>
+                                </li>
+                                <li>
+                                  <div class="title">
+                                    <div class="titlewrap">Provider</div>
+                                  </div>
+                                  <div class="field">National Gallery - Alexandros Soutzos Museum, Athens.</div>
+                                </li>
+                                <li>
+                                  <div class="title">
+                                    <div class="titlewrap">Rights</div>
+                                  </div>
+                                  <div class="field">Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</div>
+                                </li>
+                                <li>
+                                  <div class="title">
+                                    <div class="titlewrap">Record Source</div>
+                                  </div>
+                                  <div class="field"><a href="#" title="#">EUROPEANA</a></div>
+                                </li>
+                              </ul>
+                            </div>
+                            <div id="related" class="tab-pane">
+                              <!-- related media-->
+                              <div class="title">
+                                <div class="titlewrap">Other media item by National Gallery Athens</div><a href="#" title="Follow National Gallery Athens" class="follow">FOLLOW</a>
+                              </div>
+                              <ul class="related">
+                                <li><a href="#" data-toggle="tooltip" data-placement="top" title="Lorem ipsum dolor"><img src="img/content/content-4.png" alt="media"></a></li>
+                                <li><a href="#" data-toggle="tooltip" data-placement="top" title="Lorem ipsum dolor"><img src="img/content/content-4.png" alt="media"></a></li>
+                                <li><a href="#" data-toggle="tooltip" data-placement="top" title="Lorem ipsum dolor"><img src="img/content/content-4.png" alt="media"></a></li>
+                                <li><a href="#" data-toggle="tooltip" data-placement="top" title="Lorem ipsum dolor"><img src="img/content/content-4.png" alt="media"></a></li>
+                              </ul>
+                              <!-- related media-->
+                              <div class="title">
+                                <div class="titlewrap">Similar media item</div>
+                              </div>
+                              <ul class="related">
+                                <li><a href="#" data-toggle="tooltip" data-placement="top" title="Lorem ipsum dolor"><img src="img/content/content-4.png" alt="media"></a></li>
+                                <li><a href="#" data-toggle="tooltip" data-placement="top" title="Lorem ipsum dolor"><img src="img/content/content-4.png" alt="media"></a></li>
+                                <li><a href="#" data-toggle="tooltip" data-placement="top" title="Lorem ipsum dolor"><img src="img/content/content-4.png" alt="media"></a></li>
+                                <li><a href="#" data-toggle="tooltip" data-placement="top" title="Lorem ipsum dolor"><img src="img/content/content-4.png" alt="media"></a></li>
+                              </ul>
+                            </div>
+                            <div id="comment" class="tab-pane">
+                              <!-- comment -->
+                              <div class="comments">
+                                <div class="form">
+                                  <textarea placeholder="Fill in your comment" class="commentbox form-control"></textarea>
+                                  <button class="btn btn-green">Submit</button>
+                                </div>
+                                <!-- commentlist-->
+                                <ul class="commentlist">
+                                  <li><a href="#" title="#"><span class="profilepicture"><img src="img/content/img-profile.jpg"></span></a>
+                                    <div class="entry"><span class="name">Mike Jones</span>
+                                      <div class="text">Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.	</div>
+                                      <div class="meta">1 day ago</div>
+                                    </div>
+                                  </li>
+                                  <li><a href="account.html" title="#"><span class="profilepicture"><img src="img/content/img-profile.jpg"></span></a>
+                                    <div class="entry"><span class="name">Mike Jones</span>
+                                      <div class="text">Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.	</div>
+                                      <div class="meta">1 day ago</div>
+                                    </div>
+                                  </li>
+                                  <li><a href="account.html" title="#"><span class="profilepicture"><img src="img/content/img-profile.jpg"></span></a>
+                                    <div class="entry"><span class="name">Mike Jones</span>
+                                      <div class="text">Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.	</div>
+                                      <div class="meta">1 day ago</div>
+                                    </div>
+                                  </li>
+                                  <li><a href="account.html" title="#"><span class="profilepicture"><img src="img/content/img-profile.jpg"></span></a>
+                                    <div class="entry"><span class="name">Mike Jones</span>
+                                      <div class="text">Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.	</div>
+                                      <div class="meta">1 day ago</div>
+                                    </div>
+                                  </li>
+                                </ul>
+                              </div>
+                            </div>
+                            <div id="share" class="tab-pane">
+                              <!-- share-->
+                              <div class="sharetext">Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</div>
+                              <ul class="social">
+                                <li><a href="#" title="#"><img src="img/ui/ic-facebook.png" alt="facebook"></a></li>
+                                <li><a href="#" title="#"><img src="img/ui/ic-twitter.png" alt="facebook"></a></li>
+                                <li><a href="#" title="#"><img src="img/ui/ic-pinterest.png" alt="facebook"></a></li>
+                                <li><a href="#" title="#"><img src="img/ui/ic-mail.png" alt="facebook"></a></li>
+                              </ul>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </section>
+            </section>
+          </main>
+        </div>
+      </div>
+    </div>
+  </body>
+  <!-- script-->
+  <script src="js/vendor/jquery/dist/jquery.min.js"></script>
+  <script src="js/vendor/bootstrap/dist/js/bootstrap.min.js"></script>
+  <script src="js/vendor/masonry/dist/masonry.pkgd.min.js"></script>
+  <script src="js/vendor/slick.js/slick/slick.min.js"></script>
+  <script src="js/vendor/jquery.nicescroll/dist/jquery.nicescroll.min.js"></script>
+  <script src="js/vendor/isotope/isotope.pkgd.min.js"></script>
+  <script src="js/vendor/jquery-sticky/jquery.sticky.js"></script>
+  <script src="js/plugin.js"></script>
+  <script src="js/main.js"></script>
+</html>

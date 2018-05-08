@@ -30,17 +30,20 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+import play.Logger;
+import play.Logger.ALogger;
 import play.libs.F.Promise;
 import play.mvc.BodyParser;
-import play.mvc.Controller;
 import play.mvc.Result;
-import espace.core.AutocompleteResponse;
-import espace.core.AutocompleteResponse.Suggestion;
-import espace.core.ESpaceSources;
-import espace.core.ISpaceSource;
-import espace.core.ParallelAPICall;
+import sources.core.AutocompleteResponse;
+import sources.core.AutocompleteResponse.Suggestion;
+import sources.core.ESpaceSources;
+import sources.core.ISpaceSource;
+import sources.core.ParallelAPICall;
 
-public class AutocompleteController extends Controller {
+public class AutocompleteController extends WithController {
+
+	public static final ALogger log = Logger.of(AutocompleteController.class);
 
 	public static Promise<Result> autocompleteExt(String term, Integer limit, List<String> sourceFromUI) {
 		List<ISpaceSource> sourcesForAutocomplete = new ArrayList<ISpaceSource>();
@@ -71,11 +74,18 @@ public class AutocompleteController extends Controller {
 			            response.append(line);
 			        }
 			        rd.close();
+			        /*
+			         * Hack-ish FIX. The problem is that the JSON response from
+			         * the request to Europeana is not well-formatted or is empty.
+			         * Enrique need to check that.
+			         */
+			        if(response.toString().equals(""))
+			        	response.append("{ \"success\": false }");
 			        //transform response into standard json
 			        AutocompleteResponse standardResponse = src.autocompleteResponse(response.toString());;
 			        return standardResponse;
 				} catch (IOException e) {
-					e.printStackTrace();
+					log.error( "Autocomplete problem.", e );
 					return new AutocompleteResponse();
 				}
 		};
@@ -91,7 +101,7 @@ public class AutocompleteController extends Controller {
 		}
 
 		Function<AutocompleteResponse, Boolean> responseCollectionMethod =
-				(AutocompleteResponse response) -> (response.suggestions !=null && !response.suggestions.isEmpty());
+				(AutocompleteResponse response) -> ((response.suggestions !=null) && !response.suggestions.isEmpty());
 
 		Function<List<AutocompleteResponse>, List<AutocompleteResponse>> filter = (List<AutocompleteResponse> response) -> {
 			List<AutocompleteResponse> finalResponses = new ArrayList<AutocompleteResponse>();
@@ -109,7 +119,7 @@ public class AutocompleteController extends Controller {
 
 		return ParallelAPICall.<AutocompleteResponse>combineResponses(responseCollectionMethod, promises, filter);
 	}
-	
+
 
 	private static Predicate<Suggestion> distinctByValue(Function<Suggestion, String> s) {
 		Set<String> seen = new HashSet<String>();

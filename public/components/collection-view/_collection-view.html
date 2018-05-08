@@ -1,0 +1,266 @@
+		<div role="main">
+		<div class="container-fluid">
+			<!-- wrapper-->
+			<div class="wrapper" id="withcollection">
+				<!-- sidebar-->
+				<!-- ko if:isLogged()==true  -->
+				<side-bar params="route: route"></side-bar>
+				<!-- /ko -->
+				<!-- main-->
+				<main data-bind="css:{ 'full-page' :localStorage.getItem('logged_in')!='true'}">
+					<!-- collection section-->
+					<section class="collection">
+						<section class="header">
+						
+						    <!-- info-->
+			                <div class="actioninfo">
+			                  <!-- upload--><a class="upload" data-bind="visible: isLogged() && !isFavorites() && (access() == 'WRITE' || access() == 'OWN')"><span class="plus"></span><span class="text">Upload Image</span></a>
+			                </div>
+			                <!-- collection detail-->
+			                <div class="collectiondetail"><span class="title"><!-- ko text:displayTitle() --><!-- /ko --></span>
+			                 <p class="description" data-bind="text:desc.display"></p>
+							<span><a data-bind="visible: desc.showButton, text: desc.showAll() ? '  show less' : '...show more', click: desc.toggleShowAll" href="#"></a></span> </div>
+							
+						</section>
+						<!-- collection main-->
+						<section class="collection-list">
+							<!-- collection main header-->
+							<div class="list-head">
+							
+							 <!-- item count--><span class="item-count" data-bind="visible: entryCount() > -1 "><!-- ko text:itemCount() --><!-- /ko --></span>
+							
+                 				<!-- back-->
+								<a href="void(0);"  onclick="window.history.go(-1); return false;" data-toggle="tooltip" data-placement="top" title="Back previous page" class="back" data-bind="visible: !isFavorites()"><i class="fa fa-angle-left"></i></a>
+								
+								<div class="filtertype"><img src="img/ui/ic-mag.png" class="mag">
+				                    <input type="text" placeholder="Search collection item" class="filtertext" data-bind="value:query,  filterItems:query, valueUpdate:'afterkeydown'">
+				                </div>
+								<!-- control-->
+								<div class="list-control">
+									<a data-bind="visible: isLogged() && !isFavorites() && (access() == 'WRITE' || access() == 'OWN')" data-toggle="tooltip" data-placement="top" title="Edit Collection" class="fa fa-pencil editaction"></a>
+									<a data-bind="visible: isLogged() && !isFavorites() && (access() == 'WRITE' || access() == 'OWN')" data-toggle="tooltip" data-placement="top" title="Annotate" class="fa fa-tag annotate-col" ></a>
+									<!-- <a data-toggle="tooltip" data-placement="top" title="Annotate" class="fa fa-tag annotate-col" ></a>-->
+									<a data-toggle="tooltip" data-placement="top" title="Show Thesauri" class="fa fa-cog thesaurus" ></a>
+									<a data-toggle="tooltip" data-placement="top" title="API Calls" class="fa fa-rss detail-control"></a>
+									<a data-bind="visible: isLogged() && !isFavorites() && (access() == 'WRITE' || access() == 'OWN'), click: deleteMyCollection"  data-toggle="tooltip" data-placement="top" title="Delete Collection" class="fa fa-trash deleteaction"></a>
+								</div>
+							</div>
+						</section>
+					
+					
+						<!-- isotope section-->
+              <section class="isotope">
+                <section class="listing">
+                  <div class="grid" data-bind="attr: {id: id}">
+                    <div class="sizer"></div>
+                   
+                   
+                  </div>
+                </section>
+                <!-- load more -->
+							<a href="#" class="loadmore" data-bind="visible: citems().length>0 ,event: {click: loadNext}">
+								Load more
+								<div class="left"></div>
+								<div class="right"></div>
+								<div class="top"></div>
+								<div class="bot"></div>
+							</a>
+							<div class="more" data-bind="visible: loading"> <i class="fa fa-spinner fa-pulse"></i></div>
+              </section>
+						<!-- collection api-->
+						<section class="action api">
+							<div class="action-header">
+								<div class="title">API Calls</div>
+							</div>
+							<div class="action-body">
+								<div class="input-style"><span class="get">GET</span>
+									<input type="text" data-bind="value: getAPIUrlCollection()">
+								</div>
+								<div class="input-style"><span class="get">GET</span>
+									<input type="text" data-bind="value: getAPIUrlRecords()">
+								</div>
+							</div>
+							<div class="button-group"><a class="btn-green cancel">close</a></div>
+						</section>
+						<!-- collection edit-->
+						<section class="action edit">
+							<div class="action-header">
+								<div class="title">Edit Collection</div>
+								<div class="toggle">
+									<input type="checkbox" id="toggle1" data-bind="checked:isPublicEdit">
+									<label for="toggle1"></label><span class="private">private</span><span class="public">public</span>
+								</div>
+							</div>
+							<div class="action-body" data-bind="validationElement: titleToEdit">
+								<input type="text" placeholder="Name your collection"
+								data-bind="{value: titleToEdit, valueUpdate: 'afterkeypress', hasFocus: true
+				      attr: {placeholder: titleToEdit}}">
+								<textarea placeholder="Describe your collection" data-bind="{value: descriptionToEdit}" ></textarea>
+							</div>
+							<div class="button-group"><a class="btn-green-o cancel">Cancel</a><a href="#" class="btn-green" data-bind="click: editCollection">Save collection</a></div>
+						</section>
+						<!-- collection new-->
+						<section class="action upload">
+							<!-- ko component: {
+								name: "image-upload",
+								params: { collectionId: id() }
+							} -->
+							<!-- /ko -->
+						</section>
+						<!-- item view-->
+						<item-view params="route: route"></item-view>
+						<!-- collection give access-->
+						<section class="action collect">
+							<collection params="route: route"></collection>
+						</section>
+						
+<section class="action thesaurus">
+	<div class="action-header">
+		<div class="title">Vocabularies</div>
+		</div>
+			<div class="action-body">
+				<div id="nav-bar" data-bind="template: { name: 'scheme-template', data: index }"></div>
+
+<script type="text/html" id="scheme-template">
+ 
+    <ul data-bind="foreach: schemes">
+	
+		<!-- ko if: children().length !== 0 -->
+        
+		<li><div data-bind="template: { name: 'scheme-name-template', data: $data }, visible: true"></div>
+            <div data-bind="template: { name: 'tree-template', data: $data }, visible: true"></div>
+        </li>
+
+		<!-- /ko -->
+    
+	</ul>
+ 
+</script>
+
+<script type="text/html" id="scheme-name-template">
+ 
+    <span style="text-transform: capitalize; font-weight: bold" data-bind="
+    text: label, 
+    attr: { 'title': uri }, 
+    tooltip: { delay: { show: 500, hide: 10 } }"></span>
+
+ 
+</script>
+
+<script type="text/html" id="tree-template">
+    <ul data-bind="foreach: children">
+        <li>
+            <span data-bind="
+                template: { name: 'node-name-template', data: $data },
+                css: { 'pointer-icon': children().length > 0 }"></span>
+            <div data-bind="template: { name: 'folder-template', data: $data }, visible: isExpanded"></div>
+        </li>
+    </ul>
+ 
+</script>
+ 
+<script type="text/html" id="folder-template">
+ 
+    <ul data-bind="foreach: children">
+        <li>
+            <div data-bind="template: { name: 'node-template', data: $data }"></div>
+        </li>
+    </ul>
+ 
+</script>
+ 
+<script type="text/html" id="node-template">
+ 
+    <span data-bind="
+        template: { name: 'node-name-template', data: $data },
+        css: { 'pointer-icon': children().length > 0 }"></span>
+ 
+    <!-- ko if: children().length !== 0 -->
+ 
+        <div data-bind="template: { name: 'folder-template', data: $data }, visible: isExpanded"></div>
+ 
+    <!-- /ko -->
+ 
+</script>
+ 
+<script type="text/html" id="node-name-template">
+
+    <span class="tree-item" data-bind="
+    css: { 
+        'glyphicon glyphicon-minus-sign': isExpanded() && children().length > 0, 
+        'glyphicon glyphicon-plus-sign': !isExpanded() && children().length > 0,
+        'glyphicon glyphicon-stop': children().length === 0,
+		'invisible-icon': children().length === 0
+    },
+    click: toggleVisibility
+    "></span>
+ 
+    <span data-bind="
+    text: label, 
+	css: { 'pointer-icon': true },
+    attr: { 'title': uri }, 
+    tooltip: { delay: { show: 500, hide: 10 } },
+    click: addTerm"></span>
+ 
+</script>
+			
+			<div class="container-fluid" data-bind="visible: terms().length>0">
+	        	<input id="term_tags" type="text" data-role="tagsinput">
+	            <span data-bind="text: indexCount"></span>
+	        </div>
+<!--
+			<div class="searchbox">
+                 <input autocomplete="off" data-bind="value: keyword, event: {change: addKeyword}" placeholder="Keywords" class="searchinput" type="text">
+            </div>
+-->
+			<div class="button-group"><a class="btn-green cancel" data-bind="click: closeSide">Close</a></div>			
+			</div>
+</section>
+
+
+<section class="action annotate-col">
+	<div class="action-header">
+		<div class="title">Annotate</div>
+	</div>
+	<div class="action-body">
+	<!-- wrap-->
+    <div class="wraps">
+    	<!-- tabs-->
+        <!-- tabs-->
+        <ul role="tablist" class="nav nav-tabs">
+  			 <li class="active"><a href="#vocsources" data-toggle="tab" data-bind="event:{click: sourceBind}">Vocabulary Lookup</a></li>
+  			 <li><a href="#nersources" data-toggle="tab" data-bind="event:{click: sourceBind}">Named Entity Extraction</a></li>
+		</ul>
+        <!-- panes-->
+        <div class="tab-content">
+        	<div class="tab-pane active" id="vocsources">
+				<ul class="vocabularies list">
+					<!-- ko foreach: vocabularies -->
+					<li style=""><label>
+				    	<input type="checkbox" data-bind="checked: true, value: $data.vocabulary, click: $parent.selectVocabulary"/>
+				    	<span data-bind ="text: $data.label"></span>
+				    </label></li>
+				    <!--  /ko -->
+				</ul>
+			</div>
+			<div class="tab-pane" id="nersources">
+				<ul class="ner list">
+					<!-- ko foreach: ner -->
+					<li><label>
+				    	<input type="checkbox" data-bind="checked: true, value: $data.vocabulary, click: $parent.selectVocabulary"/>
+				    	<span data-bind ="text: $data.label"></span>
+				    </label></li>
+				    <!--  /ko -->
+				</ul>
+			</div>
+		</div>
+	</div>
+	<div class="button-group"><a class="btn-green ok" data-bind="click: annotateCollection">Annotate</a><a class="btn-green cancel" data-bind="click: closeSide">Close</a></div>
+</div>
+</section>
+						
+					</section>
+				</main>
+			</div>
+		</div>
+</div>

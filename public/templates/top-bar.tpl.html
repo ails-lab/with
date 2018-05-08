@@ -1,0 +1,36 @@
+	<div class="container">
+		<!-- logo-->
+		<a href="javascript:void(0)" data-bind="event :{ click: function(data,event){goToPage('#home',event);}}" class="logo">
+		<img src="img/ui/logo.png">
+		</a>
+		<!-- nav-->
+		<nav>
+			<ul>
+				<li><a href="javascript:void(0)" data-bind="event :{ click: function(data,event){goToPage('#home',event);}}" title="Home">HOME</a></li>
+				<li><a href="#about" title="About">ABOUT</a></li>
+				<li><a href="developers-lite.html" title="WITH API" target="_blank">WITH API</a></li>
+				<li><section class="explore">
+            <!-- input search-->
+            <input type="text" placeholder="Search" data-bind="value: term" class="searchinput">
+            <!-- icon--><img src="img/ui/ic-mag.png" class="icon" data-bind="attr: {src: ko.contextFor(withsearchid).$data.searching()==true ? 'img/ui/ic-loading.gif' : 'img/ui/ic-mag.png'}, click: function() { search(true,true); }">
+                         
+          </section></li>
+				<li class="mobile">
+								<a href="#login" class="login">SIGN IN</a>
+								<a href="#register" class="register">REGISTER</a>
+							</li>
+			</ul>
+			
+		</nav>
+		
+		
+		<!-- sign in -->
+		<section class="login-section">
+			<a  href="#login" class="login">SIGN IN</a>
+			<a  href="#register" class="register">REGISTER</a>
+			
+		</section>
+		<!-- mobile menu trigger -->
+					  <!-- mobile menu trigger--><a href="#" class="mobile-trigger">
+            <div class="burger"></div></a>
+	</div>

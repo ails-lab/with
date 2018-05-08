@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html>
+  <!-- head-->
+  <head>
+    <!-- meta-->
+    <title>WITH - Projects</title>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="description" content="WITH">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#454545">
+    <!-- icons-->
+    <link rel="apple-touch-icon" href="apple-touch-icon.png">
+    <link rel="icon" type="image/png" href="favicon.png">
+    <meta name="msapplication-TileImage" content="tile.png">
+    <meta name="msapplication-TileColor" content="#454545">
+    <!-- stylesheets-->
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="js/vendor/bootstrap/css/bootstrap.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="js/vendor/slick.js/slick/slick.css">
+    <link rel="stylesheet" href="js/vendor/magnific-popup/dist/magnific-popup.css">
+    <!-- script-->
+    <script src="js/vendor/modernizr/modernizr.js"></script>
+  </head>
+  <!-- body-->
+  <body>
+    <!-- head-->
+    <header>
+      <div class="wrap">
+        <div class="container-fluid">
+          <!-- logo--><a href="index.html" class="logo"><img src="img/ui/logo.png"></a>
+          <!-- sign in-->
+          <section class="login-section">
+            <!-- profile picture--><a id="profilebutton" href="#" data-toggle="dropdown" class="profile"><span class="picture"><img src="img/content/img-profile.jpg"><img src="img/ui/ic-profile-frame.png" class="frame"></span><span class="name">Megan Mullaly</span><span class="arrow"></span></a>
+            <!-- dropdown menu-->
+            <ul aria-labelledby="profilebutton" class="dropdown-menu">
+              <li><a href="#" class="showprofile">My profile</a></li>
+              <li><a href="#">Sign out</a></li>
+            </ul>
+          </section>
+          <!-- notification-->
+          <section class="notification">
+            <!-- button--><a id="notificationbutton" href="#" title="Notification" data-toggle="dropdown"><img src="img/ui/ic-notification.png"><span class="counter">12</span></a>
+            <!-- dropdown menu-->
+            <div aria-labelledby="notificationbutton" class="dropdown-menu">
+              <!-- header-->
+              <h3>WITH Notifications</h3>
+              <!-- activity list-->
+              <ul class="list">
+                <li><a href="#"><img src="img/content/img-profile.jpg" class="thumb">
+                    <div class="news">Lorem ipsum dolor sit amet consectetur adipiscing.</div></a></li>
+                <li><a href="#"><img src="img/content/img-profile.jpg" class="thumb">
+                    <div class="news">Lorem ipsum dolor sit amet consectetur adipiscing.</div></a></li>
+              </ul>
+              <!-- view all--><a href="#" class="viewall">View all activities </a>
+            </div>
+          </section>
+          <!-- home-->
+          <section class="home"><a href="dashboard.html" title="Dashboard Home"><img src="img/ui/ic-home.png" alt="Home"></a></section>
+          <!-- explore-->
+          <section class="explore">
+            <!-- input search-->
+            <input type="text" placeholder="Search">
+            <!-- icon--><img src="img/ui/ic-mag.png" class="icon">
+          </section>
+        </div>
+      </div>
+    </header>
+    <!-- main-->
+    <div role="main">
+      <div class="container-fluid">
+        <!-- wrapper-->
+        <div class="wrapper">
+          <!-- sidebar-->
+          <aside>
+            <!-- nav-->
+            <!-- header-->
+            <label class="header">NAVIGATE</label>
+            <!-- nav-->
+            <nav class="app">
+              <ul>
+                <li><a href="dashboard.html"><span class="icon"><i class="fa fa-home"></i></span><span class="text">Dashboard</span></a></li>
+                <li><a href="dashboard-collection.html"><span class="counter">7</span><span class="icon"><i class="fa fa-clone"></i></span><span class="text">My Collection</span></a></li>
+                <li><a href="dashboard-exhibition.html"><span class="counter">10</span><span class="icon"><i class="fa fa-television"></i></span><span class="text">My Exhibition</span></a></li>
+                <li><a href="dashboard-favorite.html"><span class="counter">5</span><span class="icon"><i class="fa fa-heart-o"></i></span><span class="text">My Favorite</span></a></li>
+                <!-- li( class=page === "annotation" ? "active" : "" )
+                a(href='dashboard-annotation.html')
+                 span.icon
+                  i.fa.fa-edit
+                 span.text My Annotation
+                -->
+                <li><a href="dashboard-organizations.html"><span class="icon"><i class="fa fa-bookmark-o"></i></span><span class="text">Organizations</span></a></li>
+                <li class="active"><a href="dashboard-projects.html"><span class="icon"><i class="fa fa-comment-o"></i></span><span class="text">Projects</span></a></li>
+              </ul>
+            </nav>
+            <!-- nav-->
+            <nav class="site">
+              <ul>
+                <li><a href="about.html">About WITH</a></li>
+                <li><a href="faq.html">Frequently Asked Questions</a></li>
+                <li><a href="#">WITH API</a></li>
+                <li><a href="privacy.html">Privacy Policy</a></li>
+                <li><a href="terms.html">Terms of Condition</a></li>
+                <li><a href="feedback.html">Feedback &amp; Contact</a></li>
+              </ul>
+            </nav>
+          </aside>
+          <!-- main-->
+          <main>
+            <!-- project-->
+            <section class="project">
+              <!-- upload--><a href="#" class="uploadimage"><span class="plus"></span><span class="text">Change cover image</span></a>
+              <!-- head-->
+              <div class="list-head">
+                <!-- back--><a href="dashboard-collection.html" data-toggle="tooltip" data-placement="top" title="Back to organizations list" class="back"><i class="fa fa-angle-left"></i></a>
+                <!-- control-->
+                <ul class="organization-list-control">
+                  <li><a href="projects-space-view.html" data-toggle="tooltip" data-placement="top" title="View Project page" class="fa fa-eye"></a></li>
+                  <li><a href="#" data-toggle="tooltip" data-placement="top" title="Edit Project" class="fa fa-pencil editaction new"></a></li>
+                  <li><a href="#" data-toggle="tooltip" data-placement="top" title="Manage Members" class="fa fa-user members-access"></a></li>
+                  <li><a href="#" data-toggle="tooltip" data-placement="top" title="Delete Project" class="fa fa-trash"></a></li>
+                </ul>
+              </div>
+              <!-- hero section-->
+              <section class="hero">
+                <div class="meta">
+                  <div class="top-info"><a href="#" data-toggle="tooltip" data-placement="top" title="Add thumbnails" class="thumbnails upload"><img src="img/ui/profile-placeholder.png" data-toggle="tooltip" data-placement="top" title="Add profile picture"></a>
+                    <div class="header">
+                      <div class="title">Galactic Empire Organization</div>
+                      <div class="location">Amsterdam, The Netherlands</div><a href="#">Visit site</a>
+                    </div>
+                  </div>
+                  <div class="description">Space, the final frontier. These are the voyages of the Starship enterprise. Its five-year mission: to explore strange new worlds. to seek out new life and new civilizations, to boldly go where no man has gone before. Science has not yet mastered prophecy. We predict too much for the next year and yet far too little for the next 10.</div>
+                </div>
+                <div class="map"></div>
+              </section>
+              <!-- isotope section-->
+              <section class="isotope">
+                <section class="filter">
+                  <div class="wrap">
+                    <!-- menu-->
+                    <ul class="nav">
+                      <li data-filter="*" class="active"><a href="#" title="ALL">All</a></li>
+                      <li data-filter=".collection"><a href="#" title="ALL">Collections</a></li>
+                      <li data-filter=".exhibition"><a href="#" title="EXHIBITION">Exhibitions</a></li>
+                    </ul>
+                  </div>
+                </section>
+                <section class="listing">
+                  <div class="grid">
+                    <div class="sizer"></div>
+                    <div class="item exhibition">
+                      <div class="wrap"><a href="#" title="Lorem ipsum">
+                          <div class="thumb"><img src="img/content/content-1.png" alt="Lorem ipsum"></div>
+                          <div class="info"><span class="type">Exhibitions</span>
+                            <h1 class="title">Lorem ipsum dolor sit amet conceptus</h1>
+                            <p class="text">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
+                          </div></a>
+                        <div class="action-group">
+                          <div class="wrap">
+                            <ul>
+                              <li><a href="#" data-toggle="tooltip" data-placement="top" title="Unshare media" class="fa fa-ban"></a></li>
+                              <li><a href="#" data-toggle="tooltip" data-placement="top" title="Add to favorite" class="fa fa-heart"></a></li>
+                              <li><a href="#" data-toggle="tooltip" data-placement="top" title="Collect it" class="fa fa-download collectbutton"></a></li>
+                              <li><a href="#" data-toggle="tooltip" data-placement="top" title="Set as featured" class="fa fa-star featuredbutton"></a></li>
+                            </ul>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="item exhibition">
+                      <div class="wrap"><a href="#" title="Lorem ipsum">
+                          <div class="thumb"><img src="img/content/content-1.png" alt="Lorem ipsum"></div>
+                          <div class="info"><span class="type">Exhibitions</span>
+                            <h1 class="title">Lorem ipsum dolor sit amet conceptus</h1>
+                            <p class="text">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
+                          </div></a>
+                        <div class="action-group">
+                          <div class="wrap">
+                            <ul>
+                              <li><a href="#" data-toggle="tooltip" data-placement="top" title="Unshare media" class="fa fa-ban"></a></li>
+                              <li><a href="#" data-toggle="tooltip" data-placement="top" title="Add to favorite" class="fa fa-heart"></a></li>
+                              <li><a href="#" data-toggle="tooltip" data-placement="top" title="Collect it" class="fa fa-download collectbutton"></a></li>
+                              <li><a href="#" data-toggle="tooltip" data-placement="top" title="Set as featured" class="fa fa-star featuredbutton"></a></li>
+                            </ul>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="item collection">
+                      <div class="wrap"><a href="#" title="Lorem ipsum">
+                          <div class="thumb"><img src="img/content/content-2.png" alt="Lorem ipsum">
+                            <div class="counter">124 items</div>
+                          </div>
+                          <div class="info">
+                            <div class="type">Collection</div>
+                            <h1 class="title">Lorem ipsum dolor sit amet conceptus</h1>
+                            <p class="text">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
+                          </div></a>
+                        <div class="action-group">
+                          <div class="wrap">
+                            <ul>
+                              <li><a href="#" data-toggle="tooltip" data-placement="top" title="Unshare media" class="fa fa-ban"></a></li>
+                              <li><a href="#" data-toggle="tooltip" data-placement="top" title="Add to favorite" class="fa fa-heart"></a></li>
+                              <li><a href="#" data-toggle="tooltip" data-placement="top" title="Collect it" class="fa fa-download collectbutton"></a></li>
+                              <li><a href="#" data-toggle="tooltip" data-placement="top" title="Set as featured" class="fa fa-star featuredbutton"></a></li>
+                            </ul>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="item collection">
+                      <div class="wrap"><a href="#" title="Lorem ipsum">
+                          <div class="thumb"><img src="img/content/content-3.png" alt="Lorem ipsum">
+                            <div class="counter">124 items</div>
+                          </div>
+                          <div class="info">
+                            <div class="type">Collection</div>
+                            <h1 class="title">Lorem ipsum dolor sit amet conceptus</h1>
+                            <p class="text">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
+                          </div></a>
+                        <div class="action-group">
+                          <div class="wrap">
+                            <ul>
+                              <li><a href="#" data-toggle="tooltip" data-placement="top" title="Unshare media" class="fa fa-ban"></a></li>
+                              <li><a href="#" data-toggle="tooltip" data-placement="top" title="Add to favorite" class="fa fa-heart"></a></li>
+                              <li><a href="#" data-toggle="tooltip" data-placement="top" title="Collect it" class="fa fa-download collectbutton"></a></li>
+                              <li><a href="#" data-toggle="tooltip" data-placement="top" title="Set as featured" class="fa fa-star featuredbutton"></a></li>
+                            </ul>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </section>
+              </section>
+              <!-- collection give access-->
+              <section class="action members">
+                <div class="action-header">
+                  <div class="title">Manage members</div>
+                </div>
+                <div class="action-body">
+                  <div class="group">
+                    <div class="title">Users access</div>
+                    <input type="text" placeholder="Start typing username">
+                    <ul class="access-list">
+                      <li>
+                        <div class="thumbnails"><img src="img/content/img-profile.jpg"></div><a href="#" data-toggle="tooltip" data-placement="top" title="List view" class="trash"><i class="fa fa-trash"></i></a>
+                        <div class="toggle">
+                          <input type="checkbox" id="u1">
+                          <label for="u1"></label><span class="private">member</span><span class="public">admin</span>
+                        </div>
+                      </li>
+                      <li>
+                        <div class="thumbnails"><img src="img/content/img-profile.jpg"></div><a href="#" data-toggle="tooltip" data-placement="top" title="List view" class="trash"><i class="fa fa-trash"></i></a>
+                        <div class="toggle">
+                          <input type="checkbox" id="u2">
+                          <label for="u2"></label><span class="private">member</span><span class="public">admin</span>
+                        </div>
+                      </li>
+                      <li>
+                        <div class="thumbnails"><img src="img/content/img-profile.jpg"></div><a href="#" data-toggle="tooltip" data-placement="top" title="List view" class="trash"><i class="fa fa-trash"></i></a>
+                        <div class="toggle">
+                          <input type="checkbox" id="u3">
+                          <label for="u3"></label><span class="private">member</span><span class="public">admin</span>
+                        </div>
+                      </li>
+                      <li>
+                        <div class="thumbnails"><img src="img/content/img-profile.jpg"></div><a href="#" data-toggle="tooltip" data-placement="top" title="List view" class="trash"><i class="fa fa-trash"></i></a>
+                        <div class="toggle">
+                          <input type="checkbox" id="u4">
+                          <label for="u4"></label><span class="private">member</span><span class="public">admin</span>
+                        </div>
+                      </li>
+                    </ul>
+                  </div>
+                  <div class="group">
+                    <div class="title">Groups access</div>
+                    <input type="text" placeholder="Start typing group name">
+                    <ul class="access-list">
+                      <li class="blue"><span class="text">DK</span><a href="#" data-toggle="tooltip" data-placement="top" title="List view" class="trash"><i class="fa fa-trash"></i></a>
+                        <div class="toggle">
+                          <input type="checkbox" id="g1">
+                          <label for="g1"></label><span class="private">member</span><span class="public">admin</span>
+                        </div>
+                      </li>
+                      <li class="green"><span class="text">US</span><a href="#" data-toggle="tooltip" data-placement="top" title="List view" class="trash"><i class="fa fa-trash"></i></a>
+                        <div class="toggle">
+                          <input type="checkbox" id="g2">
+                          <label for="g2"></label><span class="private">member</span><span class="public">admin</span>
+                        </div>
+                      </li>
+                      <li class="orange"><span class="text">MN</span><a href="#" data-toggle="tooltip" data-placement="top" title="List view" class="trash"><i class="fa fa-trash"></i></a>
+                        <div class="toggle">
+                          <input type="checkbox" id="g3">
+                          <label for="g3"></label><span class="private">member</span><span class="public">admin</span>
+                        </div>
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+                <div class="button-group"><a href="#" class="btn-green cancel">Close</a></div>
+              </section>
+              <!-- collection new-->
+              <section class="action upload">
+                <div class="action-header">
+                  <div class="title">Upload image</div>
+                </div>
+                <div class="action-body"><img src="img/ui/upload-placeholder.png" class="upload-img"><span style="width:40%;" class="progress"></span>
+                  <p class="info">Background image will be used as a decorative element behind main title bar, it will be stretched accordingly</p>
+                </div>
+                <div class="button-group"><a href="#" class="btn-green-o cancel">Cancel</a><a href="#" class="btn-green">Save</a></div>
+              </section>
+              <!-- collection new-->
+              <section class="action new">
+                <div class="action-header">
+                  <div class="title">Edit Project</div>
+                </div>
+                <div class="action-body">
+                  <input type="text" placeholder="Name your project" value="Galactic Empire Organization"><a href="#" class="add hidden"><span class="plus"></span><span class="text">Add description</span></a>
+                  <textarea placeholder="Describe your collection" rows="10">We choose to go to the moon in this decade and do the other things, not because they are easy, but because they are hard, because that goal will serve to organize and measure the best of our energies and skills, because that challenge is one that we are willing to accept, one we are unwilling to postpone, and one which we intend to win.</textarea>
+                  <div class="spacing">
+                    <div class="group">
+                      <div class="title">Page URL</div>
+                      <p>www.with.image.ntua.gt/assets/</p>
+                      <input type="text" placeholder="Page URL" value="neworder">
+                    </div>
+                    <div class="group">
+                      <div class="title">Location</div>
+                      <input type="text" placeholder="Address" value="Death Star">
+                      <input type="text" placeholder="City" value="Andromeda" class="half">
+                      <select class="form-control half">
+                        <option>Country</option>
+                        <option>Country 2</option>
+                        <option>Country 3</option>
+                      </select>
+                    </div>
+                    <div class="group">
+                      <div class="title">Website URL</div>
+                      <input type="text" placeholder="URL" value="Ren">
+                    </div>
+                  </div>
+                </div>
+                <div class="button-group"><a href="#" class="btn-green-o cancel">Cancel</a><a href="#" class="btn-green">Save project</a></div>
+              </section>
+            </section>
+          </main>
+        </div>
+      </div>
+    </div>
+  </body>
+  <!-- script-->
+  <script src="js/vendor/jquery/dist/jquery.min.js"></script>
+  <script src="js/vendor/bootstrap/dist/js/bootstrap.min.js"></script>
+  <script src="js/vendor/masonry/dist/masonry.pkgd.min.js"></script>
+  <script src="js/vendor/slick.js/slick/slick.min.js"></script>
+  <script src="js/vendor/jquery.nicescroll/dist/jquery.nicescroll.min.js"></script>
+  <script src="js/vendor/isotope/isotope.pkgd.min.js"></script>
+  <script src="js/vendor/jquery-sticky/jquery.sticky.js"></script>
+  <script src="js/plugin.js"></script>
+  <script src="js/main.js"></script>
+</html>

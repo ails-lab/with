@@ -1,0 +1,442 @@
+<div role="main">
+
+<div class="container-fluid">
+	<div class="wrapper">
+		<!-- ko if: isLogged() == true  -->
+		<side-bar params="route: route"></side-bar>
+		<!-- /ko -->
+		<main>
+			<!-- project-->
+			<section class="project organization">
+				<!-- header-->
+				<section class="header">
+					<!-- new collection--><a href="#" class="new"><span class="plus"></span><span class="text">New <!-- ko text: name --><!-- /ko --></span></a>
+				</section>
+				<!-- message-->
+				<section class="message"><img src="img/ui/ic-project.png" class="hero">
+					<div class="message-body">
+						<div class="header">Welcome to <!-- ko text: namePlural --><!-- /ko --></div>
+						<div class="description">This is <b data-bind="text: namePlural"></b>, a collaborative place where you can work with others in a group, to create something great.</div><a href="#" data-bind="click: function() { hideMessage() }"><span class="cross"></span><span class="text">Hide welcome message</span></a>
+					</div>
+				</section>
+				<!-- collection main-->
+				<section class="project-list">
+				
+				    <!-- collection main header-->
+                <div class="list-head">
+                  <!-- item count--><span class="item-count"><!-- ko text: groupCount() --><!-- /ko --></span>
+                  <div class="filtertype"><img src="img/ui/ic-mag.png" class="mag">
+                    <input type="text" placeholder="Search" class="filtertext" data-bind="autocompleteGroupname:myUsername, onlyParents:true, forUsers:false, forGroupType:name" >
+                  </div>
+                  <!-- control-->
+                  <div class="list-control"><a data-toggle="tooltip" data-placement="top" title="API Calls" class="fa fa-rss detail-control single"></a></div>
+                </div>
+					<!-- listing-->
+					<ul class="list-body list" data-bind="foreach: groups">
+						<li>
+							<div class="thumbnails">
+								<img class="wrap" data-bind="attr: { src: cover }">
+								<img class="wrap small" data-bind="attr: { src: logo }">
+							</div>
+							<div class="meta"><a data-bind="attr: { href: '#organization/' + dbId() }, text: friendlyName" title="View organization space" class="header"></a>
+								<div class="description" data-bind="text: about"></div>
+								<div class="other-info">
+									<div class="count" data-bind="text: itemsCount"></div>
+									<div class="date" data-bind="text: date"></div>
+									<div class="user" data-bind="text: creatorName"></div>
+								</div>
+								<div class="action-group">
+                       			 <div class="wrap">
+                       			   <ul>
+                          		  <li>
+									<a href="#" data-toggle="tooltip" data-placement="top" title="Delete organization" class="fa fa-trash-o" data-bind="visible: isCreator, click: $parent.deleteGroup"></a>
+									</li><li><a href="#" data-toggle="tooltip" data-placement="top" title="Edit organization space" class="fa fa-pencil" data-bind="visible: isCreator, click: $parent.editGroup"></a>
+									</li><li><a href="#" data-toggle="tooltip" data-placement="top" title="Manage members" class="fa fa-user members"
+									data-bind="visible: isAdmin, click: $parent.getMembersInfo.bind($data, 'both')"></a></li>
+									</ul>
+									</div>
+								</div>
+							</div>
+						</li>
+					</ul>
+					<a href="#" class="loadmore" data-bind="click: loadMore">
+					load more
+					<div class="left"></div>
+                  <div class="right"></div>
+                  <div class="top"></div>
+                  <div class="bot"></div></a>
+				</section>
+
+				<!-- collection new-->
+				<section class="action new">
+					<div class="action-header">
+						<div class="title">New <!-- ko text: name --><!-- /ko --></div>
+					</div>
+					<div class="action-body">
+						<div class="form-group" data-bind="validationElement: friendlyName">
+							<input type="text" placeholder="Name your group" data-bind="value: friendlyName, valueUpdate: 'afterkeypress', hasFocus: true;">
+							<!-- <a href="javascript:void(0)" class="add" data-bind="event: { click: function(data, event) { showDescription(event); }, clickBubble: false }">
+								<span class="plus"></span>
+								<span class="text">Add description</span>
+							</a> -->
+						</div>
+						<textarea rows="10" placeholder="Description" data-bind="value: about"></textarea>
+						<div class="spacing">
+							<div class="group" data-bind="validationElement: username">
+								<div class="title">Short Name</div>
+								<input type="text" placeholder="Give a short, unique name (i.e. with)" data-bind="value: username, valueUpdate: 'afterkeypress'">
+							</div>
+							<div class="group">
+								<div class="title">Location</div>
+								<input type="text" placeholder="Address" data-bind="value: page.address">
+								<input type="text" placeholder="City" class="half" data-bind="value: page.city">
+								<select class="form-control half" data-bind="value: page.country">
+									<option>&nbsp;</option>
+									<option>Afghanistan</option>
+									<option>Albania</option>
+									<option>Algeria</option>
+									<option>American Samoa</option>
+									<option>Andorra</option>
+									<option>Angola</option>
+									<option>Anguilla</option>
+									<option>Antarctica</option>
+									<option>Antigua and Barbuda</option>
+									<option>Argentina</option>
+									<option>Armenia</option>
+									<option>Aruba</option>
+									<option>Australia</option>
+									<option>Austria</option>
+									<option>Azerbaijan</option>
+									<option>Bahamas</option>
+									<option>Bahrain</option>
+									<option>Bangladesh</option>
+									<option>Barbados</option>
+									<option>Belarus</option>
+									<option>Belgium</option>
+									<option>Belize</option>
+									<option>Benin</option>
+									<option>Bermuda</option>
+									<option>Bhutan</option>
+									<option>Bolivia</option>
+									<option>Bosnia and Herzegovina</option>
+									<option>Botswana</option>
+									<option>Bouvet Island</option>
+									<option>Brazil</option>
+									<option>British Indian Ocean Territory</option>
+									<option>Brunei Darussalam</option>
+									<option>Bulgaria</option>
+									<option>Burkina Faso</option>
+									<option>Burundi</option>
+									<option>Cambodia</option>
+									<option>Cameroon</option>
+									<option>Canada</option>
+									<option>Cape Verde</option>
+									<option>Cayman Islands</option>
+									<option>Central African Republic</option>
+									<option>Chad</option>
+									<option>Chile</option>
+									<option>China</option>
+									<option>Christmas Island</option>
+									<option>Cocos Islands</option>
+									<option>Colombia</option>
+									<option>Comoros</option>
+									<option>Congo</option>
+									<option>Congo, Democratic Republic of the</option>
+									<option>Cook Islands</option>
+									<option>Costa Rica</option>
+									<option>Cote d'Ivoire</option>
+									<option>Croatia</option>
+									<option>Cuba</option>
+									<option>Cyprus</option>
+									<option>Czech Republic</option>
+									<option>Denmark</option>
+									<option>Djibouti</option>
+									<option>Dominica</option>
+									<option>Dominican Republic</option>
+									<option>Ecuador</option>
+									<option>Egypt</option>
+									<option>El Salvador</option>
+									<option>Equatorial Guinea</option>
+									<option>Eritrea</option>
+									<option>Estonia</option>
+									<option>Ethiopia</option>
+									<option>Falkland Islands</option>
+									<option>Faroe Islands</option>
+									<option>Fiji</option>
+									<option>Finland</option>
+									<option>France</option>
+									<option>French Guiana</option>
+									<option>French Polynesia</option>
+									<option>Gabon</option>
+									<option>Gambia</option>
+									<option>Georgia</option>
+									<option>Germany</option>
+									<option>Ghana</option>
+									<option>Gibraltar</option>
+									<option>Greece</option>
+									<option>Greenland</option>
+									<option>Grenada</option>
+									<option>Guadeloupe</option>
+									<option>Guam</option>
+									<option>Guatemala</option>
+									<option>Guinea</option>
+									<option>Guinea-Bissau</option>
+									<option>Guyana</option>
+									<option>Haiti</option>
+									<option>Heard Island and McDonald Islands</option>
+									<option>Honduras</option>
+									<option>Hong Kong</option>
+									<option>Hungary</option>
+									<option>Iceland</option>
+									<option>India</option>
+									<option>Indonesia</option>
+									<option>Iran</option>
+									<option>Iraq</option>
+									<option>Ireland</option>
+									<option>Israel</option>
+									<option>Italy</option>
+									<option>Jamaica</option>
+									<option>Japan</option>
+									<option>Jordan</option>
+									<option>Kazakhstan</option>
+									<option>Kenya</option>
+									<option>Kiribati</option>
+									<option>Kuwait</option>
+									<option>Kyrgyzstan</option>
+									<option>Laos</option>
+									<option>Latvia</option>
+									<option>Lebanon</option>
+									<option>Lesotho</option>
+									<option>Liberia</option>
+									<option>Libya</option>
+									<option>Liechtenstein</option>
+									<option>Lithuania</option>
+									<option>Luxembourg</option>
+									<option>Macao</option>
+									<option>Madagascar</option>
+									<option>Malawi</option>
+									<option>Malaysia</option>
+									<option>Maldives</option>
+									<option>Mali</option>
+									<option>Malta</option>
+									<option>Marshall Islands</option>
+									<option>Martinique</option>
+									<option>Mauritania</option>
+									<option>Mauritius</option>
+									<option>Mayotte</option>
+									<option>Mexico</option>
+									<option>Micronesia</option>
+									<option>Moldova</option>
+									<option>Monaco</option>
+									<option>Mongolia</option>
+									<option>Montenegro</option>
+									<option>Montserrat</option>
+									<option>Morocco</option>
+									<option>Mozambique</option>
+									<option>Myanmar</option>
+									<option>Namibia</option>
+									<option>Nauru</option>
+									<option>Nepal</option>
+									<option>Netherlands</option>
+									<option>Netherlands Antilles</option>
+									<option>New Caledonia</option>
+									<option>New Zealand</option>
+									<option>Nicaragua</option>
+									<option>Niger</option>
+									<option>Nigeria</option>
+									<option>Norfolk Island</option>
+									<option>North Korea</option>
+									<option>Norway</option>
+									<option>Oman</option>
+									<option>Pakistan</option>
+									<option>Palau</option>
+									<option>Palestinian Territory</option>
+									<option>Panama</option>
+									<option>Papua New Guinea</option>
+									<option>Paraguay</option>
+									<option>Peru</option>
+									<option>Philippines</option>
+									<option>Pitcairn</option>
+									<option>Poland</option>
+									<option>Portugal</option>
+									<option>Puerto Rico</option>
+									<option>Qatar</option>
+									<option>Romania</option>
+									<option>Russian Federation</option>
+									<option>Rwanda</option>
+									<option>Saint Helena</option>
+									<option>Saint Kitts and Nevis</option>
+									<option>Saint Lucia</option>
+									<option>Saint Pierre and Miquelon</option>
+									<option>Saint Vincent and the Grenadines</option>
+									<option>Samoa</option>
+									<option>San Marino</option>
+									<option>Sao Tome and Principe</option>
+									<option>Saudi Arabia</option>
+									<option>Senegal</option>
+									<option>Serbia</option>
+									<option>Seychelles</option>
+									<option>Sierra Leone</option>
+									<option>Singapore</option>
+									<option>Slovakia</option>
+									<option>Slovenia</option>
+									<option>Solomon Islands</option>
+									<option>Somalia</option>
+									<option>South Africa</option>
+									<option>South Georgia</option>
+									<option>South Korea</option>
+									<option>Spain</option>
+									<option>Sri Lanka</option>
+									<option>Sudan</option>
+									<option>Suriname</option>
+									<option>Svalbard and Jan Mayen</option>
+									<option>Swaziland</option>
+									<option>Sweden</option>
+									<option>Switzerland</option>
+									<option>Syrian Arab Republic</option>
+									<option>Taiwan</option>
+									<option>Tajikistan</option>
+									<option>Tanzania</option>
+									<option>Thailand</option>
+									<option>The Former Yugoslav Republic of Macedonia</option>
+									<option>Timor-Leste</option>
+									<option>Togo</option>
+									<option>Tokelau</option>
+									<option>Tonga</option>
+									<option>Trinidad and Tobago</option>
+									<option>Tunisia</option>
+									<option>Turkey</option>
+									<option>Turkmenistan</option>
+									<option>Tuvalu</option>
+									<option>Uganda</option>
+									<option>Ukraine</option>
+									<option>United Arab Emirates</option>
+									<option>United Kingdom</option>
+									<option>United States</option>
+									<option>United States Minor Outlying Islands</option>
+									<option>Uruguay</option>
+									<option>Uzbekistan</option>
+									<option>Vanuatu</option>
+									<option>Vatican City</option>
+									<option>Venezuela</option>
+									<option>Vietnam</option>
+									<option>Virgin Islands, British</option>
+									<option>Virgin Islands, U.S.</option>
+									<option>Wallis and Futuna</option>
+									<option>Western Sahara</option>
+									<option>Yemen</option>
+									<option>Zambia</option>
+									<option>Zimbabwe</option>
+								</select>
+							</div>
+							<div class="group">
+								<div class="title">Website URL</div>
+								<input type="text" placeholder="URL" data-bind="value: page.url">
+							</div>
+						</div>
+					</div>
+					<div class="button-group"><a href="#" data-bind="click: closeSideBar" class="btn-green-o cancel">Cancel</a><a href="#" data-bind="click: submit" class="btn-green">Create and go to organization space</a></div>
+				</section>
+
+				<!-- collection give access-->
+				<section class="action access">
+					<div class="action-header">
+						<div class="title">Manage members</div>
+					</div>
+					<div class="action-body">
+						<div class="group">
+							<div class="title">Manage users</div>
+							<input id="userName" type="text" placeholder="Start typing username" data-bind="autocompleteUsername: myUsername, forUsers:true">
+
+
+							<ul class="members-list" data-bind="foreach: userMembers">
+								<li>
+									<!-- ko if: $data.image -->
+									<div class="thumbnails"><img data-bind="attr: {src: image, id: 'image_' + userId()}">
+									<a href="#" data-toggle="tooltip" data-placement="top" data-bind="click: $parent.excecuteRemove.bind($data, userId(), 'user'),
+									attr: { title: username }"  class="trash">
+										<i class="fa fa-trash"></i>
+									</a></div>
+									<div class="toggle">
+			                          <input type="checkbox" data-bind="{checked: admin , click: $parent.isAdminToggle.bind($data, admin(), userId()), attr: {id: username}} ">
+			                          <label data-bind="{attr: {for: username}}" ></label>
+			                          <span class="member">member</span>
+			                          <span class="admin">admin</span>
+			                        </div>
+			                        <div class="username" data-bind="text: username"></div>
+									
+
+
+									<!-- /ko -->
+									<!-- ko ifnot: $data.image -->
+									<div class="thumbnails"><img src="images/user.png">
+									<a href="#" data-toggle="tooltip" data-placement="top" data-bind="click: $parent.excecuteRemove.bind($data, userId(), 'user'),
+									attr: { title: username }"
+									 class="trash">
+										<i class="fa fa-trash"></i>
+									</a></div>
+									<div class="toggle">
+			                            <input type="checkbox"   data-bind="{checked: admin , click: $parent.isAdminToggle.bind($data, admin(),userId()),attr: {id: username}}">
+			                          <label data-bind="{attr: {for: username}}"></label>
+			                          <span class="member">member</span>
+			                          <span class="admin">admin</span>
+			                        </div>
+			                        <div class="username" data-bind="text: username"></div>
+
+									<!-- /ko -->
+								</li>
+							</ul>
+						</div>
+				<div class="group">
+				  <div class="title">Manage Groups</div>
+						<input id="groupName" type="text" placeholder="Start typing group name" data-bind="autocompleteUsername: myUsername, onlyParents:false, forUsers:false, forGroupType:'UserGroup'">
+							<ul class="access-list" data-bind="foreach: groupMembers">
+				  		<li class="blue">
+					    <span class="text" data-bind="text: username().substring(0,2).toUpperCase()"></span>
+						<a data-toggle="tooltip" data-placement="top" style="cursor:pointer;" data-bind="{attr: {title: username}, click: $parent.excecuteRemove.bind($data, userId(), 'group')}" class="trash">
+					  	<i class="fa fa-trash"></i></a>
+
+					</li>
+				  </ul>
+				</div> 
+
+<!-- 						<div class="group">
+							<div class="title">Manage groups</div>
+							<input id="groupName" type="text" placeholder="Start typing group name" data-bind="autocompleteUsername: myUsername, onlyParents:false, forUsers:false, forGroupType:'UserGroup'">
+							<ul class="members-list" data-bind="foreach: groupMembers">
+							 	<li>
+ 									<div class="thumbnails"><img src="images/group.jpeg">
+	
+										<a href="#" data-toggle="tooltip" data-placement="top" data-bind="click: $parent.excecuteRemove.bind($data, userId(), 'group'),
+										attr: { title: username }"
+										 class="trash">
+											<i class="fa fa-trash"></i>
+										</a>
+										</div>
+										<div class="username" data-bind="text: username"></div>										
+								</li>
+							</ul>
+						</div> -->
+					</div>
+					<div class="button-group"><a href="#" class="btn-green cancel">Close</a></div>
+				</section>
+				<!-- group api-->
+						<section class="action api">
+							<div class="action-header">
+								<div class="title">API Calls</div>
+							</div>
+							<div class="action-body">
+								<div class="input-style"><span class="get">GET</span>
+									<input type="text" data-bind="value: getAPIUrlGroup(true)">
+								</div>
+								<div class="input-style"><span class="get">GET</span>
+									<input type="text" data-bind="value: getAPIUrlGroup(false)">
+								</div>
+							</div>
+							<div class="button-group"><a class="btn-green cancel">close</a></div>
+						</section>
+			</section>
+		</main>
+	</div>
+</div>
+</div>

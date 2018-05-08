@@ -25,7 +25,7 @@ import static play.test.Helpers.fakeRequest;
 import static play.test.Helpers.route;
 import static play.test.Helpers.running;
 import static play.test.Helpers.status;
-import model.User;
+import model.usersAndGroups.User;
 
 import org.junit.Test;
 

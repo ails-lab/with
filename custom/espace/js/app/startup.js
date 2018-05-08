@@ -13,7 +13,7 @@ define(['jquery','knockout', './router', 'knockout-mapping', 'bootstrap', 'knock
 	ko.components.register('main-content', { require: 'components/main-content/main-content' });
 	ko.components.register('search-page', { require: 'components/search-page/search' });
 	ko.components.register('item-view', { require: 'components/item-view/item' });
-	ko.components.register('collection', { require: 'components/collection/collection' });
+	ko.components.register('collection-popup', { require: 'components/collection-popup/collection-popup' });
 	ko.components.register('collection-view', { require: 'components/collection-view/collection-view' });
 	ko.components.register('exhibition-view', { require: 'components/exhibition-view/exhibition-view' });
 	ko.components.register('facets', { require: 'components/facets/facets' });
@@ -25,6 +25,7 @@ define(['jquery','knockout', './router', 'knockout-mapping', 'bootstrap', 'knock
 	ko.components.register('terms', { require: 'components/statichtml/statichtml' });
 	ko.components.register('login-page', { require: 'components/login-register-page/login-register' });
 	
+	ko.components.register('thesaurus', { require: 'components/thesaurus/thesaurus' });
 	
 	ko.components.register('popup-login', {
 		viewModel: { require: 'components/login-register-page/login-register' },

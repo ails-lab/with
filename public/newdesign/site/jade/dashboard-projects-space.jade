@@ -1,0 +1,325 @@
+//- index.jade
+- var title = "WITH - Projects"
+- var page  = "projects"
+
+doctype html
+html
+
+	// head
+	include ./includes/head.inc.jade
+
+	// body
+	body
+
+		// head
+		include ./includes/header.inc.jade
+
+		// main
+		div( role="main" )
+			.container-fluid
+
+				// wrapper
+				.wrapper
+
+					// sidebar
+					aside
+					
+						// nav
+						include ./includes/asidenav.inc.jade
+					
+					// main
+					main
+						
+						// project
+						section.project
+
+							// upload
+							a(href="#").uploadimage
+								span.plus
+								span.text Change cover image
+
+							// head
+							.list-head
+
+								// back
+								a.back( href="dashboard-collection.html" data-toggle="tooltip" data-placement="top" title="Back to organizations list") 
+									i.fa.fa-angle-left
+
+								// control
+								ul.organization-list-control
+									li
+										a(href="projects-space-view.html" data-toggle="tooltip" data-placement="top" title="View Project page").fa.fa-eye
+									li
+										a(href="#" data-toggle="tooltip" data-placement="top" title="Edit Project").fa.fa-pencil.editaction.new
+									li
+										a(href="#" data-toggle="tooltip" data-placement="top" title="Manage Members").fa.fa-user.members-access
+									li
+										a(href="#" data-toggle="tooltip" data-placement="top" title="Delete Project").fa.fa-trash
+							
+							// hero section
+							section.hero
+								.meta
+									.top-info
+										a(href="#" data-toggle="tooltip" data-placement="top" title="Add thumbnails" ).thumbnails.upload
+											img(src="img/ui/profile-placeholder.png" data-toggle="tooltip" data-placement="top" title="Add profile picture")
+										.header
+											.title Galactic Empire Organization
+											.location Amsterdam, The Netherlands
+											a(href="#") Visit site
+									.description
+										| Space, the final frontier. These are the voyages of the Starship enterprise. Its five-year mission: to explore strange new worlds. to seek out new life and new civilizations, to boldly go where no man has gone before. Science has not yet mastered prophecy. We predict too much for the next year and yet far too little for the next 10.
+
+								.map
+
+							// isotope section
+							section.isotope
+								section.filter
+									.wrap
+										// menu
+										ul.nav
+											li.active(data-filter='*')
+												a(href='#', title='ALL') All
+											li(data-filter='.collection')
+												a(href='#', title='ALL') Collections
+											li(data-filter='.exhibition')
+												a(href='#', title='EXHIBITION') Exhibitions
+
+								section.listing
+
+									.grid
+
+										.sizer
+
+										.item.exhibition
+											.wrap
+												a(href="#" title="Lorem ipsum")
+													.thumb
+														img(src="img/content/content-1.png" alt="Lorem ipsum")
+														
+													.info
+														span.type Exhibitions
+														h1.title Lorem ipsum dolor sit amet conceptus
+														p.text
+															| Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+												.action-group
+													.wrap
+														ul
+															li
+																a(href="#" data-toggle="tooltip" data-placement="top" title="Unshare media" ).fa.fa-ban
+															li
+																a(href="#" data-toggle="tooltip" data-placement="top" title="Add to favorite" ).fa.fa-heart
+															li
+																a(href="#" data-toggle="tooltip" data-placement="top" title="Collect it" ).fa.fa-download.collectbutton
+															li
+																a(href="#" data-toggle="tooltip" data-placement="top" title="Set as featured" ).fa.fa-star.featuredbutton
+
+										.item.exhibition
+											.wrap
+												a(href="#" title="Lorem ipsum")
+													.thumb
+														img(src="img/content/content-1.png" alt="Lorem ipsum")
+													.info
+														span.type Exhibitions
+														h1.title Lorem ipsum dolor sit amet conceptus
+														p.text
+															| Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+												.action-group
+													.wrap
+														ul
+															li
+																a(href="#" data-toggle="tooltip" data-placement="top" title="Unshare media" ).fa.fa-ban
+															li
+																a(href="#" data-toggle="tooltip" data-placement="top" title="Add to favorite" ).fa.fa-heart
+															li
+																a(href="#" data-toggle="tooltip" data-placement="top" title="Collect it" ).fa.fa-download.collectbutton
+															li
+																a(href="#" data-toggle="tooltip" data-placement="top" title="Set as featured" ).fa.fa-star.featuredbutton
+
+
+										.item.collection
+											.wrap
+												a(href="#" title="Lorem ipsum")
+													.thumb
+														img(src="img/content/content-2.png" alt="Lorem ipsum")
+														.counter 124 items
+													.info
+														.type Collection
+														h1.title Lorem ipsum dolor sit amet conceptus
+														p.text
+															| Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+												.action-group
+													.wrap
+														ul
+															li
+																a(href="#" data-toggle="tooltip" data-placement="top" title="Unshare media" ).fa.fa-ban
+															li
+																a(href="#" data-toggle="tooltip" data-placement="top" title="Add to favorite" ).fa.fa-heart
+															li
+																a(href="#" data-toggle="tooltip" data-placement="top" title="Collect it" ).fa.fa-download.collectbutton
+															li
+																a(href="#" data-toggle="tooltip" data-placement="top" title="Set as featured" ).fa.fa-star.featuredbutton
+
+										.item.collection
+											.wrap
+												a(href="#" title="Lorem ipsum")
+													.thumb
+														img(src="img/content/content-3.png" alt="Lorem ipsum")
+														.counter 124 items
+													.info
+														.type Collection
+														h1.title Lorem ipsum dolor sit amet conceptus
+														p.text
+															| Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+												.action-group
+													.wrap
+														ul
+															li
+																a(href="#" data-toggle="tooltip" data-placement="top" title="Unshare media" ).fa.fa-ban
+															li
+																a(href="#" data-toggle="tooltip" data-placement="top" title="Add to favorite" ).fa.fa-heart
+															li
+																a(href="#" data-toggle="tooltip" data-placement="top" title="Collect it" ).fa.fa-download.collectbutton
+															li
+																a(href="#" data-toggle="tooltip" data-placement="top" title="Set as featured" ).fa.fa-star.featuredbutton
+
+							// collection give access
+							section.action.members
+								.action-header
+									.title Manage members
+
+								.action-body
+									.group
+										.title Users access
+										input(type="text" placeholder="Start typing username")
+										ul.access-list
+											li
+												.thumbnails
+													img(src="img/content/img-profile.jpg")
+												a(href="#" data-toggle="tooltip" data-placement="top" title="List view").trash
+													i.fa.fa-trash
+												.toggle
+													input(type='checkbox')#u1
+													label(for='u1')
+													span.private member
+													span.public admin
+											li
+												.thumbnails
+													img(src="img/content/img-profile.jpg")
+												a(href="#" data-toggle="tooltip" data-placement="top" title="List view").trash
+													i.fa.fa-trash
+												.toggle
+													input(type='checkbox')#u2
+													label(for='u2')
+													span.private member
+													span.public admin
+											li
+												.thumbnails
+													img(src="img/content/img-profile.jpg")
+												a(href="#" data-toggle="tooltip" data-placement="top" title="List view").trash
+													i.fa.fa-trash
+												.toggle
+													input(type='checkbox')#u3
+													label(for='u3')
+													span.private member
+													span.public admin
+											li
+												.thumbnails
+													img(src="img/content/img-profile.jpg")
+												a(href="#" data-toggle="tooltip" data-placement="top" title="List view").trash
+													i.fa.fa-trash
+												.toggle
+													input(type='checkbox')#u4
+													label(for='u4')
+													span.private member
+													span.public admin
+
+									.group
+										.title Groups access
+										input(type="text" placeholder="Start typing group name")
+										ul.access-list
+											li.blue
+												span.text DK
+												a(href="#" data-toggle="tooltip" data-placement="top" title="List view").trash
+													i.fa.fa-trash
+												.toggle
+													input(type='checkbox')#g1
+													label(for='g1')
+													span.private member
+													span.public admin
+											li.green
+												span.text US
+												a(href="#" data-toggle="tooltip" data-placement="top" title="List view").trash
+													i.fa.fa-trash
+												.toggle
+													input(type='checkbox')#g2
+													label(for='g2')
+													span.private member
+													span.public admin
+											li.orange
+												span.text MN
+												a(href="#" data-toggle="tooltip" data-placement="top" title="List view").trash
+													i.fa.fa-trash
+												.toggle
+													input(type='checkbox')#g3
+													label(for='g3')
+													span.private member
+													span.public admin
+
+
+
+								.button-group
+									a(href="#").btn-green.cancel Close
+
+							// collection new
+							section.action.upload
+								.action-header
+									.title Upload image
+
+								.action-body
+									img(src="img/ui/upload-placeholder.png").upload-img
+									span.progress( style="width:40%;" )
+
+									p.info
+										| Background image will be used as a decorative element behind main title bar, it will be stretched accordingly
+
+								.button-group
+									a(href="#").btn-green-o.cancel Cancel
+									a(href="#").btn-green Save
+
+							// collection new
+							section.action.new
+								.action-header
+									.title Edit Project
+
+								.action-body
+									input(type="text", placeholder='Name your project' value="Galactic Empire Organization")
+									a(href="#").add.hidden
+										span.plus
+										span.text Add description
+									textarea(placeholder="Describe your collection" rows="10")
+										| We choose to go to the moon in this decade and do the other things, not because they are easy, but because they are hard, because that goal will serve to organize and measure the best of our energies and skills, because that challenge is one that we are willing to accept, one we are unwilling to postpone, and one which we intend to win.
+									.spacing
+
+										.group
+											.title Page URL
+											p www.with.image.ntua.gt/assets/
+											input(type="text" placeholder="Page URL" value="neworder" )
+										.group
+											.title Location
+											input(type="text" placeholder="Address" value="Death Star")
+											input(type="text" placeholder="City" value="Andromeda" ).half
+											select.form-control.half
+												option Country
+												option Country 2
+												option Country 3
+										.group
+											.title Website URL
+											input(type="text" placeholder="URL" value="Ren")
+
+
+
+								.button-group
+									a(href="#").btn-green-o.cancel Cancel
+									a(href="#").btn-green Save project
+	// script
+	include ./includes/script.inc.jade

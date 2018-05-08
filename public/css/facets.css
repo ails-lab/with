@@ -44,6 +44,7 @@
   box-shadow: 0 0 5px rgba(0,0,0,0.15);
   -webkit-border-radius: 4px;
   border-radius: 4px;
+      overflow: auto;
 }
 
 .facetcontents{
@@ -93,7 +94,7 @@
   background-color: #fff;
   padding: 10px 0px 3px 3px;
   overflow-y: auto;
-  min-height:360px;
+  min-height:460px;
   max-height: 460px;
   border-radius: 4px;
 }
@@ -176,7 +177,6 @@ ul.thumbfilters li:hover {
 
 .bootstrap-tagsinput {
   display: block;
-  padding: 4px 6px 0px 6.5em;
   color: #555;
   vertical-align: middle;
   border-radius: 4px;
@@ -211,7 +211,6 @@ ul.thumbfilters li:hover {
 }
 .bootstrap-tagsinput .tag {
   display: inline-block;
-  margin-top: 10px;
   margin-right: 2px;
   color: white;
   font-size:1.0em;
@@ -314,7 +313,7 @@ ul.thumbfilters li:hover {
 }
 
 .chart li .bar {
-  min-width: 0.5%;
+  min-width: 1%;
   left: 2.2em;
   position: absolute;
   cursor:pointer;

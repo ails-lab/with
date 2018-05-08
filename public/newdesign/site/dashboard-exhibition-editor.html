@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html>
+  <!-- head-->
+  <head>
+    <!-- meta-->
+    <title>WITH - My Exhibition</title>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="description" content="WITH">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#454545">
+    <!-- icons-->
+    <link rel="apple-touch-icon" href="apple-touch-icon.png">
+    <link rel="icon" type="image/png" href="favicon.png">
+    <meta name="msapplication-TileImage" content="tile.png">
+    <meta name="msapplication-TileColor" content="#454545">
+    <!-- stylesheets-->
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="js/vendor/bootstrap/css/bootstrap.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="js/vendor/slick.js/slick/slick.css">
+    <link rel="stylesheet" href="js/vendor/magnific-popup/dist/magnific-popup.css">
+    <!-- script-->
+    <script src="js/vendor/modernizr/modernizr.js"></script>
+  </head>
+  <!-- body-->
+  <body>
+    <!-- head-->
+    <header>
+      <div class="wrap">
+        <div class="container-fluid">
+          <!-- logo--><a href="index.html" class="logo"><img src="img/ui/logo.png"></a>
+          <!-- sign in-->
+          <section class="login-section">
+            <!-- profile picture--><a id="profilebutton" href="#" data-toggle="dropdown" class="profile"><span class="picture"><img src="img/content/img-profile.jpg"><img src="img/ui/ic-profile-frame.png" class="frame"></span><span class="name">Megan Mullaly</span><span class="arrow"></span></a>
+            <!-- dropdown menu-->
+            <ul aria-labelledby="profilebutton" class="dropdown-menu">
+              <li><a href="#" class="showprofile">My profile</a></li>
+              <li><a href="#">Sign out</a></li>
+            </ul>
+          </section>
+          <!-- notification-->
+          <section class="notification">
+            <!-- button--><a id="notificationbutton" href="#" title="Notification" data-toggle="dropdown"><img src="img/ui/ic-notification.png"><span class="counter">12</span></a>
+            <!-- dropdown menu-->
+            <div aria-labelledby="notificationbutton" class="dropdown-menu">
+              <!-- header-->
+              <h3>WITH Notifications</h3>
+              <!-- activity list-->
+              <ul class="list">
+                <li><a href="#"><img src="img/content/img-profile.jpg" class="thumb">
+                    <div class="news">Lorem ipsum dolor sit amet consectetur adipiscing.</div></a></li>
+                <li><a href="#"><img src="img/content/img-profile.jpg" class="thumb">
+                    <div class="news">Lorem ipsum dolor sit amet consectetur adipiscing.</div></a></li>
+              </ul>
+              <!-- view all--><a href="#" class="viewall">View all activities </a>
+            </div>
+          </section>
+          <!-- home-->
+          <section class="home"><a href="dashboard.html" title="Dashboard Home"><img src="img/ui/ic-home.png" alt="Home"></a></section>
+          <!-- explore-->
+          <section class="explore">
+            <!-- input search-->
+            <input type="text" placeholder="Search">
+            <!-- icon--><img src="img/ui/ic-mag.png" class="icon">
+          </section>
+        </div>
+      </div>
+    </header>
+    <!-- main-->
+    <div role="main">
+      <div class="container-fluid">
+        <!-- wrapper-->
+        <div class="wrapper">
+          <!-- sidebar-->
+          <aside>
+            <!-- nav-->
+            <!-- header-->
+            <label class="header">NAVIGATE</label>
+            <!-- nav-->
+            <nav class="app">
+              <ul>
+                <li><a href="dashboard.html"><span class="icon"><i class="fa fa-home"></i></span><span class="text">Dashboard</span></a></li>
+                <li><a href="dashboard-collection.html"><span class="counter">7</span><span class="icon"><i class="fa fa-clone"></i></span><span class="text">My Collection</span></a></li>
+                <li class="active"><a href="dashboard-exhibition.html"><span class="counter">10</span><span class="icon"><i class="fa fa-television"></i></span><span class="text">My Exhibition</span></a></li>
+                <li><a href="dashboard-favorite.html"><span class="counter">5</span><span class="icon"><i class="fa fa-heart-o"></i></span><span class="text">My Favorite</span></a></li>
+                <!-- li( class=page === "annotation" ? "active" : "" )
+                a(href='dashboard-annotation.html')
+                 span.icon
+                  i.fa.fa-edit
+                 span.text My Annotation
+                -->
+                <li><a href="dashboard-organizations.html"><span class="icon"><i class="fa fa-bookmark-o"></i></span><span class="text">Organizations</span></a></li>
+                <li><a href="dashboard-projects.html"><span class="icon"><i class="fa fa-comment-o"></i></span><span class="text">Projects</span></a></li>
+              </ul>
+            </nav>
+            <!-- nav-->
+            <nav class="site">
+              <ul>
+                <li><a href="about.html">About WITH</a></li>
+                <li><a href="faq.html">Frequently Asked Questions</a></li>
+                <li><a href="#">WITH API</a></li>
+                <li><a href="privacy.html">Privacy Policy</a></li>
+                <li><a href="terms.html">Terms of Condition</a></li>
+                <li><a href="feedback.html">Feedback &amp; Contact</a></li>
+              </ul>
+            </nav>
+          </aside>
+          <!-- main-->
+          <main>
+            <!-- collection section-->
+            <section class="exhibition">
+              <!-- toggle-->
+              <div class="toggle exhibitiontoggle">
+                <input type="checkbox" id="toggle2">
+                <label for="toggle2"></label><span class="private">private</span><span class="public">public</span>
+              </div>
+              <!-- head-->
+              <div class="list-head">
+                <!-- back--><a href="dashboard-collection.html" data-toggle="tooltip" data-placement="top" title="Back to collection list" class="back"><i class="fa fa-angle-left"></i></a>
+                <!-- control-->
+                <ul class="organization-list-control">
+                  <li><a href="exhibition-view.html" data-toggle="tooltip" data-placement="top" title="View Organization page" class="fa fa-eye"></a></li>
+                  <li><a href="#" data-toggle="tooltip" data-placement="top" title="Add credits section" class="fa fa-copyright creditbutton"></a></li>
+                  <li><a href="#" data-toggle="tooltip" data-placement="top" title="Upload background image" class="fa fa-image upload exhibition"></a></li>
+                  <li><a href="#" data-toggle="tooltip" data-placement="top" title="Delete Organization" class="fa fa-trash"></a></li>
+                </ul>
+              </div>
+              <!-- editor box-->
+              <div class="editorbox">
+                <div class="wrap">
+                  <!-- scroll-->
+                  <div class="scroll">
+                    <!-- box
+                    .box
+                     input.editortext( value="Never in all their history" ) 
+                     textarea.editortextarea
+                      | Never in all their history have men been able truly to conceive of the world as one: a single sphere, a globe, having the qualities of a globe, a round earth in which all the directions eventually meet, in which there is no center.
+                      
+                    -->
+                    <!-- box-->
+                    <div class="box">
+                      <div class="boxinputs">
+                        <input value="Never in all their history" class="editortext">
+                        <textarea class="editortextarea">Never in all their history have men been able truly to conceive of the world as one: a single sphere, a globe, having the qualities of a globe, a round earth in which all the directions eventually meet, in which there is no center.</textarea>
+                      </div>
+                    </div>
+                    <!-- add-->
+                    <div data-toggle="tooltip" data-placement="top" title="Drag your media here" class="add"><span><a href="#"><img src="img/ui/ic-add.png"></a></span></div>
+                    <!-- box-->
+                    <div class="box fill">
+                      <div class="boxaction">
+                        <ul>
+                          <li><a href="#" data-toggle="tooltip" data-placement="top" title="Edit section" class="editbox"><i class="fa fa-pencil-square-o"></i></a></li>
+                          <li><a href="#" data-toggle="tooltip" data-placement="top" title="Add media" class="addmediabutton"><i class="fa fa-play-circle"></i></a></li>
+                          <li><a href="#" data-toggle="tooltip" data-placement="top" title="Delete section"><i class="fa fa-trash-o"></i></a></li>
+                        </ul>
+                      </div>
+                      <div class="left">
+                        <div class="imgwrap"><img src="img/content/img-editor.jpg"></div>
+                        <div class="imginfo"><span class="mediatitle">Across the sea of space, the stars are </span><br><span class="mediasource">Digitalnz.org</span></div>
+                      </div>
+                      <div class="right">
+                        <div class="boxtitle">
+                          <p>As I stand out here in the wonders of the unknown at Hadley, I sort of realize there’s a fundamental truth to our nature, Man must explore and this is exploration at its greatest.</p>
+                          <p>The path of a cosmonaut is not an easy, triumphant march to glory. You have to get to know the meaning not just of joy but also of grief, before being allowed in the spacecraft cabin.</p>
+                        </div>
+                      </div>
+                    </div>
+                    <!-- add-->
+                    <div data-toggle="tooltip" data-placement="top" title="Drag your media here" class="add"><span><a href="#"><img src="img/ui/ic-add.png"></a></span></div>
+                    <!-- box-->
+                    <div class="box fill videoadded">
+                      <div class="boxaction">
+                        <ul>
+                          <li><a href="#" data-toggle="tooltip" data-placement="top" title="Edit section" class="editbox"><i class="fa fa-pencil-square-o"></i></a></li>
+                          <li><a href="#" data-toggle="tooltip" data-placement="top" title="Add media" class="addmediabutton"><i class="fa fa-play-circle"></i></a></li>
+                          <li><a href="#" data-toggle="tooltip" data-placement="top" title="Delete section"><i class="fa fa-trash-o"></i></a></li>
+                        </ul>
+                      </div>
+                      <div class="left">
+                        <div class="imgwrap"><img src="img/content/img-editor.jpg"></div>
+                        <div class="imginfo"><span class="mediatitle">Across the sea of space, the stars are </span><br><span class="mediasource">Digitalnz.org</span></div>
+                      </div>
+                      <div class="right">
+                        <div class="boxtitle">
+                          <p>As I stand out here in the wonders of the unknown at Hadley, I sort of realize there’s a fundamental truth to our nature, Man must explore and this is exploration at its greatest.</p>
+                          <p>The path of a cosmonaut is not an easy, triumphant march to glory. You have to get to know the meaning not just of joy but also of grief, before being allowed in the spacecraft cabin.</p>
+                        </div>
+                      </div>
+                      <div class="video">
+                        <div class="imgwrap">
+                          <div class="embed-responsive embed-responsive-4by3">
+                            <iframe src="https://www.youtube.com/embed/YykjpeuMNEk" frameborder="0" allowfullscreen class="embed-responsive-item"></iframe>
+                          </div>
+                        </div>
+                        <div class="imginfo"><span class="mediatitle">As I stand out here in the wonders of the unknown at Hadley, I sort of realize there’s a fundamental truth to our nature, Man must explore and this is exploration at its greatest.</span></div>
+                        <ul class="action">
+                          <li><a href="#" data-toggle="tooltip" data-placement="top" title="Edit video"><i class="fa fa-pencil"></i></a></li>
+                          <li><a href="#" data-toggle="tooltip" data-placement="top" title="Delete video"><i class="fa fa-trash-o"></i></a></li>
+                        </ul>
+                      </div>
+                    </div>
+                    <!-- add-->
+                    <div data-toggle="tooltip" data-placement="top" title="Drag your media here" class="add"><span><a href="#"><img src="img/ui/ic-add.png"></a></span></div>
+                    <!-- box-->
+                    <div class="box fill videoadded">
+                      <div class="boxaction">
+                        <ul>
+                          <li><a href="#" data-toggle="tooltip" data-placement="top" title="Edit section" class="editbox"><i class="fa fa-pencil-square-o"></i></a></li>
+                          <li><a href="#" data-toggle="tooltip" data-placement="top" title="Add media" class="addmediabutton"><i class="fa fa-play-circle"></i></a></li>
+                          <li><a href="#" data-toggle="tooltip" data-placement="top" title="Delete section"><i class="fa fa-trash-o"></i></a></li>
+                        </ul>
+                      </div>
+                      <div class="left">
+                        <div class="imgwrap"><img src="img/content/img-editor.jpg"></div>
+                        <div class="imginfo"><span class="mediatitle">Across the sea of space, the stars are </span><br><span class="mediasource">Digitalnz.org</span></div>
+                      </div>
+                      <div class="right">
+                        <div class="boxtitle">
+                          <p>As I stand out here in the wonders of the unknown at Hadley, I sort of realize there’s a fundamental truth to our nature, Man must explore and this is exploration at its greatest.</p>
+                          <p>The path of a cosmonaut is not an easy, triumphant march to glory. You have to get to know the meaning not just of joy but also of grief, before being allowed in the spacecraft cabin.</p>
+                        </div>
+                      </div>
+                      <div class="video">
+                        <div class="imgwrap"><img src="img/ui/ic-noimage.png"></div>
+                        <div class="imginfo"><span class="mediatitle">As I stand out here in the wonders of the unknown at Hadley, I sort of realize there’s a fundamental truth to our nature, Man must explore and this is exploration at its greatest.</span></div>
+                        <ul class="action">
+                          <li><a href="#" data-toggle="tooltip" data-placement="top" title="Edit video"><i class="fa fa-pencil"></i></a></li>
+                          <li><a href="#" data-toggle="tooltip" data-placement="top" title="Delete video"><i class="fa fa-trash-o"></i></a></li>
+                        </ul>
+                      </div>
+                    </div>
+                    <!-- add-->
+                    <div data-toggle="tooltip" data-placement="top" title="Drag your media here" class="add"><span><a href="#"><img src="img/ui/ic-add.png"></a></span></div>
+                  </div>
+                </div>
+              </div>
+              <!-- assets-->
+              <div class="assets">
+                <!-- actions-->
+                <div class="actions">
+                  <select class="form-control collectionlist">
+                    <option>Collection 1</option>
+                    <option>Collection 2</option>
+                  </select>
+                  <div class="collectionsearch">
+                    <input type="text" placeholder="Search"><img src="img/ui/ic-mag.png" class="icon">
+                  </div>
+                  <div class="notification">Select your notifications and drag items to your editor</div>
+                </div>
+                <!-- listing-->
+                <div class="assetlisting">
+                  <ul>
+                    <li><a href="#" data-toggle="tooltip" data-placement="top" title="Lorem ipsum dolor siy amet">
+                        <div class="hue"><img src="img/content/content-1.png">
+                          <div class="color"></div>
+                        </div></a></li>
+                    <li><a href="#" data-toggle="tooltip" data-placement="top" title="Lorem ipsum dolor siy amet">
+                        <div class="hue"><img src="img/content/content-2.png">
+                          <div class="color"></div>
+                        </div></a></li>
+                    <li><a href="#" data-toggle="tooltip" data-placement="top" title="Lorem ipsum dolor siy amet">
+                        <div class="hue"><img src="img/content/content-3.png">
+                          <div class="color"></div>
+                        </div></a></li>
+                    <li><a href="#" data-toggle="tooltip" data-placement="top" title="Lorem ipsum dolor siy amet">
+                        <div class="hue"><img src="img/content/content-4.png">
+                          <div class="color"></div>
+                        </div></a></li>
+                    <li><a href="#" data-toggle="tooltip" data-placement="top" title="Lorem ipsum dolor siy amet">
+                        <div class="hue"><img src="img/content/content-5.png">
+                          <div class="color"></div>
+                        </div></a></li>
+                    <li><a href="#" data-toggle="tooltip" data-placement="top" title="Lorem ipsum dolor siy amet">
+                        <div class="hue"><img src="img/content/content-6.png">
+                          <div class="color"></div>
+                        </div></a></li>
+                    <li><a href="#" data-toggle="tooltip" data-placement="top" title="Lorem ipsum dolor siy amet">
+                        <div class="hue"><img src="img/content/content-1.png">
+                          <div class="color"></div>
+                        </div></a></li>
+                    <li><a href="#" data-toggle="tooltip" data-placement="top" title="Lorem ipsum dolor siy amet">
+                        <div class="hue"><img src="img/content/content-2.png">
+                          <div class="color"></div>
+                        </div></a></li>
+                    <li><a href="#" data-toggle="tooltip" data-placement="top" title="Lorem ipsum dolor siy amet">
+                        <div class="hue"><img src="img/content/content-3.png">
+                          <div class="color"></div>
+                        </div></a></li>
+                    <li><a href="#" data-toggle="tooltip" data-placement="top" title="Lorem ipsum dolor siy amet">
+                        <div class="hue"><img src="img/content/content-4.png">
+                          <div class="color"></div>
+                        </div></a></li>
+                    <li><a href="#" data-toggle="tooltip" data-placement="top" title="Lorem ipsum dolor siy amet">
+                        <div class="hue"><img src="img/content/content-5.png">
+                          <div class="color"></div>
+                        </div></a></li>
+                    <li><a href="#" data-toggle="tooltip" data-placement="top" title="Lorem ipsum dolor siy amet">
+                        <div class="hue"><img src="img/content/content-6.png">
+                          <div class="color"></div>
+                        </div></a></li>
+                  </ul>
+                </div>
+              </div>
+            </section>
+            <!-- collection new-->
+            <section class="action upload">
+              <div class="action-header">
+                <div class="title">Upload background image</div>
+              </div>
+              <div class="action-body"><img src="img/ui/upload-placeholder.png" class="upload-img"><span style="width:40%;" class="progress"></span>
+                <p class="info">Background image will be used as a decorative element behind exhibition, it will be stretched accordingly.</p>
+              </div>
+              <div class="button-group"><a href="#" class="btn-green-o cancel">Cancel</a><a href="#" class="btn-green">Save</a></div>
+            </section>
+            <!-- collection new-->
+            <section class="action editsection">
+              <div class="action-header">
+                <div class="title">Edit section</div>
+              </div>
+              <div class="action-body">
+                <textarea type="text" placeholder="About me">Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidunt ut laoreet dolore magna aliquam erat volutpat.</textarea>
+                <div class="sectionside">
+                  <div class="head">Media location</div>
+                  <div class="toggle">
+                    <input type="checkbox" id="toggle3">
+                    <label for="toggle3"></label><span class="private">left</span><span class="public">right</span>
+                  </div>
+                </div>
+              </div>
+              <div class="button-group"><a href="#" class="btn-green-o cancel">Cancel</a><a href="#" class="btn-green">Save</a></div>
+            </section>
+            <!-- collection new-->
+            <section class="action creditsection">
+              <div class="action-header">
+                <div class="title">Add credit</div>
+              </div>
+              <div class="action-body">
+                <textarea type="text" placeholder="About me">Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidunt ut laoreet dolore magna aliquam erat volutpat.</textarea>
+              </div>
+              <div class="button-group"><a href="#" class="btn-green-o cancel">Cancel</a><a href="#" class="btn-green">Save</a></div>
+            </section>
+            <!-- collection give access-->
+            <section class="action addmediasection">
+              <div class="action-header">
+                <div class="title">Add media</div>
+              </div>
+              <div class="action-body">
+                <div class="group">
+                  <div class="title">Select media type</div>
+                  <select class="form-control">
+                    <option>Video</option>
+                    <option>Audio</option>
+                  </select>
+                </div>
+                <div class="group">
+                  <div class="title">Media URL</div>
+                  <input type="text" value="http://">
+                  <textarea type="text" placeholder="Media description"></textarea>
+                </div>
+              </div>
+              <div class="button-group"><a href="#" class="btn-green-o cancel">Cancel</a><a href="#" class="btn-green">Add media</a></div>
+            </section>
+          </main>
+        </div>
+      </div>
+    </div>
+  </body>
+  <!-- script-->
+  <script src="js/vendor/jquery/dist/jquery.min.js"></script>
+  <script src="js/vendor/bootstrap/dist/js/bootstrap.min.js"></script>
+  <script src="js/vendor/masonry/dist/masonry.pkgd.min.js"></script>
+  <script src="js/vendor/slick.js/slick/slick.min.js"></script>
+  <script src="js/vendor/jquery.nicescroll/dist/jquery.nicescroll.min.js"></script>
+  <script src="js/vendor/isotope/isotope.pkgd.min.js"></script>
+  <script src="js/vendor/jquery-sticky/jquery.sticky.js"></script>
+  <script src="js/plugin.js"></script>
+  <script src="js/main.js"></script>
+</html>

@@ -1,0 +1,190 @@
+ <annotations-end params="route: route"></annotations-end>
+ <div class="itemview">
+        <!-- menu bar-->
+        <nav class="menubar media">
+          <div class="container">
+            <!-- title-->
+            <ul>
+              <li class="active"><a href="#" title="#">Media Item</a></li>
+            </ul>
+            <!-- action-->
+            <ul class="action">
+            	<li class="close"><span class="fa-stack fa-fw"><a href="#" title="close" data-bind="visible: window.location.href.indexOf('#item')==-1,click: close"><img src="img/ic-close.png"></a></span></li>
+         
+              <li class="close"> <span class="star" data-bind="visible: loggedUser()==true && record().externalId!=null, css: { active: isLiked(record().externalId) }">
+			 <span class="fa-stack fa-fw" data-bind="event: { click: function(data,event) { likeRecord(record(),event); } }">
+					<i class="fa fa-heart fa-stack-1x"></i><i class="fa fa-heart-o fa-stack-1x fa-inverse"></i>
+			 </span>
+					</span></li>
+			 <li class="close" title="collect"><span class="fa-stack fa-fw" data-bind="visible:loggedUser, event: { click: function(data,event) { collect(record(),event); } }"><i class="fa fa-download fa-stack-1x"></i>
+						</span></li>
+             </ul>
+          </div>
+        </nav>
+        <!-- section media details-->
+        <section class="mediadetails spacer">
+          <div class="container">
+            <div class="wrap">
+              <!-- media itself-->
+              <!-- ko if: record().data.mediatype != "AUDIO"-->
+              <div class="mediathumb"><img id="mediathumbid" data-bind="attr: {src: record().fullres()}" onError="this.src=helper_thumb"> 
+              <div class="media" id="mediadiv">
+             </div> 
+             </div>
+             <!-- /ko -->
+             <!-- ko else: -->
+             <div class="mediathumb"><img id="mediathumbid" data-bind="attr: {src: record.calcThumbnail }"> 
+             <div class="media" id="mediadiv">
+             </div> 
+             </div>
+             <!-- /ko -->
+              <!-- media information-->
+              <div class="mediainfo">
+                <div class="infowrap">
+                  <!-- title-->
+                  <!-- ko if: record().nextItemToAnnotate() != null -->
+                  	<span>ITEM </span><span data-bind="text: indexInBatch"></span><span>/10</span>
+                  <!-- /ko -->
+                  <h1><!-- ko text: record().title --><!-- /ko --> 
+                  <!-- ko if: isLogged -->
+                  	<span class="pnd-resource" onclick="dispatchDocumentEvent('Pundit.showBootstrap')"></span>
+				  <!-- /ko -->
+				  <!-- ko else: -->
+                      <button style="padding-left: 5px" type="button" class="btn btn-primary" data-bind="click: loginFromItem">Login to start tagging</button>
+				  <!-- /ko -->
+				  </h1>
+                  <div class="owner" data-bind="text:record().dataProvider"></div>
+                   <!-- annotate box-->
+                   <!-- ko if: record().recordId!='-1' -->
+                  <div class="annotatebox">
+                  	<!-- ko if: record().annotations && record().annotations().length > 0 -->
+                    <div class="question">Which musical instruments do you hear in this item?</div>
+                    <div class="info">The item has been tagged with the following concepts. Add more using PUNDIT.</div>
+                    <!-- /ko -->
+                    <!-- ko else: -->
+	                    <div class="question">Which musical instruments do you hear in this item?</div>
+	                    <div class="info">Add tags using Pundit's ANNOTATE buttom above.</div>
+                    <!-- /ko -->
+                    <!-- answers-->
+                    <!-- ko if: record().myAnnotations-->
+                    <ul class="myanswers" data-bind="foreach: record().myAnnotations()">
+                      <li><a href="#" data-bind="click: $parent.deleteAnnotation"><i class="fa fa fa-times-circle"></i>  </a><a data-bind="{text: body.label.default[0], attr: {href: body.uri}}" style="color: inherit;text-decoration: none" target="_blank"></a></li>
+                    </ul>
+                    <!-- /ko -->
+                    <!-- ko if: record().otherAnnotations-->
+                    <ul class="answers" data-bind="foreach: record().otherAnnotations()">
+                      <li><a data-bind="{text: body.label.default[0], attr: {href: body.uri}}" style="color: inherit;text-decoration: none" target="_blank"></a></li>
+                    </ul>
+                    <!-- /ko -->
+                    <!-- answer action-->
+                    <!-- ko if: record().nextItemToAnnotate() != null && !jQuery.isEmptyObject(record().nextItemToAnnotate()) -->
+                    <ul class="answeraction">
+                      <li><a href="#" data-bind="click: nextItem">NEXT ITEM</a></li>
+                    </ul>
+                    <!-- /ko -->
+                     <!-- ko if: record().nextItemToAnnotate() != null && jQuery.isEmptyObject(record().nextItemToAnnotate()) -->
+                     <ul class="answeraction">
+                      <li><a href="#" data-bind="click: endBatch">NEXT ITEM</a></li>
+                    </ul>
+                     <!-- /ko -->
+                  </div>
+                  <!-- /ko -->
+                  <!-- metadata-->
+				  <ul role="tablist" class="nav nav-tabs">
+                    <li class="active"><a href="#information" title="" data-toggle="tab">Info</a></li>
+                    <li><a href="#related" title="" data-toggle="tab" data-bind="event:{ click: function(){record().findsimilar()}}">Related</a></li>
+                    <li data-bind="visible: record().recordId!='-1'"><a href="#comment" title="comments" data-toggle="tab">Comments</a></li>
+                    <li data-bind="visible: record().recordId!='-1'"><a href="#share" title="" data-toggle="tab">Share</a></li>
+                  </ul>
+                  <!-- panes-->
+                  <div class="tab-content">
+                    <div id="information" class="tab-pane active">
+                      <!-- description-->
+                      <ul class="meta">
+                        <li data-bind="if: record().description">
+                          <div class="title">DESCRIPTION</div>
+                          <div class="field" data-bind="text:record().description">
+                            
+                          </div>
+                        </li>
+                         <li data-bind="if: record().creator">
+                          <div class="title">CREATOR</div>
+                          <div class="field" data-bind="text:record().creator"></div>
+                        </li>
+                         <li data-bind="if: record().dataProvider">
+                          <div class="title">DATA PROVIDER</div>
+                          <div class="field" data-bind="text:record().dataProvider"></div>
+                        </li>
+                        <li data-bind="if: record().rights">
+                          <div class="title">RIGHTS</div>
+                          <div class="field" data-bind="text:record().rights"></div>
+                        </li>
+                         <li data-bind="if: record().mediatype && record().mediatype!=''">
+                          <div class="title">MEDIA TYPE</div>
+                          <div class="field" data-bind="text:record().mediatype"></div>
+                        </li>
+                         <li data-bind="if: record().recordId!='-1'">
+                                  <div class="title">ITEM URL</div>
+                                  <div class="field"><a data-bind="text: record().loc() , attr: { href: record().loc()}"></a></div>
+                          </li>
+                        <li>
+                          <div class="title">RECORD SOURCE</div>
+                          <div class="field"  data-bind="text:record().source()"></div>
+                        </li>
+                      </ul>
+                    </div>
+                    <div id="related" class="tab-pane">
+                      <!-- related media-->
+                      <div style="text-align: center;" data-bind="visible: record().loading()==true"><img src="img/ic-loading.gif"></div>
+                      <!-- ko if: record().related().length > 0 -->
+                      <div class="title"><span data-bind="text: 'OTHER MEDIA ITEMS BY '+record().forrelated()"></span><a href="#" title="#" class="follow">FOLLOW</a></div>
+                      <ul class="related">
+                      <!-- ko foreach: record().related -->
+                        <li><a data-bind="event: {click: function(){itemShow($data);}}" data-toggle="tooltip" data-placement="top" title="Lorem ipsum dolor"><img data-bind="attr:{src:thumb}" alt="media"></a></li>
+                     <!-- /ko -->
+                       </ul>
+                       <!-- /ko -->
+                      <!-- related media-->
+                       <!-- ko if: record().similar().length > 0 -->
+                      <div class="title">SIMILAR MEDIA ITEMS</div>
+                      <ul class="related">
+                       <!-- ko foreach: record().similar -->
+                        <li><a data-bind="event: {click: function(){itemShow($data);}}" data-toggle="tooltip" data-placement="top" title="Lorem ipsum dolor"><img data-bind="attr:{src:thumb}" alt="media"></a></li>
+                     <!-- /ko -->
+                      </ul>
+                       <!-- /ko -->
+                    </div>
+                    <div id="comment" class="tab-pane">
+                      <!-- comment -->
+                      <div class="comments">
+                        <div id="disqus_thread"></div>
+										<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+                      </div>
+                    </div>
+                    <div id="share" class="tab-pane">
+                      <!-- share-->
+               		<ul class="social">
+                		<li><a data-bind="attr: {href:record().facebook}" title="share on facebook" onclick="javascript:window.open(this.href,'facebook-share-dialog','width=626,height=436'); return false;"><img src="img/ui/ic-facebook.png" alt="facebook"></a></li>
+                		<li><a data-bind="attr: {href:record().twitter}" title="twitter share" onclick="javascript:window.open(this.href,'', 'menubar=no,toolbar=no,resizable=yes,scrollbars=yes,height=600,width=600');return false;"><img src="img/ui/ic-twitter.png" alt="facebook"></a></li>
+                		<li data-bind="event: {click: function(){record().pinterest()}}"><a href="#" title="pin it"><img src="img/ui/ic-pinterest.png" alt="facebook"></a></li>
+                		<li><a data-bind="attr: {href:record().mail}" title="email item"><img src="img/ui/ic-mail.png" alt="facebook"></a></li>
+              		</ul>
+                    </div>
+                  </div>
+                </div>
+                <!-- visit original-->
+                <div class="shortcut">
+                  <!-- ul-->
+                  <ul>
+                   
+                    <li><a data-bind="attr: { href:record().view_url()}" target="_blank" class="btn btn-alt">VISIT ITEM SITE</a></li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      
+      </div>
+   <collection-popup params="route: route"></collection-popup>	     
+		

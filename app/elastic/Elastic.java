@@ -16,67 +16,84 @@
 
 package elastic;
 
+
 import static org.elasticsearch.node.NodeBuilder.nodeBuilder;
 
 import java.io.IOException;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
-
-import model.Collection;
-import model.CollectionRecord;
+import java.util.stream.Collectors;
 
 import org.bson.types.ObjectId;
-import org.elasticsearch.ElasticsearchException;
 import org.elasticsearch.action.admin.indices.create.CreateIndexRequestBuilder;
-import org.elasticsearch.action.admin.indices.create.CreateIndexResponse;
-import org.elasticsearch.action.admin.indices.mapping.get.GetMappingsRequest;
-import org.elasticsearch.action.admin.indices.mapping.get.GetMappingsResponse;
 import org.elasticsearch.action.bulk.BulkProcessor;
 import org.elasticsearch.action.bulk.BulkRequest;
 import org.elasticsearch.action.bulk.BulkResponse;
 import org.elasticsearch.client.Client;
+import org.elasticsearch.client.IndicesAdminClient;
+import org.elasticsearch.client.node.NodeClient;
 import org.elasticsearch.client.transport.TransportClient;
-import org.elasticsearch.cluster.metadata.MappingMetaData;
+import org.elasticsearch.cluster.metadata.IndexMetaData;
 import org.elasticsearch.common.collect.ImmutableOpenMap;
-import org.elasticsearch.common.settings.ImmutableSettings;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.transport.InetSocketTransportAddress;
 import org.elasticsearch.common.unit.ByteSizeValue;
-import org.elasticsearch.common.unit.TimeValue;
+import org.elasticsearch.index.IndexNotFoundException;
 import org.elasticsearch.node.Node;
-
-import play.Logger;
-import play.libs.Json;
-import play.libs.F.Callback;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 
 import db.DB;
+import model.resources.RecordResource;
+import model.resources.WithResourceType;
+import play.Logger;
+import play.libs.F.Callback;
+import play.libs.Json;
+
+/*
+ * Provides static methods to create, configure, initialize the index.
+ * Use 'getTransportClient' or 'getBulkProcessor' to connect to elastic.
+ */
+
 
 public class Elastic {
 	public static final Logger.ALogger log = Logger.of(Elastic.class);
 
 	private static Config conf;
-	private static Client nodeClient;
+	private static Settings settings;
+	private static Settings indexSettings;
+	private static NodeClient nodeClient;
+	private static Node node;
 	private static TransportClient transportClient;
 	private static BulkProcessor bulkProcessor;
 
 	public static String cluster 		    = getConf().getString("elasticsearch.cluster");
 	public static String index   		    = getConf().getString("elasticsearch.index.name");
-	public static String mapping_collection = getConf().getString("elasticsearch.index.mapping.collection");
-	public static String type_collection    = getConf().getString("elasticsearch.index.type.collection");
-	public static String mapping_within     = getConf().getString("elasticsearch.index.mapping.within");
-	public static String type_within        = getConf().getString("elasticsearch.index.type.within");
-	public static String mapping_general    = getConf().getString("elasticsearch.index.mapping.general");
-	public static String type_general       = getConf().getString("elasticsearch.index.type.general");
+	public static String old_index 		    = getConf().getString("elasticsearch.old_index.name");
+	public static String shards   		    = getConf().getString("elasticsearch.index.num_of_shards");
+	public static String replicas  		    = getConf().getString("elasticsearch.index.num_of_replicas");
+	public static String alias   		    = getConf().getString("elasticsearch.alias.name");
+	public static String mappingResource    = getConf().getString("elasticsearch.index.mapping.resource");
+
+	// Search within collections confs
+	public static String[] searchFieldsWin  = getConf().getString("elasticsearch.searchWithin.fields").split(",");
+
+	public static final String typeResource       = WithResourceType.RecordResource.toString().toLowerCase();
+	public static final String thesaurusResource       = WithResourceType.ThesaurusObject.toString().toLowerCase();
+	public static final List<String> allTypes 	  = Arrays.asList(WithResourceType.values()).stream()
+														.map(wr -> wr.toString().toLowerCase())
+														.collect(Collectors.toList());
 
 
-	private final static String host = getConf().getString("elasticsearch.host");
-	private final static int    port = getConf().getInt("elasticsearch.port");
+
+	public final static String host = getConf().getString("elasticsearch.host");
+	public final static int    port = getConf().getInt("elasticsearch.port");
 
 	private static Config getConf() {
 		if (conf == null) {
@@ -86,18 +103,33 @@ public class Elastic {
 	}
 
 	public static Settings getSettings() {
-		Settings settings = ImmutableSettings
+		if(settings == null) {
+			settings = Settings
 				.settingsBuilder()
 				.put("cluster.name",
 						cluster).build();
+		}
 		return settings;
+	}
+
+	private static Settings getIndexSettings() {
+		if(indexSettings == null) {
+			indexSettings = Settings
+					.settingsBuilder()
+					.put("number_of_shards", shards)
+					.put("number_of_replicas", replicas)
+					.build();
+		}
+		return indexSettings;
 	}
 
 	public static void closeClient() {
 		if((transportClient != null) && (nodeClient == null))
 			transportClient.close();
-		else if( (transportClient == null) && (nodeClient != null))
+		else if( (transportClient == null) && (nodeClient != null)) {
 			nodeClient.close();
+			node.close();;
+		}
 		else if( (transportClient != null) && (nodeClient != null)) {
 			nodeClient.close();
 			transportClient.close();
@@ -112,13 +144,17 @@ public class Elastic {
 	 * on, without performing a "double hop". For example, the index operation
 	 * will automatically be executed on the shard that it will end up existing
 	 * at.
+	 *
+	 * Best used for long-lived connections
 	 */
 	public static Client getNodeClient() {
 		if (nodeClient == null) {
-			Node node = nodeBuilder()
-					.clusterName(cluster)
-					.client(true).local(true).node();
-			nodeClient = node.client();
+				if(node == null) {
+					node = nodeBuilder()
+							.clusterName(cluster)
+							.client(true).local(true).node();
+					nodeClient = (NodeClient) node.client();
+				}
 		}
 		return nodeClient;
 	}
@@ -128,13 +164,21 @@ public class Elastic {
 	 * does not join the cluster, but simply gets one or more initial transport
 	 * addresses and communicates with them. Though most actions will probably
 	 * be "two hop" operations.
+	 *
+	 * Best used for multiple short connections
 	 */
 	public static TransportClient getTransportClient() {
 		if (transportClient == null) {
-			transportClient = new TransportClient(getSettings())
-					.addTransportAddress(new InetSocketTransportAddress(
-							host,
-							port));
+			try {
+				transportClient = TransportClient.builder()
+						.settings(getSettings())
+						.build()
+						.addTransportAddress(new InetSocketTransportAddress(
+								InetAddress.getByName(host),
+								port));
+			} catch (UnknownHostException e) {
+				log.error("", e.getMessage());
+			}
 		}
 		return transportClient;
 	}
@@ -165,8 +209,7 @@ public class Elastic {
 
 				})
 				.setBulkActions(1000)
-				.setBulkSize(new ByteSizeValue(5000))
-				.setFlushInterval(TimeValue.timeValueSeconds(5))
+				.setBulkSize(new ByteSizeValue(50000000))
 				.setConcurrentRequests(1)
 				.build();
 		}
@@ -175,75 +218,54 @@ public class Elastic {
 
 	//have to check conditions on mapping Map whether a mapping exists or not
 	//have to be checked to the local computer
-	private static boolean hasMapping() {
-		GetMappingsResponse mapResp = null;
-		ImmutableOpenMap<String, ImmutableOpenMap<String, MappingMetaData>> mappings = null;
-		try {
-			mapResp = Elastic.getTransportClient().admin().indices()
-					.getMappings(new GetMappingsRequest().indices(Elastic.index)).get();
-			mappings = mapResp.getMappings();
-		} catch(ElasticsearchException ese) {
-			log.error("Client or error on mappings", ese);
-		} catch (InterruptedException e) {
-			log.error("Client or error on mappings", e);
-		} catch (ExecutionException e) {
-			log.error("Indice does not exist");
-			return false;
+	public static void initializeIndex() {
+		ImmutableOpenMap<String, IndexMetaData> indices = null;
+		indices = Elastic.getTransportClient().admin().cluster()
+					.prepareState().execute().actionGet()
+					.getState().getMetaData().indices();
+		IndicesAdminClient inds = Elastic.getTransportClient().admin().indices();
+		if(indices.containsKey(index)) {
+			return;
 		}
 
-		if( (mappings!=null) && (mappings.containsKey(index))
-				&& (mappings.get(index).containsKey(type_general)
-					|| mappings.get(index).containsKey(type_within)
-					|| mappings.get(index).containsKey(type_collection)) )
-			return true;
-		return false;
 
-	}
 
-	public static CreateIndexResponse putMapping() {
-		if(!hasMapping()) {
-			//getNodeClient().admin().indices().prepareDelete("with-mapping").execute().actionGet();
-			JsonNode general_mapping = null;
-			JsonNode within_mapping = null;
-			JsonNode collection_mapping = null;
-			CreateIndexRequestBuilder cireqb = null;
-			CreateIndexResponse ciresp = null;
-			try {
-				general_mapping = Json.parse(new String(Files.readAllBytes(Paths.get("conf/"+mapping_general))));
-				within_mapping = Json.parse(new String(Files.readAllBytes(Paths.get("conf/"+mapping_within))));
-				collection_mapping = Json.parse(new String(Files.readAllBytes(Paths.get("conf/"+mapping_collection))));
-				cireqb = Elastic.getTransportClient().admin().indices().prepareCreate(Elastic.index);
-				cireqb.addMapping(type_general, general_mapping.toString());
-				cireqb.addMapping(type_within, within_mapping.toString());
-				cireqb.addMapping(type_collection, collection_mapping.toString());
-				ciresp = cireqb.execute().actionGet();
-			} catch(ElasticsearchException ese) {
-				log.error("Cannot put mapping!", ese);
-			} catch (IOException e) {
-				log.error("Cannot read mapping from file!", e);
-				return null;
-			}
-			return ciresp;
-		}
-		return null;
-	}
-
-	public static void reindex() {
-		// hopefully delete index and reput it in place
-		//getNodeClient().admin().indices().prepareDelete(index).execute().actionGet();
-		//putMapping();
-
-		Callback<Collection> callback = new Callback<Collection>() {
-		@Override
-			public void invoke(Collection c ) throws Throwable {
-				ElasticIndexer ei = new ElasticIndexer( c );
-				ei.index();
-			}
-		};
+		// take custom mappings
+		JsonNode resourceMapping = null;
 		try {
-			DB.getCollectionDAO().onAll( callback, false );
-		} catch( Exception e ) {
-			log.error( "ReIndexing problem", e );
+			resourceMapping = Json.parse(new String(Files.readAllBytes(Paths.get("conf/"+mappingResource))));
+		} catch (IOException e) {
+			log.error("Cannot read mapping from file!", e);
+			return;
+		}
+
+		// create the index and put the alias to it
+		try {
+			CreateIndexRequestBuilder index_builder = Elastic.getTransportClient()
+					.admin().indices().prepareCreate(Elastic.index)
+					.setSettings(Elastic.getIndexSettings());
+
+			/* Add mappings for all fields */
+			for(String type: allTypes)
+					index_builder.addMapping(type, resourceMapping.toString());
+
+			/* Excecute the request */
+					index_builder.execute().actionGet();
+
+
+			if(!old_index.equals(""))
+				Elastic.getTransportClient().admin().indices().prepareAliases()
+						.removeAlias("old_index", alias)
+						.execute().actionGet();
+		} catch(IndexNotFoundException e) {
+			log.debug(e.getDetailedMessage());
+		} catch(Exception e) {
+			log.debug(e.getMessage());
+		} finally {
+			if(!alias.equals(""))
+				Elastic.getTransportClient().admin().indices().prepareAliases()
+					.addAlias(index, alias)
+					.execute().actionGet();
 		}
 	}
 
@@ -252,27 +274,19 @@ public class Elastic {
 		//getNodeClient().admin().indices().prepareDelete(index).execute().actionGet();
 		//putMapping();
 
-				Callback<CollectionRecord> callback = new Callback<CollectionRecord>() {
+				Callback<RecordResource> callback = new Callback<RecordResource>() {
 				@Override
-					public void invoke(CollectionRecord r ) throws Throwable {
-						ElasticIndexer ei = new ElasticIndexer( r );
-						ei.index();
-					}
+					public void invoke(RecordResource rr ) throws Throwable {
+						ElasticIndexer.index(Elastic.typeResource, rr.getDbId(), rr.transform());
+						}
 				};
 				try {
-					DB.getCollectionRecordDAO().onAll( callback, false );
+					DB.getRecordResourceDAO().onAll( callback, false );
 				} catch( Exception e ) {
 					log.error( "ReIndexing problem", e );
 				}
 	}
 
-	public static void reindex_some(List<String> ids) {
-		for(String id: ids) {
-			CollectionRecord r = DB.getCollectionRecordDAO().get(new ObjectId(id));
-			ElasticIndexer ei = new ElasticIndexer(r);
-			ei.index();
-		}
-	}
 
 }
 

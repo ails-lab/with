@@ -1,0 +1,155 @@
+//- index.jade
+- var title = "WITH - Organizations"
+- var page  = "Collection"
+
+doctype html
+html
+
+	// head
+	include ./includes/head.inc.jade
+
+	// body
+	body
+
+		// header
+		header
+			.wrap
+				.container
+					a(href="index.html").logo
+						img(src="img/ui/logo.png")
+
+					nav
+						ul
+							li
+								a(href="index.html" title="home") HOME
+							li
+								a(href="search-view.html" title="home") EXPLORE
+							li
+								a(href="about.html" title="home") ABOUT
+							li.mobile
+								a( href="login.html" class="login") SIGN IN
+								a( href="register.html" class="register") REGISTER
+
+					// login
+					section.login-section
+						a( href="login.html" class="login") SIGN IN
+						a( href="register.html" class="register") REGISTER
+
+					// mobile menu trigger
+					a.mobile-trigger( href="#" )
+						.burger
+		// main
+		div( role="main" ).collectionviewer
+
+			// viewer mode
+			.viewer
+
+				// hero section
+				section.collectioninfo
+					.container
+						span.title My Collection Title
+						span.item-count 3 Items
+
+						p.description
+							| Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip.
+						
+
+				// isotope section
+				section.isotope
+					.container
+						section.listing.itemlistview
+
+							.grid
+
+								.sizer
+
+								.item
+									.wrap
+										a(href="#" title="Lorem ipsum")
+											.thumb
+												img(src="img/content/content-1.png" alt="Lorem ipsum")
+												
+										.info
+											a(href="#" title="Lorem ipsum")
+												h2.title Lorem ipsum dolor sit amet conceptus
+												span.source National Library of Latvia
+											span.provider
+												a(href="#").links digitainz.org
+										.action-group
+											.wrap
+												ul
+													li
+														a(href="#" data-toggle="tooltip" data-placement="top" title="Add to favorite" ).fa.fa-heart
+													li
+														a(href="#" data-toggle="tooltip" data-placement="top" title="Collect it" ).fa.fa-download.collectbutton
+
+								.item
+									.wrap
+										a(href="#" title="Lorem ipsum")
+											.thumb
+												img(src="img/content/content-1.png" alt="Lorem ipsum")
+										.info
+											a(href="#" title="Lorem ipsum")
+												h2.title Lorem ipsum dolor sit amet conceptus
+												span.source National Library of Latvia
+											span.provider
+												a(href="#").links digitainz.org
+										.action-group
+											.wrap
+												ul
+													li
+														a(href="#" data-toggle="tooltip" data-placement="top" title="Add to favorite" ).fa.fa-heart
+													li
+														a(href="#" data-toggle="tooltip" data-placement="top" title="Collect it" ).fa.fa-download.collectbutton
+
+
+								.item
+									.wrap
+										a(href="#" title="Lorem ipsum")
+											.thumb
+												img(src="img/content/content-2.png" alt="Lorem ipsum")
+										.info
+											a(href="#" title="Lorem ipsum")
+												h2.title Lorem ipsum dolor sit amet conceptus
+												span.source National Library of Latvia
+											span.provider
+												a(href="#").links digitainz.org
+										.action-group
+											.wrap
+												ul
+													li
+														a(href="#" data-toggle="tooltip" data-placement="top" title="Add to favorite" ).fa.fa-heart
+													li
+														a(href="#" data-toggle="tooltip" data-placement="top" title="Collect it" ).fa.fa-download.collectbutton
+
+								.item
+									.wrap
+										a(href="#" title="Lorem ipsum")
+											.thumb
+												img(src="img/content/content-3.png" alt="Lorem ipsum")
+										.info
+											a(href="#" title="Lorem ipsum")
+												h2.title Lorem ipsum dolor sit amet conceptus
+												span.source National Library of Latvia
+											span.provider
+												a(href="#").links digitainz.org
+										.action-group
+											.wrap
+												ul
+													li
+														a(href="#" data-toggle="tooltip" data-placement="top" title="Add to favorite" ).fa.fa-heart
+													li
+														a(href="#" data-toggle="tooltip" data-placement="top" title="Collect it" ).fa.fa-download.collectbutton
+
+							a(href="#").loadmore 
+								| load more
+								.left
+								.right
+								.top
+								.bot
+					
+		// footer
+		include ./includes/footer.view.jade
+			
+	// script
+	include ./includes/script.inc.jade

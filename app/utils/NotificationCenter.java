@@ -19,8 +19,8 @@ package utils;
 import java.util.HashSet;
 import java.util.Set;
 
+import notifications.Notification;
 import akka.actor.ActorRef;
-import model.Notification;
 
 /**
  * Mostly static, keeping all actors for websockets together, so they can

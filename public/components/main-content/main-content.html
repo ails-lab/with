@@ -1,5 +1,5 @@
-      
 
+<div role="main" class="homepage">
 			<!-- hero -->
 			<section class="hero">
 				<div class="container">
@@ -20,7 +20,7 @@
 							<!-- hover -->
 							<div class="select-hover">
 								<p>Discover cultural content from around the world</p>
-								<a href="#">
+								<a href="#about/discover">
 									Learn More
 									<div class="left"></div>
 									<div class="right"></div>
@@ -40,7 +40,7 @@
 							<!-- hover -->
 							<div class="select-hover">
 								<p>Build using data exposed by the WITH API</p>
-								<a href="#">
+								<a href="#about/build">
 									Learn More
 									<div class="left"></div>
 									<div class="right"></div>
@@ -60,7 +60,7 @@
 							<!-- hover -->
 							<div class="select-hover">
 								<p>Create stories, collections and exhibitions</p>
-								<a href="#">
+								<a href="#about/create">
 									Learn More
 									<div class="left"></div>
 									<div class="right"></div>
@@ -80,7 +80,7 @@
 							<!-- hover -->
 							<div class="select-hover">
 								<p>Link &amp; Enrich with LoD sources</p>
-								<a href="#">
+								<a href="#about/annotate">
 									Learn More
 									<div class="left"></div>
 									<div class="right"></div>
@@ -100,7 +100,7 @@
 							<!-- hover -->
 							<div class="select-hover">
 								<p>Upload, map, transform and publish</p>
-								<a href="#">
+								<a href="#about/aggregate">
 									Learn More
 									<div class="left"></div>
 									<div class="right"></div>
@@ -120,7 +120,7 @@
 							<!-- hover -->
 							<div class="select-hover">
 								<p>Tag, follow, discuss, moderate WITH</p>
-								<a href="#">
+								<a href="#about/participate">
 									Learn More
 									<div class="left"></div>
 									<div class="right"></div>
@@ -147,18 +147,19 @@
 						<div class="wrap">
 
 							<!-- thumbnail -->
-							<div class="featured-hero">
-								<img src="img/content/space2.jpg">
-							</div>
+							<a href="../custom/soundspace/index.html" class="featured-hero">
+								<img src="img/content/soundspace-featured2.png">
+							</a>
 
 							<!-- meta -->
 							<div class="featured-meta">
 								<p class="category">Featured space</p>
-								<h2 class="title"><b>ESPACE:</b> build your own space</h2>
-								<p class="desc">Spaces of possibility for the creative re-use of digital cultural content.</p>
+								<h2 class="title"><b>Europeana Sounds crowdsourcing space</b></h2>
+								<h4 class="desc">Tag our archive: Spot musical instruments</h4>
+								<p class="desc">Have an ear for musical instruments? Use your talent to tag all the instruments you hear in the music archives of Europeana Sounds!</p>
 
 								<!-- view -->
-								<a href="../custom/espace/index.html" class="view">
+								<a href="../custom/soundspace/index.html" class="view">
 									view space <span> ></span>
 									<div class="left"></div>
 									<div class="right"></div>
@@ -170,14 +171,14 @@
 					</div>
 
 
-       
+
 
 					<!-- featured box -->
 					<div class="featured-box exhibition" data-bind="with: featuredExhibition">
 						<div class="wrap">
 
 							<!-- anchor -->
-							<a data-bind="attr: {href: url}" title="VIEW EXHIBITION">
+							<a data-bind="attr: {href: data.url()}" title="VIEW EXHIBITION">
 
 								<!-- thumbnail -->
 								<div class="featured-hero">
@@ -187,21 +188,21 @@
 								<!-- meta -->
 								<div class="featured-meta">
 
-								
+
 									<p class="category">Featured exhibition</p>
-									<h2 class="title"><b><!-- ko text:title --><!-- /ko --></b></h2>
+									<h2 class="title"><b><!-- ko text:data.title --><!-- /ko --></b></h2>
 									<ul class="img-exhibition">
 										<li>
-											<img data-bind="attr: { src: thumbs()[0].url}" alt="exb 1" title="exb 1">
-											<p><!-- ko text:thumbs()[0].title --><!-- /ko --></p>
+											<img data-bind="attr: { src: data.media[0].Thumbnail.url}" alt="exb 1" title="exb 1">
+
 										</li>
 										<li>
-											<img data-bind="attr: { src: thumbs()[1].url}" alt="exb 1" title="exb 1">
-											<p><!-- ko text:thumbs()[1].title --><!-- /ko --></p>
+											<img data-bind="attr: { src: data.media[1].Thumbnail.url}" alt="exb 1" title="exb 1">
+											<p></p>
 										</li>
 										<li>
-											<img data-bind="attr: { src: thumbs()[2].url}" alt="exb 1" title="exb 1">
-											<p><!-- ko text:thumbs()[2].title --><!-- /ko --></p>
+											<img data-bind="attr: { src: data.media[2].Thumbnail.url}" alt="exb 1" title="exb 1">
+											<p></p>
 										</li>
 									</ul>
 								</div>
@@ -214,26 +215,27 @@
 						<div class="wrap">
 
 							<!-- anchor -->
-							<a data-bind="attr: {href: url}"  title="VIEW COLLECTION">
+							<a data-bind="attr: {href: data.url()}"  title="VIEW COLLECTION">
 
 								<!-- thumbnail -->
 								<div class="featured-hero">
-									<img data-bind="attr: { src: thumbs()[0].url}">
+									<img data-bind="attr: { src: data.media[0].Thumbnail.url}">
 								</div>
 								<div class="featured-hero">
-									<img data-bind="attr: { src: thumbs()[1].url}">
+									<img data-bind="attr: { src: data.media[1].Thumbnail.url}">
 								</div>
 								<div class="featured-hero">
-									<img data-bind="attr: { src: thumbs()[2].url}">
+									<img data-bind="attr: { src: data.media[2].Thumbnail.url}">
 								</div>
+
 								<div class="featured-hero">
-									<img data-bind="attr: { src: thumbs()[3].url}">
+									<img data-bind="attr: { src: data.media[1].Thumbnail.url}">
 								</div>
-								
+
 								<!-- meta -->
 								<div class="featured-meta">
 									<p class="category">Featured collection</p>
-									<h2 class="title"><b><!-- ko text:title --><!-- /ko --></b></h2>
+									<h2 class="title"><b><!-- ko text:data.title --><!-- /ko --></b></h2>
 								</div>
 							</a>
 						</div>
@@ -248,10 +250,10 @@
 
 						<!-- menu-->
 						<ul class="nav">
-							<li data-filter="*" class="active"><a href="#" title="ALL">All</a></li>
-							<li data-filter=".collection"><a href="#" title="ALL">Collections</a></li>
-							<li data-filter=".exhibition"><a href="#" title="EXHIBITION">Exhibitions</a></li>
-							<li data-filter=".spaces"><a href="#" title="COLLECTION">Spaces</a></li>
+							<li data-filter="*" class="active" data-bind="click: filter"><a href="#" title="ALL">All</a></li>
+							<li data-filter=".collection" data-bind="click: filter"><a href="#" title="COLLECTIONS">Collections</a></li>
+							<li data-filter=".exhibition" data-bind="click: filter"><a href="#" title="EXHIBITION">Exhibitions</a></li>
+							<li data-filter=".space" data-bind="click: filter"><a href="#" title="SPACES">Spaces</a></li>
 						</ul>
 
 						<!-- menu-->
@@ -270,38 +272,26 @@
 			<section class="listing">
 				<div class="container">
 
-                 <div class="grid" id="homemasonry" data-bind="homeisotope: homecollections">
-	             <!-- ko if: $index() === 0 -->
+                 <div class="grid" id="homemasonry">
+
 	              <div class="sizer"></div>
-	              <!-- /ko -->
-	               <div data-bind=" css: itemcss">
-	              <div class="wrap">
-	                <!-- anchor--><a href="#" data-bind="click: $parent.loadCollectionOrExhibition"  title="view">
-	                <!-- thumbnail-->
-	                  <div class="thumb"><img data-bind="attr: {src: cachedThumbnail()}"></div>
-	                  <!-- info-->
-	                  <div class="info"><span class="type" data-bind="text:type"></span>
-	                    <h1 class="title" data-bind="text: collname"></h1><span class="owner" data-bind="text: owner"></span>
-	                  </div>
-	                  </a>
-	              </div>
-	            </div>
-	            
-	          </div>
+
+
+	          	</div>
 
 
 
 					<!-- load more -->
-					<a href="#" class="loadmore" data-bind="event: {click: loadNext}">
+					<a href="#" class="loadmore" data-bind="visible: homecollections().length>0 ,event: {click: loadNext}">
 						Load more
 						<div class="left"></div>
 						<div class="right"></div>
 						<div class="top"></div>
 						<div class="bot"></div>
 					</a>
-					<div id="more" data-bind="visible: loading"> <i class="fa fa-spinner fa-pulse"></i></div>
+					<div class="more" data-bind="visible: loadingex()==true || loadingcoll()==true || loadingspaces()==true "> <i class="fa fa-spinner fa-pulse"></i></div>
                   </div>
-				
+
 			</section>
 
 			<!-- partners -->
@@ -315,7 +305,6 @@
 
 					<!-- section description -->
 					<p class="section-desc">
-						Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod temporincididunt ut labore et dolore magna aliqua. 
 					</p>
 
 					<!-- list partners logo -->
@@ -343,62 +332,10 @@
 			<section class="api">
 				<div class="container">
 
-					<!-- section heading -->
-					<h2 class="section-heading">apps built using <b>with api</b></h2>
 
-					<!-- section description -->
-					<p class="section-desc">
-					Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod temporincididunt ut labore et dolore magna aliqua. 
-					</p>
-					<ul>
-						<li>
-							<img src="img/ui/api-1.png">
-							<div class="overlay">
-								<a href="#">museum tour
-									<div class="left"></div>
-									<div class="right"></div>
-									<div class="top"></div>
-									<div class="bot"></div>
-								</a>
-							</div>
-						</li>
-						<li>
-							<img src="img/ui/api-2.png">
-							<div class="overlay">
-								<a href="#">museum tour
-									<div class="left"></div>
-									<div class="right"></div>
-									<div class="top"></div>
-									<div class="bot"></div>
-								</a>
-							</div>
-						</li>
-						<li>
-							<img src="img/ui/api-3.png">
-							<div class="overlay">
-								<a href="#">museum tour
-									<div class="left"></div>
-									<div class="right"></div>
-									<div class="top"></div>
-									<div class="bot"></div>
-								</a>
-							</div>
-						</li>
-						<li>
-							<img src="img/ui/api-4.png">
-							<div class="overlay">
-								<a href="#">museum tour
-									<div class="left"></div>
-									<div class="right"></div>
-									<div class="top"></div>
-									<div class="bot"></div>
-								</a>
-							</div>
-						</li>
-					</ul>
 
 					<!-- register now -->
-					<a href="#" class="register">
+					<a href="#register" class="register">
 						register now
 						<div class="left"></div>
 						<div class="right"></div>
@@ -408,6 +345,13 @@
 				</div>
 			</section>
 
+			<!-- ko if: isLogged() -->
+			<div class="wrapper">
+			<!-- ko component: "profile" --><!-- /ko -->
+			</div>
+				<!-- /ko -->
+			
+           </div>
 			<footer>
 				<div class="container">
 
@@ -430,13 +374,13 @@
 						</a>
 					</section>
 				</div>
-			</footer>		
-			
-			
-			
-			
-				
-		 						
-		 					
-		 
-					  
+			</footer>
+
+
+
+
+
+
+
+
+

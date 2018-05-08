@@ -1,0 +1,430 @@
+<div role="main">
+		
+<div class="container-fluid">
+	<div class="wrapper">
+		<!-- ko if: isLogged() == true  -->
+		<side-bar params="route: route"></side-bar>
+		<!-- /ko -->
+		<main>
+			<!-- project-->
+			<section class="project">
+				<!-- head-->
+				 <!-- upload--><a href="#" class="uploadimage" data-bind="visible: isCreator"><span class="plus"></span><span class="text">Change cover image</span></a>
+             
+				<div class="list-head">
+					<!-- back-->
+					<a href="#" data-bind="click: goBack" class="back"><i class="fa fa-angle-left"></i></a>
+					<!-- control-->
+					<ul class="organization-list-control">
+                      	<li><a href="#" data-toggle="tooltip" data-placement="top" title="View Organization page" class="fa fa-eye" data-bind="click: showGroup"></a></li>
+						<li><a href="#" data-toggle="tooltip" data-placement="top" title="Edit Organization" class="fa fa-pencil editaction new" data-bind="visible: isCreator"></a></li>
+						<li><a href="#" data-toggle="tooltip" data-placement="top" title="Manage Members" class="fa fa-user members-access" 
+						data-bind="visible: isAdmin, click: getMembersInfo.bind($data, 'both')"></a></li>
+						<li><a href="#" data-toggle="tooltip" data-placement="top" title="Delete Organization" class="fa fa-trash" data-bind="visible: isCreator, click: deleteGroup"></a></li>
+					</ul>
+					</div>
+				
+				<!-- hero section-->
+				<section class="hero" data-bind="style: { 'background-image': backgroundImage }">
+					<div class="meta">
+						<div class="top-info">
+							<div id="uploaded-logo" data-placement="top" title="Add group logo" class="thumbnails">
+								<label for="logoupload">
+									<img data-bind="attr: { src: logo }">
+								</label>
+								<input type="file" id="logoupload" name="logo" />
+							</div>
+							<div class="header">
+								<div class="title" data-bind="text: friendlyName"></div>
+								<div class="location" data-bind="text: fullAddress"></div><a data-bind="attr: { href: page.url }, visible: page.url">Visit site</a>
+							</div>
+						</div>
+						<div class="description" data-bind="text: about"></div>
+					</div>
+					<div data-bind="visible: coords">
+						<iframe data-bind="attr : { src: coords }" frameborder="0" style="border:0" allowfullscreen class="map"></iframe>
+					</div>
+				</section>
+
+				 <!-- isotope section-->
+        <section class="isotope">
+         <!-- filter-->
+      <section class="filter">
+          <div class="wrap">
+            <!-- menu-->
+            <ul class="nav">
+              <li class="active" data-filter="*" data-bind="click: filter"><a href="#" title="ALL">All</a></li>
+              <li data-filter=".exhibition" data-bind="click: filter"><a href="#" title="EXHIBITION">Exhibition</a></li>
+              <li data-filter=".collection" data-bind="click: filter"><a href="#" title="COLLECTION">Collection</a></li>
+            </ul>
+           
+          </div>
+      </section>
+             <!-- listing-->
+		      <section class="listing">
+		          <!-- grid-->
+		          <div class="grid" id="orggrid">
+		              <div class="sizer"></div>
+		             
+		          </div>
+		          
+	     
+        		</section>
+      </section>
+
+				<!-- manage members -->
+			<section class="action members">
+					<div class="action-header">
+						<div class="title">Manage members</div>
+					</div>
+					<div class="action-body">
+						<div class="group">
+							<div class="title">Manage users</div>
+							<input id="userName" type="text" placeholder="Start typing username" data-bind="autocompleteUsername: myUsername, forUsers:true">
+							<ul class="members-list" data-bind="foreach: userMembers">
+								<li>
+									<!-- ko if: $data.image -->
+									<div class="thumbnails"><img data-bind="attr: {src: image, id: 'image_' + userId()}">
+									<a href="#" data-toggle="tooltip" data-placement="top" data-bind="click: $parent.excecuteRemove.bind($data, userId(), 'user'),
+									attr: { title: username }"  class="trash">
+										<i class="fa fa-trash"></i>
+									</a></div>
+									<div class="toggle">
+			                          <input type="checkbox" data-bind="{checked: admin , click: $parent.isAdminToggle.bind($data, admin(), userId()), attr: {id: userId}} ">
+			                          <label data-bind="{attr: {for: userId}}" ></label>
+			                          <span class="member">member</span>
+			                          <span class="admin">admin</span>
+			                        </div>
+			                        <div class="username" data-bind="text: username"></div>
+									<!-- /ko -->
+									<!-- ko ifnot: $data.image -->
+									<div class="thumbnails"><img src="images/user.png">
+									<a href="#" data-toggle="tooltip" data-placement="top" data-bind="click: $parent.excecuteRemove.bind($data, userId(), 'user'),
+									attr: { title: username }"
+									 class="trash">
+										<i class="fa fa-trash"></i>
+									</a></div>
+									<div class="toggle">
+			                            <input type="checkbox"   data-bind="{ checked: admin , click: $parent.isAdminToggle.bind($data, admin(),userId()),attr: {id: userId}}">
+			                          <label data-bind="{attr: {for: userId}}"></label>
+			                          <span class="member">member</span>
+			                          <span class="admin">admin</span>
+			                        </div>
+			                        <div class="username" data-bind="text: username"></div>
+									<!-- /ko -->
+								</li>
+							</ul>
+						</div>
+
+						<div class="group">
+
+
+				  <div class="title">Manage groups</div>
+				  <input id="groupName" type="text" placeholder="Start typing group name" data-bind="autocompleteUsername: myUsername, onlyParents:false, forUsers:false, forGroupType:'UserGroup'">
+				  <ul class="access-list" data-bind="foreach: groupMembers">
+				  	<li class="blue">
+					    <span class="text" data-bind="text: username().substring(0,2).toUpperCase()"></span>
+						<a data-toggle="tooltip" data-placement="top" style="cursor:pointer;" data-bind="{attr: {title: username}, click: $parent.excecuteRemove.bind($data, userId(), 'group')}" class="trash">
+						  	<i class="fa fa-trash"></i></a>
+					</li>
+				  </ul>
+				</div>
+					<div class="button-group"><a href="#" class="btn-green cancel">Close</a></div>
+				</section>
+
+
+				<!-- cover image update -->
+				<section class="action upload" id="action-upload">
+					<div class="action-header">
+						<div class="title">Upload image</div>
+					</div>
+					<div class="action-body">
+						<div id="uploaded-image">
+							<label for="coverupload">
+								<img class="upload-img" data-bind="attr: { src: coverThumbnail }" />
+				
+							</label>
+						 <p class="info">Background image will be used as a decorative element behind main title bar, it will be stretched accordingly</p>
+              			<input type="file" id="coverupload" name="image" />
+						</div>
+					</div>
+					<div class="button-group">
+						<a href="#" class="btn-green-o cancel" data-bind="click: closeSideBar">Cancel</a>
+						<a href="#" class="btn-green" data-bind="click: saveChanges">Save</a>
+					</div>
+				</section>
+
+				<!-- update group -->
+				<section class="action new" id="action-new">
+					<div class="action-header">
+						<div class="title">Edit <!-- ko text: name --><!-- /ko --></div>
+					</div>
+					<div class="action-body">
+						<div class="form-group" data-bind="validationElement: friendlyName">
+							<input type="text" placeholder="Name your group" data-bind="value: friendlyName, valueUpdate: 'afterkeypress', hasFocus: true;">
+						</div>
+						<textarea placeholder="Describe your collection" rows="10" data-bind="value: about"></textarea>
+						<div class="spacing">
+							<div class="group" data-bind="validationElement: username">
+								<div class="title">Short Name</div>
+								<input type="text" placeholder="Give a short, unique name (i.e. with)" data-bind="value: username, valueUpdate: 'afterkeypress'">
+							</div>
+							<div class="group">
+								<div class="title">Location</div>
+								<input type="text" placeholder="Address" data-bind="value: page.address">
+								<input type="text" placeholder="City" class="half" data-bind="value: page.city">
+								<select class="form-control half" data-bind="value: page.country">
+									<option>&nbsp;</option>
+									<option>Afghanistan</option>
+									<option>Albania</option>
+									<option>Algeria</option>
+									<option>American Samoa</option>
+									<option>Andorra</option>
+									<option>Angola</option>
+									<option>Anguilla</option>
+									<option>Antarctica</option>
+									<option>Antigua and Barbuda</option>
+									<option>Argentina</option>
+									<option>Armenia</option>
+									<option>Aruba</option>
+									<option>Australia</option>
+									<option>Austria</option>
+									<option>Azerbaijan</option>
+									<option>Bahamas</option>
+									<option>Bahrain</option>
+									<option>Bangladesh</option>
+									<option>Barbados</option>
+									<option>Belarus</option>
+									<option>Belgium</option>
+									<option>Belize</option>
+									<option>Benin</option>
+									<option>Bermuda</option>
+									<option>Bhutan</option>
+									<option>Bolivia</option>
+									<option>Bosnia and Herzegovina</option>
+									<option>Botswana</option>
+									<option>Bouvet Island</option>
+									<option>Brazil</option>
+									<option>British Indian Ocean Territory</option>
+									<option>Brunei Darussalam</option>
+									<option>Bulgaria</option>
+									<option>Burkina Faso</option>
+									<option>Burundi</option>
+									<option>Cambodia</option>
+									<option>Cameroon</option>
+									<option>Canada</option>
+									<option>Cape Verde</option>
+									<option>Cayman Islands</option>
+									<option>Central African Republic</option>
+									<option>Chad</option>
+									<option>Chile</option>
+									<option>China</option>
+									<option>Christmas Island</option>
+									<option>Cocos Islands</option>
+									<option>Colombia</option>
+									<option>Comoros</option>
+									<option>Congo</option>
+									<option>Congo, Democratic Republic of the</option>
+									<option>Cook Islands</option>
+									<option>Costa Rica</option>
+									<option>Cote d'Ivoire</option>
+									<option>Croatia</option>
+									<option>Cuba</option>
+									<option>Cyprus</option>
+									<option>Czech Republic</option>
+									<option>Denmark</option>
+									<option>Djibouti</option>
+									<option>Dominica</option>
+									<option>Dominican Republic</option>
+									<option>Ecuador</option>
+									<option>Egypt</option>
+									<option>El Salvador</option>
+									<option>Equatorial Guinea</option>
+									<option>Eritrea</option>
+									<option>Estonia</option>
+									<option>Ethiopia</option>
+									<option>Falkland Islands</option>
+									<option>Faroe Islands</option>
+									<option>Fiji</option>
+									<option>Finland</option>
+									<option>France</option>
+									<option>French Guiana</option>
+									<option>French Polynesia</option>
+									<option>Gabon</option>
+									<option>Gambia</option>
+									<option>Georgia</option>
+									<option>Germany</option>
+									<option>Ghana</option>
+									<option>Gibraltar</option>
+									<option>Greece</option>
+									<option>Greenland</option>
+									<option>Grenada</option>
+									<option>Guadeloupe</option>
+									<option>Guam</option>
+									<option>Guatemala</option>
+									<option>Guinea</option>
+									<option>Guinea-Bissau</option>
+									<option>Guyana</option>
+									<option>Haiti</option>
+									<option>Heard Island and McDonald Islands</option>
+									<option>Honduras</option>
+									<option>Hong Kong</option>
+									<option>Hungary</option>
+									<option>Iceland</option>
+									<option>India</option>
+									<option>Indonesia</option>
+									<option>Iran</option>
+									<option>Iraq</option>
+									<option>Ireland</option>
+									<option>Israel</option>
+									<option>Italy</option>
+									<option>Jamaica</option>
+									<option>Japan</option>
+									<option>Jordan</option>
+									<option>Kazakhstan</option>
+									<option>Kenya</option>
+									<option>Kiribati</option>
+									<option>Kuwait</option>
+									<option>Kyrgyzstan</option>
+									<option>Laos</option>
+									<option>Latvia</option>
+									<option>Lebanon</option>
+									<option>Lesotho</option>
+									<option>Liberia</option>
+									<option>Libya</option>
+									<option>Liechtenstein</option>
+									<option>Lithuania</option>
+									<option>Luxembourg</option>
+									<option>Macao</option>
+									<option>Madagascar</option>
+									<option>Malawi</option>
+									<option>Malaysia</option>
+									<option>Maldives</option>
+									<option>Mali</option>
+									<option>Malta</option>
+									<option>Marshall Islands</option>
+									<option>Martinique</option>
+									<option>Mauritania</option>
+									<option>Mauritius</option>
+									<option>Mayotte</option>
+									<option>Mexico</option>
+									<option>Micronesia</option>
+									<option>Moldova</option>
+									<option>Monaco</option>
+									<option>Mongolia</option>
+									<option>Montenegro</option>
+									<option>Montserrat</option>
+									<option>Morocco</option>
+									<option>Mozambique</option>
+									<option>Myanmar</option>
+									<option>Namibia</option>
+									<option>Nauru</option>
+									<option>Nepal</option>
+									<option>Netherlands</option>
+									<option>Netherlands Antilles</option>
+									<option>New Caledonia</option>
+									<option>New Zealand</option>
+									<option>Nicaragua</option>
+									<option>Niger</option>
+									<option>Nigeria</option>
+									<option>Norfolk Island</option>
+									<option>North Korea</option>
+									<option>Norway</option>
+									<option>Oman</option>
+									<option>Pakistan</option>
+									<option>Palau</option>
+									<option>Palestinian Territory</option>
+									<option>Panama</option>
+									<option>Papua New Guinea</option>
+									<option>Paraguay</option>
+									<option>Peru</option>
+									<option>Philippines</option>
+									<option>Pitcairn</option>
+									<option>Poland</option>
+									<option>Portugal</option>
+									<option>Puerto Rico</option>
+									<option>Qatar</option>
+									<option>Romania</option>
+									<option>Russian Federation</option>
+									<option>Rwanda</option>
+									<option>Saint Helena</option>
+									<option>Saint Kitts and Nevis</option>
+									<option>Saint Lucia</option>
+									<option>Saint Pierre and Miquelon</option>
+									<option>Saint Vincent and the Grenadines</option>
+									<option>Samoa</option>
+									<option>San Marino</option>
+									<option>Sao Tome and Principe</option>
+									<option>Saudi Arabia</option>
+									<option>Senegal</option>
+									<option>Serbia</option>
+									<option>Seychelles</option>
+									<option>Sierra Leone</option>
+									<option>Singapore</option>
+									<option>Slovakia</option>
+									<option>Slovenia</option>
+									<option>Solomon Islands</option>
+									<option>Somalia</option>
+									<option>South Africa</option>
+									<option>South Georgia</option>
+									<option>South Korea</option>
+									<option>Spain</option>
+									<option>Sri Lanka</option>
+									<option>Sudan</option>
+									<option>Suriname</option>
+									<option>Svalbard and Jan Mayen</option>
+									<option>Swaziland</option>
+									<option>Sweden</option>
+									<option>Switzerland</option>
+									<option>Syrian Arab Republic</option>
+									<option>Taiwan</option>
+									<option>Tajikistan</option>
+									<option>Tanzania</option>
+									<option>Thailand</option>
+									<option>The Former Yugoslav Republic of Macedonia</option>
+									<option>Timor-Leste</option>
+									<option>Togo</option>
+									<option>Tokelau</option>
+									<option>Tonga</option>
+									<option>Trinidad and Tobago</option>
+									<option>Tunisia</option>
+									<option>Turkey</option>
+									<option>Turkmenistan</option>
+									<option>Tuvalu</option>
+									<option>Uganda</option>
+									<option>Ukraine</option>
+									<option>United Arab Emirates</option>
+									<option>United Kingdom</option>
+									<option>United States</option>
+									<option>United States Minor Outlying Islands</option>
+									<option>Uruguay</option>
+									<option>Uzbekistan</option>
+									<option>Vanuatu</option>
+									<option>Vatican City</option>
+									<option>Venezuela</option>
+									<option>Vietnam</option>
+									<option>Virgin Islands, British</option>
+									<option>Virgin Islands, U.S.</option>
+									<option>Wallis and Futuna</option>
+									<option>Western Sahara</option>
+									<option>Yemen</option>
+									<option>Zambia</option>
+									<option>Zimbabwe</option>
+								</select>
+							</div>
+							<div class="group">
+								<div class="title">Website URL</div>
+								<input type="text" placeholder="URL" data-bind="value: page.url">
+							</div>
+						</div>
+					</div>
+					<div class="button-group">
+						<a href="#" class="btn-green-o cancel" data-bind="click: closeSideBar">Cancel</a>
+						<a href="#" class="btn-green" data-bind="click: saveChanges">Save organization</a>
+					</div>
+				</section>
+			</section>
+		</main>
+	</div>
+</div>
+</div>

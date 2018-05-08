@@ -1,0 +1,86 @@
+ 
+        <div class="container-fluid">
+          <!-- logo-->
+          <a href="javascript:void(0)" data-bind="event :{ click: function(data,event){goToPage('#home',event);}}" class="logo" title="WITH home">
+		<img src="img/ui/logo.png">
+		</a>
+          <!-- sign in-->
+          <section class="login-section">
+            <!-- profile picture--><a id="profilebutton" href="#" data-toggle="dropdown" class="profile" data-bind="click: removeFlyouts"><span class="picture"><img data-bind="attr: { src: profileImage }"><img src="img/ui/ic-profile-frame.png" class="frame"></span><span class="name" data-bind="text: username"></span><span class="arrow"></span></a>
+            <!-- dropdown menu-->
+            <ul aria-labelledby="profilebutton" class="dropdown-menu">
+              <li><a href="#"  class="showprofile">My profile</a></li>
+              <li><a href="#" onclick="logout(); return false;">Sign out</a></li>
+            </ul>
+          </section>
+          <!-- notification-->
+          <section class="notification">
+            <!-- button--><a id="notificationbutton" href="#"  data-toggle="tooltip" data-placement="bottom" data-toggle="dropdown"  data-bind="click: notificationShow"><img src="img/ui/ic-notification.png"><span class="counter" data-bind="visible: noticount()>0"><!-- ko text: noticount --><!-- /ko --></span></a>
+            <!-- dropdown menu-->
+            <div aria-labelledby="notificationbutton" class="dropdown-menu">
+              <!-- header-->
+              <h3>WITH Notifications</h3>
+              <!-- activity list-->
+             <ul class="notify-list" data-bind="foreach: notifications">
+						<li>
+							<!-- ko switch: activity -->
+							<!-- ko case: 'GROUP_INVITE' -->
+							<a data-bind="attr: { href: '#organization/' + group }"><div class="news"><em data-bind="text: senderName"></em> invites you to join <em data-bind="text: groupName"></em></div></a>
+							<!-- /ko -->
+							<!-- ko case: 'GROUP_INVITE_ACCEPT' -->
+							<a href="#notifications"><div class="news"><em data-bind="text: senderName"></em> joined <em data-bind="text: groupName"></em></div></a>
+							<!-- /ko -->
+							<!-- ko case: 'GROUP_INVITE_DECLINED' -->
+							<a href="#notifications"><div class="news"><em data-bind="text: senderName"></em> declined your invitation to join <em data-bind="text: groupName"></em></div></a>
+							<!-- /ko -->
+							<!-- ko case: 'GROUP_REQUEST' -->
+							<a href="#notifications"><div class="news"><em data-bind="text: senderName"></em> wants to join <em data-bind="text: groupName"></em></div></a>
+							<!-- /ko -->
+							<!-- ko case: 'GROUP_REQUEST_ACCEPT' -->
+							<a href="#notifications"><div class="news">You joined <em data-bind="text: groupName"></em></div></a>
+							<!-- /ko -->
+							<!-- ko case: 'GROUP_REQUEST_DENIED' -->
+							<a href="#notifications"><div class="news">Your request to join <em data-bind="text: groupName"></em> was declined</div></a>
+							<!-- /ko -->
+							<!-- ko case: 'COLLECTION_SHARE' -->
+							<!-- ko if: shareInfo.sharedWithGroup -->
+							<a data-bind="attr: { href: '#collectionview/' + resource }"><div class="news"><em data-bind="text: senderName"></em> wants to share collection: <em data-bind="text: resourceName"></em> with <em data-bind="text: shareInfo.userOrGroupName"></em></div></a>
+							<!-- /ko -->
+							<!-- ko ifnot: shareInfo.sharedWithGroup -->
+							<a data-bind="attr: { href: '#collectionview/' + resource }"><div class="news"><em data-bind="text: senderName"></em> wants to share collection: <em data-bind="text: resourceName"></em> with you</div></a>
+							<!-- /ko -->
+							<!-- /ko -->
+							<!-- ko case: 'COLLECTION_SHARED' -->
+							<a data-bind="attr: { href: '#collectionview/' + resource }"><div class="news"><em data-bind="text: resourceName"></em>is now shared with <em data-bind="text: shareInfo.userOrGroupName"></em></div></a>
+							<!-- /ko -->
+							<!-- ko case: 'COLLECTION_UNSHARED' -->
+							<!-- ko if: shareInfo.sharedWithGroup -->
+							<a data-bind="attr: { href: '#collectionview/' + resource }"><div class="news"><em data-bind="text: resourceName"></em> is no longer shared with <em data-bind="text: shareInfo.userOrGroupName"></em></div></a>
+							<!-- /ko -->
+							<!-- ko ifnot: shareInfo.sharedWithGroup -->
+							<a data-bind="attr: { href: '#collectionview/' + resource }"><div class="news"><em data-bind="text: resourceName"></em> is no longer shared with you</div></a>
+							<!-- /ko -->
+							<!-- /ko -->
+							<!-- ko case: 'COLLECTION_REJECTED' -->
+							<a href="#notifications"><div class="news"><em data-bind="text: shareInfo.userOrGroupName"></em> is not interested in collection: <em data-bind="text: resourceName"></em></div></a>
+							<!-- /ko -->
+							<!-- /ko -->
+							
+						</li>
+					</ul>
+              <!-- view all--><a href="#dashboard" class="viewall">View all activities </a>
+            </div>
+          </section>
+           <!-- home-->
+          <section class="home"><a href="#dashboard" title="Dashboard Home" data-toggle="tooltip" data-placement="bottom"><img src="img/ui/ic-home.png" alt="Dashboard Home"></a></section>
+         
+          <!-- explore-->
+          <section class="explore">
+            <!-- input search-->
+             <input type="text" placeholder="Search" data-bind="value: term, valueUpdate = 'afterkeydown', event: { 'keyup': enterSearch}" class="searchinput">
+            <!-- icon--><img src="img/ui/ic-mag.png" class="icon" data-bind="attr: {src: ko.contextFor(withsearchid).$data.searching()==true ? 'img/ui/ic-loading.gif' : 'img/ui/ic-mag.png'}, click: function() { search(true,true); }">
+          
+          </section>
+        </div>
+     
+

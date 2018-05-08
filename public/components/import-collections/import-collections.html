@@ -1,0 +1,57 @@
+<div class="container-fluid">
+	<div class="row">
+		<div class="col-lg-12 ">
+<br/><br/><br/><br/><br/>
+<h2>Import Collections From Europeana</h2>
+<p>
+The ID of the europeana collection should exist.
+</p>
+<div class="col-sm-12" >
+<input  data-bind="value: im.limit" placeholder="import limit"/>
+			<div class="line">&nbsp;</div>
+</div>
+<div class="col-sm-12" >
+
+			<input class="col-sm-12" data-bind="value: im.collectionName" placeholder="Europeana Collection ID..."/>
+			<div class="line">&nbsp;</div>
+			<button 
+			data-bind="click: function() { importf(); }">Import</button>
+			
+		
+
+</div>
+</div>
+</div>
+</div>
+
+
+<div class="container-fluid">
+	<div class="row">
+		<div class="col-lg-12 ">
+<br/><br/><br/><br/><br/>
+<div class="col-sm-12" >
+<h2>Import Search From Europeana</h2>
+<p>
+The search term needs to be defined using europeana expressivity. i.e. Byzantine cuisine AND NOT(PROVIDER:"Europeana Food and Drink")
+</p>
+
+<div class="col-sm-12" >
+<input  data-bind="value: q.limit" placeholder="import limit"/>
+			<div class="line">&nbsp;</div>
+</div>
+<div class="col-sm-12" >
+
+
+			<input class="col-sm-12"  data-bind="value: q.searchTerm" placeholder="Search Term..."/>
+			<div class="line">&nbsp;</div>
+			<input data-bind="value: q.collectionName" placeholder="Collection Name..."/>
+			<div class="line">&nbsp;</div>
+			<button 
+			data-bind="click: function() { search(); }">Import</button>
+			
+		
+</div>
+</div>
+</div>
+
+</div>

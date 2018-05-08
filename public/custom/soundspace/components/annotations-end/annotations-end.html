@@ -1,0 +1,91 @@
+ <div id="annotations-end" style="display: none">
+ 	<header>
+	<section class="annotatehero" id="annotateherothanks">
+        <!-- top-->
+        <div class="top">
+          <!-- wrap-->
+          <div class="wrap">
+            <div class="container">
+              <!-- the wrap-->
+              <!-- ko if: batchItemsAnnotated.length > 0 -->
+              <h1>Thank you for annotating <span data-bind="text: batchItemsAnnotated"></span> items</h1>
+              <!-- /ko -->
+              <!-- ko if: batchItemsAnnotated.length <= 0 -->
+                   <h1>The annotations batch has finished</h1>
+              <!-- /ko -->
+              <span class="topic" data-bind="visible: userTotalAnnotationCount() >= 10">So far, you have earned a <span data-bind="text: badgeName" ></span> badge.</span>
+              <span class="topic" data-bind="visible: userTotalAnnotationCount() < 10"><!-- ko text: 10  - userTotalAnnotationCount() % 10 -->  <!-- /ko -->  more records to get your first badge.</span>
+              <!-- description-->
+              <div class="badges" style="padding-top: 50px">
+              <center><div class="icon"><img data-bind="attr: {src: badgeImg()}"></div></center>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+     </header>
+     <section class="annotate">
+        <!-- bottom-->
+        <div class="bottom">
+          <!-- container-->
+          <div class="container">
+            <div class="goal">
+              <div class="info">
+              	<h2>Help us reach our goal</h2>
+              	<!-- ko if: userTotalAnnotatedRecordsCount() > 0 -->
+                <p> In total, you have annotated <span data-bind="text: userTotalAnnotatedRecordsCount"> </span> items
+                	with <span data-bind="text: userTotalAnnotationCount"></span> annotations about musical instruments.</p>
+                <!-- action button-->
+                 <a href="#" data-bind="click: startAnnotate" class="annotatebtn">Try another turn of tagging</a>
+              <!-- /ko -->
+          	<!-- ko if: userTotalAnnotatedRecordsCount() == 0 -->
+          		<p>10 annotations grant you a bronze badge, 25 a silver, and with 50 annotations you earn a golden badge. Special gifts will be
+                	provided to golden winners!</p>
+          		<a href="#" data-bind="click: startAnnotate" class="annotatebtn">Try another annotation turn</a>
+          	<!-- /ko -->
+            </div>
+           </div>
+            <div class="goal">
+              <div class="info">
+                <h2>Thank you for contributing to Europeana Sounds objective.</h2>
+                <p>	
+                	By the end of the crowdsourcing campaign (30th of June), the objective is to 
+                	have musical instruments identified in at least 2500 recordings from our archives.
+                	The tags are all controlled and available in many languages.</p>
+                    <a href="#" data-bind="click: returnHomepage" class="annotatebtn">Go to homepage</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+   
+      <section class="listing">
+      <div class="container">
+          <!-- grid-->
+      <div class="grid" data-bind="annotationsIsotope: batchItemsAnnotated">
+         <!-- ko if: $index() === 0 -->
+          <div class="sizer"></div>
+          <!-- /ko -->
+           <div class="item media" data-bind="click: itemShow">
+              <div class="wrap">
+                <!-- anchor--><a href="#" data-view="inline">
+                  <!-- thumbnail-->
+                  <div class="thumb"><div class="counter" style="background: #4f7979 none repeat scroll 0 0; color: #fff;
+    				font-size: 1.1rem; font-weight: 500; left: 0; padding: 5px 15px; position: absolute; text-transform: uppercase; top: 0;">
+                  	<span data-bind="text: annotations.length"></span> <span>Annotations</span></div>
+                  	<img data-bind="attr: {src: thumb ? thumb: 'img/ui/ic-noimage.png'}" nerror="src='img/ui/ic-noimage.png'">
+                  </div>
+                  <!-- info-->
+                  <div class="info">
+                    <h1 class="title trancate" data-bind="text: title"></h1><span class="owner" data-bind="text: dataProvider"></span>
+                  </div>
+                  <!-- rights--><span class="rights" data-bind="text: rights"></span>
+                  <!-- pointer-->
+                  <div class="pointer"><span class="arrow"><img src="img/ic-right-arrow.png" alt="Arrow"></span></div></a>
+              </div>
+            </div>
+        </div>
+		</div>
+        </div>
+      </section>
+</div>

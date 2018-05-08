@@ -1,0 +1,41 @@
+//- index.jade
+- var title = "WITH - Static"
+- var page  = "Static"
+
+doctype html
+html
+
+	// head
+	include ./includes/head.inc.jade
+
+	// body
+	body
+
+		header
+			.wrap
+				.container
+					a(href="index.html").logo
+						img(src="img/ui/logo.png")
+
+					nav
+						ul
+							li
+								a(href="index.html" title="home") HOME
+							li
+								a(href="search-view.html" title="home") EXPLORE
+							li
+								a(href="about.html" title="home") ABOUT
+							li
+								a(href="search-view.html" title="home") SEARCH
+					section.login-section
+						a( href="login.html" class="login") SIGN IN
+						a( href="register.html" class="register") REGISTER
+
+		// main
+		div( role="main" )
+
+		// footer
+		include ./includes/footer.view.jade
+			
+	// script
+	include ./includes/script.inc.jade

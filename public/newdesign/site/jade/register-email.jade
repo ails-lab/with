@@ -1,0 +1,83 @@
+//- index.jade
+- var title = "WITH - Register Email"
+- var page  = "Register Email"
+
+doctype html
+html
+
+	// head
+	include ./includes/head.inc.jade
+
+	// body
+	body
+
+		// header
+		header
+			.wrap
+				.container
+					a(href="index.html").logo
+						img(src="img/ui/logo.png")
+
+					nav
+						ul
+							li
+								a(href="index.html" title="home") HOME
+							li
+								a(href="search-view.html" title="home") EXPLORE
+							li
+								a(href="about.html" title="home") ABOUT
+							li.mobile
+								a( href="login.html" class="login") SIGN IN
+								a( href="register.html" class="register") REGISTER
+
+					// login
+					section.login-section
+						a( href="login.html" class="login") SIGN IN
+						a( href="register.html" class="register") REGISTER
+
+					// mobile menu trigger
+					a.mobile-trigger( href="#" )
+						.burger
+							
+		// main
+		div( role="main" )
+
+			// viewer mode
+			.viewer
+
+				section.entrance.register-email
+					.section-header
+						.text Register with your email address
+					.section-body
+						.input-group
+							.left
+								input.error(type="text" placeholder="Email")
+								span.errormsg Wrong email format
+							.right
+								input(type="text" placeholder="Username")
+						.input-group
+							.left
+								input(type="password" placeholder="Password")
+							.right
+								input(type="password" placeholder="Repeat Password")
+						.input-group
+							.left
+								input(type="text" placeholder="First name")
+							.right
+								input(type="text" placeholder="Last name")
+						.input-group
+							select
+								option Gender
+								option Male
+								option Female
+						.input-group.ack
+							input(type="checkbox")#ack
+							label(for="ack") I acknowledge the i have read and accept <a href="#"> Terms of Use Agreement
+						.button-group
+							a(href="#").btn-green Register
+
+		// footer
+		include ./includes/footer.view.jade
+			
+	// script
+	include ./includes/script.inc.jade

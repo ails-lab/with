@@ -17,13 +17,13 @@
 package utils;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
-import java.util.function.Consumer;
 import java.util.function.Function;
-
-import espace.core.CommonFilterLogic;
-import espace.core.CommonFilterResponse;
+import sources.core.Utils;
 
 public class ListUtils {
 
@@ -41,6 +41,21 @@ public class ListUtils {
 		}
 		return false;
 	}
+	
+	/**
+	 * tells if a collection contains all of the elements in another collection.
+	 * 
+	 * @param a
+	 * @param b
+	 * @return true iff all elements of collection b are in collection a.
+	 */
+	public static boolean containsAll(Collection a, Collection b) {
+		for (Object object : b) {
+			if (!a.contains(object))
+				return false;
+		}
+		return true;
+	}
 
 	/**
 	 * tells if a collection does not contain elements of another collection.
@@ -53,12 +68,24 @@ public class ListUtils {
 		return !containsAny(a, b);
 	}
 
+	/**
+	 * tells if all the elements of a collection fulfill a condition.
+	 * @param c
+	 * @param condition
+	 * @return
+	 */
 	public static <T> boolean allof(Collection<T> c, Function<T, Boolean> condition) {
 		return !anyof(c, (T t) -> {
 			return !condition.apply(t);
 		});
 	}
 
+	/**
+	 * tells if at least one element of a collection fulfills a condition
+	 * @param c
+	 * @param condition
+	 * @return
+	 */
 	public static <T> boolean anyof(Collection<T> c, Function<T, Boolean> condition) {
 		for (T t : c) {
 			if (condition.apply(t))
@@ -66,13 +93,105 @@ public class ListUtils {
 		}
 		return false;
 	}
+	
+	/**
+	 * tells if at least one element of a collection fulfills a condition
+	 * @param c
+	 * @param condition
+	 * @return
+	 */
+	public static <T> boolean anyof(T[] c, Function<T, Boolean> condition) {
+		return anyof(Arrays.asList(c), condition);
+	}
+	
+	/**
+	 * tells if all the elements of a collection fulfill a condition.
+	 * @param c
+	 * @param condition
+	 * @return
+	 */
+	public static <T> boolean allof(T[] c, Function<T, Boolean> condition) {
+		return allof(Arrays.asList(c), condition);
+	}
 
+
+	/**
+	 * transforms the elements of a collection of type T to a collection of elements of type R using
+	 * a functions that does the transformation.
+	 * @param objects
+	 * @param function
+	 * @return
+	 */
 	public static <T, R> List<R> transform(Collection<T> objects, Function<T, R> function) {
+		return transform(objects, function, 0, (objects==null)?0:objects.size());
+	}
+	/**
+	 * transforms the elements of a collection in the specified range (pos,...,pos+count-1) of type T to a collection of elements of type R using
+	 * a functions that does the transformation. 
+	 * @param objects
+	 * @param function
+	 * @param pos
+	 * @param count
+	 * @return
+	 */
+	public static <T, R> List<R> transform(Collection<T> objects, Function<T, R> function, int pos, int count) {
 		List<R> res = new ArrayList<>();
 		if (objects!=null){
-			for (T t : objects) {
-				res.add(function.apply(t));
+			int i=0;
+			for (Iterator<T> iterator = objects.iterator(); 
+					iterator.hasNext() && i<pos+count; i++) {
+				T t = iterator.next();
+				if (i>=pos)
+					res.add(function.apply(t));
 			}
+		}
+		return res;
+	}
+	
+	
+
+	/**
+	 * gets the last element of a list.
+	 * @param list
+	 * @return
+	 */
+	public static<T> T last(List<T> list) {
+		return list.get(list.size()-1);
+	}
+
+	public static <T> T getLast(List<T> list) {
+		if (Utils.hasInfo(list)){
+			return list.get(list.size()-1);
+		}
+		return null;
+	}
+
+	/**
+	 * set difference implementation (a-b)
+	 * @param a
+	 * @param b
+	 * @return
+	 */
+	public static <T> List<T> setDifference(Collection<T> a, Collection<T> b) {
+		ArrayList<T> res = new ArrayList<>();
+		res.addAll(a);
+		if (b != null)
+			res.removeAll(b);
+		return res;
+	}
+
+	/**
+	 * set intersection implementation (a/\b)
+	 * @param a
+	 * @param b
+	 * @return
+	 */
+	public static <T> List<T> setIntersection(Collection<T> a, Collection<T> b) {
+		ArrayList<T> res = new ArrayList<>();
+		if (Utils.hasInfo(a) && Utils.hasInfo(b))
+		for (T t : a) {
+			if (b.contains(t))
+				res.add(t);
 		}
 		return res;
 	}

@@ -1,0 +1,192 @@
+//- index.jade
+- var title = "WITH - Dashboard"
+- var page  = "dashboard"
+
+doctype html
+html
+
+	// head
+	include ./includes/head.inc.jade
+
+	// body
+	body
+
+		// head
+		include ./includes/header.inc.jade
+
+		// main
+		div( role="main" )
+			.container-fluid
+
+				// wrapper
+				.wrapper
+
+					// alert
+					.alert.alert-success.alert-dismissible( role="alert" )
+						button( type="button" class="close" data-dismiss="alert" aria-label="Close" )
+							span( aria-hidden="true" ) 
+								| &times;
+						strong
+							| Warning 
+						| Better check yourself, you're not looking too good.
+
+					// sidebar
+					aside
+					
+						// nav
+						include ./includes/asidenav.inc.jade
+					
+					// main
+					main
+						
+						section.dashboard
+
+							// message
+							section.message
+								img(src='img/ui/ic-inbox.png').hero
+								.message-body
+									.header Welcome to Your Dashboard
+									.description
+										| This is <b> Your Dashboard </b>, where you can see all the most recent activities on your collections and exhibitions. Do you know that you can start exploring the media by typing letters on your keyboard? try it now!
+
+									a(href="#")
+										span.cross
+										span.text Hide welcome message
+							
+							section.notification
+
+								// header
+								.list-head
+
+									// tabs
+									ul.typeselect
+										li.active
+											a( href="#" title="Show only my notification") My notification
+										li
+											a( href="#" title="Show all notification") All notification
+									
+									//.sort
+										a#sorting(href="#", data-toggle='dropdown')
+											span.text My notification
+											span.arrow
+
+										// dropdown
+										ul.dropdown-menu(aria-labelledby='sorting')
+											li 
+												a(href="#") My notification
+											li 
+												a(href="#") All notification
+
+								ul.notif-list
+									li
+										.thumbnails
+											img(src="img/content/img-profile.jpg")
+										img(src="img/ui/ic-plus.png").icon
+										.meta
+											.text You created 
+												a(href="#") a collection: My Collection
+										ul.action
+											li.accept
+												a( href="#" data-toggle="tooltip" data-placement="top" title="Accept")
+													i.fa.fa-check
+											li
+												| or
+											li.reject
+												a( href="#" data-toggle="tooltip" data-placement="top" title="Reject")
+													i.fa.fa-times
+										.timing
+											| 2 hours ago
+										
+
+									li
+										.thumbnails
+											img(src="img/content/img-profile.jpg")
+										img(src="img/ui/ic-mark.png").icon
+										.meta
+											.text Diana Stanton is not interested in 
+												a(href="#") collection: Street Art
+										ul.action
+											li.accept
+												a( href="#" data-toggle="tooltip" data-placement="top" title="Accept")
+													i.fa.fa-check
+											li
+												| or
+											li.reject
+												a( href="#" data-toggle="tooltip" data-placement="top" title="Reject")
+													i.fa.fa-times
+										.timing
+											| 2 hours ago
+									li
+										.thumbnails
+											img(src="img/content/img-profile.jpg")
+										img(src="img/ui/ic-cross.png").icon
+										.meta
+											.text You deleted 
+												a(href="#") an exhibition: Paris in afternoon
+										ul.action
+											li.accept
+												a( href="#" data-toggle="tooltip" data-placement="top" title="Accept")
+													i.fa.fa-check
+											li
+												| or
+											li.reject
+												a( href="#" data-toggle="tooltip" data-placement="top" title="Reject")
+													i.fa.fa-times
+										.timing
+											| 2 hours ago
+									li
+										.thumbnails
+											img(src="img/content/img-profile.jpg")
+										img(src="img/ui/ic-notice.png").icon
+										.meta
+											.text Diana Stanton just shared 
+												a(href="#") collection:Street Art 
+												| with you
+										.timing
+											| 2 hours ago
+
+					// collection give access
+					section.action.profile
+						.action-header
+							.title My Profile
+
+						.action-body
+							.group
+								.title Profile Picture
+
+								// profile picture box
+								.profilepicture
+									.boxwrap
+										img( src="img/content/img-profile.jpg")
+										a.hue( href="#" data-toggle="tooltip" data-placement="top" title="Delete profile picture")
+											i.fa.fa-trash-o
+
+									// action
+									.profileaction
+										span Load picture from
+										ul
+											li
+												a( href="#" data-toggle="tooltip" data-placement="top" title="Local image")
+													i.fa.fa-folder-o
+											li
+												a( href="#" data-toggle="tooltip" data-placement="top" title="Facebook")
+													i.fa.fa-facebook
+											li
+												a( href="#" data-toggle="tooltip" data-placement="top" title="Google+")
+													i.fa.fa-google-plus
+
+
+							.group
+								.title Personal Info
+								.fields
+									input.half( type="text" placeholder="Firstname" value="Michelle" )
+									input.half( type="text" placeholder="Lastname" value="Smith" )
+								textarea.about( type="text" placeholder="About me")
+									| Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidunt ut laoreet dolore magna aliquam erat volutpat.
+
+						.button-group
+							a(href="#").btn-green-o.cancel Cancel
+							a(href="#").btn-green Save Profile
+
+	// script
+	include ./includes/script.inc.jade

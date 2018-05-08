@@ -1,0 +1,73 @@
+//- header
+header
+	.wrap
+		.container-fluid
+		
+			// logo
+			a.logo(href='index.html')
+				img(src='img/ui/logo.png')
+			
+			// sign in
+			section.login-section
+
+				// profile picture
+				a#profilebutton.profile(href='#', data-toggle='dropdown')
+					span.picture
+						img(src='img/content/img-profile.jpg')
+						img.frame(src='img/ui/ic-profile-frame.png')
+					span.name
+						| Megan Mullaly
+					span.arrow
+				
+				// dropdown menu
+				ul.dropdown-menu(aria-labelledby='profilebutton')
+					li
+						a.showprofile(href='#') My profile
+					li
+						a(href='#') Sign out
+			
+			// notification
+			section.notification
+
+				// button
+				a#notificationbutton(href='#' title="Notification" data-toggle='dropdown')
+					img( src="img/ui/ic-notification.png" )
+					span.counter 12
+
+				// dropdown menu
+				.dropdown-menu(aria-labelledby='notificationbutton')
+
+					// header
+					h3 WITH Notifications
+
+					// activity list
+					ul.list
+						li
+							a(href='#') 
+								img.thumb( src="img/content/img-profile.jpg" )
+								.news
+									| Lorem ipsum dolor sit amet consectetur adipiscing.
+						li
+							a(href='#') 
+								img.thumb( src="img/content/img-profile.jpg" )
+								.news
+									| Lorem ipsum dolor sit amet consectetur adipiscing.
+
+					// view all
+					a.viewall( href='#' )
+						| View all activities 
+
+			// home
+			section.home
+				a( href="dashboard.html" title="Dashboard Home" )
+					img( src="img/ui/ic-home.png" alt="Home" )
+
+			// explore
+			section.explore
+
+				// input search
+				input( type="text" placeholder="Search" )
+
+				// icon
+				img.icon( src="img/ui/ic-mag.png" )
+				

@@ -1,0 +1,151 @@
+ <div role="main" class="exhibitionviewer">
+      <div class="container-fluid">
+        <!-- wrapper-->
+        <div class="wrapper">
+          <!-- section-->
+          <section class="exhibitionviewer">
+            <!-- menu bar-->
+            <nav class="titlebar exhibition">
+              <div class="container-fluid">
+                <!-- title--><span class="title" data-bind="text:exhName"></span>
+                <!-- action-->
+                <ul class="action">
+                  <li class="hidden"><a href="#" data-toggle="tooltip" data-placement="bottom" title="Expand exhibition"><img src="img/ui/ic-expand.png"></a></li>
+                  <li><a href="void(0);"  onclick="window.history.go(-1); return false;" data-toggle="tooltip" data-placement="bottom" title="Close exhibition"><img src="img/ui/ic-close.png"></a></li>
+                </ul>
+              </div>
+            </nav>
+            <!-- exhibition carousel-->
+            <!--  ko if: showCarousel-->
+            <section class="exhibitionplayer">
+              <!-- carousel-->
+              <!--  ko if: exhItems().length > 0 -->
+              <div data-bind="backgroundImage" class="wrap">
+                <div class="carouselexhibition hue">
+                  <!-- item-->
+                  <div class="item main">
+                    <div class="container">
+                      <!-- title-->
+                      <h1 class="title" data-bind="text: exhName"></h1>
+                      <div class="description">
+                        <p data-bind="text: desc">
+                         </p>
+                      </div><a href="#" title="START EXHIBITION" class="btn">START EXHIBITION</a>
+                    </div>
+                  </div>
+                  <!-- item-->
+                  <!-- ko foreach: exhItems -->
+                  	<div class="item style1">
+                    <div class="container">
+                      <!--  ko if: $data.hasOwnProperty('mediaUrl') && mediaUrl != null && mediaUrl != "" --> 
+                      <!-- ko if: $data.textPosition == 'LEFT' -->
+                      	 <div class="textbox">
+                          <div class="wrap">
+                          <h2  data-bind="text: title"></h2>
+                          <p data-bind="text: annotation">
+                          </p>
+                         </div>
+                        </div>
+                        <!-- /ko -->
+                      <div data-bind="css: {imagewrapvideo: $data.mediaType == 'VIDEO', imagewrapaudio: $data.mediaType == 'AUDIO'}">
+                      	<img data-bind="{attr: { src: fullres}}" alt="">
+                        <ul class="action">
+                          <li class="zoom"><a data-bind="attr: { href: fullres, 'title': title }" class="imagezoom"><i class="glyphicon glyphicon-resize-full"></i></a></li>
+                          <li class="view"><a data-bind="attr: { href: view_url }" title="#"><i class="glyphicon glyphicon-link"></i></a></li>
+                        </ul>
+                      </div>
+                      <!-- ko if: $data.textPosition == 'RIGHT' -->
+                      	 <div class="textbox" style="padding-right: 20px">
+                          <div class="wrap">
+                          <h2  data-bind="text: title"></h2>
+                          <p data-bind="text: annotation">
+                          </p>
+                         </div>
+                        </div>
+                        <!-- /ko -->
+                    	<!-- ko if: mediaType == "VIDEO" -->
+                    	<div class="videowrap">
+                        	<div class="embed-responsive embed-responsive-16by9">
+                            	<iframe width="100%" height="100%" data-bind="attr: { src: mediaUrl }" frameborder="0" allowfullscreen></iframe>
+                        	</div>
+                        	<!--  ko if: $data.hasOwnProperty('mediaDescription') -->
+                   		   <center><span class="mediadescription" data-bind="text: mediaDescription"></span></center>
+                    		<!-- /ko -->
+                        </div>
+                        <!-- /ko -->
+                        <!-- ko if: mediaType == "AUDIO" -->
+                        <div class="audiowrap">
+                            <div class="thumb"><img style="width: 180px;" src="img/ui/sounds_exhibition1.jpg"></div>
+                          	<audio id="mediaplayer" controls style="width: 180px;" width="576" height="324">
+                          		<source data-bind="attr:{src: mediaUrl}" type="audio/mpeg">Your browser does not support HTML5
+                          	</audio>
+                          	<!--  ko if: $data.hasOwnProperty('mediaDescription') -->
+                   		    <span class="mediadescription" style="width: 180px;" data-bind="text: mediaDescription"></span>
+                    	    <!-- /ko -->
+                        </div>
+						<!-- /ko -->            	
+                    <!-- /ko -->
+                    <!-- ko else -->
+                       <!-- ko if: $data.textPosition == 'LEFT' -->
+                      	 <div class="textbox">
+                          <div class="wrap">
+                          <h2  data-bind="text: title"></h2>
+                          <p data-bind="text: annotation">
+                          </p>
+                         </div>
+                        </div>
+                        <!-- /ko -->
+                       <div class="imagewrap"><img data-bind="attr: { src: fullres}" alt="" width="75%">
+                        <ul class="action">
+                          <li class="zoom"><a data-bind="attr: { href: fullres, 'title': title }" class="imagezoom"><i class="glyphicon glyphicon-resize-full"></i></a></li>
+                          <li class="view"><a data-bind="attr: { href: view_url }" title="#"><i class="glyphicon glyphicon-link"></i></a></li>
+                        </ul>
+                      </div>
+                      <!-- ko if: $data.textPosition == 'RIGHT' -->
+                      	 <div class="textbox">
+                          <div class="wrap">
+                          <h2  data-bind="text: title"></h2>
+                          <p data-bind="text: annotation">
+                          </p>
+                         </div>
+                        </div>
+                        <!-- /ko -->
+                    <!-- /ko -->
+                  </div>
+                  </div>
+                  <!--/ko-->
+                  <!-- item-->
+                  <!-- ko if: credits -->
+                  <div class="item credit">
+                	<div class="container">
+                    <!-- wrap-->
+                    <div class="creditwrap">
+                        <!-- title-->
+                        <h1 class="title">CREDITS</h1>
+                        <!-- wrap-->
+                        <div class="row">
+                        	<center>
+                        	<div class="description">
+                        	<p data-bind="text: credits"></p>
+                        	</div>
+                        	</center>
+                            <!-- left-->
+                            <!--<div class="left">
+                            </div>-->
+                            <!-- right-->
+                            <!--<div class="right">           
+                            </div>-->           
+                    	</div>
+                    </div>
+                	</div>
+            	</div>
+            	<!-- /ko -->
+              </div>
+              </div>
+               <!-- /ko -->
+            </section>
+            <!-- /ko -->
+          </section>
+        </div>
+      </div>
+    </div>

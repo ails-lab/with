@@ -1,4 +1,4 @@
-.item .collect {
+/*.item .collect {
 	font-size: 20px;
     position: absolute;
     display: none;
@@ -6,13 +6,46 @@
     right: 25px;
     width: 36px;
     z-index: 1;
+}*/
+
+
+.item .delete {
+   font-size: 20px;
+    position: absolute;
+    display: none; 
+    top: 2px;
+    left: 100%;
+    width: 20px;
+    z-index: 1;
+    line-height: 1.8em;
 }
 
-.item:hover .collect {
+
+.item .collect {
+   font-size: 20px;
+    position: absolute;
+    display: none;
+    /* top: 3px; */
+    left: -60%;
+    width: 20px;
+    z-index: 1;
+    line-height: 1.8em;
+}
+
+
+
+.item:hover .collect{
 	color: #dddddd;
 	display: block;
 	cursor: pointer;
 }
+
+.item:hover .delete{
+	color: #dddddd;
+	display: block;
+	cursor: pointer;
+}
+
 
 .md-modal {
 	position: fixed;

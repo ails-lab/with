@@ -1,0 +1,68 @@
+#nav-bar ul {
+	list-style-type: none;
+}
+ 
+#nav-bar {
+	padding-left: 0;
+}
+ 
+#nav-bar > ul {
+	padding-left: 20px;
+}
+ 
+.tree-item {
+	font-family: 'Glyphicons Halflings';
+	-webkit-font-smoothing: antialiased;
+	font-size: 75%;
+}
+ 
+.pointer-icon {
+	cursor: pointer;
+}
+
+.invisible-icon {
+	visibility: hidden;
+}
+
+.newlines {
+	white-space: pre-wrap;
+}
+
+.tag-selection {
+	color: #ff0000;
+}
+
+.ann-approve {
+	color: #33cc33 !important;
+}
+
+.ann-papprove {
+	color: #cccc00 !important;
+}
+
+.ann-reject {
+	color: #cc3300 !important;
+}
+
+.term {
+	padding-right: 20px;
+}
+
+.term-support {
+	padding-left: 25px;
+	padding-right: 50px;
+}
+
+.term-instance {
+	margin-bottom: 5px;
+}
+
+.ann-target-prop {
+	font-size: 85%;
+	color: #8c8c8c;
+}
+
+.ann-target-text {
+	font-style: italic;
+	font-size: 85%;
+}

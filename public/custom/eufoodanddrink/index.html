@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <!-- meta-->
+    <title>FOOD AND DRINK Space</title>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="description" content="EUscreen Space">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#009edf">
+    <!-- icons-->
+    <link rel="apple-touch-icon" href="apple-touch-icon.png">
+    <link rel="icon" type="image/png" href="favicon.png">
+    <meta name="msapplication-TileImage" content="tile.png">
+    <meta name="msapplication-TileColor" content="#d83434">
+    <!-- stylesheets-->
+    <link rel="stylesheet" type="text/css" href="bower_modules/smoke/dist/css/smoke.min.css">
+			
+    <link rel="stylesheet" href="css/main.css">
+    
+    <link rel="stylesheet" href="js/vendor/bootstrap/css/bootstrap.css">
+    <link rel="stylesheet" href="js/vendor/slick.js/slick/slick.css">
+    <link rel="stylesheet" type="text/css" href="css/selectize.bootstrap3.css">
+	<link rel="stylesheet" type="text/css" href="css/horizBarChart.css">
+	<link rel="stylesheet" type="text/css" href="css/bootstrap-select.min.css">
+    <link rel="stylesheet" type="text/css" href="bower_modules/magnific-popup/dist/magnific-popup.css">
+    <link rel="stylesheet" type="text/css" href="http://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
+	<link rel="stylesheet" type="text/css" href="css/facets.css">
+    <link rel="stylesheet" type="text/css" href="../../assets/css/collection.css">
+	<link rel="stylesheet" type="text/css" href="../../assets/css/login.css">
+		
+    <!-- script-->
+    <script src="js/vendor/modernizr/modernizr.js"></script>
+    
+   <script src="js/app/require.config.js"></script>
+	<script data-main="js/app/startup" src="bower_modules/requirejs/require.js"></script>
+	
+  </head>
+  <body data-page="home">
+    <!-- header-->
+    <header>
+    
+     <top-bar params="route: route"></top-bar>
+     
+     
+    </header>
+    <!-- main-->
+    <div role="main" data-bind="component: { name: route().page, params: route }"></div>
+    <!-- Dialog Window Hook -->
+			<div id="popup" class="modal" tabindex="-1" role="dialog" aria-labelledby="popup" aria-hidden="true" data-bind="component: { name: popupName, params: popupParams }"></div>
+            <div data-bind="component: { name: 'popup-login', params: {} }"></div>
+                
+  </body>
+</html>

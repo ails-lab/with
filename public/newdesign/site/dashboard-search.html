@@ -1,0 +1,923 @@
+<!DOCTYPE html>
+<html>
+  <!-- head-->
+  <head>
+    <!-- meta-->
+    <title>WITH - Search</title>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="description" content="WITH">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#454545">
+    <!-- icons-->
+    <link rel="apple-touch-icon" href="apple-touch-icon.png">
+    <link rel="icon" type="image/png" href="favicon.png">
+    <meta name="msapplication-TileImage" content="tile.png">
+    <meta name="msapplication-TileColor" content="#454545">
+    <!-- stylesheets-->
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="js/vendor/bootstrap/css/bootstrap.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="js/vendor/slick.js/slick/slick.css">
+    <link rel="stylesheet" href="js/vendor/magnific-popup/dist/magnific-popup.css">
+    <!-- script-->
+    <script src="js/vendor/modernizr/modernizr.js"></script>
+  </head>
+  <!-- body-->
+  <body>
+    <!-- head-->
+    <header>
+      <div class="wrap">
+        <div class="container-fluid">
+          <!-- logo--><a href="index.html" class="logo"><img src="img/ui/logo.png"></a>
+          <!-- sign in-->
+          <section class="login-section">
+            <!-- profile picture--><a id="profilebutton" href="#" data-toggle="dropdown" class="profile"><span class="picture"><img src="img/content/img-profile.jpg"><img src="img/ui/ic-profile-frame.png" class="frame"></span><span class="name">Megan Mullaly</span><span class="arrow"></span></a>
+            <!-- dropdown menu-->
+            <ul aria-labelledby="profilebutton" class="dropdown-menu">
+              <li><a href="#" class="showprofile">My profile</a></li>
+              <li><a href="#">Sign out</a></li>
+            </ul>
+          </section>
+          <!-- notification-->
+          <section class="notification">
+            <!-- button--><a id="notificationbutton" href="#" title="Notification" data-toggle="dropdown"><img src="img/ui/ic-notification.png"><span class="counter">12</span></a>
+            <!-- dropdown menu-->
+            <div aria-labelledby="notificationbutton" class="dropdown-menu">
+              <!-- header-->
+              <h3>WITH Notifications</h3>
+              <!-- activity list-->
+              <ul class="list">
+                <li><a href="#"><img src="img/content/img-profile.jpg" class="thumb">
+                    <div class="news">Lorem ipsum dolor sit amet consectetur adipiscing.</div></a></li>
+                <li><a href="#"><img src="img/content/img-profile.jpg" class="thumb">
+                    <div class="news">Lorem ipsum dolor sit amet consectetur adipiscing.</div></a></li>
+              </ul>
+              <!-- view all--><a href="#" class="viewall">View all activities </a>
+            </div>
+          </section>
+          <!-- home-->
+          <section class="home"><a href="dashboard.html" title="Dashboard Home"><img src="img/ui/ic-home.png" alt="Home"></a></section>
+          <!-- explore-->
+          <section class="explore">
+            <!-- input search-->
+            <input type="text" placeholder="Search">
+            <!-- icon--><img src="img/ui/ic-mag.png" class="icon">
+          </section>
+        </div>
+      </div>
+    </header>
+    <!-- main-->
+    <div role="main" class="searchpage">
+      <div class="container-fluid">
+        <!-- wrapper-->
+        <div class="wrapper">
+          <!-- main-->
+          <div class="search">
+            <!-- searchbar-->
+            <section class="searchbar">
+              <div class="container-fluid">
+                <!-- wrap
+                .wrap
+                
+                
+                -->
+                <!-- input
+                .searchbox
+                 img.icon( src="img/ui/ic-mag.png" alt="Search" )
+                 input.searchinput( type="text" placeholder="Type your keyword" )
+                 
+                -->
+                <!-- tabs
+                ul.typeselect
+                 li.active
+                  a( href="#" title="Search all providers item") All content provider items
+                 li
+                  a( href="#" title="Search on WITH items only") WITH items
+                  
+                  
+                  
+                -->
+                <!-- close search--><a href="#" title="Close Search" class="close"><img src="img/ui/ic-close.png"></a>
+                <!-- view setting-->
+                <ul class="view">
+                  <li class="active"><a href="#" data-view="column" data-toggle="tooltip" data-placement="bottom" title="Column view" class="listview"><span class="icon"></span></a></li>
+                  <li><a href="#" data-view="grid" data-toggle="tooltip" data-placement="bottom" title="List view" class="gridview"><span class="icon"></span></a></li>
+                </ul>
+                <!-- settings bar-->
+                <div class="settings"><a href="#" data-view="column" data-toggle="tooltip" data-placement="bottom" title="Search filter"><img src="img/ui/ic-setting.png" alt="settings"></a></div>
+              </div>
+            </section>
+            <!-- search filter-->
+            <section class="searchlabel">
+              <div class="container-fluid">
+                <!-- label--><span class="label"><span class="text">Lorem</span><a href="#"><i class="glyphicon glyphicon-remove"></i></a></span>
+                <!-- label--><span class="label"><span class="text">Ipsum Dolor</span><a href="#"><i class="glyphicon glyphicon-remove"></i></a></span>
+                <!-- label--><span class="label"><span class="text">Lorem</span><a href="#"><i class="glyphicon glyphicon-remove"></i></a></span>
+                <!-- label--><span class="label"><span class="text">Ipsum Dolor</span><a href="#"><i class="glyphicon glyphicon-remove"></i></a></span>
+              </div>
+            </section>
+            <!-- results-->
+            <div class="searchresults">
+              <!-- search result grid-->
+              <section id="gridlist" class="gridlist">
+                <!-- collect button--><a id="multiplecollect" href="#" class="multiplecollect">COLLECT MULTIPLE ITEMS</a>
+                <!-- listing-->
+                <section class="listing itemlistview">
+                  <div class="container">
+                    <!-- grid-->
+                    <div class="grid">
+                      <!-- item-->
+                      <div class="sizer"></div>
+                      <!-- item-->
+                      <div class="item media">
+                        <div class="wrap">
+                          <!-- anchor--><a href="#" title="Lorem ipsum" class="mediaviewer">
+                            <!-- thumbnail-->
+                            <div class="thumb"><img src="img/content/thumb-media-1.png" alt="Lorem ipsum"></div></a>
+                          <!-- info-->
+                          <div class="info">
+                            <!-- anchor--><a href="#" title="Lorem ipsum" class="mediaviewer">
+                              <h1 class="title">The earth was small light blue and so touchingly alone ur home that must be defended like a relic</h1><span class="source">National Library of Latvia</span></a><span class="provider"><a href="#" class="links">digitainz.org</a></span>
+                          </div>
+                          <!-- metadata-->
+                          <div class="action-group">
+                            <div class="wrap">
+                              <ul>
+                                <li><a href="#" data-toggle="tooltip" data-placement="top" title="Add to favorite" class="fa fa-heart"></a></li>
+                                <li><a href="#" data-toggle="tooltip" data-placement="top" title="Collect it" class="fa fa-download collectbutton"></a></li>
+                                <li>
+                                  <div class="inputcheck">
+                                    <input type="checkbox" class="selectitem">
+                                  </div>
+                                </li>
+                              </ul>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <!-- item-->
+                      <div class="item media">
+                        <div class="wrap">
+                          <!-- anchor--><a href="#" title="Lorem ipsum" class="mediaviewer">
+                            <!-- thumbnail-->
+                            <div class="thumb"><img src="img/content/thumb-media-2.png" alt="Lorem ipsum"></div></a>
+                          <!-- info-->
+                          <div class="info"><a href="#" title="Lorem ipsum" class="mediaviewer">
+                              <h1 class="title">The earth was small light blue and so touchingly alone.</h1><span class="source">National Library of Latvia</span></a><span class="provider"><a href="#" class="links">digitainz.org</a></span></div>
+                          <!-- metadata-->
+                          <div class="action-group">
+                            <div class="wrap">
+                              <ul>
+                                <li><a href="#" data-toggle="tooltip" data-placement="top" title="Add to favorite" class="fa fa-heart"></a></li>
+                                <li><a href="#" data-toggle="tooltip" data-placement="top" title="Collect it" class="fa fa-download collectbutton"></a></li>
+                                <li>
+                                  <div class="inputcheck">
+                                    <input type="checkbox" class="selectitem">
+                                  </div>
+                                </li>
+                              </ul>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <!-- item-->
+                      <div class="item media">
+                        <div class="wrap">
+                          <!-- anchor--><a href="#" title="Lorem ipsum" class="mediaviewer">
+                            <!-- thumbnail-->
+                            <div class="thumb"><img src="img/content/thumb-media-3.png" alt="Lorem ipsum"></div></a>
+                          <!-- info-->
+                          <div class="info"><a href="#" title="Lorem ipsum" class="mediaviewer">
+                              <h1 class="title">The earth was small light blue and so touchingly alone ur</h1><span class="source">National Library of Latvia</span></a><span class="provider"><a href="#" class="links">digitainz.org</a></span></div>
+                          <!-- metadata-->
+                          <div class="action-group">
+                            <div class="wrap">
+                              <ul>
+                                <li><a href="#" data-toggle="tooltip" data-placement="top" title="Add to favorite" class="fa fa-heart"></a></li>
+                                <li><a href="#" data-toggle="tooltip" data-placement="top" title="Collect it" class="fa fa-download collectbutton"></a></li>
+                                <li>
+                                  <div class="inputcheck">
+                                    <input type="checkbox" class="selectitem">
+                                  </div>
+                                </li>
+                              </ul>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <!-- item-->
+                      <div class="item media">
+                        <div class="wrap">
+                          <!-- anchor--><a href="#" title="Lorem ipsum" class="mediaviewer">
+                            <!-- thumbnail-->
+                            <div class="thumb"><img src="img/content/thumb-media-4.png" alt="Lorem ipsum"></div></a>
+                          <!-- info-->
+                          <div class="info"><a href="#" title="Lorem ipsum" class="mediaviewer">
+                              <h1 class="title">The earth was small light blue </h1><span class="source">National Library of Latvia</span></a><span class="provider"><a href="#" class="links">digitainz.org</a></span></div>
+                          <!-- metadata-->
+                          <div class="action-group">
+                            <div class="wrap">
+                              <ul>
+                                <li><a href="#" data-toggle="tooltip" data-placement="top" title="Add to favorite" class="fa fa-heart"></a></li>
+                                <li><a href="#" data-toggle="tooltip" data-placement="top" title="Collect it" class="fa fa-download collectbutton"></a></li>
+                                <li>
+                                  <div class="inputcheck">
+                                    <input type="checkbox" class="selectitem">
+                                  </div>
+                                </li>
+                              </ul>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <!-- item-->
+                      <div class="item media">
+                        <div class="wrap">
+                          <!-- anchor--><a href="#" title="Lorem ipsum" class="mediaviewer">
+                            <!-- thumbnail-->
+                            <div class="thumb"><img src="img/content/thumb-media-1.png" alt="Lorem ipsum"></div></a>
+                          <!-- info-->
+                          <div class="info"><a href="#" title="Lorem ipsum" class="mediaviewer">
+                              <h1 class="title">The earth was small light blue and so touchingly alone.</h1><span class="source">National Library of Latvia</span></a><span class="provider"><a href="#" class="links">digitainz.org</a></span></div>
+                          <!-- metadata-->
+                          <div class="action-group">
+                            <div class="wrap">
+                              <ul>
+                                <li><a href="#" data-toggle="tooltip" data-placement="top" title="Add to favorite" class="fa fa-heart"></a></li>
+                                <li><a href="#" data-toggle="tooltip" data-placement="top" title="Collect it" class="fa fa-download collectbutton"></a></li>
+                                <li>
+                                  <div class="inputcheck">
+                                    <input type="checkbox" class="selectitem">
+                                  </div>
+                                </li>
+                              </ul>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <!-- item-->
+                      <div class="item media">
+                        <div class="wrap">
+                          <!-- anchor--><a href="#" title="Lorem ipsum" class="mediaviewer">
+                            <!-- thumbnail-->
+                            <div class="thumb"><img src="img/content/thumb-media-2.png" alt="Lorem ipsum"></div></a>
+                          <!-- info-->
+                          <div class="info"><a href="#" title="Lorem ipsum" class="mediaviewer">
+                              <h1 class="title">The earth was small light blue and so touchingly alone.</h1><span class="source">National Library of Latvia</span></a><span class="provider"><a href="#" class="links">digitainz.org</a></span></div>
+                          <!-- metadata-->
+                          <div class="action-group">
+                            <div class="wrap">
+                              <ul>
+                                <li><a href="#" data-toggle="tooltip" data-placement="top" title="Add to favorite" class="fa fa-heart"></a></li>
+                                <li><a href="#" data-toggle="tooltip" data-placement="top" title="Collect it" class="fa fa-download collectbutton"></a></li>
+                                <li>
+                                  <div class="inputcheck">
+                                    <input type="checkbox" class="selectitem">
+                                  </div>
+                                </li>
+                              </ul>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <!-- item-->
+                      <div class="item media">
+                        <div class="wrap">
+                          <!-- anchor--><a href="#" title="Lorem ipsum" class="mediaviewer">
+                            <!-- thumbnail-->
+                            <div class="thumb"><img src="img/content/thumb-media-3.png" alt="Lorem ipsum"></div></a>
+                          <!-- info-->
+                          <div class="info"><a href="#" title="Lorem ipsum" class="mediaviewer">
+                              <h1 class="title">The earth was small light blue and so touchingly alone ur home that must be defended like a relic</h1><span class="source">National Library of Latvia</span></a><span class="provider"><a href="#" class="links">digitainz.org</a></span></div>
+                          <!-- metadata-->
+                          <div class="action-group">
+                            <div class="wrap">
+                              <ul>
+                                <li><a href="#" data-toggle="tooltip" data-placement="top" title="Add to favorite" class="fa fa-heart"></a></li>
+                                <li><a href="#" data-toggle="tooltip" data-placement="top" title="Collect it" class="fa fa-download collectbutton"></a></li>
+                                <li>
+                                  <div class="inputcheck">
+                                    <input type="checkbox" class="selectitem">
+                                  </div>
+                                </li>
+                              </ul>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <!-- item-->
+                      <div class="item media">
+                        <div class="wrap">
+                          <!-- anchor--><a href="#" title="Lorem ipsum" class="mediaviewer">
+                            <!-- thumbnail-->
+                            <div class="thumb"><img src="img/content/thumb-media-4.png" alt="Lorem ipsum"></div></a>
+                          <!-- info-->
+                          <div class="info"><a href="#" title="Lorem ipsum" class="mediaviewer">
+                              <h1 class="title">The earth was small light blue and so touchingly alone ur home that must be defended like a relic</h1><span class="source">National Library of Latvia</span></a><span class="provider"><a href="#" class="links">digitainz.org</a></span></div>
+                          <!-- metadata-->
+                          <div class="action-group">
+                            <div class="wrap">
+                              <ul>
+                                <li><a href="#" data-toggle="tooltip" data-placement="top" title="Add to favorite" class="fa fa-heart"></a></li>
+                                <li><a href="#" data-toggle="tooltip" data-placement="top" title="Collect it" class="fa fa-download collectbutton"></a></li>
+                                <li>
+                                  <div class="inputcheck">
+                                    <input type="checkbox" class="selectitem">
+                                  </div>
+                                </li>
+                              </ul>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </section>
+              </section>
+              <!-- search result-->
+              <section id="columnlist" class="searchlist active">
+                <div class="container-fluid">
+                  <!-- row-->
+                  <div class="row">
+                    <!-- column 1-->
+                    <div id="europeana-result" class="column selected loading">
+                      <!-- wrap-->
+                      <div class="wrap">
+                        <div class="header"><a href="#" title="#">
+                            <div class="source">EUROPEANA</div>
+                            <div class="link"><i class="fa fa-external-link"></i></div>
+                            <div class="loading"><i class="fa fa-circle-o-notch fa-spin"></i></div></a></div>
+                        <div class="result">
+                          <!-- item-->
+                          <div class="item"><a href="#" title="#" data-view="inline" class="mediaviewer">
+                              <div class="imgwrap"><img src="img/content/thumb-media-1.png" alt="#" class="thumb"></div><span class="text">Lorem ipsum dolor sit amet conceptuos</span></a></div>
+                          <!-- item-->
+                          <div class="item"><a href="#" title="#" data-view="inline" class="mediaviewer">
+                              <div class="imgwrap"><img src="img/content/thumb-media-1.png" alt="#" class="thumb"></div><span class="text">Lorem ipsum dolor sit amet conceptuos</span></a></div>
+                          <!-- item-->
+                          <div class="item"><a href="#" title="#" data-view="inline" class="mediaviewer">
+                              <div class="imgwrap"><img src="img/content/thumb-media-2.png" alt="#" class="thumb"></div><span class="text">Lorem ipsum dolor sit amet conceptuos</span></a></div>
+                          <!-- item-->
+                          <div class="item"><a href="#" title="#" data-view="inline" class="mediaviewer">
+                              <div class="imgwrap"><img src="img/content/thumb-media-3.png" alt="#" class="thumb"></div><span class="text">Lorem ipsum dolor sit amet conceptuos</span></a></div>
+                          <!-- item-->
+                          <div class="item"><a href="#" title="#" data-view="inline" class="mediaviewer">
+                              <div class="imgwrap"><img src="img/content/thumb-media-1.png" alt="#" class="thumb"></div><span class="text">Lorem ipsum dolor sit amet conceptuos</span></a></div>
+                          <!-- item-->
+                          <div class="item"><a href="#" title="#" data-view="inline" class="mediaviewer">
+                              <div class="imgwrap"><img src="img/content/thumb-media-2.png" alt="#" class="thumb"></div><span class="text">Lorem ipsum dolor sit amet conceptuos</span></a></div>
+                          <!-- item-->
+                          <div class="item"><a href="#" title="#" data-view="inline" class="mediaviewer">
+                              <div class="imgwrap"><img src="img/content/thumb-media-3.png" alt="#" class="thumb"></div><span class="text">Lorem ipsum dolor sit amet conceptuos </span></a></div>
+                        </div>
+                      </div>
+                    </div>
+                    <!-- column 2-->
+                    <div id="nla-result" class="column">
+                      <!-- wrap-->
+                      <div class="wrap">
+                        <div class="header"><a href="#" title="#">
+                            <div class="source">NLA</div>
+                            <div class="link"><i class="fa fa-external-link"></i></div>
+                            <div class="loading"><i class="fa fa-circle-o-notch fa-spin"></i></div></a></div>
+                        <div class="result">
+                          <!-- item-->
+                          <div class="item"><a href="#" title="#" data-view="inline" class="mediaviewer">
+                              <div class="imgwrap"><img src="img/content/thumb-media-4.png" alt="#" class="thumb"></div><span class="text">Lorem ipsum dolor sit amet conceptuos</span></a></div>
+                          <!-- item-->
+                          <div class="item"><a href="#" title="#" data-view="inline" class="mediaviewer">
+                              <div class="imgwrap"><img src="img/content/thumb-media-1.png" alt="#" class="thumb"></div><span class="text">Lorem ipsum dolor sit amet conceptuos</span></a></div>
+                          <!-- item-->
+                          <div class="item"><a href="#" title="#" data-view="inline" class="mediaviewer">
+                              <div class="imgwrap"><img src="img/content/thumb-media-2.png" alt="#" class="thumb"></div><span class="text">Lorem ipsum dolor sit amet conceptuos</span></a></div>
+                          <!-- item-->
+                          <div class="item"><a href="#" title="#" data-view="inline" class="mediaviewer">
+                              <div class="imgwrap"><img src="img/content/thumb-media-3.png" alt="#" class="thumb"></div><span class="text">Lorem ipsum dolor sit amet conceptuos</span></a></div>
+                        </div>
+                      </div>
+                    </div>
+                    <!-- column 3-->
+                    <div id="youtube-result" class="column">
+                      <!-- wrap-->
+                      <div class="wrap">
+                        <div class="header"><a href="#" title="#">
+                            <div class="source">YOUTUBE</div>
+                            <div class="link"><i class="fa fa-external-link"></i></div>
+                            <div class="loading"><i class="fa fa-circle-o-notch fa-spin"></i></div></a></div>
+                        <div class="result">
+                          <!-- item-->
+                          <div class="item"><a href="#" title="#" data-view="inline" class="mediaviewer">
+                              <div class="imgwrap"><img src="img/content/thumb-media-2.png" alt="#" class="thumb"></div><span class="text">Lorem ipsum dolor sit amet conceptuos oorem ipsum dolor sit amet conceptuos</span></a></div>
+                        </div>
+                      </div>
+                    </div>
+                    <!-- column 4-->
+                    <div id="digitalnz-result" class="column">
+                      <!-- wrap-->
+                      <div class="wrap">
+                        <div class="header"><a href="#" title="#">
+                            <div class="source">DIGITAL NZ</div>
+                            <div class="link"><i class="fa fa-external-link"></i></div>
+                            <div class="loading"><i class="fa fa-circle-o-notch fa-spin"></i></div></a></div>
+                        <div class="result">
+                          <!-- item-->
+                          <div class="item"><a href="#" title="#" data-view="inline" class="mediaviewer">
+                              <div class="imgwrap"><img src="img/content/thumb-media-1.png" alt="#" class="thumb"></div><span class="text">Lorem ipsum dolor sit amet conceptuos</span></a></div>
+                          <!-- item-->
+                          <div class="item"><a href="#" title="#" data-view="inline" class="mediaviewer">
+                              <div class="imgwrap"><img src="img/content/thumb-media-2.png" alt="#" class="thumb"></div><span class="text">Lorem ipsum dolor sit amet conceptuos</span></a></div>
+                        </div>
+                      </div>
+                    </div>
+                    <!-- column 5-->
+                    <div id="dpla-result" class="column">
+                      <!-- wrap-->
+                      <div class="wrap">
+                        <div class="header"><a href="#" title="#">
+                            <div class="source">DPLA</div>
+                            <div class="link"><i class="fa fa-external-link"></i></div>
+                            <div class="loading"><i class="fa fa-circle-o-notch fa-spin"></i></div></a></div>
+                        <div class="result">
+                          <!-- item-->
+                          <div class="item"><a href="#" title="#" data-view="inline" class="mediaviewer">
+                              <div class="imgwrap"><img src="img/content/thumb-media-1.png" alt="#" class="thumb"></div><span class="text">Lorem ipsum dolor sit amet conceptuos</span></a></div>
+                          <!-- item-->
+                          <div class="item"><a href="#" title="#" data-view="inline" class="mediaviewer">
+                              <div class="imgwrap"><img src="img/content/thumb-media-2.png" alt="#" class="thumb"></div><span class="text">Lorem ipsum dolor sit amet conceptuos</span></a></div>
+                          <!-- item-->
+                          <div class="item"><a href="#" title="#" data-view="inline" class="mediaviewer">
+                              <div class="imgwrap"><img src="img/content/thumb-media-1.png" alt="#" class="thumb"></div><span class="text">Lorem ipsum dolor sit amet conceptuos</span></a></div>
+                          <!-- item-->
+                          <div class="item"><a href="#" title="#" data-view="inline" class="mediaviewer">
+                              <div class="imgwrap"><img src="img/content/thumb-media-2.png" alt="#" class="thumb"></div><span class="text">Lorem ipsum dolor sit amet conceptuos</span></a></div>
+                        </div>
+                      </div>
+                    </div>
+                    <!-- column 6-->
+                    <div id="other1-result" class="column">
+                      <!-- wrap-->
+                      <div class="wrap">
+                        <div class="header"><a href="#" title="#">
+                            <div class="source">OTHER 1</div>
+                            <div class="link"><i class="fa fa-external-link"></i></div>
+                            <div class="loading"><i class="fa fa-circle-o-notch fa-spin"></i></div></a></div>
+                        <div class="result">
+                          <!-- item-->
+                          <div class="item"><a href="#" title="#" data-view="inline" class="mediaviewer">
+                              <div class="imgwrap"><img src="img/content/thumb-media-1.png" alt="#" class="thumb"></div><span class="text">Lorem ipsum dolor sit amet conceptuos</span></a></div>
+                          <!-- item-->
+                          <div class="item"><a href="#" title="#" data-view="inline" class="mediaviewer">
+                              <div class="imgwrap"><img src="img/content/thumb-media-2.png" alt="#" class="thumb"></div><span class="text">Lorem ipsum dolor sit amet conceptuos</span></a></div>
+                          <!-- item-->
+                          <div class="item"><a href="#" title="#" data-view="inline" class="mediaviewer">
+                              <div class="imgwrap"><img src="img/content/thumb-media-1.png" alt="#" class="thumb"></div><span class="text">Lorem ipsum dolor sit amet conceptuos</span></a></div>
+                          <!-- item-->
+                          <div class="item"><a href="#" title="#" data-view="inline" class="mediaviewer">
+                              <div class="imgwrap"><img src="img/content/thumb-media-2.png" alt="#" class="thumb"></div><span class="text">Lorem ipsum dolor sit amet conceptuos</span></a></div>
+                        </div>
+                      </div>
+                    </div>
+                    <!-- column 6-->
+                    <div id="other2-result" class="column">
+                      <!-- wrap-->
+                      <div class="wrap">
+                        <div class="header"><a href="#" title="#" data-view="inline" class="mediaviewer">
+                            <div class="source">OTHER 2</div>
+                            <div class="link"><i class="fa fa-external-link"></i></div>
+                            <div class="loading"><i class="fa fa-circle-o-notch fa-spin"></i></div></a></div>
+                        <div class="result">
+                          <!-- item-->
+                          <div class="item"><a href="#" title="#" data-view="inline" class="mediaviewer">
+                              <div class="imgwrap"><img src="img/content/thumb-media-1.png" alt="#" class="thumb"></div><span class="text">Lorem ipsum dolor sit amet conceptuos</span></a></div>
+                          <!-- item-->
+                          <div class="item"><a href="#" title="#" data-view="inline" class="mediaviewer">
+                              <div class="imgwrap"><img src="img/content/thumb-media-2.png" alt="#" class="thumb"></div><span class="text">Lorem ipsum dolor sit amet conceptuos</span></a></div>
+                          <!-- item-->
+                          <div class="item"><a href="#" title="#" data-view="inline" class="mediaviewer">
+                              <div class="imgwrap"><img src="img/content/thumb-media-1.png" alt="#" class="thumb"></div><span class="text">Lorem ipsum dolor sit amet conceptuos</span></a></div>
+                          <!-- item-->
+                          <div class="item"><a href="#" title="#" data-view="inline" class="mediaviewer">
+                              <div class="imgwrap"><img src="img/content/thumb-media-2.png" alt="#" class="thumb"></div><span class="text">Lorem ipsum dolor sit amet conceptuos</span></a></div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <!-- scroll pointer--><img id="pointermark" src="img/ui/ic-right.png" data-toggle="tooltip" data-placement="top" title="Scroll to the right to see more results" class="pointer">
+                </div>
+              </section>
+            </div>
+            <!-- item view-->
+            <section class="itemview">
+              <!-- header-->
+              <div class="header">
+                <div class="container-fluid">
+                  <!-- head-->
+                  <h3>Media Viewer</h3>
+                  <!-- close-->
+                  <ul class="close">
+                    <li><a href="#" data-toggle="tooltip" data-placement="top" title="Close media viewer" class="closemedia"><img src="img/ui/ic-close.png"></a></li>
+                  </ul>
+                  <!-- actions-->
+                  <ul class="actions">
+                    <li><a href="#" data-toggle="tooltip" data-placement="top" title="Add to favorite" class="fa fa-heart-o favorite"></a></li>
+                    <li><a href="#" data-toggle="tooltip" data-placement="top" title="Collect it" class="fa fa-download collectbutton"></a></li>
+                    <li><a href="#" data-toggle="tooltip" data-placement="top" title="Visit item site" class="fa fa-external-link medialink"></a></li>
+                  </ul>
+                </div>
+              </div>
+              <!-- media content-->
+              <div class="mediacontent">
+                <div class="container-fluid">
+                  <!-- wrap-->
+                  <div class="wrap">
+                    <!-- item-->
+                    <div class="media"><img src="img/content/img-item.jpg"></div>
+                    <!-- metadata-->
+                    <div class="metadata">
+                      <div class="infowrap">
+                        <!-- top-->
+                        <div class="top">
+                          <!-- title-->
+                          <div class="infotitle">
+                            <h1>Avenue de l'Observatoire , 1932-34</h1>
+                            <div class="owner"><a href="#" title="#">National Gallery Athens</a></div>
+                          </div>
+                          <!-- collect--><a href="#" title="#" class="infocollect collectbutton">COLLECT ITEM</a>
+                        </div>
+                        <!-- metadata-->
+                        <ul role="tablist" class="nav nav-tabs">
+                          <li class="active"><a href="#information" title="" data-toggle="tab">Info</a></li>
+                          <li><a href="#related" title="" data-toggle="tab">Related</a></li>
+                          <li><a href="#comment" title="" data-toggle="tab">Comments</a></li>
+                          <li><a href="#share" title="" data-toggle="tab">Share</a></li>
+                        </ul>
+                        <!-- panes-->
+                        <div class="tab-content">
+                          <div id="information" class="tab-pane active">
+                            <!-- description-->
+                            <div class="meta">
+                              <div class="list">
+                                <div class="title">
+                                  <div class="titlewrap">Description</div>
+                                </div>
+                                <div data-limit="400" class="field limitchar">
+                                  George Brassaï (pseudonym of Gyula Halász) (9 September 1899 — 8 July 1984) was a Hungarian photographer, 
+                                  sculptor, and filmmaker who rose to international fame in France in the 20th century. He was one of the numerous 
+                                  Hungarian artists who flourished in Paris beginning between the World Wars. 
+                                  In the early 21st century, the discovery 
+                                  of more than 200 letters and hundreds of drawings and other items from the period 1940–1984 has provided scholars with 
+                                  material for understanding his later life and career.
+                                </div>
+                              </div>
+                              <div class="list">
+                                <div class="title">
+                                  <div class="titlewrap">Provider</div>
+                                </div>
+                                <div class="field">National Gallery - Alexandros Soutzos Museum, Athens.</div>
+                              </div>
+                              <div class="list">
+                                <div class="title">
+                                  <div class="titlewrap">Rights</div>
+                                </div>
+                                <div class="field">Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</div>
+                              </div>
+                              <div class="list">
+                                <div class="title">
+                                  <div class="titlewrap">Record Source</div>
+                                </div>
+                                <div class="field"><a href="#" title="#">EUROPEANA</a></div>
+                              </div>
+                              <div id="extrainfo" class="listhide">
+                                <div class="list">
+                                  <div class="title">
+                                    <div class="titlewrap">Provider</div>
+                                  </div>
+                                  <div class="field">National Gallery - Alexandros Soutzos Museum, Athens.</div>
+                                </div>
+                                <div class="list">
+                                  <div class="title">
+                                    <div class="titlewrap">Rights</div>
+                                  </div>
+                                  <div class="field">Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</div>
+                                </div>
+                                <div class="list">
+                                  <div class="title">
+                                    <div class="titlewrap">Record Source</div>
+                                  </div>
+                                  <div class="field"><a href="#" title="#">EUROPEANA</a></div>
+                                </div>
+                                <div class="list">
+                                  <div class="title">
+                                    <div class="titlewrap">Provider</div>
+                                  </div>
+                                  <div class="field">National Gallery - Alexandros Soutzos Museum, Athens.</div>
+                                </div>
+                                <div class="list">
+                                  <div class="title">
+                                    <div class="titlewrap">Rights</div>
+                                  </div>
+                                  <div class="field">Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</div>
+                                </div>
+                              </div>
+                              <!-- more--><a href="#" data-target="extrainfo" class="listmore">SHOW MORE INFO</a>
+                            </div>
+                          </div>
+                          <div id="related" class="tab-pane">
+                            <!-- related media-->
+                            <div class="title">
+                              <div class="titlewrap">Other media item by National Gallery Athens</div><a href="#" title="Follow National Gallery Athens" class="follow">FOLLOW</a>
+                            </div>
+                            <ul class="related">
+                              <li><a href="#" data-toggle="tooltip" data-placement="top" title="Lorem ipsum dolor"><img src="img/content/content-4.png" alt="media"></a></li>
+                              <li><a href="#" data-toggle="tooltip" data-placement="top" title="Lorem ipsum dolor"><img src="img/content/content-4.png" alt="media"></a></li>
+                              <li><a href="#" data-toggle="tooltip" data-placement="top" title="Lorem ipsum dolor"><img src="img/content/content-4.png" alt="media"></a></li>
+                              <li><a href="#" data-toggle="tooltip" data-placement="top" title="Lorem ipsum dolor"><img src="img/content/content-4.png" alt="media"></a></li>
+                            </ul>
+                            <!-- related media-->
+                            <div class="title">
+                              <div class="titlewrap">Similar media item</div>
+                            </div>
+                            <ul class="related">
+                              <li><a href="#" data-toggle="tooltip" data-placement="top" title="Lorem ipsum dolor"><img src="img/content/content-4.png" alt="media"></a></li>
+                              <li><a href="#" data-toggle="tooltip" data-placement="top" title="Lorem ipsum dolor"><img src="img/content/content-4.png" alt="media"></a></li>
+                              <li><a href="#" data-toggle="tooltip" data-placement="top" title="Lorem ipsum dolor"><img src="img/content/content-4.png" alt="media"></a></li>
+                              <li><a href="#" data-toggle="tooltip" data-placement="top" title="Lorem ipsum dolor"><img src="img/content/content-4.png" alt="media"></a></li>
+                            </ul>
+                          </div>
+                          <div id="comment" class="tab-pane">
+                            <!-- comment -->
+                            <div class="comments">
+                              <div class="form">
+                                <textarea placeholder="Fill in your comment" class="commentbox form-control"></textarea>
+                                <button class="btn btn-green">Submit</button>
+                              </div>
+                              <!-- commentlist-->
+                              <ul class="commentlist">
+                                <li><a href="#" title="#"><span class="profilepicture"><img src="img/content/img-profile.jpg"></span></a>
+                                  <div class="entry"><span class="name">Mike Jones</span>
+                                    <div class="text">Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.	</div>
+                                    <div class="meta">1 day ago</div>
+                                  </div>
+                                </li>
+                                <li><a href="account.html" title="#"><span class="profilepicture"><img src="img/content/img-profile.jpg"></span></a>
+                                  <div class="entry"><span class="name">Mike Jones</span>
+                                    <div class="text">Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.	</div>
+                                    <div class="meta">1 day ago</div>
+                                  </div>
+                                </li>
+                                <li><a href="account.html" title="#"><span class="profilepicture"><img src="img/content/img-profile.jpg"></span></a>
+                                  <div class="entry"><span class="name">Mike Jones</span>
+                                    <div class="text">Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.	</div>
+                                    <div class="meta">1 day ago</div>
+                                  </div>
+                                </li>
+                                <li><a href="account.html" title="#"><span class="profilepicture"><img src="img/content/img-profile.jpg"></span></a>
+                                  <div class="entry"><span class="name">Mike Jones</span>
+                                    <div class="text">Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.	</div>
+                                    <div class="meta">1 day ago</div>
+                                  </div>
+                                </li>
+                              </ul>
+                            </div>
+                          </div>
+                          <div id="share" class="tab-pane">
+                            <!-- share-->
+                            <div class="sharetext">Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</div>
+                            <ul class="social">
+                              <li><a href="#" title="#"><img src="img/ui/ic-facebook.png" alt="facebook"></a></li>
+                              <li><a href="#" title="#"><img src="img/ui/ic-twitter.png" alt="facebook"></a></li>
+                              <li><a href="#" title="#"><img src="img/ui/ic-pinterest.png" alt="facebook"></a></li>
+                              <li><a href="#" title="#"><img src="img/ui/ic-mail.png" alt="facebook"></a></li>
+                            </ul>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </section>
+          </div>
+          <!-- collection give access-->
+          <section class="action collect">
+            <div class="action-header">
+              <div class="title">Collect an item</div>
+            </div>
+            <div class="action-body">
+              <select class="form-control">
+                <option>Select a collection</option>
+                <option>Select a collection</option>
+                <option>Select a collection</option>
+              </select>
+              <div class="group">
+                <div class="title">Media info</div>
+                <p>Lorem ipsum dolor sit amet conceptuas</p>
+                <textarea disabled>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip.</textarea>
+              </div>
+            </div>
+            <div class="button-group"><a href="#" class="btn-green-o cancel">Cancel</a><a href="#" class="btn-green">Add to collection</a></div>
+          </section>
+          <!-- collection give access-->
+          <section class="action collectmultiple">
+            <div class="action-header">
+              <div class="title">Collect multiple items</div>
+            </div>
+            <div class="action-body">
+              <select class="form-control">
+                <option>Select a collection</option>
+                <option>Select a collection</option>
+                <option>Select a collection</option>
+              </select>
+            </div>
+            <div class="button-group"><a href="#" class="btn-green-o cancel">Cancel</a><a href="#" class="btn-green">Add items to collection</a></div>
+          </section>
+          <!-- search filter-->
+          <section class="action searchfilter">
+            <div class="action-header">
+              <div class="title">Search Filter</div>
+            </div>
+            <div class="action-body">
+              <!-- setting-->
+              <!-- settings-->
+              <div class="searchsetting">
+                <!-- filter Text-->
+                <div class="filtertext">
+                  <input type="text" placeholder="Search" class="filterinput"><img alt="search" src="img/ui/ic-mag.png" class="filterimg">
+                </div>
+                <!-- wrap-->
+                <div class="wraps">
+                  <!-- tabs-->
+                  <ul role="tablist" class="nav nav-tabs">
+                    <li class="active"><a href="#sources" title="" data-toggle="tab">SOURCES</a></li>
+                    <li><a href="#type" title="" data-toggle="tab">TYPE</a></li>
+                    <li><a href="#provider" title="" data-toggle="tab">PROVIDER</a></li>
+                    <li><a href="#dataprovider" title="" data-toggle="tab">DATA PROVIDER</a></li>
+                    <li><a href="#creator" title="" data-toggle="tab">CREATOR</a></li>
+                    <li><a href="#right" title="" data-toggle="tab">RIGHTS</a></li>
+                    <li><a href="#country" title="" data-toggle="tab">COUNTRY</a></li>
+                    <li><a href="#year" title="" data-toggle="tab">YEAR</a></li>
+                  </ul>
+                  <!-- panes-->
+                  <div class="tab-content">
+                    <div id="sources" class="tab-pane active">
+                      <!-- sources-->
+                      <ul class="sources list">
+                        <li>
+                          <label>
+                            <input type="checkbox"><span>EUROPEANA</span>
+                          </label>
+                        </li>
+                        <li>
+                          <label>
+                            <input type="checkbox"><span>DPLA</span>
+                          </label>
+                        </li>
+                        <li>
+                          <label>
+                            <input type="checkbox"><span>NLA</span>
+                          </label>
+                        </li>
+                        <li>
+                          <label>
+                            <input type="checkbox"><span>YOUTUBE</span>
+                          </label>
+                        </li>
+                        <li>
+                          <label>
+                            <input type="checkbox"><span>DIGITAL NZ</span>
+                          </label>
+                        </li>
+                        <li>
+                          <label>
+                            <input type="checkbox"><span>EUSPACE</span>
+                          </label>
+                        </li>
+                      </ul>
+                    </div>
+                    <div id="type" class="tab-pane">
+                      <!-- type-->
+                      <ul class="type list">
+                        <li><a href="#" title="#">The European Library</a></li>
+                        <li><a href="#" title="#">EuroPhoto</a></li>
+                        <li><a href="#" title="#">AthenaPlus</a></li>
+                        <li><a href="#" title="#">Hispana</a></li>
+                        <li><a href="#" title="#">Culture Grid</a></li>
+                        <li><a href="#" title="#">Linked Heritage</a></li>
+                        <li><a href="#" title="#">Digitale Collectie</a></li>
+                        <li><a href="#" title="#">EUscreenXL</a></li>
+                        <li><a href="#" title="#">Cultura Italia</a></li>
+                        <li><a href="#" title="#">Europeana Photography</a></li>
+                      </ul>
+                    </div>
+                    <div id="provider" class="tab-pane">
+                      <!-- type-->
+                      <ul class="type list">
+                        <li><a href="#" title="#">Newspaper</a></li>
+                        <li><a href="#" title="#">Article</a></li>
+                        <li><a href="#" title="#">Text</a></li>
+                        <li><a href="#" title="#">Image</a></li>
+                        <li><a href="#" title="#">Archive</a></li>
+                        <li><a href="#" title="#">Research Paper</a></li>
+                        <li><a href="#" title="#">Sound</a></li>
+                        <li><a href="#" title="#">Video</a></li>
+                        <li><a href="#" title="#">Manuscripts</a></li>
+                        <li><a href="#" title="#">Data</a></li>
+                      </ul>
+                    </div>
+                    <div id="dataprovider" class="tab-pane">
+                      <!-- type-->
+                      <ul class="type list">
+                        <li><a href="#" title="#">Newspaper</a></li>
+                        <li><a href="#" title="#">Article</a></li>
+                        <li><a href="#" title="#">Text</a></li>
+                        <li><a href="#" title="#">Image</a></li>
+                        <li><a href="#" title="#">Archive</a></li>
+                        <li><a href="#" title="#">Research Paper</a></li>
+                        <li><a href="#" title="#">Sound</a></li>
+                        <li><a href="#" title="#">Video</a></li>
+                        <li><a href="#" title="#">Manuscripts</a></li>
+                        <li><a href="#" title="#">Data</a></li>
+                      </ul>
+                    </div>
+                    <div id="creator" class="tab-pane">
+                      <!-- type-->
+                      <ul class="type list">
+                        <li><a href="#" title="#">Newspaper</a></li>
+                        <li><a href="#" title="#">Article</a></li>
+                        <li><a href="#" title="#">Text</a></li>
+                        <li><a href="#" title="#">Image</a></li>
+                        <li><a href="#" title="#">Archive</a></li>
+                        <li><a href="#" title="#">Research Paper</a></li>
+                        <li><a href="#" title="#">Sound</a></li>
+                        <li><a href="#" title="#">Video</a></li>
+                        <li><a href="#" title="#">Manuscripts</a></li>
+                        <li><a href="#" title="#">Data</a></li>
+                      </ul>
+                    </div>
+                    <div id="right" class="tab-pane">
+                      <!-- type-->
+                      <ul class="type list">
+                        <li><a href="#" title="#">Newspaper</a></li>
+                        <li><a href="#" title="#">Article</a></li>
+                        <li><a href="#" title="#">Text</a></li>
+                        <li><a href="#" title="#">Image</a></li>
+                        <li><a href="#" title="#">Archive</a></li>
+                        <li><a href="#" title="#">Research Paper</a></li>
+                        <li><a href="#" title="#">Sound</a></li>
+                        <li><a href="#" title="#">Video</a></li>
+                        <li><a href="#" title="#">Manuscripts</a></li>
+                        <li><a href="#" title="#">Data</a></li>
+                      </ul>
+                    </div>
+                    <div id="country" class="tab-pane">
+                      <!-- type-->
+                      <ul class="type list">
+                        <li><a href="#" title="#">Newspaper</a></li>
+                        <li><a href="#" title="#">Article</a></li>
+                        <li><a href="#" title="#">Text</a></li>
+                        <li><a href="#" title="#">Image</a></li>
+                        <li><a href="#" title="#">Archive</a></li>
+                        <li><a href="#" title="#">Research Paper</a></li>
+                        <li><a href="#" title="#">Sound</a></li>
+                        <li><a href="#" title="#">Video</a></li>
+                        <li><a href="#" title="#">Manuscripts</a></li>
+                        <li><a href="#" title="#">Data</a></li>
+                      </ul>
+                    </div>
+                    <div id="year" class="tab-pane">
+                      <!-- type-->
+                      <ul class="type list">
+                        <li><a href="#" title="#">Newspaper</a></li>
+                        <li><a href="#" title="#">Article</a></li>
+                        <li><a href="#" title="#">Text</a></li>
+                        <li><a href="#" title="#">Image</a></li>
+                        <li><a href="#" title="#">Archive</a></li>
+                        <li><a href="#" title="#">Research Paper</a></li>
+                        <li><a href="#" title="#">Sound</a></li>
+                        <li><a href="#" title="#">Video</a></li>
+                        <li><a href="#" title="#">Manuscripts</a></li>
+                        <li><a href="#" title="#">Dat</a></li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="button-group"><a href="#" class="btn-green cancel">Close</a></div>
+          </section>
+        </div>
+      </div>
+    </div>
+  </body>
+  <!-- script-->
+  <script src="js/vendor/jquery/dist/jquery.min.js"></script>
+  <script src="js/vendor/bootstrap/dist/js/bootstrap.min.js"></script>
+  <script src="js/vendor/masonry/dist/masonry.pkgd.min.js"></script>
+  <script src="js/vendor/slick.js/slick/slick.min.js"></script>
+  <script src="js/vendor/jquery.nicescroll/dist/jquery.nicescroll.min.js"></script>
+  <script src="js/vendor/isotope/isotope.pkgd.min.js"></script>
+  <script src="js/vendor/jquery-sticky/jquery.sticky.js"></script>
+  <script src="js/plugin.js"></script>
+  <script src="js/main.js"></script>
+</html>

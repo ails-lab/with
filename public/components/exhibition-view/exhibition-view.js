@@ -1,204 +1,243 @@
-define(['knockout', 'text!./exhibition-view.html', 'app', 'magnific-popup','slick'], function (ko, template, app, magnificPopup,slick) {
+define(['knockout', 'text!./_exhibition-view.html', 'app', 'magnific-popup', 'slick', 'knockout-else'], 
+		function (ko, template, app, magnificPopup, slick, KnockoutElse) {
 
+	ko.bindingHandlers.backgroundImage = {
+		update: function (element, valueAccessor, allBindingsAccessor, viewModel, context) {
+			ko.bindingHandlers.style.update(element,
+				function () {
+					return {
+						backgroundImage: "url('" + viewModel.backgroundImgWithUrl() + "')"
+					};
+				});
+		}
+	};
 
-  
+	function Record(data) {
+		var self = this;
+		self.recordId = "";
+		self.title = "";
+		self.description = "";
+		self.thumb = "";
+		self.fullres = ko.observable("");
+		self.view_url = "";
+		self.source = "";
+		self.creator = "";
+		self.provider = "";
+		self.rights = "";
+		self.mediatype="";
+		self.url = "";
+		self.externalId = "";
+		self.isLoaded = ko.observable(false);
 
-    ko.bindingHandlers.backgroundImage = {
-        update: function(element, valueAccessor) {
-            ko.bindingHandlers.style.update(element,
-                function(){return {backgroundImage: "url('" + valueAccessor() + "')"}});
-        }
-    };
+		self.load = function (options) {
+			var admindata = options.administrative;
+			var descdata = options.descriptiveData;
+			var media = options.media;
+			var provenance = options.provenance;
+			var usage = options.usage;
 
-    function Record(data) {
-        var self = this;
-        self.recordId = "";
-        self.title = "";
-        self.description="";
-        self.thumb = "";
-        self.fullres=ko.observable("");
-        self.view_url="";
-        self.source="";
-        self.creator="";
-        self.provider="";
-        self.rights="";
-        self.url="";
-        self.externalId = "";
-        self.isLoaded = ko.observable(false);
-
-        self.load = function(data) {
-            if(data.title==undefined){
-                self.title="No title";
-            }else{self.title=data.title;}
-            self.url="#item/"+data.id;
-            self.view_url=data.view_url;
-            self.thumb=data.thumb;
-            //self.fullres=data.fullres;
-            self.description=data.description;
-            self.source=data.source;
-            self.creator=data.creator;
-            self.provider=data.provider;
-            self.rights=data.rights;
-            self.recordId=data.id;
-            self.externalId=data.externalId;
-            if (data.source!="Rijksmuseum" && data.fullres && data.fullres.length > 0) {
-				self.fullres(data.fullres);
-			} 
-			else if (data.source!="Rijksmuseum" && data.fullres && data.fullres[0]  && data.fullres[0].length > 0) {
-				self.fullres(data.fullres[0]);
+			if (descdata) {
+				self.title = findByLang(descdata.label);
+				self.description = findByLang(descdata.description);
+				self.rights = findResOrLit(descdata.metadataRights);
+				if (options.withCreator != null) {
+					self.creator = options.withCreatorInfo.username;
+				}
 			}
-			else{
+
+			self.dbId = options.dbId;
+			if (provenance) {
+				self.view_url = findProvenanceValues(provenance, "source_uri");
+				self.dataProvider = findProvenanceValues(provenance, "dataProvider");
+				self.provider = findProvenanceValues(provenance, "provider");
+				self.source = findProvenanceValues(provenance, "source");
+			}
+			self.externalId = admindata.externalid;
+			if (usage) {
+				self.likes = usage.likes;
+				self.collected = usage.collected;
+				self.collectedIn = usage.collectedIn;
+			}
+
+			self.thumb = media[0] != null && media[0].Thumbnail != null && media[0].Thumbnail.url != "null" ? media[0].Thumbnail.url : "img/ui/ic-noimage.png";
+			//self.fullres = media[0] != null && media[0].Original != null && media[0].Original.url != "null" ? media[0].Original.url : null,
+			if(media[0] != null && media[0].Original != null && media[0].Original.url != "null"){
+				self.fullres(media[0].Original.url);
+			}
+			if(media &&  media[0]){
+				if(media[0].Original && media[0].Original.type){
+					self.mediatype=media[0].Original.type;
+				}else if(media[0].Thumbnail && media[0].Thumbnail.type){
+					self.mediatype=media[0].Thumbnail.type;
+				}
+			}
+		    self.isLoaded = ko.observable(false);
+			if(self.fullres()==null || self.fullres().length==0){
 				self.fullres(self.thumb);
 			}
+		};
 
-        };
+		
+		if (data != undefined) self.load(data);
+	}
 
-        self.cachedThumbnail = ko.pureComputed(function() {
+	function EViewModel(params) {
+		document.body.setAttribute("data-page", "exhibition");
+		// $("div[role='main']").toggleClass("homepage", false);
+		var self = this;
+		self.route = params.route;
+		KnockoutElse.init([spec = {}]);
+		var counter = 1;
+		self.exhName = ko.observable('');
+		//self.access = ko.observable([]);
+		self.id = ko.observable(params.id);
+		self.owner = ko.observable('');
+		self.ownerId = ko.observable(-1);
+		self.entryCount = ko.observable(0);
+		self.exhItems = ko.observableArray();
+		self.desc = ko.observable('');
+		self.loading = ko.observable(false);
+		self.showCarousel = ko.observable(false);
+		self.backgroundImgWithUrl = ko.observable('');
+		self.credits = ko.observable('');
+		self.initCarousel = function () {
+			WITHApp.initTooltip();
+			WITHApp.initCarousel();
+			WITHApp.initExpandExhibitionText();
+			WITHApp.initImageZoom();
+		};
 
-            if(self.thumb){
-                if (self.thumb.indexOf('/') === 0) {
-                    return self.thumb;
-                } else {
-                    var newurl='url=' + encodeURIComponent(self.thumb)+'&';
-                    return '/cache/byUrl?'+newurl+'Xauth2='+ sign(newurl);
-                }}
-            else{
-                return "img/content/thumb-empty.png";
-            }
-        });
-        if(data != undefined) self.load(data);
-    }
+		self.revealItems = function (data) {
+			for (var i in data) {
+				var result = data[i];
+				var record = new Record(result);
+				record.annotation = '';
+				if (result.contextData !== undefined && result.contextData !== null && 
+						result.contextData.body != undefined 
+						&& result.contextData.body != null
+						&& ! $.isEmptyObject(result.contextData.body)) {
+					record.annotation = result.contextData.body.text.default;
+					record.mediaUrl = result.contextData.body.mediaUrl;
+					record.mediaType = result.contextData.body.mediaType;
+					record.mediaDescription = result.contextData.body.mediaDescription;
+					record.textPosition = result.contextData.body.textPosition;
+				}
+				var styleId = self.exhItems().length % 5 || 0;
+				var styleIdMapping = {
+					0: 1,
+					1: 1,
+					2: 2,
+					3: 2,
+					4: 3
+				};
+				styleId = styleIdMapping[styleId];
+				record.css = 'item style' + styleId; //0, 1, 2, 3, 4 -> 2 x style1, 2 x style2 , 1 x style3
+				self.exhItems().push(record);
+			}
+			self.exhItems.valueHasMutated();
+			setTimeout(function () {
+				self.initCarousel();
+			}, 1000);
+		};
 
-    function EViewModel(params) {
-        document.body.setAttribute("data-page","exhibition");
-        $("div[role='main']").toggleClass( "homepage", false );
-        
-        var self = this;
+		self.loadExhibition = function (id) {
+			self.loading(true);
+			$.ajax({
+				"url": "/collection/" + self.id(),
+				"method": "get",
+				"contentType": "application/json",
+				"success": function (data) {
+					/*if user not logged in and not public redirect*/
+					if (data.administrative.access.isPublic == false) {
+						if (isLogged() == false) {
+							window.location = '#login';
+							return;
+						}
+					}
+					var adminData = data.administrative;
+					self.exhName(findByLang(data.descriptiveData.label));
+					self.desc(findByLang(data.descriptiveData.description));
+					self.owner(data.withCreatorInfo.username);
+					self.ownerId(data.administrative.withCreator);
+					self.entryCount(data.administrative.entryCount);
+					self.credits(data.descriptiveData.credits);
+					var backgroundImg = data.descriptiveData.backgroundImg;
+					//self.access(adminData.access);
+					if (self.entryCount() && self.entryCount() > 0) {
+						$.ajax({
+							"url": "/collection/" + self.id() + "/list?count="+self.entryCount()+"&start=0",
+							"method": "get",
+							"contentType": "application/json",
+							"success": function (data) {
+								var items = self.revealItems(data.records);
+								if (backgroundImg == null || backgroundImg.Original == null || 
+										backgroundImg.Original.withUrl == null || 
+										backgroundImg.Original.withUrl == "") {
+									self.backgroundImgWithUrl(self.exhItems()[0].fullres());
+								} 						
+								else {
+									if (backgroundImg.Original.withUrl.indexOf("/media") == 0) {
+										self.backgroundImgWithUrl(window.location.origin + backgroundImg.Original.withUrl);
+									} else {
+										self.backgroundImgWithUrl(backgroundImg.Original.withUrl);
+									}
+								}
+								self.loading(false);
+							},
+							"error": function (result) {
+								self.loading(false);
+								$.smkAlert({
+									text: 'An error has occured',
+									type: 'danger',
+									permanent: true
+								});
+							}
+						});
+					}
+					self.showCarousel(true);
+					self.loading(false);
+				},
+				error: function (xhr, textStatus, errorThrown) {
+					self.loading(false);
+					$.smkAlert({
+						text: 'An error has occured',
+						type: 'danger',
+						permanent: true
+					});
+				}
+			});
+		};
+		self.loadExhibition();
 
-        var $container = $(".grid");
-        self.route = params.route;
-        var counter = 1;
-        self.exhName = ko.observable('');
-        self.access = ko.observable("READ");
-        self.id = ko.observable(params.id);
-        self.owner = ko.observable('');
-        self.ownerId = ko.observable(-1);
-        self.itemCount = ko.observable(0);
-        self.exhItems = ko.observableArray();
-        self.desc = ko.observable('');
-        self.loading = ko.observable(false);
-        self.showCarousel = ko.observable(false);
+		self.loadNext = function () {
+			self.moreItems();
+		};
 
-        
-        self.initCarousel=function(){
-        	 WITHApp.initCarousel();
-             WITHApp.initExpandExhibitionText();
-             WITHApp.initImageZoom();
-        }
-        
-        self.revealItems = function (data) {
-            for (var i in data) {
-                console.log(data);
-                var result = data[i];
-                var record = new Record({
-                    id: result.dbId,
-                    thumb: result.thumbnailUrl,
-                    title: result.title,
-                    view_url: result.sourceUrl,
-                    creator: result.creator,
-                    provider: result.provider,
-                    source: result.source,
-                    rights: result.rights,
-                    externalId: result.externalId
-                });
-                record.annotation='';
-                if (result.hasOwnProperty('exhibitionRecord')) {
-                    record.annotation=result.exhibitionRecord.annotation;
-                    record.videoUrl=result.exhibitionRecord.videoUrl;
-                }
-                var styleId = self.exhItems().length % 5 || 0;
-                var styleIdMapping = {
-                    0: 1,
-                    1: 1,
-                    2: 2,
-                    3: 2,
-                    4: 3
-                };
-                styleId = styleIdMapping[styleId];
-                record.css =  'item style' + styleId;//0, 1, 2, 3, 4 -> 2 x style1, 2 x style2 , 1 x style3
-                self.exhItems().push(record);
-            }
-            self.exhItems.valueHasMutated();
-            setTimeout(function(){  self.initCarousel(); }, 1000);
-           
-        };
+		self.moreItems = function () {
+			if (self.loading === true) {
+				setTimeout(self.moreItems(), 300);
+			}
+			if (self.loading() === false) {
+				self.loading(true);
+				var offset = self.exhItems().length;
+				$.ajax({
+					"url": "/collection/" + self.id() + "/list?count=10&start=" + offset,
+					"method": "get",
+					"contentType": "application/json",
+					"success": function (data) {
+						self.revealItems(data.records);
+						self.loading(false);
+					},
+					"error": function (result) {
+						self.loading(false);
+					}
+				});
+			}
+		};
+	}
 
-        self.loadExhibition = function (id) {
-            self.loading(true);
-            $.ajax({
-                "url": "/collection/" + self.id(),
-                "method": "get",
-                "contentType": "application/json",
-                "success": function (data) {
-                	/*if user not logged in and not public redirect*/
-                	if(data.isPublic==false){
-                		
-                		if(isLogged()==false){
-                		
-                			window.location='#login';
-                			return;
-                		  }
-                		
-                		
-                	}
-                    self.exhName(data.title);
-                    self.desc(data.description);
-                    self.owner(data.owner);
-                    self.ownerId(data.ownerId);
-                    self.itemCount(data.itemCount);
-                    self.access(data.access);
-                    self.revealItems(data.firstEntries);
-                    self.showCarousel(true);
-                    self.loading(false);
-                },
-                error: function (xhr, textStatus, errorThrown) {
-                    self.loading(false);
-                    $.smkAlert({text:'An error has occured', type:'danger', permanent: true});
-                }
-            });
-        };
-        self.loadExhibition();
-
-        self.loadNext = function () {
-            self.moreItems();
-        };
-
-        self.moreItems = function () {
-            if (self.loading === true) {
-                setTimeout(self.moreItems(), 300);
-            }
-            if (self.loading() === false) {
-                self.loading(true);
-                var offset = self.exhItems().length;
-                $.ajax({
-                    "url": "/collection/" + self.id() + "/list?count=40&start=" + offset,
-                    "method": "get",
-                    "contentType": "application/json",
-                    "success": function (data) {
-                        console.log(data.itemCount);
-                        self.revealItems(data.records);
-                        self.loading(false);
-                    },
-                    "error": function (result) {
-                        self.loading(false);
-                    }
-                });
-            }
-        };
-    }
-
-    return {
-        viewModel: EViewModel,
-        template: template
-    };
+	return {
+		viewModel: EViewModel,
+		template: template
+	};
 });

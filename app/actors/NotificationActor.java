@@ -16,6 +16,8 @@
 
 package actors;
 
+import notifications.Notification;
+
 import org.bson.types.ObjectId;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -24,16 +26,15 @@ import akka.actor.ActorRef;
 import akka.actor.Props;
 import akka.actor.UntypedActor;
 import db.DB;
-import model.Notification;
-import model.User;
-import model.UserGroup;
+import model.usersAndGroups.User;
+import model.usersAndGroups.UserGroup;
 import play.Logger;
 import play.Logger.ALogger;
 import play.libs.Json;
 import utils.NotificationCenter;
 
 /**
- * 
+ *
  * @author Arne Stabenau The actor that talks with the web app.
  */
 public class NotificationActor extends UntypedActor {

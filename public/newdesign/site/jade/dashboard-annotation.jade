@@ -1,0 +1,386 @@
+//- index.jade
+- var title = "WITH - My Annotation"
+- var page  = "annotation"
+
+doctype html
+html
+
+	// head
+	include ./includes/head.inc.jade
+
+	// body
+	body
+
+		// head
+		include ./includes/header.inc.jade
+
+		// main
+		div( role="main" )
+			.container-fluid
+
+				// wrapper
+				.wrapper
+
+					// sidebar
+					aside
+					
+						// nav
+						include ./includes/asidenav.inc.jade
+					
+					// main
+					main
+							
+						// collection section
+						section.collection
+
+							section.header
+
+
+
+								// new collection
+								a(href="#").new
+									span.plus
+									span.text Annotate new collection
+
+								// picker wrap
+									.picker-wrap
+										a#picker(href="#", data-toggle='dropdown').picker
+											span.text My collection
+											span.arrow
+
+										ul.dropdown-menu(aria-labelledby='picker')
+											li 
+												a(href="#") My collection
+											li 
+												a(href="#") Collection shared with me
+
+								
+								
+
+								
+
+								
+
+							// message
+							section.message
+								img(src='img/ui/ic-inbox.png').hero
+								.message-body
+									.header Welcome to My Annotation
+									.description
+										| This is <b> My Annotation </b>, all of your annotation will be collected in here.
+									a(href="#")
+										span.cross
+										span.text Hide welcome message
+
+
+							// achievements
+							section.achievement
+
+
+
+							// collection main
+							section.collection-list
+
+								// collection main header
+								.list-head
+
+									
+
+									// sort
+									.sort
+										span Sort by
+										a#sorting(href="#", data-toggle='dropdown')
+											span.text Title
+											span.arrow
+
+										// dropdown
+										ul.dropdown-menu(aria-labelledby='sorting')
+											li 
+												a(href="#") Title
+											li 
+												a(href="#") Date
+
+									.list-control
+										a(href="#" data-toggle="tooltip" data-placement="top" title="List view").fa.fa-bars
+										a(href="#" data-toggle="tooltip" data-placement="top" title="Grid view").fa.fa-th.active
+
+									// search
+									// item count
+									span.item-count-info You have annotated 7 collections
+
+								// loader
+								.loader.hidden
+									img( src="img/ui/ic-loader.gif" )
+
+								// listing
+								ul.list-body.grids
+									li.private
+										.thumbnails
+											.category private
+											.wrap
+												img(src="img/content/collection-hero-white.png")
+
+											.wrap.small
+												img(src="img/content/collection-hero-white.png")
+											.wrap.small
+										.meta
+											a(href="dashboard-collection-detail.html").header Collection title orem ipsum dolor sit amet
+											.description
+												| Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip.
+											.other-info
+												.count 20 Items
+												.date December 15, 2015
+												.user By Annac
+											
+
+									li
+										.thumbnails
+											.category public
+											.wrap
+												img(src="img/content/collection-hero.png")
+											.wrap.small
+												img(src="img/content/collection-hero.png")
+											.wrap.small
+												img(src="img/content/collection-hero.png")
+										.meta
+											a(href="dashboard-collection-detail.html").header Collection title orem ipsum dolor sit amet
+											.description
+												| Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip.
+											.other-info
+												.count 20 Items
+												.date December 15, 2015
+												.user By Annac
+											
+
+									li
+										.thumbnails
+											.category public
+											.wrap
+												img(src="img/content/collection-hero.png")
+											.wrap.small
+												img(src="img/content/collection-hero.png")
+											.wrap.small
+												img(src="img/content/collection-hero.png")
+										.meta
+											a(href="dashboard-collection-detail.html").header Collection title orem ipsum dolor sit amet
+											.description
+												| Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip.
+											.other-info
+												.count 20 Items
+												.date December 15, 2015
+												.user By Annac
+											
+
+									li
+										.thumbnails
+											.category public
+											.wrap
+												img(src="img/content/collection-hero.png")
+											.wrap.small
+												img(src="img/content/collection-hero.png")
+											.wrap.small
+												img(src="img/content/collection-hero.png")
+										.meta
+											a(href="dashboard-collection-detail.html").header Collection title orem ipsum dolor sit amet
+											.description
+												| Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip.
+											.other-info
+												.count 20 Items
+												.date December 15, 2015
+												.user By Annac
+											
+
+									li
+										.thumbnails
+											.category public
+											.wrap
+												img(src="img/content/collection-hero.png")
+											.wrap.small
+												img(src="img/content/collection-hero.png")
+											.wrap.small
+												img(src="img/content/collection-hero.png")
+										.meta
+											a(href="dashboard-collection-detail.html").header Collection title orem ipsum dolor sit amet
+											.description
+												| Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip.
+											.other-info
+												.count 20 Items
+												.date December 15, 2015
+												.user By Annac
+											
+
+									li
+										.thumbnails
+											.category public
+											.wrap
+												img(src="img/content/collection-hero.png")
+											.wrap.small
+												img(src="img/content/collection-hero.png")
+											.wrap.small
+												img(src="img/content/collection-hero.png")
+										.meta
+											a(href="dashboard-collection-detail.html").header Collection title orem ipsum dolor sit amet
+											.description
+												| Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip.
+											.other-info
+												.count 20 Items
+												.date December 15, 2015
+												.user By Annac
+											
+									li
+										.thumbnails
+											.category public
+											.wrap
+												img(src="img/content/collection-hero.png")
+											.wrap.small
+												img(src="img/content/collection-hero.png")
+											.wrap.small
+												img(src="img/content/collection-hero.png")
+										.meta
+											a(href="dashboard-collection-detail.html").header Collection title orem ipsum dolor sit amet
+											.description
+												| Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip.
+											.other-info
+												.count 20 Items
+												.date December 15, 2015
+												.user By Annac
+											
+
+								a(href="#").loadmore 
+									| load more
+									.left
+									.right
+									.top
+									.bot
+							
+							// collection edit
+							section.action.edit
+								.action-header
+									.title Edit Collection
+									.toggle
+										input(type='checkbox')#toggle1
+										label(for='toggle1')
+										span.private private
+										span.public public
+
+								.action-body
+									input(type="text" placeholder='Name your collection')
+									textarea(placeholder='Describe your collection')
+
+								.button-group
+									a(href="#").btn-green-o.cancel Cancel
+									a(href="#").btn-green Save collection
+
+							// collection new
+							section.action.new
+								.action-header
+									.title New Collection
+									.toggle
+										input(type='checkbox')#toggle2
+										label(for='toggle2')
+										span.private private
+										span.public public
+
+								.action-body
+									input(type="text", placeholder='Name your collection')
+									a(href="#").add
+										span.plus
+										span.text Add description
+
+								.button-group
+									a(href="#").btn-green-o.cancel Cancel
+									a(href="#").btn-green Create collection
+
+							// collection give access
+							section.action.access
+								.action-header
+									.title Give access to collection
+
+								.action-body
+									.group
+										.title Users access
+										input(type="text" placeholder="Start typing username")
+										ul.access-list
+											li
+												.thumbnails
+													img(src="img/content/img-profile.jpg")
+												a(href="#" data-toggle="tooltip" data-placement="top" title="List view").trash
+													i.fa.fa-trash
+												.toggle
+													input(type='checkbox')#u1
+													label(for='u1')
+													span.private view
+													span.public co-edit
+											li
+												.thumbnails
+													img(src="img/content/img-profile.jpg")
+												a(href="#" data-toggle="tooltip" data-placement="top" title="List view").trash
+													i.fa.fa-trash
+												.toggle
+													input(type='checkbox')#u2
+													label(for='u2')
+													span.private view
+													span.public co-edit
+											li
+												.thumbnails
+													img(src="img/content/img-profile.jpg")
+												a(href="#" data-toggle="tooltip" data-placement="top" title="List view").trash
+													i.fa.fa-trash
+												.toggle
+													input(type='checkbox')#u3
+													label(for='u3')
+													span.private view
+													span.public co-edit
+											li
+												.thumbnails
+													img(src="img/content/img-profile.jpg")
+												a(href="#" data-toggle="tooltip" data-placement="top" title="List view").trash
+													i.fa.fa-trash
+												.toggle
+													input(type='checkbox')#u4
+													label(for='u4')
+													span.private view
+													span.public co-edit
+
+									.group
+										.title Groups access
+										input(type="text" placeholder="Start typing group name")
+										ul.access-list
+											li.blue
+												span.text DK
+												a(href="#" data-toggle="tooltip" data-placement="top" title="List view").trash
+													i.fa.fa-trash
+												.toggle
+													input(type='checkbox')#g1
+													label(for='g1')
+													span.private view
+													span.public co-edit
+											li.green
+												span.text US
+												a(href="#" data-toggle="tooltip" data-placement="top" title="List view").trash
+													i.fa.fa-trash
+												.toggle
+													input(type='checkbox')#g2
+													label(for='g2')
+													span.private view
+													span.public co-edit
+											li.orange
+												span.text MN
+												a(href="#" data-toggle="tooltip" data-placement="top" title="List view").trash
+													i.fa.fa-trash
+												.toggle
+													input(type='checkbox')#g3
+													label(for='g3')
+													span.private view
+													span.public co-edit
+
+
+
+								.button-group
+									a(href="#").btn-green.cancel Close
+								
+
+
+
+	// script
+	include ./includes/script.inc.jade

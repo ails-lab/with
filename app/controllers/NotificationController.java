@@ -21,11 +21,14 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
-import model.Collection;
-import model.Notification;
-import model.Notification.Activity;
-import model.User;
-import model.UserGroup;
+import model.resources.WithResourceType;
+import model.usersAndGroups.User;
+import model.usersAndGroups.UserGroup;
+import notifications.Notification;
+import notifications.Notification.Activity;
+import notifications.GroupNotification;
+import notifications.ResourceNotification;
+import notifications.ResourceNotification.ShareInfo;
 
 import org.bson.types.ObjectId;
 
@@ -35,28 +38,81 @@ import play.libs.Json;
 import play.mvc.Controller;
 import play.mvc.Result;
 import play.mvc.WebSocket;
-import utils.AccessManager;
+import utils.MetricsUtils;
 import utils.NotificationCenter;
 import actors.NotificationActor;
 
+import com.codahale.metrics.Timer;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import db.DB;
-import elastic.ElasticUpdater;
 
-public class NotificationController extends Controller {
+public class NotificationController extends WithController {
 	public static final ALogger log = Logger.of(NotificationController.class);
 
 	public static WebSocket<JsonNode> socket() {
 		return WebSocket.withActor(NotificationActor::props);
 	}
 
+	public static Result groupNotification(Notification notification, User user, boolean accept, ObjectId sender, ObjectId receiver, Activity activity) {
+		ObjectNode result = Json.newObject();
+		GroupNotification groupNotification = null;
+		if (notification instanceof GroupNotification) {
+			groupNotification = (GroupNotification) notification;
+			ObjectId groupId = groupNotification.getGroup();
+			UserGroup group = DB.getUserGroupDAO().get(groupId);
+			Set<ObjectId> ancestorGroups;
+			Date now = new Date();
+			if (!accept) {
+				// The user is added to the group
+				/*ancestorGroups = group.getAncestorGroups();
+				ancestorGroups.add(group.getDbId());
+				group.getUsers().add(group.getDbId());
+				user.addUserGroups(ancestorGroups);
+				DB.getUserDAO().makePermanent(user);
+				DB.getUserGroupDAO().makePermanent(group);*/
+				ancestorGroups = group.getAncestorGroups();
+				ancestorGroups.add(group.getDbId());
+				group.removeUser(user.getDbId());
+				user.removeUserGroups(ancestorGroups);
+				DB.getUserDAO().makePermanent(user);
+				DB.getUserGroupDAO().makePermanent(group);
+			}
+			notification.setPendingResponse(false);
+			notification.setReadAt(new Timestamp(now.getTime()));
+			DB.getNotificationDAO().makePermanent(notification);
+			GroupNotification newNotification = new GroupNotification();
+			if (accept) {
+				newNotification.setActivity(Activity.GROUP_REQUEST_ACCEPT);
+			} else {
+				newNotification.setActivity(Activity.GROUP_REQUEST_DENIED);
+			}
+			newNotification.setGroup(group.getDbId());
+			newNotification.setSender(sender);
+			newNotification.setOpenedAt(new Timestamp(now.getTime()));
+			// Notification for the administrators of the group
+			newNotification.setReceiver(receiver);
+			newNotification.setDbId(null);
+			DB.getNotificationDAO().makePermanent(newNotification);
+			// Send notification through socket (to user and group
+			// administrators)
+			NotificationCenter.sendNotification(newNotification);
+			result.put("message",
+					"Succesfully reponded to user request");
+			return ok(result);
+		}
+		else {
+			result.put("error", "User is not authorized for this action");
+			return internalServerError(result);
+		}
+	}
+
 	public static Result respondToRequest(String notificationId, boolean accept) {
 		ObjectNode result = Json.newObject();
 		try {
-			String currentUserId = session().get("user");
+			String currentUserId = loggedInUser();
 			if (currentUserId == null) {
 				result.put("error", "User is not authorized for this action");
 				return forbidden(result);
@@ -75,126 +131,56 @@ public class NotificationController extends Controller {
 				result.put("error", "User is not authorized for this action");
 				return forbidden(result);
 			}
-			ObjectId groupId, userId;
-			UserGroup group;
-			User user;
-			Set<ObjectId> ancestorGroups;
 			Date now = new Date();
-			Notification newNotification;
+			//Notification newNotification;
+			GroupNotification groupNotification;
+			ResourceNotification resourceNotification;
+			Activity activity;
 			switch (notification.getActivity()) {
 			case GROUP_INVITE:
-				groupId = notification.getGroup();
-				group = DB.getUserGroupDAO().get(groupId);
-				user = currentUser;
-				if (accept) {
-					// The user is added to the group
-					ancestorGroups = group.getAncestorGroups();
-					ancestorGroups.add(group.getDbId());
-					group.getUsers().add(user.getDbId());
-					user.addUserGroups(ancestorGroups);
-					DB.getUserDAO().makePermanent(user);
-					DB.getUserGroupDAO().makePermanent(group);
-				}
-				// Mark the invitation from the group as closed with the
-				// appropriate timestamp
-				notification.setPendingResponse(false);
-				notification.setReadAt(new Timestamp(now.getTime()));
-				DB.getNotificationDAO().makePermanent(notification);
-				// Notification for the user join to the group
-				// Notification for the administrators of the group
-				newNotification = new Notification();
-				if (accept) {
-					newNotification.setActivity(Activity.GROUP_INVITE_ACCEPT);
-				} else {
-					newNotification.setActivity(Activity.GROUP_INVITE_DECLINED);
-				}
-				newNotification.setGroup(group.getDbId());
-				newNotification.setReceiver(group.getDbId());
-				newNotification.setSender(user.getDbId());
-				newNotification.setOpenedAt(new Timestamp(now.getTime()));
-				DB.getNotificationDAO().makePermanent(newNotification);
-				NotificationCenter.sendNotification(newNotification);
-				result.put("message",
-						"User succesfully responded to invitation");
-				return ok(result);
+				activity = accept ? Activity.GROUP_INVITE_ACCEPT: Activity.GROUP_INVITE_DECLINED;
+				ObjectId groupId = ((GroupNotification) notification).getGroup();
+				return groupNotification(notification, currentUser, accept, currentUser.getDbId(), groupId,  activity);
 			case GROUP_REQUEST:
-				groupId = notification.getGroup();
-				group = DB.getUserGroupDAO().get(groupId);
-				userId = notification.getSender();
-				user = DB.getUserDAO().get(userId);
-				if (accept) {
-					// The user is added to the group
-					ancestorGroups = group.getAncestorGroups();
-					ancestorGroups.add(group.getDbId());
-					group.getUsers().add(user.getDbId());
-					user.addUserGroups(ancestorGroups);
-					DB.getUserDAO().makePermanent(user);
-					DB.getUserGroupDAO().makePermanent(group);
-				}
-				// Mark the request from the user as closed with the
-				// appropriate timestamp
-				notification.setPendingResponse(false);
-				notification.setReadAt(new Timestamp(now.getTime()));
-				DB.getNotificationDAO().makePermanent(notification);
-				// Store new notification at the database for the user
-				// acceptance
-				// Notification for the user
-				newNotification = new Notification();
-				if (accept) {
-					newNotification.setActivity(Activity.GROUP_REQUEST_ACCEPT);
-				} else {
-					newNotification.setActivity(Activity.GROUP_REQUEST_DENIED);
-				}
-				newNotification.setGroup(group.getDbId());
-				newNotification.setSender(currentUser.getDbId());
-				newNotification.setOpenedAt(new Timestamp(now.getTime()));
-				// Notification for the administrators of the group
-				newNotification.setReceiver(user.getDbId());
-				newNotification.setDbId(null);
-				DB.getNotificationDAO().makePermanent(newNotification);
-				// Send notification through socket (to user and group
-				// administrators)
-				NotificationCenter.sendNotification(newNotification);
-				result.put("message",
-						"Group succesfully reponded to user request");
-				return ok(result);
+				activity = accept ? Activity.GROUP_REQUEST_ACCEPT: Activity.GROUP_REQUEST_DENIED;
+				ObjectId userId = notification.getSender();
+				User user = DB.getUserDAO().get(userId);
+				return groupNotification(notification, user, accept, currentUser.getDbId(), user.getDbId(), activity);
 			case COLLECTION_SHARE:
-				Collection collection = DB.getCollectionDAO().get(
-						notification.getCollection());
-				if (accept) {
-					collection.getRights().put(notification.getReceiver(),
-							notification.getAccess());
-					if (DB.getCollectionDAO().makePermanent(collection) == null) {
-						result.put("error",
-								"Cannot store collection to database!");
-						return internalServerError(result);
+			case EXHIBITION_SHARE: //notification has been sent only in case of upgrade
+				if (notification instanceof ResourceNotification) {
+					resourceNotification = (ResourceNotification) notification;
+					ShareInfo shareInfo = resourceNotification.getShareInfo();
+					Activity shared = (notification.getActivity() == Activity.COLLECTION_SHARE) ? Activity.COLLECTION_SHARED : Activity.EXHIBITION_SHARED;
+					Activity rejected = (notification.getActivity() == Activity.COLLECTION_SHARE) ? Activity.COLLECTION_REJECTED : Activity.EXHIBITION_REJECTED;
+					activity = accept ? shared : rejected;
+					resourceNotification.setPendingResponse(false);
+					resourceNotification.setReadAt(new Timestamp(now.getTime()));
+					DB.getNotificationDAO().makePermanent(notification);
+					if (!accept) {
+						//TODO: downgrade to previous access
+						ObjectId resourceId = resourceNotification.getResource();
+						RightsController.changeAccess(resourceId, shareInfo.getUserOrGroup(), shareInfo.getPreviousAccess(), shareInfo.getOwnerEffectiveIds(),
+								true, false);
+						ResourceNotification newNotification = new ResourceNotification();
+						newNotification.setActivity(rejected);
+						newNotification.setResource(resourceNotification.getResource());
+						newNotification.setShareInfo(shareInfo);
+						newNotification.setSender(notification.getReceiver());
+						newNotification.setReceiver(notification.getSender());
+						newNotification.setOpenedAt(new Timestamp(now.getTime()));
+						DB.getNotificationDAO().makePermanent(newNotification);
+						NotificationCenter.sendNotification(newNotification);
 					}
-					// update collection rights in index
-					ElasticUpdater updater = new ElasticUpdater(collection);
-					updater.updateCollectionRights();
+					result.put("message",
+							"User succesfully responded to collection share request");
+					return ok(result);
 				}
-				notification.setPendingResponse(false);
-				notification.setReadAt(new Timestamp(now.getTime()));
-				DB.getNotificationDAO().makePermanent(notification);
-				newNotification = new Notification();
-				newNotification.setCollection(notification.getCollection());
-				if (accept) {
-					newNotification.setActivity(Activity.COLLECTION_SHARED);
-				} else {
-					newNotification.setActivity(Activity.COLLECTION_REJECTED);
+				else  {
+					result.put("error", "User is not authorized for this action");
+					return internalServerError(result);
 				}
-				if (notification.getGroup() != null) {
-					newNotification.setGroup(notification.getGroup());
-				}
-				newNotification.setAccess(notification.getAccess());
-				newNotification.setSender(notification.getReceiver());
-				newNotification.setReceiver(notification.getSender());
-				newNotification.setOpenedAt(new Timestamp(now.getTime()));
-				DB.getNotificationDAO().makePermanent(newNotification);
-				NotificationCenter.sendNotification(newNotification);
-				result.put("message",
-						"User succesfully responded to collection share request");
-				return ok(result);
+
 			default:
 				result.put("error", "Notification does not require acceptance");
 				return badRequest(result);
@@ -207,10 +193,11 @@ public class NotificationController extends Controller {
 	}
 
 	public static Result getUserNotifications() {
+		final Timer timer = MetricsUtils.registry.timer(
+				MetricsUtils.registry.name(Notification.class, "getUserNotification", "time"));
+		final Timer.Context timeContext = timer.time();
 		try {
-			ObjectId userId = new ObjectId(
-					AccessManager.effectiveUserId(session().get(
-							"effectiveUserIds")));
+			ObjectId userId = new ObjectId(loggedInUser());
 			Set<ObjectId> userOrGroupIds = new HashSet<ObjectId>();
 			Set<ObjectId> groups = DB.getUserDAO().get(userId)
 					.getAdminInGroups();
@@ -228,12 +215,16 @@ public class NotificationController extends Controller {
 			} else {
 				notifications = unreadNotifications;
 			}
+
 			return ok(Json.toJson(notifications));
+
 		} catch (Exception e) {
 			ObjectNode result = Json.newObject();
 			result.put("error", e.getMessage());
 			return internalServerError(result);
 
+		} finally {
+			timeContext.stop();
 		}
 	}
 
@@ -246,8 +237,8 @@ public class NotificationController extends Controller {
 			try {
 				notification = DB.getNotificationDAO().get(
 						new ObjectId(id.asText()));
-				if (notification.getReadAt() == null
-						&& notification.isPendingResponse() == false) {
+				if ((notification.getReadAt() == null)
+						&& (notification.isPendingResponse() == false)) {
 					Date now = new Date();
 					notification.setReadAt(new Timestamp(now.getTime()));
 					DB.getNotificationDAO().makePermanent(notification);
@@ -266,8 +257,7 @@ public class NotificationController extends Controller {
 	}
 
 	public static Result sendMessage(String receiverId) {
-		ObjectId sender = new ObjectId(AccessManager.effectiveUserId(session()
-				.get("effectiveUserIds")));
+		ObjectId sender = new ObjectId(loggedInUser());
 		JsonNode json = request().body().asJson();
 		if (!json.has("message")) {
 			ObjectNode error = Json.newObject();

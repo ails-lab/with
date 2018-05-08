@@ -1,0 +1,77 @@
+<item-view params="route: route"></item-view>
+<div id="main-content">
+      <!-- featured-->
+      <section class="annotate">
+        <!-- bottom-->
+        <div class="bottom">
+          <!-- container-->
+          <div class="container">
+            <!-- goal-->
+            <div class="goal">
+              <!-- icon-->
+              <div class="icon">
+              	<!-- cannot make data binding for data-percent work, so not necessary here -->
+                <div class="chart"> 
+                  <div class="amount">&nbsp;&nbsp;&nbsp;<a style="color: inherit;text-decoration: none" data-bind="text: annotationPercentage"></a><span>%</span></div>
+                </div>
+              </div>
+              <!-- info-->
+              <div class="info">
+                <h2>Help us reach our goal</h2>
+                <p>The objective is to have musical instruments identified in at least 2500 recordings from our archives by the end of 
+                	the crowdsourcing campaign (30th of June). The tags are all controlled and available in many languages.</p>
+                <div class="currentannotation"> <!-- ko text: totalAnnotations() --><!-- /ko --> / <!-- ko text: goal --><!-- /ko --> Annotations</div>
+                <!-- action button-->
+                <!-- ko if: isLogged -->
+                	<a href="#" data-bind="click: startAnnotate" class="annotatebtn">Start tagging</a>
+                <!-- /ko -->
+                <!-- ko else -->
+					<a a href="#" data-bind="visible: isLogged()==false, event :{ click: function(data,event){openLogin(event);}}" class="annotatebtn" target="_blank">Start tagging</a>
+                <!-- /ko -->
+              </div>
+            </div>
+            <!-- badge-->
+            <div class="badges">
+              <!-- icon-->
+              <div class="icon"><img src="img/ic-badges.png"></div>
+              <!-- info-->
+              <div class="info">
+                <h2>Get your badge</h2>
+                <p>10 tags grant you a bronze badge, 
+                	25 a silver, and with 50 tags you earn a golden badge. Special gifts will be provided to golden winners!</p>
+                <!-- action button-->
+                 <!-- ko if: isLogged -->
+                	<a href="../../assets/index.html#myannotations" class="annotatebtn">View your tags</a>
+                <!-- /ko -->
+                <!-- ko else -->
+					<a a href="#" data-bind="visible: isLogged()==false, event :{click: function(data,event){openLogin(event);}}" class="annotatebtn" target="_blank">View your tags</a>
+                <!-- /ko -->
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+      <div></div>
+      <section class="listing">
+        <div class="container">
+          <!-- grid-->
+          <div class="grid" id="homemasonry">
+              <div class="sizer"></div>
+          </div>
+          
+          <div id="more" data-bind="visible: loading, scroll: homecollections(), scrollOptions: { loadFunc: loadNext, offset: 0 }"> <i class="fa fa-spinner fa-pulse"></i></div>
+          </div>
+        
+      </section>
+ 	</div>  
+ 
+
+
+
+
+			
+					
+		 						
+		 					
+		 
+					  

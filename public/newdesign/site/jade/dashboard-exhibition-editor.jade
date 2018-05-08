@@ -1,0 +1,390 @@
+//- index.jade
+- var title = "WITH - My Exhibition"
+- var page  = "exhibition"
+
+doctype html
+html
+
+	// head
+	include ./includes/head.inc.jade
+
+	// body
+	body
+
+		// head
+		include ./includes/header.inc.jade
+
+		// main
+		div( role="main" )
+			.container-fluid
+
+				// wrapper
+				.wrapper
+
+					// sidebar
+					aside
+					
+						// nav
+						include ./includes/asidenav.inc.jade
+					
+					// main
+					main
+
+						// collection section
+						section.exhibition
+
+							// toggle
+							.toggle.exhibitiontoggle
+								input(type='checkbox')#toggle2
+								label(for='toggle2')
+								span.private private
+								span.public public
+
+							// head
+							.list-head
+
+								// back
+								a.back( href="dashboard-collection.html" data-toggle="tooltip" data-placement="top" title="Back to collection list") 
+									i.fa.fa-angle-left
+
+
+
+								// control
+								ul.organization-list-control
+									li
+										a(href="exhibition-view.html" data-toggle="tooltip" data-placement="top" title="View Organization page").fa.fa-eye
+									li
+										a(href="#" data-toggle="tooltip" data-placement="top" title="Add credits section").fa.fa-copyright.creditbutton
+									li
+										a(href="#" data-toggle="tooltip" data-placement="top" title="Upload background image").fa.fa-image.upload.exhibition
+									
+									li
+										a(href="#" data-toggle="tooltip" data-placement="top" title="Delete Organization").fa.fa-trash
+
+							// editor box
+							.editorbox
+								.wrap
+
+									// scroll
+									.scroll
+										
+										// box
+											.box
+												input.editortext( value="Never in all their history" ) 
+												textarea.editortextarea
+													| Never in all their history have men been able truly to conceive of the world as one: a single sphere, a globe, having the qualities of a globe, a round earth in which all the directions eventually meet, in which there is no center.
+
+										// box
+										.box
+											.boxinputs
+												input.editortext( value="Never in all their history" ) 
+												textarea.editortextarea
+													| Never in all their history have men been able truly to conceive of the world as one: a single sphere, a globe, having the qualities of a globe, a round earth in which all the directions eventually meet, in which there is no center.
+												
+
+											
+
+										// add
+										.add( data-toggle="tooltip" data-placement="top" title="Drag your media here" )
+											span
+												a( href="#"  )
+													img( src="img/ui/ic-add.png" )
+
+										// box
+										.box.fill
+											.boxaction
+												ul
+													li
+														a.editbox( href="#" data-toggle="tooltip" data-placement="top" title="Edit section" ) 
+															i.fa.fa-pencil-square-o
+													li
+														a.addmediabutton( href="#" data-toggle="tooltip" data-placement="top" title="Add media" ) 
+															i.fa.fa-play-circle
+													li
+														a( href="#" data-toggle="tooltip" data-placement="top" title="Delete section" ) 
+															i.fa.fa-trash-o
+
+											.left
+												.imgwrap
+													img( src="img/content/img-editor.jpg" )
+												.imginfo
+													span.mediatitle Across the sea of space, the stars are 
+													br
+													span.mediasource Digitalnz.org
+
+											.right
+												.boxtitle
+													p
+														| As I stand out here in the wonders of the unknown at Hadley, I sort of realize there’s a fundamental truth to our nature, Man must explore and this is exploration at its greatest.
+													p 
+
+														| The path of a cosmonaut is not an easy, triumphant march to glory. You have to get to know the meaning not just of joy but also of grief, before being allowed in the spacecraft cabin.
+
+											
+													
+
+										// add
+										.add( data-toggle="tooltip" data-placement="top" title="Drag your media here" )
+											span
+												a( href="#"  )
+													img( src="img/ui/ic-add.png" )
+
+										// box
+										.box.fill.videoadded
+											.boxaction
+												ul
+													li
+														a.editbox( href="#" data-toggle="tooltip" data-placement="top" title="Edit section" ) 
+															i.fa.fa-pencil-square-o
+													li
+														a.addmediabutton( href="#" data-toggle="tooltip" data-placement="top" title="Add media" ) 
+															i.fa.fa-play-circle
+													li
+														a( href="#" data-toggle="tooltip" data-placement="top" title="Delete section" ) 
+															i.fa.fa-trash-o
+
+											.left
+												.imgwrap
+													img( src="img/content/img-editor.jpg" )
+												.imginfo
+													span.mediatitle Across the sea of space, the stars are 
+													br
+													span.mediasource Digitalnz.org
+
+											.right
+												.boxtitle
+													p
+														| As I stand out here in the wonders of the unknown at Hadley, I sort of realize there’s a fundamental truth to our nature, Man must explore and this is exploration at its greatest.
+													p 
+
+														| The path of a cosmonaut is not an easy, triumphant march to glory. You have to get to know the meaning not just of joy but also of grief, before being allowed in the spacecraft cabin.
+											.video
+												.imgwrap
+													.embed-responsive.embed-responsive-4by3
+														iframe.embed-responsive-item( src="https://www.youtube.com/embed/YykjpeuMNEk" frameborder="0" allowfullscreen)
+													
+												.imginfo
+													span.mediatitle
+														| As I stand out here in the wonders of the unknown at Hadley, I sort of realize there’s a fundamental truth to our nature, Man must explore and this is exploration at its greatest.
+												ul.action
+													li
+														a( href="#" data-toggle="tooltip" data-placement="top" title="Edit video" )
+															i.fa.fa-pencil
+													li
+														a( href="#" data-toggle="tooltip" data-placement="top" title="Delete video" )
+															i.fa.fa-trash-o
+
+										// add
+										.add( data-toggle="tooltip" data-placement="top" title="Drag your media here" )
+											span
+												a( href="#"  )
+													img( src="img/ui/ic-add.png" )
+
+										// box
+										.box.fill.videoadded
+											.boxaction
+												ul
+													li
+														a.editbox( href="#" data-toggle="tooltip" data-placement="top" title="Edit section" ) 
+															i.fa.fa-pencil-square-o
+													li
+														a.addmediabutton( href="#" data-toggle="tooltip" data-placement="top" title="Add media" ) 
+															i.fa.fa-play-circle
+													li
+														a( href="#" data-toggle="tooltip" data-placement="top" title="Delete section" ) 
+															i.fa.fa-trash-o
+
+											.left
+												.imgwrap
+													img( src="img/content/img-editor.jpg" )
+												.imginfo
+													span.mediatitle Across the sea of space, the stars are 
+													br
+													span.mediasource Digitalnz.org
+
+											.right
+												.boxtitle
+													p
+														| As I stand out here in the wonders of the unknown at Hadley, I sort of realize there’s a fundamental truth to our nature, Man must explore and this is exploration at its greatest.
+													p 
+
+														| The path of a cosmonaut is not an easy, triumphant march to glory. You have to get to know the meaning not just of joy but also of grief, before being allowed in the spacecraft cabin.
+											.video
+												.imgwrap
+													img( src="img/ui/ic-noimage.png" )
+													
+												.imginfo
+													span.mediatitle
+														| As I stand out here in the wonders of the unknown at Hadley, I sort of realize there’s a fundamental truth to our nature, Man must explore and this is exploration at its greatest.
+												ul.action
+													li
+														a( href="#" data-toggle="tooltip" data-placement="top" title="Edit video" )
+															i.fa.fa-pencil
+													li
+														a( href="#" data-toggle="tooltip" data-placement="top" title="Delete video" )
+															i.fa.fa-trash-o
+
+										// add
+										.add( data-toggle="tooltip" data-placement="top" title="Drag your media here" )
+											span
+												a( href="#"  )
+													img( src="img/ui/ic-add.png" )
+
+							// assets
+							.assets
+
+								// actions
+								.actions
+									select.form-control.collectionlist
+										option Collection 1
+										option Collection 2
+									.collectionsearch
+										input( type="text" placeholder="Search" )
+										img.icon( src="img/ui/ic-mag.png" )
+									.notification
+										| Select your notifications and drag items to your editor
+
+								// listing
+								.assetlisting
+									ul
+										li
+											a( href="#" data-toggle="tooltip" data-placement="top" title="Lorem ipsum dolor siy amet" )
+												.hue
+													img( src="img/content/content-1.png" )
+													.color
+										li
+											a( href="#" data-toggle="tooltip" data-placement="top" title="Lorem ipsum dolor siy amet" )
+												.hue
+													img( src="img/content/content-2.png" )
+													.color
+										li
+											a( href="#" data-toggle="tooltip" data-placement="top" title="Lorem ipsum dolor siy amet" )
+												.hue
+													img( src="img/content/content-3.png" )
+													.color
+										li
+											a( href="#" data-toggle="tooltip" data-placement="top" title="Lorem ipsum dolor siy amet" )
+												.hue
+													img( src="img/content/content-4.png" )
+													.color
+										li
+											a( href="#" data-toggle="tooltip" data-placement="top" title="Lorem ipsum dolor siy amet" )
+												.hue
+													img( src="img/content/content-5.png" )
+													.color
+										li
+											a( href="#" data-toggle="tooltip" data-placement="top" title="Lorem ipsum dolor siy amet" )
+												.hue
+													img( src="img/content/content-6.png" )
+													.color
+										li
+											a( href="#" data-toggle="tooltip" data-placement="top" title="Lorem ipsum dolor siy amet" )
+												.hue
+													img( src="img/content/content-1.png" )
+													.color
+										li
+											a( href="#" data-toggle="tooltip" data-placement="top" title="Lorem ipsum dolor siy amet" )
+												.hue
+													img( src="img/content/content-2.png" )
+													.color
+										li
+											a( href="#" data-toggle="tooltip" data-placement="top" title="Lorem ipsum dolor siy amet" )
+												.hue
+													img( src="img/content/content-3.png" )
+													.color
+										li
+											a( href="#" data-toggle="tooltip" data-placement="top" title="Lorem ipsum dolor siy amet" )
+												.hue
+													img( src="img/content/content-4.png" )
+													.color
+										li
+											a( href="#" data-toggle="tooltip" data-placement="top" title="Lorem ipsum dolor siy amet" )
+												.hue
+													img( src="img/content/content-5.png" )
+													.color
+										li
+											a( href="#" data-toggle="tooltip" data-placement="top" title="Lorem ipsum dolor siy amet" )
+												.hue
+													img( src="img/content/content-6.png" )
+													.color
+
+
+
+
+
+
+
+						// collection new
+						section.action.upload
+							.action-header
+								.title Upload background image
+
+							.action-body
+								img(src="img/ui/upload-placeholder.png").upload-img
+								span.progress( style="width:40%;" )
+
+								p.info
+									| Background image will be used as a decorative element behind exhibition, it will be stretched accordingly.
+
+							.button-group
+								a(href="#").btn-green-o.cancel Cancel
+								a(href="#").btn-green Save
+
+
+						// collection new
+						section.action.editsection
+							.action-header
+								.title Edit section
+
+							.action-body
+								textarea( type="text" placeholder="About me")
+									| Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidunt ut laoreet dolore magna aliquam erat volutpat.
+								.sectionside
+									.head Media location
+									.toggle
+										input(type='checkbox')#toggle3
+										label(for='toggle3')
+										span.private left
+										span.public right
+							.button-group
+								a(href="#").btn-green-o.cancel Cancel
+								a(href="#").btn-green Save
+
+						// collection new
+						section.action.creditsection
+							.action-header
+								.title Add credit
+
+							.action-body
+								textarea( type="text" placeholder="About me")
+									| Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidunt ut laoreet dolore magna aliquam erat volutpat.
+							.button-group
+								a(href="#").btn-green-o.cancel Cancel
+								a(href="#").btn-green Save
+
+						// collection give access
+						section.action.addmediasection
+							.action-header
+								.title Add media
+
+							.action-body
+								.group
+									.title Select media type
+									select.form-control
+										option Video
+										option Audio
+								.group
+									.title Media URL
+									input(type="text" value='http://')
+									textarea( type="text" placeholder="Media description")
+
+							.button-group
+								a(href="#").btn-green-o.cancel Cancel
+								a(href="#").btn-green Add media
+									
+
+
+							
+						
+	// script
+	include ./includes/script.inc.jade

@@ -18,27 +18,57 @@ package controllers
 
 import java.io.File
 import play._
-import play.api.Logger
+import play.api.mvc._
 import play.api.mvc.Controller
+import play.api.Logger
 import play.api.mvc.Action
+import _root_.filters.FilterUtils.withAjaxScript
+import scala.concurrent.Future
+import play.api.mvc.Results.Redirect
+import scala.concurrent.ExecutionContext
+import scala.concurrent.ExecutionContext.Implicits.global
+ 
 
-object CustomAssets extends Controller {
+object CustomAssets {
    val log = Logger(this.getClass())
 
-   def getFile( customName:String, path:String ) = {
-      val customDir = new File(  new File( Play.application().path(), "custom" ), customName )
-      val filePath = new File( customDir, path )
-      log.info(customName + " " + path+ " " + filePath.getAbsolutePath())
-      
-      if( path == "headers.js" )  FilterUtils.withAjaxScript
+   def getFile( customName:String, path:String ):Action[AnyContent] = {
+      if( path == "headers.js" )  withAjaxScript
       else {
-    	  if( filePath.canRead())
-    		  Action { Ok.sendFile( filePath, true ) }
-        else
-    		  Assets.at( "/public", path )
-      }
-  }
-   
+        val customPath = "custom/"+customName+"/"+path;
+        val basePath = "custom/base/" + path;
+
+        Action.async { implicit request =>
+            val resultF1 = Assets.at( "/public", customPath )(request)
+            resultF1.flatMap {
+                customRes:Result =>
+                  customRes.header.status match {
+                  case 200|304 => {
+                    log.debug( "Direct custom hit at " + customPath )
+                    Future.successful( customRes )
+                  }
+                  case _ => {
+                     val resultF2 = Assets.at( "/public", basePath )(request)
+                     resultF2.flatMap{ 
+                       baseRes:Result => 
+                         baseRes.header.status match {
+                         case 200|304 => {
+                           log.debug( "Hit at base " + basePath )
+                           Future.successful( baseRes )
+                         }
+                         case _ => {
+                            log.debug( "Fallback to public " + path )
+                           Assets.at( "/public", path )(request)
+                         }
+                       }
+                     }
+                  }
+                }
+            }
+        }
+     }
+   }
+
    def redirect( customName:String ) = Action { 
      Redirect( "/custom/"+customName+"/index.html")
    }

@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html>
+  <!-- head-->
+  <head>
+    <!-- meta-->
+    <title>WITH - Organizations</title>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="description" content="WITH">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#454545">
+    <!-- icons-->
+    <link rel="apple-touch-icon" href="apple-touch-icon.png">
+    <link rel="icon" type="image/png" href="favicon.png">
+    <meta name="msapplication-TileImage" content="tile.png">
+    <meta name="msapplication-TileColor" content="#454545">
+    <!-- stylesheets-->
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="js/vendor/bootstrap/css/bootstrap.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="js/vendor/slick.js/slick/slick.css">
+    <link rel="stylesheet" href="js/vendor/magnific-popup/dist/magnific-popup.css">
+    <!-- script-->
+    <script src="js/vendor/modernizr/modernizr.js"></script>
+  </head>
+  <!-- body-->
+  <body>
+    <!-- head-->
+    <header>
+      <div class="wrap">
+        <div class="container-fluid">
+          <!-- logo--><a href="index.html" class="logo"><img src="img/ui/logo.png"></a>
+          <!-- sign in-->
+          <section class="login-section">
+            <!-- profile picture--><a id="profilebutton" href="#" data-toggle="dropdown" class="profile"><span class="picture"><img src="img/content/img-profile.jpg"><img src="img/ui/ic-profile-frame.png" class="frame"></span><span class="name">Megan Mullaly</span><span class="arrow"></span></a>
+            <!-- dropdown menu-->
+            <ul aria-labelledby="profilebutton" class="dropdown-menu">
+              <li><a href="#" class="showprofile">My profile</a></li>
+              <li><a href="#">Sign out</a></li>
+            </ul>
+          </section>
+          <!-- notification-->
+          <section class="notification">
+            <!-- button--><a id="notificationbutton" href="#" title="Notification" data-toggle="dropdown"><img src="img/ui/ic-notification.png"><span class="counter">12</span></a>
+            <!-- dropdown menu-->
+            <div aria-labelledby="notificationbutton" class="dropdown-menu">
+              <!-- header-->
+              <h3>WITH Notifications</h3>
+              <!-- activity list-->
+              <ul class="list">
+                <li><a href="#"><img src="img/content/img-profile.jpg" class="thumb">
+                    <div class="news">Lorem ipsum dolor sit amet consectetur adipiscing.</div></a></li>
+                <li><a href="#"><img src="img/content/img-profile.jpg" class="thumb">
+                    <div class="news">Lorem ipsum dolor sit amet consectetur adipiscing.</div></a></li>
+              </ul>
+              <!-- view all--><a href="#" class="viewall">View all activities </a>
+            </div>
+          </section>
+          <!-- home-->
+          <section class="home"><a href="dashboard.html" title="Dashboard Home"><img src="img/ui/ic-home.png" alt="Home"></a></section>
+          <!-- explore-->
+          <section class="explore">
+            <!-- input search-->
+            <input type="text" placeholder="Search">
+            <!-- icon--><img src="img/ui/ic-mag.png" class="icon">
+          </section>
+        </div>
+      </div>
+    </header>
+    <!-- main-->
+    <div role="main">
+      <div class="container-fluid">
+        <!-- wrapper-->
+        <div class="wrapper">
+          <!-- sidebar-->
+          <aside>
+            <!-- nav-->
+            <!-- header-->
+            <label class="header">NAVIGATE</label>
+            <!-- nav-->
+            <nav class="app">
+              <ul>
+                <li><a href="dashboard.html"><span class="icon"><i class="fa fa-home"></i></span><span class="text">Dashboard</span></a></li>
+                <li><a href="dashboard-collection.html"><span class="counter">7</span><span class="icon"><i class="fa fa-clone"></i></span><span class="text">My Collection</span></a></li>
+                <li><a href="dashboard-exhibition.html"><span class="counter">10</span><span class="icon"><i class="fa fa-television"></i></span><span class="text">My Exhibition</span></a></li>
+                <li><a href="dashboard-favorite.html"><span class="counter">5</span><span class="icon"><i class="fa fa-heart-o"></i></span><span class="text">My Favorite</span></a></li>
+                <!-- li( class=page === "annotation" ? "active" : "" )
+                a(href='dashboard-annotation.html')
+                 span.icon
+                  i.fa.fa-edit
+                 span.text My Annotation
+                -->
+                <li class="active"><a href="dashboard-organizations.html"><span class="icon"><i class="fa fa-bookmark-o"></i></span><span class="text">Organizations</span></a></li>
+                <li><a href="dashboard-projects.html"><span class="icon"><i class="fa fa-comment-o"></i></span><span class="text">Projects</span></a></li>
+              </ul>
+            </nav>
+            <!-- nav-->
+            <nav class="site">
+              <ul>
+                <li><a href="about.html">About WITH</a></li>
+                <li><a href="faq.html">Frequently Asked Questions</a></li>
+                <li><a href="#">WITH API</a></li>
+                <li><a href="privacy.html">Privacy Policy</a></li>
+                <li><a href="terms.html">Terms of Condition</a></li>
+                <li><a href="feedback.html">Feedback &amp; Contact</a></li>
+              </ul>
+            </nav>
+          </aside>
+          <!-- main-->
+          <main>
+            <!-- project-->
+            <section class="project organization">
+              <!-- header-->
+              <section class="header">
+                <!-- new collection--><a href="#" class="new"><span class="plus"></span><span class="text">New Organization</span></a>
+              </section>
+              <!-- message-->
+              <section class="message"><img src="img/ui/ic-project.png" class="hero">
+                <div class="message-body">
+                  <div class="header">Welcome to Organizations</div>
+                  <div class="description">This is <b> Organizations </b>, a collaborative place where you can work on thins lorem ipsum dolor sit amet.</div><a href="#"><span class="cross"></span><span class="text">Hide welcome message</span></a>
+                </div>
+              </section>
+              <!-- collection main-->
+              <section class="project-list">
+                <!-- collection main header-->
+                <div class="list-head">
+                  <!-- item count--><span class="item-count">7 organizations</span>
+                  <div class="filtertype"><img src="img/ui/ic-mag.png" class="mag">
+                    <input type="text" placeholder="Search organization" class="filtertext">
+                  </div>
+                  <!-- control-->
+                  <div class="list-control"><a href="#" data-toggle="tooltip" data-placement="top" title="API Calls" class="fa fa-rss detail-control single"></a></div>
+                </div>
+                <!-- listing-->
+                <ul class="list-body list">
+                  <li>
+                    <div class="thumbnails">
+                      <div class="wrap"><img src="img/content/collection-hero.png"></div>
+                      <div class="wrap small"><img src="img/content/collection-hero.png"></div>
+                    </div>
+                    <div class="meta"><a href="organizations-space-view.html" title="View organization space" class="header">Collection title orem ipsum dolor sit amet</a>
+                      <div class="description">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip.</div>
+                      <div class="other-info">
+                        <div class="count">20 Items</div>
+                        <div class="date">December 15, 2015</div>
+                        <div class="user">By Annac</div>
+                      </div>
+                      <div class="action-group">
+                        <div class="wrap">
+                          <ul>
+                            <li><a href="#" data-toggle="tooltip" data-placement="top" title="Delete organization" class="fa fa-trash-o"></a></li>
+                            <li><a href="dashboard-organizations-space.html" data-toggle="tooltip" data-placement="top" title="Edit organization space" class="fa fa-pencil"></a></li>
+                            <li><a href="#" data-toggle="tooltip" data-placement="top" title="Manage members" class="fa fa-user members"></a></li>
+                          </ul>
+                        </div>
+                      </div>
+                    </div>
+                  </li>
+                  <li>
+                    <div class="thumbnails">
+                      <div class="wrap"><img src="img/content/collection-hero.png"></div>
+                      <div class="wrap small"><img src="img/content/collection-hero.png"></div>
+                    </div>
+                    <div class="meta"><a href="organizations-space-view.html" title="View organization space" class="header">Collection title orem ipsum dolor sit amet</a>
+                      <div class="description">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip.</div>
+                      <div class="other-info">
+                        <div class="count">20 Items</div>
+                        <div class="date">December 15, 2015</div>
+                        <div class="user">By Annac</div>
+                      </div>
+                      <div class="action-group">
+                        <div class="wrap">
+                          <ul>
+                            <li><a href="#" data-toggle="tooltip" data-placement="top" title="Delete organization" class="fa fa-trash-o"></a></li>
+                            <li><a href="dashboard-organizations-space.html" data-toggle="tooltip" data-placement="top" title="Edit organization space" class="fa fa-pencil"></a></li>
+                            <li><a href="#" data-toggle="tooltip" data-placement="top" title="Manage members" class="fa fa-user members"></a></li>
+                          </ul>
+                        </div>
+                      </div>
+                    </div>
+                  </li>
+                </ul><a href="#" class="loadmore">load more
+                  <div class="left"></div>
+                  <div class="right"></div>
+                  <div class="top"></div>
+                  <div class="bot"></div></a>
+              </section>
+              <!-- collection new-->
+              <section class="action new">
+                <div class="action-header">
+                  <div class="title">New Organization</div>
+                </div>
+                <div class="action-body">
+                  <input type="text" placeholder="Name your project"><a href="#" class="add"><span class="plus"></span><span class="text">Add description</span></a>
+                  <div class="spacing">
+                    <div class="group">
+                      <div class="title">Page URL</div>
+                      <p>www.with.image.ntua.gt/assets/</p>
+                      <input type="text" placeholder="Page URL">
+                    </div>
+                    <div class="group">
+                      <div class="title">Location</div>
+                      <input type="text" placeholder="Address">
+                      <input type="text" placeholder="City" class="half">
+                      <select class="form-control half">
+                        <option>Country</option>
+                        <option>Country 2</option>
+                        <option>Country 3</option>
+                      </select>
+                    </div>
+                    <div class="group">
+                      <div class="title">Website URL</div>
+                      <input type="text" placeholder="URL">
+                    </div>
+                  </div>
+                </div>
+                <div class="button-group"><a href="#" class="btn-green-o cancel">Cancel</a><a href="#" class="btn-green">Create and go to organization space</a></div>
+              </section>
+              <!-- collection give access-->
+              <section class="action access">
+                <div class="action-header">
+                  <div class="title">Manage members</div>
+                </div>
+                <div class="action-body">
+                  <div class="group">
+                    <div class="title">Users access</div>
+                    <input type="text" placeholder="Start typing username">
+                    <ul class="members-list">
+                      <li>
+                        <div class="toggle">
+                          <input type="checkbox" id="u1">
+                          <label for="u1"></label><span class="member">member</span><span class="admin">admin</span>
+                        </div>
+                        <div class="thumbnails"><img src="img/content/img-profile.jpg"><a href="#" class="trash"><i class="fa fa-trash"></i></a></div>
+                        <div class="username">Username 1</div>
+                      </li>
+                      <li>
+                        <div class="toggle">
+                          <input type="checkbox" id="u2">
+                          <label for="u2"></label><span class="member">member</span><span class="admin">admin</span>
+                        </div>
+                        <div class="thumbnails"><img src="img/content/img-profile.jpg"><a href="#" class="trash"><i class="fa fa-trash"></i></a></div>
+                        <div class="username">Username 2 lorem</div>
+                      </li>
+                      <li>
+                        <div class="toggle">
+                          <input type="checkbox" id="u3">
+                          <label for="u3"></label><span class="member">member</span><span class="admin">admin</span>
+                        </div>
+                        <div class="thumbnails"><img src="img/content/img-profile.jpg"><a href="#" class="trash"><i class="fa fa-trash"></i></a></div>
+                        <div class="username">Username 3</div>
+                      </li>
+                      <li>
+                        <div class="toggle">
+                          <input type="checkbox" id="u4">
+                          <label for="u4"></label><span class="member">member</span><span class="admin">admin</span>
+                        </div>
+                        <div class="thumbnails"><img src="img/content/img-profile.jpg"><a href="#" class="trash"><i class="fa fa-trash"></i></a></div>
+                        <div class="username">Username 4</div>
+                      </li>
+                      <li>
+                        <div class="toggle">
+                          <input type="checkbox" id="u5">
+                          <label for="u5"></label><span class="member">member</span><span class="admin">admin</span>
+                        </div>
+                        <div class="thumbnails"><img src="img/content/img-profile.jpg"><a href="#" class="trash"><i class="fa fa-trash"></i></a></div>
+                        <div class="username">Username 3</div>
+                      </li>
+                      <li>
+                        <div class="toggle">
+                          <input type="checkbox" id="u6">
+                          <label for="u6"></label><span class="member">member</span><span class="admin">admin</span>
+                        </div>
+                        <div class="thumbnails"><img src="img/content/img-profile.jpg"><a href="#" class="trash"><i class="fa fa-trash"></i></a></div>
+                        <div class="username">Username 4</div>
+                      </li>
+                    </ul>
+                  </div>
+                  <div class="group">
+                    <div class="title">Groups access</div>
+                    <input type="text" placeholder="Start typing group name">
+                    <ul class="members-list">
+                      <li class="blue"><span class="text">ES<a href="#" class="trash"><i class="fa fa-trash"></i></a></span>
+                        <div class="toggle">
+                          <input type="checkbox" id="g1">
+                          <label for="g1"></label><span class="member">member</span><span class="admin">admin</span>
+                        </div>
+                        <div class="username">Europeana Space</div>
+                      </li>
+                      <li class="green"><span class="text">SA<a href="#" class="trash"><i class="fa fa-trash"></i></a></span>
+                        <div class="toggle">
+                          <input type="checkbox" id="g2">
+                          <label for="g2"></label><span class="member">member</span><span class="admin">admin</span>
+                        </div>
+                        <div class="username">SOCIAL ART</div>
+                      </li>
+                      <li class="orange"><span class="text">UF<a href="#" class="trash"><i class="fa fa-trash"></i></a></span>
+                        <div class="toggle">
+                          <input type="checkbox" id="g3">
+                          <label for="g3"></label><span class="member">member</span><span class="admin">admin</span>
+                        </div>
+                        <div class="username">UNIVERSITY FELLOW</div>
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+                <div class="button-group"><a href="#" class="btn-green cancel">Close</a></div>
+              </section>
+            </section>
+          </main>
+        </div>
+      </div>
+    </div>
+  </body>
+  <!-- script-->
+  <script src="js/vendor/jquery/dist/jquery.min.js"></script>
+  <script src="js/vendor/bootstrap/dist/js/bootstrap.min.js"></script>
+  <script src="js/vendor/masonry/dist/masonry.pkgd.min.js"></script>
+  <script src="js/vendor/slick.js/slick/slick.min.js"></script>
+  <script src="js/vendor/jquery.nicescroll/dist/jquery.nicescroll.min.js"></script>
+  <script src="js/vendor/isotope/isotope.pkgd.min.js"></script>
+  <script src="js/vendor/jquery-sticky/jquery.sticky.js"></script>
+  <script src="js/plugin.js"></script>
+  <script src="js/main.js"></script>
+</html>

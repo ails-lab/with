@@ -1,0 +1,62 @@
+//- aside nav
+
+// header
+label.header NAVIGATE
+
+// nav
+nav.app
+	ul
+		li( class=page === "dashboard" ? "active" : "" )
+			a(href='dashboard.html')
+				span.icon
+					i.fa.fa-home
+				span.text Dashboard
+		li( class=page === "collection" ? "active" : "" )
+			a(href='dashboard-collection.html')
+				span.counter 7
+				span.icon
+					i.fa.fa-clone
+				span.text My Collection
+		li( class=page === "exhibition" ? "active" : "" )
+			a(href='dashboard-exhibition.html')
+				span.counter 10
+				span.icon
+					i.fa.fa-television
+				span.text My Exhibition
+		li( class=page === "favorite" ? "active" : "" )
+			a(href='dashboard-favorite.html')
+				span.counter 5
+				span.icon
+					i.fa.fa-heart-o
+				span.text My Favorite
+		// li( class=page === "annotation" ? "active" : "" )
+				a(href='dashboard-annotation.html')
+					span.icon
+						i.fa.fa-edit
+					span.text My Annotation
+		li( class=page === "organizations" ? "active" : "" )
+			a(href='dashboard-organizations.html')
+				span.icon
+					i.fa.fa-bookmark-o
+				span.text Organizations
+		li( class=page === "projects" ? "active" : "" )
+			a(href='dashboard-projects.html')
+				span.icon
+					i.fa.fa-comment-o
+				span.text Projects
+
+// nav
+nav.site
+	ul
+		li
+			a(href='about.html') About WITH
+		li
+			a(href='faq.html') Frequently Asked Questions
+		li
+			a(href='#') WITH API
+		li
+			a(href='privacy.html') Privacy Policy
+		li
+			a(href='terms.html') Terms of Condition
+		li
+			a(href='feedback.html') Feedback &amp; Contact

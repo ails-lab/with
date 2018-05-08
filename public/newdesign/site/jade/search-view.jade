@@ -1,0 +1,970 @@
+//- index.jade
+- var title = "WITH - Search"
+- var page  = "search"
+
+doctype html
+html
+
+	// head
+	include ./includes/head.inc.jade
+
+	// body
+	body
+
+		// header
+		header
+			.wrap
+				.container
+					a(href="index.html").logo
+						img(src="img/ui/logo.png")
+
+					nav
+						ul
+							li
+								a(href="index.html" title="home") HOME
+							li.active
+								a(href="search-view.html" title="home") EXPLORE
+							li
+								a(href="about.html" title="home") ABOUT
+							li.mobile
+								a( href="login.html" class="login") SIGN IN
+								a( href="register.html" class="register") REGISTER
+
+					// login
+					section.login-section
+						a( href="login.html" class="login") SIGN IN
+						a( href="register.html" class="register") REGISTER
+
+					// mobile menu trigger
+					a.mobile-trigger( href="#" )
+						.burger
+
+		// main
+		div( role="main" ).searchpage
+			.container-fluid
+
+				// wrapper
+				.wrapper
+
+					// main
+					.search
+
+						// searchbar
+						section.searchbar
+							.container-fluid
+
+								// wrap
+								//.wrap
+
+								
+									
+
+								// input
+									.searchbox
+										img.icon( src="img/ui/ic-mag.png" alt="Search" )
+										input.searchinput( type="text" placeholder="Search media" )
+
+								
+
+								
+
+								// close search
+								a.close( href="#" title="Close Search" ) 
+									img( src='img/ui/ic-close.png' )
+
+								// view setting
+								ul.view
+									li.active
+										a.listview( href="#" data-view="column"  data-toggle="tooltip" data-placement="bottom" title="Column view")
+											span.icon
+									li
+										a.gridview( href="#"  data-view="grid"  data-toggle="tooltip" data-placement="bottom" title="List view")
+											span.icon
+
+								// settings bar
+								.settings
+									a( href="#" data-view="column"  data-toggle="tooltip" data-placement="bottom" title="Search filter")
+										img( src="img/ui/ic-setting.png" alt="settings" )
+
+						// search filter
+						section.searchlabel
+							.container-fluid
+
+								// label
+								span.label
+									span.text Lorem
+									a( href="#" )
+										i.glyphicon.glyphicon-remove
+
+								// label
+								span.label
+									span.text Ipsum Dolor
+									a( href="#" )
+										i.glyphicon.glyphicon-remove
+
+								// label
+								span.label
+									span.text Lorem
+									a( href="#" )
+										i.glyphicon.glyphicon-remove
+
+								// label
+								span.label
+									span.text Ipsum Dolor
+									a( href="#" )
+										i.glyphicon.glyphicon-remove
+
+						// results
+						.searchresults
+
+							// search result grid
+							section.gridlist#gridlist
+
+								// collect button
+								a.multiplecollect#multiplecollect( href="#" ) COLLECT MULTIPLE ITEMS
+
+								// listing
+								section.listing.itemlistview
+									.container
+										// grid
+										.grid
+											// item
+											.sizer
+											// item
+											.item.media
+												.wrap
+													// anchor
+													a(href='#', title='Lorem ipsum').mediaviewer
+														// thumbnail
+														.thumb
+															img(src='img/content/thumb-media-1.png', alt='Lorem ipsum')
+													// info
+													.info
+														// anchor
+														a(href='#', title='Lorem ipsum').mediaviewer
+															h1.title
+																| The earth was small light blue and so touchingly alone ur home that must be defended like a relic
+															span.source National Library of Latvia
+														span.provider
+															a(href="#").links digitainz.org
+														
+													// metadata
+													.action-group
+														.wrap
+															ul
+																li
+																	a(href="#" data-toggle="tooltip" data-placement="bottom" title="Add to favorite" ).fa.fa-heart
+																li
+																	a(href="#" data-toggle="tooltip" data-placement="bottom" title="Collect it" ).fa.fa-download.collectbutton
+																li
+																	.inputcheck 
+																		input.selectitem( type="checkbox" )
+
+														
+											// item
+											.item.media
+												.wrap
+													// anchor
+													a(href='#', title='Lorem ipsum').mediaviewer
+														// thumbnail
+														.thumb
+															img(src='img/content/thumb-media-2.png', alt='Lorem ipsum')
+													// info
+													.info
+														a(href='#', title='Lorem ipsum').mediaviewer
+															h1.title The earth was small light blue and so touchingly alone.
+															span.source National Library of Latvia
+														span.provider
+															a(href="#").links digitainz.org
+														
+													// metadata
+													.action-group
+														.wrap
+															ul
+																li
+																	a(href="#" data-toggle="tooltip" data-placement="bottom" title="Add to favorite" ).fa.fa-heart
+																li
+																	a(href="#" data-toggle="tooltip" data-placement="bottom" title="Collect it" ).fa.fa-download.collectbutton
+																li
+																	.inputcheck 
+																		input.selectitem( type="checkbox" )
+														
+											// item
+											.item.media
+												.wrap
+													// anchor
+													a(href='#', title='Lorem ipsum').mediaviewer
+														// thumbnail
+														.thumb
+															img(src='img/content/thumb-media-3.png', alt='Lorem ipsum')
+													// info
+													.info
+														a(href='#', title='Lorem ipsum').mediaviewer
+															h1.title The earth was small light blue and so touchingly alone ur
+															span.source National Library of Latvia
+														span.provider
+															a(href="#").links digitainz.org
+													
+													// metadata
+													.action-group
+														.wrap
+															ul
+																li
+																	a(href="#" data-toggle="tooltip" data-placement="bottom" title="Add to favorite" ).fa.fa-heart
+																li
+																	a(href="#" data-toggle="tooltip" data-placement="bottom" title="Collect it" ).fa.fa-download.collectbutton
+																li
+																	.inputcheck 
+																		input.selectitem( type="checkbox" )
+														
+														
+											// item
+											.item.media
+												.wrap
+													// anchor
+													a(href='#', title='Lorem ipsum').mediaviewer
+														// thumbnail
+														.thumb
+															img(src='img/content/thumb-media-4.png', alt='Lorem ipsum')
+													// info
+													.info
+														a(href='#', title='Lorem ipsum').mediaviewer
+															h1.title The earth was small light blue 
+															span.source National Library of Latvia
+														span.provider
+															a(href="#").links digitainz.org
+													
+													// metadata
+													.action-group
+														.wrap
+															ul
+																li
+																	a(href="#" data-toggle="tooltip" data-placement="bottom" title="Add to favorite" ).fa.fa-heart
+																li
+																	a(href="#" data-toggle="tooltip" data-placement="bottom" title="Collect it" ).fa.fa-download.collectbutton
+																li
+																	.inputcheck 
+																		input.selectitem( type="checkbox" )
+
+														
+														
+											// item
+											.item.media
+												.wrap
+													// anchor
+													a(href='#', title='Lorem ipsum').mediaviewer
+														// thumbnail
+														.thumb
+															img(src='img/content/thumb-media-1.png', alt='Lorem ipsum')
+													// info
+													.info
+														a(href='#', title='Lorem ipsum').mediaviewer
+															h1.title The earth was small light blue and so touchingly alone.
+															span.source National Library of Latvia
+														span.provider
+															a(href="#").links digitainz.org
+													
+													// metadata
+													.action-group
+														.wrap
+															ul
+																li
+																	a(href="#" data-toggle="tooltip" data-placement="bottom" title="Add to favorite" ).fa.fa-heart
+																li
+																	a(href="#" data-toggle="tooltip" data-placement="bottom" title="Collect it" ).fa.fa-download.collectbutton
+																li
+																	.inputcheck 
+																		input.selectitem( type="checkbox" )
+													
+													
+											// item
+											.item.media
+												.wrap
+													// anchor
+													a(href='#', title='Lorem ipsum').mediaviewer
+														// thumbnail
+														.thumb
+															img(src='img/content/thumb-media-2.png', alt='Lorem ipsum')
+													// info
+													.info
+														a(href='#', title='Lorem ipsum').mediaviewer
+															h1.title The earth was small light blue and so touchingly alone.
+															span.source National Library of Latvia
+														span.provider
+															a(href="#").links digitainz.org
+													
+													// metadata
+													.action-group
+														.wrap
+															ul
+																li
+																	a(href="#" data-toggle="tooltip" data-placement="bottom" title="Add to favorite" ).fa.fa-heart
+																li
+																	a(href="#" data-toggle="tooltip" data-placement="bottom" title="Collect it" ).fa.fa-download.collectbutton
+																li
+																	.inputcheck 
+																		input.selectitem( type="checkbox" )
+														
+														
+											// item
+											.item.media
+												.wrap
+													// anchor
+													a(href='#', title='Lorem ipsum').mediaviewer
+														// thumbnail
+														.thumb
+															img(src='img/content/thumb-media-3.png', alt='Lorem ipsum')
+													// info
+													.info
+														a(href='#', title='Lorem ipsum').mediaviewer
+															h1.title
+																| The earth was small light blue and so touchingly alone ur home that must be defended like a relic
+															span.source National Library of Latvia
+														span.provider
+															a(href="#").links digitainz.org
+													
+													// metadata
+													.action-group
+														.wrap
+															ul
+																li
+																	a(href="#" data-toggle="tooltip" data-placement="bottom" title="Add to favorite" ).fa.fa-heart
+																li
+																	a(href="#" data-toggle="tooltip" data-placement="bottom" title="Collect it" ).fa.fa-download.collectbutton
+																li
+																	.inputcheck 
+																		input.selectitem( type="checkbox" )
+														
+														
+											// item
+											.item.media
+												.wrap
+													// anchor
+													a(href='#', title='Lorem ipsum').mediaviewer
+
+														// thumbnail
+														.thumb
+															img(src='img/content/thumb-media-4.png', alt='Lorem ipsum')
+													// info
+													.info
+														a(href='#', title='Lorem ipsum').mediaviewer
+															h1.title
+																| The earth was small light blue and so touchingly alone ur home that must be defended like a relic
+															span.source National Library of Latvia
+														span.provider
+															a(href="#").links digitainz.org
+													
+													// metadata
+													.action-group
+														.wrap
+															ul
+																li
+																	a(href="#" data-toggle="tooltip" data-placement="bottom" title="Add to favorite" ).fa.fa-heart
+																li
+																	a(href="#" data-toggle="tooltip" data-placement="bottom" title="Collect it" ).fa.fa-download.collectbutton
+																li
+																	.inputcheck 
+																		input.selectitem( type="checkbox" )
+														
+							// search result
+							section.searchlist.active#columnlist
+								.container-fluid
+
+									// row
+									.row
+
+										// column 1
+										.column.selected( id="europeana-result" ).loading
+
+											// wrap
+											.wrap
+												.header
+													a( href="#" title="#" )
+														.source EUROPEANA
+														.link
+															i.fa.fa-external-link
+														.loading
+															i.fa.fa-circle-o-notch.fa-spin
+												.result
+
+													// item
+													.item
+														a( href="#" title="#" data-view="inline" ).mediaviewer
+															.imgwrap
+																img.thumb( src="img/content/thumb-media-1.png" alt="#" )
+															span.text
+																| Lorem ipsum dolor sit amet conceptuos
+
+													// item
+													.item
+														a( href="#" title="#" data-view="inline" ).mediaviewer
+															.imgwrap
+																img.thumb( src="img/content/thumb-media-1.png" alt="#" )
+															span.text
+																| Lorem ipsum dolor sit amet conceptuos
+
+													// item
+													.item
+														a( href="#" title="#" data-view="inline" ).mediaviewer
+															.imgwrap
+																img.thumb( src="img/content/thumb-media-2.png" alt="#" )
+															span.text
+																| Lorem ipsum dolor sit amet conceptuos
+
+													// item
+													.item
+														a( href="#" title="#" data-view="inline" ).mediaviewer
+															.imgwrap
+																img.thumb( src="img/content/thumb-media-3.png" alt="#" )
+															span.text
+																| Lorem ipsum dolor sit amet conceptuos
+
+													// item
+													.item
+														a( href="#" title="#" data-view="inline" ).mediaviewer
+															.imgwrap
+																img.thumb( src="img/content/thumb-media-1.png" alt="#" )
+															span.text
+																| Lorem ipsum dolor sit amet conceptuos
+
+													// item
+													.item
+														a( href="#" title="#" data-view="inline" ).mediaviewer
+															.imgwrap
+																img.thumb( src="img/content/thumb-media-2.png" alt="#" )
+															span.text
+																| Lorem ipsum dolor sit amet conceptuos
+
+													// item
+													.item
+														a( href="#" title="#" data-view="inline" ).mediaviewer
+															.imgwrap
+																img.thumb( src="img/content/thumb-media-3.png" alt="#" )
+															span.text
+																| Lorem ipsum dolor sit amet conceptuos 
+
+										// column 2
+										.column( id="nla-result" )
+
+											// wrap
+											.wrap
+												.header
+													a( href="#" title="#" )
+														.source NLA
+														.link
+															i.fa.fa-external-link
+														.loading
+															i.fa.fa-circle-o-notch.fa-spin
+												.result
+
+													// item
+													.item
+														a( href="#" title="#" data-view="inline" ).mediaviewer
+															.imgwrap
+																img.thumb( src="img/content/thumb-media-4.png" alt="#" )
+															span.text
+																| Lorem ipsum dolor sit amet conceptuos
+
+													// item
+													.item
+														a( href="#" title="#" data-view="inline" ).mediaviewer
+															.imgwrap
+																img.thumb( src="img/content/thumb-media-1.png" alt="#" )
+															span.text
+																| Lorem ipsum dolor sit amet conceptuos
+
+													// item
+													.item
+														a( href="#" title="#" data-view="inline" ).mediaviewer
+															.imgwrap
+																img.thumb( src="img/content/thumb-media-2.png" alt="#" )
+															span.text
+																| Lorem ipsum dolor sit amet conceptuos
+
+													// item
+													.item
+														a( href="#" title="#" data-view="inline" ).mediaviewer
+															.imgwrap
+																img.thumb( src="img/content/thumb-media-3.png" alt="#" )
+															span.text
+																| Lorem ipsum dolor sit amet conceptuos
+
+										// column 3
+										.column( id="youtube-result" )
+
+											// wrap
+											.wrap
+												.header
+													a( href="#" title="#")
+														.source YOUTUBE
+														.link
+															i.fa.fa-external-link
+														.loading
+															i.fa.fa-circle-o-notch.fa-spin
+												.result
+
+													// item
+													.item
+														a( href="#" title="#" data-view="inline" ).mediaviewer
+															.imgwrap
+																img.thumb( src="img/content/thumb-media-2.png" alt="#" )
+															span.text
+																| Lorem ipsum dolor sit amet conceptuos oorem ipsum dolor sit amet conceptuos
+
+										// column 4
+										.column( id="digitalnz-result" )
+
+											// wrap
+											.wrap
+												.header
+													a( href="#" title="#" )
+														.source DIGITAL NZ
+														.link
+															i.fa.fa-external-link
+														.loading
+															i.fa.fa-circle-o-notch.fa-spin
+												.result
+
+													// item
+													.item
+														a( href="#" title="#" data-view="inline" ).mediaviewer
+															.imgwrap
+																img.thumb( src="img/content/thumb-media-1.png" alt="#" )
+															span.text
+																| Lorem ipsum dolor sit amet conceptuos
+
+													// item
+													.item
+														a( href="#" title="#" data-view="inline" ).mediaviewer
+															.imgwrap
+																img.thumb( src="img/content/thumb-media-2.png" alt="#" )
+															span.text
+																| Lorem ipsum dolor sit amet conceptuos
+
+										// column 5
+										.column( id="dpla-result" )
+
+											// wrap
+											.wrap
+												.header
+													a( href="#" title="#" )
+														.source DPLA
+														.link
+															i.fa.fa-external-link
+														.loading
+															i.fa.fa-circle-o-notch.fa-spin
+												.result
+
+													// item
+													.item
+														a( href="#" title="#" data-view="inline" ).mediaviewer
+															.imgwrap
+																img.thumb( src="img/content/thumb-media-1.png" alt="#" )
+															span.text
+																| Lorem ipsum dolor sit amet conceptuos
+
+													// item
+													.item
+														a( href="#" title="#" data-view="inline" ).mediaviewer
+															.imgwrap
+																img.thumb( src="img/content/thumb-media-2.png" alt="#" )
+															span.text
+																| Lorem ipsum dolor sit amet conceptuos
+
+													// item
+													.item
+														a( href="#" title="#" data-view="inline" ).mediaviewer
+															.imgwrap
+																img.thumb( src="img/content/thumb-media-1.png" alt="#" )
+															span.text
+																| Lorem ipsum dolor sit amet conceptuos
+
+													// item
+													.item
+														a( href="#" title="#" data-view="inline" ).mediaviewer
+															.imgwrap
+																img.thumb( src="img/content/thumb-media-2.png" alt="#" )
+															span.text
+																| Lorem ipsum dolor sit amet conceptuos
+
+									
+
+										// column 6
+										.column( id="other1-result" )
+
+											// wrap
+											.wrap
+												.header
+													a( href="#" title="#" )
+														.source OTHER 1
+														.link
+															i.fa.fa-external-link
+														.loading
+															i.fa.fa-circle-o-notch.fa-spin
+												.result
+
+													
+													// item
+													.item
+														a( href="#" title="#" data-view="inline" ).mediaviewer
+															.imgwrap
+																img.thumb( src="img/content/thumb-media-1.png" alt="#" )
+															span.text
+																| Lorem ipsum dolor sit amet conceptuos
+
+													// item
+													.item
+														a( href="#" title="#" data-view="inline" ).mediaviewer
+															.imgwrap
+																img.thumb( src="img/content/thumb-media-2.png" alt="#" )
+															span.text
+																| Lorem ipsum dolor sit amet conceptuos
+
+													// item
+													.item
+														a( href="#" title="#" data-view="inline" ).mediaviewer
+															.imgwrap
+																img.thumb( src="img/content/thumb-media-1.png" alt="#" )
+															span.text
+																| Lorem ipsum dolor sit amet conceptuos
+
+													// item
+													.item
+														a( href="#" title="#" data-view="inline" ).mediaviewer
+															.imgwrap
+																img.thumb( src="img/content/thumb-media-2.png" alt="#" )
+															span.text
+																| Lorem ipsum dolor sit amet conceptuos
+
+										// column 6
+										.column( id="other2-result" )
+
+											// wrap
+											.wrap
+												.header
+													a( href="#" title="#" data-view="inline" ).mediaviewer
+														.source OTHER 2
+														.link
+															i.fa.fa-external-link
+														.loading
+															i.fa.fa-circle-o-notch.fa-spin
+												.result
+
+													
+													// item
+													.item
+														a( href="#" title="#" data-view="inline" ).mediaviewer
+															.imgwrap
+																img.thumb( src="img/content/thumb-media-1.png" alt="#" )
+															span.text
+																| Lorem ipsum dolor sit amet conceptuos
+
+													// item
+													.item
+														a( href="#" title="#" data-view="inline" ).mediaviewer
+															.imgwrap
+																img.thumb( src="img/content/thumb-media-2.png" alt="#" )
+															span.text
+																| Lorem ipsum dolor sit amet conceptuos
+
+													// item
+													.item
+														a( href="#" title="#" data-view="inline" ).mediaviewer
+															.imgwrap
+																img.thumb( src="img/content/thumb-media-1.png" alt="#" )
+															span.text
+																| Lorem ipsum dolor sit amet conceptuos
+
+													// item
+													.item
+														a( href="#" title="#" data-view="inline" ).mediaviewer
+															.imgwrap
+																img.thumb( src="img/content/thumb-media-2.png" alt="#" )
+															span.text
+																| Lorem ipsum dolor sit amet conceptuos
+
+									// scroll pointer
+									img.pointer#pointermark( src="img/ui/ic-right.png"  data-toggle="tooltip" data-placement="top" title="Scroll to the right to see more results")
+
+						// item view
+						section.itemview
+
+							// header
+							.header
+								.container-fluid
+
+									// head
+									h3 Media Viewer
+
+									// actions
+									.actions
+										a(href="#" data-toggle="tooltip" data-placement="top" title="Add to favorite" ).fa.fa-heart.favorite
+										a(href="#" data-toggle="tooltip" data-placement="top" title="Collect it" ).fa.fa-download.collectbutton
+										a.medialink( href="#" data-toggle="tooltip" data-placement="bottom" title="Visit item site" )
+											i.fa.fa-external-link
+										a.closemedia( href="#" data-toggle="tooltip" data-placement="bottom" title="Close media viewer" )
+											img( src="img/ui/ic-close.png" )
+										
+
+							// media content
+							.mediacontent
+								.container-fluid
+
+									// wrap
+									.wrap
+
+										// item
+										.media
+											img( src="img/content/img-item.jpg" )
+
+
+										// metadata
+										.metadata
+											.infowrap
+
+												// top
+												.top
+
+													// title
+													.infotitle
+														h1 Avenue de l'Observatoire , 1932-34
+														.owner
+															a( href="#" title="#" ) National Gallery Athens
+
+													// collect
+													a.infocollect.collectbutton( href="#" title="#" ) COLLECT ITEM
+
+
+												// metadata
+												ul.nav.nav-tabs( role="tablist" )
+													li.active
+														a( href="#information" title="" data-toggle="tab" ) Info
+													li
+														a( href="#related" title="" data-toggle="tab" ) Related
+													li
+														a( href="#comment" title="" data-toggle="tab" ) Comments
+													li
+														a( href="#share" title="" data-toggle="tab" ) Share
+
+												// panes
+												.tab-content
+													.tab-pane.active( id="information" )
+														
+														// description
+														.meta
+															.list
+																.title 
+																	.titlewrap Description
+																.field.limitchar( data-limit='400' )
+																	| George Brassaï (pseudonym of Gyula Halász) (9 September 1899 — 8 July 1984) was a Hungarian photographer, 
+																	| sculptor, and filmmaker who rose to international fame in France in the 20th century. He was one of the numerous 
+																	| Hungarian artists who flourished in Paris beginning between the World Wars. 
+																	| In the early 21st century, the discovery 
+																	| of more than 200 letters and hundreds of drawings and other items from the period 1940–1984 has provided scholars with 
+																	| material for understanding his later life and career.
+															.list
+																.title 
+																	.titlewrap Provider
+																.field
+																	| National Gallery - Alexandros Soutzos Museum, Athens.
+															.list
+																.title 
+																	.titlewrap Rights
+																.field
+																	| Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+															.list
+																.title 
+																	.titlewrap Record Source
+																.field
+																	a( href="#" title="#" ) 
+																		| EUROPEANA
+
+															.listhide#extrainfo
+																.list
+																	.title 
+																		.titlewrap Provider
+																	.field
+																		| National Gallery - Alexandros Soutzos Museum, Athens.
+																.list
+																	.title 
+																		.titlewrap Rights
+																	.field
+																		| Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+																.list
+																	.title 
+																		.titlewrap Record Source
+																	.field
+																		a( href="#" title="#" ) 
+																			| EUROPEANA
+																.list
+																	.title 
+																		.titlewrap Provider
+																	.field
+																		| National Gallery - Alexandros Soutzos Museum, Athens.
+																.list
+																	.title 
+																		.titlewrap Rights
+																	.field
+																		| Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+															
+															// more
+															a.listmore( href="#" data-target="extrainfo" ) SHOW MORE INFO
+
+													.tab-pane( id="related" )
+
+														// related media
+														.title 
+															.titlewrap Other media item by National Gallery Athens
+															a.follow( href="#" title="Follow National Gallery Athens") FOLLOW
+														ul.related
+															li
+																a( href="#" data-toggle="tooltip" data-placement="top" title="Lorem ipsum dolor" )
+																	img( src="img/content/content-4.png" alt="media" )
+															li
+																a( href="#" data-toggle="tooltip" data-placement="top" title="Lorem ipsum dolor" )
+																	img( src="img/content/content-4.png" alt="media" )
+															li
+																a( href="#" data-toggle="tooltip" data-placement="top" title="Lorem ipsum dolor" )
+																	img( src="img/content/content-4.png" alt="media" )
+															li
+																a( href="#" data-toggle="tooltip" data-placement="top" title="Lorem ipsum dolor" )
+																	img( src="img/content/content-4.png" alt="media" )
+
+														// related media
+														.title 
+															.titlewrap Similar media item
+														ul.related
+															li
+																a( href="#" data-toggle="tooltip" data-placement="top" title="Lorem ipsum dolor" )
+																	img( src="img/content/content-4.png" alt="media" )
+															li
+																a( href="#" data-toggle="tooltip" data-placement="top" title="Lorem ipsum dolor" )
+																	img( src="img/content/content-4.png" alt="media" )
+															li
+																a( href="#" data-toggle="tooltip" data-placement="top" title="Lorem ipsum dolor" )
+																	img( src="img/content/content-4.png" alt="media" )
+															li
+																a( href="#" data-toggle="tooltip" data-placement="top" title="Lorem ipsum dolor" )
+																	img( src="img/content/content-4.png" alt="media" )
+
+														
+													.tab-pane( id="comment" )
+														
+														// comment 
+														.comments
+															.form
+																textarea.commentbox( class="form-control" placeholder="Fill in your comment" )
+																button.btn.btn-green Submit
+
+															// commentlist
+															ul.commentlist
+																li
+																	a( href="#" title="#" )
+																		span.profilepicture
+																			img(src='img/content/img-profile.jpg')
+																	.entry
+																		span.name Mike Jones
+																		.text
+																			| Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.	
+																		.meta
+																			| 1 day ago
+																li
+																	a( href="account.html" title="#" )
+																		span.profilepicture
+																			img(src='img/content/img-profile.jpg')
+																	.entry
+																		span.name Mike Jones
+																		.text
+																			| Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.	
+																		.meta
+																			| 1 day ago
+																li
+																	a( href="account.html" title="#" )
+																		span.profilepicture
+																			img(src='img/content/img-profile.jpg')
+																	.entry
+																		span.name Mike Jones
+																		.text
+																			| Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.	
+																		.meta
+																			| 1 day ago
+																li
+																	a( href="account.html" title="#" )
+																		span.profilepicture
+																			img(src='img/content/img-profile.jpg')
+																	.entry
+																		span.name Mike Jones
+																		.text
+																			| Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.	
+																		.meta
+																			| 1 day ago
+
+													.tab-pane( id="share" )
+						
+														// share
+														.sharetext Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+														ul.social
+															li
+																a( href="#" title="#" )
+																	img( src="img/ui/ic-facebook.png" alt="facebook" )
+															li
+																a( href="#" title="#" )
+																	img( src="img/ui/ic-twitter.png" alt="facebook" )
+															li
+																a( href="#" title="#" )
+																	img( src="img/ui/ic-pinterest.png" alt="facebook" )
+															li
+																a( href="#" title="#" )
+																	img( src="img/ui/ic-mail.png" alt="facebook" )
+
+					// collection give access
+					section.action.collect
+						.action-header
+							.title Collect an item
+
+						.action-body
+							select.form-control
+								option Select a collection
+								option Select a collection
+								option Select a collection
+								
+							.group
+								.title Media info
+								p Lorem ipsum dolor sit amet conceptuas
+								textarea(disabled)
+									| Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip.
+
+						.button-group
+							a(href="#").btn-green-o.cancel Cancel
+							a(href="#").btn-green Add to collection
+
+					// collection give access
+					section.action.collectmultiple
+						.action-header
+							.title Collect multiple items
+
+						.action-body
+							select.form-control
+								option Select a collection
+								option Select a collection
+								option Select a collection
+
+						.button-group
+							a(href="#").btn-green-o.cancel Cancel
+							a(href="#").btn-green Add items to collection
+
+					// search filter
+					section.action.searchfilter
+						.action-header
+							.title Search Filter
+
+						.action-body
+
+							// setting
+							include ./includes/search.setting.jade
+
+						.button-group
+							a(href="#").btn-green.cancel Close
+
+	// script
+	include ./includes/script.inc.jade

@@ -1,0 +1,73 @@
+<div role="main">
+	<!-- viewer mode-->
+	<div class="viewer">
+		<!-- hero section-->
+		<section class="hero" data-bind="style: { 'background-image': hero }">
+			<div class="container">
+				<div class="meta">
+					<div class="top-info">
+						<div class="thumbnails"><img data-toggle="tooltip" data-placement="top" data-bind="attr: { src: logo }"></div>
+						<div class="header">
+							<div class="title"><!-- ko text: name() --><!-- /ko --></div>
+							<div class="location" data-bind="text: address"></div><a data-bind="visible: url,attr: { href: url }" target="_blank">VISIT SITE</a>
+						</div>
+					</div>
+					<div class="description" data-bind="text: description"></div>
+				</div>
+				<div class="map" data-bind="visible: coords">
+					<iframe data-bind="attr : {src: coords}" frameborder="0" style="border:0" allowfullscreen class="maps"></iframe>
+				</div>
+			</div>
+		</section>
+		<!-- isotope section-->
+		<section class="isotope">
+			<!-- filter-->
+			<section class="filter">
+				<div class="container">
+					<div class="wrap">
+						<!-- menu-->
+						<ul class="nav">
+							<li class="active" data-filter="*" data-bind="click: filter"><a href="#" title="ALL">All</a></li>
+							<li data-filter=".exhibition" data-bind="click: filter"><a href="#" title="EXHIBITION">Exhibition</a></li>
+							<li data-filter=".collection" data-bind="click: filter"><a href="#" title="COLLECTION">Collection</a></li>
+							<li data-filter=".organization" data-bind="click: filter"><a href="#" title="ORGANIZATIONS">Organizations</a></li>
+						</ul>
+					</div>
+				</div>
+			</section>
+			<div class="container">
+				<!-- listing-->
+				<section class="listing">
+					<div class="container">
+						<!-- grid-->
+						<div class="grid" id="orggrid">
+							<div class="sizer"></div>
+						</div>
+
+						<div class="more" data-bind="visible: loading() == true || loadingOrgs() == true, scroll: collections(), scrollOptions: { loadFunc: loadNext, offset: 0 }"> <i class="fa fa-spinner fa-pulse"></i></div>
+					</div>
+				</section>
+			</div>
+		</section>
+	</div>
+
+	<div class="wrapper">
+		<!-- ko component: "profile" --><!-- /ko -->
+	</div>
+</div>
+<footer>
+	<div class="container">
+		<!-- copyright -->
+		<section class="copyright">
+			<img src="img/ui/logo-footer.png">
+			<p>WITH <em>by</em> National Technical University of Athens</p>
+		</section>
+
+		<!-- social media -->
+		<section class="sosmed">
+			<a href="//www.facebook.com/WITHinCulture/" target="_new"><i  class="fa fa-facebook"></i></a>
+			<a href="#"><i  class="fa fa-twitter"></i></a>
+			<a href="mailto:withdev@image.ntua.gr"><i  class="fa fa-envelope"></i></a>
+		</section>
+	</div>
+</footer>

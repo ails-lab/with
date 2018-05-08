@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html>
+  <!-- head-->
+  <head>
+    <!-- meta-->
+    <title>WITH - Dashboard</title>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="description" content="WITH">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#454545">
+    <!-- icons-->
+    <link rel="apple-touch-icon" href="apple-touch-icon.png">
+    <link rel="icon" type="image/png" href="favicon.png">
+    <meta name="msapplication-TileImage" content="tile.png">
+    <meta name="msapplication-TileColor" content="#454545">
+    <!-- stylesheets-->
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="js/vendor/bootstrap/css/bootstrap.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="js/vendor/slick.js/slick/slick.css">
+    <link rel="stylesheet" href="js/vendor/magnific-popup/dist/magnific-popup.css">
+    <!-- script-->
+    <script src="js/vendor/modernizr/modernizr.js"></script>
+  </head>
+  <!-- body-->
+  <body>
+    <!-- head-->
+    <header>
+      <div class="wrap">
+        <div class="container-fluid">
+          <!-- logo--><a href="index.html" class="logo"><img src="img/ui/logo.png"></a>
+          <!-- sign in-->
+          <section class="login-section">
+            <!-- profile picture--><a id="profilebutton" href="#" data-toggle="dropdown" class="profile"><span class="picture"><img src="img/content/img-profile.jpg"><img src="img/ui/ic-profile-frame.png" class="frame"></span><span class="name">Megan Mullaly</span><span class="arrow"></span></a>
+            <!-- dropdown menu-->
+            <ul aria-labelledby="profilebutton" class="dropdown-menu">
+              <li><a href="#" class="showprofile">My profile</a></li>
+              <li><a href="#">Sign out</a></li>
+            </ul>
+          </section>
+          <!-- notification-->
+          <section class="notification">
+            <!-- button--><a id="notificationbutton" href="#" title="Notification" data-toggle="dropdown"><img src="img/ui/ic-notification.png"><span class="counter">12</span></a>
+            <!-- dropdown menu-->
+            <div aria-labelledby="notificationbutton" class="dropdown-menu">
+              <!-- header-->
+              <h3>WITH Notifications</h3>
+              <!-- activity list-->
+              <ul class="list">
+                <li><a href="#"><img src="img/content/img-profile.jpg" class="thumb">
+                    <div class="news">Lorem ipsum dolor sit amet consectetur adipiscing.</div></a></li>
+                <li><a href="#"><img src="img/content/img-profile.jpg" class="thumb">
+                    <div class="news">Lorem ipsum dolor sit amet consectetur adipiscing.</div></a></li>
+              </ul>
+              <!-- view all--><a href="#" class="viewall">View all activities </a>
+            </div>
+          </section>
+          <!-- home-->
+          <section class="home"><a href="dashboard.html" title="Dashboard Home"><img src="img/ui/ic-home.png" alt="Home"></a></section>
+          <!-- explore-->
+          <section class="explore">
+            <!-- input search-->
+            <input type="text" placeholder="Search">
+            <!-- icon--><img src="img/ui/ic-mag.png" class="icon">
+          </section>
+        </div>
+      </div>
+    </header>
+    <!-- main-->
+    <div role="main">
+      <div class="container-fluid">
+        <!-- wrapper-->
+        <div class="wrapper">
+          <!-- alert-->
+          <div role="alert" class="alert alert-success alert-dismissible">
+            <button type="button" data-dismiss="alert" aria-label="Close" class="close"><span aria-hidden="true">&times;</span></button><strong>Warning </strong>Better check yourself, you're not looking too good.
+          </div>
+          <!-- sidebar-->
+          <aside>
+            <!-- nav-->
+            <!-- header-->
+            <label class="header">NAVIGATE</label>
+            <!-- nav-->
+            <nav class="app">
+              <ul>
+                <li class="active"><a href="dashboard.html"><span class="icon"><i class="fa fa-home"></i></span><span class="text">Dashboard</span></a></li>
+                <li><a href="dashboard-collection.html"><span class="counter">7</span><span class="icon"><i class="fa fa-clone"></i></span><span class="text">My Collection</span></a></li>
+                <li><a href="dashboard-exhibition.html"><span class="counter">10</span><span class="icon"><i class="fa fa-television"></i></span><span class="text">My Exhibition</span></a></li>
+                <li><a href="dashboard-favorite.html"><span class="counter">5</span><span class="icon"><i class="fa fa-heart-o"></i></span><span class="text">My Favorite</span></a></li>
+                <!-- li( class=page === "annotation" ? "active" : "" )
+                a(href='dashboard-annotation.html')
+                 span.icon
+                  i.fa.fa-edit
+                 span.text My Annotation
+                -->
+                <li><a href="dashboard-organizations.html"><span class="icon"><i class="fa fa-bookmark-o"></i></span><span class="text">Organizations</span></a></li>
+                <li><a href="dashboard-projects.html"><span class="icon"><i class="fa fa-comment-o"></i></span><span class="text">Projects</span></a></li>
+              </ul>
+            </nav>
+            <!-- nav-->
+            <nav class="site">
+              <ul>
+                <li><a href="about.html">About WITH</a></li>
+                <li><a href="faq.html">Frequently Asked Questions</a></li>
+                <li><a href="#">WITH API</a></li>
+                <li><a href="privacy.html">Privacy Policy</a></li>
+                <li><a href="terms.html">Terms of Condition</a></li>
+                <li><a href="feedback.html">Feedback &amp; Contact</a></li>
+              </ul>
+            </nav>
+          </aside>
+          <!-- main-->
+          <main>
+            <section class="dashboard">
+              <!-- message-->
+              <section class="message"><img src="img/ui/ic-inbox.png" class="hero">
+                <div class="message-body">
+                  <div class="header">Welcome to Your Dashboard</div>
+                  <div class="description">This is <b> Your Dashboard </b>, where you can see all the most recent activities on your collections and exhibitions. Do you know that you can start exploring the media by typing letters on your keyboard? try it now!</div><a href="#"><span class="cross"></span><span class="text">Hide welcome message</span></a>
+                </div>
+              </section>
+              <section class="notification">
+                <!-- header-->
+                <div class="list-head">
+                  <!-- tabs-->
+                  <ul class="typeselect">
+                    <li class="active"><a href="#" title="Show only my notification">My notification</a></li>
+                    <li><a href="#" title="Show all notification">All notification</a></li>
+                  </ul>
+                  <!--.sort
+                  a#sorting(href="#", data-toggle='dropdown')
+                   span.text My notification
+                   span.arrow
+                   
+                  // dropdown
+                  ul.dropdown-menu(aria-labelledby='sorting')
+                   li 
+                    a(href="#") My notification
+                   li 
+                    a(href="#") All notification
+                    
+                  -->
+                </div>
+                <ul class="notif-list">
+                  <li>
+                    <div class="thumbnails"><img src="img/content/img-profile.jpg"></div><img src="img/ui/ic-plus.png" class="icon">
+                    <div class="meta">
+                      <div class="text">You created <a href="#">a collection: My Collection</a></div>
+                    </div>
+                    <ul class="action">
+                      <li class="accept"><a href="#" data-toggle="tooltip" data-placement="top" title="Accept"><i class="fa fa-check"></i></a></li>
+                      <li>or</li>
+                      <li class="reject"><a href="#" data-toggle="tooltip" data-placement="top" title="Reject"><i class="fa fa-times"></i></a></li>
+                    </ul>
+                    <div class="timing">2 hours ago</div>
+                  </li>
+                  <li>
+                    <div class="thumbnails"><img src="img/content/img-profile.jpg"></div><img src="img/ui/ic-mark.png" class="icon">
+                    <div class="meta">
+                      <div class="text">Diana Stanton is not interested in <a href="#">collection: Street Art</a></div>
+                    </div>
+                    <ul class="action">
+                      <li class="accept"><a href="#" data-toggle="tooltip" data-placement="top" title="Accept"><i class="fa fa-check"></i></a></li>
+                      <li>or</li>
+                      <li class="reject"><a href="#" data-toggle="tooltip" data-placement="top" title="Reject"><i class="fa fa-times"></i></a></li>
+                    </ul>
+                    <div class="timing">2 hours ago</div>
+                  </li>
+                  <li>
+                    <div class="thumbnails"><img src="img/content/img-profile.jpg"></div><img src="img/ui/ic-cross.png" class="icon">
+                    <div class="meta">
+                      <div class="text">You deleted <a href="#">an exhibition: Paris in afternoon</a></div>
+                    </div>
+                    <ul class="action">
+                      <li class="accept"><a href="#" data-toggle="tooltip" data-placement="top" title="Accept"><i class="fa fa-check"></i></a></li>
+                      <li>or</li>
+                      <li class="reject"><a href="#" data-toggle="tooltip" data-placement="top" title="Reject"><i class="fa fa-times"></i></a></li>
+                    </ul>
+                    <div class="timing">2 hours ago</div>
+                  </li>
+                  <li>
+                    <div class="thumbnails"><img src="img/content/img-profile.jpg"></div><img src="img/ui/ic-notice.png" class="icon">
+                    <div class="meta">
+                      <div class="text">Diana Stanton just shared <a href="#">collection:Street Art </a>with you</div>
+                    </div>
+                    <div class="timing">2 hours ago</div>
+                  </li>
+                </ul>
+              </section>
+            </section>
+          </main>
+          <!-- collection give access-->
+          <section class="action profile">
+            <div class="action-header">
+              <div class="title">My Profile</div>
+            </div>
+            <div class="action-body">
+              <div class="group">
+                <div class="title">Profile Picture</div>
+                <!-- profile picture box-->
+                <div class="profilepicture">
+                  <div class="boxwrap"><img src="img/content/img-profile.jpg"><a href="#" data-toggle="tooltip" data-placement="top" title="Delete profile picture" class="hue"><i class="fa fa-trash-o"></i></a></div>
+                  <!-- action-->
+                  <div class="profileaction"><span>Load picture from</span>
+                    <ul>
+                      <li><a href="#" data-toggle="tooltip" data-placement="top" title="Local image"><i class="fa fa-folder-o"></i></a></li>
+                      <li><a href="#" data-toggle="tooltip" data-placement="top" title="Facebook"><i class="fa fa-facebook"></i></a></li>
+                      <li><a href="#" data-toggle="tooltip" data-placement="top" title="Google+"><i class="fa fa-google-plus"></i></a></li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+              <div class="group">
+                <div class="title">Personal Info</div>
+                <div class="fields">
+                  <input type="text" placeholder="Firstname" value="Michelle" class="half">
+                  <input type="text" placeholder="Lastname" value="Smith" class="half">
+                </div>
+                <textarea type="text" placeholder="About me" class="about">Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidunt ut laoreet dolore magna aliquam erat volutpat.</textarea>
+              </div>
+            </div>
+            <div class="button-group"><a href="#" class="btn-green-o cancel">Cancel</a><a href="#" class="btn-green">Save Profile</a></div>
+          </section>
+        </div>
+      </div>
+    </div>
+  </body>
+  <!-- script-->
+  <script src="js/vendor/jquery/dist/jquery.min.js"></script>
+  <script src="js/vendor/bootstrap/dist/js/bootstrap.min.js"></script>
+  <script src="js/vendor/masonry/dist/masonry.pkgd.min.js"></script>
+  <script src="js/vendor/slick.js/slick/slick.min.js"></script>
+  <script src="js/vendor/jquery.nicescroll/dist/jquery.nicescroll.min.js"></script>
+  <script src="js/vendor/isotope/isotope.pkgd.min.js"></script>
+  <script src="js/vendor/jquery-sticky/jquery.sticky.js"></script>
+  <script src="js/plugin.js"></script>
+  <script src="js/main.js"></script>
+</html>

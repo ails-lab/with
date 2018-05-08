@@ -1,6 +1,10 @@
 define("app", ['knockout', 'facebook', 'imagesloaded', 'moment', './js/app/plugin','./js/app/params','smoke'], function (ko, FB, imagesLoaded, moment,plugin,params) {
 
 	var self = this;
+
+	//hold the selected lang value from ui
+	self.lang=ko.observable("");
+
 	self.WITHApp = "";
 
 	self.settings = $.extend({
@@ -16,25 +20,25 @@ define("app", ['knockout', 'facebook', 'imagesloaded', 'moment', './js/app/plugi
 		mobileSelector: '.mobilemenu',
 		mobileMenu: '.main .menu'
 	});
-    self.custom=false;
+	self.custom = false;
 	self.transDuration = 0;
 	var isFirefox = typeof InstallTrigger !== 'undefined'; // Firefox 1.0+
 	if (isFirefox) {
 		self.transDuration = 0;
 	}
 
-	self.loadDependancies=function () {
+	self.loadDependancies = function () {
 		/* we are in WITH*/
-		if(plugin.WITHApp){
+		if (plugin.WITHApp) {
 			self.WITHApp = new plugin.WITHApp.ui({
 				// page name
 				page: $('body').attr('data-page'),
-	
+
 				// masonry
 				mSelector: '.grid',
 				mItem: '.item',
 				mSizer: '.sizer',
-	
+
 				// mobile menu
 				mobileSelector: '.mobilemenu',
 				mobileMenu: '.main .menu'
@@ -42,10 +46,9 @@ define("app", ['knockout', 'facebook', 'imagesloaded', 'moment', './js/app/plugi
 			return {
 				WITHApp: self.WITHApp
 			};
-		}
-		else{
-			self.custom=true;
-			self.WITHApp=new plugin.EUSpaceApp.ui({
+		} else {
+			self.custom = true;
+			self.WITHApp = new plugin.EUSpaceApp.ui({
 
 		 		// page name
 		 		page  	  : $( 'body' ).attr( 'data-page' ),
@@ -57,14 +60,14 @@ define("app", ['knockout', 'facebook', 'imagesloaded', 'moment', './js/app/plugi
 
 		 		// mobile menu
 		 		mobileSelector : '.mobilemenu',
-		 		mobileMenu 	   : '.main .menu'	
+		 		mobileMenu 	   : '.main .menu'
 		 	})
 
 		 self.WITHApp.projectName = params._args.projectName;
 		 self.WITHApp.projectId = params._args.projectId;
 		 self.WITHApp.featuredExhibition=params._args.featuredExhibition;
 		 setTimeout(function(){ WITHApp.init(); }, 1000);
-		
+
 		 return {
 				WITHApp: self.WITHApp
 			};
@@ -149,6 +152,7 @@ define("app", ['knockout', 'facebook', 'imagesloaded', 'moment', './js/app/plugi
 			var props = allBindingsAccessor().scrollOptions;
 			var offset = props.offset ? props.offset : "0";
 			var loadFunc = props.loadFunc;
+			var functPar1 = props.functPar1;
 			var load = ko.utils.unwrapObservable(valueAccessor());
 			var self = this;
 
@@ -156,8 +160,12 @@ define("app", ['knockout', 'facebook', 'imagesloaded', 'moment', './js/app/plugi
 				$(window).on("scroll.ko.scrollHandler", function () {
 					if ($(window).scrollTop() >= $(document).height() - $(window).height() - 300) {
 						if (self.updating) {
-							loadFunc();
-							self.updating = false;
+							if (functPar1 !== undefined && functPar1 !== null)
+
+								loadFunc(functPar1);
+							else
+								loadFunc();
+							//self.updating = false;
 						}
 					} else {
 						self.updating = true;
@@ -182,7 +190,9 @@ define("app", ['knockout', 'facebook', 'imagesloaded', 'moment', './js/app/plugi
 
 	self.receiveEvent = function (event) {
 		var notification = JSON.parse(event.data);
+
 		self.addNotification(notification);
+
 		switch (notification.activity) {
 		case "GROUP_INVITE":
 			$.smkAlert({
@@ -227,40 +237,38 @@ define("app", ['knockout', 'facebook', 'imagesloaded', 'moment', './js/app/plugi
 			});
 			break;
 		case "COLLECTION_SHARE":
-			if (notification.groupname) {
+			if (notification.shareInfo.sharedWithGroup) {
 				$.smkAlert({
-					text: '<strong>' + notification.senderName + '</strong> wants to share collection <strong>' + notification.collectionName + '</strong> with <strong>' + notification.groupName + '</strong>',
+					text: '<strong>' + notification.senderName + '</strong> wants to share collection <strong>' + notification.shareInfo.resourceName + '</strong> with <strong>' + notification.groupName + '</strong>',
 					type: 'info',
 					time: 5
 				});
 			} else {
 				$.smkAlert({
-					text: '<strong>' + notification.senderName + '</strong> wants to share collection <strong>' + notification.collectionName + '</strong> with you',
+					text: '<strong>' + notification.senderName + '</strong> wants to share collection <strong>' + notification.shareInfo.resourceName + '</strong> with you',
 					type: 'info',
 					time: 5
 				});
 			}
 			break;
 		case "COLLECTION_SHARED":
-			var senderName = notification.groupName ? notification.groupName : notification.senderName;
 			$.smkAlert({
-				text: '<strong>' + notification.collectionName + '</strong> is now shared with <strong>' + senderName + '</strong>',
+				text: '<strong>' + notification.shareInfo.resourceName + '</strong> is now shared with <strong>' + notification.shareInfo.userOrGroupName + '</strong>',
 				type: 'info',
 				time: 5
 			});
 			break;
 		case "COLLECTION_UNSHARED":
-			senderName = notification.groupName ? notification.groupName : 'you';
+			senderName = notification.shareInfo.sharedWithGroup ? notification.shareInfo.userOrGroupName : 'you';
 			$.smkAlert({
-				text: '<strong>' + notification.collectionName + '</strong> is no longer shared with <strong>' + senderName + '</strong>',
+				text: '<strong>' + notification.shareInfo.resourceName + '</strong> is no longer shared with <strong>' + senderName + '</strong>',
 				type: 'info',
 				time: 5
 			});
 			break;
 		case "COLLECTION_REJECTED":
-			senderName = notification.groupName ? notification.groupName : notification.senderName;
 			$.smkAlert({
-				text: '<strong>' + notification.senderName + '</strong> is not interested in collection <strong>' + collectionName + '</strong>',
+				text: '<strong>' + notification.shareInfo.userOrGroupName + '</strong> is not interested in collection <strong>' + notification.shareInfo.resourceName + '</strong>',
 				type: 'info',
 				time: 5
 			});
@@ -293,12 +301,19 @@ define("app", ['knockout', 'facebook', 'imagesloaded', 'moment', './js/app/plugi
 		"_id": ko.observable(),
 		"email": ko.observable(),
 		"username": ko.observable(),
-		"firstName": ko.observable(),
-		"lastName": ko.observable(),
+		"firstName": ko.observable(''),
+		"lastName": ko.observable(''),
 		"gender": ko.observable(),
 		"facebookId": ko.observable(),
 		"googleId": ko.observable(),
 		"image": ko.observable(),
+		"avatar": {
+			"Original": ko.observable(),
+			"Medium": ko.observable(),
+			"Square": ko.observable(),
+			"Thumbnail": ko.observable(),
+			"Tiny": ko.observable()
+		},
 		"recordLimit": ko.observable(),
 		"collectedRecords": ko.observable(),
 		"storageLimit": ko.observable(),
@@ -312,12 +327,18 @@ define("app", ['knockout', 'facebook', 'imagesloaded', 'moment', './js/app/plugi
 			'unread': ko.observable(0),
 			'userNotifications': ko.observableArray(),
 			'groupNotifications': ko.observableArray()
-		}
+		},
+		"collectionCount": ko.observable(0),
+		"exhibitionCount": ko.observable(0),
+		"sharedCollectionCount": ko.observable(0),
+		"sharedExhibitionCount": ko.observable(0),
+		"annotationCount": ko.observable(0)
 	};
 	isLogged = ko.observable(false);
 
 	loadUser = function (data, remember, loadCollections) {
 		self.currentUser._id(data.dbId);
+		self.currentUser.favoritesId(data.favorites);
 		self.currentUser.email(data.email);
 		self.currentUser.username(data.username);
 		self.currentUser.firstName(data.firstName);
@@ -329,12 +350,19 @@ define("app", ['knockout', 'facebook', 'imagesloaded', 'moment', './js/app/plugi
 		self.currentUser.collectedRecords(data.collectedRecords);
 		self.currentUser.storageLimit(data.storageLimit);
 		self.currentUser.image(data.image);
-		self.currentUser.favoritesId(data.favoritesId);
+		if (typeof data.avatar != 'undefined') {	// New users don't have avatars
+			self.currentUser.avatar.Original(data.avatar.Original);
+			self.currentUser.avatar.Tiny(data.avatar.Tiny);
+			self.currentUser.avatar.Square(data.avatar.Square);
+			self.currentUser.avatar.Thumbnail(data.avatar.Thumbnail);
+			self.currentUser.avatar.Medium(data.avatar.Medium);
+		}
 		self.currentUser.usergroups(data.usergroups);
 		self.currentUser.organizations(data.organizations);
 		self.currentUser.projects(data.projects);
-
+		self.currentUser.annotationCount(data.annotationCount);
 		self.loadNotifications(data.notifications);
+
 		$(".star").each(function () {
 			$(this).css("display", "");
 		});
@@ -343,10 +371,8 @@ define("app", ['knockout', 'facebook', 'imagesloaded', 'moment', './js/app/plugi
 		});
 		self.loadFavorites();
 
-		
-
 		isLogged(true);
-		
+
 		localStorage.setItem('logged_in', true);
 		waitForConnection(function () {
 			self.notificationSocket.send('{"action":"login","id":"' + data.dbId + '"}');
@@ -366,9 +392,23 @@ define("app", ['knockout', 'facebook', 'imagesloaded', 'moment', './js/app/plugi
 			url: '/user/' + self.currentUser._id(),
 			type: 'GET',
 			success: function (data, text) {
-				
-				loadUser(data, false, false);
-				
+				loadUser(data, false, true);
+			},
+			//async: false
+		});
+
+		self.loadCounters();
+	};
+
+	self.loadCounters = function () {
+		$.ajax({
+			url: '/collection/countMyAndShared',
+			type: 'GET',
+			success: function (data, text) {
+				self.currentUser.exhibitionCount(data.my.Exhibition);
+				self.currentUser.collectionCount(data.my.SimpleCollection);
+				self.currentUser.sharedExhibitionCount(data.sharedWithMe.Exhibition);
+				self.currentUser.sharedCollectionCount(data.sharedWithMe.SimpleCollection);
 			}
 		});
 	};
@@ -380,12 +420,12 @@ define("app", ['knockout', 'facebook', 'imagesloaded', 'moment', './js/app/plugi
 			})
 			.done(function (data, textStatus, jqXHR) {
 				self.currentUser.favorites(data);
-				
-				for (var i in data) {
-					if ($("#" + data[i])) {
-						$("#" + data[i]).addClass('active');
-					}
-				}
+
+				// for (var i in data) {
+				// 	if ($("#" + data[i])) {
+				// 		$("#" + data[i]).addClass('active');
+				// 	}
+				// }
 			})
 			.fail(function (jqXHR, textStatus, errorThrown) {
 				$.smkAlert({
@@ -403,16 +443,22 @@ define("app", ['knockout', 'facebook', 'imagesloaded', 'moment', './js/app/plugi
 		self.currentUser.notifications.groupNotifications.removeAll();
 		self.currentUser.notifications.unread(0);
 
-		if(data){
-		// Sort notification array
-		data.sort(function (a, b) {
-			return a.openedAt - b.openedAt;
-		});
+		if (data) {
+			// Sort notification array
+			data.sort(function (a, b) {
+				return a.openedAt - b.openedAt;
+			});
 
-		// Load notifications
-		for (var i = 0; i < data.length; i++) {
-			self.addNotification(data[i]);
-		}
+			// Load notifications
+			for (var i = 0; i < data.length; i++) {
+				if (data[i].resourceName === 'DELETED') {
+					return;
+				}
+
+				if (data[i].activity != null) {
+					self.addNotification(data[i]);
+				}
+			}
 		}
 	};
 
@@ -420,68 +466,76 @@ define("app", ['knockout', 'facebook', 'imagesloaded', 'moment', './js/app/plugi
 		data.date = ko.pureComputed(function () {
 			return moment(data.openedAt).fromNow();
 		});
+		data.image = ko.computed(function() {
+			if (null == data.senderLogoUrl) {
+				return 'images/user.png';
+			} else {
+				return data.senderLogoUrl;
+			}
+		});
 
 		data.pending = ko.observable(data.pendingResponse);
-		data.unread = ko.observable(data.readAt === null);
+		data.unread = ko.observable(data.readAt === null || data.readAt == undefined);
 
-		if (data.unread()) {
+		// Only pending notifications are displayed in the counter
+		if (data.pending()) {
 			self.currentUser.notifications.unread(self.currentUser.notifications.unread() + 1);
 		}
 
 		switch (data.activity) {
 		case "GROUP_INVITE":
-			data.message = '<strong>' + data.senderName + '</strong> invites you to join <strong><a href="#organization/' + data.group + '">' + data.groupName + '</a></strong>';
+			data.message = '<strong>' + data.senderName + '</strong> invites you to join <a href="#organization/' + data.group + '">' + data.groupName + '</a>';
 			self.currentUser.notifications.userNotifications.unshift(data);
 			break;
 		case "GROUP_INVITE_ACCEPT":
-			data.message = '<strong>' + data.senderName + '</strong> joined <strong><a href="#organization/' + data.group + '">' + data.groupName + '</a></strong>';
+			data.message = '<strong>' + data.senderName + '</strong> joined <a href="#organization/' + data.group + '">' + data.groupName + '</a>';
 			self.currentUser.notifications.groupNotifications.unshift(data);
 			break;
 		case "GROUP_INVITE_DECLINED":
-			data.message = '<strong>' + data.senderName + '</strong> declined your invitation to join <strong><a href="#organization/' + data.group + '">' + data.groupName + '</a></strong>';
+			data.message = '<strong>' + data.senderName + '</strong> declined your invitation to join <a href="#organization/' + data.group + '">' + data.groupName + '</a>';
 			self.currentUser.notifications.groupNotifications.unshift(data);
 			break;
 		case "GROUP_REQUEST":
-			data.message = '<strong>' + data.senderName + '</strong> wants to join <strong><a href="#organization/' + data.group + '">' + data.groupName + '</a></strong>';
+			data.message = '<strong>' + data.senderName + '</strong> wants to join <a href="#organization/' + data.group + '">' + data.groupName + '</a>';
 			self.currentUser.notifications.groupNotifications.unshift(data);
 			break;
 		case "GROUP_REQUEST_ACCEPT":
-			data.message = 'You joined <strong><a href="#organization/' + data.group + '">' + data.groupName + '</a></strong>';
+			data.message = 'You joined <a href="#organization/' + data.group + '">' + data.groupName + '</a>';
 			self.currentUser.notifications.userNotifications.unshift(data);
 			break;
 		case "GROUP_REQUEST_DENIED":
-			data.message = 'Your request to join <strong><a href="#organization/' + data.group + '">' + data.groupName + '</a></strong> was declined';
+			data.message = 'Your request to join <a href="#organization/' + data.group + '">' + data.groupName + '</a> was declined';
 			self.currentUser.notifications.userNotifications.unshift(data);
 			break;
 		case "COLLECTION_SHARE":
-			if (data.groupName) {
-				data.message = '<strong>' + data.senderName + '</strong> wants to share collection <strong><a href="#collectionview/' + data.collection + '">' + data.collectionName + '</a></strong> with <strong>' + data.groupName + '</strong>';
+			if (data.shareInfo.sharedWithGroup) {
+				data.message = '<strong>' + data.senderName + '</strong> wants to share collection <a href="#collectionview/' + data.resoure + '">' + data.resourceName + '</a> with <strong>' + data.shareInfo.userOrGroupName + '</strong>';
 				self.currentUser.notifications.groupNotifications.unshift(data);
 			} else {
-				data.message = '<strong>' + data.senderName + '</strong> wants to share collection <strong><a href="#collectionview/' + data.collection + '">' + data.collectionName + '</a></strong> with you';
+				data.message = '<strong>' + data.senderName + '</strong> wants to share collection <a href="#collectionview/' + data.resource + '">' + data.resourceName + '</a> with you';
 				self.currentUser.notifications.userNotifications.unshift(data);
 			}
 			break;
 		case "COLLECTION_SHARED":
-			if (data.groupName) {
-				data.message = '<strong><a href="#collectionview/' + data.collection + '">' + data.collectionName + '</a></strong> is now shared with <strong>' + data.groupName + '</strong>';
+			if (data.shareInfo.sharedWithGroup) {
+				data.message = '<a href="#collectionview/' + data.resource + '">' + data.resourceName + '</a> is now shared with <strong>' + data.shareInfo.userOrGroupName + '</strong>';
 			} else {
-				data.message = '<strong><a href="#collectionview/' + data.collection + '">' + data.collectionName + '</a></strong> is now shared with <strong>' + data.senderName + '</strong>';
+				data.message = '<a href="#collectionview/' + data.resource + '">' + data.resourceName + '</a> is now shared with <strong>' + data.senderName + '</strong>';
 			}
 			self.currentUser.notifications.userNotifications.unshift(data);
 			break;
 		case "COLLECTION_UNSHARED":
-			if (data.groupName) {
-				data.message = '<strong>' + data.collectionName + '</strong> is no longer shared with <strong>' + data.groupName + '</strong>';
+			if (data.shareInfo.sharedWithGroup) {
+				data.message = '<strong>' + data.resourceName + '</strong> is no longer shared with <strong>' + data.shareInfo.userOrGroupName + '</strong>';
 				self.currentUser.notifications.groupNotifications.unshift(data);
 			} else {
-				data.message = '<strong>' + data.collectionName + '</strong> is no longer shared with you';
+				data.message = '<strong>' + data.resourceName + '</strong> is no longer shared with you';
 				self.currentUser.notifications.userNotifications.unshift(data);
 			}
 			break;
 		case "COLLECTION_REJECTED":
-			var senderName = data.groupName ? data.groupName : data.senderName;
-			data.message = '<strong>' + senderName + '</strong> is not interested in collection <strong>' + data.collectionName + '</strong>';
+			var senderName = data.shareInfo.userOrGroupName;
+			data.message = '<strong>' + senderName + '</strong> is not interested in collection <strong>' + data.resourceName + '</strong>';
 			self.currentUser.notifications.userNotifications.unshift(data);
 			break;
 		default:
@@ -494,45 +548,15 @@ define("app", ['knockout', 'facebook', 'imagesloaded', 'moment', './js/app/plugi
 
 	likeItem = function (record, update) {
 		var id, data;
-		if (ko.isObservable(record.externalId)) {
-			id = record.externalId();
-			data = {
-				source: record.source(),
-				sourceId: record.recordId(),
-				title: record.title(),
-				provider: record.provider(),
-				creator: record.creator(),
-				description: record.description(),
-				rights: record.rights(),
-				type: '',
-				thumbnailUrl: record.thumb(),
-				sourceUrl: record.view_url(),
-				collectionId: self.currentUser.favoritesId(),
-				externalId: record.externalId()
-			};
-		} else {
-			id = record.externalId;
-			data = {
-				source: record.source,
-				sourceId: record.recordId,
-				title: record.title,
-				provider: record.provider,
-				creator: record.creator,
-				description: record.description,
-				rights: record.rights,
-				type: '',
-				thumbnailUrl: record.thumb,
-				sourceUrl: record.view_url,
-				collectionId: self.currentUser.favoritesId,
-				externalId: record.externalId
-			};
-		}
+		data = JSON.stringify(record.data());
+		id = record.externalId;
 		if (!self.isLiked(id)) { // Like
 			$.ajax({
 				type: "POST",
 				url: "/collection/liked",
-				data: JSON.stringify(data), //ko.toJSON(record),
+				data: data,
 				contentType: "application/json",
+				processData: false,
 				success: function (data, textStatus, jqXHR) {
 					self.currentUser.favorites.push(id);
 					update(true);
@@ -547,9 +571,12 @@ define("app", ['knockout', 'facebook', 'imagesloaded', 'moment', './js/app/plugi
 				}
 			});
 		} else { // Unlike
+			console.log(encodeURIComponent(id));
 			$.ajax({
-				type: "DELETE",
-				url: "/collection/unliked/" + id,
+				type: "POST",
+				url: "/collection/unliked",
+				contentType: "application/json",
+				data: JSON.stringify({externalId: id}),
 				success: function (data, textStatus, jqXHR) {
 					self.currentUser.favorites.remove(id);
 					update(false);
@@ -567,13 +594,14 @@ define("app", ['knockout', 'facebook', 'imagesloaded', 'moment', './js/app/plugi
 	};
 
 	self.getPublicCollections = function () {
+		console.log("public");
 		return $.ajax({
 			type: "GET",
 			contentType: "application/json",
 			dataType: "json",
-			url: "/collection/list",
+			url: "/collection/listPublic",
 			processData: false,
-			data: "isPublic=true&offset=0&count=20" //&isExhibition=false"
+			data: "offset=0&count=20" //&isExhibition=false"
 		}).done(
 			//"filterByUser=" +  self.currentUser.username() + "&filterByUserId=" + self.currentUser._id() +
 			//"&filterByEmail=" + self.currentUser.email() + "&access=read&offset=0&count=20"}).done(
@@ -589,6 +617,7 @@ define("app", ['knockout', 'facebook', 'imagesloaded', 'moment', './js/app/plugi
 		});
 	};
 
+	//TODO: check if it returns exhibitions. then can add unsaved records directly to exhibitions
 	self.getEditableCollections = function () {
 		return $.ajax({
 			type: "GET",
@@ -596,23 +625,18 @@ define("app", ['knockout', 'facebook', 'imagesloaded', 'moment', './js/app/plugi
 			dataType: "json",
 			url: "/collection/list",
 			processData: false,
-			data: "offset=0&count=500&isExhibition=false&directlyAccessedByUserName=" + JSON.stringify([{
+			data: "offset=0&count=50&directlyAccessedByUserOrGroup=" + JSON.stringify([{
 				user: self.currentUser.username(),
 				rights: "WRITE"
 			}]),
 		}).done(
-			//"filterByUser=" +  self.currentUser.username() + "&filterByUserId=" + self.currentUser._id() +
-			//"&filterByEmail=" + self.currentUser.email() + "&access=read&offset=0&count=20"}).done(
-
-			//"username=" + self.currentUser.username()+"&ownerId=" + self.currentUser._id() + "&email=" + self.currentUser.email() + "&offset=0" + "&count=20"}).done(
-
 			function (data) {
 				var array = JSON.parse(JSON.stringify(data.collectionsOrExhibitions));
 				self.currentUser.editables.removeAll();
 				var temparray=[];
 				array.forEach(function (item) {
 					temparray.push({
-						title: item.title,
+						title: self.findByLang(item.descriptiveData.label),
 						dbId: item.dbId
 					});
 				});
@@ -621,7 +645,7 @@ define("app", ['knockout', 'facebook', 'imagesloaded', 'moment', './js/app/plugi
 			}).fail(function (request, status, error) {});
 	};
 
-	self.getUserCollections = function (isExhibition) {
+	self.getUserCollections = function (isExhibition, offset, count) {
 		//filter = [{username:'maria.ralli',access:'OWN'}];
 		return $.ajax({
 			type: "GET",
@@ -629,14 +653,9 @@ define("app", ['knockout', 'facebook', 'imagesloaded', 'moment', './js/app/plugi
 			dataType: "json",
 			url: "/collection/list",
 			processData: false,
-			data: "creator=" + self.currentUser.username() + "&offset=0&count=20&isExhibition=" + isExhibition + "&totalHits=true"
+			data: "creator=" + self.currentUser.username() + "&offset="+offset+"&count="+count+"&isExhibition=" + isExhibition + "&collectionHits=true"
 		}).done(
 			function (data) {
-				// console.log("User collections " + JSON.stringify(data));
-				/*if (sessionStorage.getItem('User') !== null)
-					  sessionStorage.setItem("UserCollections", JSON.stringify(data));
-				  else if (localStorage.getItem('User') !== null)
-					  localStorage.setItem("UserCollections", JSON.stringify(data));*/
 				return data;
 			}).fail(function (request, status, error) {
 			//var err = JSON.parse(request.responseText);
@@ -651,7 +670,7 @@ define("app", ['knockout', 'facebook', 'imagesloaded', 'moment', './js/app/plugi
 			dataType: "json",
 			url: "/collection/list",
 			processData: false,
-			data: "creator=" + self.currentUser.username() + "&offset=0&count=1000&isExhibition=false&totalHits=true"
+			data: "creator=" + self.currentUser.username() + "&offset=0&count=1000&isExhibition=false&collectionHits=true"
 		}).done(
 			function (data) {
 				// console.log("User collections " + JSON.stringify(data));
@@ -713,6 +732,56 @@ define("app", ['knockout', 'facebook', 'imagesloaded', 'moment', './js/app/plugi
 		$('#popup').modal('show');
 	};
 
+	self.showInfoPopup = function(title, bodyText, callback) {
+		$("#myModal").find("h4").html(title);
+		var body = $("#myModal").find("div.modal-body");
+		body.html(bodyText);
+
+		var footer = $("#myModal").find("div.modal-footer");
+		if (footer.is(':empty')) {
+	        var cancelBtn = $('<button type="button" class="btn btn-default">Cancel</button>').appendTo(footer);
+	        cancelBtn.click(function() {
+	        	$("#myModal").modal('hide');
+	        });
+	        var confirmBtn = $('<button type="button" class="btn btn-primary">Confirm</button>').appendTo(footer);
+	        confirmBtn.click(function() {
+	        	$("#myModal").modal('hide');
+	        	callback();
+	        });
+	    }
+		$("#myModal").modal('show');
+		$('#myModal').on('hidden.bs.modal', function () {
+			$("#myModal").find("div.modal-footer").empty();
+		});
+		$('#myModal').addClass("topOfModal");
+	}
+
+	self.showInfoPopupTwoOptions = function(title, bodyText, callback) {
+		$("#myModal").find("h4").html(title);
+		var body = $("#myModal").find("div.modal-body");
+		body.html(bodyText);
+
+		var footer = $("#myModal").find("div.modal-footer");
+		if (footer.is(':empty')) {
+	        var cancelBtn = $('<button type="button" class="btn btn-default">No</button>').appendTo(footer);
+	        cancelBtn.click(function() {
+	        	$("#myModal").modal('hide');
+	        	callback.call(this, false);
+	        });
+	        var confirmBtn = $('<button type="button" class="btn btn-primary">Yes</button>').appendTo(footer);
+	        confirmBtn.click(function() {
+	        	$("#myModal").modal('hide');
+	        	callback.call(this, true);
+	        });
+	    }
+		$("#myModal").modal('show');
+		$('#myModal').on('hidden.bs.modal', function () {
+			$("#myModal").find("div.modal-footer").empty();
+		});
+		$('#myModal').addClass("topOfModal");
+	}
+
+
 	// Closing modal dialog and setting back to empty to dispose the component
 	closePopup = function () {
 		$('#popup').modal('hide');
@@ -720,17 +789,19 @@ define("app", ['knockout', 'facebook', 'imagesloaded', 'moment', './js/app/plugi
 		popupParams("{}");
 	};
 
-	autoCompleteUserName = function (elem, valueAccessor, allBindingsAccessor, viewModel, context) {
-		var category = allBindingsAccessor.get('category') || 0;
+	autoCompleteUserName = function (elem, valueAccessor, allBindingsAccessor, viewModel, context, callback) {
+		var onlyParents = allBindingsAccessor.get('onlyParents') || false;
+		var forUsers = allBindingsAccessor.get('forUsers') || false;
+		var paramsJSON = { "onlyParents": onlyParents, "forUsers" : forUsers};
+		if (allBindingsAccessor.has('forGroupType')) {
+			paramsJSON.forGroupType = allBindingsAccessor.get('forGroupType');
+		}
 		$(elem).devbridgeAutocomplete({
 			minChars: 3,
 			lookupLimit: 10,
 			serviceUrl: "/user/listNames",
 			paramName: "prefix",
-			params: {
-				onlyParents: false,
-				specifyCategory: category
-			},
+			params: paramsJSON,
 			ajaxSettings: {
 				dataType: "json"
 			},
@@ -755,14 +826,20 @@ define("app", ['knockout', 'facebook', 'imagesloaded', 'moment', './js/app/plugi
 				$(".autocomplete-suggestion").addClass("autocomplete-suggestion-extra");
 			},
 			formatResult: function (suggestion, currentValue) {
+				var prefix = suggestion.value.substring(0, currentValue.length);
 				var s =
 					/*'<img class="img-responsive img-circle" src="';
 				s	 += (currentUser.image() ? currentUser.image() : 'images/user.png') + '" />'
 				s	 +=*/
-					'<strong>' + currentValue + '</strong>';
+					'<strong>' + prefix + '</strong>';
 				s += suggestion.value.substring(currentValue.length);
 				s += ' <span class="label pull-right">' + suggestion.data.category + '</span>';
 				return s;
+			},
+			triggerSelectOnValidInput: false,
+			onSelect: function (suggestion) {
+				if (callback !== undefined && callback != null)
+					callback.call(this, suggestion.value);
 			}
 		});
 	};
@@ -776,7 +853,7 @@ define("app", ['knockout', 'facebook', 'imagesloaded', 'moment', './js/app/plugi
 		loadUser(storageData, true);
 	}*/
 
-	
+
 	function readCookie(name) {
 	    var nameEQ = encodeURIComponent(name) + "=";
 	    var ca = document.cookie.split(';');
@@ -787,7 +864,7 @@ define("app", ['knockout', 'facebook', 'imagesloaded', 'moment', './js/app/plugi
 	    }
 	    return null;
 	}
-	  
+
 	function ExtractQueryString(cookie) {
 	    var oResult = {};
 	    var aQueryString = cookie.replace(/\"/g, "").split("&");
@@ -798,37 +875,154 @@ define("app", ['knockout', 'facebook', 'imagesloaded', 'moment', './js/app/plugi
 	        }
 	    }
 	    return oResult;
-	} 
-	
+	}
+
 	self.checkLogged=function(){
 		var user=null;
 		var usercookie=readCookie("PLAY_SESSION");
 		if(usercookie)
 		usercookie.replace(/\"/g, "");
 		if(usercookie!=null){
-		   var keys=ExtractQueryString(usercookie);	
+		   var keys=ExtractQueryString(usercookie);
 		   if(self.currentUser._id()==undefined || self.currentUser._id().length==0){
-		     if(keys["user"]){self.currentUser._id(keys["user"]);self.reloadUser();}}
+		   	if(keys["username"]){self.currentUser.username(keys["username"]);}
+		   	if(keys["user"]){self.currentUser._id(keys["user"]);self.reloadUser();}}
 		    return (keys["user"]==undefined ? false : true);
-		}else{return false;}
-		
+		} else{return false;}
+
 	};
-	
+
 	self.checkLogged();
+
+	self.findByLang=function(val, language) {
+		if (language == undefined || language == null)
+			language = "default";
+		if (val !== undefined && val !== null)
+			if (val[language]) {
+				var label = val[language];
+				if(val[language][0]){
+					label = val[language][0];
+				}
+				if (label)
+					return label;
+			}
+		return "";
+     }
 	
-	//self.reloadUser(); // Reloads the user on refresh
-	
+	arrayFirstIndexOf = function (array, predicate) {
+		for (var i = 0, j = array.length; i < j; i++) {
+			if (predicate.call(undefined, array[i])) {
+				return i;
+			}
+		}
+		return -1;
+	};
+
+	 self.findProvenanceValues=function(array, selection) {
+			selvalue="";
+			if(selection=="dataProvider"){
+			  if(array.length>1 && array[0].provider)
+				  selvalue=array[0].provider;
+
+
+			 }
+			else if(selection=="dataProvider_uri"){
+				  if(array.length>1){
+					  selvalue=array[0].uri;
+
+					  if(array[0].uri && array[0].uri.length>0){
+						  selvalue=array[0].uri;
+			        	}
+
+				 }}
+			else if (selection=="provider"){
+				  if(array.length==3){
+
+					  if(array[1].uri && array[1].uri.length>0){
+			        		if(array[1].provider && array[1].provider.length>0){
+			        			selvalue="<a href='"+array[1].uri+"' target='blank'>"+array[1].provider+"</a>";
+			        		}
+
+			        	}else if(array[1].provider){
+			              selvalue+=array[1].provider;}
+
+				     }
+			}
+			else if (selection=="provider_uri"){
+				  if(array.length==3)
+					  if(array[1].uri && array[1].uri.length>0){
+
+			        			selvalue=array[1].uri;
+			        		}
+
+
+			}
+			else if (selection=="source"){
+				var size=array.length-1;
+				if(array[size].provider){
+	              selvalue+=array[size].provider;}
+
+		     }
+			else if (selection=="source_uri"){
+				var size=array.length-1;
+				if(array[size].uri && array[size].uri.length>0){
+	        			selvalue=array[size].uri;
+	        	} else if (size>0 && array[size-1].uri && array[size-1].uri.length>0) {
+        			selvalue=array[size-1].uri;
+	        	}
+
+		     }
+			else if (selection=="id"){
+				var size=array.length-1;
+				if(array[size].resourceId && array[size].resourceId.length>0){
+
+	        			selvalue+=array[size].resourceId;
+	        		}
+
+
+		     }
+			return selvalue;
+
+		}
+
+
+	 self.findResOrLit=function(data) {
+
+			selvalue="";
+			var uilang="";
+		    if(self.lang().length==0){
+						uilang="default";
+					}
+
+			if(data){
+			if(data[uilang]){
+
+			                	selvalue=data[uilang];
+			   }
+			else if(data.uri){
+				selvalue=data.uri;
+			}
+			else if(data["en"]){
+
+            	selvalue=data["en"];
+				}
+			}
+			return selvalue;
+
+		}
+//self.reloadUser(); // Reloads the user on refresh
+
 	/* function to alert all tabs on log in changes*/
 	function storageChange(event) {
 		if(event.key == 'logged_in' ) {
 			//console.log("logged in:"+event.newValue);
-			
+
 				window.location.reload();
 				if(event.newValue=="true"){
 					console.log("just logare");
-					
+
 				}
-			
+
 	    }
 	}
 	window.addEventListener('storage', storageChange, false);
@@ -839,17 +1033,24 @@ define("app", ['knockout', 'facebook', 'imagesloaded', 'moment', './js/app/plugi
 		reloadUser: reloadUser,
 		showPopup: showPopup,
 		closePopup: closePopup,
+		findByLang: findByLang,
+		findProvenanceValues: findProvenanceValues,
+		findResOrLit: findResOrLit,
 		autoCompleteUserName: autoCompleteUserName,
 		logout: logout,
 		getUserCollections: getUserCollections,
 		getAllUserCollections: getAllUserCollections,
 		getPublicCollections: getPublicCollections,
 		getEditableCollections: getEditableCollections,
+		showInfoPopup: showInfoPopup,
+		showInfoPopupTwoOptions: showInfoPopupTwoOptions,
 		isLiked: isLiked,
 		isLogged:isLogged,
 		loadFavorites: loadFavorites,
+		loadCounters: loadCounters,
 		likeItem: likeItem,
 		initOrUpdate: initOrUpdate,
-		scroll: scroll
+		scroll: scroll,
+		arrayFirstIndexOf: arrayFirstIndexOf
 	};
 });

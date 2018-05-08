@@ -1,0 +1,43 @@
+<section class="action profile">
+	<div class="action-header">
+		<div class="title">My Profile</div>
+	</div>
+	<div class="action-body">
+		<div class="group">
+			<div class="title">Profile Picture</div>
+			<!-- profile picture box-->
+			<div class="profilepicture">
+				<div class="boxwrap">
+					<img data-bind="attr: { src: profileImage }" />
+					<a href="#" data-toggle="tooltip" data-placement="top" title="Delete profile picture" class="hue" data-bind="click: deleteAvatar"><i class="fa fa-trash-o"></i></a>
+				</div>
+				<!-- action-->
+				<div class="profileaction">
+					<span>Load picture from</span>
+					<ul>
+						<li><a href="#" data-toggle="tooltip" data-placement="top" title="Local image" data-bind="click: loadFromDisk"><i class="fa fa-folder-o"></i></a></li>
+						<li><a href="#" data-toggle="tooltip" data-placement="top" title="Facebook" data-bind="click: loadFromFacebook"><i class="fa fa-facebook"></i></a></li>
+						<li><a href="#" data-toggle="tooltip" data-placement="top" title="Google+" data-bind="click: loadFromGoogle"><i class="fa fa-google-plus"></i></a></li>
+					</ul>
+					<div class="hiddenfile"><input type="file" id="imageupload" name="image" /></div>
+				</div>
+			</div>
+		</div>
+		<div class="group">
+			<div class="title">Personal Info</div>
+			<div class="fields">
+				<div class="form-group" data-bind="validationElement: firstName">
+					<input type="text" placeholder="First Name" class="half" data-bind="value: firstName, valueUpdate: 'afterkeypress', hasFocus: true;" />
+				</div>
+				<div class="form-group" data-bind="validationElement: lastName">
+					<input type="text" placeholder="Last Name" class="half" data-bind="value: lastName, valueUpdate: 'afterkeypress'" />
+				</div>
+			</div>
+			<textarea type="text" placeholder="About me" class="about" data-bind="value: about"></textarea>
+		</div>
+	</div>
+	<div class="button-group">
+		<a href="#" class="btn-green-o cancel" data-bind="click: closeWindow">Cancel</a>
+		<a href="#" class="btn-green" data-bind="click: updateProfile">Save Profile</a>
+	</div>
+</section>

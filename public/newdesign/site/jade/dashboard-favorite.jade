@@ -1,0 +1,399 @@
+//- index.jade
+- var title = "WITH - My Favorite"
+- var page  = "favorite"
+
+doctype html
+html
+
+	// head
+	include ./includes/head.inc.jade
+
+	// body
+	body
+
+		// head
+		include ./includes/header.inc.jade
+
+		// main
+		div( role="main" )
+			.container-fluid
+
+				// wrapper
+				.wrapper
+
+					// sidebar
+					aside
+					
+						// nav
+						include ./includes/asidenav.inc.jade
+					
+					// main
+					main
+
+						// collection section
+						section.favorite
+
+							// message
+							section.message
+								img(src='img/ui/ic-heart.png').hero
+								.message-body
+									.header Welcome to My Favorite
+									.description
+										| This is <b> my favorite </b>, a collaborative place where you can work on thins lorem ipsum dolor sit amet.
+									a(href="#")
+										span.cross
+										span.text Hide welcome message
+
+							// collection main
+							section.collection-list.favorite-list
+
+								// collection main header
+								.list-head
+
+									// item count
+									span.item-count 7 items
+
+									.filtertype
+										img.mag( src="img/ui/ic-mag.png" )
+										input( type="text" class="filtertext" placeholder="Search favorite" )
+											
+									
+									// control
+									.list-control
+
+										a(href="#" data-toggle="tooltip" data-placement="top" title="API Calls").fa.fa-rss.detail-control.single
+
+							// isotope section
+							section.isotope
+								
+
+								section.listing
+
+									.grid
+
+										.sizer
+
+										.item
+											.wrap
+												a(href="#" title="Lorem ipsum")
+													.thumb
+														img(src="img/content/content-1.png" alt="Lorem ipsum")
+														
+												.info
+													h2.title Lorem ipsum dolor sit amet conceptus
+													span.source National Library of Latvia
+													span.provider 
+														a(href="#").links digitainz.org
+												.action-group
+													.wrap
+														
+														ul
+															li
+																a(href="#" data-toggle="tooltip" data-placement="top" title="Delete media" ).fa.fa-trash-o
+															li
+																a(href="#" data-toggle="tooltip" data-placement="top" title="Add to favorite" ).fa.fa-heart
+															li
+																a(href="#" data-toggle="tooltip" data-placement="top" title="Collect it" ).fa.fa-download.collectbutton
+
+
+
+										.item
+											.wrap
+												a(href="#" title="Lorem ipsum")
+													.thumb
+														img(src="img/content/content-1.png" alt="Lorem ipsum")
+														
+												.info
+													h2.title Lorem ipsum dolor sit amet conceptus
+													span.source National Library of Latvia
+													span.provider 
+														a(href="#").links digitainz.org
+												.action-group
+													.wrap
+														ul
+															li
+																a(href="#" data-toggle="tooltip" data-placement="top" title="Delete media" ).fa.fa-trash-o
+															li
+																a(href="#" data-toggle="tooltip" data-placement="top" title="Add to favorite" ).fa.fa-heart
+															li
+																a(href="#" data-toggle="tooltip" data-placement="top" title="Collect it" ).fa.fa-download.collectbutton
+
+
+										.item
+											.wrap
+												a(href="#" title="Lorem ipsum")
+													.thumb
+														img(src="img/content/content-3.png" alt="Lorem ipsum")
+														
+												.info
+													h2.title Lorem ipsum dolor sit amet conceptus
+													span.source National Library of Latvia
+													span.provider 
+														a(href="#").links digitainz.org
+												.action-group
+													.wrap
+														ul
+															li
+																a(href="#" data-toggle="tooltip" data-placement="top" title="Delete media" ).fa.fa-trash-o
+															li
+																a(href="#" data-toggle="tooltip" data-placement="top" title="Add to favorite" ).fa.fa-heart
+															li
+																a(href="#" data-toggle="tooltip" data-placement="top" title="Collect it" ).fa.fa-download.collectbutton
+
+										.item
+											.wrap
+												a(href="#" title="Lorem ipsum")
+													.thumb
+														img(src="img/content/content-2.png" alt="Lorem ipsum")
+														
+												.info
+													h2.title Lorem ipsum dolor sit amet conceptus
+													span.source National Library of Latvia
+													span.provider 
+														a(href="#").links digitainz.org
+												.action-group
+													.wrap
+														ul
+															li
+																a(href="#" data-toggle="tooltip" data-placement="top" title="Delete media" ).fa.fa-trash-o
+															li
+																a(href="#" data-toggle="tooltip" data-placement="top" title="Add to favorite" ).fa.fa-heart
+															li
+																a(href="#" data-toggle="tooltip" data-placement="top" title="Collect it" ).fa.fa-download.collectbutton
+
+							a(href="#").loadmore 
+								| load more
+								.left
+								.right
+								.top
+								.bot
+							
+							// collection api
+							section.action.api
+								.action-header
+									.title API Calls
+
+								.action-body
+									.input-style
+										span.get GET
+										input(type="text" value='http://ipa.image.ntua.gr:9010/collection/53')
+									.input-style
+										span.post POST
+										input(type="text" value='http://ipa.image.ntua.gr:9010/collection/53')
+
+								.button-group
+									a(href="#").btn-green.cancel close
+
+							// collection give access
+							section.action.collect
+								.action-header
+									.title Collect an item
+
+								.action-body
+									select.form-control
+										option Select a collection
+										option Select a collection
+										option Select a collection
+										
+									.group
+										.title Media info
+										p Lorem ipsum dolor sit amet conceptuas
+										textarea(disabled)
+											| Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip.
+
+								.button-group
+									a(href="#").btn-green-o.cancel Cancel
+									a(href="#").btn-green Add to collection
+
+							// item view
+							section.itemview
+
+								// header
+								.header
+									.container-fluid
+
+										// head
+										h3 Media Viewer
+
+										// actions
+										.actions
+											a.medialink( href="#" data-toggle="tooltip" data-placement="bottom" title="Visit item site" )
+												i.fa.fa-external-link
+											a.closemedia( href="#" data-toggle="tooltip" data-placement="bottom" title="Close media viewer" )
+												img( src="img/ui/ic-close.png" )
+											
+
+								// media content
+								.mediacontent
+									.container-fluid
+
+										// wrap
+										.wrap
+
+											// item
+											.media
+												img( src="img/content/img-item.jpg" )
+
+
+											// metadata
+											.metadata
+												.infowrap
+
+													// title
+													h1 Avenue de l'Observatoire , 1932-34
+													.owner
+														a( href="#" title="#" ) National Gallery Athens
+
+
+													// metadata
+													ul.nav.nav-tabs( role="tablist" )
+														li.active
+															a( href="#information" title="" data-toggle="tab" ) Info
+														li
+															a( href="#related" title="" data-toggle="tab" ) Related
+														li
+															a( href="#comment" title="" data-toggle="tab" ) Comments
+														li
+															a( href="#share" title="" data-toggle="tab" ) Share
+
+													// panes
+													.tab-content
+														.tab-pane.active( id="information" )
+															
+															// description
+															ul.meta
+																li
+																	.title 
+																		.titlewrap Description
+																	.field
+																		| George Brassaï (pseudonym of Gyula Halász) (9 September 1899 — 8 July 1984) was a Hungarian photographer, 
+																		| sculptor, and filmmaker who rose to international fame in France in the 20th century. He was one of the numerous 
+																		| Hungarian artists who flourished in Paris beginning between the World Wars. In the early 21st century, the discovery 
+																		| of more than 200 letters and hundreds of drawings and other items from the period 1940–1984 has provided scholars with 
+																		| material for understanding his later life and career.
+																li
+																	.title 
+																		.titlewrap Provider
+																	.field
+																		| National Gallery - Alexandros Soutzos Museum, Athens.
+																li
+																	.title 
+																		.titlewrap Rights
+																	.field
+																		| Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+																li
+																	.title 
+																		.titlewrap Record Source
+																	.field
+																		a( href="#" title="#" ) 
+																			| EUROPEANA
+
+														.tab-pane( id="related" )
+
+															// related media
+															.title 
+																.titlewrap Other media item by National Gallery Athens
+																a.follow( href="#" title="Follow National Gallery Athens") FOLLOW
+															ul.related
+																li
+																	a( href="#" data-toggle="tooltip" data-placement="top" title="Lorem ipsum dolor" )
+																		img( src="img/content/content-4.png" alt="media" )
+																li
+																	a( href="#" data-toggle="tooltip" data-placement="top" title="Lorem ipsum dolor" )
+																		img( src="img/content/content-4.png" alt="media" )
+																li
+																	a( href="#" data-toggle="tooltip" data-placement="top" title="Lorem ipsum dolor" )
+																		img( src="img/content/content-4.png" alt="media" )
+																li
+																	a( href="#" data-toggle="tooltip" data-placement="top" title="Lorem ipsum dolor" )
+																		img( src="img/content/content-4.png" alt="media" )
+
+															// related media
+															.title 
+																.titlewrap Similar media item
+															ul.related
+																li
+																	a( href="#" data-toggle="tooltip" data-placement="top" title="Lorem ipsum dolor" )
+																		img( src="img/content/content-4.png" alt="media" )
+																li
+																	a( href="#" data-toggle="tooltip" data-placement="top" title="Lorem ipsum dolor" )
+																		img( src="img/content/content-4.png" alt="media" )
+																li
+																	a( href="#" data-toggle="tooltip" data-placement="top" title="Lorem ipsum dolor" )
+																		img( src="img/content/content-4.png" alt="media" )
+																li
+																	a( href="#" data-toggle="tooltip" data-placement="top" title="Lorem ipsum dolor" )
+																		img( src="img/content/content-4.png" alt="media" )
+
+															
+														.tab-pane( id="comment" )
+															
+															// comment 
+															.comments
+																.form
+																	textarea.commentbox( class="form-control" placeholder="Fill in your comment" )
+																	button.btn.btn-green Submit
+
+																// commentlist
+																ul.commentlist
+																	li
+																		a( href="#" title="#" )
+																			span.profilepicture
+																				img(src='img/content/img-profile.jpg')
+																		.entry
+																			span.name Mike Jones
+																			.text
+																				| Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.	
+																			.meta
+																				| 1 day ago
+																	li
+																		a( href="account.html" title="#" )
+																			span.profilepicture
+																				img(src='img/content/img-profile.jpg')
+																		.entry
+																			span.name Mike Jones
+																			.text
+																				| Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.	
+																			.meta
+																				| 1 day ago
+																	li
+																		a( href="account.html" title="#" )
+																			span.profilepicture
+																				img(src='img/content/img-profile.jpg')
+																		.entry
+																			span.name Mike Jones
+																			.text
+																				| Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.	
+																			.meta
+																				| 1 day ago
+																	li
+																		a( href="account.html" title="#" )
+																			span.profilepicture
+																				img(src='img/content/img-profile.jpg')
+																		.entry
+																			span.name Mike Jones
+																			.text
+																				| Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.	
+																			.meta
+																				| 1 day ago
+
+														.tab-pane( id="share" )
+							
+															// share
+															.sharetext Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+															ul.social
+																li
+																	a( href="#" title="#" )
+																		img( src="img/ui/ic-facebook.png" alt="facebook" )
+																li
+																	a( href="#" title="#" )
+																		img( src="img/ui/ic-twitter.png" alt="facebook" )
+																li
+																	a( href="#" title="#" )
+																		img( src="img/ui/ic-pinterest.png" alt="facebook" )
+																li
+																	a( href="#" title="#" )
+																		img( src="img/ui/ic-mail.png" alt="facebook" )
+
+	// script
+	include ./includes/script.inc.jade

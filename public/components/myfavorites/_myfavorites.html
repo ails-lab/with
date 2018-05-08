@@ -1,0 +1,98 @@
+ <div role="main">
+		<div class="container-fluid">
+			<!-- wrapper-->
+			<div class="wrapper" id="withcollection">
+				<!-- sidebar-->
+				<!-- ko if:isLogged()==true  -->
+				<side-bar params="route: route"></side-bar>
+				<!-- /ko -->
+				<!-- main-->
+          <!-- main-->
+          <main>
+            <!-- collection section-->
+            <section class="favorite">
+              <!-- message-->
+              <section class="message"><img src="img/ui/ic-heart.png" class="hero">
+                <div class="message-body">
+                  <div class="header">Welcome to My Favorites</div>
+                  <div class="description">This is a place to store all <b> my favorite </b> items.</div><a href="#"><span class="cross"></span><span class="text">Hide welcome message</span></a>
+                </div>
+              </section>
+              <!-- collection main-->
+              <section class="collection-list favorite-list">
+                <!-- collection main header-->
+                <div class="list-head">
+                  <!-- control-->
+                  <div class="list-control">
+                 <a data-toggle="tooltip" data-placement="top" title="API Calls" class="fa fa-rss detail-control"></a> </div>
+                </div>
+			</section>
+					
+						
+						
+						<!-- isotope section-->
+              <section class="isotope">
+                <section class="listing">
+                  <div class="grid" data-bind="attr: {id: id}">
+                    <div class="sizer"></div>
+                   
+                   
+                  </div>
+                </section>
+                <!-- load more -->
+							<a href="#" class="loadmore" data-bind="visible: citems().length>0 ,event: {click: loadNext}">
+								Load more
+								<div class="left"></div>
+								<div class="right"></div>
+								<div class="top"></div>
+								<div class="bot"></div>
+							</a>
+							<div class="more" data-bind="visible: loading"> <i class="fa fa-spinner fa-pulse"></i></div>
+              </section>
+						<!-- collection api-->
+						<section class="action api">
+							<div class="action-header">
+								<div class="title">API Calls</div>
+							</div>
+							<div class="action-body">
+								<div class="input-style"><span class="get">GET</span>
+									<input type="text" data-bind="value: getAPIUrlCollection()">
+								</div>
+								<div class="input-style"><span class="get">GET</span>
+									<input type="text" data-bind="value: getAPIUrlRecords()">
+								</div>
+							</div>
+							<div class="button-group"><a class="btn-green cancel">close</a></div>
+						</section>
+						<!-- collection edit-->
+						<section class="action edit">
+							<div class="action-header">
+								<div class="title">Edit Collection</div>
+								<div class="toggle">
+									<input type="checkbox" id="toggle1" data-bind="checked:isPublicEdit">
+									<label for="toggle1"></label><span class="private">private</span><span class="public">public</span>
+								</div>
+							</div>
+							<div class="action-body">
+								<input type="text" placeholder="Name your collection" data-bind="{value: titleToEdit}">
+								<textarea placeholder="Describe your collection" data-bind="{value: descriptionToEdit}" ></textarea>
+							</div>
+							<div class="button-group"><a class="btn-green-o cancel">Cancel</a><a href="#" class="btn-green" data-bind="click: editCollection">Save collection</a></div>
+						</section>
+						<!-- collection new-->
+						<section class="action upload">
+							<!-- ko component: {
+								name: "image-upload",
+								params: { collectionId: id() }
+							} -->
+							<!-- /ko -->
+						</section>
+						<!-- item view-->
+						<item-view params="route: route"></item-view>
+						
+						
+					</section>
+				</main>
+			</div>
+		</div>
+</div>

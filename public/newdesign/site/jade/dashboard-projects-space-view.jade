@@ -1,0 +1,120 @@
+//- index.jade
+- var title = "WITH - Projects"
+- var page  = "projects"
+
+doctype html
+html
+
+	// head
+	include ./includes/head.inc.jade
+
+	// body
+	body
+
+		header
+			.wrap
+				.container
+					a(href="#").logo
+						img(src="img/ui/logo.png")
+
+					nav
+						ul
+							li
+								a(href="#" title="home") HOME
+							li
+								a(href="#" title="home") EXPLORE
+							li
+								a(href="#" title="home") ABOUT
+							li
+								a(href="#" title="home") SEARCH
+					section.login-section
+						a(href="dashboard.html").back GO TO DASHBOARD
+
+		// main
+		div( role="main" )
+
+			// viewer mode
+			.viewer
+
+				// hero section
+				section.hero
+					.container
+						.meta
+							.top-info
+								.thumbnails
+									img(src="img/ui/profile-placeholder.png" data-toggle="tooltip" data-placement="top" title="Add profile picture")
+								.header
+									.title Galactic Empire Organization
+									.location Amsterdam, The Netherlands
+									a(href="#") Visit site
+							.description
+								| Space, the final frontier. These are the voyages of the Starship enterprise. Its five-year mission: to explore strange new worlds. to seek out new life and new civilizations, to boldly go where no man has gone before. Science has not yet mastered prophecy. We predict too much for the next year and yet far too little for the next 10.
+
+						.map
+
+				
+				// isotope section
+				section.isotope
+					section.filter
+						.container
+							.wrap
+								// menu
+								ul.nav
+									li.active(data-filter='*')
+										a(href='#', title='ALL') All
+									li(data-filter='.collection')
+										a(href='#', title='ALL') Collections
+									li(data-filter='.exhibition')
+										a(href='#', title='EXHIBITION') Exhibitions
+					.container
+						section.listing
+
+							.grid
+
+								.sizer
+
+								.item.exhibition
+									.wrap
+										a(href="#" title="Lorem ipsum")
+											.thumb
+												img(src="img/content/content-1.png" alt="Lorem ipsum")
+												
+											.info
+												.type Exhibitions
+												h2.title Lorem ipsum dolor sit amet conceptus
+
+								.item.exhibition
+									.wrap
+										a(href="#" title="Lorem ipsum")
+											.thumb
+												img(src="img/content/content-1.png" alt="Lorem ipsum")
+											.info
+												.type Exhibitions
+												h2.title Lorem ipsum dolor sit amet conceptus
+
+
+								.item.collection
+									.wrap
+										a(href="#" title="Lorem ipsum")
+											.thumb
+												img(src="img/content/content-2.png" alt="Lorem ipsum")
+												.counter 124 items
+											.info
+												.type Collection
+												h2.title Lorem ipsum dolor sit amet conceptus
+
+								.item.collection
+									.wrap
+										a(href="#" title="Lorem ipsum")
+											.thumb
+												img(src="img/content/content-3.png" alt="Lorem ipsum")
+												.counter 124 items
+											.info
+												.type Collection
+												h2.title Lorem ipsum dolor sit amet conceptus
+		
+			// footer
+			include ./includes/footer.view.jade
+
+	// script
+	include ./includes/script.inc.jade

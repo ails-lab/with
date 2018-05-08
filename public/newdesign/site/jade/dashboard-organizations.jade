@@ -1,0 +1,292 @@
+//- index.jade
+- var title = "WITH - Organizations"
+- var page  = "organizations"
+
+doctype html
+html
+
+	// head
+	include ./includes/head.inc.jade
+
+	// body
+	body
+
+		// head
+		include ./includes/header.inc.jade
+
+		// main
+		div( role="main" )
+			.container-fluid
+
+				// wrapper
+				.wrapper
+
+					// sidebar
+					aside
+					
+						// nav
+						include ./includes/asidenav.inc.jade
+					
+					// main
+					main
+
+						// project
+						section.project.organization
+
+							// header
+							section.header
+
+								// new collection
+								a(href="#").new
+									span.plus
+									span.text New Organization
+
+							// message
+							section.message
+								img(src='img/ui/ic-project.png').hero
+								.message-body
+									.header Welcome to Organizations
+									.description
+										| This is <b> Organizations </b>, a collaborative place where you can work on thins lorem ipsum dolor sit amet.
+									a(href="#")
+										span.cross
+										span.text Hide welcome message
+
+							// collection main
+							section.project-list
+
+								// collection main header
+								.list-head
+
+									// item count
+									span.item-count 7 organizations
+
+									.filtertype
+										img.mag( src="img/ui/ic-mag.png" )
+										input( type="text" class="filtertext" placeholder="Search organization" )
+											
+									
+									// control
+									.list-control
+
+										a(href="#" data-toggle="tooltip" data-placement="top" title="API Calls").fa.fa-rss.detail-control.single
+
+								// listing
+								ul.list-body.list
+
+									li
+										.thumbnails
+											.wrap
+												img(src="img/content/collection-hero.png")
+											.wrap.small
+												img(src="img/content/collection-hero.png")
+										.meta
+											a(href="organizations-space-view.html" title="View organization space").header Collection title orem ipsum dolor sit amet
+											.description
+												| Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip.
+											.other-info
+												.count 20 Items
+												.date December 15, 2015
+												.user By Annac
+											.action-group
+												.wrap
+													ul
+														li
+															a(href="#" data-toggle="tooltip" data-placement="top" title="Delete organization" ).fa.fa-trash-o
+														li
+															a(href="dashboard-organizations-space.html" data-toggle="tooltip" data-placement="top" title="Edit organization space" ).fa.fa-pencil
+														li
+															a(href="#" data-toggle="tooltip" data-placement="top" title="Manage members" ).fa.fa-user.members
+
+
+									li
+										.thumbnails
+											.wrap
+												img(src="img/content/collection-hero.png")
+											.wrap.small
+												img(src="img/content/collection-hero.png")
+										.meta
+											a(href="organizations-space-view.html" title="View organization space").header Collection title orem ipsum dolor sit amet
+											.description
+												| Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip.
+											.other-info
+												.count 20 Items
+												.date December 15, 2015
+												.user By Annac
+											.action-group
+												.wrap
+													ul
+														li
+															a(href="#" data-toggle="tooltip" data-placement="top" title="Delete organization" ).fa.fa-trash-o
+														li
+															a(href="dashboard-organizations-space.html" data-toggle="tooltip" data-placement="top" title="Edit organization space" ).fa.fa-pencil
+														li
+															a(href="#" data-toggle="tooltip" data-placement="top" title="Manage members" ).fa.fa-user.members
+
+								a(href="#").loadmore 
+									| load more
+									.left
+									.right
+									.top
+									.bot
+
+							// collection new
+							section.action.new
+								.action-header
+									.title New Organization
+
+								.action-body
+									input(type="text", placeholder='Name your project')
+									a(href="#").add
+										span.plus
+										span.text Add description
+									.spacing
+
+										.group
+											.title Page URL
+											p www.with.image.ntua.gt/assets/
+											input(type="text" placeholder="Page URL")
+										.group
+											.title Location
+											input(type="text" placeholder="Address")
+											input(type="text" placeholder="City").half
+											select.form-control.half
+												option Country
+												option Country 2
+												option Country 3
+										.group
+											.title Website URL
+											input(type="text" placeholder="URL")
+
+
+
+								.button-group
+									a(href="#").btn-green-o.cancel Cancel
+									a(href="#").btn-green Create and go to organization space
+
+							// collection give access
+							section.action.access
+								.action-header
+									.title Manage members
+
+								.action-body
+									.group
+										.title Users access
+										input(type="text" placeholder="Start typing username")
+										ul.members-list
+											li
+
+												.toggle
+													input(type='checkbox')#u1
+													label(for='u1')
+													span.member member
+													span.admin admin
+												.thumbnails
+													img(src="img/content/img-profile.jpg")
+													a(href="#" ).trash
+														i.fa.fa-trash
+												.username Username 1
+												
+											li
+												.toggle
+													input(type='checkbox')#u2
+													label(for='u2')
+													span.member member
+													span.admin admin
+												.thumbnails
+													img(src="img/content/img-profile.jpg")
+													a(href="#").trash
+														i.fa.fa-trash
+												.username Username 2 lorem
+												
+											li
+												.toggle
+													input(type='checkbox')#u3
+													label(for='u3')
+													span.member member
+													span.admin admin
+												.thumbnails
+													img(src="img/content/img-profile.jpg")
+													a(href="#" ).trash
+														i.fa.fa-trash
+												.username Username 3
+												
+											li
+												.toggle
+													input(type='checkbox')#u4
+													label(for='u4')
+													span.member member
+													span.admin admin
+												.thumbnails
+													img(src="img/content/img-profile.jpg")
+													a(href="#").trash
+														i.fa.fa-trash
+												.username Username 4
+
+											li
+												.toggle
+													input(type='checkbox')#u5
+													label(for='u5')
+													span.member member
+													span.admin admin
+												.thumbnails
+													img(src="img/content/img-profile.jpg")
+													a(href="#" ).trash
+														i.fa.fa-trash
+												.username Username 3
+												
+											li
+												.toggle
+													input(type='checkbox')#u6
+													label(for='u6')
+													span.member member
+													span.admin admin
+												.thumbnails
+													img(src="img/content/img-profile.jpg")
+													a(href="#").trash
+														i.fa.fa-trash
+												.username Username 4
+												
+
+									.group
+										.title Groups access
+										input(type="text" placeholder="Start typing group name")
+										ul.members-list
+											li.blue
+												span.text ES
+													a(href="#" ).trash
+														i.fa.fa-trash
+												.toggle
+													input(type='checkbox')#g1
+													label(for='g1')
+													span.member member
+													span.admin admin
+												.username Europeana Space
+											li.green
+												span.text SA
+													a(href="#" ).trash
+														i.fa.fa-trash
+												.toggle
+													input(type='checkbox')#g2
+													label(for='g2')
+													span.member member
+													span.admin admin
+												.username SOCIAL ART
+											li.orange
+												span.text UF
+													a(href="#" ).trash
+														i.fa.fa-trash
+												.toggle
+													input(type='checkbox')#g3
+													label(for='g3')
+													span.member member
+													span.admin admin
+												.username UNIVERSITY FELLOW
+
+
+								.button-group
+									a(href="#").btn-green.cancel Close
+							
+						
+	// script
+	include ./includes/script.inc.jade

@@ -1,0 +1,33 @@
+	<div class="action-header">
+		<div class="title">Upload image</div>
+	</div>
+	<form id="image-upload">
+		<div class="action-body">
+			<div id="uploaded-image">
+				<label for="mediaupload">
+					<img class="upload-img" data-bind="attr: { src: displayImage }" />
+				</label>
+				<input type="file" id="mediaupload" name="image" />
+			</div>
+
+			<span class="help-block has-error" data-bind="validationMessage: thumbnailUrl"></span>
+
+			<div class="progress" id="progress">
+				<div class="progress-bar" role="progressbar" aria-valuenow="60" aria-valuemin="0" aria-valuemax="100" style="width: 0%;"></div>
+			</div>
+
+			<div class="form-group" data-bind="validationElement: title" style="vertical-align: top;">
+				<input type="text" placeholder="Title" id="itemTitle" data-bind="value: title, valueUpdate: 'afterkeypress', hasFocus: true;">
+			</div>
+			<div class="form-group">
+				<select class="form-control" id="itemRights" data-bind="options: rights, optionsCaption: 'Please select rights', value: withRights"></select>
+			</div>
+			<div class="form-group">
+				<textarea rows="4" placeholder="Description..." id="itemDescription" data-bind="value: description"></textarea>
+			</div>
+			<div class="form-group">
+				<textarea rows="4" placeholder="Data Provider" id="itemDataProvider" data-bind="value: dataProvider"></textarea>
+			</div>
+		</div>
+		<div class="button-group"><a class="btn-green-o cancel" data-bind="click: close">Cancel</a><a  class="btn-green" data-bind="click: uploadImage">Save</a></div>
+	</form>

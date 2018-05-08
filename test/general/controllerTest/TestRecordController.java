@@ -32,7 +32,7 @@ import java.util.Date;
 
 import model.Collection;
 import model.CollectionRecord;
-import model.User;
+import model.usersAndGroups.User;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -64,7 +64,7 @@ public class TestRecordController {
 		col.setCreated(new Date());
 		col.setLastModified(new Date());
 		col.setIsPublic(false);
-		col.setOwnerId(user);
+		col.setCreatorId(user);
 		DB.getCollectionDAO().makePermanent(col);
 
 		CollectionRecord record = new CollectionRecord();
@@ -72,11 +72,11 @@ public class TestRecordController {
 		record.setTitle("This is stored to test the controller");
 		record.setDescription("Desc to test controller");
 		record.setCreated(new Date());
-		record.setSource("Youtube");
-		record.setSourceId("123456");
-		record.setSourceUrl("http://www.youtube.com/");
-		record.setType("Music");
-		record.setItemRights("all");
+		//record.setSource("Youtube");
+		//record.setSourceId("123456");
+		//record.setSourceUrl("http://www.youtube.com/");
+		//record.setType("Music");
+		//record.setItemRights("all");
 
 		try {
 			record.getContent().put("XML-EDM",
@@ -123,7 +123,7 @@ public class TestRecordController {
 		col.setCreated(new Date());
 		col.setLastModified(new Date());
 		col.setIsPublic(false);
-		col.setOwnerId(user);
+		col.setCreatorId(user);
 		DB.getCollectionDAO().makePermanent(col);
 
 		CollectionRecord record = new CollectionRecord();
@@ -131,11 +131,7 @@ public class TestRecordController {
 		record.setTitle("This is stored to test the controller");
 		record.setDescription("Desc to test controller");
 		record.setCreated(new Date());
-		record.setSource("Youtube");
-		record.setSourceId("123456");
-		record.setSourceUrl("http://www.youtube.com/");
-		record.setType("Music");
-		record.setItemRights("all");
+		
 
 		try {
 			record.getContent().put("XML-EDM",
@@ -186,7 +182,7 @@ public class TestRecordController {
 		col.setCreated(new Date());
 		col.setLastModified(new Date());
 		col.setIsPublic(false);
-		col.setOwnerId(user);
+		col.setCreatorId(user);
 		DB.getCollectionDAO().makePermanent(col);
 
 		CollectionRecord record = new CollectionRecord();
@@ -194,11 +190,7 @@ public class TestRecordController {
 		record.setTitle("This is stored to test the controller");
 		record.setDescription("Desc to test controller");
 		record.setCreated(new Date());
-		record.setSource("Youtube");
-		record.setSourceId("123456");
-		record.setSourceUrl("http://www.youtube.com/");
-		record.setType("Music");
-		record.setItemRights("all");
+		
 
 		try {
 			record.getContent().put("XML-EDM",
@@ -245,7 +237,7 @@ public class TestRecordController {
 		col.setCreated(new Date());
 		col.setLastModified(new Date());
 		col.setIsPublic(false);
-		col.setOwnerId(user);
+		col.setCreatorId(user);
 		DB.getCollectionDAO().makePermanent(col);
 
 		CollectionRecord record = new CollectionRecord();
@@ -253,11 +245,7 @@ public class TestRecordController {
 		record.setTitle("This is stored to test the controller");
 		record.setDescription("Desc to test controller");
 		record.setCreated(new Date());
-		record.setSource("Youtube");
-		record.setSourceId("123456");
-		record.setSourceUrl("http://www.youtube.com/");
-		record.setType("Music");
-		record.setItemRights("all");
+		
 
 		try {
 			record.getContent().put("XML-EDM",
@@ -304,7 +292,7 @@ public class TestRecordController {
 		col.setCreated(new Date());
 		col.setLastModified(new Date());
 		col.setIsPublic(false);
-		col.setOwnerId(user);
+		col.setCreatorId(user);
 		DB.getCollectionDAO().makePermanent(col);
 
 		CollectionRecord record = new CollectionRecord();
@@ -313,12 +301,7 @@ public class TestRecordController {
 		record.setDescription("Desc to test controller");
 		record.setCreated(new Date());
 		record.setExternalId("AAA666");
-		record.setSource("Youtube");
-		record.setSourceId("123456");
-		record.setSourceUrl("http://www.youtube.com/");
-		record.setType("Music");
-		record.setItemRights("all");
-
+		
 		try {
 			record.getContent().put("XML-EDM",
 					new String(Files.readAllBytes(Paths.get("test/resources/sample-euscreenxml-core.xml"))));
@@ -329,8 +312,8 @@ public class TestRecordController {
 		}
 		DB.getCollectionRecordDAO().makePermanent(record);
 
-		ElasticIndexer indexer = new ElasticIndexer(col, record);
-		indexer.index();
+		//ElasticIndexer indexer = new ElasticIndexer(col, record);
+		//indexer.index();
 
 		running( fakeApplication(), new Runnable() {
 			@Override

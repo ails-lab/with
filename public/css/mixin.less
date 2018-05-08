@@ -1,0 +1,193 @@
+
+// button mixin
+.btn(@color,@hover) {
+	display: block;
+	padding: 5px 30px;
+	border: 1px solid @color;
+	text-decoration: none;
+	font-size: 12px;
+	letter-spacing: 1.3px;
+	text-transform: uppercase;
+	color: @color;
+	.transition(all .3s);
+
+	&:hover {
+		color: @hover;
+	}
+}
+
+// section heading
+.section-heading() {
+	display: table;
+	margin: 0 auto 30px;
+	padding: 0;
+	font-family: inherit;
+	font-size: 18px;
+	text-transform: uppercase;
+}
+
+// section description
+.section-description() {
+	font-style: italic;
+	margin: 0 auto 40px;
+	width: 50%;
+	display: table;
+	line-height: 1.4em;
+}
+
+// readmore box effect 
+.border-effect(@border-color,@border-overlay) {
+	& {
+		display: block;
+		border: 1px solid @border-color;
+		text-decoration: none;
+		position: relative;
+		.transition(all .3s);
+
+		div {
+			position: absolute;
+			background: @border-overlay;
+			.transition(all .3s);
+
+			&.left {
+				left: -1px;
+				bottom: 0;
+				width: 2px;
+				height: 0;
+			}
+
+			&.right {
+				right: -1px;
+				top: 0;
+				width: 2px;
+				height: 0;
+			}
+
+			&.bot {
+				height: 2px;
+				width: 0;
+				right: 0;
+				bottom: -1px;
+			}
+
+			&.top {
+				height: 2px;
+				width: 0;
+				left: 0;
+				top: -1px;
+			}
+		}
+
+		&:hover {
+
+			div {
+
+				&.left {
+					height: 100%;
+				}
+
+				&.right {
+					height: 100%;
+				}
+
+				&.bot {
+					width: 100%;
+				}
+
+				&.top {
+					width: 100%;
+				}
+			}
+		}
+	}
+}
+
+// anchor main navigation style
+.anavi() {
+
+	a {
+		display: block;
+		color: darken(white,20%);
+		padding-top: 7px;
+		margin-bottom: 23px;
+		position: relative;
+		font-size: 12px;
+		letter-spacing: 1px;
+		.transition(all .3s);
+
+		&::after {
+			content: '';
+			position: absolute;
+			bottom: -23px;
+			left: 0;
+			height: 1px;
+			width: 100%;
+			background: white;
+			opacity: 0;
+			.transition(all .3s);
+		}
+
+		&:focus,&:visited {
+			color: darken(white,20%);
+			text-decoration: none;
+		}
+	}
+	
+
+	&:hover,&.active {
+
+		a {
+			color: white !important;
+			text-decoration: none;
+
+			&::after {
+				opacity: 1;
+			}
+		}
+	}
+
+	
+}
+
+// dark hue on top of images
+.hue() {
+	.hue {
+		background: rgba( 0,0,0,0.4 );
+		width: 100%;
+		height: 100%;
+	}
+}
+
+// tabs
+.tabs() {
+	margin: 0;
+	padding: 0;
+}
+
+.plus() {
+	margin-right: 10px;
+	display: inline-block;
+	width: 10px;
+	height: 1px;
+	position: relative;
+	top: -5px;
+	background-color: #4f7979;
+
+	&::after {
+		content: '';
+		display: block;
+		background-color: inherit;
+		width: inherit;
+		height: inherit;
+		transform:rotate(90deg);
+		-ms-transform:rotate(90deg);
+		-webkit-transform:rotate(90deg);
+	}
+}
+
+.cross() {
+	.plus;
+	transform:rotate(45deg);
+	-ms-transform:rotate(45deg);
+	-webkit-transform:rotate(45deg);
+}

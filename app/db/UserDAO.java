@@ -17,18 +17,19 @@
 package db;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
-import model.Collection;
-import model.Search;
-import model.User;
+import model.usersAndGroups.User;
 
 import org.bson.types.ObjectId;
+import org.mongodb.morphia.Key;
 import org.mongodb.morphia.query.Query;
 import org.mongodb.morphia.query.UpdateOperations;
 
 import play.Logger;
 import play.Logger.ALogger;
+import utils.Tuple;
 
 public class UserDAO extends DAO<User> {
 	public static final ALogger log = Logger.of(UserDAO.class);
@@ -37,17 +38,20 @@ public class UserDAO extends DAO<User> {
 		super(User.class);
 	}
 
-	public User getById(ObjectId id, List<String> retrievedFields) {
-		Query<User> q = this.createQuery().field("_id").equal(id);
-		if (retrievedFields != null)
-			for (int i = 0; i < retrievedFields.size(); i++)
-				q.retrievedFields(true, retrievedFields.get(i));
-		return this.findOne(q);
-
-	}
-
 	public User getByEmail(String email) {
 		return this.findOne("email", email);
+	}
+
+	public ObjectId getIdByUsername(String username) {
+		User user = this.getUniqueByFieldAndValue("username", username, Arrays.asList("_id"));
+		if (user != null)
+			return user.getDbId();
+		else 
+			return null;
+	}
+
+	public User getByUsername(String username, List<String> retrievedFields) {
+		return this.getUniqueByFieldAndValue("username", username, retrievedFields);
 	}
 
 	public User getByUsername(String username) {
@@ -91,7 +95,7 @@ public class UserDAO extends DAO<User> {
 
 	//Is this fast or should we use ElasticSearch
 	public List<User> getByUsernamePrefix(String prefix) {
-		Query<User> q = this.createQuery().field("username").startsWith(prefix);
+		Query<User> q = this.createQuery().field("username").startsWithIgnoreCase(prefix);
 		return find(q).asList();
 
 	}
@@ -106,9 +110,9 @@ public class UserDAO extends DAO<User> {
 		User user = getById(id, null);
 
 		// delete user realted searches
-		List<Search> userSearches = user.getSearchHistory();
+		/*List<Search> userSearches = user.getSearchHistory();
 		for (Search s : userSearches)
-			DB.getSearchDAO().makeTransient(s);
+			DB.getSearchDAO().makeTransient(s);*/
 
 		// delete user related collections
 		/*
@@ -123,5 +127,12 @@ public class UserDAO extends DAO<User> {
 		Query<User> q = this.createQuery().field("userGroupsIds")
 				.hasThisOne(groupId);
 		return find(q).asList();
+	}
+
+	public boolean isSuperUser(ObjectId id) {
+		ArrayList<Tuple<String, Object>> superUser = new ArrayList<Tuple<String, Object>>();
+		superUser.add(new Tuple("_id", id));
+		superUser.add(new Tuple("superUser", true));
+		return existsFieldsWithValues(superUser);
 	}
 }
