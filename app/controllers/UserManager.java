@@ -87,7 +87,7 @@ public class UserManager extends WithController {
 	private static final String facebookSecretEspace = "SECRET_KEY";
 	private static final String facebookSecretLocalhost = "SECRET_KEY";
 	
-	private static final String googleSecret = "kXfPrEXZaaytG00LDhKWX540";
+	private static final String googleSecret = "SECRET_KEY";
 
 	/**
 	 * Propose new username when it is already in use.

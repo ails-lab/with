@@ -123,6 +123,31 @@ public class AnnotationController extends Controller {
 		}
 	}
 	
+	public static Result approveAnnotationObject(String id) {
+		try {
+			ObjectNode error = Json.newObject();
+			
+			JsonNode json = request().body().asJson();
+			if (json == null) {
+				error.put("error", "Invalid JSON");
+				return badRequest();
+			}
+			if (WithController.effectiveUserDbId() == null) {
+				error.put("error", "User not logged in");
+				return badRequest();
+			}
+			AnnotationAdmin administrative = getAnnotationAdminFromJson(json, WithController.effectiveUserDbId());
+			
+			ObjectId oid = new ObjectId(id);
+			DB.getAnnotationDAO().addApproveObject(oid, WithController.effectiveUserDbId(), administrative);
+			ElasticUtils.update(DB.getRecordResourceDAO().getByAnnotationId(oid));
+			return ok();
+		} catch (Exception e) {
+			log.error("", e);
+			return internalServerError();
+		}
+	}
+	
 	public static Result rejectAnnotation(String id) {
 		try {			
 			ObjectId oid = new ObjectId(id);
@@ -134,10 +159,46 @@ public class AnnotationController extends Controller {
 		}
 	}
 	
+	public static Result rejectAnnotationObject(String id) {
+		try {
+			ObjectNode error = Json.newObject();
+			
+			JsonNode json = request().body().asJson();
+			if (json == null) {
+				error.put("error", "Invalid JSON");
+				return badRequest();
+			}
+			if (WithController.effectiveUserDbId() == null) {
+				error.put("error", "User not logged in");
+				return badRequest();
+			}
+			AnnotationAdmin administrative = getAnnotationAdminFromJson(json, WithController.effectiveUserDbId());
+			
+			ObjectId oid = new ObjectId(id);
+			DB.getAnnotationDAO().addRejectObject(oid, WithController.effectiveUserDbId(), administrative);
+			ElasticUtils.update(DB.getRecordResourceDAO().getByAnnotationId(oid));
+			return ok();
+		} catch (Exception e) {
+			log.error("", e);
+			return internalServerError();
+		}
+	}
+	
 	public static Result unscoreAnnotation(String id) {
 		try {			
 			ObjectId oid = new ObjectId(id);
 			DB.getAnnotationDAO().removeScore(oid, WithController.effectiveUserDbId());
+			ElasticUtils.update(DB.getRecordResourceDAO().getByAnnotationId(oid));
+			return ok();
+		} catch (Exception e) {
+			return internalServerError();
+		}
+	}
+	
+	public static Result unscoreAnnotationObject(String id) {
+		try {			
+			ObjectId oid = new ObjectId(id);
+			DB.getAnnotationDAO().removeScoreObject(oid, WithController.effectiveUserDbId());
 			ElasticUtils.update(DB.getRecordResourceDAO().getByAnnotationId(oid));
 			return ok();
 		} catch (Exception e) {
@@ -349,12 +410,30 @@ public class AnnotationController extends Controller {
 							}
 							if( annotation.getScore() != null ) {
 								if( annotation.getScore().getApprovedBy() != null ) {
+									for( Object obj : annotation.getScore().getApprovedBy()) {
+										AnnotationAdmin aa = (AnnotationAdmin) obj;
+										if( aa.getWithCreator() != null ) {
+											String userId = aa.getWithCreator().toHexString();
+											counts.get( userId ).increase();
+										}
+									}
+									/*
 									for(ObjectId userId:  annotation.getScore().getApprovedBy())
 										counts.get( userId.toHexString()).increase();
+									*/
 								}
 								if( annotation.getScore().getRejectedBy() != null ) {
+									for( Object obj : annotation.getScore().getRejectedBy()) {
+										AnnotationAdmin aa = (AnnotationAdmin) obj;
+										if( aa.getWithCreator() != null ) {
+											String userId = aa.getWithCreator().toHexString();
+											counts.get( userId ).increase();
+										}
+									}
+									/*
 									for(ObjectId userId:  annotation.getScore().getRejectedBy())
 										counts.get( userId.toHexString()).increase();
+									*/
 								}
 							}
 						});
@@ -459,6 +538,32 @@ public class AnnotationController extends Controller {
 		} catch (ClassNotFoundException e) {
 			return new Annotation();
 		}
+	}
+	
+	public static AnnotationAdmin getAnnotationAdminFromJson(JsonNode json, ObjectId userId) {
+		AnnotationAdmin administrative = new AnnotationAdmin();
+		administrative.setWithCreator(userId);
+		if (json.has("generated")) {
+			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+			try {
+				administrative.setGenerated(sdf.parse(json.get("generated")
+						.asText()));
+			} catch (ParseException e) {
+				log.error(e.getMessage());
+				administrative.setGenerated(new Date());
+			}
+		} else {
+			administrative.setGenerated(new Date());
+		}
+		administrative.setCreated(administrative.getGenerated());
+		administrative.setLastModified(new Date());
+		if (json.has("generator"))
+			administrative.setGenerator(json.get("generator").asText());
+		if (json.has("confidence")) {
+			administrative.setConfidence(json.get("confidence").asDouble());
+		}
+
+		return administrative;
 	}
 	
 	private static Annotation updateAnnotationAdmin(Annotation annotation, ObjectId user) {

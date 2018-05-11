@@ -1655,18 +1655,28 @@ public class CollectionObjectController extends WithResourceController {
 			boolean rejectedByUser = false;
 			
 			if (score != null) {
-				ArrayList<ObjectId> aby = score.getApprovedBy();
-				ArrayList<ObjectId> rby = score.getRejectedBy();
+				ArrayList<AnnotationAdmin> aby = score.getApprovedBy();
+				ArrayList<AnnotationAdmin> rby = score.getRejectedBy();
 				
 				if (aby != null) {
-					if (userId != null && aby.contains(userId)) {
-						approvedByUser = true;
+					if (userId != null) {
+						for (AnnotationAdmin id : aby) {
+							if (id.getWithCreator().equals(userId)) {
+								approvedByUser = true;
+								break;
+							}
+						}
 					}
 					approved = aby.size();
 				}
 				if (rby != null) {
-					if (userId != null && rby.contains(userId)) {
-						rejectedByUser = true;
+					if (userId != null) {
+						for (AnnotationAdmin id : rby) {
+							if (id.getWithCreator().equals(userId)) {
+								rejectedByUser = true;
+								break;
+							}
+						}
 					}
 					rejected = rby.size();
 				}

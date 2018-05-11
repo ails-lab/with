@@ -65,8 +65,11 @@ GET		/annotation/unscoreMultiple				controllers.AnnotationController.unscoreMult
 GET		/annotation/:id							controllers.AnnotationController.getAnnotation(id)
 DELETE	/annotation/:id							controllers.AnnotationController.deleteAnnotation(id)
 GET		/annotation/:id/approve					controllers.AnnotationController.approveAnnotation(id)
+POST	/annotation/:id/approveObj				controllers.AnnotationController.approveAnnotationObject(id)
 GET		/annotation/:id/reject					controllers.AnnotationController.rejectAnnotation(id)
+POST	/annotation/:id/rejectObj				controllers.AnnotationController.rejectAnnotationObject(id)
 GET		/annotation/:id/unscore					controllers.AnnotationController.unscoreAnnotation(id)
+GET		/annotation/:id/unscoreObj				controllers.AnnotationController.unscoreAnnotationObject(id)
 
 # Collection Controller
 #GET 	 /collection/list 						controllers.CollectionObjectController.list(directlyAccessedByUserOrGroup: play.libs.F.Option[controllers.parameterTypes.MyPlayList], recursivelyAccessedByUserOrGroup: play.libs.F.Option[controllers.parameterTypes.MyPlayList], creator: play.libs.F.Option[String], isPublic: play.libs.F.Option[java.lang.Boolean], isExhibition: play.libs.F.Option[java.lang.Boolean], collectionHits:Boolean ?= false, offset: Integer ?=0, count: Integer ?=10)
@@ -222,4 +225,13 @@ POST	/annotation/annotateRequestResult					controllers.AnnotationRequestControll
 GET		/collection/api/removeIdsOfDeletedRecords	controllers.WithResourceController.removeIdsOfDeletedRecords()		
 
 GET	     /collection/:id/annotations 	        			controllers.CollectionObjectController.getAnnotations(id)
-GET	     /collection/:id/annotationSummary 	        			controllers.CollectionObjectController.getAnnotationSummary(id, mode: String ?="FLAT", userOnly: Boolean ?= false)
+
+#GET	     /collection/:id/annotationSummary 	        			controllers.CollectionObjectController.getAnnotationSummary(id, mode: String ?="FLAT")
+
+#Campaign Controller
+GET		/campaign/count								controllers.CampaignController.getCampaignCount(group: String ?= "", active: Boolean ?= true)
+GET		/campaign/getCampaign						controllers.CampaignController.getCampaign(campaignId: String)
+GET		/campaign/getCampaignByName					controllers.CampaignController.getCampaignByName(cname: String)
+GET		/campaign/activeCampaigns					controllers.CampaignController.getActiveCampaigns(group: String ?= "", sortBy: String ?= "Alphabetical", offset: Integer ?=0, count: Integer ?=10)
+GET		/campaign/incUserPoints						controllers.CampaignController.incUserPoints(campaignId: String, userId: String, annotationType: String)
+GET		/campaign/decUserPoints						controllers.CampaignController.decUserPoints(campaignId: String, userId: String, annotationType: String)
