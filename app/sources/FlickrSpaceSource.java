@@ -73,7 +73,7 @@ public abstract class FlickrSpaceSource extends ISpaceSource {
 			} catch (Exception e) {
 				log.error("",e);
 			}
-			System.out.println(licences);
+			log.debug(">>>>>>>>>>>>>>> "+licences.toString());
 		}
 	}
 

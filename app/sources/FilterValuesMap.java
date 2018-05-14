@@ -121,6 +121,7 @@ public class FilterValuesMap {
 			String matchexpr = getKey(filterID, specificValue);
 			List<Object> v = new ArrayList<>();			
 			for (String kk : commonvalues.keySet()) {
+//				System.out.println(">>>>>>>>>" + specificValue+"is a? "+kk);
 				if (matchexpr.matches(kk) || matchexpr.equals(kk)) {
 					// String k = getKey(filterID, specificValue);
 					List<Object> orset = getOrset(commonvalues, kk, false);
@@ -130,6 +131,7 @@ public class FilterValuesMap {
 			if (v.isEmpty()) {
 				v.add(specificValue);
 			}
+//			System.out.println(v);
 			return v;
 		}
 		return null;
