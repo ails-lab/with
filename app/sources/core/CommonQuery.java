@@ -38,6 +38,7 @@ import play.Logger;
 import play.Logger.ALogger;
 import play.libs.F.Option;
 import play.mvc.QueryStringBindable;
+import search.Fields;
 import search.Filter;
 import search.FiltersFields;
 import search.IFilterContainer;
@@ -76,12 +77,18 @@ public class CommonQuery implements IFilterContainer, Cloneable , QueryStringBin
 		this.page = ""+query.getPage();
 		this.pageSize = ""+query.getPageSize();
 		filters = new ArrayList<>();
+
+		System.err.println(query.filters);
 		for (HashMap<String, List<String>> f : query.buildFactorizeFilters()) {
 			for (Entry<String, List<String>> e : f.entrySet()) {
 				if (e.getKey().equals(FiltersFields.ANYWHERE.getFilterId())){
 					this.searchTerm = e.getValue().get(0);
 				} else {
-					filters.add(new CommonFilter(e.getKey(),e.getValue()));
+					System.err.println(e.getKey());
+					if (e.getKey().equals(Fields.hasImage.fieldId()))
+						this.hasMedia = (e.getValue().contains("true"));
+					else
+						filters.add(new CommonFilter(e.getKey(),e.getValue()));
 				}
 				
 			}

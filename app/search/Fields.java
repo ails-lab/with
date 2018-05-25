@@ -47,7 +47,10 @@ public enum Fields {
 	
 	// the collections this is in
 	collectedIn,
-	
+	/**
+	 * includes only items with images.
+	 */
+	hasImage,
 	// this should allow to search for records inside a persons collections, a usergroups collection a space
 	// access cannot do this, since public records don't have access for user ids
 	administrative_collectedBy, // shortcut field for any other field
