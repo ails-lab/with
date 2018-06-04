@@ -29,6 +29,10 @@ import utils.SortedList;
 
 public class CommonFilterLogic implements Cloneable {
 	public static final ALogger log = Logger.of( CommonFilterLogic.class);
+	/**
+	 * defines if the elements have unique values or can also have multiple.
+	 */
+	private boolean unique = false;
 	
 	private HashMap<String, ValueCount> counts = new HashMap<String, ValueCount>();
 
@@ -37,6 +41,7 @@ public class CommonFilterLogic implements Cloneable {
 	public CommonFilterLogic(FiltersFields filter) {
 		this.data.filterID = filter.getFilterId();
 		this.data.filterName = filter.getFilterName().get(Language.DEFAULT).get(0);
+		this.unique = filter.isUnique();
 	}
 	
 	public CommonFilterLogic(CommonFilterResponse filter) {
@@ -87,6 +92,8 @@ public class CommonFilterLogic implements Cloneable {
 	public void addValue(Collection<String> values, int count) {
 		for (String string : values) {
 			addValue(string, count);
+			if (unique)
+				break;
 		}
 	}
 

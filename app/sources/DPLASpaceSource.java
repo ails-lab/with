@@ -139,8 +139,8 @@ public class DPLASpaceSource extends ISpaceSource {
 
 					WithResource myitem;
 					res.addItem(myitem = formatreader.readObjectFrom(item));
-					countValue(rights, new JsonContextRecord(item).getStringArrayValue("sourceResource.rights"));
-
+					List<String> stringArrayValue = new JsonContextRecord(item).getStringArrayValue("sourceResource.rights");
+					countValue(rights, stringArrayValue);
 				}
 				res.facets = response.path("facets");
 				res.filtersLogic = new ArrayList<>();

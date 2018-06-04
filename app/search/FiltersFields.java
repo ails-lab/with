@@ -30,7 +30,7 @@ public enum FiltersFields {
 		TYPE(Fields.media_type,"Media Type"),
 		PROVIDER(Fields.provenance_provider,"Provider"),
 		CREATOR("dccreator.default","Creator"),
-		RIGHTS(Fields.media_withRights,"Media Rights"),
+		RIGHTS(Fields.media_withRights,"Media Rights", true),
 		COUNTRY(Fields.descriptiveData_country,"Spatial"),
 		YEAR(Fields.descriptiveData_dcdate_year,"Dates"),
 		CONTRIBUTOR("dccontributor.default","Contributor"),
@@ -44,22 +44,32 @@ public enum FiltersFields {
 
 		private final MultiLiteral filterName;
 		private final String filterId;
+		private final boolean unique;
 		
+		
+		private FiltersFields(Fields filterId, MultiLiteral filterName, boolean unique) {
+			this(filterId.fieldId(),filterName, unique);
+		}
 		
 		private FiltersFields(Fields filterId, MultiLiteral filterName) {
-			this(filterId.fieldId(),filterName);
+			this(filterId.fieldId(),filterName, false);
 		}
-		private FiltersFields(String filterId, MultiLiteral filterName) {
+		private FiltersFields(String filterId, MultiLiteral filterName, boolean unique) {
 			this.filterId = filterId;
 			this.filterName = filterName;
+			this.unique = unique;
+		}
+		
+		private FiltersFields(Fields filterId, String filterName, boolean unique) {
+			this(filterId,new MultiLiteral(filterName).fillDEF(), unique);
 		}
 		
 		private FiltersFields(Fields filterId, String filterName) {
-			this(filterId,new MultiLiteral(filterName).fillDEF());
+			this(filterId,new MultiLiteral(filterName).fillDEF(), false);
 		}
 		
 		private FiltersFields(String filterId, String filterName) {
-			this(filterId,new MultiLiteral(filterName).fillDEF());
+			this(filterId,new MultiLiteral(filterName).fillDEF(), false);
 		}
 		public MultiLiteral getFilterName() {
 			return filterName;
@@ -76,6 +86,10 @@ public enum FiltersFields {
 					return f;
 			}
 			return null;
+		}
+
+		public boolean isUnique() {
+			return unique;
 		}
 
 		

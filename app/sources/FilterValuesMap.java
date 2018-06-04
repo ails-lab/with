@@ -28,6 +28,7 @@ import java.util.function.Function;
 
 import model.EmbeddedMediaObject.WithMediaRights;
 import model.EmbeddedMediaObject.WithMediaType;
+import search.Fields;
 import search.FiltersFields;
 import search.IFilterContainer;
 import search.Sources;
@@ -121,6 +122,7 @@ public class FilterValuesMap {
 			String matchexpr = getKey(filterID, specificValue);
 			List<Object> v = new ArrayList<>();			
 			for (String kk : commonvalues.keySet()) {
+//				System.out.println(">>>>>>>>>" + specificValue+"is a? "+kk);
 				if (matchexpr.matches(kk) || matchexpr.equals(kk)) {
 					// String k = getKey(filterID, specificValue);
 					List<Object> orset = getOrset(commonvalues, kk, false);
@@ -130,6 +132,7 @@ public class FilterValuesMap {
 			if (v.isEmpty()) {
 				v.add(specificValue);
 			}
+//			System.out.println(v);
 			return v;
 		}
 		return null;
@@ -200,6 +203,8 @@ public class FilterValuesMap {
 			ms = MapsConfig.buildFilterValuesMap(source);
 			map.put(source, ms);
 			switch (source) {
+			case Europeana:
+				ms.fillEuropeana();
 			case DPLA:
 				ms.fillDPLA();
 				break;
@@ -290,6 +295,11 @@ public class FilterValuesMap {
 	private void fillDPLA() {
 	}
 	
+	private void fillEuropeana() {
+		addRestriction(Fields.hasImage.fieldId(),"true", "false"
+				);
+	}
+	
 	private void fillHistorypin() {
 		addRestriction(FiltersFields.TYPE.getFilterId(),
 				WithMediaType.IMAGE.getName(), 
@@ -314,6 +324,7 @@ public class FilterValuesMap {
 	
 
 	private void fillRijks() {
+		addRestriction(Fields.hasImage.fieldId(),"true", "false");
 		addRestriction(FiltersFields.TYPE.getFilterId(),WithMediaType.IMAGE.getName(), WithMediaType.TEXT.getName());
 		addRestriction(FiltersFields.RIGHTS.getFilterId(),WithMediaRights.Public.toString());
 	}

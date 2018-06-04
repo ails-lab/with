@@ -520,6 +520,11 @@ public class JsonContextRecord {
 	public void setRootInformation(JsonNode rootInformation) {
 		this.rootInformation = rootInformation;
 	}
+	
+	@Override
+	public String toString() {
+		return rootInformation.toString();
+	}
 
 	public static void main(String[] args) {
 		JsonContextRecord r = new JsonContextRecord("{\"a\":\"b\",\"ages\":[1,2], \"f\":{\"size\":\"4\"}}");

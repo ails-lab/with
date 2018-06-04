@@ -1,4 +1,15 @@
-This is your new Play application
-=================================
 
-This file will be packaged with your application, when using `activator dist`.
+git clone git@git.image.ece.ntua.gr:stabenau/with.git
+
+cd /git/with
+
+run examples : 
+
+run ./activator
+
+run ./activator eclipse
+
+./activator "run 9060" -jvm-debug 9999
+
+./activator -Dconfig.file=conf/local-develop.conf "run 9060" -jvm-debug 9999
+
