@@ -163,36 +163,42 @@ public class RecordResourceController extends WithResourceController {
 		// else get them all
 		while(( count > 0 ) && collectionIdCopy.size() > 0 ) {
 			String collectionId = collectionIdCopy.remove(0);
-			CollectionObject sc = DB.getCollectionObjectDAO().getById(new ObjectId( collectionId ));
-			if(! sc.getAdministrative().getAccess().getIsPublic()) return badRequest("Access to collection " + collectionId + " which is not public.");
-			List<ContextData<?>> resList = sc.getCollectedResources();
-			
+			try {
+				CollectionObject sc = DB.getCollectionObjectDAO().getById(new ObjectId( collectionId ));
+				if(! sc.getAdministrative().getAccess().getIsPublic()) return badRequest("Access to collection " + collectionId + " which is not public.");
+				List<ContextData<?>> resList = sc.getCollectedResources();
+				
 
-			// mini optimization, dont shuffle huge lists if you only want few records
-			if( count < (resList.size()/10)) {
-				HashSet<ObjectId> pickedRecordIds = new HashSet<ObjectId>();
-				while( count > 0 ) {
-					int idx = r.nextInt(resList.size());
-					ObjectId recId = resList.get( idx ).getTarget().getRecordId();
-					if( ! pickedRecordIds.contains(recId)) {
-						pickedRecordIds.add(recId );
+				// mini optimization, dont shuffle huge lists if you only want few records
+				if( count < (resList.size()/10)) {
+					HashSet<ObjectId> pickedRecordIds = new HashSet<ObjectId>();
+					while( count > 0 ) {
+						int idx = r.nextInt(resList.size());
+						ObjectId recId = resList.get( idx ).getTarget().getRecordId();
+						if( ! pickedRecordIds.contains(recId)) {
+							pickedRecordIds.add(recId );
+							RecordResource rec = DB.getRecordResourceDAO().get(recId );
+							res.add( (ObjectNode) Json.toJson(rec ));
+							count--;						
+						}
+					}
+				} else {
+					// when you retrieve a lot of records, this should be the right method
+					Collections.shuffle( resList ,r );
+
+					for( ContextData elem: resList ) {
+						if( count == 0 ) break;
+						ObjectId recId = elem.getTarget().getRecordId();
 						RecordResource rec = DB.getRecordResourceDAO().get(recId );
 						res.add( (ObjectNode) Json.toJson(rec ));
-						count--;						
+						count--;
 					}
 				}
-			} else {
-				// when you retrieve a lot of records, this should be the right method
-				Collections.shuffle( resList ,r );
-
-				for( ContextData elem: resList ) {
-					if( count == 0 ) break;
-					ObjectId recId = elem.getTarget().getRecordId();
-					RecordResource rec = DB.getRecordResourceDAO().get(recId );
-					res.add( (ObjectNode) Json.toJson(rec ));
-					count--;
-				}
 			}
+			catch (Exception e) {
+				log.error("Collection " + collectionId, e);
+			}
+			
 		}
 			
 		return ok( res );
@@ -458,10 +464,10 @@ public class RecordResourceController extends WithResourceController {
 				for (Annotation annotation : DB.getAnnotationDAO().getUserAnnotations(userId, new ObjectId(rid), Arrays.asList("annotators", "score.rejectedBy"))) {
 					AnnotationScore as = annotation.getScore();
 					if (as != null) {
-						ArrayList<ObjectId> rej = as.getRejectedBy();
+						ArrayList<AnnotationAdmin> rej = as.getRejectedBy();
 						if (rej != null) {
-							for (ObjectId id : rej) {
-								if (id.equals(userId)) {
+							for (AnnotationAdmin id : rej) {
+								if (id.getWithCreator().equals(userId)) {
 									ArrayList<AnnotationAdmin> annotators = annotation.getAnnotators();
 									AnnotationAdmin annotator = null;
 									for (AnnotationAdmin a : annotators) {

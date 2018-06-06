@@ -202,11 +202,31 @@ public class AnnotationDAO extends DAO<Annotation> {
 		this.update(q, updateOps);
 	}
 	
+	public void addApproveObject(ObjectId id, ObjectId userId, AnnotationAdmin user) {
+		Query<Annotation> q = this.createQuery().field("_id").equal(id);
+		UpdateOperations<Annotation> updateOps = this.createUpdateOperations();
+		updateOps.add("score.approvedBy", user, false);
+		AnnotationAdmin u = new AnnotationAdmin();
+		u.setWithCreator(userId);
+		updateOps.removeAll("score.rejectedBy", u);
+		this.update(q, updateOps);
+	}
+	
 	public void removeScore(ObjectId id, ObjectId userId) {
 		Query<Annotation> q = this.createQuery().field("_id").equal(id);
 		UpdateOperations<Annotation> updateOps = this.createUpdateOperations();
 		updateOps.removeAll("score.approvedBy", userId);		
 		updateOps.removeAll("score.rejectedBy", userId);
+		this.update(q, updateOps);
+	}
+	
+	public void removeScoreObject(ObjectId id, ObjectId userId) {
+		Query<Annotation> q = this.createQuery().field("_id").equal(id);
+		UpdateOperations<Annotation> updateOps = this.createUpdateOperations();
+		AnnotationAdmin u = new AnnotationAdmin();
+		u.setWithCreator(userId);
+		updateOps.removeAll("score.approvedBy", u);		
+		updateOps.removeAll("score.rejectedBy", u);
 		this.update(q, updateOps);
 	}
 	
@@ -217,7 +237,16 @@ public class AnnotationDAO extends DAO<Annotation> {
 		updateOps.removeAll("score.approvedBy", userId);
 		this.update(q, updateOps);
 	}
-
+	
+	public void addRejectObject(ObjectId id, ObjectId userId, AnnotationAdmin user) {
+		Query<Annotation> q = this.createQuery().field("_id").equal(id);
+		UpdateOperations<Annotation> updateOps = this.createUpdateOperations();
+		updateOps.add("score.rejectedBy", user, false);
+		AnnotationAdmin u = new AnnotationAdmin();
+		u.setWithCreator(userId);
+		updateOps.removeAll("score.approvedBy", u);
+		this.update(q, updateOps);
+	}
 
 	public void removeAnnotators(ObjectId id, List<AnnotationAdmin> annotators) {
 		Query<Annotation> q = this.createQuery().field("_id").equal(id);
