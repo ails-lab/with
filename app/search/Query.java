@@ -268,6 +268,13 @@ public class Query implements IFilterContainer{
 		sources.add( source );
 		return this;
 	}
+	
+	public Query addSource( Sources... sources ) {
+		for (Sources source : sources) {
+			addSource(source);
+		}
+		return this;
+	}
 
 	public boolean containsSource( Sources findSource ) {
 		for( Sources source: sources ) {

@@ -64,6 +64,11 @@ import sources.core.ParallelAPICall;
 import sources.utils.JsonContextRecord;
 import utils.Tuple;
 
+/**
+ * Data Access Object.
+ *
+ * @param <E>
+ */
 public class DAO<E> extends BasicDAO<E, ObjectId> {
 
 	public enum QueryOperator {

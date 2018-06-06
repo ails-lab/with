@@ -49,7 +49,9 @@ import play.data.Form;
 import play.libs.F.Function0;
 import play.libs.F.Promise;
 import play.libs.Json;
+import play.mvc.Controller;
 import play.mvc.Result;
+import search.Fields;
 import search.Query;
 import search.RecordsList;
 import search.Response;
@@ -175,63 +177,7 @@ public class SearchController extends WithController {
 			try {
 				final search.Query q = Json.fromJson(json, search.Query.class );
 				// fix it up or write a deserializer
-				if( q.getPage() > 0 ) {
-					q.setPageAndSize( q.getPage(), q.getPageSize());
-				} else {
-					q.setStartCount( q.getStart(), q.getCount());
-				}
-				// check if the query needs readability additions for WITHin
-				if( q.containsSource( Sources.WITHin)) {
-					// add conditions for visibility in WITH
-					Query.Clause visible = Query.Clause.create()
-							.add( "administrative.isPublic", "true", true );
-					for( String userId: effectiveUserIds()) {
-						visible.add( "administrative.access.READ", userId, true );
-						visible.add( "administrative.access.WRITE", userId, true );
-						visible.add( "administrative.access.OWN", userId, true );
-					}
-					q.addClause( visible.filters());
-				}
-				// print warnings in the log for fields not known
-				q.validateFieldIds();
-				
-				// remove facet requests that are not relevant
-				q.pruneFacets();
-				final Set<String> commonSupportedFields = q.commonSupportedFields();
-				
-				// split the query
-				Map<Sources, Query> queries = q.splitBySource();
-				// create promises
-				Iterable<Promise<Response.SingleResponse>> promises =
-						queries.entrySet().stream()
-						.map( 
-								entry -> 
-								entry.getKey().getDriver().execute(entry.getValue())
-							)
-						.collect( Collectors.toList());
-
-				if( q.continuation ) {
-					// initiate a continuation
-					return ChainedSearchResult.create(promises, q );
-				} else if( StringUtils.isNotBlank( q.continuationId)) {
-					// try to respond with continuation
-					return continuedSearch( q.continuationId );
-				} else {
-					// normal query
-					Promise<List<Response.SingleResponse>> allResponses  =
-							Promise.sequence(promises, ParallelAPICall.Priority.FRONTEND.getExcecutionContext());
-					Promise<Result> res = allResponses.map( singleResponses -> {
-						Response r = new Response();
-						r.query = q;
-						for(Response.SingleResponse sr: singleResponses ) {
-							sr.pruneFacets(commonSupportedFields);
-							r.addSingleResponse(sr);
-						}
-						r.createAccumulated();
-						return ok(Json.toJson(r));
-					});
-					return res;
-				}
+				return search2internal(q);
 
 				// bad request
 			} catch (Exception e) {
@@ -241,6 +187,97 @@ public class SearchController extends WithController {
 		}
 
 		// return Promise.pure( badRequest( "Not implemented yet"));
+	}
+
+	private static Promise<Result> search2internal(final search.Query q) {
+		// Promise.pure( Controller.ok(Json.toJson(sr)));
+		final Set<String> commonSupportedFields = prepareQuery(q);
+		
+		// split the query
+		Map<Sources, Query> queries = q.splitBySource();
+		// create promises
+		Iterable<Promise<Response.SingleResponse>> promises = splitQuery(queries);
+
+		if( q.continuation ) {
+			// initiate a continuation
+			return ChainedSearchResult.create(promises, q );
+		} else if( StringUtils.isNotBlank( q.continuationId)) {
+			// try to respond with continuation
+			return continuedSearch( q.continuationId );
+		} else {
+			// normal query
+			Promise<Response> res = search2internalResponseNormal(q, commonSupportedFields, promises);
+			return res.map( (Response r)-> {
+				return ok(Json.toJson(r));
+			});
+		}
+	}
+
+	private static Promise<Response> search2internalResponse(final search.Query q) {
+		// Promise.pure( Controller.ok(Json.toJson(sr)));
+		final Set<String> commonSupportedFields = prepareQuery(q);
+		// split the query
+		Map<Sources, Query> queries = q.splitBySource();
+		// create promises
+		Iterable<Promise<Response.SingleResponse>> promises = splitQuery(queries);
+		// normal query
+		Promise<Response> res = search2internalResponseNormal(q, commonSupportedFields, promises);
+		return res;
+	}
+
+	private static Promise<Response> search2internalResponseNormal(final search.Query q,
+			final Set<String> commonSupportedFields, Iterable<Promise<Response.SingleResponse>> promises) {
+		Promise<List<Response.SingleResponse>> allResponses = Promise.sequence(promises,
+				ParallelAPICall.Priority.FRONTEND.getExcecutionContext());
+		Promise<Response> res = allResponses.map(singleResponses -> {
+			Response r = new Response();
+			r.query = q;
+			for (Response.SingleResponse sr : singleResponses) {
+				sr.pruneFacets(commonSupportedFields);
+				r.addSingleResponse(sr);
+			}
+			r.createAccumulated();
+			return r;
+		});
+		return res;
+	}
+
+	private static Iterable<Promise<Response.SingleResponse>> splitQuery(Map<Sources, Query> queries) {
+		Iterable<Promise<Response.SingleResponse>> promises =
+				queries.entrySet().stream()
+				.map( 
+						entry -> 
+						entry.getKey().getDriver().execute(entry.getValue())
+					)
+				.collect( Collectors.toList());
+		return promises;
+	}
+
+	private static Set<String> prepareQuery(final search.Query q) {
+		if( q.getPage() > 0 ) {
+			q.setPageAndSize( q.getPage(), q.getPageSize());
+		} else {
+			q.setStartCount( q.getStart(), q.getCount());
+		}
+		// check if the query needs readability additions for WITHin
+		if( q.containsSource( Sources.WITHin)) {
+			// add conditions for visibility in WITH
+			Query.Clause visible = Query.Clause.create()
+					.add( "administrative.isPublic", "true", true );
+			for( String userId: effectiveUserIds()) {
+				visible.add( "administrative.access.READ", userId, true );
+				visible.add( "administrative.access.WRITE", userId, true );
+				visible.add( "administrative.access.OWN", userId, true );
+			}
+			q.addClause( visible.filters());
+		}
+		// print warnings in the log for fields not known
+		q.validateFieldIds();
+		
+		// remove facet requests that are not relevant
+		q.pruneFacets();
+		final Set<String> commonSupportedFields = q.commonSupportedFields();
+		return commonSupportedFields;
 	}
 
 	public static Promise<Result> continuedSearch( String continuationId ) {
@@ -315,29 +352,30 @@ public class SearchController extends WithController {
 	}
 
 	public static Promise<Result> getfilters() {
-		JsonNode json = request().body().asJson();
-		if (json == null) {
-			return Promise.pure((Result)badRequest("Expecting Json query"));
-		} else {
-			// Parse the query.
-			try {
-				final CommonQuery q = Utils.parseJson(json);
-				q.searchTerm=null;
-				q.setTypes(Elastic.allTypes);
-				q.setEffectiveUserIds(effectiveUserIds());
-				Promise<SearchResponse> myResults = getMyResutlsPromise(q);
-				play.libs.F.Function<SearchResponse, Result> function =
-				new play.libs.F.Function<SearchResponse, Result>() {
-				  public Result apply(SearchResponse r) {
-				    return ok(Json.toJson(r.filters));
-				  }
-				};
-				return myResults.map(function);
+		// Parse the query.
+		try {
+			// final CommonQuery q = Utils.parseJson(json);
+			// q.searchTerm=null;
+			// q.setTypes(Elastic.allTypes);
+			// q.setEffectiveUserIds(effectiveUserIds());
+			//
+			Query q = new Query();
+			q.addClause(new search.Filter(Fields.anywhere.fieldId(),null));
+			q.setStartCount(0, 1);
+			q.addSource(Sources.Europeana, Sources.DPLA, Sources.Rijksmuseum);
+			q.addSource(Sources.BritishLibrary, Sources.DigitalNZ);
+			Promise<Response> myResults = search2internalResponse(q);
+			play.libs.F.Function<Response, Result> function = new play.libs.F.Function<Response, Result>() {
+				public Result apply(Response r) {
+					// save the result.
+					return ok(Json.toJson(r.accumulatedValues));
+				}
+			};
+			return myResults.map(function);
 
-			} catch (Exception e) {
-				log.error("",e);
-				return Promise.pure((Result)badRequest(e.getMessage()));
-			}
+		} catch (Exception e) {
+			log.error("", e);
+			return Promise.pure((Result) badRequest(e.getMessage()));
 		}
 	}
 

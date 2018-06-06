@@ -278,7 +278,7 @@ public class DB {
 	 * @return
 	 */
 
-	private static DAO<?> getDAO(Class<?> clazz) {
+	public static DAO<?> getDAO(Class<?> clazz) {
 		DAO<?> dao = daos.get(clazz.getSimpleName());
 		if (dao == null) {
 			try {
