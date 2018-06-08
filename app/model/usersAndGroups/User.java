@@ -411,6 +411,7 @@ public class User extends UserOrGroup {
 		}
 		json.put("myOrganizations", orgs);
 		json.put("myProjects", projects);
+		json.put("myGroups", orgs+projects);
 		return json;				
 	}
 	
