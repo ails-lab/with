@@ -16,6 +16,7 @@
 
 package search;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map.Entry;
 
@@ -38,7 +39,7 @@ public class FiltersCache {
 	public static final ObjectId ID = new ObjectId(new byte[] {0,1,2,3,4,5,6,7,8,9,10,11});
 	private static final int DAY = 100*60*60*24;
 	@Embedded
-	private ValueCounts accumulatedValues;
+	private HashMap<String,List<ValueCount>> accumulatedValues;
 	private long creationTime;
 	
 	@Id
@@ -69,7 +70,7 @@ public class FiltersCache {
 	}
 	
 
-	public ValueCounts getAccumulatedValues() {
+	public HashMap<String, List<ValueCount>> getAccumulatedValues() {
 		return accumulatedValues;
 	}
 
@@ -87,7 +88,7 @@ public class FiltersCache {
 	
 	public ValueCounts exportAccumulatedValues() {
 		ValueCounts res = new ValueCounts();
-		ValueCounts acc = accumulatedValues;
+		HashMap<String, List<ValueCount>> acc = accumulatedValues;
 		for (Entry<String, List<ValueCount>> e : acc.entrySet()) {
 			res.put(getDotkey(e.getKey()), e.getValue());
 		}
