@@ -49,6 +49,7 @@ import model.usersAndGroups.User;
 import play.Logger;
 import play.Logger.ALogger;
 import play.libs.Json;
+import search.Response.ValueCount;
 import sources.utils.JsonContextRecord;
 
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
@@ -131,6 +132,20 @@ public class Serializer {
 			ObjectNode json = mapper.createObjectNode();
 			json.put("latitude", ((Point) point).getLatitude());
 			json.put("longitude", ((Point) point).getLongitude());
+			jsonGen.writeObject(json);
+		}
+
+	}
+	
+	public static class ValueCountSerializer extends JsonSerializer<Object> {
+		@Override
+		public void serialize(Object vc, JsonGenerator jsonGen,
+				SerializerProvider provider) throws IOException,
+				JsonProcessingException {
+			ObjectMapper mapper = new ObjectMapper();
+			ObjectNode json = mapper.createObjectNode();
+			json.put("value", ((ValueCount) vc).value);
+			json.put("count", ((ValueCount) vc).count);
 			jsonGen.writeObject(json);
 		}
 

@@ -24,6 +24,15 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.mongodb.morphia.annotations.Converters;
+import org.mongodb.morphia.annotations.Entity;
+
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+
+import db.converters.ProvenanceInfoConverter;
+import db.converters.ValueCountConverter;
+import utils.Serializer.ValueCountSerializer;
+
 /**
  * A Response encapsulates all information that is needed to answer a Query
  *
@@ -33,6 +42,8 @@ import java.util.stream.Collectors;
 public class Response {
 	public static Response EMPTY = new Response();
 
+	@JsonSerialize(using = ValueCountSerializer.class)
+	@Converters(ValueCountConverter.class)
 	public static class ValueCount {
 		// a string appearing in a result field
 		public String value;

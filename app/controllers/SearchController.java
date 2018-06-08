@@ -23,13 +23,16 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.apache.commons.lang3.StringUtils;
+import org.bson.types.ObjectId;
 import org.elasticsearch.action.suggest.SuggestResponse;
 
 import com.fasterxml.jackson.core.JsonParseException;
@@ -39,6 +42,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
+import db.DAO;
+import db.DB;
 import elastic.Elastic;
 import elastic.ElasticCoordinator;
 import elastic.ElasticSearcher;
@@ -52,6 +57,7 @@ import play.libs.Json;
 import play.mvc.Controller;
 import play.mvc.Result;
 import search.Fields;
+import search.FiltersCache;
 import search.Query;
 import search.RecordsList;
 import search.Response;
@@ -353,21 +359,45 @@ public class SearchController extends WithController {
 
 	public static Promise<Result> getfilters() {
 		// Parse the query.
+
+		System.out.println("checked DB");
 		try {
 			// final CommonQuery q = Utils.parseJson(json);
 			// q.searchTerm=null;
 			// q.setTypes(Elastic.allTypes);
 			// q.setEffectiveUserIds(effectiveUserIds());
 			//
+			DAO<FiltersCache> dbhelper = (DAO<FiltersCache>) new DAO(FiltersCache.class);
+//			dbhelper.deleteById(FiltersCache.ID);
+			System.out.println(dbhelper);
+			Stream<FiltersCache> st = dbhelper.findAll("accumulatedValues", "creationTime");
+			Iterator<FiltersCache> iterator = st.iterator();
+			boolean update = false;
+			if (iterator.hasNext()) {
+				FiltersCache cache = iterator.next();
+				if (cache.isUpToDate(30)) {
+					return Promise.pure( Controller.ok(Json.toJson(cache.exportAccumulatedValues())));
+				} else 
+					update = true;
+			}
+			boolean updatef = update;
 			Query q = new Query();
 			q.addClause(new search.Filter(Fields.anywhere.fieldId(),null));
 			q.setStartCount(0, 1);
-			q.addSource(Sources.Europeana, Sources.DPLA, Sources.Rijksmuseum);
+			q.addSource(Sources.Europeana, Sources.DPLA);
+			q.addSource(Sources.Rijksmuseum);
 			q.addSource(Sources.BritishLibrary, Sources.DigitalNZ);
 			Promise<Response> myResults = search2internalResponse(q);
 			play.libs.F.Function<Response, Result> function = new play.libs.F.Function<Response, Result>() {
 				public Result apply(Response r) {
 					// save the result.
+					FiltersCache c = new FiltersCache(r.accumulatedValues, System.currentTimeMillis());
+					if (updatef) {
+						dbhelper.updateField(FiltersCache.ID, "accumulatedValues", c.getAccumulatedValues());
+						dbhelper.updateField(FiltersCache.ID, "creationTime", c.getCreationTime());
+					} else {
+						dbhelper.makePermanent(c);
+					}
 					return ok(Json.toJson(r.accumulatedValues));
 				}
 			};
@@ -375,6 +405,7 @@ public class SearchController extends WithController {
 
 		} catch (Exception e) {
 			log.error("", e);
+			e.printStackTrace();
 			return Promise.pure((Result) badRequest(e.getMessage()));
 		}
 	}

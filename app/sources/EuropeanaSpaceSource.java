@@ -213,7 +213,7 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 		QueryBuilder builder = new EuropeanaQueryBuilder("http://www.europeana.eu/api/v2/search.json");
 		builder.addSearchParam("wskey", apiKey);
 
-		builder.setQuery("query", q.searchTerm);
+		builder.setQuery("query", q.searchTerm!=null?q.searchTerm:"*");
 
 		if (usingCursor){
 			if (q.page.equals("1"))
