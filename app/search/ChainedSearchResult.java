@@ -14,7 +14,7 @@
  */
 
 
-package utils;
+package search;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -22,9 +22,13 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.apache.jena.atlas.logging.Log;
 import org.bson.types.ObjectId;
 
 import akka.actor.Cancellable;
+import controllers.SearchController;
+import play.Logger;
+import play.Logger.ALogger;
 import play.libs.Akka;
 import play.libs.F;
 import play.libs.F.Promise;
@@ -34,8 +38,6 @@ import play.mvc.Controller;
 import play.mvc.Result;
 import scala.concurrent.duration.Duration;
 import scala.concurrent.duration.FiniteDuration;
-import search.Query;
-import search.Response;
 
 /**
  * 
@@ -51,6 +53,8 @@ import search.Response;
  */
 public class ChainedSearchResult {
 	
+	public static final ALogger log = Logger.of(ChainedSearchResult.class);
+
 	// the running queries, 
 	public static HashMap<String, ChainedSearchResult> cache = new HashMap<String, ChainedSearchResult>();
 
@@ -97,11 +101,13 @@ public class ChainedSearchResult {
 			public void invoke(Response.SingleResponse sr) throws Throwable {
 				thisResult.collectSourceResponse( sr );
 				thisResult.finishedPromises.incrementAndGet();
+				log.debug( "Finished "+sr.source.name() + " Count: " + thisResult.finishedPromises.get());
 			}
 		} );
 		pr.onFailure(new F.Callback<Throwable>() {
 			public void invoke(Throwable arg0) throws Throwable {
 				thisResult.finishedPromises.incrementAndGet();
+				log.debug( "Failed Count: " + thisResult.finishedPromises.get());
 			}
 		});
 	}
@@ -153,11 +159,13 @@ public class ChainedSearchResult {
 		}
 
 		// check if we have all responses and add uuid only if we expect more
-		if( finishedPromises.get() < countPromises) 
+		if( finishedPromises.get() < countPromises) {
 			 nextResponse.continuationId = uuid;
-		else {
+			 log.info( "Finished: " + finishedPromises.get() + " Target: " + countPromises );
+		} else {
 			// we can remove the continuation from the cache, its finished
 			ChainedSearchResult.cache.remove( uuid );
+			log.info( "UUID: " + nextResponse.continuationId );
 		}
 		
 		currentResponses.clear();
