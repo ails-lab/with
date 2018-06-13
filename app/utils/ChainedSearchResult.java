@@ -141,7 +141,6 @@ public class ChainedSearchResult {
 	private Response responseFromCurrent() {
 		Response nextResponse = new Response();
 		nextResponse.query = query;
-		nextResponse.continuationId = uuid;
 		
 		currentResponses.forEach(sr -> {
 			nextResponse.addSingleResponse(sr);
@@ -156,6 +155,10 @@ public class ChainedSearchResult {
 		// check if we have all responses and add uuid only if we expect more
 		if( finishedPromises.get() < countPromises) 
 			 nextResponse.continuationId = uuid;
+		else {
+			// we can remove the continuation from the cache, its finished
+			ChainedSearchResult.cache.remove( uuid );
+		}
 		
 		currentResponses.clear();
 		lastResponse = nextResponse;
