@@ -99,8 +99,8 @@ public class ChainedSearchResult {
 		// each promise needs to add its result to this chain separately and update the filters
 		pr.onRedeem( new F.Callback<Response.SingleResponse>() {
 			public void invoke(Response.SingleResponse sr) throws Throwable {
-				thisResult.collectSourceResponse( sr );
 				thisResult.finishedPromises.incrementAndGet();
+				thisResult.collectSourceResponse( sr );
 				log.debug( "Finished "+sr.source.name() + " Count: " + thisResult.finishedPromises.get());
 			}
 		} );
