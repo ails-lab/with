@@ -73,7 +73,12 @@ public class ElasticCoordinator {
 							newFilter.fieldId = "";
 						if (Fields.media_withRights.fieldId().equals(newFilter.fieldId))
 							newFilter.value = EmbeddedMediaObject.WithMediaRights.getRights(newFilter.value).name();
+						if (newFilter.fieldId.equals("hasImage")) {
+							newFilter.fieldId = "media.type";
+							newFilter.value = "IMAGE";
+						}
 						return newFilter;
+						
 					}).collect(Collectors.toList());
 				}).collect(Collectors.toList());
 
