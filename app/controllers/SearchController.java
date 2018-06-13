@@ -56,6 +56,7 @@ import play.libs.F.Promise;
 import play.libs.Json;
 import play.mvc.Controller;
 import play.mvc.Result;
+import search.ChainedSearchResult;
 import search.Fields;
 import search.FiltersCache;
 import search.Query;
@@ -78,7 +79,6 @@ import sources.core.ParallelAPICall.Priority;
 import sources.core.SearchResponse;
 import sources.core.SourceResponse;
 import sources.core.Utils;
-import utils.ChainedSearchResult;
 import utils.ListUtils;
 
 public class SearchController extends WithController {
@@ -360,7 +360,6 @@ public class SearchController extends WithController {
 	public static Promise<Result> getfilters() {
 		// Parse the query.
 
-		System.out.println("checked DB");
 		try {
 			// final CommonQuery q = Utils.parseJson(json);
 			// q.searchTerm=null;
@@ -368,8 +367,6 @@ public class SearchController extends WithController {
 			// q.setEffectiveUserIds(effectiveUserIds());
 			//
 			DAO<FiltersCache> dbhelper = (DAO<FiltersCache>) new DAO(FiltersCache.class);
-//			dbhelper.deleteById(FiltersCache.ID);
-			System.out.println(dbhelper);
 			Stream<FiltersCache> st = dbhelper.findAll("accumulatedValues", "creationTime");
 			Iterator<FiltersCache> iterator = st.iterator();
 			boolean update = false;
@@ -405,7 +402,6 @@ public class SearchController extends WithController {
 
 		} catch (Exception e) {
 			log.error("", e);
-			e.printStackTrace();
 			return Promise.pure((Result) badRequest(e.getMessage()));
 		}
 	}
