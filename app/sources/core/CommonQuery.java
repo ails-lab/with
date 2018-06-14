@@ -52,7 +52,7 @@ public class CommonQuery implements IFilterContainer, Cloneable , QueryStringBin
 
 	@JsonIgnoreProperties(ignoreUnknown=true)
 	public String page = "1";
-	public String facetsMode = FacetsModes.DEFAULT;
+	public String facetsMode = FacetsModes.SOME;
 	public boolean hasMedia=false;
 	public String pageSize = "20";
 	public String searchTerm;

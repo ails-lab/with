@@ -244,7 +244,7 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 		}
 		if (q.hasMedia)
 			builder.addSearchParam("media", "true");
-//		builder.addSearchParam("facet", facets);
+		builder.addSearchParam("facet", facets);
 		builder.setTail(q.tail);
 		return addfilters(q, builder).getHttp();
 	}

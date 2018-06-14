@@ -150,7 +150,6 @@ public class CollectionObjectController extends WithResourceController {
 	}
 
 	public static Result importOmeka(String colid) {
-		System.out.println(colid);
 		OmekaExhibitionReader r = new OmekaExhibitionReader();
 		ObjectId creatorDbId = new ObjectId(loggedInUser());
 		r.importOmeka(creatorDbId, colid);

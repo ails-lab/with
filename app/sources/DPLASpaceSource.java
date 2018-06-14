@@ -128,7 +128,6 @@ public class DPLASpaceSource extends ISpaceSource {
 		if (checkFilters(q)) {
 			try {
 				response = getHttpConnector().getURLContent(httpQuery);
-				// System.out.println(response.toString());
 				JsonNode docs = response.path("docs");
 				res.totalCount = Utils.readIntAttr(response, "count", true);
 				res.count = docs.size();
@@ -144,6 +143,9 @@ public class DPLASpaceSource extends ISpaceSource {
 					res.addItem(myitem = formatreader.readObjectFrom(item));
 					List<String> stringArrayValue = new JsonContextRecord(item).getStringArrayValue("sourceResource.rights");
 					countValue(rights, stringArrayValue);
+					
+					List<String> cr = new JsonContextRecord(item).getStringArrayValue(false,"sourceResource.creator","originalRecord.creator");
+					countValue(creator, cr);
 				}
 				res.facets = response.path("facets");
 				res.filtersLogic = new ArrayList<>();
@@ -179,7 +181,6 @@ public class DPLASpaceSource extends ISpaceSource {
 	}
 
 	private void readList(JsonNode json, CommonFilterLogic filter) {
-		// System.out.println(json);
 		for (JsonNode f : json.path("terms")) {
 			String label = f.path("term").asText();
 			int count = f.path("count").asInt();
