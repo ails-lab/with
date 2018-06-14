@@ -23,6 +23,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.function.Function;
 
+import org.apache.http.conn.ConnectTimeoutException;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -33,9 +34,11 @@ import model.resources.CulturalObject;
 import model.resources.RecordResource;
 import model.resources.WithResource;
 import play.Logger;
+import play.Logger.ALogger;
 import play.libs.Json;
 import search.FiltersFields;
 import search.Sources;
+import search.Response.Failure;
 import sources.core.AdditionalQueryModifier;
 import sources.core.AutocompleteResponse;
 import sources.core.AutocompleteResponse.DataJSON;
@@ -60,7 +63,8 @@ import sources.utils.FunctionsUtils;
 import utils.ListUtils;
 
 public class HistorypinSpaceSource extends ISpaceSource {
-	
+	public static final ALogger log = Logger.of( HistorypinSpaceSource.class);
+
 	private boolean usingCursor = false;
 	private String nextCursor;
 	
@@ -139,9 +143,12 @@ public class HistorypinSpaceSource extends ISpaceSource {
 
 				res.filtersLogic = vmap.getRestrictionsAsFilters(q,res.count);
 
-			} catch (Exception e) {
+			} catch (ConnectTimeoutException ce) {
+				res.error = Failure.TIMEOUT;
 				// TODO Auto-generated catch block
-				e.printStackTrace();
+				log.error( "", ce );
+			} catch (Exception e ) {
+				log.error( "", e );				
 			}
 		}
 		return res;

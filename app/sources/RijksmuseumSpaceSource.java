@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import org.apache.http.conn.ConnectTimeoutException;
 import org.w3c.dom.Document;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -30,9 +31,12 @@ import model.EmbeddedMediaObject;
 import model.resources.CulturalObject;
 import model.resources.RecordResource;
 import model.resources.WithResourceType;
+import play.Logger;
+import play.Logger.ALogger;
 import play.libs.Json;
 import search.FiltersFields;
 import search.Sources;
+import search.Response.Failure;
 import sources.core.CommonFilterLogic;
 import sources.core.CommonQuery;
 import sources.core.HttpConnector;
@@ -49,6 +53,7 @@ import sources.formatreaders.RijksmuseumRecordFormatter;
 import utils.Serializer;
 
 public class RijksmuseumSpaceSource extends ISpaceSource {
+	public static final ALogger log = Logger.of( RijksmuseumSpaceSource.class);
 
 	public RijksmuseumSpaceSource() {
 		super(Sources.Rijksmuseum);
@@ -96,8 +101,12 @@ public class RijksmuseumSpaceSource extends ISpaceSource {
 				res.filtersLogic = createFilters(response);
 				res.filtersLogic.addAll(vmap.getRestrictionsAsFilters(q,res.count));
 				
-			} catch (Exception e) {
-				e.printStackTrace();
+			} catch (ConnectTimeoutException ce) {
+				res.error = Failure.TIMEOUT;
+				// TODO Auto-generated catch block
+				log.error( "", ce );
+			} catch (Exception e ) {
+				log.error( "", e );				
 			}
 		}
 		return res;
