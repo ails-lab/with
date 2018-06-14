@@ -257,7 +257,7 @@ public class CollectionObjectController extends WithResourceController {
 					page++;
 					q.page = page + "";
 					result = src.getResults(q);
-					if (!result.error) {
+					if (result.error == null ) {
 						int c = addResultToCollection(result, collection.getDbId().toString(), mylimit - itemsCount,
 								resultInfo, dontDuplicate);
 						itemsCount = itemsCount + c;

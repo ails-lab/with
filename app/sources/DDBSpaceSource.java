@@ -20,6 +20,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
 
+import org.apache.http.conn.ConnectTimeoutException;
+
 import com.fasterxml.jackson.databind.JsonNode;
 
 import model.resources.RecordResource;
@@ -29,6 +31,7 @@ import play.Logger.ALogger;
 import play.libs.Json;
 import search.FiltersFields;
 import search.Sources;
+import search.Response.Failure;
 import sources.core.CommonFilterLogic;
 import sources.core.CommonQuery;
 import sources.core.HttpConnector;
@@ -110,9 +113,12 @@ public class DDBSpaceSource extends ISpaceSource {
 				}
 				res.filtersLogic = createFilters(response);
 
-			} catch (Exception e) {
+			} catch (ConnectTimeoutException ce) {
+				res.error = Failure.TIMEOUT;
 				// TODO Auto-generated catch block
-				log.error( "",e );
+				log.error( "", ce );
+			} catch (Exception e ) {
+				log.error( "", e );				
 			}
 		}
 
