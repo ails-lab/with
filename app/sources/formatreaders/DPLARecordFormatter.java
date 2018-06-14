@@ -43,7 +43,6 @@ public class DPLARecordFormatter extends CulturalRecordFormatter {
 
 	@Override
 	public CulturalObject fillObjectFrom(JsonContextRecord rec) {
-//		System.out.println(rec);
 		CulturalObjectData model = (CulturalObjectData) object.getDescriptiveData();
 		Language[] language = null;
 		List<String> langs = rec.getStringArrayValue(false,"sourceResource.language[.*].iso639_3","originalRecord.language");
@@ -52,7 +51,6 @@ public class DPLARecordFormatter extends CulturalRecordFormatter {
 			for (int i = 0; i < langs.size(); i++) {
 				language[i] = Language.getLanguage(langs.get(i));
 			}
-//			System.out.println(Arrays.toString(language));
 		}
 		if (!Utils.hasInfo(language)){
 			language = getLanguagesFromText(rec.getStringValue("sourceResource.title"),
@@ -81,13 +79,11 @@ public class DPLARecordFormatter extends CulturalRecordFormatter {
 		object.addToProvenance(
 				new ProvenanceInfo(Sources.DPLA.toString(), uri, recID));
 		List<String> rights = rec.getStringArrayValue("sourceResource.rights");
-//		System.out.println(" ------> " +rights);
 		String stringValue = rec.getStringValue("sourceResource.type","originalRecord.type");
 		List<Object> translateToCommon = getValuesMap().translateToCommon(FiltersFields.TYPE.getFilterId(), stringValue);
 		WithMediaType type = translateToCommon==null?null:(WithMediaType.getType(translateToCommon.get(0).toString())) ;
 		WithMediaRights withRights = ((rights==null) || (rights.size()==0))?WithMediaRights.UNKNOWN
 				:WithMediaRights.getRights(getValuesMap().translateToCommon(FiltersFields.RIGHTS.getFilterId(), rights.get(0)).get(0).toString());
-//		System.out.println(" ------> " +withRights);
 		String uri3 = rec.getStringValue("object");
 		String uri2 = model.getIsShownBy()==null?null:model.getIsShownBy().toString();
 		if (Utils.hasInfo(uri3)){

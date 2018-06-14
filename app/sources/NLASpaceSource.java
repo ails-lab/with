@@ -123,7 +123,6 @@ public class NLASpaceSource extends ISpaceSource {
 		if (checkFilters(q)) {
 			try {
 				response = getHttpConnector().getURLContent(httpQuery);
-				// System.out.println(response.toString());
 				JsonNode pa = response.path("response").path("zone");
 				ArrayList<WithResource<?, ?>> a = new ArrayList<>();
 
@@ -136,9 +135,6 @@ public class NLASpaceSource extends ISpaceSource {
 						res.startIndex = Utils.readIntAttr(o.path("records"), "s", true);
 
 						JsonNode aa = o.path("records").path("work");
-
-						// System.out.println(aa.size());
-
 						for (JsonNode item : aa) {
 
 							List<String> v = Utils.readArrayAttr(item, "type", false);
@@ -153,12 +149,10 @@ public class NLASpaceSource extends ISpaceSource {
 						}
 						for (JsonNode facet : o.path("facets").path("facet")) {
 							if (!o.path("name").asText().equals("people")) {
-								// System.out.println(">>>"+facet.path("term").toString());
 								for (JsonNode jsonNode : facet.path("term")) {
 									String label = jsonNode.path("search").asText();
 									int count = jsonNode.path("count").asInt();
 									JsonNode path = facet.path("name");
-									// System.out.println(" path "+path);
 									switch (path.asText()) {
 									case "format":
 										countValue(type, label, count);
