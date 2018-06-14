@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
 
+import org.apache.http.conn.ConnectTimeoutException;
 import org.w3c.dom.Document;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -31,6 +32,7 @@ import play.Logger.ALogger;
 import play.libs.Json;
 import search.FiltersFields;
 import search.Sources;
+import search.Response.Failure;
 import sources.core.AdditionalQueryModifier;
 import sources.core.CommonFilterLogic;
 import sources.core.CommonQuery;
@@ -181,9 +183,12 @@ public class NLASpaceSource extends ISpaceSource {
 				 res.filtersLogic.add(year);
 
 				// System.out.println(type);
-			} catch (Exception e) {
+			} catch (ConnectTimeoutException ce) {
+				res.error = Failure.TIMEOUT;
 				// TODO Auto-generated catch block
-				e.printStackTrace();
+				log.error( "", ce );
+			} catch (Exception e ) {
+				log.error( "", e );				
 			}
 		}
 
