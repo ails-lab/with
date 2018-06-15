@@ -90,7 +90,7 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 
 		addDefaultQueryModifier(FiltersFields.YEAR.getFilterId(), qDatewriter());
 
-		addDefaultQueryModifier(FiltersFields.CREATOR.getFilterId(), qwriter("CREATOR"));
+		addDefaultQueryModifier(FiltersFields.CREATOR.getFilterId(), qwriter("proxy_dc_creator"));
 
 		// addDefaultWriter(CommonFilters.CONTRIBUTOR_ID,
 		// qfwriter("proxy_dc_contributor"));
@@ -214,9 +214,7 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 	public String getHttpQuery(CommonQuery q) {
 		QueryBuilder builder = new EuropeanaQueryBuilder("http://www.europeana.eu/api/v2/search.json");
 		builder.addSearchParam("wskey", apiKey);
-
 		builder.setQuery("query", q.searchTerm!=null?q.searchTerm:"*");
-
 		if (usingCursor){
 			if (q.page.equals("1"))
 				builder.addSearchParam("cursor", "*");
