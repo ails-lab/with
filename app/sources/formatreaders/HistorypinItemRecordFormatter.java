@@ -92,7 +92,6 @@ public class HistorypinItemRecordFormatter extends CulturalRecordFormatter {
 		WithMediaType type = (WithMediaType.getType(translateToCommon.get(0).toString())) ;
 		WithMediaRights withRights = (!Utils.hasInfo(rights))?null:WithMediaRights.getRights(
 				getValuesMap().translateToCommon(FiltersFields.RIGHTS.getFilterId(), rights.get(0)).get(0).toString());
-		System.out.println(getValuesMap().translateToCommon(FiltersFields.RIGHTS.getFilterId(), rights.get(0)).get(0).toString());
 		
 		String uri3 = "http://www.historypin.org"+rec.getStringValue("display.content");
 		String uri2 = model.getIsShownBy()==null?null:model.getIsShownBy().toString();

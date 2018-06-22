@@ -249,7 +249,7 @@ public class Response {
 			accumulateValueCountsList(accumulated, sr.facets);
 			accumulateValueCountsList(accumulated, sr.counts);
 		}
-
+		
 		// convert the Hash of hash of string count fieldId->value->count
 		// to the list valueList with sorting of values by count downwards
 		for( Map.Entry<String, HashMap<String, Integer>> entry: accumulated.entrySet() ) {

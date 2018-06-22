@@ -239,6 +239,7 @@ public class SearchController extends WithController {
 			Response r = new Response();
 			r.query = q;
 			for (Response.SingleResponse sr : singleResponses) {
+				// TODO change this logic
 				sr.pruneFacets(commonSupportedFields);
 				r.addSingleResponse(sr);
 			}

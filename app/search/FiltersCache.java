@@ -96,7 +96,10 @@ public class FiltersCache {
 	}
 
 	private String getMykey(String key) {
-		return Fields.forFieldId(key).name();
+		if (Fields.validFieldId(key))
+			return Fields.forFieldId(key).name();
+		else
+			return key;
 	}
 	
 	private String getDotkey(String key) {
