@@ -45,7 +45,7 @@ public enum Sources {
 	EuropeanaFashion(EuropeanaFashionProxySource.class,"EuropeanaFashion"),
 	YouTube(YoutubeProxySource.class,"Youtube"),
 	NLA(NLAProxySource.class,"NLA","National Library of Australia"),
-	WITHin(ElasticSource.class,"WITHin"),
+	WITHin(ElasticSource.class,"WITHin", "WITH Collections"),
 	Rijksmuseum(RijksProxySource.class,"Rijksmuseum","Rijksmuseum"),
 	Historypin(HistoryPinProxySource.class,"Historypin")
 	;

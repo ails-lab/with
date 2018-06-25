@@ -26,6 +26,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.stream.Collectors;
@@ -201,6 +202,7 @@ public class SearchController extends WithController {
 		
 		// split the query
 		Map<Sources, Query> queries = q.splitBySource();
+		
 		// create promises
 		Iterable<Promise<Response.SingleResponse>> promises = splitQuery(queries);
 
@@ -303,7 +305,8 @@ public class SearchController extends WithController {
 				if( !excludedFieldnames.contains(fieldId))
 					jsonSource.withArray("supportedFields").add( fieldId );
 			}
-			jsonSource.put("name", source.name());
+			jsonSource.put("id", source.getID());
+			jsonSource.put("name", source.getText());
 			if( s.apiConsole() != null)
 				jsonSource.put("apiConsole", s.apiConsole());
 			res.add( jsonSource );

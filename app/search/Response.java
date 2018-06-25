@@ -80,6 +80,8 @@ public class Response {
 		 * The source where this result belongs to
 		 */
 		public Sources source;
+		
+		public String source_name;
 
 		/**
 		 * The total count of results if available
@@ -178,6 +180,8 @@ public class Response {
 	 * All the sources this response is containing
 	 */
 	public List<Sources> sources = new ArrayList<Sources>();
+	
+	public List<String> sources_names = new ArrayList<String>();
 
 	/**
 	 * Merging facet counts is not very meaningful. We will still do it here for now.
@@ -209,8 +213,10 @@ public class Response {
 		}
 		SingleResponse res = new SingleResponse();
 		res.source = source;
+		res.source_name = source.getText();
 		results.add( res );
 		sources.add( source );
+		sources_names.add(source.getText());
 		return res;
 	}
 
@@ -325,8 +331,10 @@ public class Response {
 	 * @param sr
 	 */
 	public void addSingleResponse( SingleResponse sr ) {
+		sr.source_name = sr.source.getText();
 		results.add( sr );
 		sources.add( sr.source );
+		sources_names.add(sr.source.getText());
 	}
 
 }
