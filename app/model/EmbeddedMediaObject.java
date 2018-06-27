@@ -70,19 +70,19 @@ public class EmbeddedMediaObject {
 	 *
 	 */
 	public static enum WithMediaType {
-		VIDEO, IMAGE, TEXT, AUDIO, THREED{
+		VIDEO, IMAGE, TEXT, AUDIO, 
+		THREED{
 			@Override
 			public String getName() {
 				return "3D";
 			}
-		}, OTHER{
+		}, 
+		OTHER{
 
 			@Override
 			public boolean isKnown() {
 				return false;
 			}
-
-
 		},
 		// WEBPAGE indicates a media that is only playable in given URL
 		// it could be because of restricted access or players not 
@@ -167,21 +167,15 @@ public class EmbeddedMediaObject {
 		Creative_BY_NC_ND("Not modify, adapt, or build upon, not for commercial purposes"),
 		
 		
-		/**
-		 * <h1>NO KNOWN COPYRIGHT</h1>
-		 * This Rights Statement should be used for Items for which the copyright status has not been determined conclusively, but for which the organization that intends to make the Item available has reasonable cause to believe that the underlying Work is not covered by copyright or related rights anymore. This Rights Statement should not be used for Orphan Works (which are assumed to be in-copyright) or for Items where the organization that intends to make the Item available has not undertaken an effort to ascertain the copyright status of the underlying Work.
-		 * URI: <a href"http://rightsstatements.org/vocab/NKC/1.0/">http://rightsstatements.org/vocab/NKC/1.0/</a>
-		 */
-		
-		UNKNOWN("Unknown"),
-		
+		// InC
 		
 		
 		/**
 		 * <h1>In Copyright (InC)</h1>
 		 * The InC statement is for use with in copyright Digital Objects which are freely available online and where re-use requires additional permission from the rights holder(s).
 		 * What else do I need to know? This rights statement should be used for objects where any re-use is subject to additional permission from the rights holder(s), or you do want or you are not authorised to allow re-use of the Digital Object.
-		 * When I use this statement, what information does the user see?  The user will be directed to http://rightsstatements.org/vocab/InC/1.0/ 
+		 * When I use this statement, what information does the user see?  The user will be directed to http://rightsstatements.org/vocab/InC/1.0/
+		 * TODO: check if this includes all the ones bellow 
 		 */
 		RR("In Copyright (InC)"),
 		
@@ -199,9 +193,81 @@ public class EmbeddedMediaObject {
 		 */
 		InC_EDU("IN COPYRIGHT - EDUCATIONAL USE PERMITTED"),
 		
+		/**
+		 * <h1>IN COPYRIGHT - NON-COMMERCIAL USE PERMITTED</h1>
+		 * This Rights Statement can be used only for copyrighted Items for which the organization making the Item available is the rights-holder or has been explicitly authorized by the rights-holder(s) to allow third parties to use their Work(s) for non-commercial purposes without obtaining permission first.
+		 * <a>http://rightsstatements.org/vocab/InC-NC/1.0/
+		 */
+		InC_NC("IN COPYRIGHT - NON-COMMERCIAL USE PERMITTED"),
+		
+		/**
+		 * <h1>IN COPYRIGHT - RIGHTS-HOLDER(S) UNLOCATABLE OR UNIDENTIFIABLE</h1>
+		 * This Rights Statement is intended for use with an Item that has been identified as in copyright but for which no rights-holder(s) has been identified or located after some reasonable investigation. This Rights Statement should only be used if the organization that intends to make the Item available is reasonably sure that the underlying Work is in copyright. This Rights Statement is not intended for use by EU-based organizations who have identified works as Orphan Works in accordance with the EU Orphan Works Directive (they must use InC-OW-EU instead).
+		 * <a>http://rightsstatements.org/vocab/InC-RUU/1.0/
 
+		 */
+		InC_RUU("IN COPYRIGHT - RIGHTS-HOLDER(S) UNLOCATABLE OR UNIDENTIFIABLE"),
+		
+		
+				
+		// NC
+					
+		/**
+		 * <h1>NO COPYRIGHT - CONTRACTUAL RESTRICTIONS</h1>
+		 * This Rights Statement can only be used for Items that are in the Public Domain but for which the organization that intends to make the Item available has entered into contractual agreement that requires it to take steps to restrict third party uses of the Item. In order for this Rights Statement to be conclusive, the organization that intends to make the Item available should provide a link to a page detailing the contractual restrictions that apply to the use of the Item.
+		 * <a>http://rightsstatements.org/vocab/NoC-CR/1.0/
+		 */
+		NoC_CR("NO COPYRIGHT - CONTRACTUAL RESTRICTIONS"),
+		
+		/**
+		 * <h1>NO COPYRIGHT - NON-COMMERCIAL USE ONLY</h1>
+		 * This Rights Statement can only be used for Works that are in the Public Domain and have been digitized in a public-private partnership as part of which, the partners have agreed to limit commercial uses of this digital representation of the Work by third parties. It has been developed specifically to allow the inclusion of Works that have been digitized as part of the partnerships between European Libraries and Google, but can in theory be applied to Items that have been digitized in similar public-private partnerships.
+		 * <a> http://rightsstatements.org/vocab/NoC-NC/1.0/
+		 */
+		NoC_NC("NO COPYRIGHT - NON-COMMERCIAL USE ONLY"),
+		
+		/**
+		 * <h1>NO COPYRIGHT - OTHER KNOWN LEGAL RESTRICTIONS</h1>
+		 * This Rights Statement should be used for Items that are in the Public Domain but that cannot be freely re-used as the consequence of known legal restrictions that prevent the organization that intends to make the Item available from allowing free re-use of the Item, such as cultural heritage or traditional cultural expression protections. In order for this Rights Statement to be conclusive, the organization that intends to make the Item available should provide a link to a page detailing the legal restrictions that limit re-use of the Item.
+		 * <a>http://rightsstatements.org/vocab/NoC-OKLR/1.0/
+		 */
+		NoC_OKLR("NO COPYRIGHT - OTHER KNOWN LEGAL RESTRICTIONS"),
+		
+		
+		/**
+		 * <h1>NO COPYRIGHT - UNITED STATES</h1>
+		 * This Rights Statement should be used for Items for which the organization that intends to make the Item available has determined are free of copyright under the laws of the United States. This Rights Statement should not be used for Orphan Works (which are assumed to be in-copyright) or for Items where the organization that intends to make the Item available has not undertaken an effort to ascertain the copyright status of the underlying Work.
+		 * <a>http://rightsstatements.org/vocab/NoC-US/1.0/
+		 */
+		NoC_US("NO COPYRIGHT - UNITED STATES"),
+		
+		/**
+		 * <h1>COPYRIGHT NOT EVALUATED</h1>
+		 * This Rights Statement should be used for Items for which the copyright status is unknown and for which the organization that intends to make the Item available has not undertaken an effort to determine the copyright status of the underlying Work.
+		 * <a>http://rightsstatements.org/vocab/CNE/1.0/
+		 */
+		CNE("COPYRIGHT NOT EVALUATED"),
+		
+		/**
+		 * <h1>COPYRIGHT UNDETERMINED</h1>
+		 * This Rights Statement should be used for Items for which the copyright status is unknown and for which the organization that has made the Item available has undertaken an (unsuccessful) effort to determine the copyright status of the underlying Work. Typically, this Rights Statement is used when the organization is missing key facts essential to making an accurate copyright status determination.
+		 * <a>http://rightsstatements.org/vocab/UND/1.0/
+		 */
+		UND("COPYRIGHT UNDETERMINED"),
+		
+		/**
+		 * <h1>NO KNOWN COPYRIGHT</h1>
+		 * This Rights Statement should be used for Items for which the copyright status has not been determined conclusively, but for which the organization that intends to make the Item available has reasonable cause to believe that the underlying Work is not covered by copyright or related rights anymore. 
+		 * This Rights Statement should not be used for Orphan Works (which are assumed to be in-copyright) or for Items where the organization that intends to make the Item available has not undertaken an effort to ascertain the copyright status of the underlying Work.
+		 * <a>http://rightsstatements.org/vocab/NKC/1.0/
+		 */
+		NKC("NO KNOWN COPYRIGHT"),
+		UNKNOWN("Unknown"),
+		/**
+		 * general
+		 */
 		OUT_OF_COPYRIGHT("Out of Copyright"),
-		Restricted("Restricted"),
+		
 		RRPA("Rights Reserved - Paid Access"),
 		RRRA("Rights Reserved - Restricted Access"),
 		RRFA("Rights Reserved - Free Access"),
@@ -210,12 +276,21 @@ public class EmbeddedMediaObject {
 
 		// database seems to contain other WithMediaRights, temporarily we adding them here to
 		// make it work... We need to find out why this happens
+		@Deprecated
 		Modify("Modify"),
+		@Deprecated
+		Restricted("Restricted"),
+		@Deprecated
 		Creative_SA("Creative SA"),
+		@Deprecated
 		Permission("Permission granted"),
+		@Deprecated
 		Creative_Not_Commercial_Modify("NOT comercial modify"),
+		@Deprecated
 		Creative("Creative"),
+		@Deprecated
 		Creative_Not_Modify("Not Modify"),
+		@Deprecated
 		Creative_Not_Commercial("Not Comercial");
 		
 		
@@ -270,6 +345,11 @@ public class EmbeddedMediaObject {
 	@JsonDeserialize(using = Deserializer.MimeTypeDeserializer.class)
 	private MediaType mimeType = MediaType.ANY_IMAGE_TYPE;
 
+	/**
+	 * media (image, video, audio, text) quality
+	 * @author gardero
+	 *
+	 */
 	public static enum Quality {
 		/**
 		 * Unknown media quality.
