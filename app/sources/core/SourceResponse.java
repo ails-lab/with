@@ -67,7 +67,7 @@ public class SourceResponse {
 	//comesFrom in each record in the WITH db indicates where it was imported from, i.e. external APIs, Mint or UploadedByUser
 	public SourceResponse(SearchResponse resp, int offset) {
 		this.totalCount = (int) resp.getHits().getTotalHits();
-		this.source = "WITH Collections";
+		this.source = Sources.WITHin.getID();
 		this.startIndex = offset;
 		List<WithResource<?, ?>> items = new ArrayList<WithResource<?, ?>>();
 
