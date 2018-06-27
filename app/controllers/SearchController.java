@@ -306,7 +306,6 @@ public class SearchController extends WithController {
 					jsonSource.withArray("supportedFields").add( fieldId );
 			}
 			jsonSource.put("id", source.getID());
-			jsonSource.put("name", source.getText());
 			if( s.apiConsole() != null)
 				jsonSource.put("apiConsole", s.apiConsole());
 			res.add( jsonSource );
