@@ -145,7 +145,7 @@ public class SourceResponse {
 		r.items = this.items.getAll();
 		r.facets =new ValueCounts();
 //		r.source = Sources.valueOf(source);
-		r.source = Sources.getSourceByID(source);
+		r.source_id = Sources.getSourceByID(source).getID();
 		if (filtersLogic!=null)
 		for (CommonFilterLogic f : filtersLogic) {
 			CommonFilterResponse ff = f.export();
