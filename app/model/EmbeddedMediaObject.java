@@ -131,40 +131,40 @@ public class EmbeddedMediaObject {
 		 *  <h2>CC BY</h2>
 		 *  This license lets others distribute, remix, tweak, and build upon your work, even commercially, as long as they credit you for the original creation. This is the most accommodating of licenses offered. Recommended for maximum dissemination and use of licensed materials. 
 		 */
-		Creative_BY("Use by attribution"),
+		Creative_BY("Attribution"),
 		
 		/**
 		 *  <h1>Attribution-ShareAlike</h1>
 		 *  <h2>CC BY-SA</h2>
 		 *  This license lets others remix, tweak, and build upon your work even for commercial purposes, as long as they credit you and license their new creations under the identical terms. This license is often compared to “copyleft” free and open source software licenses. All new works based on yours will carry the same license, so any derivatives will also allow commercial use. This is the license used by Wikipedia, and is recommended for materials that would benefit from incorporating content from Wikipedia and similarly licensed projects. 
 		 */
-		Creative_BY_SA("Share alike"),
+		Creative_BY_SA("Attribution ShareAlike"),
 		
 		/**
 		 *  <h1>Attribution-NonCommercial</h1>
 		 *  <h2>CC BY-NC</h2>
 		 *  This license lets others remix, tweak, and build upon your work non-commercially, and although their new works must also acknowledge you and be non-commercial, they don’t have to license their derivative works on the same terms. 
 		 */
-		Creative_BY_NC("NOT Comercial"),
+		Creative_BY_NC("Attribution NonCommercial"),
 		
 		/**
 		 *  <h1>Attribution-NoDerivs</h1> <h2>CC BY-ND</h2>
 		 *  This license allows for redistribution, commercial and non-commercial, as long as it is passed along unchanged and in whole, with credit to you. 
 		 */
-		Creative_BY_ND("NOT Modify"),
+		Creative_BY_ND("Attribution NoDerivs"),
 		
 		/**
 		 *  <h1>Attribution-NonCommercial-ShareAlike</h1>
 		 *  <h2>CC BY-NC-SA</h2>
 		 *  This license lets others remix, tweak, and build upon your work non-commercially, as long as they credit you and license their new creations under the identical terms. 
 		 */
-		Creative_BY_NC_SA("Share alike, not for commercial purposes"),
+		Creative_BY_NC_SA("Attribution NonCommercial-ShareAlike"),
 		
 		/**
 		 *  <h1>Attribution-NonCommercial-NoDerivs</h1>
 		 *  <h2>CC BY-NC-ND</h2> This license is the most restrictive of our six main licenses, only allowing others to download your works and share them with others as long as they credit you, but they can’t change them in any way or use them commercially. 
 		 */
-		Creative_BY_NC_ND("Not modify, adapt, or build upon, not for commercial purposes"),
+		Creative_BY_NC_ND("Attribution NonCommercial-NoDerivs"),
 		
 		
 		// InC
@@ -177,7 +177,7 @@ public class EmbeddedMediaObject {
 		 * When I use this statement, what information does the user see?  The user will be directed to http://rightsstatements.org/vocab/InC/1.0/
 		 * TODO: check if this includes all the ones bellow 
 		 */
-		RR("In Copyright (InC)"),
+		InC("In Copyright (InC)"),
 		
 		/**
 		 * <h1>IN COPYRIGHT - EU ORPHAN WORK</h1>
@@ -261,38 +261,39 @@ public class EmbeddedMediaObject {
 		 * This Rights Statement should not be used for Orphan Works (which are assumed to be in-copyright) or for Items where the organization that intends to make the Item available has not undertaken an effort to ascertain the copyright status of the underlying Work.
 		 * <a>http://rightsstatements.org/vocab/NKC/1.0/
 		 */
-		NKC("NO KNOWN COPYRIGHT"),
-		UNKNOWN("Unknown"),
+		UNKNOWN("NO KNOWN COPYRIGHT"),
+//		UNKNOWN("Unknown"),
 		/**
 		 * general
 		 */
+		// TODO: public domain now...
 		OUT_OF_COPYRIGHT("Out of Copyright"),
 		
-		RRPA("Rights Reserved - Paid Access"),
-		RRRA("Rights Reserved - Restricted Access"),
-		RRFA("Rights Reserved - Free Access"),
-		PROVIDER_SPECIFIC("Provider specific rights statement"),
+//		RRPA("Rights Reserved - Paid Access"),
+//		RRRA("Rights Reserved - Restricted Access"),
+//		RRFA("Rights Reserved - Free Access"),
+		PROVIDER_SPECIFIC("Provider specific rights statement");
 		
 
 		// database seems to contain other WithMediaRights, temporarily we adding them here to
 		// make it work... We need to find out why this happens
-		@Deprecated
-		Modify("Modify"),
-		@Deprecated
-		Restricted("Restricted"),
-		@Deprecated
-		Creative_SA("Creative SA"),
-		@Deprecated
-		Permission("Permission granted"),
-		@Deprecated
-		Creative_Not_Commercial_Modify("NOT comercial modify"),
-		@Deprecated
-		Creative("Creative"),
-		@Deprecated
-		Creative_Not_Modify("Not Modify"),
-		@Deprecated
-		Creative_Not_Commercial("Not Comercial");
-		
+//		@Deprecated
+//		Modify("Modify"),
+//		@Deprecated
+//		Restricted("Restricted"),
+//		@Deprecated
+//		Creative_SA("Creative SA"),
+//		@Deprecated
+//		Permission("Permission granted"),
+//		@Deprecated
+//		Creative_Not_Commercial_Modify("NOT comercial modify"),
+//		@Deprecated
+//		Creative("Creative"),
+//		@Deprecated
+//		Creative_Not_Modify("Not Modify"),
+//		@Deprecated
+//		Creative_Not_Commercial("Not Comercial");
+//		
 		
 		private final String text;
 

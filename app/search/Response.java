@@ -57,12 +57,18 @@ public class Response {
 			this.value = value;
 			this.count = count;
 		}
+		@Override
+		public String toString() {
+			return " [value=" + value + ", count=" + count + "]";
+		}
+		
 
 	}
 
 	public static class ValueCounts extends HashMap<String,List<ValueCount>> {
 		// keys are field ids
 		// values are list of values and occurrence counts
+		
 	}
 
 
@@ -70,7 +76,7 @@ public class Response {
 		/**
 		 * limit of value counts returned in a single facet.
 		 */
-		public static final int FACETS_LIMIT = 10;
+		public static final int FACETS_LIMIT = 20;
 
 
 		public static SingleResponse EMPTY = new Response.SingleResponse();

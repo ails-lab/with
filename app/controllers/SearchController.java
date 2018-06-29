@@ -371,13 +371,13 @@ public class SearchController extends WithController {
 			Stream<FiltersCache> st = dbhelper.findAll("accumulatedValues", "creationTime");
 			Iterator<FiltersCache> iterator = st.iterator();
 			boolean update = false;
-			if (iterator.hasNext()) {
-				FiltersCache cache = iterator.next();
-				if (cache.isUpToDate(30)) {
-					return Promise.pure( Controller.ok(Json.toJson(cache.exportAccumulatedValues())));
-				} else 
-					update = true;
-			}
+//			if (iterator.hasNext()) {
+//				FiltersCache cache = iterator.next();
+//				if (cache.isUpToDate(30)) {
+//					return Promise.pure( Controller.ok(Json.toJson(cache.exportAccumulatedValues())));
+//				} else 
+//					update = true;
+//			}
 			boolean updatef = update;
 			Query q = new Query();
 			q.addClause(new search.Filter(Fields.anywhere.fieldId(),null));

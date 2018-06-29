@@ -45,9 +45,11 @@ public class RecordQuality {
 	}
 	
 	
-	protected double computeLiteral(EmbeddedMediaObject l){
+	protected double computeRights(EmbeddedMediaObject l){
 		WeightedSum s = new WeightedSum().init();
 		s.add(Utils.hasInfo(l.getOriginalRights()));
+		s.add(l.getWithRights()!=WithMediaRights.UNKNOWN);
+		// TODO check for creative....
 		s.add(l.getWithRights()!=WithMediaRights.UNKNOWN);
 		s.add(4,proportional(l.getSize()));
 		return s.computeWeight();

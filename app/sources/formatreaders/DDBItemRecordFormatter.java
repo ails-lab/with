@@ -92,9 +92,7 @@ public class DDBItemRecordFormatter extends CulturalRecordFormatter {
 		
 		LiteralOrResource rights = rec.getLiteralOrResourceValue("WebResource.rights");
 		String rightsString = rec.getStringValue("WebResource.rights");
-		WithMediaRights withMediaRights = (!Utils.hasInfo(rightsString ))?null:
-			(WithMediaRights.getRights(getValuesMap().translateToCommon(FiltersFields.RIGHTS.getFilterId(),
-					rightsString).get(0).toString()));
+		WithMediaRights withMediaRights = getWithMediaRights(rightsString);
 		
 		model.setIsShownAt(new Resource( rec.getStringValue("Aggregation.isShownAt")));
 		model.setIsShownBy(new Resource( rec.getStringValue("Aggregation.isShownBy")));
