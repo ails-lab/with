@@ -115,7 +115,7 @@ public abstract class SimilarSearch {
 			return allResponses.map((List<SingleResponse> list)->{
 				Map<Sources, SingleResponse> res = new HashMap<>();
 				for (SingleResponse r : list) {
-					res.put(r.source, r);
+					res.put(Sources.getSourceByID(r.source_id), r);
 				}
 				return res;
 			});
