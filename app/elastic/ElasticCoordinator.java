@@ -122,7 +122,7 @@ public class ElasticCoordinator {
 		}
 		
 		sresp.totalCount = (int) elasticresp.getHits().getTotalHits();
-		sresp.source = Sources.WITHin;
+		sresp.source_id = Sources.WITHin.getID();
 		sresp.count = resultMap.size();
 		if(elasticresp.getAggregations() != null)
 			extractFacets(elasticresp.getAggregations(), sresp);
