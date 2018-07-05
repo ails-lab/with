@@ -16,6 +16,7 @@
 
 package search;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map.Entry;
@@ -36,11 +37,11 @@ import utils.Serializer.ValueCountSerializer;
 
 public class FiltersCache {
 	
-	public static final ObjectId ID = new ObjectId(new byte[] {0,1,2,3,4,5,6,7,8,9,10,11});
 	private static final int DAY = 100*60*60*24;
 	@Embedded
 	private HashMap<String,List<ValueCount>> accumulatedValues;
 	private long creationTime;
+	private String source;
 	
 	@Id
 	@JsonSerialize(using = Serializer.ObjectIdSerializer.class)
@@ -56,11 +57,16 @@ public class FiltersCache {
 
 	
 	public FiltersCache() {
-		setDbId(ID);
+		setDbId(getIDfromSource(""));
+	}
+	
+	public static ObjectId getIDfromSource(String s){
+		return new ObjectId(new Date(System.currentTimeMillis()));
 	}
 
-	public FiltersCache(ValueCounts accumulatedValues, long creationTime) {
-		setDbId(ID);
+	public FiltersCache(String source, ValueCounts accumulatedValues, long creationTime) {
+		setDbId(getIDfromSource(source));
+		this.source = source;
 		parseAccumulatedValues(accumulatedValues);
 		this.creationTime = creationTime;
 	}
@@ -103,7 +109,11 @@ public class FiltersCache {
 	}
 	
 	private String getDotkey(String key) {
-		return Fields.forFieldId(key).fieldId();
+		if (Fields.validFieldId(key))
+			return Fields.forFieldId(key).fieldId();
+		else {
+			return key;
+		}
 	}
 
 	public long getCreationTime() {
@@ -113,6 +123,16 @@ public class FiltersCache {
 	public void setCreationTime(long creationTime) {
 		this.creationTime = creationTime;
 	}
+
+	public String getSource() {
+		return source;
+	}
+
+	public void setSource(String source) {
+		this.source = source;
+	}
+	
+	
 	
 	
 	

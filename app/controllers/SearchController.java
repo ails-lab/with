@@ -358,7 +358,7 @@ public class SearchController extends WithController {
 		}
 	}
 
-	public static Promise<Result> getfilters() {
+	public static Promise<Result> getfilters(String source) {
 		// Parse the query.
 
 		try {
@@ -367,34 +367,49 @@ public class SearchController extends WithController {
 			// q.setTypes(Elastic.allTypes);
 			// q.setEffectiveUserIds(effectiveUserIds());
 			//
+			if (!Utils.hasAny(source)) {
+				source = "ALL";
+			}
 			DAO<FiltersCache> dbhelper = (DAO<FiltersCache>) new DAO(FiltersCache.class);
-			Stream<FiltersCache> st = dbhelper.findAll("accumulatedValues", "creationTime");
+			org.mongodb.morphia.query.Query<FiltersCache> qr = dbhelper.createQuery().field("source").equal(source);
+			Stream<FiltersCache> st = dbhelper.find(qr , "source","accumulatedValues", "creationTime");
 			Iterator<FiltersCache> iterator = st.iterator();
 			boolean update = false;
+			ObjectId id=null;
 			if (iterator.hasNext()) {
 				FiltersCache cache = iterator.next();
 				if (cache.isUpToDate(30)) {
+					System.out.println("---------------- taken from to DB");
 					return Promise.pure( Controller.ok(Json.toJson(cache.exportAccumulatedValues())));
-				} else 
+				} else {
+					id  = cache.getDbId();
 					update = true;
+				}
 			}
+			ObjectId idp=id;
 			boolean updatef = update;
 			Query q = new Query();
 			q.addClause(new search.Filter(Fields.anywhere.fieldId(),null));
 			q.setStartCount(0, 1);
-			q.addSource(Sources.Europeana, Sources.DPLA);
-			q.addSource(Sources.Rijksmuseum);
-			q.addSource(Sources.BritishLibrary, Sources.DigitalNZ);
+			if (Utils.hasAny(source) && !source.equals("ALL")) {
+				q.addSource(Sources.getSourceByID(source));
+			} else {
+				q.addSource(Sources.Europeana, Sources.DPLA);
+				q.addSource(Sources.Rijksmuseum);
+				q.addSource(Sources.BritishLibrary, Sources.DigitalNZ);
+			}
+			String sourcep = source;
 			Promise<Response> myResults = search2internalResponse(q);
 			play.libs.F.Function<Response, Result> function = new play.libs.F.Function<Response, Result>() {
 				public Result apply(Response r) {
 					// save the result.
-					FiltersCache c = new FiltersCache(r.accumulatedValues, System.currentTimeMillis());
+					FiltersCache c = new FiltersCache(sourcep, r.accumulatedValues, System.currentTimeMillis());
 					if (updatef) {
-						dbhelper.updateField(FiltersCache.ID, "accumulatedValues", c.getAccumulatedValues());
-						dbhelper.updateField(FiltersCache.ID, "creationTime", c.getCreationTime());
+						dbhelper.updateField(idp, "accumulatedValues", c.getAccumulatedValues());
+						dbhelper.updateField(idp, "creationTime", c.getCreationTime());
 					} else {
 						dbhelper.makePermanent(c);
+						System.out.println("----------------saved to DB");
 					}
 					return ok(Json.toJson(r.accumulatedValues));
 				}
