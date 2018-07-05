@@ -381,7 +381,6 @@ public class SearchController extends WithController {
 			if (iterator.hasNext()) {
 				FiltersCache cache = iterator.next();
 				if (cache.isUpToDate(30)) {
-					System.out.println("---------------- taken from to DB");
 					return Promise.pure( Controller.ok(Json.toJson(cache.exportAccumulatedValues())));
 				} else {
 					id  = cache.getDbId();
@@ -411,7 +410,6 @@ public class SearchController extends WithController {
 						dbhelper.updateField(idp, "creationTime", c.getCreationTime());
 					} else {
 						dbhelper.makePermanent(c);
-						System.out.println("----------------saved to DB");
 					}
 					return ok(Json.toJson(r.accumulatedValues));
 				}
