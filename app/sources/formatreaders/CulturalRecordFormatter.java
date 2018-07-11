@@ -113,6 +113,7 @@ public abstract class CulturalRecordFormatter extends JsonContextRecordFormatRea
 		return valuesMap;
 	}
 	
+	
 	public WithMediaRights getWithMediaRights(String specificValue){
 		if (Utils.hasInfo(specificValue))
 		return (WithMediaRights.getRights(getValuesMap().translateToCommon(FiltersFields.RIGHTS.getFilterId(),

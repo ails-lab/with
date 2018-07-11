@@ -180,10 +180,13 @@ public class CollectionObjectController extends WithResourceController {
 	}
 
 	public static Result importIDs(String cname, String source, String ids) {
+		System.out.println("----------------check collection");
 		ObjectNode resultInfo = Json.newObject();
+		System.out.println("----------------check collection");
 		CollectionObject ccid = getOrCreateCollection(cname, resultInfo);
 		if (ccid == null)
 			return internalServerError(resultInfo);
+		System.out.println("----------------collection ok");
 		for (String oid : ids.split("[,\\s]+")) {
 			CulturalObject record = new CulturalObject();
 			CulturalObjectData descriptiveData = new CulturalObjectData();
