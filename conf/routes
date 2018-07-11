@@ -21,7 +21,7 @@ GET     /api/updatemediaquality      controllers.CollectionObjectController.upda
 POST     /api/advancedsearch        controllers.SearchController.searchwithfilter()
 POST     /api/relatedsearch        controllers.SearchController.relatedSearch()
 GET     /api/advancedsearchGET      controllers.SearchController.searchwithfilterGET(q: sources.core.CommonQuery)
-GET     /api/initialfilters        controllers.SearchController.getfilters(source: String)
+GET     /api/initialfilters        controllers.SearchController.getfilters(source: String, days: Integer ?=30)
 GET      /api/searchsources        	controllers.SearchController.searchSources()
 POST     /api/mergefilters         	controllers.SearchController.mergeFilters()
 POST     /api/search            	controllers.SearchController.search()

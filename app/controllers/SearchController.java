@@ -360,7 +360,7 @@ public class SearchController extends WithController {
 		}
 	}
 
-	public static Promise<Result> getfilters(String source) {
+	public static Promise<Result> getfilters(String source, int days) {
 		// Parse the query.
 
 		try {
@@ -380,7 +380,7 @@ public class SearchController extends WithController {
 			ObjectId id=null;
 			if (iterator.hasNext()) {
 				FiltersCache cache = iterator.next();
-				if (cache.isUpToDate(30)) {
+				if (cache.isUpToDate(days)) {
 					return Promise.pure( Controller.ok(Json.toJson(cache.exportAccumulatedValues())));
 				} else {
 					id  = cache.getDbId();
