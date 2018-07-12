@@ -372,7 +372,7 @@ public class SearchController extends WithController {
 			if (!Utils.hasAny(source)) {
 				source = "ALL";
 			}
-			System.out.println("Results for "+source);
+//			System.out.println("Results for "+source);
 			DAO<FiltersCache> dbhelper = (DAO<FiltersCache>) new DAO(FiltersCache.class);
 			org.mongodb.morphia.query.Query<FiltersCache> qr = dbhelper.createQuery().field("source").equal(source);
 			Stream<FiltersCache> st = dbhelper.find(qr , "source","accumulatedValues", "creationTime");
@@ -401,7 +401,7 @@ public class SearchController extends WithController {
 				q.addSource(Sources.Rijksmuseum);
 				q.addSource(Sources.BritishLibrary, Sources.DigitalNZ);
 			}
-			System.out.println("from "+q.sources);
+//			System.out.println("from "+q.sources);
 			String sourcep = source;
 			q.facets = new ArrayList<>(q.commonSupportedFields());
 			Promise<Response> myResults = search2internalResponse(q);
