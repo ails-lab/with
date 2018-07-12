@@ -392,6 +392,7 @@ public class SearchController extends WithController {
 			boolean updatef = update;
 			Query q = new Query();
 			q.addClause(new search.Filter(Fields.anywhere.fieldId(),null));
+			q.addClause(new search.Filter(Fields.resourceType.fieldId(), "CulturalObject", true));
 			q.setStartCount(0, 1);
 			if (Utils.hasAny(source) && !source.equals("ALL")) {
 				q.addSource(Sources.getSourceByID(source));
@@ -402,6 +403,7 @@ public class SearchController extends WithController {
 			}
 			System.out.println("from "+q.sources);
 			String sourcep = source;
+			q.facets = new ArrayList<>(q.commonSupportedFields());
 			Promise<Response> myResults = search2internalResponse(q);
 			play.libs.F.Function<Response, Result> function = new play.libs.F.Function<Response, Result>() {
 				public Result apply(Response r) {
@@ -420,6 +422,7 @@ public class SearchController extends WithController {
 
 		} catch (Exception e) {
 			log.error("", e);
+			e.printStackTrace();
 			return Promise.pure((Result) badRequest(e.getMessage()));
 		}
 	}

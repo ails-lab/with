@@ -61,6 +61,8 @@ import org.elasticsearch.search.suggest.term.TermSuggestionBuilder;
 import play.Logger;
 import play.Logger.ALogger;
 import search.Filter;
+import sources.core.Utils;
+import utils.ListUtils;
 import utils.Tuple;
 
 public class ElasticSearcher {
@@ -152,7 +154,7 @@ public class ElasticSearcher {
 			search.addAggregation(agg1).addAggregation(agg2);
 		}
 
-		//System.out.println(search.toString());
+//		System.out.println(search.toString());
 		return search.execute().actionGet();
 	}
 
@@ -440,8 +442,15 @@ public class ElasticSearcher {
 				  .setScroll(new TimeValue(60000))
 				  .setSize(100);
 		}
+		
+//		System.out.println(must_qs);
+//		System.out.println(should_qs);
+
 
 		BoolQueryBuilder outer_bool = QueryBuilders.boolQuery();
+		if (!Utils.hasInfo(must_qs) && !Utils.hasInfo(should_qs)) {
+			outer_bool.must(QueryBuilders.matchAllQuery());
+		} 
 		if(must_qs!=null)
 			for(QueryBuilder q: must_qs)
 				outer_bool.must(q);
