@@ -108,7 +108,7 @@ public enum Sources {
 
 	public static Sources getSourceByID(String id){
 		for (Sources e : Sources.values()) {
-			if (e.getID().equals(id)){
+			if (e.getID().equals(id) || e.getText().equals(id)){
 				return e;
 			}
 		}

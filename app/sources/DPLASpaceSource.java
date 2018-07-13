@@ -139,7 +139,11 @@ public class DPLASpaceSource extends ISpaceSource {
 					WithResource myitem;
 					res.addItem(myitem = formatreader.readObjectFrom(item));
 					List<String> stringArrayValue = new JsonContextRecord(item).getStringArrayValue("sourceResource.rights");
-					countValue(rights, stringArrayValue);
+					if (Utils.hasInfo(stringArrayValue)) {
+						countValue(rights, stringArrayValue);
+					} else {
+						countValue(rights, "UNKNOWN");
+					}
 					
 					List<String> cr = new JsonContextRecord(item).getStringArrayValue(false,"sourceResource.creator","originalRecord.creator");
 					countValue(creator, cr);
@@ -164,7 +168,8 @@ public class DPLASpaceSource extends ISpaceSource {
 				res.filtersLogic.add(creator);
 				res.filtersLogic.add(country);
 				res.filtersLogic.add(contributor);
-				res.filtersLogic.add(rights);
+//				res.filtersLogic.add(rights);
+				res.filtersLogic.addAll(vmap.getRestrictionsAsFilters(q,res.count));
 
 			} catch (Exception e) {
 				log.error( "", e );

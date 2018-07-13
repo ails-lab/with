@@ -359,6 +359,12 @@ public class SearchController extends WithController {
 			return Promise.pure((Result) badRequest(e.getMessage()));
 		}
 	}
+	
+	public static Result clearFilters() {
+		DAO<FiltersCache> dbhelper = (DAO<FiltersCache>) new DAO(FiltersCache.class);
+		dbhelper.dropCollection();
+		return ok("");
+	}
 
 	public static Promise<Result> getfilters(String source, int days) {
 		// Parse the query.
@@ -379,15 +385,18 @@ public class SearchController extends WithController {
 			Iterator<FiltersCache> iterator = st.iterator();
 			boolean update = false;
 			ObjectId id=null;
+			FiltersCache backupCache = null;
 			if (iterator.hasNext()) {
 				FiltersCache cache = iterator.next();
 				if (cache.isUpToDate(days)) {
 					return Promise.pure( Controller.ok(Json.toJson(cache.exportAccumulatedValues())));
 				} else {
+					backupCache = cache;
 					id  = cache.getDbId();
 					update = true;
 				}
 			}
+			FiltersCache backupCache1 = backupCache;
 			ObjectId idp=id;
 			boolean updatef = update;
 			Query q = new Query();
@@ -408,6 +417,9 @@ public class SearchController extends WithController {
 			play.libs.F.Function<Response, Result> function = new play.libs.F.Function<Response, Result>() {
 				public Result apply(Response r) {
 					// save the result.
+					if (!Utils.hasInfo(r.accumulatedValues)) {
+						return Controller.ok(Json.toJson(backupCache1.exportAccumulatedValues()));
+					}
 					FiltersCache c = new FiltersCache(sourcep, r.accumulatedValues, System.currentTimeMillis());
 					if (updatef) {
 						dbhelper.updateField(idp, "accumulatedValues", c.getAccumulatedValues());

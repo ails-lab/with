@@ -43,7 +43,7 @@ import utils.ListUtils;
 public class FilterValuesMap {
 
 
-	private static HashMap<Sources, FilterValuesMap> map;
+	private static HashMap<String, FilterValuesMap> map;
 	private HashMap<String, List<Object>> specificvalues;
 	// private HashMap<String, List<Pair<String>>> queryTexts;
 	private HashMap<String, List<Object>> commonvalues;
@@ -196,10 +196,10 @@ public class FilterValuesMap {
 	}
 	
 	public static FilterValuesMap getMap(Sources source){
-		FilterValuesMap ms = map.get(source);
+		FilterValuesMap ms = map.get(source.name());
 		if (ms==null){
 			ms = MapsConfig.buildFilterValuesMap(source);
-			map.put(source, ms);
+			map.put(source.name(), ms);
 			switch (source) {
 			case Europeana:
 				ms.fillEuropeana();
@@ -291,6 +291,10 @@ public class FilterValuesMap {
 	
 	
 	private void fillDPLA() {
+		addRestriction(FiltersFields.RIGHTS.getFilterId(),
+				WithMediaRights.Public.toString(),
+				WithMediaRights.PROVIDER_SPECIFIC.toString(),
+				WithMediaRights.RR.toString());
 	}
 	
 	private void fillEuropeana() {
@@ -352,6 +356,12 @@ public class FilterValuesMap {
 			res.add(f);
 		}
 		return res;
+	}
+	
+	@Override
+	public String toString() {
+		// TODO Auto-generated method stub
+		return specificvalues.toString();
 	}
 
 }
