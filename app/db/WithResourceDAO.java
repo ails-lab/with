@@ -25,9 +25,11 @@ import java.util.List;
 import model.DescriptiveData;
 import model.EmbeddedMediaObject;
 import model.EmbeddedMediaObject.MediaVersion;
+import model.EmbeddedMediaObject.WithMediaRights;
 import model.annotations.ContextData;
 import model.annotations.ContextData.ContextDataBody;
 import model.basicDataTypes.Language;
+import model.basicDataTypes.LiteralOrResource;
 import model.basicDataTypes.ProvenanceInfo;
 import model.basicDataTypes.WithAccess;
 import model.basicDataTypes.WithAccess.Access;
@@ -36,6 +38,8 @@ import model.resources.collection.CollectionObject;
 import model.resources.RecordResource;
 import model.resources.WithResource;
 import model.usersAndGroups.User;
+import search.Sources;
+import sources.FilterValuesMap;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.bson.types.ObjectId;
@@ -46,6 +50,7 @@ import org.mongodb.morphia.query.Query;
 import org.mongodb.morphia.query.UpdateOperations;
 
 import controllers.WithController.Action;
+import utils.ListUtils;
 import utils.Tuple;
 
 import com.mongodb.BasicDBObject;
@@ -237,6 +242,35 @@ public class WithResourceDAO<T extends WithResource> extends DAO<T> {
 		updateOps.set("media." + index + "." + version, media);
 		this.updateFirst(q, updateOps);
 	}
+	
+
+	public void computeAndUpdateRights(ObjectId id) {
+		T obj = getById(id, Arrays.asList("provenance", "media"));
+		ProvenanceInfo e = (ProvenanceInfo)ListUtils.last(obj.getProvenance());
+		Sources s = Sources.forValue(e.getProvider());
+		if (s!=null) {
+			FilterValuesMap map = FilterValuesMap.getMap(s);
+			boolean update = false;
+			for (Object med : obj.getMedia()) {
+				HashMap<MediaVersion, EmbeddedMediaObject> m = (HashMap<MediaVersion, EmbeddedMediaObject>)med;
+					for ( EmbeddedMediaObject o : m.values()) {
+						if (o!=null) {
+							LiteralOrResource originalRights = o.getOriginalRights();
+							String r = originalRights==null? null : originalRights.getURI();
+							WithMediaRights withMediaRights = map.getWithMediaRights(r);
+							if (withMediaRights!=o.getWithRights()) {
+								System.out.println(id+":  "+o.getWithRights()+"--->"+withMediaRights);
+								o.setWithRights(withMediaRights);
+								update =true;
+							}
+						}
+					}
+			}
+			if (update)
+				updateField(id, "media", obj.getMedia());
+		}
+	}
+
 
 	public boolean isPublic(ObjectId id) {
 		Query<T> q = this.createQuery().field("_id").equal(id).limit(1);

@@ -114,29 +114,20 @@ public abstract class CulturalRecordFormatter extends JsonContextRecordFormatRea
 	}
 	
 	
-	public WithMediaRights getWithMediaRights(String specificValue){
-		if (Utils.hasInfo(specificValue))
-		return (WithMediaRights.getRights(getValuesMap().translateToCommon(FiltersFields.RIGHTS.getFilterId(),
-				specificValue).get(0).toString()));
-		else return WithMediaRights.UNKNOWN;
-	
+	public WithMediaRights getWithMediaRights(String specificValue) {
+		return valuesMap.getWithMediaRights(specificValue);
 	}
-	
+
 	public WithMediaRights getWithMediaRights(String[] specificValues){
-		return getWithMediaRights(Arrays.asList(specificValues));
+		return valuesMap.getWithMediaRights(Arrays.asList(specificValues));
 	}
 	
 	public WithMediaRights getWithMediaRights(Collection<String> specificValues){
-		if (Utils.hasInfo(specificValues)) {
-			for (String string : specificValues) {
-				WithMediaRights res = getWithMediaRights(string);
-				if (res!=null)
-					return res;
-			}
-		}
-		return null;
+		return valuesMap.getWithMediaRights(specificValues);
 	
 	}
+	
+	
 
 
 	public void setValuesMap(FilterValuesMap valuesMap) {

@@ -197,6 +197,9 @@ public class FilterValuesMap {
 	}
 	
 	public static FilterValuesMap getMap(Sources source){
+		if (map==null) {
+			map = new HashMap<>();
+		}
 		FilterValuesMap ms = map.get(source.name());
 		if (ms==null){
 			ms = MapsConfig.buildFilterValuesMap(source);
@@ -294,8 +297,8 @@ public class FilterValuesMap {
 	private void fillDPLA() {
 		addRestriction(FiltersFields.RIGHTS.getFilterId(),
 				WithMediaRights.Public.toString(),
-				WithMediaRights.PROVIDER_SPECIFIC.toString(),
-				WithMediaRights.RR.toString());
+				WithMediaRights.UND.toString(),
+				WithMediaRights.InC.toString());
 	}
 	
 	private void fillEuropeana() {
@@ -363,6 +366,30 @@ public class FilterValuesMap {
 	public String toString() {
 		// TODO Auto-generated method stub
 		return specificvalues.toString();
+	}
+	
+	public WithMediaRights getWithMediaRights(String specificValue) {
+		if (Utils.hasInfo(specificValue))
+			return (WithMediaRights.getRights(translateToCommon(FiltersFields.RIGHTS.getFilterId(), specificValue).get(0).toString()));
+		else
+			return WithMediaRights.UND;
+
+	}
+
+	public WithMediaRights getWithMediaRights(String[] specificValues){
+		return getWithMediaRights(Arrays.asList(specificValues));
+	}
+	
+	public WithMediaRights getWithMediaRights(Collection<String> specificValues){
+		if (Utils.hasInfo(specificValues)) {
+			for (String string : specificValues) {
+				WithMediaRights res = getWithMediaRights(string);
+				if (res!=null)
+					return res;
+			}
+		}
+		return WithMediaRights.UND;
+	
 	}
 
 }

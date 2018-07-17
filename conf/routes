@@ -48,6 +48,9 @@ GET 	/custom/:customName					    controllers.CustomAssets.redirect(customName)
 GET 	/custom/:customName/					controllers.CustomAssets.redirect(customName)
 GET 	/custom/:customName/*file				controllers.CustomAssets.getFile(customName:String, file:String)
 
+
+GET     /record/updateAllRights					controllers.RecordResourceController.updateAllRights()
+GET     /record/updateRights					controllers.RecordResourceController.updateRights(id: String)
 GET     /record/randomRecords					controllers.RecordResourceController.getRandomRecords(groupId: String, batchCount: Integer)
 GET		/record/randomAnnotatedRecords			controllers.RecordResourceController.getRandomAnnotatedRecords( groupId: String, count: Integer, minimum:Integer ?= 3 )
 GET		/record/randomRecordsFromCollections	controllers.RecordResourceController.getRandomRecordsFromCollections( collectionIds: java.util.List[String], count: Integer )

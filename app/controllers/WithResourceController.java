@@ -660,6 +660,8 @@ public class WithResourceController extends WithController {
 						CulturalObject cho = Json.fromJson(json, CulturalObject.class);
 						
 						DB.getWithResourceDAO().computeAndUpdateQuality(recordId);
+						
+						DB.getWithResourceDAO().computeAndUpdateRights(recordId);
 						log.debug(data.getJsonContent());
 						
 						DB.getWithResourceDAO().updateDescriptiveData(recordId,

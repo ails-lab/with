@@ -267,12 +267,11 @@ public class EmbeddedMediaObject {
 		 * general
 		 */
 		// TODO: public domain now...
-		OUT_OF_COPYRIGHT("Out of Copyright"),
+//		OUT_OF_COPYRIGHT("Out of Copyright"),
 		
 //		RRPA("Rights Reserved - Paid Access"),
 //		RRRA("Rights Reserved - Restricted Access"),
 //		RRFA("Rights Reserved - Free Access"),
-		PROVIDER_SPECIFIC("Provider specific rights statement");
 		
 
 		// database seems to contain other WithMediaRights, temporarily we adding them here to
@@ -293,6 +292,26 @@ public class EmbeddedMediaObject {
 //		Creative_Not_Modify("Not Modify"),
 //		@Deprecated
 //		Creative_Not_Commercial("Not Comercial");
+		
+		
+		RR("In Copyright (InC)"),
+		OUT_OF_COPYRIGHT("Out of Copyright"),
+		Restricted("Restricted"),
+		RRPA("Rights Reserved - Paid Access"),
+		RRRA("Rights Reserved - Restricted Access"),
+		RRFA("Rights Reserved - Free Access"),
+		PROVIDER_SPECIFIC("Provider specific rights statement"),
+		Modify("Modify"),
+		Creative_SA("Creative SA"),
+		Permission("Permission granted"),
+		Creative_Not_Commercial_Modify("NOT comercial modify"),
+		Creative("Creative"),
+		Creative_Not_Modify("Not Modify"),
+		Creative_Not_Commercial("Not Comercial");
+		
+		
+		
+		
 //		
 		
 		private final String text;

@@ -574,7 +574,7 @@ public class DAO<E> extends BasicDAO<E, ObjectId> {
 		log.debug("Quality "+dq);
 		updateField(id, "qualityMeasure", dq);
 	}
-
+	
 
 	public void updateField(ObjectId id, String field, Object value) {
 		Query<E> q = this.createQuery().field("_id").equal(id);
