@@ -265,6 +265,22 @@ public class WithResourceDAO<T extends WithResource> extends DAO<T> {
 							}
 						}
 					}
+			} 
+			if (update)
+				updateField(id, "media", obj.getMedia());
+		} else {
+			boolean update = false;
+			for (Object med : obj.getMedia()) {
+				HashMap<MediaVersion, EmbeddedMediaObject> m = (HashMap<MediaVersion, EmbeddedMediaObject>) med;
+				for (EmbeddedMediaObject o : m.values()) {
+					if (o != null) {
+						if (null == o.getWithRights()) {
+							System.out.println(id + ":  " + o.getWithRights() + "--->" + WithMediaRights.CNE);
+							o.setWithRights(WithMediaRights.CNE);
+							update = true;
+						}
+					}
+				}
 			}
 			if (update)
 				updateField(id, "media", obj.getMedia());
