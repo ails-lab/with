@@ -26,6 +26,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.stream.Collectors;
@@ -201,6 +202,7 @@ public class SearchController extends WithController {
 		
 		// split the query
 		Map<Sources, Query> queries = q.splitBySource();
+		
 		// create promises
 		Iterable<Promise<Response.SingleResponse>> promises = splitQuery(queries);
 
@@ -303,7 +305,7 @@ public class SearchController extends WithController {
 				if( !excludedFieldnames.contains(fieldId))
 					jsonSource.withArray("supportedFields").add( fieldId );
 			}
-			jsonSource.put("name", source.name());
+			jsonSource.put("id", source.getID());
 			if( s.apiConsole() != null)
 				jsonSource.put("apiConsole", s.apiConsole());
 			res.add( jsonSource );
@@ -357,8 +359,14 @@ public class SearchController extends WithController {
 			return Promise.pure((Result) badRequest(e.getMessage()));
 		}
 	}
+	
+	public static Result clearFilters() {
+		DAO<FiltersCache> dbhelper = (DAO<FiltersCache>) new DAO(FiltersCache.class);
+		dbhelper.dropCollection();
+		return ok("");
+	}
 
-	public static Promise<Result> getfilters() {
+	public static Promise<Result> getfilters(String source, int days) {
 		// Parse the query.
 
 		try {
@@ -367,32 +375,57 @@ public class SearchController extends WithController {
 			// q.setTypes(Elastic.allTypes);
 			// q.setEffectiveUserIds(effectiveUserIds());
 			//
+			if (!Utils.hasAny(source)) {
+				source = "ALL";
+			}
+//			System.out.println("Results for "+source);
 			DAO<FiltersCache> dbhelper = (DAO<FiltersCache>) new DAO(FiltersCache.class);
-			Stream<FiltersCache> st = dbhelper.findAll("accumulatedValues", "creationTime");
+			org.mongodb.morphia.query.Query<FiltersCache> qr = dbhelper.createQuery().field("source").equal(source);
+			Stream<FiltersCache> st = dbhelper.find(qr , "source","accumulatedValues", "creationTime");
 			Iterator<FiltersCache> iterator = st.iterator();
 			boolean update = false;
-//			if (iterator.hasNext()) {
-//				FiltersCache cache = iterator.next();
-//				if (cache.isUpToDate(30)) {
-//					return Promise.pure( Controller.ok(Json.toJson(cache.exportAccumulatedValues())));
-//				} else 
-//					update = true;
-//			}
+
+			ObjectId id=null;
+			FiltersCache backupCache = null;
+			if (iterator.hasNext()) {
+				FiltersCache cache = iterator.next();
+				if (cache.isUpToDate(days)) {
+					return Promise.pure( Controller.ok(Json.toJson(cache.exportAccumulatedValues())));
+				} else {
+					backupCache = cache;
+					id  = cache.getDbId();
+					update = true;
+				}
+			}
+			FiltersCache backupCache1 = backupCache;
+			ObjectId idp=id;
+
 			boolean updatef = update;
 			Query q = new Query();
 			q.addClause(new search.Filter(Fields.anywhere.fieldId(),null));
+			q.addClause(new search.Filter(Fields.resourceType.fieldId(), "CulturalObject", true));
 			q.setStartCount(0, 1);
-			q.addSource(Sources.Europeana, Sources.DPLA);
-			q.addSource(Sources.Rijksmuseum);
-			q.addSource(Sources.BritishLibrary, Sources.DigitalNZ);
+			if (Utils.hasAny(source) && !source.equals("ALL")) {
+				q.addSource(Sources.getSourceByID(source));
+			} else {
+				q.addSource(Sources.Europeana, Sources.DPLA);
+				q.addSource(Sources.Rijksmuseum);
+				q.addSource(Sources.BritishLibrary, Sources.DigitalNZ);
+			}
+//			System.out.println("from "+q.sources);
+			String sourcep = source;
+			q.facets = new ArrayList<>(q.commonSupportedFields());
 			Promise<Response> myResults = search2internalResponse(q);
 			play.libs.F.Function<Response, Result> function = new play.libs.F.Function<Response, Result>() {
 				public Result apply(Response r) {
 					// save the result.
-					FiltersCache c = new FiltersCache(r.accumulatedValues, System.currentTimeMillis());
+					if (!Utils.hasInfo(r.accumulatedValues)) {
+						return Controller.ok(Json.toJson(backupCache1.exportAccumulatedValues()));
+					}
+					FiltersCache c = new FiltersCache(sourcep, r.accumulatedValues, System.currentTimeMillis());
 					if (updatef) {
-						dbhelper.updateField(FiltersCache.ID, "accumulatedValues", c.getAccumulatedValues());
-						dbhelper.updateField(FiltersCache.ID, "creationTime", c.getCreationTime());
+						dbhelper.updateField(idp, "accumulatedValues", c.getAccumulatedValues());
+						dbhelper.updateField(idp, "creationTime", c.getCreationTime());
 					} else {
 						dbhelper.makePermanent(c);
 					}
@@ -403,6 +436,7 @@ public class SearchController extends WithController {
 
 		} catch (Exception e) {
 			log.error("", e);
+			e.printStackTrace();
 			return Promise.pure((Result) badRequest(e.getMessage()));
 		}
 	}

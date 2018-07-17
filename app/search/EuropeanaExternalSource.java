@@ -126,7 +126,7 @@ public class EuropeanaExternalSource extends ExternalSource {
 		if (isError(response)){
 			parseError(response,resultResponse);
 		} else {
-			resultResponse.source = thisSource();
+			resultResponse.source_id = thisSource().getID();
 			resultResponse.totalCount = Utils.readIntAttr(response, "totalResults", true);
 			resultResponse.count = Utils.readIntAttr(response, "itemsCount", true);
 			readRecords(response.path("items"), resultResponse, new EuropeanaRecordFormatter());

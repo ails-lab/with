@@ -101,7 +101,7 @@ public class ChainedSearchResult {
 			public void invoke(Response.SingleResponse sr) throws Throwable {
 				thisResult.finishedPromises.incrementAndGet();
 				thisResult.collectSourceResponse( sr );
-				log.debug( "Finished "+sr.source.name() + " Count: " + thisResult.finishedPromises.get());
+				log.debug( "Finished "+ Sources.getSourceByID(sr.source_id).getID() + " Count: " + thisResult.finishedPromises.get());
 			}
 		} );
 		pr.onFailure(new F.Callback<Throwable>() {

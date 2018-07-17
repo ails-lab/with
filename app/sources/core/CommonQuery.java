@@ -78,13 +78,11 @@ public class CommonQuery implements IFilterContainer, Cloneable , QueryStringBin
 		this.pageSize = ""+query.getPageSize();
 		filters = new ArrayList<>();
 
-		System.err.println(query.filters);
 		for (HashMap<String, List<String>> f : query.buildFactorizeFilters()) {
 			for (Entry<String, List<String>> e : f.entrySet()) {
 				if (e.getKey().equals(FiltersFields.ANYWHERE.getFilterId())){
 					this.searchTerm = e.getValue().get(0);
 				} else {
-					System.err.println(e.getKey());
 					if (e.getKey().equals(Fields.hasImage.fieldId()))
 						this.hasMedia = (e.getValue().contains("true"));
 					else
