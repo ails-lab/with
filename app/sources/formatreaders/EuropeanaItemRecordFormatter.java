@@ -107,7 +107,7 @@ public class EuropeanaItemRecordFormatter extends CulturalRecordFormatter {
 		LiteralOrResource rightsLiteral = rec.getLiteralOrResourceValue("edmRights");
 		LiteralOrResource rights = rightsLiteral;
 		String rightsString = rec.getStringValue("edmRights");
-		WithMediaRights withMediaRights =getWithMediaRights(rightsString);
+		WithMediaRights withMediaRights =getValuesMap().getWithMediaRights(rightsString);
 		
 		model.setIsShownAt(rec.getResource("edmIsShownAt"));
 		model.setIsShownBy(rec.getResource("edmIsShownBy"));
