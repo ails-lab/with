@@ -17,6 +17,8 @@
 package model;
 
 import java.net.URLEncoder;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.mongodb.morphia.annotations.Converters;
 import org.mongodb.morphia.annotations.Entity;
@@ -106,6 +108,10 @@ public class EmbeddedMediaObject {
 		}
 
 	}
+	
+	public static enum WithMediaRightsCategory{
+		FREE, LIMITED, NORIGHTS;
+	}
 
 	// this needs work
 	public static enum WithMediaRights {
@@ -113,14 +119,14 @@ public class EmbeddedMediaObject {
 		 * <h1>Public Domain Mark</h1>
 		 * Our Public Domain Mark enables works that are no longer restricted by copyright to be marked as such in a standard and simple way, making them easily discoverable and available to others. Many cultural heritage institutions including museums, libraries and other curators are knowledgeable about the copyright status of paintings, books and manuscripts, photographs and other works in their collections, many of which are old and no longer under copyright.  The Public Domain Mark operates as a tag or a label, allowing institutions like those as well as others with such knowledge to communicate that a work is no longer restricted by copyright and can be freely used by others.  The mark can also be an important source of information, allowing others to verify a work’s copyright status and learn more about the work.
 		 */
-		Public("The Public Domain Mark (PDM)"),
+		Public("The Public Domain Mark (PDM)", WithMediaRightsCategory.FREE),
 		
 		/**
 		 * <h1>No Rights Reserved</h1>
 		 * <h2>CC0</h2>
 		 * CC0 enables scientists, educators, artists and other creators and owners of copyright- or database-protected content to waive those interests in their works and thereby place them as completely as possible in the public domain, so that others may freely build upon, enhance and reuse the works for any purposes without restriction under copyright or database law.
 		 */
-		PublicCC0("No Rights Reserved CC0"),
+		PublicCC0("No Rights Reserved CC0", WithMediaRightsCategory.FREE),
 		
 		
 		// From CC
@@ -131,40 +137,40 @@ public class EmbeddedMediaObject {
 		 *  <h2>CC BY</h2>
 		 *  This license lets others distribute, remix, tweak, and build upon your work, even commercially, as long as they credit you for the original creation. This is the most accommodating of licenses offered. Recommended for maximum dissemination and use of licensed materials. 
 		 */
-		Creative_BY("Attribution"),
+		Creative_BY("Attribution", WithMediaRightsCategory.FREE),
 		
 		/**
 		 *  <h1>Attribution-ShareAlike</h1>
 		 *  <h2>CC BY-SA</h2>
 		 *  This license lets others remix, tweak, and build upon your work even for commercial purposes, as long as they credit you and license their new creations under the identical terms. This license is often compared to “copyleft” free and open source software licenses. All new works based on yours will carry the same license, so any derivatives will also allow commercial use. This is the license used by Wikipedia, and is recommended for materials that would benefit from incorporating content from Wikipedia and similarly licensed projects. 
 		 */
-		Creative_BY_SA("Attribution ShareAlike"),
+		Creative_BY_SA("Attribution ShareAlike", WithMediaRightsCategory.FREE),
 		
 		/**
 		 *  <h1>Attribution-NonCommercial</h1>
 		 *  <h2>CC BY-NC</h2>
 		 *  This license lets others remix, tweak, and build upon your work non-commercially, and although their new works must also acknowledge you and be non-commercial, they don’t have to license their derivative works on the same terms. 
 		 */
-		Creative_BY_NC("Attribution NonCommercial"),
+		Creative_BY_NC("Attribution NonCommercial", WithMediaRightsCategory.LIMITED),
 		
 		/**
 		 *  <h1>Attribution-NoDerivs</h1> <h2>CC BY-ND</h2>
 		 *  This license allows for redistribution, commercial and non-commercial, as long as it is passed along unchanged and in whole, with credit to you. 
 		 */
-		Creative_BY_ND("Attribution NoDerivs"),
+		Creative_BY_ND("Attribution NoDerivs", WithMediaRightsCategory.LIMITED),
 		
 		/**
 		 *  <h1>Attribution-NonCommercial-ShareAlike</h1>
 		 *  <h2>CC BY-NC-SA</h2>
 		 *  This license lets others remix, tweak, and build upon your work non-commercially, as long as they credit you and license their new creations under the identical terms. 
 		 */
-		Creative_BY_NC_SA("Attribution NonCommercial-ShareAlike"),
+		Creative_BY_NC_SA("Attribution NonCommercial-ShareAlike", WithMediaRightsCategory.LIMITED),
 		
 		/**
 		 *  <h1>Attribution-NonCommercial-NoDerivs</h1>
 		 *  <h2>CC BY-NC-ND</h2> This license is the most restrictive of our six main licenses, only allowing others to download your works and share them with others as long as they credit you, but they can’t change them in any way or use them commercially. 
 		 */
-		Creative_BY_NC_ND("Attribution NonCommercial-NoDerivs"),
+		Creative_BY_NC_ND("Attribution NonCommercial-NoDerivs", WithMediaRightsCategory.LIMITED),
 		
 		
 		// InC
@@ -184,21 +190,21 @@ public class EmbeddedMediaObject {
 		 * This Rights Statement is intended for use with Items for which the underlying Work has been identified as an Orphan Work in accordance with Directive 2012/28/EU of the European Parliament and of the Council of 25 October 2012 on certain permitted uses of Orphan Works. It can only be applied to Items derived from Works that are covered by the Directive: Works published in the form of books, journals, newspapers, magazines or other writings as well as cinematographic or audiovisual works and phonograms (note: this excludes photography and visual arts). It can only be applied by organizations that are beneficiaries of the Directive: publicly accessible libraries, educational establishments and museums, archives, film or audio heritage institutions and public-service broadcasting organizations, established in one of the EU member states. The beneficiary is also expected to have registered the work in the EU Orphan Works Database maintained by EUIPO.
 		 * URI: http://rightsstatements.org/vocab/InC-OW-EU/1.0/
 		 */
-		InC_OW_EU("IN COPYRIGHT - EU ORPHAN WORK"),
+		InC_OW_EU("IN COPYRIGHT - EU ORPHAN WORK", WithMediaRightsCategory.LIMITED),
 		
 		/**
 		 * <h1>IN COPYRIGHT - EDUCATIONAL USE PERMITTED</h1>
 		 * This Rights Statement can be used only for copyrighted Items for which the organization making the Item available is the rights-holder or has been explicitly authorized by the rights-holder(s) to allow third parties to use their Work(s) for educational purposes without first obtaining permission.
 		 * URI: <a>http://rightsstatements.org/vocab/InC-EDU/1.0/</a>
 		 */
-		InC_EDU("IN COPYRIGHT - EDUCATIONAL USE PERMITTED"),
+		InC_EDU("IN COPYRIGHT - EDUCATIONAL USE PERMITTED", WithMediaRightsCategory.LIMITED),
 		
 		/**
 		 * <h1>IN COPYRIGHT - NON-COMMERCIAL USE PERMITTED</h1>
 		 * This Rights Statement can be used only for copyrighted Items for which the organization making the Item available is the rights-holder or has been explicitly authorized by the rights-holder(s) to allow third parties to use their Work(s) for non-commercial purposes without obtaining permission first.
 		 * <a>http://rightsstatements.org/vocab/InC-NC/1.0/
 		 */
-		InC_NC("IN COPYRIGHT - NON-COMMERCIAL USE PERMITTED"),
+		InC_NC("IN COPYRIGHT - NON-COMMERCIAL USE PERMITTED", WithMediaRightsCategory.LIMITED),
 		
 		/**
 		 * <h1>IN COPYRIGHT - RIGHTS-HOLDER(S) UNLOCATABLE OR UNIDENTIFIABLE</h1>
@@ -315,9 +321,15 @@ public class EmbeddedMediaObject {
 //		
 		
 		private final String text;
+		private final WithMediaRightsCategory category;
 
 		private WithMediaRights(final String text) {
+			this(text, WithMediaRightsCategory.NORIGHTS);
+		}
+		
+		private WithMediaRights(final String text, final WithMediaRightsCategory category) {
 			this.text = text;
+			this.category = category;
 		}
 
 		@Override
@@ -332,6 +344,16 @@ public class EmbeddedMediaObject {
 				}
 			}
 			return UNKNOWN;
+		}
+		
+		public static List<WithMediaRights> getRightsByCategory(String category){
+			WithMediaRightsCategory cat = WithMediaRightsCategory.valueOf(category);
+			List<WithMediaRights> res = new ArrayList<WithMediaRights>();
+			for (WithMediaRights v : WithMediaRights.values()) {
+				if (v.category.equals(cat))
+					res.add(v);
+			}
+			return res;
 		}
 
 	}

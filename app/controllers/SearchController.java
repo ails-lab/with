@@ -49,6 +49,7 @@ import elastic.Elastic;
 import elastic.ElasticCoordinator;
 import elastic.ElasticSearcher;
 import elastic.ElasticSearcher.SearchOptions;
+import model.EmbeddedMediaObject.WithMediaRights;
 import play.Logger;
 import play.Logger.ALogger;
 import play.data.Form;
@@ -364,6 +365,10 @@ public class SearchController extends WithController {
 		DAO<FiltersCache> dbhelper = (DAO<FiltersCache>) new DAO(FiltersCache.class);
 		dbhelper.dropCollection();
 		return ok("");
+	}
+	
+	public static Result getRightsByCategory(String category) {
+		return ok(Json.toJson(ListUtils.transform(WithMediaRights.getRightsByCategory(category), (x)->x.toString())));
 	}
 
 	public static Promise<Result> getfilters(String source, int days) {
