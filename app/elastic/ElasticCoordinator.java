@@ -70,10 +70,10 @@ public class ElasticCoordinator {
 							.filter((f)-> f.value!=null)
 					.map(filter -> {
 						Filter newFilter = (Filter) filter.clone();
-//						if (newFilter.fieldId.equals("anywhere")) {
-//							newFilter.fieldId = "";
+						if (newFilter.fieldId.equals("anywhere")) {
+							newFilter.fieldId = "";
 //							newFilter.value = "dance";
-//						}
+						}
 						if (Fields.media_withRights.fieldId().equals(newFilter.fieldId))
 							newFilter.value = EmbeddedMediaObject.WithMediaRights.getRights(newFilter.value).name();
 						if (newFilter.fieldId.equals("hasImage")) {
