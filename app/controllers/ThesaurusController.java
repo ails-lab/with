@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import model.Campaign;
 import model.basicDataTypes.Language;
 import model.resources.ThesaurusObject;
 import model.resources.WithResourceType;
@@ -38,6 +39,7 @@ import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHitField;
+import org.elasticsearch.search.suggest.context.CategoryContextMapping;
 
 import play.Logger;
 import play.Logger.ALogger;
@@ -328,7 +330,7 @@ public class ThesaurusController extends Controller {
 	};
 	
 	
-	public static Result getSuggestions(String word, String namespaces) {
+	public static Result getSuggestions(String word, String namespaces, String campaignId) {
 		
 		ObjectNode response = Json.newObject();
 		response.put("request", word);
@@ -355,6 +357,12 @@ public class ThesaurusController extends Controller {
 			String[] namespaceArray = new String[0];
 			if( StringUtils.isNotBlank(namespaces)) {
 				namespaceArray = namespaces.split(",");
+			}
+			
+			if (campaignId != null) {
+				Campaign campaign = DB.getCampaignDAO().getById(new ObjectId(campaignId));
+				List<String> vocabularyList = campaign.getVocabularies();
+				namespaceArray =  vocabularyList.toArray(new String[vocabularyList.size()]);
 			}
 			
 			if (ok) {
