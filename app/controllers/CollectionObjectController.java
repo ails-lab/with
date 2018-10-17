@@ -1112,7 +1112,7 @@ public class CollectionObjectController extends WithResourceController {
 					if (usergroup != null)
 						result.add(userOrGroupJson(usergroup, accessRights));
 					else
-						return internalServerError("User with id " + userId + " cannot be retrieved from db");
+						log.error("User with id " + userId + " cannot be retrieved from db");
 				}
 			}
 		}
