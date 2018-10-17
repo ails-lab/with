@@ -131,6 +131,7 @@ public class RecordResource<T extends RecordResource.RecordDescriptiveData>
 	private void addBasicRecordFields(RecordResource output) {
 		output.setResourceType(getResourceType());
 		output.setAdministrative(getAdministrative());
+		output.setCollectedIn(getCollectedIn());
 		output.getDescriptiveData().setLabel(getDescriptiveData().getLabel());
 		output.getDescriptiveData().setDescription(getDescriptiveData().getDescription());
 		//add more fields from descriptive?
@@ -142,6 +143,7 @@ public class RecordResource<T extends RecordResource.RecordDescriptiveData>
 	private void addMediumRecordFields(RecordResource output) {
 		output.setResourceType(getResourceType());
 		output.setAdministrative(getAdministrative());
+		output.setCollectedIn(getCollectedIn());
 		output.setDbId(getDbId());
 		output.setProvenance(getProvenance());
 		output.setDescriptiveData(getDescriptiveData());
