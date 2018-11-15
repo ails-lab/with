@@ -243,3 +243,4 @@ GET		/campaign/getCampaignByName					controllers.CampaignController.getCampaignB
 GET		/campaign/activeCampaigns					controllers.CampaignController.getActiveCampaigns(group: String ?= "", sortBy: String ?= "Alphabetical", offset: Integer ?=0, count: Integer ?=10)
 GET		/campaign/incUserPoints						controllers.CampaignController.incUserPoints(campaignId: String, userId: String, annotationType: String)
 GET		/campaign/decUserPoints						controllers.CampaignController.decUserPoints(campaignId: String, userId: String, annotationType: String)
+POST	/campaign/createCampaign					controllers.CampaignController.createCampaign()

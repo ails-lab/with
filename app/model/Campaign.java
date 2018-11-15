@@ -54,6 +54,13 @@ public class Campaign {
 		private long rejected;
 		private long records;
 		
+		public AnnotationCount() {
+			this.created = 0;
+			this.approved = 0;
+			this.rejected = 0;
+			this.records = 0;
+		}
+		
 		public long getCreated() {
 			return created;
 		}

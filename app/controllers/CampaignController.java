@@ -16,14 +16,23 @@
 
 package controllers;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.Hashtable;
 import java.util.List;
+import java.util.Set;
+
 import org.apache.commons.lang3.StringUtils;
 import org.bson.types.ObjectId;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import db.DB;
 import model.Campaign;
+import model.Campaign.AnnotationCount;
+import model.usersAndGroups.User;
+import model.usersAndGroups.UserGroup;
 import play.Logger;
 import play.Logger.ALogger;
 import play.libs.Json;
@@ -95,6 +104,155 @@ public class CampaignController extends WithController {
 		return ok();
 	}
 	
+	private static boolean uniqueCampaignName(String name) {
+		return (DB.getCampaignDAO().getCampaignByName(name) == null);
+	}
+	
+	public static Result createCampaign() {
+
+		Campaign newCampaign = null;
+		ObjectNode error = Json.newObject();
+		JsonNode json = request().body().asJson();
+		
+		try {
+			if (json == null) {
+				error.put("error", "Invalid JSON body");
+				return badRequest(error);
+			}
+			
+			Class<?> clazz = Class.forName("model.Campaign");
+			newCampaign = (Campaign) Json.fromJson(json, clazz);
+
+			// Set Campaign.creator
+			ObjectId creator = effectiveUserDbId();
+			if (creator == null) {
+				error.put("error", "No rights for campaign creation");
+				return forbidden(error);
+			}
+			else {
+				newCampaign.setCreator(creator);
+			}
+			
+			// Set Campaign.title
+			if (!json.has("campaignTitle")) {
+				error.put("error", "Must specify title for the campaign");
+				return badRequest(error);
+			}
+			else if (json.get("campaignTitle").asText().length() < 3) {
+				error.put("error", "Title of Campaign must contain at least 3 characters");
+				return badRequest(error);
+			}
+			String title = json.get("campaignTitle").asText();
+			newCampaign.setCampaignTitle(title);
+			
+			// Set Campaign.username
+			String username = title.replaceAll("\\s+","-").toLowerCase();
+			if (!uniqueCampaignName(username)) {
+				error.put("error",
+						"Campaign name already exists! Please specify another name");
+				return badRequest(error);
+			}
+			else {
+				newCampaign.setUsername(username);
+			}
+			
+			// Set Campaign.description
+			if (!json.has("description")) {
+				newCampaign.setDescription("");
+			}
+			else {
+				newCampaign.setDescription(json.get("description").asText());
+			}
+			
+			// Set Campaign.space and Campaign.spacename 
+			if ( (!json.has("space")) && (!json.has("spacename")) ) {
+				newCampaign.setSpace(null);
+				newCampaign.setSpacename("");
+			}
+			else if ( (!json.has("space")) && (json.has("spacename")) ) {
+				String sname = json.get("spacename").asText();
+				UserGroup with = DB.getUserGroupDAO().findOne("username", sname);
+				newCampaign.setSpace(with.getDbId());
+				newCampaign.setSpacename(sname);
+			}
+			else if ( (json.has("space")) && (!json.has("spacename")) ) {
+				UserGroup group = DB.getUserGroupDAO().get(new ObjectId(json.get("space").asText()));
+				String sname = group.getUsername();
+				newCampaign.setSpace(new ObjectId(json.get("space").asText()));
+				newCampaign.setSpacename(sname);
+			}
+			else {
+				newCampaign.setSpace(new ObjectId(json.get("space").asText()));
+				newCampaign.setSpacename(json.get("spacename").asText());
+			}
+			
+			// Set Campaign.banner
+			if (!json.has("campaignBanner")) {
+				newCampaign.setCampaignBanner("");
+			}
+			else {
+				newCampaign.setCampaignBanner(json.get("campaignBanner").asText());
+			}
+			
+			// Set Campaign.annotationTarget
+			if (!json.has("annotationTarget")) {
+				newCampaign.setAnnotationTarget(0);
+			}
+			else {
+				try {
+					int tar = Integer.parseInt(json.get("annotationTarget").asText());
+					newCampaign.setAnnotationTarget(tar);
+				}
+				catch (NumberFormatException e) {
+					error.put("error", "Given annotation target is not a number");
+					return badRequest(error);
+				}
+			}
+			
+			// Set Campaign.annotationCurrent
+			newCampaign.setAnnotationCurrent(new Campaign.AnnotationCount());
+			
+			// Set Campaign.annotationCurrent
+			newCampaign.setContributorsPoints(new Hashtable<ObjectId, AnnotationCount>());
+			
+			// Set Campaign.startDate and Campaign.endDate
+			if (json.has("startDate")) {
+				SimpleDateFormat sdfs = new SimpleDateFormat("yyyy-MM-dd");
+				try {
+					newCampaign.setStartDate(sdfs.parse(json.get("startDate").asText()));
+				} catch (ParseException e) {
+					error.put("error", "Start date's format is invalid");
+					return badRequest(error);
+				}
+			}
+			if (json.has("endDate")) {
+				SimpleDateFormat sdfe = new SimpleDateFormat("yyyy-MM-dd");
+				try {
+					newCampaign.setStartDate(sdfe.parse(json.get("startDate").asText()));
+				} catch (ParseException e) {
+					error.put("error", "End date's format is invalid");
+					return badRequest(error);
+				}
+			}
+
+			
+			try {
+				DB.getCampaignDAO().makePermanent(newCampaign);
+			}
+			catch (Exception e) {
+				log.error("Cannot save campaign to database!", e.getMessage());
+				error.put("error", "Cannot save campaign to database!");
+				return internalServerError(error);
+			}
+			//updatePage(newGroup.getDbId(), json);
+
+			return ok(Json.toJson(newCampaign));
+		} catch (Exception e) {
+			error.put("error", e.getMessage());
+			return internalServerError(error);
+		}
+	}
+	
 	/*
 	private static ObjectNode validateCampaign(JsonNode json) {
 		
@@ -151,13 +309,6 @@ public class CampaignController extends WithController {
 		}
 		
 		return result;
-	}
-	
-	public static Result createCampaign() {
-		
-		JsonNode json = request().body().asJson();
-		ObjectNode result = Json.newObject();
-		
 	}
 	*/
 }
