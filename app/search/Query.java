@@ -21,6 +21,7 @@ import sources.utils.ListMap;
 import utils.ListUtils;
 
 import java.util.*;
+import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
 /**
@@ -322,21 +323,42 @@ public class Query implements IFilterContainer{
 		return newQuery;
 	}
 
+	/**
+	 * filters present in at least M sources are returned.
+	 * M = min(M, sources.size())
+	 * @return
+	 */
 	public HashSet<String> commonSupportedFields() {
-		HashSet<String> commonFields = new HashSet<String>();		
+		HashSet<String> commonFields = new HashSet<String>();
+		HashMap<String, Integer> counts = new HashMap<>();
+		int threshold = Math.min(1, sources.size());
 		if( !sources.isEmpty()) {
-			boolean first = true;
+//			boolean first = true;
 			for( Sources s:sources) {
-				if( first ) {
-					commonFields.addAll( s.getDriver().supportedFieldIds());
-					first = false;
-				} else {
-					Iterator<String> i = commonFields.iterator();
-					Set<String> newFields =  s.getDriver().supportedFieldIds();
-					while( i.hasNext()) {
-						if( ! newFields.contains(i.next())) i.remove();
-					}
+				
+				for (String field : s.getDriver().supportedFieldIds()) {
+					Integer v = counts.get(field);
+					if (v != null)
+						counts.put(field, v+1);
+					else
+						counts.put(field, 1);
 				}
+				
+//				if( first ) {
+//					commonFields.addAll( s.getDriver().supportedFieldIds());
+//					first = false;
+//				} else {
+//					Iterator<String> i = commonFields.iterator();
+//					Set<String> newFields =  s.getDriver().supportedFieldIds();
+//					while( i.hasNext()) {
+//						if( ! newFields.contains(i.next())) i.remove();
+//					}
+//				}
+			}
+		}
+		for (Entry<String, Integer> pairs : counts.entrySet()) {
+			if (pairs.getValue()>=threshold) {
+				commonFields.add(pairs.getKey());
 			}
 		}
 		return commonFields;

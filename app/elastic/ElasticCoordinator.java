@@ -64,13 +64,16 @@ public class ElasticCoordinator {
 	 */
 	public SingleResponse federatedSearch(List<List<Filter>> filters) {
 		ElasticSearcher searcher = new ElasticSearcher();
-
 		List<List<Filter>> newFilters = filters.stream().map(
 				clause -> {
-					return clause.stream().map(filter -> {
+					return clause.stream()
+							.filter((f)-> f.value!=null)
+					.map(filter -> {
 						Filter newFilter = (Filter) filter.clone();
-						if (newFilter.fieldId.equals("anywhere"))
+						if (newFilter.fieldId.equals("anywhere")) {
 							newFilter.fieldId = "";
+//							newFilter.value = "dance";
+						}
 						if (Fields.media_withRights.fieldId().equals(newFilter.fieldId))
 							newFilter.value = EmbeddedMediaObject.WithMediaRights.getRights(newFilter.value).name();
 						if (newFilter.fieldId.equals("hasImage")) {
@@ -81,7 +84,6 @@ public class ElasticCoordinator {
 						
 					}).collect(Collectors.toList());
 				}).collect(Collectors.toList());
-
 		List<QueryBuilder> musts = new ArrayList<QueryBuilder>();
 		for (List<Filter> ors : newFilters) {
 			musts.add(searcher.boolShouldQuery(ors));
@@ -92,7 +94,7 @@ public class ElasticCoordinator {
 				add(new Filter("descriptiveData.label.default", "_favorites", true));
 			}
 		}));
-
+		
 		SearchResponse elasticresp = searcher.executeWithAggs(musts, must_not, options);
 				/*searcher.getBoolSearchRequestBuilder(musts, null, null, options)
 				.execute().actionGet();*/
@@ -122,7 +124,7 @@ public class ElasticCoordinator {
 		}
 		
 		sresp.totalCount = (int) elasticresp.getHits().getTotalHits();
-		sresp.source = Sources.WITHin;
+		sresp.source_id = Sources.WITHin.getID();
 		sresp.count = resultMap.size();
 		if(elasticresp.getAggregations() != null)
 			extractFacets(elasticresp.getAggregations(), sresp);

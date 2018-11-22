@@ -54,6 +54,13 @@ public class Campaign {
 		private long rejected;
 		private long records;
 		
+		public AnnotationCount() {
+			this.created = 0;
+			this.approved = 0;
+			this.rejected = 0;
+			this.records = 0;
+		}
+		
 		public long getCreated() {
 			return created;
 		}
@@ -124,6 +131,9 @@ public class Campaign {
 	private String description;
 	
 	private String banner;
+	
+	@JsonSerialize(using = Serializer.ObjectIdSerializer.class)
+	private ObjectId creator;
 	
 	@JsonSerialize(using = Serializer.ObjectIdSerializer.class)
 	private ObjectId space;
@@ -289,6 +299,14 @@ public class Campaign {
 
 	public void setSpacename(String spacename) {
 		this.spacename = spacename;
+	}
+
+	public ObjectId getCreator() {
+		return creator;
+	}
+
+	public void setCreator(ObjectId creator) {
+		this.creator = creator;
 	}
 
 }

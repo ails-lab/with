@@ -16,6 +16,13 @@
 
 package search;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Map.Entry;
+
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonValue;
+
 import play.Logger;
 import search.ProxySource.BritishLibProxySource;
 import search.ProxySource.DDBProxySource;
@@ -37,18 +44,29 @@ import sources.ElasticSource;
  */
 public enum Sources {
 	Europeana(EuropeanaProxySource.class, "Europeana"),
-	BritishLibrary(BritishLibProxySource.class,"BritishLibrary", "The British Library"),
-	InternetArchive(InternetArchiveProxySource.class,"InternetArchive","Internet Archive"),
-	DDB(DDBProxySource.class,"DDB","Deutsche Digitale Bibliothek"),
+	BritishLibrary(BritishLibProxySource.class, "The British Library"),
+	InternetArchive(InternetArchiveProxySource.class, "Internet Archive"),
+	DDB(DDBProxySource.class,"Deutsche Digitale Bibliothek"),
 	DigitalNZ(DigitalNZProxySource.class,"DigitalNZ"),
-	DPLA(DPLAProxySource.class,"DPLA","Digital Public Library of America"),
+	DPLA(DPLAProxySource.class,"Digital Public Library of America"),
 	EuropeanaFashion(EuropeanaFashionProxySource.class,"EuropeanaFashion"),
 	YouTube(YoutubeProxySource.class,"Youtube"),
-	NLA(NLAProxySource.class,"NLA","National Library of Australia"),
-	WITHin(ElasticSource.class,"WITHin"),
-	Rijksmuseum(RijksProxySource.class,"Rijksmuseum","Rijksmuseum"),
+	NLA(NLAProxySource.class,"National Library of Australia"),
+	WITHin(ElasticSource.class,"WITH Collections"),
+	Rijksmuseum(RijksProxySource.class,"Rijksmuseum"),
 	Historypin(HistoryPinProxySource.class,"Historypin")
 	;
+	 
+	
+    @JsonCreator
+    public static Sources forValue(String sourceID) {
+    	return Sources.getSourceByID(sourceID);
+    }
+    
+    @JsonValue
+    public String toValue(Sources s) {
+    	return s.getID();	
+    }
 
 
 	private final String sourceName;
@@ -90,7 +108,7 @@ public enum Sources {
 
 	public static Sources getSourceByID(String id){
 		for (Sources e : Sources.values()) {
-			if (e.getID().equals(id)){
+			if (e.getID().equals(id) || e.getText().equals(id)){
 				return e;
 			}
 		}

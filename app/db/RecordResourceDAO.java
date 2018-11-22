@@ -44,14 +44,21 @@ import model.EmbeddedMediaObject.MediaVersion;
 import model.annotations.Annotation;
 import model.annotations.ContextData;
 import model.annotations.ContextData.ContextDataBody;
+import model.basicDataTypes.ProvenanceInfo;
 import model.basicDataTypes.WithAccess;
 import model.basicDataTypes.WithAccess.Access;
 import model.basicDataTypes.WithAccess.AccessEntry;
+import model.quality.RecordQuality;
 import model.resources.RecordResource;
 import model.resources.collection.CollectionObject;
 import play.Logger;
 import play.Logger.ALogger;
+import play.libs.Json;
+import search.Sources;
+import sources.FilterValuesMap;
 import sources.core.ParallelAPICall;
+import sources.utils.JsonContextRecord;
+import utils.ListUtils;
 
 /*
  * This class is the aggregator of methods
@@ -320,6 +327,8 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 		DB.getCollectionObjectDAO().addCollectionMedia(collectionId, recordId,
 				collection.getCollectedResources().size());
 	}
+	
+
 
 	// TODO Refactor
 	public WithAccess mergeParentCollectionRights(ObjectId recordId,

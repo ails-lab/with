@@ -17,10 +17,13 @@
 package sources.formatreaders;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
+import model.EmbeddedMediaObject.WithMediaRights;
 import model.basicDataTypes.Language;
 import model.basicDataTypes.LiteralOrResource;
 import model.basicDataTypes.ProvenanceInfo;
@@ -30,6 +33,7 @@ import model.resources.CulturalObject.CulturalObjectData;
 import model.resources.RecordResource;
 import play.Logger;
 import play.Logger.ALogger;
+import search.FiltersFields;
 import sources.FilterValuesMap;
 import sources.core.JsonContextRecordFormatReader;
 import sources.core.Utils;
@@ -108,6 +112,23 @@ public abstract class CulturalRecordFormatter extends JsonContextRecordFormatRea
 	public FilterValuesMap getValuesMap() {
 		return valuesMap;
 	}
+	
+	
+	public WithMediaRights getWithMediaRights(String specificValue) {
+		return valuesMap.getWithMediaRights(specificValue);
+	}
+
+	public WithMediaRights getWithMediaRights(String[] specificValues){
+		return valuesMap.getWithMediaRights(Arrays.asList(specificValues));
+	}
+	
+	public WithMediaRights getWithMediaRights(Collection<String> specificValues){
+		return valuesMap.getWithMediaRights(specificValues);
+	
+	}
+	
+	
+
 
 	public void setValuesMap(FilterValuesMap valuesMap) {
 		this.valuesMap = valuesMap;

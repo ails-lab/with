@@ -43,7 +43,7 @@ import utils.ListUtils;
 public class FilterValuesMap {
 
 
-	private static HashMap<Sources, FilterValuesMap> map;
+	private static HashMap<String, FilterValuesMap> map;
 	private HashMap<String, List<Object>> specificvalues;
 	// private HashMap<String, List<Pair<String>>> queryTexts;
 	private HashMap<String, List<Object>> commonvalues;
@@ -126,6 +126,7 @@ public class FilterValuesMap {
 					// String k = getKey(filterID, specificValue);
 					List<Object> orset = getOrset(commonvalues, kk, false);
 					v.addAll(orset);
+//					System.out.println("+++++"+specificValue+"---> "+orset);
 				}
 			}
 			if (v.isEmpty()) {
@@ -196,10 +197,13 @@ public class FilterValuesMap {
 	}
 	
 	public static FilterValuesMap getMap(Sources source){
-		FilterValuesMap ms = map.get(source);
+		if (map==null) {
+			map = new HashMap<>();
+		}
+		FilterValuesMap ms = map.get(source.name());
 		if (ms==null){
 			ms = MapsConfig.buildFilterValuesMap(source);
-			map.put(source, ms);
+			map.put(source.name(), ms);
 			switch (source) {
 			case Europeana:
 				ms.fillEuropeana();
@@ -255,7 +259,7 @@ public class FilterValuesMap {
 	
 	private void fillFlickr() {
 		addRestriction(FiltersFields.TYPE.getFilterId(),WithMediaType.IMAGE.getName(), WithMediaType.VIDEO.getName());
-		addMapping(FiltersFields.RIGHTS.getFilterId(), WithMediaRights.RR, FlickrSpaceSource.getLicence("0"));
+		addMapping(FiltersFields.RIGHTS.getFilterId(), WithMediaRights.InC, FlickrSpaceSource.getLicence("0"));
 		addMapping(FiltersFields.RIGHTS.getFilterId(), WithMediaRights.Creative_BY_NC, FlickrSpaceSource.getLicence("3"),
 				BritishLibrarySpaceSource.getLicence("2"), FlickrSpaceSource.getLicence("1"));
 		addMapping(FiltersFields.RIGHTS.getFilterId(), WithMediaRights.Creative_BY_SA, FlickrSpaceSource.getLicence("6"));
@@ -264,7 +268,7 @@ public class FilterValuesMap {
 		addMapping(FiltersFields.RIGHTS.getFilterId(), WithMediaRights.UNKNOWN, FlickrSpaceSource.getLicence("7"));
 		addMapping(FiltersFields.RIGHTS.getFilterId(), WithMediaRights.Public, FlickrSpaceSource.getLicence("9"), FlickrSpaceSource.getLicence("10"));
 		addRestriction(FiltersFields.RIGHTS.getFilterId(),
-				WithMediaRights.RR.toString(),
+				WithMediaRights.InC.toString(),
 				WithMediaRights.Creative_BY_NC.toString(),
 				WithMediaRights.Creative_BY_SA.toString(),
 				WithMediaRights.Creative_BY.toString(),
@@ -291,6 +295,10 @@ public class FilterValuesMap {
 	
 	
 	private void fillDPLA() {
+		addRestriction(FiltersFields.RIGHTS.getFilterId(),
+				WithMediaRights.Public.toString(),
+				WithMediaRights.UND.toString(),
+				WithMediaRights.InC.toString());
 	}
 	
 	private void fillEuropeana() {
@@ -311,7 +319,7 @@ public class FilterValuesMap {
 				WithMediaRights.Creative_BY_SA.toString(),
 				WithMediaRights.Creative_BY_NC.toString(),
 				WithMediaRights.UNKNOWN.toString(),
-				WithMediaRights.RR.toString());
+				WithMediaRights.InC.toString());
 		
 	}
 	
@@ -352,6 +360,36 @@ public class FilterValuesMap {
 			res.add(f);
 		}
 		return res;
+	}
+	
+	@Override
+	public String toString() {
+		// TODO Auto-generated method stub
+		return specificvalues.toString();
+	}
+	
+	public WithMediaRights getWithMediaRights(String specificValue) {
+		if (Utils.hasInfo(specificValue))
+			return (WithMediaRights.getRights(translateToCommon(FiltersFields.RIGHTS.getFilterId(), specificValue).get(0).toString()));
+		else
+			return WithMediaRights.UND;
+
+	}
+
+	public WithMediaRights getWithMediaRights(String[] specificValues){
+		return getWithMediaRights(Arrays.asList(specificValues));
+	}
+	
+	public WithMediaRights getWithMediaRights(Collection<String> specificValues){
+		if (Utils.hasInfo(specificValues)) {
+			for (String string : specificValues) {
+				WithMediaRights res = getWithMediaRights(string);
+				if (res!=null)
+					return res;
+			}
+		}
+		return WithMediaRights.UND;
+	
 	}
 
 }

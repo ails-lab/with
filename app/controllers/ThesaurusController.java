@@ -16,6 +16,7 @@
 
 package controllers;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -25,11 +26,17 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import model.Campaign;
 import model.basicDataTypes.Language;
 import model.resources.ThesaurusObject;
 import model.resources.WithResourceType;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.HttpClientBuilder;
 import org.bson.types.ObjectId;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
@@ -38,6 +45,7 @@ import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHitField;
+import org.elasticsearch.search.suggest.context.CategoryContextMapping;
 
 import play.Logger;
 import play.Logger.ALogger;
@@ -327,9 +335,28 @@ public class ThesaurusController extends Controller {
 		retrievedFields[3 + searchLangCodes.length] = "properties.values.prefLabel.en";
 	};
 	
+	public static ArrayNode getWikidataSuggestions(String word) throws ClientProtocolException, IOException {
+		String url = "https://www.wikidata.org/w/api.php?action=wbsearchentities&language=fr&format=json&search=" + word;
+		HttpClient client = HttpClientBuilder.create().build();
+		HttpGet request = new HttpGet(url);
+		HttpResponse resp = client.execute(request);
+		JsonNode jsonRes = Json.parse(resp.getEntity().getContent()).get("search");
+		ArrayNode terms = Json.newObject().arrayNode();
+		for (JsonNode res : jsonRes) {
+			ObjectNode element = Json.newObject();
+			element.put("id", res.get("id").asText());
+			element.put("label", res.get("label").asText());
+			element.put("matchedLabel", res.get("match").get("text").asText());
+			element.put("uri", res.get("concepturi").asText());
+			element.put("vocabulary", "wikidata");
+			terms.add(element);
+		}
+		return terms;
+	}
+
 	
-	public static Result getSuggestions(String word, String namespaces) {
-		
+	
+	public static Result getSuggestions(String word, String namespaces, String campaignId) throws ClientProtocolException, IOException {
 		ObjectNode response = Json.newObject();
 		response.put("request", word);
 
@@ -355,6 +382,12 @@ public class ThesaurusController extends Controller {
 			String[] namespaceArray = new String[0];
 			if( StringUtils.isNotBlank(namespaces)) {
 				namespaceArray = namespaces.split(",");
+			}
+			
+			if (campaignId != null) {
+				Campaign campaign = DB.getCampaignDAO().getById(new ObjectId(campaignId));
+				List<String> vocabularyList = campaign.getVocabularies();
+				namespaceArray =  vocabularyList.toArray(new String[vocabularyList.size()]);
 			}
 			
 			if (ok) {
@@ -399,6 +432,7 @@ public class ThesaurusController extends Controller {
 //				}
 			
 				if( namespaceArray.length > 0 ) {
+					
 					if( namespaceArray.length == 1 ) {
 						query.must(QueryBuilders.termQuery("vocabulary.name", namespaceArray[0]));
 					} else {
@@ -495,8 +529,15 @@ public class ThesaurusController extends Controller {
 					}
 				}
 			}
-			
-			response.put("results", terms);
+			List<String> namespaceArrayList = Arrays.asList(namespaceArray);
+			ArrayNode allTerms = Json.newObject().arrayNode();
+			if (namespaceArrayList.contains("wikidata")) {
+				allTerms = getWikidataSuggestions(word);
+				allTerms.addAll(terms);				
+			} else {
+				allTerms = terms;
+			}
+			response.put("results", allTerms);
 			
 			return ok(response);
 

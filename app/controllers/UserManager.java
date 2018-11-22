@@ -591,6 +591,15 @@ public class UserManager extends WithController {
 			return badRequest(result);
 		}
 	}
+	
+	public static Result getUserByUsername(String username) {
+		try {
+			User user = DB.getUserDAO().getUniqueByFieldAndValue("username", username);
+			return ok(Json.toJson(user));
+		} catch (Exception e) {
+			return badRequest(Json.parse("'error' : '"+ e.getMessage() +"'"));
+		}
+	}
 
 	/**
 	 * This action clears the session, the user is logged out.

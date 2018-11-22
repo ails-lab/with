@@ -180,10 +180,13 @@ public class CollectionObjectController extends WithResourceController {
 	}
 
 	public static Result importIDs(String cname, String source, String ids) {
+		System.out.println("----------------check collection");
 		ObjectNode resultInfo = Json.newObject();
+		System.out.println("----------------check collection");
 		CollectionObject ccid = getOrCreateCollection(cname, resultInfo);
 		if (ccid == null)
 			return internalServerError(resultInfo);
+		System.out.println("----------------collection ok");
 		for (String oid : ids.split("[,\\s]+")) {
 			CulturalObject record = new CulturalObject();
 			CulturalObjectData descriptiveData = new CulturalObjectData();
@@ -1109,7 +1112,7 @@ public class CollectionObjectController extends WithResourceController {
 					if (usergroup != null)
 						result.add(userOrGroupJson(usergroup, accessRights));
 					else
-						return internalServerError("User with id " + userId + " cannot be retrieved from db");
+						log.error("User with id " + userId + " cannot be retrieved from db");
 				}
 			}
 		}

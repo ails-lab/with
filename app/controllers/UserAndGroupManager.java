@@ -583,7 +583,8 @@ public class UserAndGroupManager extends WithController {
 			ObjectId userOrGroupId = new ObjectId(id);
 			if (DB.getUserDAO().get(userOrGroupId) != null) {
 				User user = DB.getUserDAO().get(userOrGroupId);
-
+				user.addGroupForAdministration(new ObjectId(groupId));
+				DB.getUserDAO().makePermanent(user);
 				group.addAdministrator(userOrGroupId);
 				if (!(DB.getUserGroupDAO().makePermanent(group) == null)) {
 

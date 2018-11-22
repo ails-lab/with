@@ -51,7 +51,7 @@ public class MapsConfig {
 		}
 	}
 	public static FilterValuesMap buildFilterValuesMap(Sources source){
-		String sourceID = source.toString();
+		String sourceID = source.name();
 		FilterValuesMap res = new FilterValuesMap();
 		HashMap<String, HashMap<String, List<String>>> hashMap = getmap().get(sourceID);
 		if (hashMap==null){

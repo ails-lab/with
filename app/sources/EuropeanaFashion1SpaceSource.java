@@ -36,8 +36,6 @@ public class EuropeanaFashion1SpaceSource extends EuropeanaSpaceSource {
 
 	public EuropeanaFashion1SpaceSource() {
 		super();
-	
-		setProfile("rich");
 	}
 	
 	@Override

@@ -25,11 +25,12 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 
-public class AnnotationBodyGeoTagging extends AnnotationBody {
+public class AnnotationBodyGeoTagging extends AnnotationBodyTagging {
 	
 	@JsonDeserialize(using = PointDeserializer.class)
 	@JsonSerialize(using = PointSerializer.class)
 	private Point coordinates;
+	private String countryName;
 	
 	public Point getCoordinates() {
 		return coordinates;
@@ -37,5 +38,13 @@ public class AnnotationBodyGeoTagging extends AnnotationBody {
 
 	public void setCoordinates(Point coordinates) {
 		this.coordinates = coordinates;
+	}
+
+	public String getCountryName() {
+		return countryName;
+	}
+
+	public void setCountryName(String countryName) {
+		this.countryName = countryName;
 	}
 }

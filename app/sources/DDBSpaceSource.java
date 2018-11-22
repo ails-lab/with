@@ -75,7 +75,7 @@ public class DDBSpaceSource extends ISpaceSource {
 		QueryBuilder builder = super.getBuilder(q);
 		builder.setBaseUrl("http://api.deutsche-digitale-bibliothek.de/search?");
 		builder.addSearchParam("oauth_consumer_key", apiKey);
-		builder.setQuery("query", q.searchTerm);
+		builder.setQuery("query", q.searchTerm==null?"*":q.searchTerm);
 		builder.addSearchParam("rows", q.pageSize);
 		builder.addSearchParam("offset", "" + ((Integer.parseInt(q.page) - 1) * Integer.parseInt(q.pageSize)));
 		builder.addSearchParam("facet", "place_fct");
@@ -84,11 +84,11 @@ public class DDBSpaceSource extends ISpaceSource {
 		builder.addSearchParam("facet", "time_fct");
 		builder.addSearchParam("facet", "license");
 //		builder.addSearchParam("isThumbnailFiltered", "true");
-		FashionSearch fq = new FashionSearch();
-		fq.setTerm(q.searchTerm);
-		fq.setCount(Integer.parseInt(q.pageSize));
-		fq.setOffset(((Integer.parseInt(q.page) - 1) * Integer.parseInt(q.pageSize)));
-		builder.setData(fq);
+//		FashionSearch fq = new FashionSearch();
+//		fq.setTerm(q.searchTerm);
+//		fq.setCount(Integer.parseInt(q.pageSize));
+//		fq.setOffset(((Integer.parseInt(q.page) - 1) * Integer.parseInt(q.pageSize)));
+//		builder.setData(fq);
 		addfilters(q, builder);
 		return builder;
 	}

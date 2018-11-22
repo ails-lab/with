@@ -170,6 +170,27 @@ public class AnnotationDAO extends DAO<Annotation> {
 		long count = q.countAll();
 		return count;
 	}
+	
+	public long countUserCreatedAnnotations(ObjectId userId) {
+		Query<Annotation> q = this.createQuery();
+		q.criteria("annotators.withCreator").equal(userId);
+		long count = q.countAll();
+		return count;
+	}
+	
+	public long countUserUpvotedAnnotations(ObjectId userId) {
+		Query<Annotation> q = this.createQuery();
+		q.criteria("score.approvedBy").equal(userId);
+		long count = q.countAll();
+		return count;
+	}
+	
+	public long countUserDownvotedAnnotations(ObjectId userId) {
+		Query<Annotation> q = this.createQuery();
+		q.criteria("score.rejectedBy").equal(userId);
+		long count = q.countAll();
+		return count;
+	}
 
 	// TODO: Mongo distinct count
 	@SuppressWarnings("unchecked")

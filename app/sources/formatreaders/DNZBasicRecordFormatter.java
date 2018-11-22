@@ -100,8 +100,8 @@ public class DNZBasicRecordFormatter extends CulturalRecordFormatter {
 				}
 			}
 		}
-		WithMediaRights withRights = (rights==null || rights.size()==0)?null:(WithMediaRights.getRights(getValuesMap().translateToCommon(FiltersFields.RIGHTS.getFilterId(), rights.get(0)).get(0).toString())) ;
-		
+//		WithMediaRights withRights = (rights==null || rights.size()==0)?null:(WithMediaRights.getRights(getValuesMap().translateToCommon(FiltersFields.RIGHTS.getFilterId(), rights.get(0)).get(0).toString())) ;
+		WithMediaRights withRights = getWithMediaRights(rights);
 		
 		
 		String uri3 = rec.getStringValue("thumbnail_url","object_url");//TODO MediaVersion.Thumbnail <- thumbnail_url or object_url

@@ -58,7 +58,7 @@ public class ESpaceSources {
 		esources.add(new HistorypinSpaceSource());
 //		esources.add(new WithinASpaceSource());
 		log.info("Initialization of sources list");
-		System.out.println(esources);
+//		System.out.println(esources);
 	}
 
 	public static List<ISpaceSource> getESources() {

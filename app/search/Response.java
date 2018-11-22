@@ -57,6 +57,11 @@ public class Response {
 			this.value = value;
 			this.count = count;
 		}
+		@Override
+		public String toString() {
+			return " [value=" + value + ", count=" + count + "]";
+		}
+		
 
 	}
 
@@ -71,6 +76,7 @@ public class Response {
 	public static class ValueCounts extends HashMap<String,List<ValueCount>> {
 		// keys are field ids
 		// values are list of values and occurrence counts
+		
 	}
 
 
@@ -78,7 +84,7 @@ public class Response {
 		/**
 		 * limit of value counts returned in a single facet.
 		 */
-		public static final int FACETS_LIMIT = 10;
+		public static final int FACETS_LIMIT = 20;
 
 
 		public static SingleResponse EMPTY = new Response.SingleResponse();
@@ -86,8 +92,8 @@ public class Response {
 
 		/**
 		 * The source where this result belongs to
-		 */
-		public Sources source;
+		 */		
+		public String source_id;
 
 		/**
 		 * The total count of results if available
@@ -184,8 +190,8 @@ public class Response {
 
 	/**
 	 * All the sources this response is containing
-	 */
-	public List<Sources> sources = new ArrayList<Sources>();
+	 */	
+	public List<String> sources_ids = new ArrayList<String>();
 
 	/**
 	 * Merging facet counts is not very meaningful. We will still do it here for now.
@@ -213,12 +219,12 @@ public class Response {
 	 */
 	public SingleResponse getOrMakeSingleResponse( Sources source ) {
 		for( SingleResponse sr: results ) {
-			if( sr.source == source) return sr;
+			if( Sources.getSourceByID(sr.source_id) == source) return sr;
 		}
 		SingleResponse res = new SingleResponse();
-		res.source = source;
+		res.source_id = source.getText();
 		results.add( res );
-		sources.add( source );
+		sources_ids.add(source.getText());
 		return res;
 	}
 
@@ -257,7 +263,7 @@ public class Response {
 			accumulateValueCountsList(accumulated, sr.facets);
 			accumulateValueCountsList(accumulated, sr.counts);
 		}
-
+		
 		// convert the Hash of hash of string count fieldId->value->count
 		// to the list valueList with sorting of values by count downwards
 		for( Map.Entry<String, HashMap<String, Integer>> entry: accumulated.entrySet() ) {
@@ -333,8 +339,9 @@ public class Response {
 	 * @param sr
 	 */
 	public void addSingleResponse( SingleResponse sr ) {
+		sr.source_id = Sources.getSourceByID(sr.source_id).getID();
 		results.add( sr );
-		sources.add( sr.source );
+		sources_ids.add(Sources.getSourceByID(sr.source_id).getID());
 	}
 
 }

@@ -45,6 +45,7 @@ import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
 import akka.actor.Props;
 import annotators.AnnotatorConfig;
+import db.DAO;
 import db.DB;
 import model.DescriptiveData;
 import model.EmbeddedMediaObject;
@@ -202,6 +203,23 @@ public class RecordResourceController extends WithResourceController {
 		}
 			
 		return ok( res );
+	}
+	
+	public static Result updateRights(String id) {
+		ObjectId recordDbId = new ObjectId(id);
+		DB.getWithResourceDAO().computeAndUpdateRights(recordDbId);
+		return ok("record rights updated");
+	}
+	
+	
+	public static Result updateAllRights() {
+		DB.getWithResourceDAO().findAll("_id").forEach((r) -> {
+			ObjectId recordDbId = r.getDbId();
+//			System.out.println(recordDbId);
+			DB.getWithResourceDAO().computeAndUpdateRights(recordDbId);
+		});
+		// DB.getWithResourceDAO().computeAndUpdateRights(recordDbId);
+		return ok("All record rights updated");
 	}
 	
 	
