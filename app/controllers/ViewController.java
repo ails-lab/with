@@ -23,7 +23,7 @@ import play.mvc.Result;
 public class ViewController extends Controller {
 
 	public static Result devLite() {
-		return ok( views.html.swaggerEntry.render( DB.getConf().getString("with.origin")+"/assets/apispecs.json"));
+		return ok( views.html.swaggerEntry.render( DB.getConf().getString("with.api")+"/assets/apispecs.json"));
 	}
 
 }
