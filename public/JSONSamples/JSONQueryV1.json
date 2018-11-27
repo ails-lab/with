@@ -1,0 +1,106 @@
+{
+	startIndex : "1",
+	offset: "20",
+	searchTerm: "term to search",
+	"_europeana_api":"query=(term+to+search)",
+	
+	termToExclude:"exclude this",
+	"_europeana_api":"query=((term+to+search)+NOT+(exclude+this))",
+	
+	"_source_comment": "If null then all the available sources are used",
+	source : [
+		"Europeana",
+		"DPLA"
+	],
+	
+	"_europeanaAPI_comment": "Europeana API parameters",
+	europeanaAPI : {
+		who: "Name Surname",
+		"_europeana_api":"query=((term+to+search)+NOT+(exclude+this))+AND(who:Name+Surname)",
+		
+		where : "County City",
+		"_europeana_api":"query=((term+to+search)+NOT+(exclude+this))+AND+(who:Name+Surname)+AND+(where:County+City)",
+		
+		refiment:{
+			refimentTerms :
+			[
+				"This is term1",
+				"term2"
+			],
+			"_europeana_api":"query=...&qf=this+is+term1&qf=term2",
+		
+			spatialParams: {
+				latitude:{
+					startPoint: "37.90",
+					endPoint: "38.09"
+				},
+				"_europeana_api":"query=...&qf=pl_wgs84_pos_lat:[37.90+TO+38.09]",
+			
+			
+				longitude:{
+					startPoint: "23.89",
+					endPoint: "24.98"
+				},
+				"_europeana_api":"query=...&qf=pl_wgs84_pos_long:[23.89+TO+24.98]",
+			},
+			"_europeana_api":"query=...&qf=pl_wgs84_pos_lat:[37.90+TO+38.09]+AND+pl_wgs84_pos_long:[23.89+TO+24.98]",
+			
+			temporalParams: {
+				startYear: "1950",
+				endYear: "2015"
+			},
+			"_europeana_api":"query=...&qf=YEAR:[1950+TO+2015]",
+		},
+		
+		facets:{
+			
+			TYPE:[
+				"IMAGE",
+				"VIDEO"
+			],
+			"_europeana_api":"query=...&qf=TYPE:IMAGE&qf=TYPE:VIDEO",
+			
+			LANGUAGE:[
+				"en",
+				"fr"
+			],
+			"_europeana_api":"query=...&qf=LANGUAGE:en&qf=LANGUAGE:fr",
+			
+			YEAR:[
+				"1981",
+				"2013"
+			],
+			"_europeana_api":"query=...&qf=YEAR:1981&qf=YEAR:2013",
+			
+			COYNTRY:[
+				"france",
+				"germany"
+			],
+			"_europeana_api":"query=...&qf=COYNTRY:france&qf=COYNTRY:germany",
+			
+			RIGHTS:[
+				"http://www.europeana.eu/rights/rr-f/",
+				"http://creativecommons.org/publicdomain/mark/1.0/"
+			],
+			"_europeana_api":"query=...&qf=RIGHTS:http://www.europeana.eu/rights/rr-f/&qf=RIGHTS:http://creativecommons.org/publicdomain/mark/1.0/",
+			
+			PROVIDER:[
+				"The European Library",
+				"National Technical"
+			],
+			"_europeana_api":"query=...&qf=PROVIDER:The+European+Library&qf=PROVIDER:National+Technical",
+			
+			UGC:["true"],
+			"_europeana_api":"query=...&qf=UGC:true"
+		
+		},
+		
+		"_reusability_comment": "One of or more values from open, restricted, permission ",
+		reusability : [
+			"open",
+			"restricted",
+			"permission"
+		],
+		"_europeana_api":"query=...&qf=...&start=...&rows=...&profile=...&reusability=open&reusability=restricted&reusability=permission",
+	}
+}
