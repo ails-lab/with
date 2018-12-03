@@ -186,7 +186,7 @@ public class ApacheHttpConnector extends HttpConnector {
 	private HttpGet buildGet(String url) throws URISyntaxException {
 		HttpGet httpGet = new HttpGet(url);
 		// TODO check if everyone wants json
-		httpGet.addHeader(new BasicHeader("Accept", "application/json"));
+		httpGet.addHeader(new BasicHeader("Accept", "application/json, */*"));
 		return httpGet;
 	}
 
