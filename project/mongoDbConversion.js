@@ -53,17 +53,20 @@ function missCopy( collection, sourceDb, targetDb ) {
 	sourceDb[collection].find({},{"_id":1}).forEach( function( rec) { missing[rec._id] = 1;});
 	// remove existing 
 	targetDb[collection].find({},{"_id":1}).forEach( function( rec) { delete missing[rec._id];});
-
+	var  count = 0;
+	
 	//copy missing records
 	sourceDb[collection].find().forEach( function( rec) {
 		if( missing[ rec._id ] !== undefined ) {
 			targetDb[collection].insert( rec );
 			print( rec );
+			count += 1 ;
 		}
 	} );
+	return count;
 }
 
-missCopy( "User", dbx, db );
+print("Copied Users " +  missCopy( "User", dbx, db ));
 missCopy( "UserGroup", dbx, db );
 missCopy( "CollectionObject", dbx, db );
 missCopy( "Annotation", dbx, db );
@@ -200,7 +203,7 @@ for( var idx in recordAnnotation) {
        print( "Missing " + recId );
     } else {
 	  rec.annotationIds = recordAnnotation[idx];
-	  print( "Update " + idx + " with " + recordAnnotation[idx]);
-	  // db.RecordResource.save( rec );
+	  //print( "Update " + idx + " with " + recordAnnotation[idx]);
+	  db.RecordResource.save( rec );
    }
 }

@@ -21,6 +21,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.function.Function;
 
+import org.apache.http.conn.ConnectTimeoutException;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -33,6 +34,7 @@ import play.Logger;
 import play.Logger.ALogger;
 import play.libs.Json;
 import search.FiltersFields;
+import search.Response.Failure;
 import search.Sources;
 import sources.core.AdditionalQueryModifier;
 import sources.core.AutocompleteResponse;
@@ -344,14 +346,17 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 						Logger.error("cursor error!!");
 						Logger.error("response--->"+response.toString());
 						Logger.error("[again]response--->"+getHttpConnector().getURLContent(httpQuery));
-						res.error = true;
+						res.error = Failure.SERVER_ERROR;
 					}
 				}
 				
 
-			} catch (Exception e) {
+			} catch (ConnectTimeoutException ce) {
+				res.error = Failure.TIMEOUT;
 				// TODO Auto-generated catch block
-				log.error( "", e );
+				log.error( "", ce );
+			} catch (Exception e ) {
+				log.error( "", e );				
 			}
 		}
 		return res;

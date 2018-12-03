@@ -65,6 +65,14 @@ public class Response {
 
 	}
 
+	public static enum Failure {
+		// when the source doesn't respond or is slow
+		TIMEOUT, 
+		
+		// really anything else
+		SERVER_ERROR, 
+	}
+	
 	public static class ValueCounts extends HashMap<String,List<ValueCount>> {
 		// keys are field ids
 		// values are list of values and occurrence counts
@@ -135,10 +143,10 @@ public class Response {
 		public ValueCounts counts = new ValueCounts();
 
 		/**
-		 * in case there was something wrong with the call the error message can be found here,
+		 * in case there was something wrong with the call the error can be found here,
 		 * otherwise this field should be null.
 		 */
-		public String errorMessage;
+		public Failure error;
 		
 		//
 		//  Convenience Functions to build the SingleResponse

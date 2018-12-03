@@ -22,6 +22,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.function.Function;
 
+import org.apache.http.conn.ConnectTimeoutException;
+
 import com.fasterxml.jackson.databind.JsonNode;
 
 import model.EmbeddedMediaObject.WithMediaType;
@@ -29,6 +31,7 @@ import play.Logger;
 import play.Logger.ALogger;
 import search.FiltersFields;
 import search.Sources;
+import search.Response.Failure;
 import sources.core.ApacheHttpConnector;
 import sources.core.CommonFilterLogic;
 import sources.core.CommonQuery;
@@ -193,8 +196,12 @@ public abstract class FlickrSpaceSource extends ISpaceSource {
 				// CommonFilterLogic type = CommonFilterLogic.typeFilter();
 				// countValue(type, "video", 1);
 				// countValue(type, "photo", 1);
-			} catch (Exception e) {
-				log.error("", e );
+			} catch (ConnectTimeoutException ce) {
+				res.error = Failure.TIMEOUT;
+				// TODO Auto-generated catch block
+				log.error( "", ce );
+			} catch (Exception e ) {
+				log.error( "", e );				
 			}
 		}
 		return res;

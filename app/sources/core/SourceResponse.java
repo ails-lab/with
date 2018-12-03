@@ -30,6 +30,7 @@ import model.resources.CulturalObject;
 import model.resources.RecordResource;
 import model.resources.WithResource;
 import search.Response;
+import search.Response.Failure;
 import search.Response.SingleResponse;
 import search.Response.ValueCounts;
 import search.Sources;
@@ -48,12 +49,11 @@ public class SourceResponse {
 	public JsonNode facets;
 	private List<CommonFilterResponse> filters;
 	public List<CommonFilterLogic> filtersLogic;
-	public boolean error;
+	public Failure error;
 
 	public SourceResponse() {
 		items = new ItemsGrouping();
 		filters = new ArrayList<>();
-		error = false;
 	}
 
 	public SourceResponse(int totalHits, int offset, int count) {

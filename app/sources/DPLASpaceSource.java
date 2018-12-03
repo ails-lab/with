@@ -21,6 +21,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.function.Function;
 
+import org.apache.http.conn.ConnectTimeoutException;
+
 import com.fasterxml.jackson.databind.JsonNode;
 
 import model.resources.RecordResource;
@@ -30,6 +32,7 @@ import play.Logger.ALogger;
 import play.libs.Json;
 import search.FiltersFields;
 import search.Sources;
+import search.Response.Failure;
 import sources.core.CommonFilterLogic;
 import sources.core.CommonQuery;
 import sources.core.ISpaceSource;
@@ -171,8 +174,12 @@ public class DPLASpaceSource extends ISpaceSource {
 //				res.filtersLogic.add(rights);
 				res.filtersLogic.addAll(vmap.getRestrictionsAsFilters(q,res.count));
 
-			} catch (Exception e) {
-				log.error( "", e );
+			} catch (ConnectTimeoutException ce) {
+				res.error = Failure.TIMEOUT;
+				// TODO Auto-generated catch block
+				log.error( "", ce );
+			} catch (Exception e ) {
+				log.error( "", e );				
 			}
 		}
 		return res;

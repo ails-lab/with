@@ -1,0 +1,11 @@
+{
+	"searchTerm": "Athens",
+
+	"page":1,
+ 	"pageSize":20,
+
+	"source" : [
+		"Europeana",
+		"DPLA"
+	]
+}

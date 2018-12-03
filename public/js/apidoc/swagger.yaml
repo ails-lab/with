@@ -1,0 +1,2012 @@
+swagger: '2.0'
+info:
+  version: v1.3
+  title: WITH API
+  description: |
+    Welcome to the WITH API documentation! 
+    We are still in a development phase, so expect changes. We will keep this documentation updated and this text will include a memo of the latest changes. 
+paths:
+  /api/search:
+    post:
+      tags:
+        - Search
+      summary: General search in external resources and the WITH database.
+      description: Body contains search parameters, response is a JSON array of records that match the search term. Boolean search supports use of AND, OR and NOT operators. Terms seperated without an operator (using a space) are treated as an AND. Use of quotes will perform exact term or phrase searches. For example, ```"Olympian Zeus"``` will search for the exact phrase, whereas ```Olympian Zeus``` will equate to ```Olympian AND Zeus```. For more search options use advanced search.
+      parameters:
+        - in: body
+          name: body
+          required: true
+          description: Search parameters.
+          schema:
+            type: object
+            properties:
+              searchTerm:
+                type: string
+                default: "zeus"
+              page:
+                type: integer
+                default: 1
+              pageSize:
+                type: integer
+                default: 10
+              source:
+                description: Different values can be Europeana, DPLA, DigitalNZ, Rijksmuseum, WITHin, The British Library. Results from WITHin correspond to internal records.
+                type: array
+                items:
+                  type: string
+                  enum:
+                    - Europeana
+                    - DPLA
+                    - DigitalNZ
+                    - Rijksmuseum
+                    - WITHin
+                    - The British Library
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/Responses'
+        '403':
+          description: Bad request
+          schema:
+            properties:
+              error:
+                type: string
+                
+  /api/advancedsearch:
+    post:
+      tags:
+        - Search
+      summary: Advanced search with filters (faceted sarch).
+      description: An extension of the simple search to include filters for search with facets. The values of the filters are NOT preset. To see what filters you can use, you need to check the response from a search without filters. Then you can send another query with some values of all the possible filters. To get a better understanding we suggest you use the inspector console of your favourite browser and observe the network activity while performing a search from the frontend, using different filter values. Bear in mind we are aware of a small typographical error, the field "responses" will be changed to "responses".
+      parameters:
+        - in: body
+          name: body
+          required: true
+          description: Search parameters.
+          schema:
+            type: object
+            properties:
+              searchTerm:
+                type: string
+                default: "zeus"
+              page:
+                type: integer
+                default: 1
+              pageSize:
+                type: integer
+                default: 10
+              source:
+                description: Different values can be Europeana, DPLA, DigitalNZ, Rijksmuseum, WITHin, The British Library. Results from WITHin correspond to internal records.
+                type: array
+                items:
+                  type: string
+                  enum:
+                    - Europeana
+                    - DPLA
+                    - DigitalNZ
+                    - Rijksmuseum
+                    - WITHin
+                    - The British Library
+              filters:
+                description: To find information about filters we suggest you check the inspector console of a web browser while performing a faceted search from the frontend.
+                type: array
+                items:
+                  type: object
+                  properties:
+                    filterID:
+                      type: string
+                      default: type
+                    values:
+                      type: array
+                      items:
+                        type: string
+                        default: image
+      responses:
+        '200':
+          description: OK
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Search'
+        '403':
+          description: Bad request
+          schema:
+            properties:
+              error:
+                type: string   
+                
+  /collection/listShared:
+    get:
+      parameters:
+        - name: direct
+          in: query
+          description: If set to true, only collections shared directly (ie not via usergroups) with the logged in user will be shown. Default value is false.
+          type: boolean
+        - name: loggedInUserAccess
+          in: query
+          description: Filters returned collections based on the logged in user's access level (recursively checked for inheritance from usergroups). Values are "READ", ```"WRITE", "OWN"```. These values have a hierarcy, ie if the value ```"WRITE"``` is set, ```"READ"``` will also be returned (but not ```"OWN"```).
+          type: string
+        - name: directlyAccessedByUserName
+          in: query
+          description: Filters returned collections based on the specified rights for each user in the input array of JSON objects. Each user needs to have direct access rights to this collection and not through a usergroup (organization or project).
+          type: array
+          items:
+            type: object
+            properties:
+              username:
+                type: string
+              rights:
+                type: string
+                description: Values are "READ", "WRITE", "OWN".
+        - name: recursivelyAccessedByUserName
+          in: query
+          description: This field works like ```directlyAccessedByUserName``` with the difference that access rights can be inherited from a usergroup to which a user recursively belongs to.
+          type: array
+          items:
+            type: object
+            properties:
+              username:
+                type: string
+              rights:
+                type: string
+                description: Values are "READ", "WRITE", "OWN".
+        - name: directlyAccessedByGroupName
+          in: query
+          description: This field also works like ```directlyAccessedByUserName``` but fields of the JSON objects are usergroup names instead of users. For testing purposes please use this as input ```[{group1:username1,rights:"READ"},{group2:username2,rights2:"WRITE"}]```
+          type: array
+          items:
+            type: string
+            properties:
+              groupname:
+                type: string
+              rights:
+                type: string
+                description: Values are "READ", "WRITE", "OWN".
+        - name: recursivelyAccessedByGroupName
+          in: query
+          description: See ```recursivelyAccessedByUserName``` but fields of the JSON objects are usergroup names instead of users.
+          type: array
+          items:
+            type: object
+            properties:
+              groupname:
+                type: string
+              rights:
+                type: string
+                description: Values are ```"READ", "WRITE", "OWN"```.
+        - name: isExhibition
+          in: query
+          description: If true returns only exhibitions, if false only collections and if unspecified returns both.
+          type: boolean
+        - name: collectionHits
+          in: query
+          type: boolean
+          description: If true returns the total numbers of exhibitions and/or collections this call may return (limited by the count).
+          default: false
+        - name: offset
+          in: query
+          description: Offset
+          type: integer
+          default: 0
+        - name: count
+          in: query
+          default: 10
+          description: Count (default 10)
+          type: integer          
+      summary: Get a list of collections shared with the user.
+      description: This call returns a list of all the collections that have been shared with the logged in user. This means, the user did not create these collections but has been given access rights to it. The filters are similar to the ```collection/list``` call. Using the parameter filters, you can narrow down the collections associated with a specific user. All filters are optional. Since this call has many parameters we suggest you go through all descriptions before using it.
+      tags:
+        - Collection
+      responses:
+        '200':
+          description: OK
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Collection'
+        '403':
+          description: Forbidden (user not specified)
+          schema:
+            properties:
+              error:
+                type: string
+              
+                
+  /collection/list:
+    get:
+      parameters:
+        - name: loggedInUserAccess
+          in: query
+          description: Filters returned collections based on the logged in user's access level (recursively checked for inheritance from usergroups). Values are "READ", "WRITE", "OWN". These values have a hierarcy, ie if the value "WRITE" is set, "READ" will also be returned (but not "OWN").
+          type: string
+        - name: directlyAccessedByUserName
+          in: query
+          description: Filters returned collections based on the specified rights for each user in the input array of JSON objects. Each user needs to have direct access rights to this collection and not through a usergroup (organization or project).
+          type: array
+          items:
+            type: object
+            properties:
+              username:
+                type: string
+              rights:
+                type: string
+                description: Values are "READ", "WRITE", "OWN".
+        - name: recursivelyAccessedByUserName
+          in: query
+          description: This field works like '''directlyAccessedByUserName''' with the difference that access rights can be inherited from a usergroup to which a user recursively belongs to.
+          type: array
+          items:
+            type: object
+            properties:
+              username:
+                type: string
+              rights:
+                type: string
+                description: Values are "READ", "WRITE", "OWN".
+        - name: directlyAccessedByGroupName
+          in: query
+          description: This field also works like '''directlyAccessedByUserName''' but fields of the JSON objects are usergroup names instead of users. For testing purposes please use this as input ```[{group1:username1,rights:"READ"},{group2:username2,rights2:"WRITE"}]```
+          type: array
+          items:
+            type: object
+            properties:
+              groupname:
+                type: string
+              rights:
+                type: string
+                description: Values are "READ", "WRITE", "OWN".
+        - name: recursivelyAccessedByGroupName
+          in: query
+          description: See '''recursivelyAccessedByUserName''' but fields of the JSON objects are usergroup names instead of users.
+          type: array
+          items:
+            type: object
+            properties:
+              groupname:
+                type: string
+              rights:
+                type: string
+                description: Values are "READ", "WRITE", "OWN".
+        - name: creator
+          in: query
+          description: Filters returned collections based on the '''ownerId''' field of a collection, ie the Id of the user that created the collection.
+          type: string
+        - name: isPublic
+          in: query
+          description: If true returns only public collections, if false or unspecified this filter remains inactive.
+          type: boolean
+        - name: isExhibition
+          in: query
+          description: If true returns only exhibitions, if false only collections and if unspecified returns both.
+          type: boolean
+          
+        - name: collectionHits
+          in: query
+          type: boolean
+          description: If true returns the total numbers of exhibitions and/or collections this call may return (limited by the count).
+          default: false
+        - name: offset
+          in: query
+          default: 0
+          description: Offset
+          type: integer
+        - name: count
+          in: query
+          default: 10
+          description: Count (default 10)
+          type: integer
+
+      summary: Get a list of collections.
+      description: This call returns a list of all the accessible collections (at least read access) to the logged in user. Using the parameter filters, you can narrow down the collections associated with a specific user. All filters are optional. Since this call has many parameters we suggest you go through all descriptions before using it.
+      tags:
+        - Collection
+      responses:
+        '200':
+          description: OK
+          schema:
+            properties:
+              collectionsOrExhibitions:
+                type: array
+                items:
+                  $ref: '#/definitions/Collection'
+        '500':
+          description: Internal Server Error
+          schema:
+            properties:
+              error:
+                type: string
+
+  /group/create:
+    post:
+      parameters:
+        - name: adminId
+          in: query
+          required: true
+          description: User ID of the group administrator.
+          type: string
+        - name: adminUsername
+          in: query
+          required: true
+          description: Username of the group administrator.
+          type: string
+        - in: body
+          name: body
+          description: Group metadata
+          required: true
+          schema:
+            $ref: '#/definitions/Group'
+      tags:
+        - Group
+      summary: Create a new group.
+      description: Creates a new group and stores it at the database. Every group should have an administrator. Projects and organizations are different group types, to create one of those see their respective calls.
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/Group'
+        '400':
+          description: Bad Request(invalid json, did not specify group admin, duplicate group name or no name provided)
+          schema:
+            properties:
+              error:
+                type: string
+        '500':
+          description: Internal Server Error (cannot save to database)
+          schema:
+            properties:
+              error:
+                type: string
+
+  /organization/create:
+    post:
+      parameters:
+        - name: adminId
+          in: query
+          required: true
+          description: User ID of the group administrator.
+          type: string
+        - name: adminUsername
+          in: query
+          required: true
+          description: Username of the group administrator.
+          type: string
+        - in: body
+          name: body
+          description: Group metadata
+          required: true
+          schema:
+            $ref: '#/definitions/Group'
+      tags:
+        - Organization
+      summary: Create a new organization.
+      description: Creates a new organization and stores it at the database. Projects and generic groups are different group types, to create one of those see their respective calls.
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/Group'
+        '400':
+          description: Bad Request(invalid json, did not specify group admin, duplicate group name or no name provided)
+          schema:
+            properties:
+              error:
+                type: string
+        '500':
+          description: Internal Server Error (cannot save to database)
+          schema:
+            properties:
+              error:
+                type: string
+
+  /project/create:
+    post:
+      parameters:
+        - name: adminId
+          in: query
+          required: true
+          description: User ID of the group administrator.
+          type: string
+        - name: adminUsername
+          in: query
+          required: true
+          description: Username of the group administrator.
+          type: string
+        - in: body
+          name: body
+          description: Group metadata
+          required: true
+          schema:
+            $ref: '#/definitions/Group'
+      tags:
+        - Project
+      summary: Create a new project.
+      description: Creates a new project and stores it at the database. Organizations and generic groups are different group types, to create one of those see their respective calls.
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/Group'
+        '400':
+          description: Bad Request(invalid json, did not specify group admin, duplicate group name or no name provided)
+          schema:
+            properties:
+              error:
+                type: string
+        '500':
+          description: Internal Server Error (cannot save to database)
+          schema:
+            properties:
+              error:
+                type: string
+    
+    
+  '/group/{groupId}':
+    parameters:
+      - name: groupId
+        in: path
+        required: true
+        description: Id of a group.
+        type: string
+    put:
+      parameters:
+      - name: body
+        in: body
+        description: New group metadata. You only need to provide the fields you want to change.
+        schema:
+          $ref: '#/definitions/Group'
+      tags:
+        - Group
+      summary: Edit a group.
+      description: Changes attributes of an existing group. You only need to provide the fields you want to change. Only the administrator of a group has the right to edit it. This call can be applied to all group types, ie organizations and projects.
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/Group'
+        '400':
+          description: Bad Request (invalid json, duplicate group name or no name provided)
+          schema:
+            properties:
+              error:
+                type: string
+        '403':
+          description: Forbidden (only group admins can edit groups)
+          schema:
+            properties:
+              error:
+                type: string
+        '500':
+          description: Internal Server Error (cannot retrieve or save to database)
+          schema:
+            properties:
+              error:
+                type: string
+    get:
+      tags:
+        - Group
+      summary: Retrieve group info.
+      description: Retrieves attributes of a group from the database. This call can be applied to all group types, ie organizations and projects.
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/Group'
+        '500':
+          description: Internal Server Error (cannot retrieve or save to database)
+          schema:
+            properties:
+              error:
+                type: string
+    delete:
+      tags:
+        - Group
+      summary: Delete a group.
+      description: Removes a group from the database. Only the group admin can delete the group. This call can be applied to all group types, ie organizations and projects.
+      responses:
+        '200':
+          description: OK (successfully deleted)
+          schema:
+            properties:
+              OK:
+                type: string
+        '403':
+          description: Forbidden (only group admins can edit groups)
+          schema:
+            properties:
+              error:
+                type: string
+        '500':
+          description: Internal Server Error (cannot edit database)
+          schema:
+            properties:
+              error:
+                type: string
+
+
+  '/group/addUserOrGroup/{groupId}':
+    parameters:
+      - name: groupId
+        in: path
+        required: true
+        description: Id of a group
+        type: string
+    put:
+      parameters:
+        - name: id
+          in: query
+          required: true
+          description: User or group ID to add in group
+          type: string
+      tags:
+        - Group
+      summary: Add a user or another group to a group.
+      description: Adds a user or a group to the group with the group ID specified in the path. This call can be applied to all group types, ie organizations and projects. This way you can create a group hierarchy with organizations that belong to projects and different usergroups that belong to organizations.
+      responses:
+        '200':
+          description: OK (successfully added user or group)
+          schema:
+            properties:
+              OK:
+                type: string
+        '400':
+          description: Bad Request (wrong user or group id)
+          schema:
+            properties:
+              error:
+                type: string
+        '403':
+          description: Forbidden (only group admins can edit groups)
+          schema:
+            properties:
+              error:
+                type: string
+        '500':
+          description: Internal Server Error (cannot retrieve or write to database)
+          schema:
+            properties:
+              error:
+                type: string
+
+      
+      
+  '/group/removeUser/{groupId}':
+    parameters:
+      - name: groupId
+        in: path
+        required: true
+        description: Id of a group
+        type: string
+    put:
+      parameters:
+        - name: id
+          in: query
+          required: true
+          description: User ID to remove from this group.
+          type: string
+      tags:
+        - Group
+      summary: Removes a user from a group.
+      description: Removes a user from a group with the group ID specified in the path. This call can be applied to all group types, ie organizations and projects.
+      responses:
+        '200':
+          description: OK (successfully removed user)
+          schema:
+            properties:
+              OK:
+                type: string
+        '403':
+          description: Forbidden (no rights for removal)
+          schema:
+            properties:
+              error:
+                type: string
+        '500':
+          description: Internal Server Error (cannot retrieve or write to database)
+          schema:
+            properties:
+              error:
+                type: string
+
+
+
+
+  '/group/descendantGroups/{groupId}':
+    parameters:
+      - name: groupId
+        in: path
+        required: true
+        description: Id of a group.
+        type: string
+    get:
+      parameters:
+        - name: direct
+          in: query
+          description: Only direct descendants (default is true)
+          type: boolean
+      tags:
+        - Group
+      summary: Find subgroups of a group.
+      description: Retrieves the specified group's descendant groups in the group hierarchy. See '''/group/addUserOrGroup/{groupId}'''.
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/Group'
+
+
+  '/group/descendantOrganizations/{groupId}':
+    parameters:
+      - name: groupId
+        in: path
+        required: true
+        description: Id of a group.
+        type: string
+    get:
+      parameters:
+        - name: direct
+          in: query
+          description: Only direct descendants (default is true)
+          type: boolean
+      tags:
+        - Organization
+      summary: Find subgroups of an organization.
+      description: Retrieves the specified group's descendant groups in the group hierarchy. See '''/group/addUserOrGroup/{groupId}'''.
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/Group'
+
+
+  '/group/descendantProjects/{groupId}':
+    parameters:
+      - name: groupId
+        in: path
+        required: true
+        description: Id of a group.
+        type: string
+    get:
+      parameters:
+        - name: direct
+          in: query
+          description: Only direct descendants (default is true)
+          type: boolean
+      tags:
+        - Project
+      summary: Find subgroups of a project.
+      description: Retrieves the specified group's descendant groups in the group hierarchy. See '''/group/addUserOrGroup/{groupId}'''.
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/Group'
+
+
+  /collection/create:
+    post:
+      tags:
+        - Collection
+      summary: Create a new collection.
+      description: This creates a new collection and stores it in the database. You can add records to it later with  ```/collection/{collectionId}/addRecord``` Fields with asterisk are required. Note that calls to this path can also be used for exhibitions. A user must be logged in for the session and will be automatically retrieved. This user will be the owner of this collection. The ```belongsTo``` field will set the organization that owns this collection.
+      parameters:
+        - in: body
+          name: body
+          description: Collection metadata
+          required: true
+          schema:
+            type: object
+            required:
+              - title
+              - isPublic
+            properties:
+              title:
+                type: string
+              description:
+                type: string
+              isPublic:
+                type: boolean
+              rights:
+                type: string
+              belongsTo:
+                type: string
+              isExhibition:
+                type: boolean
+              exhibition:
+                type: object
+                properties:
+                  intro:
+                    type: string
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/Collection'
+        '400':
+          description: Bad Request
+          schema:
+            properties:
+              error:
+                description: invalid json, constraint violations
+                type: string
+        '403':
+          description: Forbidden
+          schema:
+            properties:
+              error:
+                description: cannot find user or unspecified
+                type: string
+        '500':
+          description: Internal Server Error
+          schema:
+            properties:
+              error:
+                description: title already exists, cannot save to database
+                type: string
+
+  '/collection/{collectionId}/addRecord':
+    parameters:
+      - name: collectionId
+        in: path
+        required: true
+        description: Id of the collection or exhibition 
+        type: string
+    post:
+      description: Adds a record to the collection specified in the path, creating a new internal record that containts the specified metadata. You will need to be logged in and have write access or be the owner of the collection in order to add records to it. Note that calls to this path can also be used for exhibitions. Position is a Mandatory field for exhibitions, the default is 0.
+      summary: Add a record to a collection.
+      tags:
+        - Collection
+        - Exhibition
+      parameters:
+        - in: body
+          name: body
+          description: Record JSON schema
+          schema:
+            $ref: '#/definitions/InternalRecord'
+
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/InternalRecord'
+        '400':
+          description: Bad Request (no position in exhibition, constraint violation)
+          schema:
+            properties:
+              error:
+                type: string
+        '403':
+          description: Forbidden (no permission to edit collection)
+          schema:
+            properties:
+              error:
+                type: string
+        '500':
+          description: Internal Server Error (cannot save to database)
+          schema:
+            properties:
+              error:
+                type: string
+  '/collection/{collectionId}/removeRecord':
+    parameters:
+      - name: collectionId
+        in: path
+        required: true
+        description: Id of the collection or exhibition from which to remove the record
+        type: string
+    delete:
+      description: Removes the specified record (parameter) from a specified collection (path). Note that calls to this path can also be used for exhibitions.
+      summary: Remove a record from a collection.
+      tags:
+        - Collection
+        - Exhibition
+      parameters:
+        - name: recordId
+          in: query
+          description: Id of record to be removed
+          type: string
+      responses:
+        '200':
+          description: OK (collection Id in string)
+          schema:
+            properties:
+              message:
+                type: string
+
+        '403':
+          description: Forbidden (no permission to edit collection)
+          schema:
+            properties:
+              error:
+                type: string
+
+        '500':
+          description: Internal Server Error (no or wrong record Id, cannot delete from database, exception error)
+          schema:
+            properties:
+              error:
+                type: string
+
+  '/collection/{collectionId}/list':
+    parameters:
+      - name: collectionId
+        in: path
+        required: true
+        description: Id of the collection
+        type: string
+    get:
+      description: Retrieves all records from the collection specified in the path and returns an array of record objects. Record metadata can be available in different serializations. The format parameter defines this serialization in the records array field of the JSON response.
+      summary: Retrieve all records in a collection.
+      tags:
+        - Collection
+        - Exhibition
+      parameters:
+        - name: start
+          in: query
+          description: offset
+          type: integer
+          default: 0
+        - name: count
+          in: query
+          description: count (default 10)
+          type: integer
+          default: 10
+        - name: format
+          in: query
+          description: 'One of the following:  JSON_UNKNOWN, JSONLD_UNKNOWN, XML_UNKNOWN, JSON_EDM, JSONLD_EDM, XML_EDM, JSONLD_DPLA, JSON_NLA, XML_NLA, JSON_DNZ, XML_DNZ, JSON_YOUTUBE, “UKNOWN”, “all”. If not specified, no content is returned, only basic collection fields.'
+          type: string
+          default: "all"
+          
+      responses:
+        '200':
+          description: OK (JSON contains the serialization specified)
+          schema:
+            type: object
+            properties:
+              itemCount:
+                type: integer
+              records:
+                type: array
+                items:
+                  $ref: '#/definitions/InternalRecord'
+
+        '403':
+          description: Forbiden (invalid collection id, no read access)
+          schema:
+            properties:
+              error:
+                type: string
+
+        '500':
+          description: Internal Server Error (cannot retrieve records from database)
+          schema:
+            properties:
+              error:
+                type: string
+
+  '/collection/{collectionId}':
+    parameters:
+      - name: collectionId
+        in: path
+        description: Internal id of the collection or exhibition
+        required: true
+        type: string
+    get:
+      summary: Retrieve collection metadata.
+      description: Returns the metadata of the collection specified in path. Note that calls to this path can also be used for exhibitions.
+      tags:
+        - Collection
+        - Exhibition
+      responses:
+        '200':
+          description: OK
+          schema:
+            properties:
+              collection:
+                $ref: '#/definitions/Collection'
+        '403':
+          description: Forbidden (no read-access)
+          schema:
+            properties:
+              error:
+                type: string
+        '500':
+          description: Internal Server Error(database error)
+          schema:
+            properties:
+              error:
+                type: string
+    post:
+      summary: Update metadata in a collection.
+      description: Use this call to change the stored metadata of a collection. Note that calls to this path can also be used for exhibitions.
+      tags:
+        - Collection
+        - Exhibition
+      parameters:
+        - in: body
+          name: body
+          description: New collection/exhibtion metadata. Only provide the fields you wish to be changed!
+          required: true
+          schema:
+            $ref: '#/definitions/Collection'
+      responses:
+        '200':
+          description: OK
+          schema:
+            properties:
+              owner:
+                type: string
+              access:
+                type: string
+              collection:
+                $ref: '#/definitions/Collection'
+
+        '400':
+          description: Bad Request (null/invalid JSON, duplicate title, wrong JSON fields)
+          schema:
+            properties:
+              error:
+                type: string
+
+        '403':
+          description: Forbidden (no read-access)
+          schema:
+            properties:
+              error:
+                type: string
+
+        '500':
+          description: Internal Server Error (database error)
+          schema:
+            properties:
+              error:
+                type: string
+
+    delete:
+      summary: Delete a collection.
+      description: Removes a collection from the database. Records that were created into this collection will also be deleted. Note that calls to this path can also be used for exhibitions.
+      tags:
+        - Collection
+        - Exhibition
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/Collection'
+        '403':
+          description: Forbiden (no read-access)
+          schema:
+            properties:
+              error:
+                type: string
+
+        '500':
+          description: Internal Server Error (database error)
+          schema:
+            properties:
+              error:
+                type: string
+
+
+  /collection/listByUser:
+    post:
+      tags:
+        - Collection
+      summary: Get the first records of a user's collections.
+      description: Retrieve all fields from the first 20 items of all collections of the specified user.
+      parameters:
+        - in: body
+          name: body
+          description: ownerId is the id of the user whose collections this call will list.
+          required: true
+          schema:
+            type: object
+            properties:
+              ownerId:
+                type: string
+      responses:
+        '200':
+          description: OK
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Collection'
+        '400':
+          description: Bad Request
+          schema:
+            properties:
+              error:
+                description: invalid json, or did not specify the owner
+                type: string
+        '403':
+          description: Forbidden
+          schema:
+            properties:
+              error:
+                description: user not specified, or user does not have access to requested records
+                type: string
+
+
+
+  '/record/{recordId}':
+    parameters:
+      - name: recordId
+        in: path
+        required: true
+        description: The id of the record
+        type: string
+    get:
+      parameters:
+        - name: format
+          in: query
+          description: 'The serialization of the response. One of the following:  JSON_UNKNOWN, JSONLD_UNKNOWN, XML_UNKNOWN, JSON_EDM, JSONLD_EDM, XML_EDM, JSONLD_DPLA, JSON_NLA, XML_NLA, JSON_DNZ, XML_DNZ, JSON_YOUTUBE, “UKNOWN”, “all”. If not specified, no content is returned, only basic collection fields.'
+          type: string
+      summary: Retrieve a record.
+      description: Retrieve a JSON with the metadata of the record specified in the path. The format parameter defines the serialization in the record field of the JSON response.
+      tags:
+        - Record
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/InternalRecord'
+        '500':
+          description: Internal Server Error (database error)
+          schema:
+            properties:
+              error:
+                type: string
+
+    post:
+      summary: Update a record.
+      description: Update the metadata of an existing record, specified by its id in the path. You only need to provide the fields you want updated in the record body.
+      parameters:
+        - name: format
+          in: query
+          description: 'The serialization of the response. One of the following:  JSON_UNKNOWN, JSONLD_UNKNOWN, XML_UNKNOWN, JSON_EDM, JSONLD_EDM, XML_EDM, JSONLD_DPLA, JSON_NLA, XML_NLA, JSON_DNZ, XML_DNZ, JSON_YOUTUBE, “UKNOWN”, “all”. If not specified, no content is returned, only basic collection fields.'
+          type: string
+        - in: body
+          name: body
+          description: A JSON with the updated metadata
+          schema:
+            $ref: '#/definitions/InternalRecord'
+      tags:
+        - Record
+      responses:
+        '200':
+          description: OK
+          schema:
+            properties:
+              message:
+                type: string
+        '400':
+          description: Bad Request (invalid json)
+          schema:
+            properties:
+              message:
+                type: string
+
+        '403':
+          description: Forbiden (no edit permissions)
+          schema:
+            properties:
+              error:
+                type: string
+
+        '500':
+          description: Internal Server Error (database error)
+          schema:
+            properties:
+              message:
+                type: string
+
+    delete:
+      summary: Remove a record.
+      description: Remove the whole record specified in the path from the database, or just a single format.
+      tags:
+        - Record
+      responses:
+        '200':
+          description: OK
+          schema:
+            properties:
+              message:
+                type: string
+        '500':
+          description: Internal Server Error
+          schema:
+            properties:
+              message:
+                type: string
+
+  '/rights/{collectionId}/{right}':
+    parameters:
+      - name: collectionId
+        in: path
+        required: true
+        description: Internal Id of the collection whose rights you wish to change
+        type: string
+      - name: right
+        in: path
+        required: true
+        description: '"none" (withdraws previously given rights), "read", "write", "own"'
+        type: string
+    post:
+      summary: Change access rights to a collection.
+      description: 'Changes access rights: "none" (withdraws previously given rights), "read", "write", "own", of a specified user (parameter) for a specifed collection (in path). Only the owner of a collection can use this call (you need to be loged in). Just one of username, email or userId needs to be provided.'
+      tags:
+        - Rights
+        - Collection
+      parameters:
+        - name: username
+          in: query
+          description: username of user to give rights to (or take away from)
+          type: string
+        - name: email
+          in: query
+          description: another way of specifying the user
+          type: string
+        - name: userId
+          in: query
+          description: another way of specifying the user
+          type: string
+      responses:
+        '200':
+          description: OK
+          schema:
+            properties:
+              message:
+                type: string
+
+        '400':
+          description: Bad Request (no user specified)
+          schema:
+            properties:
+              error:
+                type: string
+                
+        '403':
+          description: Forbidden (no owner rights)
+          schema:
+            properties:
+              error:
+                type: string
+
+        '500':
+          description: Interal Server Error (read/write database error)
+          schema:
+            properties:
+              message:
+                type: string
+
+
+  /user/register:
+    post:
+      tags:
+        - User
+      description: Creates a new user and stores at the database.
+      summary: Create new user.
+      produces:
+        - application/json
+        - application/xml
+      parameters:
+        - in: body
+          name: body
+          description: Contains JSON of the user to create
+          required: true
+          schema:
+            type: object
+            properties:
+              firstName:
+                type: string
+              lastName:
+                type: string
+              username:
+                type: string
+              email:
+                type: string
+              password:
+                type: string
+              gender:
+                type: string
+              facebookId:
+                type: string
+              googleID:
+                type: string
+              about:
+                type: string
+              location:
+                type: string
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/User'
+        '400':
+          description: Bad Request (json object describes all errors)
+          schema:
+            type: object
+            
+  /user/login:
+    post:
+      tags:
+        - User
+      summary: User login.
+      description: Log an user in (create a browser cookie). Some API calls do not take the user as a parameter and you need to be logged in first. You can log in with your google or facebook id. The email parameter can be a username.
+      parameters:
+        - in: body
+          name: body
+          description: Email or username and password
+          required: true
+          schema:
+            type: object
+            properties:
+              email:
+                type: string
+              password:
+                type: string
+              googleId:
+                type: string
+              facebokId:
+                type: string
+      responses:
+        '200':
+          description: OK (creates login browser cookie, returns user metadata JSON including userID.)
+          schema:
+            $ref: '#/definitions/User'
+        '400':
+          description: Bad Request (error status, problem description JSON object)
+          schema:
+            type: object
+
+  /user/logout:
+    get:
+      description: 'Browser cookie is removed, user is logged out (all session information is kept in cookie, nothing is stored on server).'
+      summary: User logout.
+      tags:
+        - User
+      responses:
+        '200':
+          description: OK
+          
+  /user/emailAvailable:
+    get:
+      tags:
+        - User
+        - Group
+      summary: Check email availability.
+      description: Used when registering a new user, checks if there has been another user with the same email already stored in the database.
+      parameters:
+        - name: email
+          in: query
+          description: Proposed email address
+          required: true
+          type: string
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: Bad Request (not available)
+          schema:
+            properties:
+              error:
+                type: string
+
+  '/user/{userId}':
+    parameters:
+      - name: userId
+        in: path
+        description: Internal ID of a user
+        required: true
+        type: string
+    get:
+      summary: Get user details.
+      description: Returns the complete entry of a user specified by the id provided in the path.
+      tags:
+        - User
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/User'
+        '400':
+          description: Bad Request (user does not exist, exception error)
+          schema:
+            properties:
+              error:
+                type: string
+
+    put:
+      tags:
+        - User
+      summary: Update a user entry.
+      description: Updates the stored info of the user specified by the id provided in the path.
+      parameters:
+        - in: body
+          name: body
+          description: New user entry
+          required: true
+          schema:
+            $ref: '#/definitions/User'
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/User'
+        '400':
+          description: Bad Request (error status, problem description JSON object)
+          schema:
+            type: object
+
+    delete:
+      tags:
+        - User
+      summary: Deletes the user.
+      description: Removes a user from the database. (This call might not function currently at the moment.)
+      responses:
+        '200':
+          description: OK
+          schema:
+            properties:
+              message:
+                type: string
+
+        '400':
+          description: Bad Request (user does not exist)
+          schema:
+            properties:
+              error:
+                type: string
+
+  '/user/resetPassword/{emailOrUserName}':
+    parameters:
+      - name: emailOrUserName
+        in: path
+        description: Username or email
+        required: true
+        type: string
+    get:
+      tags:
+        - User
+      summary: Send a reset password email.
+      description: Sends an email to the user provided in the path. The email contains a link to a webpage where the user can provide a new password.
+      responses:
+        '200':
+          description: OK
+          schema:
+            properties:
+              message:
+                type: string
+        '400':
+          description: Bad Request (invalid username or email, could not send email)
+          schema:
+            properties:
+              error:
+                type: string
+        '404':
+          description: Not Found (user email not found - if user had originally registered with google or facebook account))
+          schema:
+            properties:
+              error:
+                type: string
+
+        
+  '/user/apikey/create':
+    post:
+      tags:
+        - User
+      summary: Get an API key.
+      description: Automatically sends an API key to the stored email address of the logged in user.
+      responses:
+        '200':
+          description: OK
+          schema:
+            properties:
+              email:
+                type: string
+
+        '400':
+          description: Bad Request (no user logged in, email already sent in past, email exception error)
+          schema:
+            properties:
+              error:
+                type: string
+
+        '500':
+          description: Internal Server Error ( could not create API key)
+          schema:
+            properties:
+              error:
+                type: string
+
+  '/user/{id}/photo':
+    parameters:
+      - name: id
+        in: path
+        description: User or group id
+        required: true
+        type: string
+    get:
+      tags:
+        - User
+        - Group
+      summary: Get the profile thumbnail of a user or group.
+      description: Returns the photoId of the thumbnail the user or group use in their profile.
+      responses:
+        '200':
+          description: OK
+          schema:
+            properties:
+              photoId:
+                type: string
+        '400':
+          description: Bad Request (user or group do not exist)
+          schema:
+            properties:
+              error:
+                type: string
+
+
+
+  /user/findByUserOrGroupNameOrEmail:
+    get:
+      parameters:
+        - name: userOrGroupNameOrEmail
+          in: query
+          required: true
+          description: user or group name or email
+          type: string
+          default: "ntua"
+        - name: collectionId
+          in: query
+          required: false
+          description: A collection id to check for access rights
+          type: string
+      tags:
+        - User
+        - Group
+      summary: Find a user or group by name or email.
+      description: Returns a JSON object with metadata for the a group or a user that have the specified user/group name or email address. This call can be applied to all group types, ie organizations and projects. An optional functionality of this call is to check what access rights a group or user has to a collection. Just use the ```collectionId``` parameter. The access rights will be returned as an extra field named ```accessRights``` in the group or user json response.
+      responses:
+        '200':
+          description: OK (found user)
+          schema:
+            $ref: '#/definitions/User'
+        
+        '200':
+          description: OK (found group)
+          schema:
+            $ref: '#/definitions/Group'
+        
+        '400':
+          description: Bad Request (no user or group found)
+          schema:
+            properties:
+              error:
+                type: string
+
+
+
+
+
+  /user/listNames:
+    get:
+      parameters:
+        - name: prefix
+          in: query
+          required: true
+          description: Optional prefix of user or group name
+          type: string
+          default: "ntua"
+        - name: onlyParents
+          in: query
+          required: false
+          description: If true filters results to groups and users that have other subgroups or subusers
+          type: boolean
+          default: false
+      tags:
+        - User
+        - Group
+      summary: Find a user or group by name or email.
+      description: This call is mainly used for autocomplete functions. It returns an array of JSON objects that contain users and groups whose names match the prefix, as well a ```category``` field with values "user" or "group". This call can be applied to all group types, ie organizations and projects. The ```onlyParents``` parameter filters results so that only groups or users that contain other groups or users are shown.
+      responses:
+        '200':
+          description: OK
+          schema:
+            type: array
+            items:
+              type: object
+              properties:
+                value:
+                  type: string
+                data:
+                  type: object
+                  properties:
+                    category:
+                      type: string
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+
+  '/collection/55b74e5b569e1b44eeac72c0/list':
+    parameters:
+      - name: collectionId
+        in: path
+        required: true
+        description: Id of the collection
+        type: string
+    get:
+      description: This call makes a test request for all records of a sampled collection. Please see ```/api/advancedsearch``` for more. In this example the collection is called "street art".
+
+      summary: Retrieve all records in a collection.
+      tags:
+        - Test calls
+      parameters:
+        - name: start
+          in: query
+          description: offset
+          type: integer
+          default: 0
+        - name: count
+          in: query
+          description: count
+          type: integer
+          default: 10
+        - name: format
+          in: query
+          description: 'One of the following:  JSON_UNKNOWN, JSONLD_UNKNOWN, XML_UNKNOWN, JSON_EDM, JSONLD_EDM, XML_EDM, JSONLD_DPLA, JSON_NLA, XML_NLA, JSON_DNZ, XML_DNZ, JSON_YOUTUBE, “UKNOWN”, “all”. If not specified, no content is returned, only basic collection fields.'
+          type: string
+          default: "all"
+          
+      responses:
+        '200':
+          description: OK (JSON contains the serialization specified)
+          schema:
+            type: object
+            properties:
+              itemCount:
+                type: integer
+              records:
+                type: array
+                items:
+                  $ref: '#/definitions/InternalRecord'
+
+        '403':
+          description: Forbiden (invalid collection id, no read access)
+          schema:
+            properties:
+              error:
+                type: string
+
+        '500':
+          description: Internal Server Error (cannot retrieve records from database)
+          schema:
+            properties:
+              error:
+                type: string
+
+  '/collection/55b74e5b569e1b44eeac72c0':
+    parameters:
+      - name: collectionId
+        in: path
+        description: Internal id of the collection or exhibition
+        required: true
+        type: string
+    get:
+      summary: Retrieve collection metadata.
+      description: This call makes a test request for the sample collection "street art" and returns all its metadata. Please see ```/collection/{collectionId}``` for more.
+      tags:
+        - Test calls
+      responses:
+        '200':
+          description: OK
+          schema:
+            properties:
+              collection:
+                $ref: '#/definitions/Collection'
+        '403':
+          description: Forbidden (no read-access)
+          schema:
+            properties:
+              error:
+                type: string
+        '500':
+          description: Internal Server Error(database error)
+          schema:
+            properties:
+              error:
+                type: string
+
+      
+  '/group/5620e9f8e4b0857763602205':
+    parameters:
+      - name: groupId
+        in: path
+        required: true
+        description: Id of a group.
+        type: string
+    get:
+      tags:
+        - Test calls
+      summary: Retrieve group info.
+      description: This call requests the stored metadata about the group "ntua". Please see ```/group/{groupId}``` for more. 
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/Group'
+        '500':
+          description: Internal Server Error (cannot retrieve or save to database)
+          schema:
+            properties:
+              error:
+                type: string
+
+
+        
+        
+  '/group/descendantGroups/561fa2f4e4b069ad810ab44b':
+    parameters:
+      - name: groupId
+        in: path
+        required: true
+        description: Id of a group.
+        type: string
+    get:
+      parameters:
+        - name: direct
+          in: query
+          description: Only direct descendants (default is true)
+          type: boolean
+          default: true
+      tags:
+        - Test calls
+      summary: Find subgroups of a group.
+      description: This call finds all the descendant groups of the "ntua" organization. Please see ```/group/descendantGroups/{groupId}``` for more. 
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/Group'
+
+
+  '/group/descendantOrganizations/5620e9f8e4b0857763602205':
+    parameters:
+      - name: groupId
+        in: path
+        required: true
+        description: Id of a group.
+        type: string
+    get:
+      parameters:
+        - name: direct
+          in: query
+          description: Only direct descendants (default is true)
+          type: boolean
+          default: true
+      tags:
+        - Test calls
+      summary: Find subgroups of an organization.
+      description: This call finds all the descendant groups of the "espace" organization. Please see ```/group/descendantOrganizations/{groupId}``` for more. In the results you can see the "ntua" group of the previous examples.
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/Group'
+
+
+        
+  '/record/55b74e8b569e1b44eeac72c3':
+    parameters:
+      - name: recordId
+        in: path
+        required: true
+        description: The id of the record
+        type: string
+    get:
+      parameters:
+        - name: format
+          in: query
+          description: 'The serialization of the response. One of the following:  JSON_UNKNOWN, JSONLD_UNKNOWN, XML_UNKNOWN, JSON_EDM, JSONLD_EDM, XML_EDM, JSONLD_DPLA, JSON_NLA, XML_NLA, JSON_DNZ, XML_DNZ, JSON_YOUTUBE, “UKNOWN”, “all”. If not specified, no content is returned, only basic collection fields.'
+          type: string
+      summary: Retrieve a record.
+      description: This is a test call of a record metadata. The sample record is called "Big walls - street art on Hereford Street". Note that by default the content object has the "JSON-DNZ" and "XML-DNZ" serializations. For more details please see ```/record/{recordId}```.
+      tags:
+        - Test calls
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/InternalRecord'
+        '500':
+          description: Internal Server Error (database error)
+          schema:
+            properties:
+              error:
+                type: string
+
+
+
+        
+
+definitions:
+  User:
+    description: Describes a registered user in the database.
+    type: object
+    required:
+      - firstName
+      - lastName
+      - username
+      - email
+      - password
+      - about
+      - location
+    properties:
+      email:
+        type: string
+      firstName:
+        type: string
+      lastName:
+        type: string
+      gender:
+        type: string
+      facebookId:
+        type: string
+      googleID:
+        type: string
+      md5Password:
+        type: string
+      recordLimit:
+        type: integer
+      collectedRecords:
+        type: integer
+      exhibitionsCreated:
+        type: integer
+      storageLimit:
+        type: integer
+      id:
+        type: string
+      username:
+        type: string
+      favoritesId:
+        type: string
+
+  Group:
+    description: Describes a group, organization or project.
+    type: object
+    properties:
+      username:
+        type: string
+      about:
+        type: string
+      privateGroup:
+        type: boolean
+      dbId:
+        type: string
+      thumbnail:
+        type: string
+      adminIds:
+        type: array
+        items:
+          type: string
+      users:
+        type: array
+        items:
+          type: string
+      parentGroups:
+        type: array
+        items:
+          type: string
+
+  
+  Collection:
+    description: Collection metadata. The fields isExhibition and exhibition are only used in calls for exhibitions. 
+    type: object
+    properties:
+      title:
+        type: string
+      description:
+        type: string
+      itemCount:
+        type: integer
+      isPublic:
+        type: boolean
+      isExhibition:
+        type: boolean
+      firstEntries:
+        type: array
+        items:
+          $ref: '#/definitions/InternalRecord'
+      thumbnailUrl:
+        type: string
+      dbId:
+        type: string
+      ownerId:
+        type: string
+      created:
+        type: string
+      lastModified:
+        type: string
+      rights:
+        type: object
+        properties:
+          value:
+            type: string
+      creator:
+        type: string
+      access:
+        type: string
+        
+  InternalRecord:
+    description: An individual record description and metadata. The fields exhibition and position are used only for records in exhibitions. This object schema is used for internal search responses (records stored in the WITH database).
+    type: object
+    required:
+      - title
+      - position
+    properties:
+      externalId:
+        type: string
+      isPublic:
+        type: boolean
+      source:
+        type: string
+      thumbnailUrl:
+        type: string
+      title:
+        type: string
+      description:
+        type: string
+      provider:
+        type: string
+      sourceId:
+        type: string
+      sourceUrl:
+        type: string
+      type:
+        type: string
+      totalLikes:
+        type: integer
+      position:
+        type: integer
+      content:
+        description: Different formats will have different field names in the array see documentation for "/collection/{collectionId}/list".
+        type: array
+        items:
+          type: string
+      tags:
+        type: array
+        items:
+          type: string
+      dbId:
+        type: string
+      collectionId:
+        type: string
+        
+  Record:
+    description: An individual record description and metadata. This is the schema for objects acquired through searches in external sources.
+    type: object
+    required:
+      - title
+      - position
+    properties:
+      id:
+        type: string
+      thumb:
+        type: array
+        items:
+          type: string
+      title:
+        type: string
+      description:
+        type: string
+      creator:
+        type: string
+      year:
+        type: array
+        items:
+          type: string
+      dataProvider:
+        type: string
+      url:
+        type: object
+        properties:
+          original:
+            type: array
+            items:
+              type: string
+          fromSourceAPI:
+            type: string
+      fullresolution:
+        type: array
+        items:
+          type: string
+      comesFrom:
+        type: string
+      rights:
+        type: string
+      externalId:
+        type: string
+  Filters:
+    description: This JSON Array contains details about the different filter values available as well as counts of records for each filter.
+    type: array
+    items:
+      type: object
+      properties:
+        filterName:
+          type: string
+        filterID:
+          type: string
+        suggestedValues:
+          type: array
+          items:
+            type: object
+            properties:
+              value:
+                type: string
+              count:
+                type: integer
+  Responses:
+    description: This Array contains results from each external source, seperated in respecting objects. Note that the facets field is NOT used in the faceted search. The filters field contains filters seperated for the corresponding source.
+    type: array
+    items:
+      type: object
+      properties:
+        query:
+          type: string
+        totalCount:
+          type: integer
+        startIndex:
+          type: integer
+        count:
+          type: integer
+        items:
+          type: array
+          items:
+            $ref: '#/definitions/Record'
+        source:
+          type: string
+        facets:
+          type: array
+          items:
+            type: object
+            properties:
+              name:
+                type: string
+              fields:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    label:
+                      type: string
+                    count:
+                      type: integer
+        filters:
+          type: array
+          items:
+            $ref: '#/definitions/Filters'
+  Search:
+    description: The search response contains two JSON array objects. Responses contains objects corresponding to each external source queried for the search. Filters contains aggregated filters from all the available sources. Inside the response array objects however, there are filter objects that contain the filters for each individual source.
+    type: object
+    properties:
+      responses:
+        $ref: '#/definitions/Responses'
+      filters:
+        $ref: '#/definitions/Filters'

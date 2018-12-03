@@ -31,6 +31,7 @@ import model.resources.RecordResource;
 import model.resources.WithResource;
 import play.libs.F.Promise;
 import play.libs.Json;
+import search.Response.Failure;
 import search.Response.SingleResponse;
 import sources.FilterValuesMap;
 import sources.core.ApacheHttpConnector;
@@ -85,10 +86,10 @@ public abstract class ExternalSource extends EmptySource {
 	public abstract void parseResponse(JsonNode response, SingleResponse resultResponse)
 	throws Exception;
 	public void parseError(JsonNode response, SingleResponse resultResponse){
-		resultResponse.errorMessage = response.get("error").asText();
+		resultResponse.error = Failure.SERVER_ERROR;
 	}
 	public void parseError(Exception e, SingleResponse resultResponse){
-		resultResponse.errorMessage = e.getMessage();
+		resultResponse.error = Failure.SERVER_ERROR;
 	}
 	
 	public HttpConnector getHttpConnector() {
