@@ -80,6 +80,22 @@ public class CampaignController extends WithController {
 		return ok(Json.toJson(campaigns));
 	}
 	
+	public static Result getUserCampaigns(String userId, int offset, int count) {
+		ObjectNode result = Json.newObject();
+				
+		List<Campaign> campaigns = new ArrayList<Campaign>();
+		campaigns = DB.getCampaignDAO().getUserCampaigns(new ObjectId(userId), offset, count);
+		long total = DB.getCampaignDAO().countUserCampaigns(new ObjectId(userId));
+		
+		if (campaigns == null) {
+			result.put("error", "There are not any campaigns for this user");
+			return internalServerError(result);
+		}
+		result.set("campaigns", Json.toJson(campaigns));
+		result.put("count", total);
+		return ok(result);
+	}
+	
 	public static Result incUserPoints(String campaignId, String userId, String annotationType) {
 		
 		ObjectId campaignDbId = null;
