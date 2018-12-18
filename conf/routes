@@ -245,3 +245,4 @@ GET		/campaign/activeCampaigns					controllers.CampaignController.getActiveCampa
 GET		/campaign/incUserPoints						controllers.CampaignController.incUserPoints(campaignId: String, userId: String, annotationType: String)
 GET		/campaign/decUserPoints						controllers.CampaignController.decUserPoints(campaignId: String, userId: String, annotationType: String)
 POST	/campaign/createCampaign					controllers.CampaignController.createCampaign()
+GET		/campaign/userCampaigns						controllers.CampaignController.getUserCampaigns(userId: String, offset: Integer ?=0, count: Integer ?=10)
