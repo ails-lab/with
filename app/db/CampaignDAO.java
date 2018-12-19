@@ -17,15 +17,16 @@
 package db;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+
 import org.bson.types.ObjectId;
 import org.mongodb.morphia.query.Query;
 import org.mongodb.morphia.query.UpdateOperations;
 
+import com.fasterxml.jackson.databind.JsonNode;
+
 import model.Campaign;
-import model.resources.collection.CollectionObject;
 
 public class CampaignDAO extends DAO<Campaign> {
 
@@ -134,6 +135,14 @@ public class CampaignDAO extends DAO<Campaign> {
 			updateOps2.dec("annotationCurrent." + annotType);
 			this.update(q, updateOps2);
 		}
+	}
+	
+	public void editCampaign(ObjectId dbId, JsonNode json) {
+		Query<Campaign> q = this.createQuery().field("_id").equal(dbId);
+		UpdateOperations<Campaign> updateOps = this
+				.createUpdateOperations();
+		updateFields("", json, updateOps);
+		this.update(q, updateOps);
 	}
 
 }

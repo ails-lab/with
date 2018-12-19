@@ -182,6 +182,16 @@ public class Deserializer {
 			return out;
 		}
 	}
+	
+//	public static class ObjectIdDeserializer extends JsonDeserializer<String> {
+//		@Override
+//		public void deserialize(Object oid, JsonGenerator jsonGen,
+//				SerializerProvider provider) throws IOException,
+//				JsonProcessingException {
+//			jsonGen.writeString(oid.toString());
+//		}
+//
+//	}
 
 	public static class MultiLiteralOrResourceDesiarilizer extends
 			JsonDeserializer<MultiLiteralOrResource> {

@@ -16,6 +16,7 @@
 
 package model;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.Hashtable;
 import java.util.List;
@@ -24,12 +25,13 @@ import org.bson.types.ObjectId;
 import org.mongodb.morphia.annotations.Entity;
 import org.mongodb.morphia.annotations.Id;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 import model.annotations.Annotation.MotivationType;
 import utils.Serializer;
 
-
+@JsonIgnoreProperties(ignoreUnknown = true)
 @Entity("Campaign")
 public class Campaign {
 
@@ -49,10 +51,10 @@ public class Campaign {
 	}
 
 	public static class AnnotationCount {
-		private long created;
-		private long approved;
-		private long rejected;
-		private long records;
+		private long created = 0;
+		private long approved = 0;
+		private long rejected = 0;
+		private long records = 0;
 		
 		public AnnotationCount() {
 			this.created = 0;
@@ -152,7 +154,7 @@ public class Campaign {
 	/**
 	 * The goal (number of annotations) of the campaign.
 	 */
-	private long annotationTarget;
+	private long annotationTarget = 1000;
 	
 	private AnnotationCount annotationCurrent;
 	
@@ -165,7 +167,7 @@ public class Campaign {
 	 * The list of item collections to be annotated in this campaign.
 	 */
 	@JsonSerialize(using = Serializer.ObjectIdArraySerializer.class)
-	private List<ObjectId> targetCollections;
+	private List<ObjectId> targetCollections = new ArrayList<ObjectId>();
 	
 	/**
 	 * Hashtable with the campaign's contributors and the points they've earned
