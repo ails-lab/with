@@ -79,7 +79,7 @@ public class CampaignController extends WithController {
 		}
 		Class<?> clazz = Class.forName("model.Campaign");
 		ObjectMapper mapper = new ObjectMapper();
-		mapper.readerForUpdating(campaign).readValue(campaign);
+		mapper.readerForUpdating(campaign).readValue(json);
 //		Campaign campaignChanges = (Campaign) Json.fromJson(json, clazz);
 		DB.getCampaignDAO().editCampaign(campaignDbId, json);
 		return ok(Json.toJson(DB.getCampaignDAO().get(campaignDbId)));
@@ -235,6 +235,7 @@ public class CampaignController extends WithController {
 					return badRequest(error);
 				}
 			}
+			newCampaign.setCreated(new Date());
 			try {
 				DB.getCampaignDAO().makePermanent(newCampaign);
 			} catch (Exception e) {

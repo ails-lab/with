@@ -26,9 +26,11 @@ import org.mongodb.morphia.annotations.Entity;
 import org.mongodb.morphia.annotations.Id;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 import model.annotations.Annotation.MotivationType;
+import utils.Deserializer;
 import utils.Serializer;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -120,11 +122,23 @@ public class Campaign {
 	private ObjectId dbId;
 
 	@JsonSerialize(using = Serializer.DateSerializer.class)
+	@JsonDeserialize(using = Deserializer.DateExtendedDeserializer.class)
 	private Date startDate;
 	
 	@JsonSerialize(using = Serializer.DateSerializer.class)
+	@JsonDeserialize(using = Deserializer.DateExtendedDeserializer.class)
 	private Date endDate;
 	
+	@JsonSerialize(using = Serializer.DateSerializer.class)
+	private Date created;
+
+	public Date getCreated() {
+		return created;
+	}
+
+	public void setCreated(Date created) {
+		this.created = created;
+	}
 
 	private String username;
 	
@@ -135,9 +149,11 @@ public class Campaign {
 	private String banner;
 	
 	@JsonSerialize(using = Serializer.ObjectIdSerializer.class)
+	@JsonDeserialize(using = Deserializer.ObjectIdDeserializer.class)
 	private ObjectId creator;
 	
 	@JsonSerialize(using = Serializer.ObjectIdSerializer.class)
+	@JsonDeserialize(using = Deserializer.ObjectIdDeserializer.class)	
 	private ObjectId space;
 	
 	private String spacename;
@@ -226,7 +242,8 @@ public class Campaign {
 		return annotationTarget;
 	}
 	public void setAnnotationTarget(long annotationTarget) {
-		this.annotationTarget = annotationTarget;
+		if (annotationTarget != 0)
+			this.annotationTarget = annotationTarget;
 	}
 
 	public List<String> getVocabularies() {
