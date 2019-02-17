@@ -16,27 +16,35 @@
 
 package controllers;
 
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.Reader;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Hashtable;
 import java.util.List;
-import java.util.Set;
 
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.lang3.StringUtils;
 import org.bson.types.ObjectId;
 
+import com.aliasi.util.Arrays;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+
 import db.DB;
 import model.Campaign;
 import model.Campaign.AnnotationCount;
-import model.usersAndGroups.User;
 import model.usersAndGroups.UserGroup;
+import model.Campaign.CampaignTerm;
+import model.basicDataTypes.Language;
 import play.Logger;
 import play.Logger.ALogger;
 import play.libs.Json;
@@ -61,13 +69,13 @@ public class CampaignController extends WithController {
 		Campaign campaign = DB.getCampaignDAO().getCampaignByName(cname);
 		return ok(Json.toJson(campaign));
 	}
-	
+
 	public static Result deleteCampaign(String campaignId) {
 		ObjectId campaignDbId = new ObjectId(campaignId);
 		DB.getCampaignDAO().deleteById(campaignDbId);
 		return ok();
 	}
-	
+
 	public static Result editCampaign(String id) throws ClassNotFoundException, JsonProcessingException, IOException {
 		JsonNode json = request().body().asJson();
 		ObjectNode result = Json.newObject();
@@ -80,11 +88,11 @@ public class CampaignController extends WithController {
 		Class<?> clazz = Class.forName("model.Campaign");
 		ObjectMapper mapper = new ObjectMapper();
 		mapper.readerForUpdating(campaign).readValue(json);
-//		Campaign campaignChanges = (Campaign) Json.fromJson(json, clazz);
-		DB.getCampaignDAO().editCampaign(campaignDbId, json);
+		// Campaign campaignChanges = (Campaign) Json.fromJson(json, clazz);
+		DB.getCampaignDAO().makePermanent(campaign);
 		return ok(Json.toJson(DB.getCampaignDAO().get(campaignDbId)));
 	}
-	
+
 	public static Result getActiveCampaigns(String group, String sortBy, int offset, int count) {
 		ObjectNode result = Json.newObject();
 		List<Campaign> campaigns = new ArrayList<Campaign>();
@@ -250,6 +258,61 @@ public class CampaignController extends WithController {
 			error.put("error", e.getMessage());
 			return internalServerError(error);
 		}
+	}
+
+
+	public CampaignTerm createCampaignTerm( String literal, String uri, boolean selectable ) {
+		CampaignTerm term = new CampaignTerm();
+		term.labelAndUri.addLiteral(Language.EN, literal);
+		term.selectable = selectable;
+		if (uri == null || uri.equals(""))
+			return term;
+		term.labelAndUri.addURI(uri);
+		String requestUri = uri;
+		if (requestUri.contains("wikidata")) {
+			String[] split = requestUri.split("/");
+			
+			requestUri = Arrays.arrayToString(split);
+		}
+		requestUri = requestUri + ".json";
+		return term;
+		
+	}
+
+	@SuppressWarnings("unused")
+	public static Result readCampaignTerms() throws Exception {
+		Reader in = new FileReader("vocabularies/Sport_Vocabulary - Foglio1.csv");
+		Iterable<CSVRecord> records = CSVFormat.DEFAULT.withDelimiter(',').parse(in);
+		ArrayList<CampaignTerm> terms = new ArrayList<CampaignTerm>();
+		CampaignTerm lastOfLevel[];
+		lastOfLevel = new CampaignTerm[3];
+		int j = 0;
+		for (CSVRecord record : records) {
+//			if (j++ == 60)
+//				break;
+			if (lastOfLevel[0] == null || !record.get(0).equals(lastOfLevel[0].labelAndUri.getLiteral(Language.EN))) {
+				CampaignTerm term = new CampaignTerm();
+				term.labelAndUri.addLiteral(Language.EN, record.get(0));
+				term.selectable = false;
+				terms.add(term);
+				lastOfLevel[0] = term;
+			}
+			for (int i = 1; i < (record.size() - 1); i++) {
+				if (!record.get(i).equals("")) {
+					CampaignTerm term = new CampaignTerm();
+					term.labelAndUri.addLiteral(Language.EN, record.get(i));
+					term.labelAndUri.addURI(record.get(3));
+					term.selectable = true;
+					lastOfLevel[i-1].addChild(term);
+					lastOfLevel[i] = term;
+				}
+			}
+		}
+		FileWriter fileWriter = new FileWriter("/tmp/output.json");
+		fileWriter.write(Json.toJson(terms).toString());
+		fileWriter.close();
+//		System.out.println(Json.toJson(terms));
+		return ok();
 	}
 
 	/*

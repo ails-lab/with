@@ -304,28 +304,20 @@ public class Deserializer {
 		}
 	}
 
-//	public static class DateExtendedDeserializer extends JsonDeserializer<Date> {
-//
-//		@Override
-//		public Date deserialize(JsonParser date, DeserializationContext arg1)
-//				throws IOException, JsonProcessingException {
-//		      Date d = DateUtils.parseDateStrictly("23/10/2014T12:34:22", 
-//		              new String[] {"yyyy/MM/dd'T'HH:mm:ss",
-//		                  "dd/MM/yyyy'T'HH:mm:ss"});
-//
-//		          System.out.println(d);
-////			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
-////			Date d = new Date();
-////			String format = sdf.format(d);
-////			try {
-////				return sdf.parse(date.getValueAsString());
-////			} catch (ParseException e) {
-////				log.error("", e);
-////				return null;
-////			}
-//
-//		}
-//	}
+	public static class DateExtendedDeserializer extends JsonDeserializer<Date> {
+
+		@Override
+		public Date deserialize(JsonParser date, DeserializationContext arg1)
+				throws IOException, JsonProcessingException {
+			try {
+				Date d = DateUtils.parseDateStrictly(date.getValueAsString(), "yyyy/MM/dd'T'HH:mm:ss.SSS'Z'",
+						"yyyy-MM-dd");
+				return d;
+			} catch (ParseException e) {
+				return null;
+			}
+		}
+	}
 
 	public static class PointDeserializer extends JsonDeserializer<Point> {
 

@@ -30,6 +30,7 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 import model.annotations.Annotation.MotivationType;
+import model.basicDataTypes.LiteralOrResource;
 import utils.Deserializer;
 import utils.Serializer;
 
@@ -50,6 +51,18 @@ public class Campaign {
 	
 	public static enum CampaignPurpose {
 		Annotate, Validate
+	}
+	
+	public static class CampaignTerm {
+		public List<CampaignTerm> children;
+		public LiteralOrResource labelAndUri = new LiteralOrResource();
+		public boolean selectable;
+		
+		public void addChild(CampaignTerm child) {
+			if (this.children == null)
+				this.children = new ArrayList<CampaignTerm>();
+			this.children.add(child);
+		}
 	}
 
 	public static class AnnotationCount {
@@ -131,6 +144,8 @@ public class Campaign {
 	
 	@JsonSerialize(using = Serializer.DateSerializer.class)
 	private Date created;
+	
+	private List<CampaignTerm> campaignTerms;
 
 	public Date getCreated() {
 		return created;
@@ -147,6 +162,8 @@ public class Campaign {
 	private String description;
 	
 	private String banner;
+	
+	private String logo;
 	
 	@JsonSerialize(using = Serializer.ObjectIdSerializer.class)
 	@JsonDeserialize(using = Deserializer.ObjectIdDeserializer.class)
@@ -326,6 +343,22 @@ public class Campaign {
 
 	public void setCreator(ObjectId creator) {
 		this.creator = creator;
+	}
+
+	public String getLogo() {
+		return logo;
+	}
+
+	public void setLogo(String logo) {
+		this.logo = logo;
+	}
+
+	public List<CampaignTerm> getCampaignTerms() {
+		return campaignTerms;
+	}
+
+	public void setCampaignTerms(List<CampaignTerm> campaignTerms) {
+		this.campaignTerms = campaignTerms;
 	}
 
 }
