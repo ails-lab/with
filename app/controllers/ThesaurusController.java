@@ -409,7 +409,7 @@ public class ThesaurusController extends Controller {
 					ArrayNode res = searchCampaignTerms(word, campaignTerms);
 					ObjectNode result = Json.newObject();
 					result.put("request", word);
-					result.set("response", res);
+					result.set("results", res);
 					return ok(result);
 				}
 				List<String> vocabularyList = campaign.getVocabularies();
