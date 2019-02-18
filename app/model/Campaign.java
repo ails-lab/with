@@ -159,7 +159,7 @@ public class Campaign {
 	private String spacename;
 	
 	/**
-	 * The purpose of campaign's annotations [Tagging, GeoTagging, Linking, Commenting, Editing].
+	 * The purpose of campaign's annotations [Tagging, GeoTagging, Linking, Commenting, Editing, Polling].
 	 */
 	private List<MotivationType> campaignMotivation;
 	
