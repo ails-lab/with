@@ -21,12 +21,15 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.Hashtable;
+import java.util.Iterator;
 import java.util.List;
 
 import org.apache.commons.csv.CSVFormat;
@@ -265,51 +268,76 @@ public class CampaignController extends WithController {
 		}
 	}
 
+	// public CampaignTerm createCampaignTerm( String literal, String uri, boolean
+	// selectable ) {
+	// CampaignTerm term = new CampaignTerm();
+	// term.labelAndUri.addLiteral(Language.EN, literal);
+	// term.selectable = selectable;
+	// if (uri == null || uri.equals(""))
+	// return term;
+	// term.labelAndUri.addURI(uri);
+	// String requestUri = uri;
+	// if (requestUri.contains("wikidata")) {
+	// String[] split = requestUri.split("/");
+	//
+	// requestUri = Arrays.arrayToString(split);
+	// }
+	// requestUri = requestUri + ".json";
+	// return term;
+	//
+	// }
 
-//	public CampaignTerm createCampaignTerm( String literal, String uri, boolean selectable ) {
-//		CampaignTerm term = new CampaignTerm();
-//		term.labelAndUri.addLiteral(Language.EN, literal);
-//		term.selectable = selectable;
-//		if (uri == null || uri.equals(""))
-//			return term;
-//		term.labelAndUri.addURI(uri);
-//		String requestUri = uri;
-//		if (requestUri.contains("wikidata")) {
-//			String[] split = requestUri.split("/");
-//			
-//			requestUri = Arrays.arrayToString(split);
-//		}
-//		requestUri = requestUri + ".json";
-//		return term;
-//		
-//	}
-	
 	public static void addLangs(CampaignTerm term) throws ClientProtocolException, IOException {
+		String[] langs = new String[] { "it", "nl", "fr", "de", "es", "pl" };
 		if (term.labelAndUri.getURI().contains("wikidata")) {
 			term.labelAndUri.addURI(term.labelAndUri.getURI().replace("/wiki/", "/entity/"));
 			HttpClient client = HttpClientBuilder.create().build();
-			HttpGet request = new HttpGet(term.labelAndUri.getURI()+ ".json");
+			HttpGet request = new HttpGet(term.labelAndUri.getURI() + ".json");
 			HttpResponse response = client.execute(request);
 			InputStream jsonStream = response.getEntity().getContent();
 			JsonNode json = Json.parse(jsonStream);
-			String italian = json.get("entities").fields().next().getValue().get("labels").get("it").get("value").asText();
-			System.out.println(italian);
-			
+			for (String lang : langs) {
+				JsonNode langNode = json.get("entities").fields().next().getValue().get("labels").get(lang);
+				if (langNode != null) {
+					String langTerm = langNode.get("value").asText();
+					term.labelAndUri.addLiteral(Language.getLanguage(lang), langTerm);
+				}
+			}
+		} else {
+			try {
+				URL u = new URL(term.labelAndUri.getURI() + ".json");
+				InputStream jsonStream = u.openStream();
+				JsonNode json = Json.parse(jsonStream);
+				for (String lang : langs) {
+					Iterator<JsonNode> it = json.get("results").get("bindings").iterator();
+					while (it.hasNext()) {
+						JsonNode node = it.next();
+						if (node.get("Object").get("xml:lang") != null
+								&& Arrays.asList(langs).contains(node.get("Object").get("xml:lang").asText())) {
+							String langTerm = node.get("Object").get("value").asText();
+							String lan = node.get("Object").get("xml:lang").asText();
+							term.labelAndUri.addLiteral(Language.getLanguage(lan), langTerm);
+						}
+					}
+				}
+			} catch (MalformedURLException e) {
+				System.out.println(e);
+			}
 		}
 
 	}
 
 	@SuppressWarnings("unused")
 	public static Result readCampaignTerms() throws Exception {
-		Reader in = new FileReader("/home/maria/Desktop/vocabularies/Sport_Vocabulary.csv");
+		Reader in = new FileReader("vocabularies/Cities_Landscapes_Means_of_Transport_Vocabulary.csv");
 		Iterable<CSVRecord> records = CSVFormat.DEFAULT.withDelimiter(',').parse(in);
 		ArrayList<CampaignTerm> terms = new ArrayList<CampaignTerm>();
 		CampaignTerm lastOfLevel[];
 		lastOfLevel = new CampaignTerm[3];
 		int j = 0;
 		for (CSVRecord record : records) {
-//			if (j++ == 60)
-//				break;
+			// if (j++ == 60)
+			// break;
 			if (lastOfLevel[0] == null || !record.get(0).equals(lastOfLevel[0].labelAndUri.getLiteral(Language.EN))) {
 				CampaignTerm term = new CampaignTerm();
 				term.labelAndUri.addLiteral(Language.EN, record.get(0));
@@ -324,15 +352,18 @@ public class CampaignController extends WithController {
 					term.labelAndUri.addURI(record.get(3));
 					term.selectable = true;
 					addLangs(term);
-					lastOfLevel[i-1].addChild(term);
+					lastOfLevel[i - 1].addChild(term);
 					lastOfLevel[i] = term;
 				}
 			}
 		}
-		FileWriter fileWriter = new FileWriter("/tmp/output.json");
-		fileWriter.write(Json.toJson(terms).toString());
-		fileWriter.close();
-//		System.out.println(Json.toJson(terms));
+		Campaign campaign = DB.getCampaignDAO().getCampaignByName("cities-landscapes");
+		campaign.setCampaignTerms(terms);
+		DB.getCampaignDAO().makePermanent(campaign);
+//		FileWriter fileWriter = new FileWriter("/tmp/output.json");
+//		fileWriter.write(Json.toJson(terms).toString());
+//		fileWriter.close();
+		// System.out.println(Json.toJson(terms));
 		return ok();
 	}
 
