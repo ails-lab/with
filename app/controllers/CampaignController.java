@@ -16,26 +16,42 @@
 
 package controllers;
 
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.Reader;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.Hashtable;
+import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
 
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.HttpClientBuilder;
 import org.bson.types.ObjectId;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+
 import db.DB;
 import model.Campaign;
 import model.Campaign.AnnotationCount;
-import model.usersAndGroups.User;
+import model.Campaign.CampaignTerm;
+import model.basicDataTypes.Language;
 import model.usersAndGroups.UserGroup;
 import play.Logger;
 import play.Logger.ALogger;
@@ -61,13 +77,13 @@ public class CampaignController extends WithController {
 		Campaign campaign = DB.getCampaignDAO().getCampaignByName(cname);
 		return ok(Json.toJson(campaign));
 	}
-	
+
 	public static Result deleteCampaign(String campaignId) {
 		ObjectId campaignDbId = new ObjectId(campaignId);
 		DB.getCampaignDAO().deleteById(campaignDbId);
 		return ok();
 	}
-	
+
 	public static Result editCampaign(String id) throws ClassNotFoundException, JsonProcessingException, IOException {
 		JsonNode json = request().body().asJson();
 		ObjectNode result = Json.newObject();
@@ -80,11 +96,11 @@ public class CampaignController extends WithController {
 		Class<?> clazz = Class.forName("model.Campaign");
 		ObjectMapper mapper = new ObjectMapper();
 		mapper.readerForUpdating(campaign).readValue(json);
-//		Campaign campaignChanges = (Campaign) Json.fromJson(json, clazz);
-		DB.getCampaignDAO().editCampaign(campaignDbId, json);
+		// Campaign campaignChanges = (Campaign) Json.fromJson(json, clazz);
+		DB.getCampaignDAO().makePermanent(campaign);
 		return ok(Json.toJson(DB.getCampaignDAO().get(campaignDbId)));
 	}
-	
+
 	public static Result getActiveCampaigns(String group, String sortBy, int offset, int count) {
 		ObjectNode result = Json.newObject();
 		List<Campaign> campaigns = new ArrayList<Campaign>();
@@ -250,6 +266,105 @@ public class CampaignController extends WithController {
 			error.put("error", e.getMessage());
 			return internalServerError(error);
 		}
+	}
+
+	// public CampaignTerm createCampaignTerm( String literal, String uri, boolean
+	// selectable ) {
+	// CampaignTerm term = new CampaignTerm();
+	// term.labelAndUri.addLiteral(Language.EN, literal);
+	// term.selectable = selectable;
+	// if (uri == null || uri.equals(""))
+	// return term;
+	// term.labelAndUri.addURI(uri);
+	// String requestUri = uri;
+	// if (requestUri.contains("wikidata")) {
+	// String[] split = requestUri.split("/");
+	//
+	// requestUri = Arrays.arrayToString(split);
+	// }
+	// requestUri = requestUri + ".json";
+	// return term;
+	//
+	// }
+
+	public static void addLangs(CampaignTerm term) throws ClientProtocolException, IOException {
+		String[] langs = new String[] { "it", "nl", "fr", "de", "es", "pl" };
+		if (term.labelAndUri.getURI().contains("wikidata")) {
+			term.labelAndUri.addURI(term.labelAndUri.getURI().replace("/wiki/", "/entity/"));
+			HttpClient client = HttpClientBuilder.create().build();
+			HttpGet request = new HttpGet(term.labelAndUri.getURI() + ".json");
+			HttpResponse response = client.execute(request);
+			InputStream jsonStream = response.getEntity().getContent();
+			JsonNode json = Json.parse(jsonStream);
+			for (String lang : langs) {
+				JsonNode langNode = json.get("entities").fields().next().getValue().get("labels").get(lang);
+				if (langNode != null) {
+					String langTerm = langNode.get("value").asText();
+					term.labelAndUri.addLiteral(Language.getLanguage(lang), langTerm);
+				}
+			}
+		} else {
+			try {
+				URL u = new URL(term.labelAndUri.getURI() + ".json");
+				InputStream jsonStream = u.openStream();
+				JsonNode json = Json.parse(jsonStream);
+				for (String lang : langs) {
+					Iterator<JsonNode> it = json.get("results").get("bindings").iterator();
+					while (it.hasNext()) {
+						JsonNode node = it.next();
+						if (node.get("Object").get("xml:lang") != null
+								&& Arrays.asList(langs).contains(node.get("Object").get("xml:lang").asText())) {
+							String langTerm = node.get("Object").get("value").asText();
+							String lan = node.get("Object").get("xml:lang").asText();
+							term.labelAndUri.addLiteral(Language.getLanguage(lan), langTerm);
+						}
+					}
+				}
+			} catch (MalformedURLException e) {
+				System.out.println(e);
+			}
+		}
+
+	}
+
+	@SuppressWarnings("unused")
+	public static Result readCampaignTerms() throws Exception {
+		Reader in = new FileReader("vocabularies/Cities_Landscapes_Means_of_Transport_Vocabulary.csv");
+		Iterable<CSVRecord> records = CSVFormat.DEFAULT.withDelimiter(',').parse(in);
+		ArrayList<CampaignTerm> terms = new ArrayList<CampaignTerm>();
+		CampaignTerm lastOfLevel[];
+		lastOfLevel = new CampaignTerm[3];
+		int j = 0;
+		for (CSVRecord record : records) {
+			// if (j++ == 60)
+			// break;
+			if (lastOfLevel[0] == null || !record.get(0).equals(lastOfLevel[0].labelAndUri.getLiteral(Language.EN))) {
+				CampaignTerm term = new CampaignTerm();
+				term.labelAndUri.addLiteral(Language.EN, record.get(0));
+				term.selectable = false;
+				terms.add(term);
+				lastOfLevel[0] = term;
+			}
+			for (int i = 1; i < (record.size() - 1); i++) {
+				if (!record.get(i).equals("")) {
+					CampaignTerm term = new CampaignTerm();
+					term.labelAndUri.addLiteral(Language.EN, record.get(i));
+					term.labelAndUri.addURI(record.get(3));
+					term.selectable = true;
+					addLangs(term);
+					lastOfLevel[i - 1].addChild(term);
+					lastOfLevel[i] = term;
+				}
+			}
+		}
+		Campaign campaign = DB.getCampaignDAO().getCampaignByName("cities-landscapes");
+		campaign.setCampaignTerms(terms);
+		DB.getCampaignDAO().makePermanent(campaign);
+//		FileWriter fileWriter = new FileWriter("/tmp/output.json");
+//		fileWriter.write(Json.toJson(terms).toString());
+//		fileWriter.close();
+		// System.out.println(Json.toJson(terms));
+		return ok();
 	}
 
 	/*

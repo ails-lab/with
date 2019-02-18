@@ -16,9 +16,11 @@
 
 package db;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.bson.types.ObjectId;
 import org.mongodb.morphia.query.Query;
@@ -46,7 +48,6 @@ public class CampaignDAO extends DAO<Campaign> {
 		if (active) {
 			q = q.field("startDate").lessThanOrEq(today).field("endDate").greaterThanOrEq(today);
 		}
-
 		return q.countAll();
 	}
 
@@ -84,7 +85,7 @@ public class CampaignDAO extends DAO<Campaign> {
 		campaigns = this.find(q).asList();
 		return campaigns;
 	}
-	
+
 	public List<Campaign> getUserCampaigns(ObjectId userId, int offset, int count) {
 		Query<Campaign> q = this.createQuery();
 		q.field("creator").equal(userId);
@@ -93,14 +94,14 @@ public class CampaignDAO extends DAO<Campaign> {
 		campaigns = this.find(q).asList();
 		return campaigns;
 	}
-	
+
 	public long countUserCampaigns(ObjectId userId) {
 		Query<Campaign> q = this.createQuery();
 		q.field("creator").equal(userId);
 		long count = this.count(q);
 		return count;
 	}
-	
+
 	public long getCampaignsCount(ObjectId groupId) {
 		Query<Campaign> q = this.createQuery();
 		if (groupId != null) {
@@ -136,11 +137,10 @@ public class CampaignDAO extends DAO<Campaign> {
 			this.update(q, updateOps2);
 		}
 	}
-	
+
 	public void editCampaign(ObjectId dbId, JsonNode json) {
 		Query<Campaign> q = this.createQuery().field("_id").equal(dbId);
-		UpdateOperations<Campaign> updateOps = this
-				.createUpdateOperations();
+		UpdateOperations<Campaign> updateOps = this.createUpdateOperations();
 		updateFields("", json, updateOps);
 		this.update(q, updateOps);
 	}
