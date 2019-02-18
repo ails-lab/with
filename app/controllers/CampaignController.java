@@ -16,14 +16,15 @@
 
 package controllers;
 
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.Reader;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.Hashtable;
 import java.util.List;
@@ -31,9 +32,13 @@ import java.util.List;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.HttpClientBuilder;
 import org.bson.types.ObjectId;
 
-import com.aliasi.util.Arrays;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -42,9 +47,9 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import db.DB;
 import model.Campaign;
 import model.Campaign.AnnotationCount;
-import model.usersAndGroups.UserGroup;
 import model.Campaign.CampaignTerm;
 import model.basicDataTypes.Language;
+import model.usersAndGroups.UserGroup;
 import play.Logger;
 import play.Logger.ALogger;
 import play.libs.Json;
@@ -261,27 +266,42 @@ public class CampaignController extends WithController {
 	}
 
 
-	public CampaignTerm createCampaignTerm( String literal, String uri, boolean selectable ) {
-		CampaignTerm term = new CampaignTerm();
-		term.labelAndUri.addLiteral(Language.EN, literal);
-		term.selectable = selectable;
-		if (uri == null || uri.equals(""))
-			return term;
-		term.labelAndUri.addURI(uri);
-		String requestUri = uri;
-		if (requestUri.contains("wikidata")) {
-			String[] split = requestUri.split("/");
+//	public CampaignTerm createCampaignTerm( String literal, String uri, boolean selectable ) {
+//		CampaignTerm term = new CampaignTerm();
+//		term.labelAndUri.addLiteral(Language.EN, literal);
+//		term.selectable = selectable;
+//		if (uri == null || uri.equals(""))
+//			return term;
+//		term.labelAndUri.addURI(uri);
+//		String requestUri = uri;
+//		if (requestUri.contains("wikidata")) {
+//			String[] split = requestUri.split("/");
+//			
+//			requestUri = Arrays.arrayToString(split);
+//		}
+//		requestUri = requestUri + ".json";
+//		return term;
+//		
+//	}
+	
+	public static void addLangs(CampaignTerm term) throws ClientProtocolException, IOException {
+		if (term.labelAndUri.getURI().contains("wikidata")) {
+			term.labelAndUri.addURI(term.labelAndUri.getURI().replace("/wiki/", "/entity/"));
+			HttpClient client = HttpClientBuilder.create().build();
+			HttpGet request = new HttpGet(term.labelAndUri.getURI()+ ".json");
+			HttpResponse response = client.execute(request);
+			InputStream jsonStream = response.getEntity().getContent();
+			JsonNode json = Json.parse(jsonStream);
+			String italian = json.get("entities").fields().next().getValue().get("labels").get("it").get("value").asText();
+			System.out.println(italian);
 			
-			requestUri = Arrays.arrayToString(split);
 		}
-		requestUri = requestUri + ".json";
-		return term;
-		
+
 	}
 
 	@SuppressWarnings("unused")
 	public static Result readCampaignTerms() throws Exception {
-		Reader in = new FileReader("vocabularies/Sport_Vocabulary - Foglio1.csv");
+		Reader in = new FileReader("/home/maria/Desktop/vocabularies/Sport_Vocabulary.csv");
 		Iterable<CSVRecord> records = CSVFormat.DEFAULT.withDelimiter(',').parse(in);
 		ArrayList<CampaignTerm> terms = new ArrayList<CampaignTerm>();
 		CampaignTerm lastOfLevel[];
@@ -303,6 +323,7 @@ public class CampaignController extends WithController {
 					term.labelAndUri.addLiteral(Language.EN, record.get(i));
 					term.labelAndUri.addURI(record.get(3));
 					term.selectable = true;
+					addLangs(term);
 					lastOfLevel[i-1].addChild(term);
 					lastOfLevel[i] = term;
 				}
