@@ -123,7 +123,14 @@ public class MediaController extends WithController {
 			// return redirect(url);
 		} catch (Exception e) {
 			log.error("Cannot retrieve media document from database", e);
-			return internalServerError("Cannot retrieve media document from database");
+			FileAndType med;
+			try {
+				med = ((ApacheHttpConnector) ApacheHttpConnector.getApacheHttpConnector())
+						.getContentAndType(url);
+			} catch (Exception e1) {
+				return internalServerError("Cannot retrieve media document");
+			}
+			return ok(med.data).as(med.mimeType);
 		}
 	}
 
