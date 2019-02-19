@@ -357,11 +357,12 @@ public class ThesaurusController extends Controller {
 		for (CampaignTerm term : terms) {
 			if (term.selectable) {
 				for (Entry<String, String> e : term.labelAndUri.entrySet()) {
-					if (e.getValue().toLowerCase().startsWith(word)) {
+					if (e.getValue().toLowerCase().startsWith(word) && !e.getKey().equalsIgnoreCase("uri")) {
 						ObjectNode resInfo = Json.newObject();
 						resInfo.put("label", e.getValue());
 						resInfo.put("uri", term.labelAndUri.getURI());
 						resInfo.put("lang", e.getKey());
+						resInfo.put("id", term.labelAndUri.getURI());
 						results.add(resInfo);
 					}
 				}
@@ -373,7 +374,7 @@ public class ThesaurusController extends Controller {
 		return results;
 	}
 
-	public static Result getSuggestions(String word, String namespaces, String campaignId)
+	public static Result getSuggestions(String word, String namespaces, String campaignId, Boolean geotagging)
 			throws ClientProtocolException, IOException {
 		ObjectNode response = Json.newObject();
 		response.put("request", word);
@@ -404,7 +405,7 @@ public class ThesaurusController extends Controller {
 
 			if (campaignId != null) {
 				Campaign campaign = DB.getCampaignDAO().getById(new ObjectId(campaignId));
-				if (campaign.getCampaignTerms() != null && campaign.getCampaignTerms().size() > 0) {
+				if (!geotagging && campaign.getCampaignTerms() != null && campaign.getCampaignTerms().size() > 0) {
 					List<CampaignTerm> campaignTerms = campaign.getCampaignTerms();
 					ArrayNode res = searchCampaignTerms(word, campaignTerms);
 					ObjectNode result = Json.newObject();
