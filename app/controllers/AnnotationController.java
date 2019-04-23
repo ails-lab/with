@@ -83,11 +83,11 @@ public class AnnotationController extends Controller {
 		JsonNode json = request().body().asJson();
 		if (json == null) {
 			error.put("error", "Invalid JSON");
-			return badRequest();
+			return badRequest(error);
 		}
 		if (WithController.effectiveUserDbId() == null) {
 			error.put("error", "User not logged in");
-			return badRequest();
+			return badRequest(error);
 		}
 		Annotation annotation = getAnnotationFromJson(json);
 		if (annotation.getMotivation().equals(MotivationType.GeoTagging)) {
