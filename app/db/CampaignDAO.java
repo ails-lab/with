@@ -63,11 +63,16 @@ public class CampaignDAO extends DAO<Campaign> {
 		return this.findOne(q);
 	}
 
-	public List<Campaign> getCampaigns(String groupName, boolean active, String sortBy, int offset, int count) {
+	public List<Campaign> getCampaigns(String groupName, String project, boolean active, String sortBy, int offset, int count) {
 		Query<Campaign> q = this.createQuery();
+		
 		if (!groupName.isEmpty()) {
 			q = q.field("spacename").equal(groupName);
 		}
+		if (!project.isEmpty()) {
+			q = q.field("project").equal(project);
+		}
+		
 		Date today = new Date();
 		if (active) {
 			q = q.field("startDate").lessThanOrEq(today).field("endDate").greaterThanOrEq(today);

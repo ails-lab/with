@@ -243,7 +243,7 @@ GET		/campaign/getCampaign						controllers.CampaignController.getCampaign(campa
 DELETE	/campaign/:id								controllers.CampaignController.deleteCampaign(id)
 PUT		/campaign/:id								controllers.CampaignController.editCampaign(id)
 GET		/campaign/getCampaignByName					controllers.CampaignController.getCampaignByName(cname: String)
-GET		/campaign/activeCampaigns					controllers.CampaignController.getActiveCampaigns(group: String ?= "", sortBy: String ?= "Alphabetical", offset: Integer ?=0, count: Integer ?=10)
+GET		/campaign/activeCampaigns					controllers.CampaignController.getActiveCampaigns(group: String ?= "", project: String ?= "withcrowd", sortBy: String ?= "Alphabetical", offset: Integer ?=0, count: Integer ?=10)
 GET		/campaign/incUserPoints						controllers.CampaignController.incUserPoints(campaignId: String, userId: String, annotationType: String)
 GET		/campaign/decUserPoints						controllers.CampaignController.decUserPoints(campaignId: String, userId: String, annotationType: String)
 POST	/campaign/createCampaign					controllers.CampaignController.createCampaign()

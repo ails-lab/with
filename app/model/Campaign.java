@@ -147,14 +147,6 @@ public class Campaign {
 	
 	private List<CampaignTerm> campaignTerms;
 
-	public Date getCreated() {
-		return created;
-	}
-
-	public void setCreated(Date created) {
-		this.created = created;
-	}
-
 	private String username;
 	
 	private String title;
@@ -187,7 +179,7 @@ public class Campaign {
 	/**
 	 * The goal (number of annotations) of the campaign.
 	 */
-	private long annotationTarget = 1000;
+	private long annotationTarget;
 	
 	private AnnotationCount annotationCurrent;
 	
@@ -206,8 +198,13 @@ public class Campaign {
 	 * Hashtable with the campaign's contributors and the points they've earned
 	 */
 	private Hashtable<ObjectId, AnnotationCount> contributorsPoints;
-
-
+	
+	/**
+	 * Field that specifies under which Project the WithCrowd platform is deployed
+	 */
+	private String project;
+	
+	
 
 	public BadgeType getBadge(int points) {
 		if (points >= badges.gold)
@@ -218,6 +215,14 @@ public class Campaign {
 			return  BadgeType.Bronze;
 		else
 			return  BadgeType.None;		
+	}
+	
+	public Date getCreated() {
+		return created;
+	}
+
+	public void setCreated(Date created) {
+		this.created = created;
 	}
 	
 	public Date getStartDate() {
@@ -359,6 +364,14 @@ public class Campaign {
 
 	public void setCampaignTerms(List<CampaignTerm> campaignTerms) {
 		this.campaignTerms = campaignTerms;
+	}
+
+	public String getProject() {
+		return project;
+	}
+
+	public void setProject(String project) {
+		this.project = project;
 	}
 
 }
