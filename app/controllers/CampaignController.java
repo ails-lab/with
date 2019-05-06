@@ -62,8 +62,8 @@ public class CampaignController extends WithController {
 
 	public static final ALogger log = Logger.of(CampaignController.class);
 
-	public static Result getCampaignCount(String group, boolean active) {
-		long count = DB.getCampaignDAO().campaignCount(group, active);
+	public static Result getCampaignCount(String group, String project, boolean active) {
+		long count = DB.getCampaignDAO().campaignCount(group, project, active);
 		return ok(Json.toJson(count));
 	}
 

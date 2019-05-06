@@ -36,12 +36,18 @@ public class CampaignDAO extends DAO<Campaign> {
 		super(Campaign.class);
 	}
 
-	public long campaignCount(String groupName, boolean active) {
+	public long campaignCount(String groupName, String project, boolean active) {
 
 		Query<Campaign> q = this.createQuery();
 
 		if (!groupName.isEmpty()) {
 			q = q.field("spacename").equal(groupName);
+		}
+		if (project == "") {
+			q = q.field("project").equal("withcrowd");
+		}
+		else {
+			q = q.field("project").equal(project);
 		}
 
 		Date today = new Date();
@@ -107,11 +113,20 @@ public class CampaignDAO extends DAO<Campaign> {
 		return count;
 	}
 
-	public long getCampaignsCount(ObjectId groupId) {
+	public long getCampaignsCount(ObjectId groupId, String project) {
 		Query<Campaign> q = this.createQuery();
+		
 		if (groupId != null) {
 			q = q.field("space").equal(groupId);
 		}
+		
+		if (project == "") {
+			q = q.field("project").equal("withcrowd");
+		}
+		else {
+			q = q.field("project").equal(project);
+		}
+		
 		return q.countAll();
 	}
 
