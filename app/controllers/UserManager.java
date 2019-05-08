@@ -85,7 +85,10 @@ public class UserManager extends WithController {
 	private static final String facebookAccessTokenUrl = "https://graph.facebook.com/v2.8/oauth/access_token";
 	private static final String facebookSecretWith =   "SECRET_KEY";
 	private static final String facebookSecretEspace = "SECRET_KEY";
+	//private static final String facebookSecretLocalhost = "SECRET_KEY"; //ORIGINAL
 	private static final String facebookSecretLocalhost = "SECRET_KEY";
+	private static final String facebookSecretWITHcrowd = "SECRET_KEY";
+	private static final String facebookSecretCrowdHeritage = "SECRET_KEY";
 	
 	private static final String googleSecret = "SECRET_KEY";
 
@@ -397,6 +400,10 @@ public class UserManager extends WithController {
 				facebookSecret = facebookSecretEspace;
 			else if (json.get("redirectUri").asText().contains("localhost"))
 				facebookSecret = facebookSecretLocalhost;
+			else if (json.get("redirectUri").asText().contains("withcrowd"))
+				facebookSecret = facebookSecretWITHcrowd;
+			else if (json.get("redirectUri").asText().contains("crowdheritage"))
+				facebookSecret = facebookSecretCrowdHeritage;
 			else
 				facebookSecret = facebookSecretWith;
 			// Exchange authorization code for access token.
