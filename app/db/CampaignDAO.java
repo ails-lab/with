@@ -44,7 +44,7 @@ public class CampaignDAO extends DAO<Campaign> {
 			q = q.field("spacename").equal(groupName);
 		}
 		if (project == "") {
-			q = q.field("project").equal("withcrowd");
+			q = q.field("project").equal("WITHcrowd");
 		}
 		else {
 			q = q.field("project").equal(project);
@@ -121,7 +121,7 @@ public class CampaignDAO extends DAO<Campaign> {
 		}
 		
 		if (project == "") {
-			q = q.field("project").equal("withcrowd");
+			q = q.field("project").equal("WITHcrowd");
 		}
 		else {
 			q = q.field("project").equal(project);

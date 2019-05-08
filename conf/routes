@@ -238,12 +238,12 @@ GET	     /collection/:id/annotations 	        			controllers.CollectionObjectCon
 #GET	     /collection/:id/annotationSummary 	        			controllers.CollectionObjectController.getAnnotationSummary(id, mode: String ?="FLAT")
 
 #Campaign Controller
-GET		/campaign/count								controllers.CampaignController.getCampaignCount(group: String ?= "", project: String ?= "withcrowd", active: Boolean ?= true)
+GET		/campaign/count								controllers.CampaignController.getCampaignCount(group: String ?= "", project: String ?= "WITHcrowd", active: Boolean ?= true)
 GET		/campaign/getCampaign						controllers.CampaignController.getCampaign(campaignId: String)
 DELETE	/campaign/:id								controllers.CampaignController.deleteCampaign(id)
 PUT		/campaign/:id								controllers.CampaignController.editCampaign(id)
 GET		/campaign/getCampaignByName					controllers.CampaignController.getCampaignByName(cname: String)
-GET		/campaign/activeCampaigns					controllers.CampaignController.getActiveCampaigns(group: String ?= "", project: String ?= "withcrowd", sortBy: String ?= "Alphabetical", offset: Integer ?=0, count: Integer ?=10)
+GET		/campaign/activeCampaigns					controllers.CampaignController.getActiveCampaigns(group: String ?= "", project: String ?= "WITHcrowd", sortBy: String ?= "Alphabetical", offset: Integer ?=0, count: Integer ?=10)
 GET		/campaign/incUserPoints						controllers.CampaignController.incUserPoints(campaignId: String, userId: String, annotationType: String)
 GET		/campaign/decUserPoints						controllers.CampaignController.decUserPoints(campaignId: String, userId: String, annotationType: String)
 POST	/campaign/createCampaign					controllers.CampaignController.createCampaign()
