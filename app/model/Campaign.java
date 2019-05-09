@@ -143,6 +143,7 @@ public class Campaign {
 	private Date endDate;
 	
 	@JsonSerialize(using = Serializer.DateSerializer.class)
+	@JsonDeserialize(using = Deserializer.DateExtendedDeserializer.class)
 	private Date created;
 	
 	private List<CampaignTerm> campaignTerms;
@@ -170,7 +171,7 @@ public class Campaign {
 	/**
 	 * The purpose of campaign's annotations [Tagging, GeoTagging, Linking, Commenting, Editing, Polling].
 	 */
-	private List<MotivationType> campaignMotivation;
+	private List<MotivationType> motivation;
 	
 	private BadgeRanges badges;
 	
@@ -253,11 +254,11 @@ public class Campaign {
 		this.space = space;
 	}
 	
-	public List<MotivationType> getCampaignMotivation() {
-		return campaignMotivation;
+	public List<MotivationType> getMotivation() {
+		return motivation;
 	}
-	public void setCampaignMotivation(List<MotivationType> campaignMotivation) {
-		this.campaignMotivation = campaignMotivation;
+	public void setMotivation(List<MotivationType> motivation) {
+		this.motivation = motivation;
 	}
 
 	public long getAnnotationTarget() {
@@ -282,11 +283,11 @@ public class Campaign {
 		this.targetCollections = targetCollections;
 	}
 
-	public String getCampaignTitle() {
+	public String getTitle() {
 		return title;
 	}
-	public void setCampaignTitle(String campaignTitle) {
-		this.title = campaignTitle;
+	public void setTitle(String title) {
+		this.title = title;
 	}
 
 	public Hashtable<ObjectId, AnnotationCount> getContributorsPoints() {
@@ -296,11 +297,11 @@ public class Campaign {
 		this.contributorsPoints = contributorsPoints;
 	}
 
-	public String getCampaignBanner() {
+	public String getBanner() {
 		return banner;
 	}
-	public void setCampaignBanner(String campaignBanner) {
-		this.banner = campaignBanner;
+	public void setBanner(String banner) {
+		this.banner = banner;
 	}
 
 	

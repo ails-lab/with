@@ -93,9 +93,28 @@ public class CampaignController extends WithController {
 			result.put("error", "Invalid JSON");
 			return badRequest(result);
 		}
-		Class<?> clazz = Class.forName("model.Campaign");
+		//Class<?> clazz = Class.forName("model.Campaign");
 		ObjectMapper mapper = new ObjectMapper();
 		mapper.readerForUpdating(campaign).readValue(json);
+
+		// Parse correctly the given dates
+		if (json.has("startDate")) {
+			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+			try {
+				campaign.setStartDate(sdf.parse(json.get("startDate").asText()));
+			} catch (ParseException e) {
+				log.error(e.getMessage());
+			}
+		}
+		if (json.has("endDate")) {
+			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+			try {
+				campaign.setEndDate(sdf.parse(json.get("endDate").asText()));
+			} catch (ParseException e) {
+				log.error(e.getMessage());
+			}
+		}
+		
 		// Campaign campaignChanges = (Campaign) Json.fromJson(json, clazz);
 		DB.getCampaignDAO().makePermanent(campaign);
 		return ok(Json.toJson(DB.getCampaignDAO().get(campaignDbId)));
@@ -169,15 +188,15 @@ public class CampaignController extends WithController {
 				newCampaign.setCreator(creator);
 			}
 			// Set Campaign.title
-			if (!json.has("campaignTitle")) {
+			if (!json.has("title")) {
 				error.put("error", "Must specify title for the campaign");
 				return badRequest(error);
-			} else if (json.get("campaignTitle").asText().length() < 3) {
+			} else if (json.get("title").asText().length() < 3) {
 				error.put("error", "Title of Campaign must contain at least 3 characters");
 				return badRequest(error);
 			}
-			String title = json.get("campaignTitle").asText();
-			newCampaign.setCampaignTitle(title);
+			String title = json.get("title").asText();
+			newCampaign.setTitle(title);
 			// Set Campaign.username
 			String username = title.replaceAll("\\s+", "-").toLowerCase();
 			if (!uniqueCampaignName(username)) {
@@ -211,10 +230,10 @@ public class CampaignController extends WithController {
 				newCampaign.setSpacename(json.get("spacename").asText());
 			}
 			// Set Campaign.banner
-			if (!json.has("campaignBanner")) {
-				newCampaign.setCampaignBanner("");
+			if (!json.has("banner")) {
+				newCampaign.setBanner("");
 			} else {
-				newCampaign.setCampaignBanner(json.get("campaignBanner").asText());
+				newCampaign.setBanner(json.get("banner").asText());
 			}
 			// Set Campaign.annotationTarget
 			if (!json.has("annotationTarget")) {
@@ -234,7 +253,7 @@ public class CampaignController extends WithController {
 			newCampaign.setContributorsPoints(new Hashtable<ObjectId, AnnotationCount>());
 			// Set Campaign.startDate and Campaign.endDate
 			if (json.has("startDate")) {
-				SimpleDateFormat sdfs = new SimpleDateFormat("yyyy-MM-dd");
+				SimpleDateFormat sdfs = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
 				try {
 					newCampaign.setStartDate(sdfs.parse(json.get("startDate").asText()));
 				} catch (ParseException e) {
@@ -243,14 +262,15 @@ public class CampaignController extends WithController {
 				}
 			}
 			if (json.has("endDate")) {
-				SimpleDateFormat sdfe = new SimpleDateFormat("yyyy-MM-dd");
+				SimpleDateFormat sdfe = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
 				try {
-					newCampaign.setStartDate(sdfe.parse(json.get("startDate").asText()));
+					newCampaign.setStartDate(sdfe.parse(json.get("endDate").asText()));
 				} catch (ParseException e) {
 					error.put("error", "End date's format is invalid");
 					return badRequest(error);
 				}
 			}
+			
 			newCampaign.setCreated(new Date());
 			try {
 				DB.getCampaignDAO().makePermanent(newCampaign);
