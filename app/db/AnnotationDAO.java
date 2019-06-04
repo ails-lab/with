@@ -28,6 +28,8 @@ import model.annotations.Annotation.AnnotationAdmin;
 import model.annotations.Annotation.MotivationType;
 import model.annotations.bodies.AnnotationBodyGeoTagging;
 import model.annotations.bodies.AnnotationBodyTagging;
+import model.annotations.bodies.AnnotationBodyColorTagging;
+import model.annotations.bodies.AnnotationBodyPolling;
 import model.annotations.selectors.SelectorType;
 import model.annotations.targets.AnnotationTarget;
 import model.basicDataTypes.Language;
@@ -111,7 +113,22 @@ public class AnnotationDAO extends DAO<Annotation> {
 			if (body.getUri() != null) {
 				q.field("body.uri").equal(body.getUri());
 			}
-		} else if (annotation.getMotivation().equals(MotivationType.GeoTagging)) {
+		}
+		else if (annotation.getMotivation().equals(MotivationType.ColorTagging)) {
+			AnnotationBodyColorTagging body = (AnnotationBodyColorTagging) annotation.getBody();
+			
+			if (body.getUri() != null) {
+				q.field("body.uri").equal(body.getUri());
+			}
+		}
+		else if (annotation.getMotivation().equals(MotivationType.Polling)) {
+			AnnotationBodyPolling body = (AnnotationBodyPolling) annotation.getBody();
+			
+			if (body.getUri() != null) {
+				q.field("body.uri").equal(body.getUri());
+			}
+		}
+		else if (annotation.getMotivation().equals(MotivationType.GeoTagging)) {
 			AnnotationBodyGeoTagging body = (AnnotationBodyGeoTagging) annotation.getBody();
 				
 			q.field("body.coordinates").equal(body.getCoordinates());
