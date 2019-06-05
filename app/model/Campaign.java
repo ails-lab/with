@@ -218,6 +218,11 @@ public class Campaign {
 			return  BadgeType.None;		
 	}
 	
+	public Boolean getActive() {
+		Date today = new Date();
+		return ( (today.compareTo(this.startDate)>0) && (today.compareTo(this.endDate)<0) );
+	}
+	
 	public Date getCreated() {
 		return created;
 	}

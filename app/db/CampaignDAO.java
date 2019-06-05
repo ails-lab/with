@@ -28,15 +28,20 @@ import org.mongodb.morphia.query.UpdateOperations;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
+import controllers.CampaignController;
 import model.Campaign;
+import play.Logger;
+import play.Logger.ALogger;
 
 public class CampaignDAO extends DAO<Campaign> {
+	
+	public static final ALogger log = Logger.of(CampaignController.class);
 
 	public CampaignDAO() {
 		super(Campaign.class);
 	}
 
-	public long campaignCount(String groupName, String project, boolean active) {
+	public long campaignCount(String groupName, String project, String state) {
 
 		Query<Campaign> q = this.createQuery();
 
@@ -51,9 +56,16 @@ public class CampaignDAO extends DAO<Campaign> {
 		}
 
 		Date today = new Date();
-		if (active) {
+		if (state.equals("active")) {
 			q = q.field("startDate").lessThanOrEq(today).field("endDate").greaterThanOrEq(today);
 		}
+		else if (state.equals("inactive")) {
+			q.or(q.criteria("startDate").greaterThanOrEq(today), q.criteria("endDate").lessThanOrEq(today));
+		}
+		else if (state.equals("all")) {
+			q = q.field("startDate").exists().field("endDate").exists();
+		}
+
 		return q.countAll();
 	}
 
@@ -69,7 +81,7 @@ public class CampaignDAO extends DAO<Campaign> {
 		return this.findOne(q);
 	}
 
-	public List<Campaign> getCampaigns(String groupName, String project, boolean active, String sortBy, int offset, int count) {
+	public List<Campaign> getCampaigns(String groupName, String project, String state, String sortBy, int offset, int count) {
 		Query<Campaign> q = this.createQuery();
 		
 		if (!groupName.isEmpty()) {
@@ -80,11 +92,16 @@ public class CampaignDAO extends DAO<Campaign> {
 		}
 		
 		Date today = new Date();
-		if (active) {
+		if (state.equals("active")) {
 			q = q.field("startDate").lessThanOrEq(today).field("endDate").greaterThanOrEq(today);
-		} else {
+		}
+		else if (state.equals("inactive")) {
 			q.or(q.criteria("startDate").greaterThanOrEq(today), q.criteria("endDate").lessThanOrEq(today));
 		}
+		else if (state.equals("all")) {
+			q = q.field("startDate").exists().field("endDate").exists();
+		}
+				
 		if (sortBy.equals("Date")) {
 			q = q.order("endDate").offset(offset).limit(count);
 		} else if (sortBy.equals("Alphabetical")) {
@@ -111,23 +128,6 @@ public class CampaignDAO extends DAO<Campaign> {
 		q.field("creator").equal(userId);
 		long count = this.count(q);
 		return count;
-	}
-
-	public long getCampaignsCount(ObjectId groupId, String project) {
-		Query<Campaign> q = this.createQuery();
-		
-		if (groupId != null) {
-			q = q.field("space").equal(groupId);
-		}
-		
-		if (project == "") {
-			q = q.field("project").equal("WITHcrowd");
-		}
-		else {
-			q = q.field("project").equal(project);
-		}
-		
-		return q.countAll();
 	}
 
 	public void incUserPoints(ObjectId campaignId, String userid, String annotType) {
