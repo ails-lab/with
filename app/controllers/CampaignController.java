@@ -237,7 +237,7 @@ public class CampaignController extends WithController {
 			}
 			// Set Campaign.annotationTarget
 			if (!json.has("annotationTarget")) {
-				newCampaign.setAnnotationTarget(0);
+				newCampaign.setAnnotationTarget(1000);
 			} else {
 				try {
 					int tar = Integer.parseInt(json.get("annotationTarget").asText());
@@ -264,7 +264,7 @@ public class CampaignController extends WithController {
 			if (json.has("endDate")) {
 				SimpleDateFormat sdfe = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
 				try {
-					newCampaign.setStartDate(sdfe.parse(json.get("endDate").asText()));
+					newCampaign.setEndDate(sdfe.parse(json.get("endDate").asText()));
 				} catch (ParseException e) {
 					error.put("error", "End date's format is invalid");
 					return badRequest(error);
