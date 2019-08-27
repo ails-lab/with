@@ -58,7 +58,8 @@ libraryDependencies ++= Seq(
  "com.google.api-client" % "google-api-client" % "1.22.0",
  "com.google.apis" % "google-api-services-plus" % "v1-rev413-1.22.0",
  "org.facebook4j" % "facebook4j-core" % "2.4.8",
-  "org.apache.commons" % "commons-compress" % "1.12",
+ "org.apache.commons" % "commons-compress" % "1.12",
+ "org.apache.commons" % "commons-lang3" % "3.0" withSources() withJavadoc(),
  "commons-io" % "commons-io" % "2.2",
  "com.hermit-reasoner" % "org.semanticweb.hermit" % "1.3.8.4"
 )

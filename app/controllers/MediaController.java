@@ -27,6 +27,8 @@ import java.io.InputStream;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
 import java.net.URLConnection;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -74,6 +76,7 @@ import model.EmbeddedMediaObject.MediaVersion;
 import model.EmbeddedMediaObject.WithMediaRights;
 import model.EmbeddedMediaObject.WithMediaType;
 import model.MediaObject;
+import model.basicDataTypes.Language;
 import model.resources.RecordResource;
 import net.coobird.thumbnailator.Thumbnails;
 import net.coobird.thumbnailator.geometry.Positions;
@@ -125,8 +128,7 @@ public class MediaController extends WithController {
 			log.error("Cannot retrieve media document from database", e);
 			FileAndType med;
 			try {
-				med = ((ApacheHttpConnector) ApacheHttpConnector.getApacheHttpConnector())
-						.getContentAndType(url);
+				med = ((ApacheHttpConnector) ApacheHttpConnector.getApacheHttpConnector()).getContentAndType(url);
 			} catch (Exception e1) {
 				return internalServerError("Cannot retrieve media document");
 			}
@@ -158,7 +160,7 @@ public class MediaController extends WithController {
 			FileAndType img = ((ApacheHttpConnector) ApacheHttpConnector.getApacheHttpConnector())
 					.getContentAndType(url);
 			byte[] mediaBytes = IOUtils.toByteArray(new FileInputStream(img.data));
-			img.data.delete(); 
+			img.data.delete();
 			media.setUrl(url);
 			media.setMediaBytes(mediaBytes);
 			if (version != null) {
@@ -187,8 +189,8 @@ public class MediaController extends WithController {
 					Arrays.asList("media"));
 			Set<String> urls = new HashSet<String>();
 			for (RecordResource record : records) {
-				if (urls.size() >= 100)
-					break;
+//				if (urls.size() >= 100)
+//					break;
 				urls.addAll(((List<HashMap<MediaVersion, EmbeddedMediaObject>>) record.getMedia()).stream()
 						.filter(m -> m.containsKey(MediaVersion.Original)
 								&& m.get(MediaVersion.Original).getType() != null
@@ -207,7 +209,7 @@ public class MediaController extends WithController {
 						if (((image = downloadMedia(url, MediaVersion.Original)) != null)
 								&& (imageBytes = image.getMediaBytes()) != null) {
 							try {
-								zipout.putNextEntry(new ZipEntry("Image" + i++));
+								zipout.putNextEntry(new ZipEntry(URLEncoder.encode(url, StandardCharsets.UTF_8.toString())));
 								zipout.write(imageBytes);
 								zipout.closeEntry();
 							} catch (IOException e) {
@@ -222,7 +224,8 @@ public class MediaController extends WithController {
 					}
 				}
 			}).start();
-			response().setHeader( "content-disposition", "attachment; filename=\"images.zip\"");
+			response().setHeader("content-disposition", "attachment; filename=\""
+					+ DB.getCollectionObjectDAO().getById(collectionDbId).getDescriptiveData().getLabel().get(Language.DEFAULT).get(0) + "\"");
 			return ok(in).as("application/zip");
 		} catch (Exception e) {
 			log.error("Couldn't get images ", e);
@@ -249,10 +252,9 @@ public class MediaController extends WithController {
 	}
 
 	/**
-	 * Allow media create with two different methods, by first supplying
-	 * metadata or a file File data can arrive in different ways. Whole body is
-	 * file content, form based file upload, or json field with encoded file
-	 * data.
+	 * Allow media create with two different methods, by first supplying metadata or
+	 * a file File data can arrive in different ways. Whole body is file content,
+	 * form based file upload, or json field with encoded file data.
 	 *
 	 * @param fileData
 	 * @return
@@ -446,10 +448,10 @@ public class MediaController extends WithController {
 	}
 
 	/*
-	 * private static ResourceType parseOriginalRights(String resourceType) {
-	 * for (ResourceType type : ResourceType.values()) { if
-	 * (StringUtils.equals(type.name().toLowerCase(),
-	 * resourceType.toLowerCase())) { return type; } } return null; }
+	 * private static ResourceType parseOriginalRights(String resourceType) { for
+	 * (ResourceType type : ResourceType.values()) { if
+	 * (StringUtils.equals(type.name().toLowerCase(), resourceType.toLowerCase())) {
+	 * return type; } } return null; }
 	 */
 
 	private static void editMediaAfterChecker(MediaObject med, JsonNode json) {
