@@ -60,7 +60,10 @@ public class CampaignDAO extends DAO<Campaign> {
 			q = q.field("startDate").lessThanOrEq(today).field("endDate").greaterThanOrEq(today);
 		}
 		else if (state.equals("inactive")) {
-			q.or(q.criteria("startDate").greaterThanOrEq(today), q.criteria("endDate").lessThanOrEq(today));
+			q = q.field("startDate").lessThanOrEq(today).field("endDate").lessThanOrEq(today);
+		}
+		else if (state.equals("upcoming")) {
+			q = q.field("startDate").greaterThanOrEq(today).field("endDate").greaterThanOrEq(today);
 		}
 		else if (state.equals("all")) {
 			q = q.field("startDate").exists().field("endDate").exists();
@@ -96,7 +99,10 @@ public class CampaignDAO extends DAO<Campaign> {
 			q = q.field("startDate").lessThanOrEq(today).field("endDate").greaterThanOrEq(today);
 		}
 		else if (state.equals("inactive")) {
-			q.or(q.criteria("startDate").greaterThanOrEq(today), q.criteria("endDate").lessThanOrEq(today));
+			q = q.field("startDate").lessThanOrEq(today).field("endDate").lessThanOrEq(today);
+		}
+		else if (state.equals("upcoming")) {
+			q = q.field("startDate").greaterThanOrEq(today).field("endDate").greaterThanOrEq(today);
 		}
 		else if (state.equals("all")) {
 			q = q.field("startDate").exists().field("endDate").exists();
