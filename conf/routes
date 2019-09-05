@@ -64,6 +64,7 @@ GET     /record/multiple						controllers.RecordResourceController.getMultipleRe
 GET		/record/:id							    controllers.RecordResourceController.getRecordResource(id, format: play.libs.F.Option[String], profile: String ?="MEDIUM", locale: play.libs.F.Option[java.lang.String])
 PUT		/record/:id								controllers.RecordResourceController.editRecordResource(id)
 
+GET		/annotation/importAutomatic					controllers.AnnotationController.importAutomaticColourAnnotations()
 GET 	/annotation/leaderboard					controllers.AnnotationController.leaderboard( groupId: String )
 GET		/annotation/approveMultiple				controllers.AnnotationController.approveMultipleAnnotations( id: java.util.List[String])
 GET		/annotation/rejectMultiple				controllers.AnnotationController.rejectMultipleAnnotations( id: java.util.List[String])
@@ -232,7 +233,6 @@ POST	/group/:id/annotate							controllers.CollectionObjectController.annotateCo
 
 POST	/annotation/annotateRequestResult					controllers.AnnotationRequestController.newAnnotations()	
 GET		/collection/api/removeIdsOfDeletedRecords	controllers.WithResourceController.removeIdsOfDeletedRecords()		
-
 GET	     /collection/:id/annotations 	        			controllers.CollectionObjectController.getAnnotations(id)
 
 #GET	     /collection/:id/annotationSummary 	        			controllers.CollectionObjectController.getAnnotationSummary(id, mode: String ?="FLAT")

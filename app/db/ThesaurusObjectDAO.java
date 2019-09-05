@@ -31,6 +31,7 @@ import sources.core.ParallelAPICall;
 import com.fasterxml.jackson.databind.JsonNode;
 
 import elastic.ElasticEraser;
+import model.annotations.Annotation;
 import model.resources.RecordResource;
 import model.resources.ThesaurusObject;
 
@@ -42,6 +43,12 @@ public class ThesaurusObjectDAO extends DAO<ThesaurusObject> {
 	
 	public ThesaurusObject getByUri(String uri) {
 		return this.findOne("semantic.uri", uri);
+	}
+	
+	public ThesaurusObject getByPrefLabel(String label) {
+		Query<ThesaurusObject> q = this.createQuery().disableValidation()
+				.field("semantic.prefLabel.default").equal(label);
+		return this.findOne(q);
 	}
 	
 	public List<ThesaurusObject> getByExactMatch(String uri) {

@@ -17,6 +17,7 @@
 package controllers;
 
 import java.io.IOException;
+import java.sql.SQLException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -24,6 +25,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Hashtable;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -34,13 +36,13 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.bson.types.ObjectId;
+import org.mongodb.morphia.geo.GeoJson;
+import org.mongodb.morphia.geo.Point;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-
-import org.mongodb.morphia.geo.GeoJson;
-import org.mongodb.morphia.geo.Point;
+import com.mongodb.connection.Connection;
 
 import controllers.RecordResourceController.CollectionAndRecordsCounts;
 import controllers.WithController.Profile;
@@ -53,13 +55,15 @@ import model.annotations.Annotation;
 import model.annotations.Annotation.AnnotationAdmin;
 import model.annotations.Annotation.MotivationType;
 import model.annotations.bodies.AnnotationBody;
-import model.annotations.bodies.AnnotationBodyTagging;
+import model.annotations.bodies.AnnotationBodyColorTagging;
 import model.annotations.bodies.AnnotationBodyGeoTagging;
+import model.annotations.targets.AnnotationTarget;
 import model.basicDataTypes.Language;
 import model.basicDataTypes.MultiLiteral;
 import model.basicDataTypes.WithAccess;
 import model.basicDataTypes.WithAccess.Access;
 import model.resources.RecordResource;
+import model.resources.ThesaurusObject;
 import model.resources.WithResourceType;
 import model.usersAndGroups.User;
 import play.Logger;
@@ -504,7 +508,7 @@ public class AnnotationController extends Controller {
 		recordsWithCount.put("annotatedRecordsCount", annotatedRecords);
 		return ok(recordsWithCount);
 	}
-	
+
 	public static JsonNode getUserAnnotatedRecords(ObjectId withUser, int offset, int count) {
 		ArrayNode recordsList = Json.newObject().arrayNode();
 		List<RecordResource> records = DB.getRecordResourceDAO().getAnnotatedRecords(withUser, offset, count);
@@ -516,7 +520,7 @@ public class AnnotationController extends Controller {
 		}
 		return recordsList;
 	}
-	
+
 	public static Result getUserAnnotatedRecords(String userId, int offset, int count) {
 		ObjectId withUser = null;
 		if (userId != null)
@@ -526,9 +530,8 @@ public class AnnotationController extends Controller {
 		if (withUser == null)
 			return badRequest(Json.parse("{ 'error' : 'No user defined' }"));
 		return ok(getUserAnnotatedRecords(withUser, offset, count));
-		
-	}
 
+	}
 
 	public static Annotation getAnnotationFromJson(JsonNode json) {
 		return getAnnotationFromJson(json, WithController.effectiveUserDbId());
@@ -700,5 +703,99 @@ public class AnnotationController extends Controller {
 		}
 
 		return ok(result);
+	}
+	private static void addAutomaticAnnotation(RecordResource record, String colour, Double score ) throws ClientProtocolException, IOException {
+		ObjectNode error = Json.newObject();
+		Annotation annotation = new Annotation();
+		AnnotationAdmin annotationAdmin = new AnnotationAdmin();
+		annotationAdmin.setWithCreator(new ObjectId("5c599c9c4c74793211258bbd")); //EFHA
+		annotationAdmin.setGenerator("Image Analysis");
+		annotationAdmin.setCreated(new Date());
+		annotationAdmin.setGenerated(new Date());
+		annotationAdmin.setLastModified(new Date());
+		annotationAdmin.setConfidence(score);
+		annotation.setAnnotators(new ArrayList(Arrays.asList(annotationAdmin)));
+		annotation.setTarget(new AnnotationTarget());
+		annotation.getTarget().setRecordId(record.getDbId());
+		annotation.getTarget().setExternalId(record.getAdministrative().getExternalId());
+		annotation.getTarget().setWithURI(record.getAdministrative().getWithURI());
+		annotation.setMotivation(MotivationType.ColorTagging);
+		annotation.setBody(new AnnotationBodyColorTagging());
+		ThesaurusObject to = DB.getThesaurusDAO().getByPrefLabel(colour);
+		((AnnotationBodyColorTagging) annotation.getBody()).setUriVocabulary("fashion");
+		((AnnotationBodyColorTagging) annotation.getBody()).setLabel(new MultiLiteral(to.getSemantic().getPrefLabel()));
+		((AnnotationBodyColorTagging) annotation.getBody()).setUri(to.getSemantic().getUri());
+		System.out.println(annotation);
+		
+	
+//		if (annotation.getTarget().getRecordId() == null) {
+//			RecordResource record = DB.getRecordResourceDAO().getByExternalId(annotation.getTarget().getExternalId());
+//			if (record == null)
+//				return badRequest();
+//			annotation.getTarget().setRecordId(record.getDbId());
+//			annotation.getTarget().setWithURI("/record/" + record.getDbId());
+//		}
+//		Annotation existingAnnotation = DB.getAnnotationDAO().getExistingAnnotation(annotation);
+//		if (existingAnnotation == null) {
+//			DB.getAnnotationDAO().makePermanent(annotation);
+//			annotation.setAnnotationWithURI("/annotation/" + annotation.getDbId());
+//			DB.getAnnotationDAO().makePermanent(annotation); // is this needed for a second time?
+//			DB.getRecordResourceDAO().addAnnotation(annotation.getTarget().getRecordId(), annotation.getDbId());
+//		} else {
+//			ArrayList<AnnotationAdmin> annotators = existingAnnotation.getAnnotators();
+//			ObjectId userId = WithController.effectiveUserDbId();
+//			for (AnnotationAdmin a : annotators) {
+//				if (a.getWithCreator().equals(userId)) {
+//					return ok(Json.toJson(existingAnnotation));
+//				}
+//			}
+//			DB.getAnnotationDAO().addAnnotators(existingAnnotation.getDbId(), annotation.getAnnotators());
+//			annotation = DB.getAnnotationDAO().get(existingAnnotation.getDbId());
+//		}
+		return;
+	}
+
+	public static Result importAutomaticColourAnnotations() throws SQLException, ClassNotFoundException, ClientProtocolException, IOException {
+		Class.forName("com.mysql.jdbc.Driver");  
+		java.sql.Connection con= java.sql.DriverManager.getConnection( 
+		"jdbc:mysql://panic.image.ntua.gr:3306/portal","USERNAME","PASSWORD"); 
+		// Database properties 
+		//String url = "jdbc:mysql://panic.image.ntua.gr:3306/";
+		// the portal  String dbName = "portal"; 
+		// the DB name  String driver = "com.mysql.jdbc.Driver"; 
+		// the DB driver  String userName = "USERNAME"; 
+		// the portal username  String password = "PASSWORD";
+		// the portal password
+		List<ObjectId> collectionIds = Arrays.asList(new ObjectId("5cf7891d4c74797c594a8383"),
+				new ObjectId("5cf78d264c74797c594a8500"), new ObjectId("5cf8d8ca4c74797c594a9105"));
+		Iterator<RecordResource> i = DB.getRecordResourceDAO().getByCollection(collectionIds.get(0)).iterator();
+		int errors = 0;
+		while (i.hasNext()) {
+			RecordResource record = i.next();
+			String[] split = record.getDescriptiveData().getIsShownBy().toString().split("/");
+			String filename = split[split.length - 1];
+			java.sql.Statement stmt=con.createStatement();  
+			java.sql.ResultSet rs=stmt.executeQuery("select * from image_analysis where filename=\""+ filename + "\"");
+			int j = 0;
+			while(rs.next()) {
+				for (int k = 3; k < 14; k++) {
+					String[] colourInfo = rs.getString(k).split(":");
+					String colour = colourInfo[0];
+					Double score = Double.parseDouble(colourInfo[1]);
+					if (score > 0.01) {
+						addAutomaticAnnotation(record, colour, score );
+					}
+				}
+				System.out.println(filename + ": " + rs.getString(3)+"  "+rs.getString(4)+"  "+rs.getString(5));
+				j++;
+			}
+			if (j != 1) {
+				errors++;
+				System.out.println("ERROR: " + filename + " has " + j + "entries");
+			}
+		}
+		System.out.println("Finished with " + errors + " errors");
+		con.close();
+		return ok();
 	}
 }
