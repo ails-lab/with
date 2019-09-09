@@ -704,11 +704,12 @@ public class AnnotationController extends Controller {
 
 		return ok(result);
 	}
-	private static void addAutomaticAnnotation(RecordResource record, String colour, Double score ) throws ClientProtocolException, IOException {
-		ObjectNode error = Json.newObject();
+
+	private static void addAutomaticAnnotation(RecordResource record, String colour, Double score)
+			throws ClientProtocolException, IOException {
 		Annotation annotation = new Annotation();
 		AnnotationAdmin annotationAdmin = new AnnotationAdmin();
-		annotationAdmin.setWithCreator(new ObjectId("5c599c9c4c74793211258bbd")); //EFHA
+		annotationAdmin.setWithCreator(new ObjectId("5c599c9c4c74793211258bbd")); // EFHA
 		annotationAdmin.setGenerator("Image Analysis");
 		annotationAdmin.setCreated(new Date());
 		annotationAdmin.setGenerated(new Date());
@@ -725,76 +726,59 @@ public class AnnotationController extends Controller {
 		((AnnotationBodyColorTagging) annotation.getBody()).setUriVocabulary("fashion");
 		((AnnotationBodyColorTagging) annotation.getBody()).setLabel(new MultiLiteral(to.getSemantic().getPrefLabel()));
 		((AnnotationBodyColorTagging) annotation.getBody()).setUri(to.getSemantic().getUri());
-		System.out.println(annotation);
-		
-	
-//		if (annotation.getTarget().getRecordId() == null) {
-//			RecordResource record = DB.getRecordResourceDAO().getByExternalId(annotation.getTarget().getExternalId());
-//			if (record == null)
-//				return badRequest();
-//			annotation.getTarget().setRecordId(record.getDbId());
-//			annotation.getTarget().setWithURI("/record/" + record.getDbId());
-//		}
-//		Annotation existingAnnotation = DB.getAnnotationDAO().getExistingAnnotation(annotation);
-//		if (existingAnnotation == null) {
-//			DB.getAnnotationDAO().makePermanent(annotation);
-//			annotation.setAnnotationWithURI("/annotation/" + annotation.getDbId());
-//			DB.getAnnotationDAO().makePermanent(annotation); // is this needed for a second time?
-//			DB.getRecordResourceDAO().addAnnotation(annotation.getTarget().getRecordId(), annotation.getDbId());
-//		} else {
-//			ArrayList<AnnotationAdmin> annotators = existingAnnotation.getAnnotators();
-//			ObjectId userId = WithController.effectiveUserDbId();
-//			for (AnnotationAdmin a : annotators) {
-//				if (a.getWithCreator().equals(userId)) {
-//					return ok(Json.toJson(existingAnnotation));
-//				}
-//			}
-//			DB.getAnnotationDAO().addAnnotators(existingAnnotation.getDbId(), annotation.getAnnotators());
-//			annotation = DB.getAnnotationDAO().get(existingAnnotation.getDbId());
-//		}
+		annotation.getTarget().setWithURI("/record/" + record.getDbId());
+		DB.getAnnotationDAO().makePermanent(annotation);
+		annotation.setAnnotationWithURI("/annotation/" + annotation.getDbId());
+		DB.getAnnotationDAO().makePermanent(annotation); // is this needed for a second time?
+		DB.getRecordResourceDAO().addAnnotation(annotation.getTarget().getRecordId(), annotation.getDbId());
 		return;
 	}
 
-	public static Result importAutomaticColourAnnotations() throws SQLException, ClassNotFoundException, ClientProtocolException, IOException {
-		Class.forName("com.mysql.jdbc.Driver");  
-		java.sql.Connection con= java.sql.DriverManager.getConnection( 
-		"jdbc:mysql://panic.image.ntua.gr:3306/portal","USERNAME","PASSWORD"); 
-		// Database properties 
-		//String url = "jdbc:mysql://panic.image.ntua.gr:3306/";
-		// the portal  String dbName = "portal"; 
-		// the DB name  String driver = "com.mysql.jdbc.Driver"; 
-		// the DB driver  String userName = "USERNAME"; 
-		// the portal username  String password = "PASSWORD";
+	public static Result importAutomaticColourAnnotations()
+			throws SQLException, ClassNotFoundException, ClientProtocolException, IOException {
+		Class.forName("com.mysql.jdbc.Driver");
+		java.sql.Connection con = java.sql.DriverManager.getConnection("jdbc:mysql://panic.image.ntua.gr:3306/portal",
+				"USERNAME", "PASSWORD");
+		// Database properties
+		// String url = "jdbc:mysql://panic.image.ntua.gr:3306/";
+		// the portal String dbName = "portal";
+		// the DB name String driver = "com.mysql.jdbc.Driver";
+		// the DB driver String userName = "USERNAME";
+		// the portal username String password = "PASSWORD";
 		// the portal password
 		List<ObjectId> collectionIds = Arrays.asList(new ObjectId("5cf7891d4c74797c594a8383"),
 				new ObjectId("5cf78d264c74797c594a8500"), new ObjectId("5cf8d8ca4c74797c594a9105"));
-		Iterator<RecordResource> i = DB.getRecordResourceDAO().getByCollection(collectionIds.get(0)).iterator();
-		int errors = 0;
-		while (i.hasNext()) {
-			RecordResource record = i.next();
-			String[] split = record.getDescriptiveData().getIsShownBy().toString().split("/");
-			String filename = split[split.length - 1];
-			java.sql.Statement stmt=con.createStatement();  
-			java.sql.ResultSet rs=stmt.executeQuery("select * from image_analysis where filename=\""+ filename + "\"");
-			int j = 0;
-			while(rs.next()) {
-				for (int k = 3; k < 14; k++) {
-					String[] colourInfo = rs.getString(k).split(":");
-					String colour = colourInfo[0];
-					Double score = Double.parseDouble(colourInfo[1]);
-					if (score > 0.01) {
-						addAutomaticAnnotation(record, colour, score );
+		for (ObjectId collectionId : collectionIds) {
+			Iterator<RecordResource> i = DB.getRecordResourceDAO().getByCollection(collectionId).iterator();
+			int errors = 0;
+			while (i.hasNext()) {
+				RecordResource record = i.next();
+				String[] split = record.getDescriptiveData().getIsShownBy().toString().split("/");
+				String filename = split[split.length - 1];
+				java.sql.Statement stmt = con.createStatement();
+				java.sql.ResultSet rs = stmt
+						.executeQuery("select * from image_analysis where filename=\"" + filename + "\"");
+				int j = 0;
+				while (rs.next()) {
+					for (int k = 3; k < 14; k++) {
+						String[] colourInfo = rs.getString(k).split(":");
+						String colour = colourInfo[0];
+						Double score = Double.parseDouble(colourInfo[1]);
+						if (score > 0.01) {
+							addAutomaticAnnotation(record, colour, score);
+						}
 					}
+					System.out.println(
+							filename + ": " + rs.getString(3) + "  " + rs.getString(4) + "  " + rs.getString(5));
+					j++;
 				}
-				System.out.println(filename + ": " + rs.getString(3)+"  "+rs.getString(4)+"  "+rs.getString(5));
-				j++;
+				if (j != 1) {
+					errors++;
+					System.out.println("ERROR: " + filename + " has " + j + "entries");
+				}
 			}
-			if (j != 1) {
-				errors++;
-				System.out.println("ERROR: " + filename + " has " + j + "entries");
-			}
+			System.out.println("Finished with " + errors + " errors");
 		}
-		System.out.println("Finished with " + errors + " errors");
 		con.close();
 		return ok();
 	}
