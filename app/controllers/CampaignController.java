@@ -167,6 +167,12 @@ public class CampaignController extends WithController {
 	private static boolean uniqueCampaignName(String name) {
 		return (DB.getCampaignDAO().getCampaignByName(name) == null);
 	}
+	
+	public static Result resetCampaign(String campaignId) {
+		DB.getCampaignDAO().resetCampaignPoints(new ObjectId(campaignId));
+		DB.getAnnotationDAO().deleteCampaignAnnotations(new ObjectId(campaignId));
+		return ok();
+	}
 
 	public static Result createCampaign() {
 		Campaign newCampaign = null;

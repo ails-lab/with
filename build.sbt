@@ -1,5 +1,6 @@
 import sbt._
 import Keys._
+import EclipseKeys._
 import IO._
 import Seq._
 import scala.xml._
@@ -65,4 +66,6 @@ libraryDependencies ++= Seq(
  "mysql" % "mysql-connector-java" % "5.1.12"
 )
 
-sources in doc in Compile := List() 
+sources in doc in Compile := List()
+
+EclipseKeys.withSource := true 

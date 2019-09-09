@@ -241,6 +241,7 @@ GET	     /collection/:id/annotations 	        			controllers.CollectionObjectCon
 GET		/campaign/count								controllers.CampaignController.getCampaignCount(group: String ?= "", project: String ?= "WITHcrowd", state: String ?= "all")
 GET		/campaign/getCampaign						controllers.CampaignController.getCampaign(campaignId: String)
 DELETE	/campaign/:id								controllers.CampaignController.deleteCampaign(id)
+GET		/campaign/reset/:id							controllers.CampaignController.resetCampaign(id)
 PUT		/campaign/:id								controllers.CampaignController.editCampaign(id)
 GET		/campaign/getCampaignByName					controllers.CampaignController.getCampaignByName(cname: String)
 GET		/campaign/campaigns							controllers.CampaignController.getCampaigns(group: String ?= "", project: String ?= "WITHcrowd", state: String ?="all", sortBy: String ?= "Alphabetical", offset: Integer ?=0, count: Integer ?=10)

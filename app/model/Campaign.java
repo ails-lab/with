@@ -129,6 +129,38 @@ public class Campaign {
 		}
 	}
 	
+	public static class BadgePrizes {
+		private String bronze;
+		private String silver;
+		private String gold;
+		private String rookie;
+		
+		public String getBronze() {
+			return bronze;
+		}
+		public void setBronze(String bronze) {
+			this.bronze = bronze;
+		}
+		public String getSilver() {
+			return silver;
+		}
+		public void setSilver(String silver) {
+			this.silver = silver;
+		}
+		public String getGold() {
+			return gold;
+		}
+		public void setGold(String gold) {
+			this.gold = gold;
+		}
+		public String getRookie() {
+			return rookie;
+		}
+		public void setRookie(String rookie) {
+			this.rookie = rookie;
+		}
+	}
+	
 	
 	@Id
 	@JsonSerialize(using = Serializer.ObjectIdSerializer.class)
@@ -174,6 +206,9 @@ public class Campaign {
 	private List<MotivationType> motivation;
 	
 	private BadgeRanges badges;
+	
+	private BadgePrizes prizes;
+
 	
 	private CampaignPurpose purpose;
 	
@@ -378,6 +413,14 @@ public class Campaign {
 
 	public void setProject(String project) {
 		this.project = project;
+	}
+
+	public BadgePrizes getPrizes() {
+		return prizes;
+	}
+
+	public void setPrices(BadgePrizes prizes) {
+		this.prizes = prizes;
 	}
 
 }

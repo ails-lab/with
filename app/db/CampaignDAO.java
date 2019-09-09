@@ -32,6 +32,7 @@ import controllers.CampaignController;
 import model.Campaign;
 import play.Logger;
 import play.Logger.ALogger;
+import play.libs.Json;
 
 public class CampaignDAO extends DAO<Campaign> {
 	
@@ -138,7 +139,7 @@ public class CampaignDAO extends DAO<Campaign> {
 
 	public void incUserPoints(ObjectId campaignId, String userid, String annotType) {
 		Query<Campaign> q = this.createQuery().field("_id").equal(campaignId);
-
+		
 		UpdateOperations<Campaign> updateOps1 = this.createUpdateOperations().disableValidation();
 		updateOps1.inc("contributorsPoints." + userid + "." + annotType);
 		this.update(q, updateOps1);
@@ -148,6 +149,14 @@ public class CampaignDAO extends DAO<Campaign> {
 			updateOps2.inc("annotationCurrent." + annotType);
 			this.update(q, updateOps2);
 		}
+	}
+	
+	public void resetCampaignPoints(ObjectId campaignId) {
+		Query<Campaign> q = this.createQuery().field("_id").equal(campaignId);
+		UpdateOperations<Campaign> updateOps = this.createUpdateOperations().disableValidation();
+		updateOps.set("contributorsPoints", Json.newObject());
+		updateOps.set("annotationCurrent", Json.newObject());
+		this.update(q, updateOps);
 	}
 
 	public void decUserPoints(ObjectId campaignId, String userid, String annotType) {
