@@ -174,6 +174,7 @@ public class CampaignController extends WithController {
 		return ok();
 	}
 
+	//TODO get multilingual object from front-end (title and description)
 	public static Result createCampaign() {
 		Campaign newCampaign = null;
 		ObjectNode error = Json.newObject();

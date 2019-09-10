@@ -18,9 +18,12 @@ package model;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
+import java.util.Map;
 
+import org.apache.commons.collections.map.HashedMap;
 import org.bson.types.ObjectId;
 import org.mongodb.morphia.annotations.Entity;
 import org.mongodb.morphia.annotations.Id;
@@ -30,6 +33,7 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 import model.annotations.Annotation.MotivationType;
+import model.basicDataTypes.Language;
 import model.basicDataTypes.LiteralOrResource;
 import utils.Deserializer;
 import utils.Serializer;
@@ -130,33 +134,33 @@ public class Campaign {
 	}
 	
 	public static class BadgePrizes {
-		private String bronze;
-		private String silver;
-		private String gold;
-		private String rookie;
+		private Map<String, String> bronze;
+		private Map<String, String> silver;
+		private Map<String, String> gold;
+		private Map<String, String> rookie;
 		
-		public String getBronze() {
+		public Map<String, String> getBronze() {
 			return bronze;
 		}
-		public void setBronze(String bronze) {
+		public void setBronze(Map<String, String> bronze) {
 			this.bronze = bronze;
 		}
-		public String getSilver() {
+		public Map<String, String> getSilver() {
 			return silver;
 		}
-		public void setSilver(String silver) {
+		public void setSilver(Map<String, String> silver) {
 			this.silver = silver;
 		}
-		public String getGold() {
+		public Map<String, String> getGold() {
 			return gold;
 		}
-		public void setGold(String gold) {
+		public void setGold(Map<String, String> gold) {
 			this.gold = gold;
 		}
-		public String getRookie() {
+		public Map<String, String> getRookie() {
 			return rookie;
 		}
-		public void setRookie(String rookie) {
+		public void setRookie(Map<String, String> rookie) {
 			this.rookie = rookie;
 		}
 	}
@@ -182,9 +186,9 @@ public class Campaign {
 
 	private String username;
 	
-	private String title;
+	private Map<String, String> title;
 	
-	private String description;
+	private Map<String, String> description;
 	
 	private String banner;
 	
@@ -280,11 +284,16 @@ public class Campaign {
 		this.endDate = endDate;
 	}
 
-	public String getDescription() {
+	public Map<String, String> getDescription() {
 		return description;
 	}
-	public void setDescription(String description) {
+	public void setDescription(Map<String, String> description) {
 		this.description = description;
+	}
+	
+	public void setDescription(String description) {
+		this.description = new HashMap<String, String>();
+		this.description.put("en", description);
 	}
 	
 	public ObjectId getSpace() {
@@ -323,13 +332,18 @@ public class Campaign {
 		this.targetCollections = targetCollections;
 	}
 
-	public String getTitle() {
+	public Map<String, String> getTitle() {
 		return title;
 	}
-	public void setTitle(String title) {
+	public void setTitle(Map<String, String> title) {
 		this.title = title;
 	}
-
+	
+	public void setTitle(String title) {
+		this.title = new HashMap<String, String>();
+		this.title.put("en", title);
+	}
+	
 	public Hashtable<ObjectId, AnnotationCount> getContributorsPoints() {
 		return contributorsPoints;
 	}
