@@ -190,6 +190,8 @@ public class Campaign {
 	
 	private Map<String, String> description;
 	
+	private Map<String, String> instructions;
+	
 	private String banner;
 	
 	private String logo;
@@ -435,6 +437,14 @@ public class Campaign {
 
 	public void setPrices(BadgePrizes prizes) {
 		this.prizes = prizes;
+	}
+
+	public Map<String, String> getInstructions() {
+		return instructions;
+	}
+
+	public void setInstructions(Map<String, String> instructions) {
+		this.instructions = instructions;
 	}
 
 }
