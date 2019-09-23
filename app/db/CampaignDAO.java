@@ -110,7 +110,7 @@ public class CampaignDAO extends DAO<Campaign> {
 		}
 				
 		if (sortBy.equals("Date")) {
-			q = q.order("endDate").offset(offset).limit(count);
+			q = q.order("startDate").offset(offset).limit(count);
 		} else if (sortBy.equals("Alphabetical")) {
 			q = q.order("title").offset(offset).limit(count);
 		} else {
