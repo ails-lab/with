@@ -124,7 +124,7 @@ public class AnnotationController extends Controller {
 			DB.getAnnotationDAO().makePermanent(annotation);
 			annotation.setAnnotationWithURI("/annotation/" + annotation.getDbId());
 			DB.getAnnotationDAO().makePermanent(annotation); // is this needed for a second time?
-			DB.getRecordResourceDAO().addAnnotation(annotation.getTarget().getRecordId(), annotation.getDbId());
+			DB.getRecordResourceDAO().addAnnotation(annotation.getTarget().getRecordId(), annotation.getDbId(), WithController.effectiveUserId());
 		} else {
 			ArrayList<AnnotationAdmin> annotators = existingAnnotation.getAnnotators();
 			ObjectId userId = WithController.effectiveUserDbId();
@@ -303,7 +303,7 @@ public class AnnotationController extends Controller {
 			DB.getAnnotationDAO().makePermanent(annotation);
 			annotation.setAnnotationWithURI("/annotation/" + annotation.getDbId());
 			// DB.getAnnotationDAO().makePermanent(annotation);
-			DB.getRecordResourceDAO().addAnnotation(annotation.getTarget().getRecordId(), annotation.getDbId());
+			DB.getRecordResourceDAO().addAnnotation(annotation.getTarget().getRecordId(), annotation.getDbId(), user.toHexString());
 		} else {
 			ArrayList<AnnotationAdmin> annotators = existingAnnotation.getAnnotators();
 			for (AnnotationAdmin a : annotators) {
@@ -730,7 +730,7 @@ public class AnnotationController extends Controller {
 		DB.getAnnotationDAO().makePermanent(annotation);
 		annotation.setAnnotationWithURI("/annotation/" + annotation.getDbId());
 		DB.getAnnotationDAO().makePermanent(annotation); // is this needed for a second time?
-		DB.getRecordResourceDAO().addAnnotation(annotation.getTarget().getRecordId(), annotation.getDbId());
+		DB.getRecordResourceDAO().addAnnotation(annotation.getTarget().getRecordId(), annotation.getDbId(), "5c599c9c4c74793211258bbd");
 		return;
 	}
 

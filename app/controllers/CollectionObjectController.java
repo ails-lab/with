@@ -16,23 +16,48 @@
 
 package controllers;
 
-import actors.annotation.AnnotationControlActor;
-import akka.actor.ActorRef;
-import akka.actor.ActorSelection;
-import akka.actor.Props;
-import annotators.AnnotatorConfig;
+import java.io.File;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
+import java.util.Set;
+import java.util.TreeMap;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
+import javax.validation.ConstraintViolation;
+
+import org.bson.types.ObjectId;
+import org.elasticsearch.action.search.SearchResponse;
+import org.elasticsearch.index.query.QueryBuilder;
+import org.elasticsearch.search.SearchHit;
+import org.elasticsearch.search.SearchHits;
+import org.mongodb.morphia.geo.Point;
 
 import com.codahale.metrics.Histogram;
 import com.codahale.metrics.Timer;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
+import actors.annotation.AnnotationControlActor;
+import akka.actor.ActorRef;
+import akka.actor.ActorSelection;
+import akka.actor.Props;
+import annotators.AnnotatorConfig;
 import controllers.parameterTypes.MyPlayList;
 import controllers.parameterTypes.StringTuple;
 import db.DB;
@@ -59,15 +84,12 @@ import model.resources.WithResourceType;
 import model.resources.collection.CollectionObject;
 import model.resources.collection.CollectionObject.CollectionAdmin;
 import model.resources.collection.SimpleCollection;
-import model.usersAndGroups.*;
-
-import org.bson.types.ObjectId;
-import org.elasticsearch.action.search.SearchResponse;
-import org.elasticsearch.index.query.QueryBuilder;
-import org.elasticsearch.search.SearchHit;
-import org.elasticsearch.search.SearchHits;
-import org.mongodb.morphia.geo.Point;
-
+import model.usersAndGroups.Organization;
+import model.usersAndGroups.Page;
+import model.usersAndGroups.Project;
+import model.usersAndGroups.User;
+import model.usersAndGroups.UserGroup;
+import model.usersAndGroups.UserOrGroup;
 import play.Logger;
 import play.Logger.ALogger;
 import play.data.validation.Validation;
@@ -87,24 +109,25 @@ import search.Sources;
 import sources.EuropeanaCollectionSpaceSource;
 import sources.EuropeanaSpaceSource;
 import sources.OWLExporter.CulturalItemOWLExporter;
-import sources.core.*;
+import sources.core.CommonQuery;
+import sources.core.JsonContextRecordFormatReader;
+import sources.core.ParallelAPICall;
 import sources.core.ParallelAPICall.Priority;
-import sources.formatreaders.OmekaExhibitionReader;
+import sources.core.ResourcesListImporter;
+import sources.core.SourceResponse;
+import sources.core.Utils;
 import sources.formatreaders.DanceExhibitionReader;
 import sources.formatreaders.ExhibitionReader;
 import sources.formatreaders.MuseumofModernArtRecordFormatter;
+import sources.formatreaders.OmekaExhibitionReader;
 import sources.utils.JsonContextRecord;
-import utils.*;
 import utils.Deserializer.PointDeserializer;
+import utils.ListUtils;
+import utils.Locks;
+import utils.MetricsUtils;
 import utils.Serializer.PointSerializer;
+import utils.Tuple;
 import vocabularies.Vocabulary;
-
-import javax.validation.ConstraintViolation;
-
-import java.io.File;
-import java.util.*;
-import java.util.function.BiFunction;
-import java.util.function.Function;
 
 @SuppressWarnings("rawtypes")
 public class CollectionObjectController extends WithResourceController {
@@ -1014,8 +1037,10 @@ public class CollectionObjectController extends WithResourceController {
 	 * List all Records from a Collection using a start item and a page size
 	 */
 	public static Result listRecordResources(String collectionId, String contentFormat, int start, int count,
-			String profile, Option<String> locale, Option<String> sortingCriteria) {
+			String profile, Option<String> locale, Option<String> sortingCriteria, boolean hideMine) {
 		ObjectNode result = Json.newObject();
+//		long notMine = DB.getRecordResourceDAO().countRecordsWithNoContributions(effectiveUserId(), new ObjectId(collectionId));
+//		long all = ((CollectionAdmin) DB.getCollectionObjectDAO().get(new ObjectId(collectionId)).getAdministrative()).getEntryCount();
 		ObjectId colId = new ObjectId(collectionId);
 		Locks locks = null;
 		try {
@@ -1024,10 +1049,30 @@ public class CollectionObjectController extends WithResourceController {
 			if (!response.toString().equals(ok().toString()))
 				return response;
 			else {
-				List<RecordResource> records = (!sortingCriteria.isDefined())
-						? DB.getRecordResourceDAO().getByCollectionBetweenPositions(colId, start, start + count)
-						: DB.getRecordResourceDAO().getByCollectionBetweenPositionsAndSort(colId, start, start + count,
-								sortingCriteria.get());
+				List<RecordResource> records = null;
+				if (hideMine) {
+					records = DB.getRecordResourceDAO().getRecordsWithNoContributions(effectiveUserId(), colId, start, count);
+//					records = (List<RecordResource>) new ArrayList<RecordResource>();
+//					int i = start;
+//					int j = start + count;
+//					List<RecordResource> newRecords = (List<RecordResource>) new ArrayList<RecordResource>();
+//					// Find the number of the records without user annotations and calculate new offset
+//					
+//					
+//					do {
+//						
+//						newRecords = (!sortingCriteria.isDefined())
+//						? DB.getRecordResourceDAO().getByCollectionBetweenPositions(colId, i, j)
+//						: DB.getRecordResourceDAO().getByCollectionBetweenPositionsAndSort(colId, i, j,
+//								sortingCriteria.get());
+//						records.addAll(newRecords.stream().filter(r -> !r.getAdministrative().getAnnotators().containsKey(effectiveUserDbId())).collect(Collectors.toList()));
+//					} while (!newRecords.isEmpty() && records.size() < count);
+				} else {
+					records = (!sortingCriteria.isDefined())
+							? DB.getRecordResourceDAO().getByCollectionBetweenPositions(colId, start, start + count)
+							: DB.getRecordResourceDAO().getByCollectionBetweenPositionsAndSort(colId, start, start + count,
+									sortingCriteria.get());
+				}
 				if (records == null) {
 					result.put("message", "Cannot retrieve records from database!");
 					return internalServerError(result);
@@ -1068,7 +1113,7 @@ public class CollectionObjectController extends WithResourceController {
 				}
 				result.put("entryCount",
 						((CollectionAdmin) DB.getCollectionObjectDAO()
-								.getById(colId, new ArrayList<String>(Arrays.asList("administrative.entryCount")))
+								.getById(colId, Arrays.asList("administrative.entryCount"))
 								.getAdministrative()).getEntryCount());
 				result.put("records", recordsList);
 				return ok(result);

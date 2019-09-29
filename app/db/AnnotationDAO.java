@@ -278,15 +278,17 @@ public class AnnotationDAO extends DAO<Annotation> {
 	public void deleteCampaignAnnotations(ObjectId campaignId) {
 		String campaignName = DB.getCampaignDAO().getById(campaignId).getUsername();
 		Query<Annotation> q = this.createQuery().field("annotators.generator").endsWith(campaignName);
-		this.find(q.retrievedFields(true, "_id", "target")).asList().stream().forEach(
-				ann -> DB.getRecordResourceDAO().removeAnnotation(ann.getTarget().getRecordId(), ann.getDbId()));
+		this.find(q.retrievedFields(true, "_id", "target")).asList().stream()
+				.forEach(ann -> DB.getRecordResourceDAO().removeAnnotation(ann.getTarget().getRecordId(), ann.getDbId(),
+						((AnnotationAdmin) ann.getAnnotators().get(0)).getWithCreator().toHexString()));
 		this.deleteByQuery(q);
 	}
 
 	public void deleteAnnotation(ObjectId annotationId) {
 		Annotation annotation = this.get(annotationId);
 		ObjectId recordId = annotation.getTarget().getRecordId();
-		DB.getRecordResourceDAO().removeAnnotation(recordId, annotationId);
+		DB.getRecordResourceDAO().removeAnnotation(recordId, annotationId,
+				((AnnotationAdmin) annotation.getAnnotators().get(0)).getWithCreator().toHexString());
 		this.deleteById(annotationId);
 	}
 }

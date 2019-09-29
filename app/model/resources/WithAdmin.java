@@ -18,7 +18,9 @@ package model.resources;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.bson.types.ObjectId;
 import org.mongodb.morphia.annotations.Embedded;
@@ -44,6 +46,8 @@ public class WithAdmin {
 	private WithAccess access = new WithAccess();
 	
 	private List<AccessEntry> collectedBy = new ArrayList<AccessEntry>();
+	
+	private Map<String, Integer> annotators = new HashMap<String, Integer>();
 
 	/*
 	 * withCreator is empty in cases of records imported from external
@@ -147,6 +151,14 @@ public class WithAdmin {
 
 	public void setCollectedBy(List<AccessEntry> collectedBy) {
 		this.collectedBy = collectedBy;
+	}
+
+	public Map<String, Integer> getAnnotators() {
+		return annotators;
+	}
+
+	public void setAnnotators(Map<String, Integer> annotators) {
+		this.annotators = annotators;
 	}
 
 }
