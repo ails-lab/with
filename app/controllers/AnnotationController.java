@@ -143,6 +143,8 @@ public class AnnotationController extends Controller {
 		try {
 			ObjectId oid = new ObjectId(id);
 			DB.getAnnotationDAO().addApprove(oid, WithController.effectiveUserDbId());
+			ObjectId recordId = DB.getRecordResourceDAO().getByAnnotationId(oid).getDbId();
+			DB.getRecordResourceDAO().addAnnotator(recordId, WithController.effectiveUserId());
 			ElasticUtils.update(DB.getRecordResourceDAO().getByAnnotationId(oid));
 			return ok();
 		} catch (Exception e) {
@@ -167,6 +169,8 @@ public class AnnotationController extends Controller {
 
 			ObjectId oid = new ObjectId(id);
 			DB.getAnnotationDAO().addApproveObject(oid, WithController.effectiveUserDbId(), administrative);
+			ObjectId recordId = DB.getRecordResourceDAO().getByAnnotationId(oid).getDbId();
+			DB.getRecordResourceDAO().addAnnotator(recordId, WithController.effectiveUserId());
 			ElasticUtils.update(DB.getRecordResourceDAO().getByAnnotationId(oid));
 			return ok();
 		} catch (Exception e) {
@@ -179,6 +183,8 @@ public class AnnotationController extends Controller {
 		try {
 			ObjectId oid = new ObjectId(id);
 			DB.getAnnotationDAO().addReject(oid, WithController.effectiveUserDbId());
+			ObjectId recordId = DB.getRecordResourceDAO().getByAnnotationId(oid).getDbId();
+			DB.getRecordResourceDAO().addAnnotator(recordId, WithController.effectiveUserId());
 			ElasticUtils.update(DB.getRecordResourceDAO().getByAnnotationId(oid));
 			return ok();
 		} catch (Exception e) {
@@ -203,6 +209,8 @@ public class AnnotationController extends Controller {
 
 			ObjectId oid = new ObjectId(id);
 			DB.getAnnotationDAO().addRejectObject(oid, WithController.effectiveUserDbId(), administrative);
+			ObjectId recordId = DB.getRecordResourceDAO().getByAnnotationId(oid).getDbId();
+			DB.getRecordResourceDAO().addAnnotator(recordId, WithController.effectiveUserId());
 			ElasticUtils.update(DB.getRecordResourceDAO().getByAnnotationId(oid));
 			return ok();
 		} catch (Exception e) {
@@ -215,6 +223,8 @@ public class AnnotationController extends Controller {
 		try {
 			ObjectId oid = new ObjectId(id);
 			DB.getAnnotationDAO().removeScore(oid, WithController.effectiveUserDbId());
+			ObjectId recordId = DB.getRecordResourceDAO().getByAnnotationId(oid).getDbId();
+			DB.getRecordResourceDAO().removeAnnotator(recordId, WithController.effectiveUserId());
 			ElasticUtils.update(DB.getRecordResourceDAO().getByAnnotationId(oid));
 			return ok();
 		} catch (Exception e) {
@@ -226,6 +236,8 @@ public class AnnotationController extends Controller {
 		try {
 			ObjectId oid = new ObjectId(id);
 			DB.getAnnotationDAO().removeScoreObject(oid, WithController.effectiveUserDbId());
+			ObjectId recordId = DB.getRecordResourceDAO().getByAnnotationId(oid).getDbId();
+			DB.getRecordResourceDAO().removeAnnotator(recordId, WithController.effectiveUserId());
 			ElasticUtils.update(DB.getRecordResourceDAO().getByAnnotationId(oid));
 			return ok();
 		} catch (Exception e) {
@@ -240,6 +252,8 @@ public class AnnotationController extends Controller {
 			try {
 				ObjectId oid = new ObjectId(singleId);
 				DB.getAnnotationDAO().addApprove(oid, user);
+				ObjectId recordId = DB.getRecordResourceDAO().getByAnnotationId(oid).getDbId();
+				DB.getRecordResourceDAO().addAnnotator(recordId, WithController.effectiveUserId());
 				ElasticUtils.update(DB.getRecordResourceDAO().getByAnnotationId(oid));
 			} catch (Exception e) {
 				ok = false;
@@ -260,6 +274,8 @@ public class AnnotationController extends Controller {
 			try {
 				ObjectId oid = new ObjectId(singleId);
 				DB.getAnnotationDAO().addReject(oid, user);
+				ObjectId recordId = DB.getRecordResourceDAO().getByAnnotationId(oid).getDbId();
+				DB.getRecordResourceDAO().removeAnnotator(recordId, WithController.effectiveUserId());
 				ElasticUtils.update(DB.getRecordResourceDAO().getByAnnotationId(oid));
 			} catch (Exception e) {
 				ok = false;

@@ -92,16 +92,18 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 	}
 
 	public long countRecordsWithNoContributions(String userId, ObjectId collectionId) {
-		Query<RecordResource> q = this.createQuery().disableValidation().field("collectedIn").equal(collectionId)
-				.field("administrative.annotators." + userId).greaterThan(0);
+		Query<RecordResource> q = this.createQuery().disableValidation().field("collectedIn").equal(collectionId);
+		q.or(q.criteria("administrative.annotators." + userId).doesNotExist(),
+				q.criteria("administrative.annotators." + userId).lessThan(1));
 		return q.countAll();
-
 	}
 
 	public List<RecordResource> getRecordsWithNoContributions(String userId, ObjectId collectionId, int offset,
 			int count) {
-		Query<RecordResource> q = this.createQuery().disableValidation().field("collectedIn").equal(collectionId)
-				.field("administrative.annotators." + userId).doesNotExist().offset(offset).limit(count);
+		Query<RecordResource> q = this.createQuery().disableValidation().field("collectedIn").equal(collectionId);
+		q.or(q.criteria("administrative.annotators." + userId).doesNotExist(),
+				q.criteria("administrative.annotators." + userId).lessThan(1));
+		q.offset(offset).limit(count);
 		return q.asList();
 
 	}
@@ -179,6 +181,15 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 
 		return resources;
 
+	}
+
+	public List<RecordResource> getByCollectionIds(List<ObjectId> collectionIds, int count, String userId) {
+		Query<RecordResource> q = this.createQuery().field("collectedIn").in(collectionIds);
+		q.or(q.criteria("administrative.annotators." + userId).doesNotExist(),
+				q.criteria("administrative.annotators." + userId).lessThan(1));
+		q.limit(count);
+		List<RecordResource> resources = this.find(q).asList();
+		return resources;
 	}
 
 	public List<RecordResource> getByCollection(ObjectId collectionId) {
@@ -562,6 +573,20 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 		UpdateOperations<RecordResource> updateOps = this.createUpdateOperations();
 		updateOps.add("annotationIds", annotationId);
 		updateOps.inc("administrative.annotators." + userId);
+		this.update(q, updateOps);
+	}
+
+	public void addAnnotator(ObjectId recordId, String userId) {
+		Query<RecordResource> q = this.createQuery().field("_id").equal(recordId).disableValidation();
+		UpdateOperations<RecordResource> updateOps = this.createUpdateOperations();
+		updateOps.inc("administrative.annotators." + userId);
+		this.update(q, updateOps);
+	}
+
+	public void removeAnnotator(ObjectId recordId, String userId) {
+		Query<RecordResource> q = this.createQuery().field("_id").equal(recordId).disableValidation();
+		UpdateOperations<RecordResource> updateOps = this.createUpdateOperations();
+		updateOps.dec("administrative.annotators." + userId);
 		this.update(q, updateOps);
 	}
 

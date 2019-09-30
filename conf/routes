@@ -55,7 +55,7 @@ GET     /record/updateAllRights					controllers.RecordResourceController.updateA
 GET     /record/updateRights					controllers.RecordResourceController.updateRights(id: String)
 GET     /record/randomRecords					controllers.RecordResourceController.getRandomRecords(groupId: String, batchCount: Integer)
 GET		/record/randomAnnotatedRecords			controllers.RecordResourceController.getRandomAnnotatedRecords( groupId: String, count: Integer, minimum:Integer ?= 3 )
-GET		/record/randomRecordsFromCollections	controllers.RecordResourceController.getRandomRecordsFromCollections( collectionIds: java.util.List[String], count: Integer )
+GET		/record/randomRecordsFromCollections	controllers.RecordResourceController.getRandomRecordsFromCollections( collectionIds: java.util.List[String], count: Integer, hideMyAnnotated:Boolean ?= false)
 GET		/record/annotationCount					controllers.AnnotationController.getAnnotationCount(groupId: String)
 GET		/record/deepAnnotationCount				controllers.AnnotationController.getDeepAnnotationCount(groupId: String)
 POST 	/record/annotation						controllers.AnnotationController.addAnnotation()

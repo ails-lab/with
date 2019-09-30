@@ -1040,7 +1040,6 @@ public class CollectionObjectController extends WithResourceController {
 			String profile, Option<String> locale, Option<String> sortingCriteria, boolean hideMine) {
 		ObjectNode result = Json.newObject();
 //		long notMine = DB.getRecordResourceDAO().countRecordsWithNoContributions(effectiveUserId(), new ObjectId(collectionId));
-//		long all = ((CollectionAdmin) DB.getCollectionObjectDAO().get(new ObjectId(collectionId)).getAdministrative()).getEntryCount();
 		ObjectId colId = new ObjectId(collectionId);
 		Locks locks = null;
 		try {
@@ -1052,21 +1051,6 @@ public class CollectionObjectController extends WithResourceController {
 				List<RecordResource> records = null;
 				if (hideMine) {
 					records = DB.getRecordResourceDAO().getRecordsWithNoContributions(effectiveUserId(), colId, start, count);
-//					records = (List<RecordResource>) new ArrayList<RecordResource>();
-//					int i = start;
-//					int j = start + count;
-//					List<RecordResource> newRecords = (List<RecordResource>) new ArrayList<RecordResource>();
-//					// Find the number of the records without user annotations and calculate new offset
-//					
-//					
-//					do {
-//						
-//						newRecords = (!sortingCriteria.isDefined())
-//						? DB.getRecordResourceDAO().getByCollectionBetweenPositions(colId, i, j)
-//						: DB.getRecordResourceDAO().getByCollectionBetweenPositionsAndSort(colId, i, j,
-//								sortingCriteria.get());
-//						records.addAll(newRecords.stream().filter(r -> !r.getAdministrative().getAnnotators().containsKey(effectiveUserDbId())).collect(Collectors.toList()));
-//					} while (!newRecords.isEmpty() && records.size() < count);
 				} else {
 					records = (!sortingCriteria.isDefined())
 							? DB.getRecordResourceDAO().getByCollectionBetweenPositions(colId, start, start + count)
