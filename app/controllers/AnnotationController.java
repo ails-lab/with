@@ -510,10 +510,10 @@ public class AnnotationController extends Controller {
 		if (withUser == null)
 			return badRequest(Json.parse("{ 'error' : 'No user defined' }"));
 		long annotatedRecords = DB.getAnnotationDAO().countUserAnnotatedRecords(withUser);
-		long annotationCount = DB.getAnnotationDAO().countUserAnnotations(withUser);
 		long createdCount = DB.getAnnotationDAO().countUserCreatedAnnotations(withUser);
 		long approvedCount = DB.getAnnotationDAO().countUserUpvotedAnnotations(withUser);
 		long rejectedCount = DB.getAnnotationDAO().countUserDownvotedAnnotations(withUser);
+		long annotationCount = createdCount + approvedCount + rejectedCount;
 		JsonNode recordsList = getUserAnnotatedRecords(withUser, offset, count);
 		ObjectNode recordsWithCount = Json.newObject();
 		recordsWithCount.set("records", recordsList);
