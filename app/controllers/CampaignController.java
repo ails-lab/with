@@ -16,6 +16,7 @@
 
 package controllers;
 
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -52,6 +53,7 @@ import model.Campaign;
 import model.Campaign.AnnotationCount;
 import model.Campaign.CampaignTerm;
 import model.basicDataTypes.Language;
+import model.resources.ThesaurusObject;
 import model.usersAndGroups.UserGroup;
 import play.Logger;
 import play.Logger.ALogger;
@@ -93,7 +95,7 @@ public class CampaignController extends WithController {
 			result.put("error", "Invalid JSON");
 			return badRequest(result);
 		}
-		//Class<?> clazz = Class.forName("model.Campaign");
+		// Class<?> clazz = Class.forName("model.Campaign");
 		ObjectMapper mapper = new ObjectMapper();
 		mapper.readerForUpdating(campaign).readValue(json);
 
@@ -114,13 +116,14 @@ public class CampaignController extends WithController {
 				log.error(e.getMessage());
 			}
 		}
-		
+
 		// Campaign campaignChanges = (Campaign) Json.fromJson(json, clazz);
 		DB.getCampaignDAO().makePermanent(campaign);
 		return ok(Json.toJson(DB.getCampaignDAO().get(campaignDbId)));
 	}
 
-	public static Result getCampaigns(String group, String project, String state, String sortBy, int offset, int count) {
+	public static Result getCampaigns(String group, String project, String state, String sortBy, int offset,
+			int count) {
 		ObjectNode result = Json.newObject();
 		List<Campaign> campaigns = new ArrayList<Campaign>();
 		campaigns = DB.getCampaignDAO().getCampaigns(group, project, state, sortBy, offset, count);
@@ -167,14 +170,15 @@ public class CampaignController extends WithController {
 	private static boolean uniqueCampaignName(String name) {
 		return (DB.getCampaignDAO().getCampaignByName(name) == null);
 	}
-	
+
 	public static Result resetCampaign(String campaignId) {
 		DB.getCampaignDAO().resetCampaignPoints(new ObjectId(campaignId));
-		DB.getAnnotationDAO().deleteCampaignAnnotations(new ObjectId(campaignId));
+//		DB.getAnnotationDAO().deleteCampaignAnnotations(new ObjectId(campaignId));
+//		DB.getAnnotationDAO().unscoreAutomaticAnnotations();
 		return ok();
 	}
 
-	//TODO get multilingual object from front-end (title and description)
+	// TODO get multilingual object from front-end (title and description)
 	public static Result createCampaign() {
 		Campaign newCampaign = null;
 		ObjectNode error = Json.newObject();
@@ -277,7 +281,7 @@ public class CampaignController extends WithController {
 					return badRequest(error);
 				}
 			}
-			
+
 			newCampaign.setCreated(new Date());
 			try {
 				DB.getCampaignDAO().makePermanent(newCampaign);
@@ -353,10 +357,79 @@ public class CampaignController extends WithController {
 		}
 
 	}
+	
+	public static List<CampaignTerm> createMIMOCampaignTerm(String uri, int level) {
+		ArrayList<CampaignTerm> terms = new ArrayList<CampaignTerm>();
+		ThesaurusObject thes = DB.getThesaurusDAO().getByUri(uri);
+		CampaignTerm term = new CampaignTerm();
+		term.labelAndUri.addURI(uri);
+		term.labelAndUri.addLiteral(Language.EN, thes.getSemantic().getPrefLabel().getLiteral(Language.EN));
+		term.labelAndUri.addLiteral(Language.IT, thes.getSemantic().getPrefLabel().getLiteral(Language.IT));
+		term.labelAndUri.addLiteral(Language.FR, thes.getSemantic().getPrefLabel().getLiteral(Language.FR));
+		term.selectable = true;
+		terms.add(term);
+		if (thes.getSemantic().getAltLabel() != null && level == 3) {
+			List<String> alts = thes.getSemantic().getAltLabel().get(Language.DEFAULT);
+			for (String alt : alts) {
+				if (!alt.equalsIgnoreCase(thes.getSemantic().getPrefLabel().getLiteral(Language.EN))) {
+					CampaignTerm altTerm = new CampaignTerm();
+					altTerm.labelAndUri.addURI(uri);
+					altTerm.labelAndUri.addLiteral(Language.EN, thes.getSemantic().getPrefLabel().getLiteral(Language.EN));
+					altTerm.selectable = true;
+					terms.add(altTerm);
+				}
+			}
+		}
+		return terms;
+		
+	}
+	
+	public static void readMIMO() throws Exception {
+		Reader in = new FileReader("vocabularies/MIMO-Thesaurus for-campaign.csv");
+		Iterable<CSVRecord> records = CSVFormat.DEFAULT.withDelimiter(',').withHeader().parse(in);
+		ArrayList<CampaignTerm> terms = new ArrayList<CampaignTerm>();
+		CampaignTerm lastOfLevel[];
+		lastOfLevel = new CampaignTerm[3];
+//		for (CSVRecord record : records) {
+//			System.out.println(record.get("URI"));
+//			ThesaurusObject thes = DB.getThesaurusDAO().getByUri(record.get("URI"));
+//			if (thes.equals(null))
+//				System.out.println(record.get("URI"));
+//			else
+//				System.out.println(thes.getSemantic().getPrefLabel());
+
+//		}
+		for (CSVRecord record : records) {
+			if (lastOfLevel[0] == null || !record.get("Level_1").equals("")
+					&& !record.get("Level_1").equals(lastOfLevel[0].labelAndUri.getLiteral(Language.EN))) {
+				List<CampaignTerm> createdTerms = createMIMOCampaignTerm(record.get("URI"), 0);
+				terms.addAll(createdTerms);
+				lastOfLevel[0] = createdTerms.get(0);
+			}
+			for (int i = 2; i <= 3; i++) {
+				if (!record.get("Level_" + i).equals("")) {
+					List<CampaignTerm> createdTerms = createMIMOCampaignTerm(record.get("URI"), i);
+					// addLangs(term);
+					for (CampaignTerm createdTerm : createdTerms) {
+						lastOfLevel[i - 2].addChild(createdTerm);
+						lastOfLevel[i - 1] = createdTerm;
+					}
+				}
+			}
+		}
+
+		System.out.println(terms);
+
+	}
 
 	@SuppressWarnings("unused")
 	public static Result readCampaignTerms() throws Exception {
-		Reader in = new FileReader("vocabularies/Cities_Landscapes_Means_of_Transport_Vocabulary.csv");
+		if (true) {
+			readMIMO();
+			return ok();
+		}
+		Reader in = new FileReader(
+				"vocabularies/Cities_Landscapes_Means_of_Transport_Vocabulary.csv");
 		Iterable<CSVRecord> records = CSVFormat.DEFAULT.withDelimiter(',').parse(in);
 		ArrayList<CampaignTerm> terms = new ArrayList<CampaignTerm>();
 		CampaignTerm lastOfLevel[];
