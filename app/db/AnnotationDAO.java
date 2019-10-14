@@ -156,14 +156,6 @@ public class AnnotationDAO extends DAO<Annotation> {
 		return this.find(q).asList();
 	}
 
-	public long countUserAnnotations(ObjectId userId) {
-		Query<Annotation> q = this.createQuery();
-		q.or(q.criteria("annotators.withCreator").equal(userId), q.criteria("score.approvedBy").equal(userId),
-				q.criteria("score.rejectedBy").equal(userId));
-		long count = q.countAll();
-		return count;
-	}
-
 	public long countUserCreatedAnnotations(ObjectId userId) {
 		Query<Annotation> q = this.createQuery();
 		q.criteria("annotators.withCreator").equal(userId);
@@ -173,14 +165,14 @@ public class AnnotationDAO extends DAO<Annotation> {
 
 	public long countUserUpvotedAnnotations(ObjectId userId) {
 		Query<Annotation> q = this.createQuery();
-		q.criteria("score.approvedBy").equal(userId);
+		q.criteria("score.approvedBy.withCreator").equal(userId);
 		long count = q.countAll();
 		return count;
 	}
 
 	public long countUserDownvotedAnnotations(ObjectId userId) {
 		Query<Annotation> q = this.createQuery();
-		q.criteria("score.rejectedBy").equal(userId);
+		q.criteria("score.rejectedBy.withCreator").equal(userId);
 		long count = q.countAll();
 		return count;
 	}
@@ -188,8 +180,13 @@ public class AnnotationDAO extends DAO<Annotation> {
 	// TODO: Mongo distinct count
 	@SuppressWarnings("unchecked")
 	public long countUserAnnotatedRecords(ObjectId userId) {
-		Query<Annotation> q = this.createQuery().field("annotators.withCreator").equal(userId).retrievedFields(true,
-				new String[] { "target.recordId" });
+		Query<Annotation> q = this.createQuery();
+		q.or(q.criteria("annotators.withCreator").equal(userId), 
+			 q.criteria("score.approvedBy.withCreator").equal(userId),
+			 q.criteria("score.rejectedBy.withCreator").equal(userId)
+			);
+		q.retrievedFields(true, new String[] { "target.recordId" });
+		
 		List<Annotation> annotations = this.find(q).asList();
 		List<ObjectId> recordIds = (List<ObjectId>) CollectionUtils.collect(annotations,
 				new BeanToPropertyValueTransformer("target.recordId"));
