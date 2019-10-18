@@ -275,11 +275,19 @@ public class AnnotationDAO extends DAO<Annotation> {
 	public void deleteCampaignAnnotations(ObjectId campaignId) {
 		String campaignName = DB.getCampaignDAO().getById(campaignId).getUsername();
 		Query<Annotation> q = this.createQuery().field("annotators.generator").endsWith(campaignName);
-		this.find(q.retrievedFields(true, "_id", "target")).asList().stream()
+		this.find(q.retrievedFields(true, "_id", "target", "annotators")).asList().stream()
 				.forEach(ann -> DB.getRecordResourceDAO().removeAnnotation(ann.getTarget().getRecordId(), ann.getDbId(),
 						((AnnotationAdmin) ann.getAnnotators().get(0)).getWithCreator().toHexString()));
 		this.deleteByQuery(q);
 	}
+	
+	public void unscoreAutomaticAnnotations() {
+		Query<Annotation> q = this.createQuery().field("annotators.generator").equal("Image Analysis");
+		UpdateOperations<Annotation> updateOps = this.createUpdateOperations();
+		updateOps.unset("score");
+		this.update(q, updateOps);
+	}
+	
 
 	public void deleteAnnotation(ObjectId annotationId) {
 		Annotation annotation = this.get(annotationId);

@@ -213,7 +213,7 @@ DELETE  /thesaurus/deleteThesaurus/:name	        controllers.ThesaurusController
 GET 	/thesaurus/getTerm		   					controllers.ThesaurusController.getThesaurusTerm(uri: String)
 GET 	/thesaurus/listVocabularies		   				controllers.ThesaurusController.listVocabularies()
 GET 	/thesaurus/listAnnotators		   				controllers.ThesaurusController.listAnnotators()
-GET 	/thesaurus/suggestions						controllers.ThesaurusController.getSuggestions(word: String, namespaces: String ?= "", campaignId: String ?= null, geotagging: Boolean ?= false)
+GET 	/thesaurus/suggestions						controllers.ThesaurusController.getSuggestions(word: String, namespaces: String ?= "", campaignId: String ?= null, geotagging: Boolean ?= false, language : String ?= "all")
 
 #Thesaurus gui
 POST	/collection/:id/facets 	        			controllers.CollectionIndexController.getCollectionFacets(id)

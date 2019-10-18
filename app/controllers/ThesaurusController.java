@@ -352,12 +352,15 @@ public class ThesaurusController extends Controller {
 		return terms;
 	}
 
-	public static ArrayNode searchCampaignTerms(String word, List<CampaignTerm> terms) {
+	public static ArrayNode searchCampaignTerms(String word, List<CampaignTerm> terms, String language) {
 		ArrayNode results = Json.newObject().arrayNode();
 		for (CampaignTerm term : terms) {
 			if (term.selectable) {
 				for (Entry<String, String> e : term.labelAndUri.entrySet()) {
-					if (e.getValue().toLowerCase().startsWith(word) && !e.getKey().equalsIgnoreCase("uri")) {
+					Boolean languageCondition = (language.equalsIgnoreCase("all") ? true
+							: e.getKey().equalsIgnoreCase(language) || e.getKey().equalsIgnoreCase("default"));
+					if (languageCondition && e.getValue().toLowerCase().contains(word)
+							&& !e.getKey().equalsIgnoreCase("uri")) {
 						ObjectNode resInfo = Json.newObject();
 						resInfo.put("label", e.getValue());
 						resInfo.put("uri", term.labelAndUri.getURI());
@@ -366,16 +369,24 @@ public class ThesaurusController extends Controller {
 						results.add(resInfo);
 					}
 				}
-			}
-			if (term.children != null && term.children.size() > 0) {
-				results.addAll(searchCampaignTerms(word, term.children));
+				if (term.children != null && term.children.size() > 0) {
+					results.addAll(searchCampaignTerms(word, term.children, language));
+				}
 			}
 		}
-		return results;
+		ArrayNode sortedResults = Json.newObject().arrayNode();
+		for (JsonNode res : results) {
+			if (res.get("label").asText().toLowerCase().startsWith(word)) {
+				sortedResults.insert(0, res);
+			} else {
+				sortedResults.add(res);
+			}
+		}
+		return sortedResults;
 	}
 
-	public static Result getSuggestions(String word, String namespaces, String campaignId, Boolean geotagging)
-			throws ClientProtocolException, IOException {
+	public static Result getSuggestions(String word, String namespaces, String campaignId, Boolean geotagging,
+			String language) throws ClientProtocolException, IOException {
 		ObjectNode response = Json.newObject();
 		response.put("request", word);
 
@@ -407,7 +418,7 @@ public class ThesaurusController extends Controller {
 				Campaign campaign = DB.getCampaignDAO().getById(new ObjectId(campaignId));
 				if (!geotagging && campaign.getCampaignTerms() != null && campaign.getCampaignTerms().size() > 0) {
 					List<CampaignTerm> campaignTerms = campaign.getCampaignTerms();
-					ArrayNode res = searchCampaignTerms(word, campaignTerms);
+					ArrayNode res = searchCampaignTerms(word, campaignTerms, language);
 					ObjectNode result = Json.newObject();
 					result.put("request", word);
 					result.set("results", res);
