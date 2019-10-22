@@ -192,6 +192,22 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 		return resources;
 	}
 
+	public List<RecordResource> getRandomRecordsWithNoContributions(ObjectId collectionId, int count, String userId) {
+		long total = countRecordsWithNoContributions(userId, collectionId);
+		int colOffset = (int) ((int) (total - count) * Math.random());
+		Query<RecordResource> q = this.createQuery().field("collectedIn").equal(collectionId);
+		q.or(q.criteria("administrative.annotators." + userId).doesNotExist(),
+				q.criteria("administrative.annotators." + userId).lessThan(1));
+		q.offset(colOffset).limit(count);
+		return this.find(q).asList();
+	}
+
+	public List<RecordResource> getRandomRecordsWithNoContributions(List<ObjectId> collectionIds, int count,
+			String userId) {
+		Collections.shuffle(collectionIds);
+		return getRandomRecordsWithNoContributions(collectionIds.get(0), count, userId);
+	}
+
 	public List<RecordResource> getByCollection(ObjectId collectionId) {
 		CollectionObject collection = DB.getCollectionObjectDAO().getById(collectionId,
 				new ArrayList<String>(Arrays.asList("collectedResources")));

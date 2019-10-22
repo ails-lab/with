@@ -153,9 +153,10 @@ public class RecordResourceController extends WithResourceController {
 		if (hideMine) {
 			List<ObjectId> collectionObjectIds = collectionIdCopy.stream().map(c -> new ObjectId(c))
 					.collect(Collectors.toList());
-			List<RecordResource> records = DB.getRecordResourceDAO().getByCollectionIds(collectionObjectIds, count,
+			List<RecordResource> records = DB.getRecordResourceDAO().getRandomRecordsWithNoContributions(collectionObjectIds, count,
 					WithController.effectiveUserId());
-			Json.toJson(records);
+			Collections.shuffle(records);
+			return ok(Json.toJson(records));
 		}
 		Collections.shuffle(collectionIdCopy, r);
 		ArrayNode res = Json.newObject().arrayNode();
