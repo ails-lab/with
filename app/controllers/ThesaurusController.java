@@ -321,15 +321,16 @@ public class ThesaurusController extends Controller {
 
 	static {
 		searchLanguages = new Language[searchLangCodes.length];
-		retrievedFields = new String[searchLangCodes.length + 4];
+		retrievedFields = new String[searchLangCodes.length + 5];
 		retrievedFields[0] = "uri";
 		retrievedFields[1] = "vocabulary.name";
-		retrievedFields[2] = "broader.prefLabel.en";
+		retrievedFields[2] = "broaderTransitive.uri";
+		retrievedFields[3] = "broader.prefLabel.en";
 		for (int i = 0; i < searchLangCodes.length; i++) {
-			retrievedFields[3 + i] = "prefLabel." + searchLangCodes[i];
+			retrievedFields[4 + i] = "prefLabel." + searchLangCodes[i];
 			searchLanguages[i] = Language.getLanguageByCode(searchLangCodes[i]);
 		}
-		retrievedFields[3 + searchLangCodes.length] = "properties.values.prefLabel.en";
+		retrievedFields[4 + searchLangCodes.length] = "properties.values.prefLabel.en";
 	};
 
 	public static ArrayNode getWikidataSuggestions(String word) throws ClientProtocolException, IOException {
@@ -483,6 +484,9 @@ public class ThesaurusController extends Controller {
 						query.must(vocabNameQuery);
 					}
 
+						
+					}
+					query.must(QueryBuilders.termQuery("broaderTransitive.uri.string", "http://thesaurus.europeanafashion.eu/thesaurus/10000"));
 					// System.out.println("QUERY" + query);
 					SearchOptions so = new SearchOptions(0, 1000);
 					so.isPublic = false;
@@ -569,7 +573,6 @@ public class ThesaurusController extends Controller {
 						terms.add(element);
 					}
 				}
-			}
 			List<String> namespaceArrayList = Arrays.asList(namespaceArray);
 			ArrayNode allTerms = Json.newObject().arrayNode();
 			if (namespaceArrayList.contains("wikidata")) {
