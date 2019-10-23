@@ -486,7 +486,11 @@ public class ThesaurusController extends Controller {
 
 						
 					}
-					query.must(QueryBuilders.termQuery("broaderTransitive.uri.string", "http://thesaurus.europeanafashion.eu/thesaurus/10000"));
+					if (campaignId != null) {
+						Campaign campaign = DB.getCampaignDAO().getById(new ObjectId(campaignId));
+						if (campaign !=null && campaign.getUsername().equals("garment-type"))
+							query.must(QueryBuilders.termQuery("broaderTransitive.uri.string", "http://thesaurus.europeanafashion.eu/thesaurus/10000"));
+					}
 					// System.out.println("QUERY" + query);
 					SearchOptions so = new SearchOptions(0, 1000);
 					so.isPublic = false;
