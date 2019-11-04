@@ -370,9 +370,9 @@ public class ThesaurusController extends Controller {
 						results.add(resInfo);
 					}
 				}
-				if (term.children != null && term.children.size() > 0) {
-					results.addAll(searchCampaignTerms(word, term.children, language));
-				}
+			}
+			if (term.children != null && term.children.size() > 0) {
+				results.addAll(searchCampaignTerms(word, term.children, language));
 			}
 		}
 		ArrayNode sortedResults = Json.newObject().arrayNode();
