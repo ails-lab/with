@@ -30,6 +30,7 @@ import java.util.regex.Pattern;
 import model.Campaign;
 import model.Campaign.CampaignTerm;
 import model.basicDataTypes.Language;
+import model.basicDataTypes.MultiLiteral;
 import model.resources.ThesaurusObject;
 import model.resources.WithResourceType;
 
@@ -367,6 +368,9 @@ public class ThesaurusController extends Controller {
 						resInfo.put("uri", term.labelAndUri.getURI());
 						resInfo.put("lang", e.getKey());
 						resInfo.put("id", term.labelAndUri.getURI());
+						MultiLiteral labels = new MultiLiteral(term.labelAndUri);
+						labels.remove("uri");
+						resInfo.put("labels", Json.toJson(labels));
 						results.add(resInfo);
 					}
 				}
