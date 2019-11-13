@@ -356,6 +356,7 @@ public class ThesaurusController extends Controller {
 
 	public static ArrayNode searchCampaignTerms(String word, List<CampaignTerm> terms, String language) {
 		ArrayNode results = Json.newObject().arrayNode();
+		word = word.toLowerCase();
 		for (CampaignTerm term : terms) {
 			if (term.selectable) {
 				for (Entry<String, String> e : term.labelAndUri.entrySet()) {
