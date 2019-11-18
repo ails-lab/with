@@ -455,6 +455,10 @@ public class ThesaurusController extends Controller {
 				BoolQueryBuilder query = QueryBuilders.boolQuery();
 
 				BoolQueryBuilder langQuery = QueryBuilders.boolQuery();
+				if (!language.equalsIgnoreCase("all")) {
+					Language lang = Language.getLanguage(language);
+					searchLanguages = new Language[] { lang };
+				}
 				for (Language lang : searchLanguages) {
 					BoolQueryBuilder ilangQuery = QueryBuilders.boolQuery();
 
@@ -528,7 +532,8 @@ public class ThesaurusController extends Controller {
 							}
 
 							suggestions.add(new SearchSuggestion(word, hit.getId(),
-									(String) hit.field("prefLabel.en").getValues().get(0),
+									(String) hit.field("prefLabel." + (language.equalsIgnoreCase("all") ? "en" : language.toLowerCase()))
+									.getValues().get(0),
 									labels.toArray(new String[labels.size()]),
 									(String) hit.field("uri").getValues().get(0),
 									(String) hit.field("vocabulary.name").getValues().get(0),
@@ -553,7 +558,7 @@ public class ThesaurusController extends Controller {
 						ObjectNode element = Json.newObject();
 						element.put("id", ss.id);
 
-						element.put("label", ss.enLabel);
+						element.put("label", ss.langLabel);
 						element.put("matchedLabel", ss.getSelectedLabel());
 						element.put("uri", ss.uri);
 						element.put("vocabulary", ss.vocabulary);
@@ -602,7 +607,7 @@ public class ThesaurusController extends Controller {
 
 	private static class SearchSuggestion implements Comparable<SearchSuggestion> {
 		public String id;
-		public String enLabel;
+		public String langLabel;
 		public String[] labels;
 		public String uri;
 		public String vocabulary;
@@ -614,10 +619,10 @@ public class ThesaurusController extends Controller {
 
 		private static JaccardDistance jaccard = new JaccardDistance(IndoEuropeanTokenizerFactory.INSTANCE);
 
-		public SearchSuggestion(String reference, String id, String enLabel, String[] labels, String uri,
+		public SearchSuggestion(String reference, String id, String langLabel, String[] labels, String uri,
 				String vocabulary, String[] categories, String[] properties) {
 			this.id = id;
-			this.enLabel = enLabel;
+			this.langLabel = langLabel;
 			this.labels = labels;
 			this.uri = uri;
 			this.vocabulary = vocabulary;
