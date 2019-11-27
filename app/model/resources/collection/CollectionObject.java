@@ -195,8 +195,8 @@ public class CollectionObject<T extends CollectionObject.CollectionDescriptiveDa
 				Exhibition output = new Exhibition();
 				addCommonCollectionFields(output);
 				ExhibitionDescriptiveData edd = (ExhibitionDescriptiveData) getDescriptiveData();
-				if ((edd.getBackgroundImg() != null) && edd.getBackgroundImg().containsKey(MediaVersion.Original))
-					edd.getBackgroundImg().remove(MediaVersion.Original);
+//				if ((edd.getBackgroundImg() != null) && edd.getBackgroundImg().containsKey(MediaVersion.Original))
+//					edd.getBackgroundImg().remove(MediaVersion.Original);
 				output.getDescriptiveData().setBackgroundImg(edd.getBackgroundImg());
 				output.getDescriptiveData().setCredits(edd.getCredits());
 				output.getDescriptiveData().setIntro(edd.getIntro());
