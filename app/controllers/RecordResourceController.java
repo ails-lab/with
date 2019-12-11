@@ -46,6 +46,7 @@ import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
 import akka.actor.Props;
 import annotators.AnnotatorConfig;
+import controllers.WithController.Profile;
 import db.DAO;
 import db.DB;
 import model.DescriptiveData;
@@ -650,6 +651,26 @@ public class RecordResourceController extends WithResourceController {
 		for (String singleId : id) {
 			try {
 				ObjectId recordId = new ObjectId(singleId);
+				Result response = errorIfNoAccessToRecord(Action.READ, recordId);
+				if (!response.toString().equals(ok().toString()))
+					continue;
+				RecordResource record = DB.getRecordResourceDAO().getByIdAndExclude(recordId, Arrays.asList("content"));
+				RecordResource profiledRecord = record.getRecordProfile(profile);
+				filterResourceByLocale(locale, profiledRecord);
+				result.add(Json.toJson(profiledRecord));
+			} catch (Exception e) {
+				log.error(e.getMessage(), e);
+			}
+		}
+		return ok(result);
+	}
+	
+	public static Result getAnnotatedRecordsByLabel(String label, List<String> generators, String profile, Option<String> locale) {
+		ArrayNode result = Json.newObject().arrayNode();
+		List<Annotation> anns = DB.getAnnotationDAO().getRecordsByLabel(generators, label);
+		for (Annotation ann : anns) {
+			ObjectId recordId = ann.getTarget().getRecordId(); 
+			try {
 				Result response = errorIfNoAccessToRecord(Action.READ, recordId);
 				if (!response.toString().equals(ok().toString()))
 					continue;

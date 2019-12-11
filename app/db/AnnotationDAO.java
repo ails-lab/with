@@ -36,6 +36,7 @@ import model.annotations.bodies.AnnotationBodyPolling;
 import model.annotations.selectors.SelectorType;
 import model.annotations.targets.AnnotationTarget;
 import model.basicDataTypes.Language;
+import model.resources.RecordResource;
 import model.resources.collection.CollectionObject;
 
 import org.apache.commons.beanutils.BeanToPropertyValueTransformer;
@@ -76,6 +77,17 @@ public class AnnotationDAO extends DAO<Annotation> {
 			Query<Annotation> q = this.createQuery().field("target.recordId").in(recIds);
 			return this.find(q).asList();
 		} else {
+			return new ArrayList<Annotation>();
+		}
+	}
+	
+	public List<Annotation> getRecordsByLabel(List<String> generators, String label) {
+		if (generators.size() > 0) {
+			Query<Annotation> q = this.createQuery().disableValidation().field("body.label.default").equal(label).field("annotators.generator").in(generators);
+			List<Annotation> anns = this.find(q).asList();
+			return anns;
+		}
+		else {
 			return new ArrayList<Annotation>();
 		}
 	}
