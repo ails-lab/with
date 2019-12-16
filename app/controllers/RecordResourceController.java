@@ -665,11 +665,15 @@ public class RecordResourceController extends WithResourceController {
 		return ok(result);
 	}
 	
-	public static Result getAnnotatedRecordsByLabel(String label, List<String> generators, String profile, Option<String> locale) {
+	public static Result getRecordIdsByAnnLabel(String label, List<String> generators) {
 		ArrayNode result = Json.newObject().arrayNode();
-		List<Annotation> anns = DB.getAnnotationDAO().getRecordsByLabel(generators, label);
+		List<Annotation> anns = DB.getAnnotationDAO().getByLabel(generators, label);
 		for (Annotation ann : anns) {
-			ObjectId recordId = ann.getTarget().getRecordId(); 
+			// Do NOT return the actual records, TOO SLOW
+			// Instead, return an array with the record ids
+			result.add(Json.toJson(ann.getTarget().getRecordId().toHexString()));
+			/*
+			ObjectId recordId = ann.getTarget().getRecordId();
 			try {
 				Result response = errorIfNoAccessToRecord(Action.READ, recordId);
 				if (!response.toString().equals(ok().toString()))
@@ -681,6 +685,7 @@ public class RecordResourceController extends WithResourceController {
 			} catch (Exception e) {
 				log.error(e.getMessage(), e);
 			}
+			*/
 		}
 		return ok(result);
 	}
