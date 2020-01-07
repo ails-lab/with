@@ -29,6 +29,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
@@ -196,7 +197,7 @@ public class CampaignController extends WithController {
 				error.put("error", "No rights for campaign creation");
 				return forbidden(error);
 			} else {
-				newCampaign.setCreator(creator);
+				newCampaign.setCreators(new HashSet<ObjectId>(Arrays.asList(creator)));
 			}
 			// Set Campaign.title
 			if (!json.has("title")) {
