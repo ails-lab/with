@@ -196,8 +196,8 @@ public class Campaign {
 	
 	private String logo;
 	
-	@JsonSerialize(using = Serializer.ObjectIdSerializer.class)
-	@JsonDeserialize(using = Deserializer.ObjectIdDeserializer.class)
+	@JsonSerialize(using = Serializer.ObjectIdArraySerializer.class)
+//	@JsonDeserialize(using = Deserializer.ObjectIdArraySerializer.class)
 	private Set<ObjectId> creators = new HashSet<ObjectId>();
 	
 	@JsonSerialize(using = Serializer.ObjectIdSerializer.class)
@@ -403,12 +403,8 @@ public class Campaign {
 		return creators;
 	}
 
-	public void setCreators(Set<ObjectId> creator) {
+	public void setCreators(Set<ObjectId> creators) {
 		this.creators = creators;
-	}
-	
-	public void setCreator(ObjectId creator) {
-		this.creators.add(creator);
 	}
 
 	public String getLogo() {
