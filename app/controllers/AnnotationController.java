@@ -504,7 +504,7 @@ public class AnnotationController extends Controller {
 		}, ParallelAPICall.Priority.FRONTEND);
 	}
 
-	public static Result getUserAnnotations(String userId, int offset, int count) {
+	public static Result getUserAnnotations(String userId, String project, String campaign, int offset, int count) {
 		ObjectId withUser = null;
 		if (userId != null)
 			withUser = new ObjectId(userId);
@@ -512,12 +512,12 @@ public class AnnotationController extends Controller {
 			withUser = WithController.effectiveUserDbId();
 		if (withUser == null)
 			return badRequest(Json.parse("{ 'error' : 'No user defined' }"));
-		long annotatedRecords = DB.getAnnotationDAO().countUserAnnotatedRecords(withUser);
-		long createdCount = DB.getAnnotationDAO().countUserCreatedAnnotations(withUser);
-		long approvedCount = DB.getAnnotationDAO().countUserUpvotedAnnotations(withUser);
-		long rejectedCount = DB.getAnnotationDAO().countUserDownvotedAnnotations(withUser);
+		long annotatedRecords = DB.getAnnotationDAO().countUserAnnotatedRecords(withUser, project, campaign);
+		long createdCount = DB.getAnnotationDAO().countUserCreatedAnnotations(withUser, project, campaign);
+		long approvedCount = DB.getAnnotationDAO().countUserUpvotedAnnotations(withUser, project, campaign);
+		long rejectedCount = DB.getAnnotationDAO().countUserDownvotedAnnotations(withUser, project, campaign);
 		long annotationCount = createdCount + approvedCount + rejectedCount;
-		JsonNode recordsList = getUserAnnotatedRecords(withUser, offset, count);
+		JsonNode recordsList = getUserAnnotatedRecords(withUser, project, campaign, offset, count);
 		ObjectNode recordsWithCount = Json.newObject();
 		recordsWithCount.set("records", recordsList);
 		recordsWithCount.put("annotationCount", annotationCount);
@@ -528,9 +528,9 @@ public class AnnotationController extends Controller {
 		return ok(recordsWithCount);
 	}
 
-	public static JsonNode getUserAnnotatedRecords(ObjectId withUser, int offset, int count) {
+	public static JsonNode getUserAnnotatedRecords(ObjectId withUser, String project, String campaign, int offset, int count) {
 		ArrayNode recordsList = Json.newObject().arrayNode();
-		List<RecordResource> records = DB.getRecordResourceDAO().getAnnotatedRecords(withUser, offset, count);
+		List<RecordResource> records = DB.getRecordResourceDAO().getAnnotatedRecords(withUser, project, campaign, offset, count);
 		for (RecordResource record : records) {
 			Some<String> locale = new Some(Language.DEFAULT.toString());
 			RecordResource profiledRecord = record.getRecordProfile(Profile.MEDIUM.toString());
@@ -540,7 +540,7 @@ public class AnnotationController extends Controller {
 		return recordsList;
 	}
 
-	public static Result getUserAnnotatedRecords(String userId, int offset, int count) {
+	public static Result getUserAnnotatedRecords(String userId, String project, String campaign, int offset, int count) {
 		ObjectId withUser = null;
 		if (userId != null)
 			withUser = new ObjectId(userId);
@@ -548,7 +548,7 @@ public class AnnotationController extends Controller {
 			withUser = WithController.effectiveUserDbId();
 		if (withUser == null)
 			return badRequest(Json.parse("{ 'error' : 'No user defined' }"));
-		return ok(getUserAnnotatedRecords(withUser, offset, count));
+		return ok(getUserAnnotatedRecords(withUser, project, campaign, offset, count));
 
 	}
 

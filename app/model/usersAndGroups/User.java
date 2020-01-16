@@ -442,9 +442,9 @@ public class User extends UserOrGroup {
 	
 	public String getAnnotationCount() {
 		String annotationCount = ""
-				+ DB.getAnnotationDAO().countUserCreatedAnnotations(this.getDbId()) 
-				+ DB.getAnnotationDAO().countUserUpvotedAnnotations(this.getDbId())
-				+ DB.getAnnotationDAO().countUserDownvotedAnnotations(this.getDbId());
+				+ DB.getAnnotationDAO().countUserCreatedAnnotations(this.getDbId(),"","") 
+				+ DB.getAnnotationDAO().countUserUpvotedAnnotations(this.getDbId(),"","")
+				+ DB.getAnnotationDAO().countUserDownvotedAnnotations(this.getDbId(),"","");
 		return annotationCount;
 	}
 	
