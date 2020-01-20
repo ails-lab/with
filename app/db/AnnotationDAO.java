@@ -162,9 +162,12 @@ public class AnnotationDAO extends DAO<Annotation> {
 	}
 
 	public List<Annotation> getUserAnnotations(ObjectId userId, String project, String campaign, List<String> retrievedFields) {
-		Query<Annotation> q = this.createQuery().field("annotators.withCreator").equal(userId)
-												.field("annotators.generator").equal(project+' '+campaign)
-												.retrievedFields(true, retrievedFields.toArray(new String[retrievedFields.size()]));
+		Query<Annotation> q = this.createQuery().field("annotators.generator").equal(project + " " + campaign);
+		q.or(q.criteria("annotators.withCreator").equal(userId), 
+		    q.criteria("score.approvedBy.withCreator").equal(userId),
+			q.criteria("score.rejectedBy.withCreator").equal(userId)
+		);
+		q.retrievedFields(true, retrievedFields.toArray(new String[retrievedFields.size()]));
 		return this.find(q).asList();
 	}
 
