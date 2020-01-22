@@ -83,10 +83,13 @@ public class AnnotationDAO extends DAO<Annotation> {
 	
 	public List<Annotation> getByLabel(List<String> generators, String label) {
 		if (generators.size() > 0) {
-			Query<Annotation> q = this.createQuery().disableValidation()
-					.field("body.label.en").equal(label)
-					.field("annotators.generator").in(generators)
-					.order("score.approvedBy");
+			Query<Annotation> q = this.createQuery().disableValidation();
+			q.or(
+				q.criteria("body.label.en").equal(label),
+				q.criteria("body.label.default").equal(label)
+			);
+			q.field("annotators.generator").in(generators)
+				.order("score.approvedBy");
 			List<Annotation> anns = this.find(q).asList();
 			return anns;
 		}
