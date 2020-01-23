@@ -50,6 +50,7 @@ import db.DB;
 import elastic.ElasticSearcher;
 import elastic.ElasticSearcher.SearchOptions;
 import elastic.ElasticUtils;
+import model.Campaign;
 import model.EmbeddedMediaObject.MediaVersion;
 import model.annotations.Annotation;
 import model.annotations.Annotation.AnnotationAdmin;
@@ -124,7 +125,8 @@ public class AnnotationController extends Controller {
 			DB.getAnnotationDAO().makePermanent(annotation);
 			annotation.setAnnotationWithURI("/annotation/" + annotation.getDbId());
 			DB.getAnnotationDAO().makePermanent(annotation); // is this needed for a second time?
-			DB.getRecordResourceDAO().addAnnotation(annotation.getTarget().getRecordId(), annotation.getDbId(), WithController.effectiveUserId());
+			DB.getRecordResourceDAO().addAnnotation(annotation.getTarget().getRecordId(), annotation.getDbId(),
+					WithController.effectiveUserId());
 		} else {
 			ArrayList<AnnotationAdmin> annotators = existingAnnotation.getAnnotators();
 			ObjectId userId = WithController.effectiveUserDbId();
@@ -319,7 +321,8 @@ public class AnnotationController extends Controller {
 			DB.getAnnotationDAO().makePermanent(annotation);
 			annotation.setAnnotationWithURI("/annotation/" + annotation.getDbId());
 			// DB.getAnnotationDAO().makePermanent(annotation);
-			DB.getRecordResourceDAO().addAnnotation(annotation.getTarget().getRecordId(), annotation.getDbId(), user.toHexString());
+			DB.getRecordResourceDAO().addAnnotation(annotation.getTarget().getRecordId(), annotation.getDbId(),
+					user.toHexString());
 		} else {
 			ArrayList<AnnotationAdmin> annotators = existingAnnotation.getAnnotators();
 			for (AnnotationAdmin a : annotators) {
@@ -501,20 +504,20 @@ public class AnnotationController extends Controller {
 		}, ParallelAPICall.Priority.FRONTEND);
 	}
 
-	public static Result getUserAnnotations(String userId, int offset, int count) {
+	public static Result getUserAnnotations(String userId, String project, String campaign, int offset, int count) {
 		ObjectId withUser = null;
 		if (userId != null)
 			withUser = new ObjectId(userId);
 		else
 			withUser = WithController.effectiveUserDbId();
 		if (withUser == null)
-			return badRequest(Json.parse("{\"error\" : \"No user defined\" }"));
-		long annotatedRecords = DB.getAnnotationDAO().countUserAnnotatedRecords(withUser);
-		long createdCount = DB.getAnnotationDAO().countUserCreatedAnnotations(withUser);
-		long approvedCount = DB.getAnnotationDAO().countUserUpvotedAnnotations(withUser);
-		long rejectedCount = DB.getAnnotationDAO().countUserDownvotedAnnotations(withUser);
+			return badRequest(Json.parse("{ 'error' : 'No user defined' }"));
+		long annotatedRecords = DB.getAnnotationDAO().countUserAnnotatedRecords(withUser, project, campaign);
+		long createdCount = DB.getAnnotationDAO().countUserCreatedAnnotations(withUser, project, campaign);
+		long approvedCount = DB.getAnnotationDAO().countUserUpvotedAnnotations(withUser, project, campaign);
+		long rejectedCount = DB.getAnnotationDAO().countUserDownvotedAnnotations(withUser, project, campaign);
 		long annotationCount = createdCount + approvedCount + rejectedCount;
-		JsonNode recordsList = getUserAnnotatedRecords(withUser, offset, count);
+		JsonNode recordsList = getUserAnnotatedRecords(withUser, project, campaign, offset, count);
 		ObjectNode recordsWithCount = Json.newObject();
 		recordsWithCount.set("records", recordsList);
 		recordsWithCount.put("annotationCount", annotationCount);
@@ -525,9 +528,9 @@ public class AnnotationController extends Controller {
 		return ok(recordsWithCount);
 	}
 
-	public static JsonNode getUserAnnotatedRecords(ObjectId withUser, int offset, int count) {
+	public static JsonNode getUserAnnotatedRecords(ObjectId withUser, String project, String campaign, int offset, int count) {
 		ArrayNode recordsList = Json.newObject().arrayNode();
-		List<RecordResource> records = DB.getRecordResourceDAO().getAnnotatedRecords(withUser, offset, count);
+		List<RecordResource> records = DB.getRecordResourceDAO().getAnnotatedRecords(withUser, project, campaign, offset, count);
 		for (RecordResource record : records) {
 			Some<String> locale = new Some(Language.DEFAULT.toString());
 			RecordResource profiledRecord = record.getRecordProfile(Profile.MEDIUM.toString());
@@ -537,7 +540,7 @@ public class AnnotationController extends Controller {
 		return recordsList;
 	}
 
-	public static Result getUserAnnotatedRecords(String userId, int offset, int count) {
+	public static Result getUserAnnotatedRecords(String userId, String project, String campaign, int offset, int count) {
 		ObjectId withUser = null;
 		if (userId != null)
 			withUser = new ObjectId(userId);
@@ -545,7 +548,7 @@ public class AnnotationController extends Controller {
 			withUser = WithController.effectiveUserDbId();
 		if (withUser == null)
 			return badRequest(Json.parse("{\"error\" : \"No user defined\" }"));
-		return ok(getUserAnnotatedRecords(withUser, offset, count));
+		return ok(getUserAnnotatedRecords(withUser, project, campaign, offset, count));
 
 	}
 
@@ -652,8 +655,25 @@ public class AnnotationController extends Controller {
 					annotator = a;
 				}
 			}
-			if (annotator == null)
-				return forbidden();
+			boolean isCreator = false;
+			if (annotator == null) {
+				if (annotators.get(0).getGenerator() != null) {
+					if (annotation.getAnnotators() != null) {
+						String[] generator = annotators.get(0).getGenerator().split(" ");
+						String campaignName = generator[1];
+						Campaign campaign = DB.getCampaignDAO().getCampaignByName(campaignName);
+						if (campaign != null && campaign.getCreators() != null
+								&& campaign.getCreators().contains(withUser))
+							isCreator = true;
+					}
+					if (!isCreator)
+						return forbidden();
+				}
+			}
+			if (isCreator) {
+				DB.getAnnotationDAO().deleteAnnotation(annotationId);
+				return ok();
+			}
 			if (annotators.size() == 1) {
 				DB.getAnnotationDAO().deleteAnnotation(annotationId);
 				return ok();
@@ -746,7 +766,8 @@ public class AnnotationController extends Controller {
 		DB.getAnnotationDAO().makePermanent(annotation);
 		annotation.setAnnotationWithURI("/annotation/" + annotation.getDbId());
 		DB.getAnnotationDAO().makePermanent(annotation); // is this needed for a second time?
-		DB.getRecordResourceDAO().addAnnotation(annotation.getTarget().getRecordId(), annotation.getDbId(), "5c599c9c4c74793211258bbd");
+		DB.getRecordResourceDAO().addAnnotation(annotation.getTarget().getRecordId(), annotation.getDbId(),
+				"5c599c9c4c74793211258bbd");
 		return;
 	}
 

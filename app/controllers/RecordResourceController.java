@@ -20,6 +20,7 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -46,7 +47,6 @@ import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
 import akka.actor.Props;
 import annotators.AnnotatorConfig;
-import db.DAO;
 import db.DB;
 import model.DescriptiveData;
 import model.EmbeddedMediaObject;
@@ -63,7 +63,6 @@ import model.basicDataTypes.MultiLiteral;
 import model.resources.RecordResource;
 import model.resources.collection.CollectionObject;
 import model.resources.collection.CollectionObject.CollectionAdmin;
-import model.resources.collection.SimpleCollection;
 import model.usersAndGroups.User;
 import play.Logger;
 import play.Logger.ALogger;
@@ -153,8 +152,8 @@ public class RecordResourceController extends WithResourceController {
 		if (hideMine) {
 			List<ObjectId> collectionObjectIds = collectionIdCopy.stream().map(c -> new ObjectId(c))
 					.collect(Collectors.toList());
-			List<RecordResource> records = DB.getRecordResourceDAO().getRandomRecordsWithNoContributions(collectionObjectIds, count,
-					WithController.effectiveUserId());
+			List<RecordResource> records = DB.getRecordResourceDAO()
+					.getRandomRecordsWithNoContributions(collectionObjectIds, count, WithController.effectiveUserId());
 			Collections.shuffle(records);
 			return ok(Json.toJson(records));
 		}
@@ -664,6 +663,47 @@ public class RecordResourceController extends WithResourceController {
 			} catch (Exception e) {
 				log.error(e.getMessage(), e);
 			}
+		}
+		return ok(result);
+	}
+
+	enum Order {
+		UPVOTED, // upvoted first
+		DOWNVOTED, // downvoted first
+		NEUTRAL // neutral first
+	}
+
+	private static int getVoteDifference(Annotation a, Order order) {
+		int upvoted = 1;
+		int downvoted = 0;
+		if (a.getScore() != null) {
+			if (a.getScore().getApprovedBy() != null)
+				upvoted = a.getScore().getApprovedBy().size();
+			if (a.getScore().getRejectedBy() != null)
+				downvoted = a.getScore().getRejectedBy().size();
+		}
+		switch (order) {
+		case UPVOTED:
+			return downvoted - upvoted;
+		case DOWNVOTED:
+			return upvoted - downvoted;
+		case NEUTRAL:
+			return Math.abs(upvoted - downvoted);
+		}
+		return downvoted - upvoted;
+	}
+
+	public static Result getRecordIdsByAnnLabel(String label, List<String> generators, String order) {
+		ArrayNode result = Json.newObject().arrayNode();
+		List<Annotation> anns = DB.getAnnotationDAO().getByLabel(generators, label);
+		List<Annotation> sortedAnns = anns.stream()
+				.sorted((a1, a2) -> Integer.compare(getVoteDifference(a1, Order.valueOf(order.toUpperCase())),
+						getVoteDifference(a2, Order.valueOf(order.toUpperCase()))))
+				.collect(Collectors.toList());
+		for (Annotation ann : sortedAnns) {
+			// Do NOT return the actual records, TOO SLOW
+			// Instead, return an array with the record ids
+			result.add(Json.toJson(ann.getTarget().getRecordId().toHexString()));
 		}
 		return ok(result);
 	}

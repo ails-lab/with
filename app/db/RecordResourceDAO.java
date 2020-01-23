@@ -229,9 +229,8 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 		return this.findOne(q);
 	}
 
-	public List<RecordResource> getAnnotatedRecords(ObjectId userId, int offset, int count) {
-		List<Annotation> annotations = DB.getAnnotationDAO().getUserAnnotations(userId,
-				Arrays.asList("target.recordId"));
+	public List<RecordResource> getAnnotatedRecords(ObjectId userId, String project, String campaign, int offset, int count) {
+		List<Annotation> annotations = DB.getAnnotationDAO().getUserAnnotations(userId, project, campaign, Arrays.asList("target.recordId"));
 		if (annotations.isEmpty())
 			return new ArrayList<RecordResource>();
 		List<ObjectId> recordIds = (List<ObjectId>) CollectionUtils.collect(annotations,

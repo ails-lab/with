@@ -19,11 +19,12 @@ package model;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
-import org.apache.commons.collections.map.HashedMap;
 import org.bson.types.ObjectId;
 import org.mongodb.morphia.annotations.Entity;
 import org.mongodb.morphia.annotations.Id;
@@ -33,7 +34,6 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 import model.annotations.Annotation.MotivationType;
-import model.basicDataTypes.Language;
 import model.basicDataTypes.LiteralOrResource;
 import utils.Deserializer;
 import utils.Serializer;
@@ -204,9 +204,9 @@ public class Campaign {
 	
 	private String logo;
 	
-	@JsonSerialize(using = Serializer.ObjectIdSerializer.class)
-	@JsonDeserialize(using = Deserializer.ObjectIdDeserializer.class)
-	private ObjectId creator;
+	@JsonSerialize(using = Serializer.ObjectIdArraySerializer.class)
+//	@JsonDeserialize(using = Deserializer.ObjectIdArraySerializer.class)
+	private Set<ObjectId> creators = new HashSet<ObjectId>();
 	
 	@JsonSerialize(using = Serializer.ObjectIdSerializer.class)
 	@JsonDeserialize(using = Deserializer.ObjectIdDeserializer.class)	
@@ -407,12 +407,12 @@ public class Campaign {
 		this.spacename = spacename;
 	}
 
-	public ObjectId getCreator() {
-		return creator;
+	public Set<ObjectId> getCreators() {
+		return creators;
 	}
 
-	public void setCreator(ObjectId creator) {
-		this.creator = creator;
+	public void setCreators(Set<ObjectId> creators) {
+		this.creators = creators;
 	}
 
 	public String getLogo() {

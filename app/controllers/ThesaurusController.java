@@ -17,6 +17,8 @@
 package controllers;
 
 import java.io.IOException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -24,15 +26,7 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import model.Campaign;
-import model.Campaign.CampaignTerm;
-import model.basicDataTypes.Language;
-import model.basicDataTypes.MultiLiteral;
-import model.resources.ThesaurusObject;
-import model.resources.WithResourceType;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpResponse;
@@ -48,15 +42,6 @@ import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHitField;
-import org.elasticsearch.search.suggest.context.CategoryContextMapping;
-
-import play.Logger;
-import play.Logger.ALogger;
-import play.libs.Json;
-import play.mvc.Controller;
-import play.mvc.Result;
-import vocabularies.Vocabulary;
-import vocabularies.Vocabulary.VocabularyType;
 
 import com.aliasi.spell.JaccardDistance;
 import com.aliasi.tokenizer.IndoEuropeanTokenizerFactory;
@@ -64,15 +49,27 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
-import db.DB;
-import elastic.Elastic;
-import elastic.ElasticSearcher;
-import elastic.ElasticSearcher.SearchOptions;
-import actors.annotation.CultIVMLAnnotatorActor;
 import annotators.CultIVMLAnnotator;
 import annotators.DBPediaAnnotator;
 import annotators.LookupAnnotator;
 import annotators.NLPAnnotator;
+import db.DB;
+import elastic.Elastic;
+import elastic.ElasticSearcher;
+import elastic.ElasticSearcher.SearchOptions;
+import model.Campaign;
+import model.Campaign.CampaignTerm;
+import model.basicDataTypes.Language;
+import model.basicDataTypes.MultiLiteral;
+import model.resources.ThesaurusObject;
+import model.resources.WithResourceType;
+import play.Logger;
+import play.Logger.ALogger;
+import play.libs.Json;
+import play.mvc.Controller;
+import play.mvc.Result;
+import vocabularies.Vocabulary;
+import vocabularies.Vocabulary.VocabularyType;
 
 /**
  * @author achort
@@ -336,7 +333,7 @@ public class ThesaurusController extends Controller {
 
 	public static ArrayNode getWikidataSuggestions(String word) throws ClientProtocolException, IOException {
 		String url = "https://www.wikidata.org/w/api.php?action=wbsearchentities&language=fr&format=json&search="
-				+ word;
+				+ URLEncoder.encode(word, StandardCharsets.UTF_8.toString());
 		HttpClient client = HttpClientBuilder.create().build();
 		HttpGet request = new HttpGet(url);
 		HttpResponse resp = client.execute(request);
@@ -346,6 +343,8 @@ public class ThesaurusController extends Controller {
 			ObjectNode element = Json.newObject();
 			element.put("id", res.get("id").asText());
 			element.put("label", res.get("label").asText());
+			if (res.hasNonNull("description"))
+				element.put("description", res.get("description").asText());
 			element.put("matchedLabel", res.get("match").get("text").asText());
 			element.put("uri", res.get("concepturi").asText());
 			element.put("vocabulary", "wikidata");

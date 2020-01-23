@@ -36,6 +36,7 @@ import model.annotations.bodies.AnnotationBodyPolling;
 import model.annotations.selectors.SelectorType;
 import model.annotations.targets.AnnotationTarget;
 import model.basicDataTypes.Language;
+import model.resources.RecordResource;
 import model.resources.collection.CollectionObject;
 
 import org.apache.commons.beanutils.BeanToPropertyValueTransformer;
@@ -76,6 +77,23 @@ public class AnnotationDAO extends DAO<Annotation> {
 			Query<Annotation> q = this.createQuery().field("target.recordId").in(recIds);
 			return this.find(q).asList();
 		} else {
+			return new ArrayList<Annotation>();
+		}
+	}
+	
+	public List<Annotation> getByLabel(List<String> generators, String label) {
+		if (generators.size() > 0) {
+			Query<Annotation> q = this.createQuery().disableValidation();
+			q.or(
+				q.criteria("body.label.en").equal(label),
+				q.criteria("body.label.default").equal(label)
+			);
+			q.field("annotators.generator").in(generators)
+				.order("score.approvedBy");
+			List<Annotation> anns = this.find(q).asList();
+			return anns;
+		}
+		else {
 			return new ArrayList<Annotation>();
 		}
 	}
@@ -138,15 +156,21 @@ public class AnnotationDAO extends DAO<Annotation> {
 		return this.findOne(q);
 	}
 
-	public List<Annotation> getUserAnnotations(ObjectId userId, int offset, int count) {
-		Query<Annotation> q = this.createQuery().field("annotators.withCreator").equal(userId).offset(offset)
-				.limit(count);
+	public List<Annotation> getUserAnnotations(ObjectId userId, String project, String campaign, int offset, int count) {
+		Query<Annotation> q = this.createQuery().field("annotators.withCreator").equal(userId)
+												.field("annotators.generator").equal(project+' '+campaign)
+												.offset(offset)
+												.limit(count);
 		return this.find(q).asList();
 	}
 
-	public List<Annotation> getUserAnnotations(ObjectId userId, List<String> retrievedFields) {
-		Query<Annotation> q = this.createQuery().field("annotators.withCreator").equal(userId).retrievedFields(true,
-				retrievedFields.toArray(new String[retrievedFields.size()]));
+	public List<Annotation> getUserAnnotations(ObjectId userId, String project, String campaign, List<String> retrievedFields) {
+		Query<Annotation> q = this.createQuery().field("annotators.generator").equal(project + " " + campaign);
+		q.or(q.criteria("annotators.withCreator").equal(userId), 
+		    q.criteria("score.approvedBy.withCreator").equal(userId),
+			q.criteria("score.rejectedBy.withCreator").equal(userId)
+		);
+		q.retrievedFields(true, retrievedFields.toArray(new String[retrievedFields.size()]));
 		return this.find(q).asList();
 	}
 
@@ -156,22 +180,22 @@ public class AnnotationDAO extends DAO<Annotation> {
 		return this.find(q).asList();
 	}
 
-	public long countUserCreatedAnnotations(ObjectId userId) {
-		Query<Annotation> q = this.createQuery();
+	public long countUserCreatedAnnotations(ObjectId userId, String project, String campaign) {
+		Query<Annotation> q = this.createQuery().field("annotators.generator").equal(project+' '+campaign);
 		q.criteria("annotators.withCreator").equal(userId);
 		long count = q.countAll();
 		return count;
 	}
 
-	public long countUserUpvotedAnnotations(ObjectId userId) {
-		Query<Annotation> q = this.createQuery();
+	public long countUserUpvotedAnnotations(ObjectId userId, String project, String campaign) {
+		Query<Annotation> q = this.createQuery().field("annotators.generator").equal(project+' '+campaign);
 		q.criteria("score.approvedBy.withCreator").equal(userId);
 		long count = q.countAll();
 		return count;
 	}
 
-	public long countUserDownvotedAnnotations(ObjectId userId) {
-		Query<Annotation> q = this.createQuery();
+	public long countUserDownvotedAnnotations(ObjectId userId, String project, String campaign) {
+		Query<Annotation> q = this.createQuery().field("annotators.generator").equal(project+' '+campaign);
 		q.criteria("score.rejectedBy.withCreator").equal(userId);
 		long count = q.countAll();
 		return count;
@@ -179,8 +203,8 @@ public class AnnotationDAO extends DAO<Annotation> {
 
 	// TODO: Mongo distinct count
 	@SuppressWarnings("unchecked")
-	public long countUserAnnotatedRecords(ObjectId userId) {
-		Query<Annotation> q = this.createQuery();
+	public long countUserAnnotatedRecords(ObjectId userId, String project, String campaign) {
+		Query<Annotation> q = this.createQuery().field("annotators.generator").equal(project+' '+campaign);
 		q.or(q.criteria("annotators.withCreator").equal(userId), 
 			 q.criteria("score.approvedBy.withCreator").equal(userId),
 			 q.criteria("score.rejectedBy.withCreator").equal(userId)
