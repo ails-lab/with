@@ -393,7 +393,7 @@ public class RecordResourceController extends WithResourceController {
 
 	public static void annotateRecord(String recordId, ObjectId user, List<AnnotatorConfig> annConfigs,
 			ActorSelection ac) throws Exception {
-
+		
 		RecordResource record = DB.getRecordResourceDAO().get(new ObjectId(recordId));
 		DescriptiveData dd = null;
 
@@ -622,7 +622,9 @@ public class RecordResourceController extends WithResourceController {
 			List<Annotation> anns = DB.getAnnotationDAO().getByRecordId(new ObjectId(id), motivations);
 
 			for (Annotation ann : anns) {
+
 				JsonNode json = Json.toJson(ann);
+
 				for (Iterator<JsonNode> iter = json.get("annotators").elements(); iter.hasNext();) {
 					JsonNode annotator = iter.next();
 
@@ -636,9 +638,11 @@ public class RecordResourceController extends WithResourceController {
 
 				array.add(json);
 			}
+
 			return ok(array);
 //			}				
 		} catch (Exception e) {
+			
 			e.printStackTrace();
 			result.put("error", e.getMessage());
 			return internalServerError(result);

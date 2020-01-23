@@ -64,7 +64,7 @@ GET     /record/multiple						controllers.RecordResourceController.getMultipleRe
 GET		/record/:id							    controllers.RecordResourceController.getRecordResource(id, format: play.libs.F.Option[String], profile: String ?="MEDIUM", locale: play.libs.F.Option[java.lang.String])
 PUT		/record/:id								controllers.RecordResourceController.editRecordResource(id)
 
-GET		/annotation/importAutomatic					controllers.AnnotationController.importAutomaticColourAnnotations()
+GET		/annotation/importAutomatic				controllers.AnnotationController.importAutomaticColourAnnotations()
 GET 	/annotation/leaderboard					controllers.AnnotationController.leaderboard( groupId: String )
 GET		/annotation/approveMultiple				controllers.AnnotationController.approveMultipleAnnotations( id: java.util.List[String])
 GET		/annotation/rejectMultiple				controllers.AnnotationController.rejectMultipleAnnotations( id: java.util.List[String])
@@ -130,7 +130,7 @@ POST	 /exhibition/:id/addBackgroundImg		controllers.ExhibitionObjectController.a
 POST	/group/create							controllers.GroupManager.createGroup(adminId: String ?=null, adminUsername: String ?=null, groupType: String ?="UserGroup")
 POST	/organization/create					controllers.GroupManager.createGroup(adminId: String ?=null, adminUsername: String ?=null, groupType: String ?="Organization")
 POST	/project/create							controllers.GroupManager.createGroup(adminId: String ?=null, adminUsername: String ?=null, groupType: String ?="Project")
-GET      /group/findByGroupName                 controllers.GroupManager.findByGroupName(name, collectionId: String ?= null)
+GET     /group/findByGroupName                  controllers.GroupManager.findByGroupName(name, collectionId: String ?= null)
 GET		/group/descendantGroups/:groupId		controllers.GroupManager.getDescendantGroups(groupId, groupType: String  ?="All", direct: Boolean ?=true, collectionHits:Boolean ?= false)
 GET		/group/descendantOrganizations/:groupId	controllers.GroupManager.getDescendantGroups(groupId, groupType: String  ?="Organization", direct: Boolean ?=true, collectionHits:Boolean ?= false)
 GET		/group/descendantProjects/:groupId		controllers.GroupManager.getDescendantGroups(groupId, groupType: String  ?="Project", direct: Boolean ?=true, collectionHits:Boolean ?= false)
@@ -185,6 +185,7 @@ GET		/user/token				                controllers.UserManager.getToken()
 GET 	/user/loginWithToken	                controllers.UserManager.loginWithToken( token: java.lang.String )
 GET		/user/annotatedRecords					controllers.AnnotationController.getUserAnnotatedRecords(userId: String ?= null, offset: Integer ?=0, count: Integer ?=10)
 GET		/user/annotations						controllers.AnnotationController.getUserAnnotations(userId: String ?= null, offset: Integer ?=0, count: Integer ?=10)
+GET     /user/points                            controllers.CampaignController.getUserPoints(userId: String ?= null, pointType:String ?=null)
 
 # both users and groups
 GET      /user/findByUserOrGroupNameOrEmail        controllers.UserAndGroupManager.findByUserOrGroupNameOrEmail(userOrGroupNameOrEmail: String, collectionId ?= null)
@@ -250,4 +251,4 @@ GET		/campaign/decUserPoints						controllers.CampaignController.decUserPoints(c
 POST	/campaign/createCampaign					controllers.CampaignController.createCampaign()
 GET		/campaign/userCampaigns						controllers.CampaignController.getUserCampaigns(userId: String, offset: Integer ?=0, count: Integer ?=10)
 GET		/campaign/readCampaignTerms					controllers.CampaignController.readCampaignTerms()
-
+GET     /campaign/updateKarma/:id                   controllers.CampaignController.updateKarma(id)

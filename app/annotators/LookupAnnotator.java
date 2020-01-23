@@ -78,8 +78,9 @@ public class LookupAnnotator implements TextAnnotator {
 	}
 
     public static synchronized LookupAnnotator getAnnotator(Language lang, boolean cs) {
-    	LookupAnnotator ta = annotators.get(lang);
-    	
+
+		LookupAnnotator ta = annotators.get(lang);
+
     	if (ta == null) {
    			ta = new LookupAnnotator(lang, cs);
    			annotators.put(lang, ta);
@@ -118,6 +119,8 @@ public class LookupAnnotator implements TextAnnotator {
 			
 			String uri = semantic.getUri();
 			String thesaurus = semantic.getVocabulary().getName();
+
+			
 
 			if (label != null && uri != null) {
 				ObjectNode cc = Json.newObject();
@@ -178,7 +181,6 @@ public class LookupAnnotator implements TextAnnotator {
 	@Override
 	public List<Annotation> annotate(String text, ObjectId user, AnnotationTarget target, Map<String, Object> props) throws Exception {
 		text = strip(text);
-		
 		List<Annotation> res = new ArrayList<>();
 		
 		Chunking chunking = tt.chunk(text);

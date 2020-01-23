@@ -137,11 +137,22 @@ public class CampaignDAO extends DAO<Campaign> {
 		return count;
 	}
 
-	public void incUserPoints(ObjectId campaignId, String userid, String annotType) {
+	public List<Campaign> getUserAnnotatedCampaigns(ObjectId userId, String pointType) {
+		Query<Campaign> q = this.createQuery();
+		String userExists = "contributorsPoints." + userId.toString();
+		q.criteria(userExists).exists();
+		List<Campaign> campaigns = new ArrayList<Campaign>();
+		campaigns = this.find(q).asList();
+		
+
+		return campaigns;
+	}
+
+	public void incUserPoints(ObjectId campaignId, String userId, String annotType) {
 		Query<Campaign> q = this.createQuery().field("_id").equal(campaignId);
 		
 		UpdateOperations<Campaign> updateOps1 = this.createUpdateOperations().disableValidation();
-		updateOps1.inc("contributorsPoints." + userid + "." + annotType);
+		updateOps1.inc("contributorsPoints." + userId + "." + annotType);
 		this.update(q, updateOps1);
 
 		if (!annotType.equals("records")) {
@@ -159,11 +170,18 @@ public class CampaignDAO extends DAO<Campaign> {
 		this.update(q, updateOps);
 	}
 
-	public void decUserPoints(ObjectId campaignId, String userid, String annotType) {
+	public void resetKarmaPoints(ObjectId campaignId, String userId) {
+		Query<Campaign> q = this.createQuery().field("_id").equal(campaignId);
+		UpdateOperations<Campaign> updateOps = this.createUpdateOperations().disableValidation();
+		updateOps.set("contributorsPoints." + userId + ".karmaPoints", 0);
+		this.update(q, updateOps);
+	}
+
+	public void decUserPoints(ObjectId campaignId, String userId, String annotType) {
 		Query<Campaign> q = this.createQuery().field("_id").equal(campaignId);
 
 		UpdateOperations<Campaign> updateOps1 = this.createUpdateOperations().disableValidation();
-		updateOps1.dec("contributorsPoints." + userid + "." + annotType);
+		updateOps1.dec("contributorsPoints." + userId + "." + annotType);
 		this.update(q, updateOps1);
 
 		if (!annotType.equals("records")) {

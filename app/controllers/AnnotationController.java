@@ -508,7 +508,7 @@ public class AnnotationController extends Controller {
 		else
 			withUser = WithController.effectiveUserDbId();
 		if (withUser == null)
-			return badRequest(Json.parse("{ 'error' : 'No user defined' }"));
+			return badRequest(Json.parse("{\"error\" : \"No user defined\" }"));
 		long annotatedRecords = DB.getAnnotationDAO().countUserAnnotatedRecords(withUser);
 		long createdCount = DB.getAnnotationDAO().countUserCreatedAnnotations(withUser);
 		long approvedCount = DB.getAnnotationDAO().countUserUpvotedAnnotations(withUser);
@@ -544,7 +544,7 @@ public class AnnotationController extends Controller {
 		else
 			withUser = WithController.effectiveUserDbId();
 		if (withUser == null)
-			return badRequest(Json.parse("{ 'error' : 'No user defined' }"));
+			return badRequest(Json.parse("{\"error\" : \"No user defined\" }"));
 		return ok(getUserAnnotatedRecords(withUser, offset, count));
 
 	}

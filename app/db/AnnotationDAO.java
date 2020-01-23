@@ -280,6 +280,12 @@ public class AnnotationDAO extends DAO<Annotation> {
 						((AnnotationAdmin) ann.getAnnotators().get(0)).getWithCreator().toHexString()));
 		this.deleteByQuery(q);
 	}
+
+	public List<Annotation> getCampaignAnnotations(ObjectId campaignId) {
+		String campaignName = DB.getCampaignDAO().getById(campaignId).getUsername();
+		Query<Annotation> q = this.createQuery().field("annotators.generator").endsWith(campaignName);
+		return this.find(q).asList();
+	}
 	
 	public void unscoreAutomaticAnnotations() {
 		Query<Annotation> q = this.createQuery().field("annotators.generator").equal("Image Analysis");

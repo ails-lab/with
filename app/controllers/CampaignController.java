@@ -16,6 +16,7 @@
 
 package controllers;
 
+
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -32,6 +33,7 @@ import java.util.Date;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVRecord;
@@ -59,6 +61,9 @@ import play.Logger;
 import play.Logger.ALogger;
 import play.libs.Json;
 import play.mvc.Result;
+import model.annotations.Annotation;
+import model.annotations.Annotation.AnnotationAdmin;
+
 
 public class CampaignController extends WithController {
 
@@ -503,4 +508,85 @@ public class CampaignController extends WithController {
 	 * 
 	 * return result; }
 	 */
+	public static Result getUserPoints(String userId, String pointType) throws Exception {
+		ObjectId withUser = null;
+		String type;
+		long points=0;
+		ObjectNode result = Json.newObject();
+		if (userId != null)
+			withUser = new ObjectId(userId);
+		else
+			withUser = WithController.effectiveUserDbId();
+		
+		if (pointType != null)
+			type = pointType;
+		else 
+			type = "karmaPoints";
+
+		if (withUser == null)
+			return badRequest(Json.parse("{ \"error\" : \"No user defined\" }"));
+		List<Campaign> campaigns = new ArrayList<Campaign>();
+		campaigns = DB.getCampaignDAO().getUserAnnotatedCampaigns(withUser, pointType);
+		Campaign myCampaign;
+		if (campaigns == null) {
+			result.put("error", "DB error");
+			return internalServerError(result);
+		}
+		else{
+			for (int i=0; i<campaigns.size(); i++){
+				myCampaign = campaigns.get(i);
+				if(type.equals("karmaPoints"))
+					points = points + ((myCampaign.getContributorsPoints()).get(withUser)).getKarmaPoints();
+				else if(type.equals("created"))
+					points = points + ((myCampaign.getContributorsPoints()).get(withUser)).getCreated();
+				else if(type.equals("approved"))
+					points = points + ((myCampaign.getContributorsPoints()).get(withUser)).getApproved();
+				else if(type.equals("rejected"))
+					points = points + ((myCampaign.getContributorsPoints()).get(withUser)).getRejected();
+				else
+					points = points + ((myCampaign.getContributorsPoints()).get(withUser)).getKarmaPoints();
+			}
+		}
+		result.set(type, Json.toJson(points));
+		return ok(result);	
+	}
+
+
+	public static Result updateKarma(String campaignId) throws Exception {
+		ObjectId campaignDbId = new ObjectId(campaignId);
+		ObjectId creatorId; 
+		Campaign campaign = DB.getCampaignDAO().getCampaign(campaignDbId);
+		int i;
+		//First we zero the karmaPoints of allUsers in order to recaclulate them
+		Hashtable<ObjectId, AnnotationCount> contributors = campaign.getContributorsPoints();
+		Set<ObjectId> keys = contributors.keySet();
+		for(ObjectId key: keys){
+			contributors.get(key).setKarmaPoints(0);
+			DB.getCampaignDAO().resetKarmaPoints(campaignDbId,key.toHexString());
+		}
+		//Then we search all the Annotations for the ones that belong to the specific Campaign and we update annotation by annotation the karma points of their creator
+		List<Annotation> annotations;
+		Annotation current;
+		annotations = DB.getAnnotationDAO().getCampaignAnnotations(campaignDbId);
+		for (i=0; i<annotations.size(); i++){
+			current = annotations.get(i);
+			if(current.getScore() != null){
+				if ((current.getScore().getRejectedBy() != null) && (current.getScore().getApprovedBy() != null) ){
+					if (current.getScore().getRejectedBy().size() >= current.getScore().getApprovedBy().size()){
+						if (current.getAnnotators() != null){
+							if ((AnnotationAdmin)(current.getAnnotators()).get(0)!=null){
+								creatorId = ((AnnotationAdmin)(current.getAnnotators()).get(0)).getWithCreator();
+								if (creatorId != null){
+									DB.getCampaignDAO().incUserPoints(campaignDbId,creatorId.toString(),"karmaPoints");
+								}
+							}	
+						}	
+					}
+				}
+			}
+		}
+		return ok();	
+	}
+
+
 }

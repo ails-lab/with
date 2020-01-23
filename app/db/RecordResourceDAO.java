@@ -86,7 +86,7 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 		if (upperBound < lowerBound)
 			return new ArrayList<RecordResource>();
 		CollectionObject collection = DB.getCollectionObjectDAO().getSliceOfCollectedResources(collectionId, lowerBound,
-				upperBound - lowerBound);
+				upperBound - lowerBound);	/* Maybe it needs upperBound - lowerBound + 1? */
 		Query<RecordResource> q = this.createQuery();
 		return getRecords(collection.getCollectedResources(), q);
 	}

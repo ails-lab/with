@@ -527,6 +527,7 @@ public class UserManager extends WithController {
 		ObjectNode error = Json.newObject();
 		User u = null;
 		if (json.has("facebookId")) {
+
 			String facebookId = json.get("facebookId").asText();
 			u = DB.getUserDAO().getByFacebookId(facebookId);
 			if (u != null) {
