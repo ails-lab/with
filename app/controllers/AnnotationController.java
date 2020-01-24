@@ -506,6 +506,7 @@ public class AnnotationController extends Controller {
 
 	public static Result getUserAnnotations(String userId, String project, String campaign, int offset, int count) {
 		ObjectId withUser = null;
+	
 		if (userId != null)
 			withUser = new ObjectId(userId);
 		else
@@ -525,6 +526,35 @@ public class AnnotationController extends Controller {
 		recordsWithCount.put("approvedCount", approvedCount);
 		recordsWithCount.put("rejectedCount", rejectedCount);
 		recordsWithCount.put("annotatedRecordsCount", annotatedRecords);
+
+		long karmaPoints=0;
+		if (campaign != null){
+			ObjectId creatorId; 
+			List<Annotation> annotations;
+			Annotation current;
+			annotations = DB.getAnnotationDAO().getCampaignAnnotations(campaign);
+			int i;
+			for (i=0; i<annotations.size(); i++){
+				current = annotations.get(i);
+				if(current.getScore() != null){
+					if ((current.getScore().getRejectedBy() != null) && (current.getScore().getApprovedBy() != null) ){
+						if (current.getScore().getRejectedBy().size() >= current.getScore().getApprovedBy().size()){
+							if (current.getAnnotators() != null){
+								if ((AnnotationAdmin)(current.getAnnotators()).get(0)!=null){
+									creatorId = ((AnnotationAdmin)(current.getAnnotators()).get(0)).getWithCreator();
+									if (creatorId.equals(withUser)){
+										karmaPoints++;
+									}
+								}	
+							}	
+						}
+					}
+				}
+			}
+		}
+		recordsWithCount.put("karmaPoints", karmaPoints);
+
+
 		return ok(recordsWithCount);
 	}
 
