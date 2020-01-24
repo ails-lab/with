@@ -19,6 +19,7 @@ package db;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -37,16 +38,35 @@ import model.annotations.selectors.SelectorType;
 import model.annotations.targets.AnnotationTarget;
 import model.basicDataTypes.Language;
 import model.resources.RecordResource;
+import model.resources.WithResourceType;
 import model.resources.collection.CollectionObject;
 
 import org.apache.commons.beanutils.BeanToPropertyValueTransformer;
 import org.apache.commons.collections.CollectionUtils;
 import org.bson.types.ObjectId;
+import org.elasticsearch.action.search.SearchRequestBuilder;
+import org.elasticsearch.action.search.SearchResponse;
+import org.elasticsearch.index.query.BoolQueryBuilder;
+import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.search.SearchHit;
+import org.elasticsearch.search.aggregations.Aggregation;
+import org.elasticsearch.search.aggregations.AggregationBuilder;
+import org.elasticsearch.search.aggregations.AggregationBuilders;
+import org.elasticsearch.search.aggregations.Aggregations;
+
+
+import org.elasticsearch.search.aggregations.bucket.terms.Terms;
+import org.elasticsearch.search.aggregations.metrics.tophits.TopHits;
+
+
 import org.mongodb.morphia.query.Query;
 import org.mongodb.morphia.query.UpdateOperations;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.mongodb.WriteResult;
+
+import elastic.ElasticSearcher;
+import elastic.ElasticSearcher.SearchOptions;
 
 @SuppressWarnings("rawtypes")
 public class AnnotationDAO extends DAO<Annotation> {
@@ -96,6 +116,37 @@ public class AnnotationDAO extends DAO<Annotation> {
 		else {
 			return new ArrayList<Annotation>();
 		}
+	}
+	
+	public Map<String, Integer> getByCampaign(String campaignName, String term, int offset, int count) {
+		BoolQueryBuilder query = QueryBuilders.boolQuery();
+		BoolQueryBuilder langQuery = QueryBuilders.boolQuery();
+		langQuery.should(QueryBuilders.regexpQuery("body.label.default", term + ".*"));
+		langQuery.should(QueryBuilders.regexpQuery("body.label.en", term + ".*"));
+		query.must(langQuery);
+		query.must(QueryBuilders.regexpQuery("annotators.generator", campaignName.split("-")[0] + ".*" ));
+		SearchOptions so = new SearchOptions(offset, count);
+		so.searchFields = new String[]{ "body.label.en" };
+		
+		ElasticSearcher searcher = new ElasticSearcher();
+		searcher.setTypes(new ArrayList<String>() {
+			{
+				add("annotation");
+			}
+		});
+		AggregationBuilder aggregation =
+			    AggregationBuilders
+			        .terms("agg").field("body.label.en");
+		SearchRequestBuilder srb = searcher.getSearchRequestBuilder(query, so).addAggregation(aggregation);
+		SearchResponse sr = srb.execute().actionGet();
+		HashMap<String, Integer> result = new HashMap<String, Integer>();
+		Terms agg = sr.getAggregations().get("agg");
+		for (Terms.Bucket entry : agg.getBuckets()) {
+		    String key = (String) entry.getKey();
+		    long docCount = entry.getDocCount();
+		    result.put(key, Integer.valueOf((int) docCount));
+		}	
+		return result;
 	}
 
 	public List<Annotation> getApprovedByRecordId(ObjectId recordId, List<Annotation.MotivationType> motivations,

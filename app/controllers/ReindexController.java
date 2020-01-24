@@ -104,6 +104,18 @@ public class ReindexController extends WithController {
 		return ok();
 	}
 	
+	public static Result reindexAllAnnotations() {
+
+		try {
+			ElasticReindexer.reindexAllDbAnnotations();
+		} catch(Exception e) {
+			log.error(e.getMessage(), e);
+			return internalServerError(e.getMessage());
+		}
+
+		return ok();
+	}
+	
 	public static Result reindexCollection(String id) {
 
 		try {

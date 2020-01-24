@@ -205,6 +205,7 @@ GET	/api/mkconst									controllers.ReindexController.makeConsistent()
 GET	/api/idxres										controllers.ReindexController.reindexAllResources()
 GET	/api/idxcols									controllers.ReindexController.reindexAllCollections()
 GET	/api/idxthes									controllers.ReindexController.reindexAllThesaurus()
+GET	/api/idxann										controllers.ReindexController.reindexAllAnnotations()
 GET /api/purge										controllers.ReindexController.purgeElastic()
 GET /api/collection/:id/reindex							controllers.ReindexController.reindexCollection(id)
 
@@ -251,4 +252,4 @@ GET		/campaign/decUserPoints						controllers.CampaignController.decUserPoints(c
 POST	/campaign/createCampaign					controllers.CampaignController.createCampaign()
 GET		/campaign/userCampaigns						controllers.CampaignController.getUserCampaigns(userId: String, offset: Integer ?=0, count: Integer ?=10)
 GET		/campaign/readCampaignTerms					controllers.CampaignController.readCampaignTerms()
-
+GET		/campaign/popularAnnotations				controllers.CampaignController.getPopularAnnotations(campaignName: String, term : String ?= "", offset : Integer ?= 0, count: Integer ?= 10)
