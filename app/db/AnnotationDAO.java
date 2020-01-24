@@ -361,6 +361,11 @@ public class AnnotationDAO extends DAO<Annotation> {
 		Query<Annotation> q = this.createQuery().field("annotators.generator").endsWith(campaignName);
 		return this.find(q).asList();
 	}
+
+	public List<Annotation> getCampaignAnnotations(String campaignName) {
+		Query<Annotation> q = this.createQuery().field("annotators.generator").endsWith(campaignName);
+		return this.find(q).asList();
+	}
 	
 	public void unscoreAutomaticAnnotations() {
 		Query<Annotation> q = this.createQuery().field("annotators.generator").equal("Image Analysis");
