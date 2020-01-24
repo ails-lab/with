@@ -547,7 +547,7 @@ public class AnnotationController extends Controller {
 		else
 			withUser = WithController.effectiveUserDbId();
 		if (withUser == null)
-			return badRequest(Json.parse("{ 'error' : 'No user defined' }"));
+			return badRequest(Json.parse("{\"error\" : \"No user defined\" }"));
 		return ok(getUserAnnotatedRecords(withUser, project, campaign, offset, count));
 
 	}

@@ -74,12 +74,14 @@ public class Campaign {
 		private long approved = 0;
 		private long rejected = 0;
 		private long records = 0;
-		
+		private long karmaPoints = 0;
+
 		public AnnotationCount() {
 			this.created = 0;
 			this.approved = 0;
 			this.rejected = 0;
 			this.records = 0;
+			this.karmaPoints = 0;
 		}
 		
 		public long getCreated() {
@@ -105,6 +107,12 @@ public class Campaign {
 		}
 		public void setRecords(long records) {
 			this.records = records;
+		}
+		public long getKarmaPoints() {
+			return karmaPoints;
+		}
+		public void setKarmaPoints(long karmaPoints) {
+			this.karmaPoints = karmaPoints;
 		}
 	}
 	
@@ -361,7 +369,7 @@ public class Campaign {
 	}
 
 	
-	public AnnotationCount getAnnotationCurrent() {
+	public AnnotationCount get() {
 		return annotationCurrent;
 	}
 	public void setAnnotationCurrent(AnnotationCount annotationCurrent) {
