@@ -369,7 +369,7 @@ public class Campaign {
 	}
 
 	
-	public AnnotationCount get() {
+	public AnnotationCount getAnnotationCurrent() {
 		return annotationCurrent;
 	}
 	public void setAnnotationCurrent(AnnotationCount annotationCurrent) {
