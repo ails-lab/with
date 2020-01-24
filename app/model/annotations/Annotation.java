@@ -52,12 +52,10 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 @SuppressWarnings("unchecked")
 @JsonInclude(value = JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
-@Indexes({
-	@Index(fields = @Field(value = "motivation", type = IndexType.ASC), options = @IndexOptions()),
+@Indexes({ @Index(fields = @Field(value = "motivation", type = IndexType.ASC), options = @IndexOptions()),
 //	@Index(fields = @Field(value = "body.uri", type = IndexType.ASC), options = @IndexOptions(disableValidation = true)),
-	@Index(fields = @Field(value = "target.recordId", type = IndexType.ASC), options = @IndexOptions()),
-	@Index(fields = @Field(value = "score.approvedBy", type = IndexType.ASC), options = @IndexOptions()),
-})
+		@Index(fields = @Field(value = "target.recordId", type = IndexType.ASC), options = @IndexOptions()),
+		@Index(fields = @Field(value = "score.approvedBy", type = IndexType.ASC), options = @IndexOptions()), })
 
 @Entity("Annotation")
 public class Annotation<T extends AnnotationBody> {
@@ -94,12 +92,12 @@ public class Annotation<T extends AnnotationBody> {
 	}
 
 	/**
-	 * The motivation why this annotation has been created. This takes values
-	 * from an enumerated list that currently includes Tagging, Linking,
-	 * Commenting, Editing
+	 * The motivation why this annotation has been created. This takes values from
+	 * an enumerated list that currently includes Tagging, Linking, Commenting,
+	 * Editing
 	 */
 	private MotivationType motivation;
-	
+
 	@Embedded
 	private AnnotationScore score;
 
@@ -272,8 +270,7 @@ public class Annotation<T extends AnnotationBody> {
 		private ArrayList<AnnotationAdmin> rejectedBy;
 
 		/**
-		 * An arrayList with the users who didn't comment on this annotation
-		 * body.
+		 * An arrayList with the users who didn't comment on this annotation body.
 		 */
 		private ArrayList<AnnotationAdmin> dontKnowBy;
 
@@ -314,15 +311,11 @@ public class Annotation<T extends AnnotationBody> {
 
 		JsonNode json = mapper.valueToTree(this);
 
-		((ObjectNode)json).remove("annotationWithURI");
-		((ObjectNode)json.get("target")).remove("selector");
+		((ObjectNode) json).remove("annotationWithURI");
+		((ObjectNode) json.get("target")).remove("selector");
 
-//		((ObjectNode)json).remove("narrower");
-//		((ObjectNode)json).remove("topConcepts");
-//		((ObjectNode)json).remove("members");
-//		
-		
 		return mapper.convertValue(json, Map.class);
+
 	}
 
 }

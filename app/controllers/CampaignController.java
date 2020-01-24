@@ -34,6 +34,7 @@ import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.csv.CSVFormat;
@@ -426,6 +427,11 @@ public class CampaignController extends WithController {
 
 		System.out.println(terms);
 
+	}
+	
+	public static Result getPopularAnnotations(String campaignName, String term, int offset, int count) {
+		Map<String, Integer> res = DB.getAnnotationDAO().getByCampaign(campaignName, term, offset, count);
+		return ok(Json.toJson(res)) ;
 	}
 
 	@SuppressWarnings("unused")
