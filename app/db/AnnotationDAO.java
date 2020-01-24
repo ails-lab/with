@@ -126,7 +126,7 @@ public class AnnotationDAO extends DAO<Annotation> {
 		query.must(langQuery);
 		query.must(QueryBuilders.regexpQuery("annotators.generator", campaignName.split("-")[0] + ".*" ));
 		SearchOptions so = new SearchOptions(offset, count);
-		so.searchFields = new String[]{ "body.label.en" };
+		so.searchFields = new String[]{ "annlabel" };
 		
 		ElasticSearcher searcher = new ElasticSearcher();
 		searcher.setTypes(new ArrayList<String>() {
@@ -136,7 +136,7 @@ public class AnnotationDAO extends DAO<Annotation> {
 		});
 		AggregationBuilder aggregation =
 			    AggregationBuilders
-			        .terms("agg").field("body.label.en");
+			        .terms("agg").field("annlabel.raw").size(count);
 		SearchRequestBuilder srb = searcher.getSearchRequestBuilder(query, so).addAggregation(aggregation);
 		SearchResponse sr = srb.execute().actionGet();
 		HashMap<String, Integer> result = new HashMap<String, Integer>();

@@ -48,6 +48,7 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.fasterxml.jackson.databind.node.NullNode;
 
 @SuppressWarnings("unchecked")
 @JsonInclude(value = JsonInclude.Include.NON_NULL)
@@ -313,6 +314,17 @@ public class Annotation<T extends AnnotationBody> {
 
 		((ObjectNode) json).remove("annotationWithURI");
 		((ObjectNode) json.get("target")).remove("selector");
+		try {
+			JsonNode label = json.get("body").get("label").get("en");
+			if (label == null) {
+				label = json.get("body").get("label").get("default");
+			}
+			if (label != null && label.get(0) != null) {
+				((ObjectNode) json).put("annlabel", label.get(0).asText());
+			}
+		} catch (NullPointerException e) {
+
+		}
 
 		return mapper.convertValue(json, Map.class);
 

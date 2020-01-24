@@ -20,5 +20,5 @@ public enum WithResourceType {
 	WithResource, CollectionObject, SimpleCollection, Exhibition, NewExhibition, RecordResource,
 	CulturalObject, EuScreenObject, EventObject, 
 	PlaceObject, TimespanObject, ThesaurusObject,
-	AgentObject, Annotation;
+	AgentObject;
 }
