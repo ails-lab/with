@@ -101,7 +101,8 @@ public class Annotation<T extends AnnotationBody> {
 
 	@Embedded
 	private AnnotationScore score;
-
+	
+	private boolean publish ;
 	/**
 	 * The body that includes the annotation details.
 	 */
@@ -168,6 +169,14 @@ public class Annotation<T extends AnnotationBody> {
 
 	public void setAnnotators(ArrayList<AnnotationAdmin> annotators) {
 		this.annotators = annotators;
+	}
+
+	public boolean getPublish() {
+		return publish;
+	}
+
+	public void setPublish(boolean publish) {
+		this.publish = publish;
 	}
 
 	@JsonInclude(value = JsonInclude.Include.NON_NULL)

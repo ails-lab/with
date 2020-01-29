@@ -17,18 +17,23 @@
 package controllers;
 
 import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.sql.SQLException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
@@ -36,13 +41,13 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.bson.types.ObjectId;
+import org.junit.Assert;
 import org.mongodb.morphia.geo.GeoJson;
 import org.mongodb.morphia.geo.Point;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.mongodb.connection.Connection;
 
 import controllers.RecordResourceController.CollectionAndRecordsCounts;
 import controllers.WithController.Profile;
@@ -54,10 +59,12 @@ import model.Campaign;
 import model.EmbeddedMediaObject.MediaVersion;
 import model.annotations.Annotation;
 import model.annotations.Annotation.AnnotationAdmin;
+import model.annotations.Annotation.AnnotationScore;
 import model.annotations.Annotation.MotivationType;
 import model.annotations.bodies.AnnotationBody;
 import model.annotations.bodies.AnnotationBodyColorTagging;
 import model.annotations.bodies.AnnotationBodyGeoTagging;
+import model.annotations.bodies.AnnotationBodyTagging;
 import model.annotations.targets.AnnotationTarget;
 import model.basicDataTypes.Language;
 import model.basicDataTypes.MultiLiteral;
@@ -506,7 +513,7 @@ public class AnnotationController extends Controller {
 
 	public static Result getUserAnnotations(String userId, String project, String campaign, int offset, int count) {
 		ObjectId withUser = null;
-	
+
 		if (userId != null)
 			withUser = new ObjectId(userId);
 		else
@@ -527,26 +534,26 @@ public class AnnotationController extends Controller {
 		recordsWithCount.put("rejectedCount", rejectedCount);
 		recordsWithCount.put("annotatedRecordsCount", annotatedRecords);
 
-		long karmaPoints=0;
-		if (campaign != null){
-			ObjectId creatorId; 
+		long karmaPoints = 0;
+		if (campaign != null) {
+			ObjectId creatorId;
 			List<Annotation> annotations;
 			Annotation current;
 			annotations = DB.getAnnotationDAO().getCampaignAnnotations(campaign);
 			int i;
-			for (i=0; i<annotations.size(); i++){
+			for (i = 0; i < annotations.size(); i++) {
 				current = annotations.get(i);
-				if(current.getScore() != null){
-					if ((current.getScore().getRejectedBy() != null) && (current.getScore().getApprovedBy() != null) ){
-						if (current.getScore().getRejectedBy().size() >= current.getScore().getApprovedBy().size()){
-							if (current.getAnnotators() != null){
-								if ((AnnotationAdmin)(current.getAnnotators()).get(0)!=null){
-									creatorId = ((AnnotationAdmin)(current.getAnnotators()).get(0)).getWithCreator();
-									if (creatorId.equals(withUser)){
+				if (current.getScore() != null) {
+					if ((current.getScore().getRejectedBy() != null) && (current.getScore().getApprovedBy() != null)) {
+						if (current.getScore().getRejectedBy().size() >= current.getScore().getApprovedBy().size()) {
+							if (current.getAnnotators() != null) {
+								if ((AnnotationAdmin) (current.getAnnotators()).get(0) != null) {
+									creatorId = ((AnnotationAdmin) (current.getAnnotators()).get(0)).getWithCreator();
+									if (creatorId.equals(withUser)) {
 										karmaPoints++;
 									}
-								}	
-							}	
+								}
+							}
 						}
 					}
 				}
@@ -554,13 +561,14 @@ public class AnnotationController extends Controller {
 		}
 		recordsWithCount.put("karmaPoints", karmaPoints);
 
-
 		return ok(recordsWithCount);
 	}
 
-	public static JsonNode getUserAnnotatedRecords(ObjectId withUser, String project, String campaign, int offset, int count) {
+	public static JsonNode getUserAnnotatedRecords(ObjectId withUser, String project, String campaign, int offset,
+			int count) {
 		ArrayNode recordsList = Json.newObject().arrayNode();
-		List<RecordResource> records = DB.getRecordResourceDAO().getAnnotatedRecords(withUser, project, campaign, offset, count);
+		List<RecordResource> records = DB.getRecordResourceDAO().getAnnotatedRecords(withUser, project, campaign,
+				offset, count);
 		for (RecordResource record : records) {
 			Some<String> locale = new Some(Language.DEFAULT.toString());
 			RecordResource profiledRecord = record.getRecordProfile(Profile.MEDIUM.toString());
@@ -570,7 +578,8 @@ public class AnnotationController extends Controller {
 		return recordsList;
 	}
 
-	public static Result getUserAnnotatedRecords(String userId, String project, String campaign, int offset, int count) {
+	public static Result getUserAnnotatedRecords(String userId, String project, String campaign, int offset,
+			int count) {
 		ObjectId withUser = null;
 		if (userId != null)
 			withUser = new ObjectId(userId);
@@ -848,5 +857,135 @@ public class AnnotationController extends Controller {
 		}
 		con.close();
 		return ok();
+	}
+
+	private static String getEuropeanaRecord(AnnotationTarget target) {
+		String externalUrl = target.getExternalId();
+		if (externalUrl == null) {
+			externalUrl = DB.getRecordResourceDAO().get(target.getRecordId()).getAdministrative().getExternalId();
+		}
+		if (externalUrl.startsWith("/")) {
+			externalUrl = "http://data.europeana.eu/item" + externalUrl;
+		}
+		try {
+			URL url = new URL(externalUrl);
+			HttpURLConnection huc = (HttpURLConnection) url.openConnection();
+			int responseCode = huc.getResponseCode();
+//		Assert.assertEquals(HttpURLConnection.HTTP_OK, responseCode);
+		} catch (Exception e) {
+			Logger.error("Europeana url is not working :" + externalUrl);
+		}
+		return externalUrl;
+	}
+
+	private static JsonNode tranformToEuropeanaModel(Annotation ann) {
+		ObjectNode europeanaAnnotation = Json.newObject();
+		europeanaAnnotation.put("type", "Annotation");
+		// Creation info
+		AnnotationAdmin createdAdmin = (AnnotationAdmin) ann.getAnnotators().get(0);
+		User creator = DB.getUserDAO().get(createdAdmin.getWithCreator());
+		String creatorName = creator.getFirstName() + " " + creator.getLastName();
+		europeanaAnnotation.put("created", createdAdmin.getCreated().toInstant().toString());
+		europeanaAnnotation.put("creator", Json.newObject().put("type", "Person").put("name", creatorName));
+		// Generated info
+		ObjectNode generator = Json.newObject().put("type", "Software").put("name", "CrowdHeritage").put("homepage",
+				"https://crowdheritage.eu");
+		europeanaAnnotation.put("generator", generator);
+		// Motivation, Body and Target
+		europeanaAnnotation.put("motivation", "tagging");
+		AnnotationBodyTagging body = (AnnotationBodyTagging) ann.getBody();
+		europeanaAnnotation.put("body", body.getUri());
+		europeanaAnnotation.put("target", getEuropeanaRecord(ann.getTarget()));
+		return europeanaAnnotation;
+	}
+
+	private static class Score {
+		int upvotes;
+		int downvotes;
+		int finalScore;
+
+		private Score(int upvotes, int downvotes, int finalScore) {
+			this.upvotes = upvotes;
+			this.downvotes = downvotes;
+			this.finalScore = finalScore;
+		}
+	}
+
+	private static Score getFinalScore(Annotation annotation) {
+		AnnotationScore score = annotation.getScore();
+		if (annotation.getScore() == null) {
+			return new Score(0, 0, 0);
+		}
+		int app = score.getApprovedBy() == null ? 0 : score.getApprovedBy().size();
+		int rej = score.getRejectedBy() == null ? 0 : score.getRejectedBy().size();
+		int finalScore = app - rej;
+		return new Score(app, rej, finalScore);
+	}
+
+//	Criteria to pick the colours for the caltwalk colours campaign.
+//	Publish only the first colour in terms of net score,
+//	if two colours have the same net score we publish both,
+// 	if three or more have the same net score we publish just
+//	the first two with the higher number of upvotes.
+//	If the colour “multicolor” appears as top colour together
+//	with another one (same net score), we only publish the “multicolor”.
+	private static void checkAndAdd(Annotation annotation, List<Annotation> existingAnnotations) {
+		Score newScore = getFinalScore(annotation);
+		if (existingAnnotations.size() == 0 || existingAnnotations.size() > 2) {
+			Logger.error("Annotations for publishing are not conforming to the criteria");
+			return;
+		}
+		boolean removed = false;
+		removed = existingAnnotations.removeIf(a -> getFinalScore(a).finalScore < newScore.finalScore);
+		removed = removed | existingAnnotations.removeIf(a -> (getFinalScore(a).finalScore == newScore.finalScore)
+				&& ((AnnotationBodyTagging) annotation.getBody()).getLabel().get(Language.EN).get(0)
+						.equals("multicoloured"));
+		if (removed) {
+			existingAnnotations.add(annotation);
+			return;
+		}
+		if (getFinalScore(existingAnnotations.get(0)).finalScore == newScore.finalScore) {
+			existingAnnotations.add(annotation);
+			existingAnnotations.stream().sorted((a1, a2) -> {
+				int up1 = getFinalScore(a1).upvotes;
+				int up2 = getFinalScore(a2).upvotes;
+				if (up1 == up2) {
+					return 0;
+				}
+				return up1 > up2 ? -1 : 1;
+			}).collect(Collectors.toList());
+		}
+		if (existingAnnotations.size() > 2) {
+			existingAnnotations.remove(2);
+		}
+	}
+
+	private static void prepareAnnotationForPublish(Map<ObjectId, List<Annotation>> annotationsPerRecord,
+			Annotation annotation) {
+		Score currentFinalScore = getFinalScore(annotation);
+		if (currentFinalScore.finalScore <= 0)
+			return;
+		ObjectId recordId = annotation.getTarget().getRecordId();
+		if (annotationsPerRecord.containsKey(recordId) == false) {
+			annotationsPerRecord.put(recordId, new ArrayList<Annotation>(Arrays.asList(annotation)));
+		} else {
+			checkAndAdd(annotation, annotationsPerRecord.get(recordId));
+		}
+	}
+
+	public static Result exportAnnotationsForEuropeanaApi(String campaignName, int maxRanking) {
+		List<Annotation> annotations = DB.getAnnotationDAO().getCampaignAnnotations(campaignName);
+		if (campaignName.equals("colours-catwalk")) {
+			annotations.addAll(DB.getAnnotationDAO().getCampaignAnnotations("Image Analysis"));
+		}
+		HashMap<ObjectId, List<Annotation>> annotationsPerRecord = new HashMap<ObjectId, List<Annotation>>();
+		for (Annotation annotation : annotations) {
+			prepareAnnotationForPublish(annotationsPerRecord, annotation);
+		}
+		List<Annotation> published = annotationsPerRecord.values().stream().flatMap(List::stream)
+				.collect(Collectors.toList());
+		published.forEach(a -> DB.getAnnotationDAO().markAnnotationForPublish(a.getDbId()));
+		List<JsonNode> res = published.stream().map(a -> tranformToEuropeanaModel(a)).collect(Collectors.toList());
+		return ok(Json.toJson(res));
 	}
 }

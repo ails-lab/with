@@ -346,7 +346,14 @@ public class AnnotationDAO extends DAO<Annotation> {
 		updateOps.set("lastModified", new Date());
 		this.update(q, updateOps);
 	}
-
+	
+	public void markAnnotationForPublish(ObjectId dbId) {
+		Query<Annotation> q = this.createQuery().field("_id").equal(dbId);
+		UpdateOperations<Annotation> updateOps = this.createUpdateOperations();
+		updateOps.set("publish", true);
+		this.updateFirst(q, updateOps);
+	}
+	
 	public void deleteCampaignAnnotations(ObjectId campaignId) {
 		String campaignName = DB.getCampaignDAO().getById(campaignId).getUsername();
 		Query<Annotation> q = this.createQuery().field("annotators.generator").endsWith(campaignName);
