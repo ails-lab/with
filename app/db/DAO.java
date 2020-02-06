@@ -340,24 +340,24 @@ public class DAO<E> extends BasicDAO<E, ObjectId> {
 		// E doc = findOne(q);
 		if (doc != null) {
 			String type = defineInstanceOf(doc);
-			try {
-				if (type != null) {
-					/* Index Resource */
-					BiFunction<ObjectId, Map<String, Object>, IndexResponse> indexResource = (
-							ObjectId colId, Map<String, Object> map) -> {
-						return ElasticIndexer.index(type, colId, map);
-					};
-					ParallelAPICall.createPromise(indexResource, (ObjectId) doc
-							.getClass().getMethod("getDbId", new Class<?>[0])
-							.invoke(doc), (Map<String, Object>) doc.getClass()
-							.getMethod("transform", new Class<?>[0])
-							.invoke(doc));
-				}
-			} catch (Exception e) {
-				System.out.println(e.getMessage());
-				log.error(e.getMessage(), e);
-				return null;
-			}
+//			try {
+//				if (type != null) {
+//					/* Index Resource */
+//					BiFunction<ObjectId, Map<String, Object>, IndexResponse> indexResource = (
+//							ObjectId colId, Map<String, Object> map) -> {
+//						return ElasticIndexer.index(type, colId, map);
+//					};
+//					ParallelAPICall.createPromise(indexResource, (ObjectId) doc
+//							.getClass().getMethod("getDbId", new Class<?>[0])
+//							.invoke(doc), (Map<String, Object>) doc.getClass()
+//							.getMethod("transform", new Class<?>[0])
+//							.invoke(doc));
+//				}
+//			} catch (Exception e) {
+//				System.out.println(e.getMessage());
+//				log.error(e.getMessage(), e);
+//				return null;
+//			}
 		}
 		int n = doc == null ? 0 : 1;
 		return new UpdateResults(new WriteResult(n, true, null));
