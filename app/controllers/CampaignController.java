@@ -16,10 +16,7 @@
 
 package controllers;
 
-
-import java.io.FileNotFoundException;
 import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
@@ -36,6 +33,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVRecord;
@@ -56,6 +56,9 @@ import db.DB;
 import model.Campaign;
 import model.Campaign.AnnotationCount;
 import model.Campaign.CampaignTerm;
+import model.Campaign.CampaignTermWithInfo;
+import model.annotations.Annotation;
+import model.annotations.Annotation.AnnotationAdmin;
 import model.basicDataTypes.Language;
 import model.resources.ThesaurusObject;
 import model.usersAndGroups.UserGroup;
@@ -63,13 +66,16 @@ import play.Logger;
 import play.Logger.ALogger;
 import play.libs.Json;
 import play.mvc.Result;
-import model.annotations.Annotation;
-import model.annotations.Annotation.AnnotationAdmin;
-
 
 public class CampaignController extends WithController {
 
 	public static final ALogger log = Logger.of(CampaignController.class);
+	public static final String vocabularyPath = "vocabularies/";
+	public static final Map<String, String> termsFile = Stream
+			.of(new String[][] { { "sports", "Sport_Vocabulary.csv" },
+					{ "cities-landscapes", "Cities_Landscapes_Means_of_Transport_Vocabulary.csv" },
+					{ "instruments", "MIMO-Thesaurus for-campaign.csv" }, { "opera", "Opera_entities.csv" } })
+			.collect(Collectors.toMap(data -> data[0], data -> data[1]));
 
 	public static Result getCampaignCount(String group, String project, String state) {
 		long count = DB.getCampaignDAO().campaignCount(group, project, state);
@@ -326,7 +332,7 @@ public class CampaignController extends WithController {
 	// }
 
 	public static void addLangs(CampaignTerm term) throws ClientProtocolException, IOException {
-		String[] langs = new String[] { "it", "nl", "fr", "de", "es", "pl" };
+		String[] langs = new String[] { "en", "it", "fr" };
 		if (term.labelAndUri.getURI().contains("wikidata")) {
 			term.labelAndUri.addURI(term.labelAndUri.getURI().replace("/wiki/", "/entity/"));
 			HttpClient client = HttpClientBuilder.create().build();
@@ -339,6 +345,16 @@ public class CampaignController extends WithController {
 				if (langNode != null) {
 					String langTerm = langNode.get("value").asText();
 					term.labelAndUri.addLiteral(Language.getLanguage(lang), langTerm);
+				} else {
+					String englishTerm = term.labelAndUri.getLiteral(Language.EN);
+					term.labelAndUri.addLiteral(Language.getLanguage(lang), englishTerm);
+				}
+				if (term instanceof CampaignTermWithInfo) {
+					JsonNode descNode = json.get("entities").fields().next().getValue().get("descriptions").get(lang);
+					if (descNode != null) {
+						String desc = descNode.get("value").asText();
+						((CampaignTermWithInfo) term).description.addLiteral(Language.getLanguage(lang), desc);
+					}
 				}
 			}
 		} else {
@@ -359,12 +375,23 @@ public class CampaignController extends WithController {
 					}
 				}
 			} catch (MalformedURLException e) {
-				System.out.println(e);
+				String englishTerm = term.labelAndUri.getLiteral(Language.EN);
+				String[] s = englishTerm.split(",");
+				if (s.length > 2) {
+					Logger.info("Cannot create name");
+				} else if (s.length == 2) {
+					englishTerm = s[1].trim() + " " + s[0].trim();
+				}
+				for (String lang : langs) {
+					term.labelAndUri.addLiteral(Language.getLanguage(lang), englishTerm);
+				}
+				Logger.error(e.getMessage());
+				;
 			}
 		}
 
 	}
-	
+
 	public static List<CampaignTerm> createMIMOCampaignTerm(String uri, int level) {
 		ArrayList<CampaignTerm> terms = new ArrayList<CampaignTerm>();
 		ThesaurusObject thes = DB.getThesaurusDAO().getByUri(uri);
@@ -381,31 +408,23 @@ public class CampaignController extends WithController {
 				if (!alt.equalsIgnoreCase(thes.getSemantic().getPrefLabel().getLiteral(Language.EN))) {
 					CampaignTerm altTerm = new CampaignTerm();
 					altTerm.labelAndUri.addURI(uri);
-					altTerm.labelAndUri.addLiteral(Language.EN, thes.getSemantic().getPrefLabel().getLiteral(Language.EN));
+					altTerm.labelAndUri.addLiteral(Language.EN,
+							thes.getSemantic().getPrefLabel().getLiteral(Language.EN));
 					altTerm.selectable = true;
 					terms.add(altTerm);
 				}
 			}
 		}
 		return terms;
-		
+
 	}
-	
+
 	public static void readMIMO() throws Exception {
-		Reader in = new FileReader("vocabularies/MIMO-Thesaurus for-campaign.csv");
+		Reader in = new FileReader(vocabularyPath + termsFile.get("instruments"));
 		Iterable<CSVRecord> records = CSVFormat.DEFAULT.withDelimiter(',').withHeader().parse(in);
 		ArrayList<CampaignTerm> terms = new ArrayList<CampaignTerm>();
 		CampaignTerm lastOfLevel[];
 		lastOfLevel = new CampaignTerm[3];
-//		for (CSVRecord record : records) {
-//			System.out.println(record.get("URI"));
-//			ThesaurusObject thes = DB.getThesaurusDAO().getByUri(record.get("URI"));
-//			if (thes.equals(null))
-//				System.out.println(record.get("URI"));
-//			else
-//				System.out.println(thes.getSemantic().getPrefLabel());
-
-//		}
 		for (CSVRecord record : records) {
 			if (lastOfLevel[0] == null || !record.get("Level_1").equals("")
 					&& !record.get("Level_1").equals(lastOfLevel[0].labelAndUri.getLiteral(Language.EN))) {
@@ -416,7 +435,6 @@ public class CampaignController extends WithController {
 			for (int i = 2; i <= 3; i++) {
 				if (!record.get("Level_" + i).equals("")) {
 					List<CampaignTerm> createdTerms = createMIMOCampaignTerm(record.get("URI"), i);
-					// addLangs(term);
 					for (CampaignTerm createdTerm : createdTerms) {
 						lastOfLevel[i - 2].addChild(createdTerm);
 						lastOfLevel[i - 1] = createdTerm;
@@ -424,36 +442,31 @@ public class CampaignController extends WithController {
 				}
 			}
 		}
-
-		System.out.println(terms);
-
 	}
-	
+
 	public static Result getPopularAnnotations(String campaignName, String term, int offset, int count) {
 		Map<String, Integer> res = DB.getAnnotationDAO().getByCampaign(campaignName, term, offset, count);
-		return ok(Json.toJson(res)) ;
+		return ok(Json.toJson(res));
 	}
 
-	@SuppressWarnings("unused")
-	public static Result readCampaignTerms() throws Exception {
-		if (true) {
+	public static Result readCampaignTerms(String cname) throws Exception {
+		if (cname.equals("instruments")) {
 			readMIMO();
 			return ok();
 		}
-		Reader in = new FileReader(
-				"vocabularies/Cities_Landscapes_Means_of_Transport_Vocabulary.csv");
+		Reader in = new FileReader(vocabularyPath + termsFile.get(cname));
 		Iterable<CSVRecord> records = CSVFormat.DEFAULT.withDelimiter(',').parse(in);
 		ArrayList<CampaignTerm> terms = new ArrayList<CampaignTerm>();
 		CampaignTerm lastOfLevel[];
 		lastOfLevel = new CampaignTerm[3];
-		int j = 0;
 		for (CSVRecord record : records) {
-			// if (j++ == 60)
-			// break;
 			if (lastOfLevel[0] == null || !record.get(0).equals(lastOfLevel[0].labelAndUri.getLiteral(Language.EN))) {
-				CampaignTerm term = new CampaignTerm();
+				CampaignTerm term = new CampaignTermWithInfo();
 				term.labelAndUri.addLiteral(Language.EN, record.get(0));
-				term.selectable = false;
+				String uri = record.get(1).length() == 0 ? UUID.randomUUID().toString() : record.get(1);
+				term.labelAndUri.addURI(uri);
+				term.selectable = true;
+				addLangs(term);
 				terms.add(term);
 				lastOfLevel[0] = term;
 			}
@@ -469,13 +482,9 @@ public class CampaignController extends WithController {
 				}
 			}
 		}
-		Campaign campaign = DB.getCampaignDAO().getCampaignByName("cities-landscapes");
+		Campaign campaign = DB.getCampaignDAO().getCampaignByName(cname);
 		campaign.setCampaignTerms(terms);
 		DB.getCampaignDAO().makePermanent(campaign);
-//		FileWriter fileWriter = new FileWriter("/tmp/output.json");
-//		fileWriter.write(Json.toJson(terms).toString());
-//		fileWriter.close();
-		// System.out.println(Json.toJson(terms));
 		return ok();
 	}
 
@@ -518,16 +527,16 @@ public class CampaignController extends WithController {
 	public static Result getUserPoints(String userId, String pointType) throws Exception {
 		ObjectId withUser = null;
 		String type;
-		long points=0;
+		long points = 0;
 		ObjectNode result = Json.newObject();
 		if (userId != null)
 			withUser = new ObjectId(userId);
 		else
 			withUser = WithController.effectiveUserDbId();
-		
+
 		if (pointType != null)
 			type = pointType;
-		else 
+		else
 			type = "karmaPoints";
 
 		if (withUser == null)
@@ -538,62 +547,62 @@ public class CampaignController extends WithController {
 		if (campaigns == null) {
 			result.put("error", "DB error");
 			return internalServerError(result);
-		}
-		else{
-			for (int i=0; i<campaigns.size(); i++){
+		} else {
+			for (int i = 0; i < campaigns.size(); i++) {
 				myCampaign = campaigns.get(i);
-				if(type.equals("karmaPoints"))
+				if (type.equals("karmaPoints"))
 					points = points + ((myCampaign.getContributorsPoints()).get(withUser)).getKarmaPoints();
-				else if(type.equals("created"))
+				else if (type.equals("created"))
 					points = points + ((myCampaign.getContributorsPoints()).get(withUser)).getCreated();
-				else if(type.equals("approved"))
+				else if (type.equals("approved"))
 					points = points + ((myCampaign.getContributorsPoints()).get(withUser)).getApproved();
-				else if(type.equals("rejected"))
+				else if (type.equals("rejected"))
 					points = points + ((myCampaign.getContributorsPoints()).get(withUser)).getRejected();
 				else
 					points = points + ((myCampaign.getContributorsPoints()).get(withUser)).getKarmaPoints();
 			}
 		}
 		result.set(type, Json.toJson(points));
-		return ok(result);	
+		return ok(result);
 	}
-
 
 	public static Result updateKarma(String campaignId) throws Exception {
 		ObjectId campaignDbId = new ObjectId(campaignId);
-		ObjectId creatorId; 
+		ObjectId creatorId;
 		Campaign campaign = DB.getCampaignDAO().getCampaign(campaignDbId);
 		int i;
-		//First we zero the karmaPoints of allUsers in order to recaclulate them
+		// First we zero the karmaPoints of allUsers in order to recaclulate them
 		Hashtable<ObjectId, AnnotationCount> contributors = campaign.getContributorsPoints();
 		Set<ObjectId> keys = contributors.keySet();
-		for(ObjectId key: keys){
+		for (ObjectId key : keys) {
 			contributors.get(key).setKarmaPoints(0);
-			DB.getCampaignDAO().resetKarmaPoints(campaignDbId,key.toHexString());
+			DB.getCampaignDAO().resetKarmaPoints(campaignDbId, key.toHexString());
 		}
-		//Then we search all the Annotations for the ones that belong to the specific Campaign and we update annotation by annotation the karma points of their creator
+		// Then we search all the Annotations for the ones that belong to the specific
+		// Campaign and we update annotation by annotation the karma points of their
+		// creator
 		List<Annotation> annotations;
 		Annotation current;
 		annotations = DB.getAnnotationDAO().getCampaignAnnotations(campaignDbId);
-		for (i=0; i<annotations.size(); i++){
+		for (i = 0; i < annotations.size(); i++) {
 			current = annotations.get(i);
-			if(current.getScore() != null){
-				if ((current.getScore().getRejectedBy() != null) && (current.getScore().getApprovedBy() != null) ){
-					if (current.getScore().getRejectedBy().size() >= current.getScore().getApprovedBy().size()){
-						if (current.getAnnotators() != null){
-							if ((AnnotationAdmin)(current.getAnnotators()).get(0)!=null){
-								creatorId = ((AnnotationAdmin)(current.getAnnotators()).get(0)).getWithCreator();
-								if (creatorId != null){
-									DB.getCampaignDAO().incUserPoints(campaignDbId,creatorId.toString(),"karmaPoints");
+			if (current.getScore() != null) {
+				if ((current.getScore().getRejectedBy() != null) && (current.getScore().getApprovedBy() != null)) {
+					if (current.getScore().getRejectedBy().size() >= current.getScore().getApprovedBy().size()) {
+						if (current.getAnnotators() != null) {
+							if ((AnnotationAdmin) (current.getAnnotators()).get(0) != null) {
+								creatorId = ((AnnotationAdmin) (current.getAnnotators()).get(0)).getWithCreator();
+								if (creatorId != null) {
+									DB.getCampaignDAO().incUserPoints(campaignDbId, creatorId.toString(),
+											"karmaPoints");
 								}
-							}	
-						}	
+							}
+						}
 					}
 				}
 			}
 		}
-		return ok();	
+		return ok();
 	}
-
 
 }

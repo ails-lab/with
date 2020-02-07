@@ -34,6 +34,7 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 import model.annotations.Annotation.MotivationType;
+import model.basicDataTypes.Literal;
 import model.basicDataTypes.LiteralOrResource;
 import utils.Deserializer;
 import utils.Serializer;
@@ -68,7 +69,12 @@ public class Campaign {
 			this.children.add(child);
 		}
 	}
-
+	
+	public static class CampaignTermWithInfo extends CampaignTerm {
+		public String imageUrl;
+		public Literal description = new Literal();
+	}
+	
 	public static class AnnotationCount {
 		private long created = 0;
 		private long approved = 0;

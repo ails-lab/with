@@ -59,6 +59,7 @@ import elastic.ElasticSearcher;
 import elastic.ElasticSearcher.SearchOptions;
 import model.Campaign;
 import model.Campaign.CampaignTerm;
+import model.Campaign.CampaignTermWithInfo;
 import model.basicDataTypes.Language;
 import model.basicDataTypes.MultiLiteral;
 import model.resources.ThesaurusObject;
@@ -365,6 +366,9 @@ public class ThesaurusController extends Controller {
 							&& !e.getKey().equalsIgnoreCase("uri")) {
 						ObjectNode resInfo = Json.newObject();
 						resInfo.put("label", e.getValue());
+						if (((CampaignTermWithInfo) term).description.get(e.getKey()) != null) {
+							resInfo.put("description", ((CampaignTermWithInfo) term).description.get(e.getKey()));
+						}
 						resInfo.put("uri", term.labelAndUri.getURI());
 						resInfo.put("lang", e.getKey());
 						resInfo.put("id", term.labelAndUri.getURI());
