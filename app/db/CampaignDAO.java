@@ -123,7 +123,7 @@ public class CampaignDAO extends DAO<Campaign> {
 
 	public List<Campaign> getUserCampaigns(ObjectId userId, int offset, int count) {
 		Query<Campaign> q = this.createQuery();
-		q.field("creator").equal(userId);
+		q.field("creators").equal(userId);
 		q = q.offset(offset).limit(count);
 		List<Campaign> campaigns = new ArrayList<Campaign>();
 		campaigns = this.find(q).asList();
@@ -132,7 +132,7 @@ public class CampaignDAO extends DAO<Campaign> {
 
 	public long countUserCampaigns(ObjectId userId) {
 		Query<Campaign> q = this.createQuery();
-		q.field("creator").equal(userId);
+		q.field("creators").equal(userId);
 		long count = this.count(q);
 		return count;
 	}
@@ -143,7 +143,6 @@ public class CampaignDAO extends DAO<Campaign> {
 		q.criteria(userExists).exists();
 		List<Campaign> campaigns = new ArrayList<Campaign>();
 		campaigns = this.find(q).asList();
-		
 
 		return campaigns;
 	}
