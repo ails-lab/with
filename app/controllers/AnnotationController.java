@@ -85,7 +85,7 @@ import play.mvc.Result;
 import sources.core.ParallelAPICall;
 import utils.Tuple;
 
-@SuppressWarnings({ "rawtypes", "unchecked", "deprecation" })
+@SuppressWarnings({ "rawtypes", "unchecked" })
 public class AnnotationController extends Controller {
 
 	public static final ALogger log = Logger.of(AnnotationController.class);
@@ -894,6 +894,8 @@ public class AnnotationController extends Controller {
 		// Motivation, Body and Target
 		europeanaAnnotation.put("motivation", "tagging");
 		AnnotationBodyTagging body = (AnnotationBodyTagging) ann.getBody();
+		if (body.getUri().equals("http://wordnet-rdf.princeton.edu/wn30/13645812-n"))
+			body.setUri("http://thesaurus.europeanafashion.eu/thesaurus/10405");
 		europeanaAnnotation.put("body", body.getUri());
 		europeanaAnnotation.put("target", getEuropeanaRecord(ann.getTarget()));
 		return europeanaAnnotation;
@@ -973,18 +975,20 @@ public class AnnotationController extends Controller {
 		}
 	}
 
-	public static Result exportAnnotationsForEuropeanaApi(String campaignName, int maxRanking) {
+	public static Result exportAnnotationsForEuropeanaApi(String campaignName, int maxRanking, boolean mark) {
 		List<Annotation> annotations = DB.getAnnotationDAO().getCampaignAnnotations(campaignName);
+		List<Annotation> published = annotations;
 		if (campaignName.equals("colours-catwalk")) {
 			annotations.addAll(DB.getAnnotationDAO().getCampaignAnnotations("Image Analysis"));
+			HashMap<ObjectId, List<Annotation>> annotationsPerRecord = new HashMap<ObjectId, List<Annotation>>();
+			for (Annotation annotation : annotations) {
+				prepareAnnotationForPublish(annotationsPerRecord, annotation);
+			}
+			published = annotationsPerRecord.values().stream().flatMap(List::stream).collect(Collectors.toList());
 		}
-		HashMap<ObjectId, List<Annotation>> annotationsPerRecord = new HashMap<ObjectId, List<Annotation>>();
-		for (Annotation annotation : annotations) {
-			prepareAnnotationForPublish(annotationsPerRecord, annotation);
+		if (mark) {
+			published.forEach(a -> DB.getAnnotationDAO().markAnnotationForPublish(a.getDbId()));
 		}
-		List<Annotation> published = annotationsPerRecord.values().stream().flatMap(List::stream)
-				.collect(Collectors.toList());
-		published.forEach(a -> DB.getAnnotationDAO().markAnnotationForPublish(a.getDbId()));
 		List<JsonNode> res = published.stream().map(a -> tranformToEuropeanaModel(a)).collect(Collectors.toList());
 		return ok(Json.toJson(res));
 	}
