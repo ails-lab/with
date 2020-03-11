@@ -18,7 +18,6 @@ package model;
 
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.List;
@@ -36,9 +35,11 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 import model.annotations.Annotation.MotivationType;
+import model.basicDataTypes.Language;
 import model.basicDataTypes.Literal;
 import model.basicDataTypes.LiteralOrResource;
 import utils.Deserializer;
+import utils.Deserializer.LiteralDesiarilizer;
 import utils.Serializer;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -203,11 +204,14 @@ public class Campaign {
 
 	private String username;
 	
-	private Map<String, String> title;
+	@JsonDeserialize(using = Deserializer.LiteralEnglishDefaultDesiarilizer.class)
+	private Literal title;
 	
-	private Map<String, String> description;
+	@JsonDeserialize(using = Deserializer.LiteralEnglishDefaultDesiarilizer.class)
+	private Literal description;
 	
-	private Map<String, String> instructions;
+	@JsonDeserialize(using = Deserializer.LiteralEnglishDefaultDesiarilizer.class)
+	private Literal instructions;
 	
 	private String banner;
 	
@@ -284,7 +288,6 @@ public class Campaign {
 	public Date getCreated() {
 		return created;
 	}
-
 	public void setCreated(Date created) {
 		this.created = created;
 	}
@@ -303,16 +306,11 @@ public class Campaign {
 		this.endDate = endDate;
 	}
 
-	public Map<String, String> getDescription() {
+	public Literal getDescription() {
 		return description;
 	}
-	public void setDescription(Map<String, String> description) {
+	public void setDescription(Literal description) {
 		this.description = description;
-	}
-	
-	public void setDescription(String description) {
-		this.description = new HashMap<String, String>();
-		this.description.put("en", description);
 	}
 	
 	public ObjectId getSpace() {
@@ -351,16 +349,14 @@ public class Campaign {
 		this.targetCollections = targetCollections;
 	}
 
-	public Map<String, String> getTitle() {
+	public Literal getTitle() {
 		return title;
 	}
-	public void setTitle(Map<String, String> title) {
-		this.title = title;
+	public String getEnglishTitle() {
+		return title.getLiteral(Language.EN);
 	}
-	
-	public void setTitle(String title) {
-		this.title = new HashMap<String, String>();
-		this.title.put("en", title);
+	public void setTitle(Literal title) {
+		this.title = title;
 	}
 	
 	public Hashtable<ObjectId, AnnotationCount> getContributorsPoints() {
@@ -456,11 +452,10 @@ public class Campaign {
 		this.prizes = prizes;
 	}
 
-	public Map<String, String> getInstructions() {
+	public Literal getInstructions() {
 		return instructions;
 	}
-
-	public void setInstructions(Map<String, String> instructions) {
+	public void setInstructions(Literal instructions) {
 		this.instructions = instructions;
 	}
 

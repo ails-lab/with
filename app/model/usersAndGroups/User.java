@@ -412,6 +412,7 @@ public class User extends UserOrGroup {
 		json.put("myOrganizations", orgs);
 		json.put("myProjects", projects);
 		json.put("myGroups", orgs+projects);
+		json.put("campaigns", DB.getCampaignDAO().countUserCampaigns(getDbId()));		
 		return json;				
 	}
 	

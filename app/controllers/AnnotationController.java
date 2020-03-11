@@ -862,18 +862,15 @@ public class AnnotationController extends Controller {
 	private static String getEuropeanaRecord(AnnotationTarget target) {
 		String externalUrl = target.getExternalId();
 		if (externalUrl == null) {
-			externalUrl = DB.getRecordResourceDAO().get(target.getRecordId()).getAdministrative().getExternalId();
+			try {
+				externalUrl = DB.getRecordResourceDAO().get(target.getRecordId()).getAdministrative().getExternalId();
+			} catch (Exception e) {
+				Logger.error("Cannot find external url for record: " + target.getRecordId());
+				return null;
+			}
 		}
 		if (externalUrl.startsWith("/")) {
 			externalUrl = "http://data.europeana.eu/item" + externalUrl;
-		}
-		try {
-			URL url = new URL(externalUrl);
-			HttpURLConnection huc = (HttpURLConnection) url.openConnection();
-			int responseCode = huc.getResponseCode();
-//		Assert.assertEquals(HttpURLConnection.HTTP_OK, responseCode);
-		} catch (Exception e) {
-			Logger.error("Europeana url is not working :" + externalUrl);
 		}
 		return externalUrl;
 	}
@@ -975,8 +972,9 @@ public class AnnotationController extends Controller {
 		}
 	}
 
-	public static Result exportAnnotationsForEuropeanaApi(String campaignName, int maxRanking, boolean mark) {
-		List<Annotation> annotations = DB.getAnnotationDAO().getCampaignAnnotations(campaignName);
+	public static Result exportAnnotationsForEuropeanaApi(String project, String campaignName, int maxRanking,
+			boolean mark) {
+		List<Annotation> annotations = DB.getAnnotationDAO().getCampaignAnnotations(project + " " + campaignName);
 		List<Annotation> published = annotations;
 		if (campaignName.equals("colours-catwalk")) {
 			annotations.addAll(DB.getAnnotationDAO().getCampaignAnnotations("Image Analysis"));
@@ -987,9 +985,14 @@ public class AnnotationController extends Controller {
 			published = annotationsPerRecord.values().stream().flatMap(List::stream).collect(Collectors.toList());
 		}
 		if (mark) {
-			published.forEach(a -> DB.getAnnotationDAO().markAnnotationForPublish(a.getDbId()));
+			published.stream().filter(a -> getFinalScore(a).finalScore < 1)
+			.forEach(a -> DB.getAnnotationDAO().unmarkAnnotationForPublish(a.getDbId()));
+			published.stream().filter(a -> getFinalScore(a).finalScore > 0)
+					.forEach(a -> DB.getAnnotationDAO().markAnnotationForPublish(a.getDbId()));
 		}
-		List<JsonNode> res = published.stream().map(a -> tranformToEuropeanaModel(a)).collect(Collectors.toList());
+		List<JsonNode> res = published.stream().filter(a -> getFinalScore(a).finalScore > 0)
+				.map(a -> tranformToEuropeanaModel(a)).filter(a -> (a.get("target") != null))
+				.collect(Collectors.toList());
 		return ok(Json.toJson(res));
 	}
 }
