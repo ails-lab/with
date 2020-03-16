@@ -125,7 +125,7 @@ public class MediaController extends WithController {
 			return ok(med.data).as(med.mimeType);
 			// return redirect(url);
 		} catch (Exception e) {
-			log.error("Cannot retrieve media document from database", e);
+			log.debug("Cannot retrieve media document from database", e);
 			FileAndType med;
 			try {
 				med = ((ApacheHttpConnector) ApacheHttpConnector.getApacheHttpConnector()).getContentAndType(url);
@@ -142,7 +142,7 @@ public class MediaController extends WithController {
 				downloadMedia(imageUrl, mediaVersion);
 				return true;
 			} catch (Exception e) {
-				log.error("Couldn't cache image:" + e.getMessage());
+				log.debug("Couldn't cache image:" + e.getMessage());
 				return false;
 			}
 
@@ -176,7 +176,7 @@ public class MediaController extends WithController {
 			}
 			return media;
 		} catch (Exception e) {
-			log.error("Couldn't download image at '" + url + "' version " + version, e);
+			log.debug("Couldn't download image at '" + url + "' version " + version, e);
 			return null;
 		}
 	}
@@ -213,14 +213,14 @@ public class MediaController extends WithController {
 								zipout.write(imageBytes);
 								zipout.closeEntry();
 							} catch (IOException e) {
-								log.error(e.getMessage(), e);
+								log.debug(e.getMessage(), e);
 							}
 						}
 					}
 					try {
 						zipout.close();
 					} catch (IOException e) {
-						log.error(e.getMessage(), e);
+						log.debug(e.getMessage(), e);
 					}
 				}
 			}).start();
@@ -228,7 +228,7 @@ public class MediaController extends WithController {
 					+ DB.getCollectionObjectDAO().getById(collectionDbId).getDescriptiveData().getLabel().get(Language.DEFAULT).get(0) + "\"");
 			return ok(in).as("application/zip");
 		} catch (Exception e) {
-			log.error("Couldn't get images ", e);
+			log.debug("Couldn't get images ", e);
 			return internalServerError();
 		}
 	}
@@ -289,7 +289,7 @@ public class MediaController extends WithController {
 				}
 				return ok(result);
 			} catch (Exception e) {
-				log.error("Media create error", e);
+				log.debug("Media create error", e);
 				result.put("error", "Couldn't create from file or url");
 				return badRequest(result);
 			}
@@ -587,11 +587,7 @@ public class MediaController extends WithController {
 		try {
 			cmd.run(op, image, outfile);
 		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			log.error("", e);
 		} catch (IM4JavaException e) {
-			// TODO Auto-generated catch block
-			log.error("", e);
 		}
 		File newFile = new File(outfile);
 		BufferedImage ithumb = ImageIO.read(newFile);
@@ -607,11 +603,7 @@ public class MediaController extends WithController {
 			try {
 				cmd2.run(op, ithumb, outfile2);
 			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				log.error("", e);
 			} catch (IM4JavaException e) {
-				// TODO Auto-generated catch block
-				log.error("", e);
 			}
 			newFile = new File(outfile);
 			ithumb = ImageIO.read(newFile);
@@ -666,8 +658,6 @@ public class MediaController extends WithController {
 				hc.close();
 
 			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				log.error("", e);
 			}
 			return resp;
 		};
@@ -729,7 +719,7 @@ public class MediaController extends WithController {
 				DB.getMediaObjectDAO().makePermanent(newMedia);
 
 			} catch (Exception e) {
-				log.error("Cannot store Media object to database!", e);
+				log.debug("Cannot store Media object to database!", e);
 				result.put("message", "Cannot store Media object to database");
 				return internalServerError(result);
 			}
@@ -764,7 +754,7 @@ public class MediaController extends WithController {
 		try {
 			media = DB.getMediaObjectDAO().findById(new ObjectId(mediaId));
 		} catch (Exception e) {
-			log.error("Cannot retrieve media document from database", e);
+			log.debug("Cannot retrieve media document from database", e);
 		}
 		if (media == null) {
 			return internalServerError("Cannot retrieve media" + mediaId + " document from database");

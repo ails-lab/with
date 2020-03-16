@@ -85,7 +85,7 @@ import play.mvc.Result;
 import sources.core.ParallelAPICall;
 import utils.Tuple;
 
-@SuppressWarnings({ "rawtypes", "unchecked", "deprecation" })
+@SuppressWarnings({ "rawtypes", "unchecked" })
 public class AnnotationController extends Controller {
 
 	public static final ALogger log = Logger.of(AnnotationController.class);
@@ -862,18 +862,15 @@ public class AnnotationController extends Controller {
 	private static String getEuropeanaRecord(AnnotationTarget target) {
 		String externalUrl = target.getExternalId();
 		if (externalUrl == null) {
-			externalUrl = DB.getRecordResourceDAO().get(target.getRecordId()).getAdministrative().getExternalId();
+			try {
+				externalUrl = DB.getRecordResourceDAO().get(target.getRecordId()).getAdministrative().getExternalId();
+			} catch (Exception e) {
+				Logger.error("Cannot find external url for record: " + target.getRecordId());
+				return null;
+			}
 		}
 		if (externalUrl.startsWith("/")) {
 			externalUrl = "http://data.europeana.eu/item" + externalUrl;
-		}
-		try {
-			URL url = new URL(externalUrl);
-			HttpURLConnection huc = (HttpURLConnection) url.openConnection();
-			int responseCode = huc.getResponseCode();
-//		Assert.assertEquals(HttpURLConnection.HTTP_OK, responseCode);
-		} catch (Exception e) {
-			Logger.error("Europeana url is not working :" + externalUrl);
 		}
 		return externalUrl;
 	}
@@ -894,6 +891,8 @@ public class AnnotationController extends Controller {
 		// Motivation, Body and Target
 		europeanaAnnotation.put("motivation", "tagging");
 		AnnotationBodyTagging body = (AnnotationBodyTagging) ann.getBody();
+		if (body.getUri().equals("http://wordnet-rdf.princeton.edu/wn30/13645812-n"))
+			body.setUri("http://thesaurus.europeanafashion.eu/thesaurus/10405");
 		europeanaAnnotation.put("body", body.getUri());
 		europeanaAnnotation.put("target", getEuropeanaRecord(ann.getTarget()));
 		return europeanaAnnotation;
@@ -973,19 +972,27 @@ public class AnnotationController extends Controller {
 		}
 	}
 
-	public static Result exportAnnotationsForEuropeanaApi(String campaignName, int maxRanking) {
-		List<Annotation> annotations = DB.getAnnotationDAO().getCampaignAnnotations(campaignName);
+	public static Result exportAnnotationsForEuropeanaApi(String project, String campaignName, int maxRanking,
+			boolean mark) {
+		List<Annotation> annotations = DB.getAnnotationDAO().getCampaignAnnotations(project + " " + campaignName);
+		List<Annotation> published = annotations;
 		if (campaignName.equals("colours-catwalk")) {
 			annotations.addAll(DB.getAnnotationDAO().getCampaignAnnotations("Image Analysis"));
+			HashMap<ObjectId, List<Annotation>> annotationsPerRecord = new HashMap<ObjectId, List<Annotation>>();
+			for (Annotation annotation : annotations) {
+				prepareAnnotationForPublish(annotationsPerRecord, annotation);
+			}
+			published = annotationsPerRecord.values().stream().flatMap(List::stream).collect(Collectors.toList());
 		}
-		HashMap<ObjectId, List<Annotation>> annotationsPerRecord = new HashMap<ObjectId, List<Annotation>>();
-		for (Annotation annotation : annotations) {
-			prepareAnnotationForPublish(annotationsPerRecord, annotation);
+		if (mark) {
+			published.stream().filter(a -> getFinalScore(a).finalScore < 1)
+			.forEach(a -> DB.getAnnotationDAO().unmarkAnnotationForPublish(a.getDbId()));
+			published.stream().filter(a -> getFinalScore(a).finalScore > 0)
+					.forEach(a -> DB.getAnnotationDAO().markAnnotationForPublish(a.getDbId()));
 		}
-		List<Annotation> published = annotationsPerRecord.values().stream().flatMap(List::stream)
+		List<JsonNode> res = published.stream().filter(a -> getFinalScore(a).finalScore > 0)
+				.map(a -> tranformToEuropeanaModel(a)).filter(a -> (a.get("target") != null))
 				.collect(Collectors.toList());
-		published.forEach(a -> DB.getAnnotationDAO().markAnnotationForPublish(a.getDbId()));
-		List<JsonNode> res = published.stream().map(a -> tranformToEuropeanaModel(a)).collect(Collectors.toList());
 		return ok(Json.toJson(res));
 	}
 }

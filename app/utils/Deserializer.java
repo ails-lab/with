@@ -233,6 +233,34 @@ public class Deserializer {
 		}
 	}
 
+	public static class LiteralEnglishDefaultDesiarilizer extends JsonDeserializer<Literal> {
+
+		@Override
+		public Literal deserialize(JsonParser string, DeserializationContext arg1) {
+			Map<String, String> map;
+			Literal out = new Literal();
+			try {
+				map = string.readValueAs(new TypeReference<Map<String, String>>() {
+				});
+			} catch (JsonProcessingException e1) {
+				try {
+					out.addLiteral(Language.EN, string.getText());
+					return out;
+				} catch (Exception e2) {
+					return null;
+				}
+			} catch (IOException e1) {
+				return null;
+			}
+			for (Entry<String, String> e : map.entrySet()) {
+				if (Language.isLanguage(e.getKey())) {
+					out.addLiteral(Language.getLanguageByCode(e.getKey()), e.getValue());
+				}
+			}
+			return out;
+		}
+	}
+
 	public static class LiteralOrResourceDesiarilizer extends JsonDeserializer<LiteralOrResource> {
 
 		@Override
@@ -311,7 +339,7 @@ public class Deserializer {
 				throws IOException, JsonProcessingException {
 			try {
 				Date d = DateUtils.parseDateStrictly(date.getValueAsString(), "yyyy/MM/dd'T'HH:mm:ss.SSS'Z'",
-						"yyyy-MM-dd");
+						"yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", "yyyy-MM-dd");
 				return d;
 			} catch (ParseException e) {
 				return null;
