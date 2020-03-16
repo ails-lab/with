@@ -256,3 +256,4 @@ GET		/campaign/userCampaigns						controllers.CampaignController.getUserCampaign
 GET		/campaign/readCampaignTerms					controllers.CampaignController.readCampaignTerms(cname: String)
 GET		/campaign/popularAnnotations				controllers.CampaignController.getPopularAnnotations(campaignName: String, term : String ?= "", offset : Integer ?= 0, count: Integer ?= 10)
 GET     /campaign/updateKarma/:id                   controllers.CampaignController.updateKarma(id)
+GET     /campaign/contributors		                controllers.CampaignController.getContributors(cname: String)

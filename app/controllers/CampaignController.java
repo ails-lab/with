@@ -26,6 +26,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Hashtable;
@@ -603,6 +604,26 @@ public class CampaignController extends WithController {
 			}
 		}
 		return ok();
+	}
+	
+	public static Result getContributors(String cname) {
+		ObjectNode result = Json.newObject();
+		ArrayList<ObjectNode> contributors = new ArrayList<ObjectNode>();
+		contributors = DB.getCampaignDAO().getContributors(cname);
+		if (contributors == null) {
+			result.put("error", "The campaign does not have any contributors yet.");
+			return internalServerError(result);
+		}
+		Comparator<ObjectNode> compareByPoints = new Comparator<ObjectNode>() {
+			@Override
+			public int compare(ObjectNode o1, ObjectNode o2) {
+				Long p1 = o1.get("Points").asLong();
+				Long p2 = o2.get("Points").asLong();
+				return p2.compareTo(p1);
+			}
+		};
+		contributors.sort(compareByPoints);
+		return ok(Json.toJson(contributors));
 	}
 
 }

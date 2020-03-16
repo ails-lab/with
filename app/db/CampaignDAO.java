@@ -19,7 +19,9 @@ package db;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Hashtable;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.bson.types.ObjectId;
@@ -27,9 +29,12 @@ import org.mongodb.morphia.query.Query;
 import org.mongodb.morphia.query.UpdateOperations;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import controllers.CampaignController;
 import model.Campaign;
+import model.Campaign.AnnotationCount;
+import model.usersAndGroups.User;
 import play.Logger;
 import play.Logger.ALogger;
 import play.libs.Json;
@@ -195,6 +200,26 @@ public class CampaignDAO extends DAO<Campaign> {
 		UpdateOperations<Campaign> updateOps = this.createUpdateOperations();
 		updateFields("", json, updateOps);
 		this.update(q, updateOps);
+	}
+	
+	public ArrayList<ObjectNode> getContributors(String cname) {
+		ArrayList<ObjectNode> contributors = new ArrayList<ObjectNode>();
+		
+		Query<Campaign> q = this.createQuery().field("username").equal(cname);
+		Hashtable<ObjectId, AnnotationCount> points = this.findOne(q).getContributorsPoints();
+        for (ObjectId key: points.keySet()) {		
+        	Query<User> q1 = DB.getUserDAO().createQuery().field("_id").equal(key);
+        	User u = DB.getUserDAO().findOne(q1);
+        	ObjectNode entry = Json.newObject();
+        	entry.put("First Name", u.getFirstName());
+        	entry.put("Last Name", u.getLastName());
+        	entry.put("E-Mail", u.getEmail());
+        	entry.put("Username", u.getUsername());
+        	entry.put("Points", points.get(key).getCreated() + points.get(key).getApproved() + points.get(key).getRejected());
+        	contributors.add(entry);
+        }
+        
+        return contributors;
 	}
 
 }
