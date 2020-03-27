@@ -58,6 +58,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
+import java.util.function.BiConsumer;
+import java.util.function.BiFunction;
+import java.util.function.Consumer;
+import java.util.function.Function;
+
 import db.DB;
 import model.Campaign;
 import model.Campaign.AnnotationCount;
@@ -109,38 +114,55 @@ public class CampaignController extends WithController {
 		return ok();
 	}
 
+	public static void updateLiteralField(Campaign c1, Campaign c2, Function<Campaign, Literal> f) {
+		Literal newVal = f.apply(c2);
+		if (newVal == null) {
+			return;
+		}
+		Set<String> langs = newVal.keySet();
+		for (String lang : langs) {
+			String newLang = newVal.getLiteral(Language.getLanguageByCode(lang));
+			if (newLang != null && (newLang.isEmpty() == false)) {
+				f.apply(c1).addLiteral(Language.getLanguageByCode(lang), newLang);
+			}
+		}
+	}
+
+	public static void updateListField(Campaign c1, Campaign c2, Function<Campaign, List<ObjectId>> f) {
+		f.apply(c1).clear();
+		if (f.apply(c2) == null)
+			return;
+		List<ObjectId> newList = f.apply(c2).stream().distinct().collect(Collectors.toList());
+		f.apply(c1).addAll(newList);
+	}
+
 	public static Result editCampaign(String id) throws ClassNotFoundException, JsonProcessingException, IOException {
 		JsonNode json = request().body().asJson();
 		ObjectNode result = Json.newObject();
-		ObjectId campaignDbId = new ObjectId(id);
-		Campaign campaign = DB.getCampaignDAO().get(campaignDbId);
+		ObjectId user = effectiveUserDbId();
 		if (json == null) {
 			result.put("error", "Invalid JSON");
 			return badRequest(result);
 		}
-		// Class<?> clazz = Class.forName("model.Campaign");
-		ObjectMapper mapper = new ObjectMapper();
-		mapper.readerForUpdating(campaign).readValue(json);
-
-		// Parse correctly the given dates
-		if (json.has("startDate")) {
-			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
-			try {
-				campaign.setStartDate(sdf.parse(json.get("startDate").asText()));
-			} catch (ParseException e) {
-				log.error(e.getMessage());
-			}
+		ObjectId campaignDbId = new ObjectId(id);
+		Campaign campaign = DB.getCampaignDAO().get(campaignDbId);
+		if (user == null || !campaign.getCreators().contains(user)) {
+			result.put("error", "No rights for campaign edit");
+			return forbidden(result);
 		}
-		if (json.has("endDate")) {
-			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
-			try {
-				campaign.setEndDate(sdf.parse(json.get("endDate").asText()));
-			} catch (ParseException e) {
-				log.error(e.getMessage());
-			}
-		}
-
-		// Campaign campaignChanges = (Campaign) Json.fromJson(json, clazz);
+		Class<?> clazz = Class.forName("model.Campaign");
+		Campaign newCampaign = (Campaign) Json.fromJson(json, clazz);
+		updateLiteralField(campaign, newCampaign, Campaign::getTitle);
+		updateLiteralField(campaign, newCampaign, Campaign::getDescription);
+		if (newCampaign.getStartDate() != null)
+			campaign.setStartDate(newCampaign.getStartDate());
+		if (newCampaign.getEndDate() != null)
+			campaign.setEndDate(newCampaign.getEndDate());
+		if (newCampaign.getBanner() != null)
+			campaign.setBanner(newCampaign.getBanner());
+		else
+			campaign.setBanner(null);
+		updateListField(campaign, newCampaign, Campaign::getTargetCollections);
 		DB.getCampaignDAO().makePermanent(campaign);
 		return ok(Json.toJson(DB.getCampaignDAO().get(campaignDbId)));
 	}
@@ -596,7 +618,7 @@ public class CampaignController extends WithController {
 		}
 		return ok();
 	}
-	
+
 	public static Result getContributors(String cname) {
 		ObjectNode result = Json.newObject();
 		ArrayList<ObjectNode> contributors = new ArrayList<ObjectNode>();
