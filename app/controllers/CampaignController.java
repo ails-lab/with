@@ -16,7 +16,10 @@
 
 package controllers;
 
+
+import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
@@ -70,6 +73,9 @@ import play.Logger;
 import play.Logger.ALogger;
 import play.libs.Json;
 import play.mvc.Result;
+import model.annotations.Annotation;
+import model.annotations.Annotation.AnnotationAdmin;
+
 
 public class CampaignController extends WithController {
 

@@ -235,9 +235,12 @@ GET		/record/:id/deleteRejectedAnnotations		controllers.RecordResourceController
 POST	/collection/:id/annotate					controllers.CollectionObjectController.annotateCollection(id)
 POST	/group/:id/annotate							controllers.CollectionObjectController.annotateCollectionsByGroupId(id)
 
-POST	/annotation/annotateRequestResult					controllers.AnnotationRequestController.newAnnotations()	
+POST    /annotation/annotateRequestResult			controllers.AnnotationRequestController.newAnnotations()	
 GET		/collection/api/removeIdsOfDeletedRecords	controllers.WithResourceController.removeIdsOfDeletedRecords()		
-GET	     /collection/:id/annotations 	        			controllers.CollectionObjectController.getAnnotations(id)
+GET	    /collection/:id/annotations 	        	controllers.CollectionObjectController.getAnnotations(id)
+
+GET	    /record/:id/nerd	    					controllers.RecordResourceController.nerdRecord(id)
+GET 	/collection/:id/nerd						controllers.CollectionObjectController.nerdCollection(id)
 
 #GET	     /collection/:id/annotationSummary 	        			controllers.CollectionObjectController.getAnnotationSummary(id, mode: String ?="FLAT")
 
@@ -257,3 +260,4 @@ GET		/campaign/readCampaignTerms					controllers.CampaignController.readCampaign
 GET		/campaign/popularAnnotations				controllers.CampaignController.getPopularAnnotations(campaignName: String, term : String ?= "", offset : Integer ?= 0, count: Integer ?= 10)
 GET     /campaign/updateKarma/:id                   controllers.CampaignController.updateKarma(id)
 GET     /campaign/contributors		                controllers.CampaignController.getContributors(cname: String)
+

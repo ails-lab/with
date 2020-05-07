@@ -17,10 +17,12 @@
 package controllers;
 
 import java.lang.reflect.Method;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -28,16 +30,29 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
+import java.util.function.BiFunction;
 import java.util.stream.Collectors;
-
+import java.util.function.Function;
+import java.text.Normalizer;
+import java.net.URLEncoder;
 import javax.validation.ConstraintViolation;
-
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.*;
 import org.bson.types.ObjectId;
 
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.util.EntityUtils;
+import org.apache.http.HttpEntity;
+
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.fasterxml.jackson.databind.node.ValueNode;
 
 import actors.annotation.AnnotationControlActor;
 import actors.annotation.AnnotatorActor;
@@ -54,16 +69,24 @@ import model.EmbeddedMediaObject.MediaVersion;
 import model.annotations.Annotation;
 import model.annotations.Annotation.AnnotationAdmin;
 import model.annotations.Annotation.AnnotationScore;
+import model.annotations.Annotation.MotivationType;
 import model.annotations.ContextData;
 import model.annotations.ContextData.ContextDataType;
+import model.annotations.bodies.AnnotationBody;
+import model.annotations.bodies.AnnotationBodyGeoTagging;
+import model.annotations.bodies.AnnotationBodyTagging;
 import model.annotations.selectors.PropertyTextFragmentSelector;
 import model.annotations.targets.AnnotationTarget;
 import model.basicDataTypes.Language;
+import model.basicDataTypes.Literal;
 import model.basicDataTypes.MultiLiteral;
+import model.basicDataTypes.ProvenanceInfo;
 import model.resources.RecordResource;
 import model.resources.collection.CollectionObject;
 import model.resources.collection.CollectionObject.CollectionAdmin;
+import model.resources.CulturalObject.CulturalObjectData;
 import model.usersAndGroups.User;
+import model.resources.ThesaurusObject;
 import play.Logger;
 import play.Logger.ALogger;
 import play.data.validation.Validation;
@@ -73,6 +96,10 @@ import play.libs.F.Some;
 import play.libs.Json;
 import play.mvc.Result;
 import utils.Tuple;
+import sources.core.ParallelAPICall;
+import controllers.ThesaurusController;
+import org.mongodb.morphia.geo.GeoJson;
+import org.mongodb.morphia.geo.Point;
 
 /**
  * @author mariaral
@@ -464,6 +491,727 @@ public class RecordResourceController extends WithResourceController {
 					}
 				}
 			}
+		}
+	}
+
+	public static Result nerdRecord(String recordId) {
+		ObjectNode request = Json.newObject();
+		RecordResource record = DB.getRecordResourceDAO().get(new ObjectId(recordId));
+		if (record != null){
+			User user = DB.getUserDAO().getUniqueByFieldAndValue("username", "AIDA");
+			ObjectId aidaUser = user.getDbId();
+			User user2 = DB.getUserDAO().getUniqueByFieldAndValue("username", "Geek");
+			ObjectId geekUser = user2.getDbId();
+			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+			String createdString = sdf.format(new Date());
+			/***** AIDA API Call *****/
+			Function<String[],String> AidaAPICall = (String[] input) -> {
+				try {
+					String text = input[0];
+					String property = input[1];
+					int limit = input[0].length();
+					String text2 = text;
+					if (property == "provider"){
+						text2 = text + " is the provider of this piece of art or cultural heritage item.";
+					}
+					else if (property == "country"){
+						text2 = text + " is in the country field of this piece of art or cultural heritage item.";
+					}
+					else if (property == "city"){
+						text2 = text + " is in the city field of this piece of art or cultural heritage item.";
+					}
+					else if (property == "label"){
+						text2 = text + " is in the label field of this piece of art or cultural heritage item.";
+					}
+					else if (property == "creator"){
+						text2 = text + " is in the creator of this piece of art or cultural heritage item.";
+					}
+					HttpClient client = HttpClientBuilder.create().build();
+					HttpPost req = new HttpPost("https://gate.d5.mpi-inf.mpg.de/aida/service/disambiguate");
+					req.setHeader("content-type", "application/json");
+					ObjectNode requestJson = Json.newObject();
+					requestJson.put("text", text2);
+					req.setEntity(new StringEntity(requestJson.toString(), "UTF-8")); //setting the body for POST request
+					HttpResponse response = client.execute(req);
+					if (response.getStatusLine().getStatusCode() == 200) {
+						String json = EntityUtils.toString(response.getEntity(), "UTF-8"); 
+						JsonNode responseJson = new ObjectMapper().readTree(json);
+						if (responseJson.has("mentions")){
+							JsonNode mentions = responseJson.get("mentions");
+							if (responseJson.has("entityMetadata")) {
+								JsonNode entityMetadata = responseJson.get("entityMetadata");
+								if (mentions.isArray()) {
+									for (final JsonNode mentionJson : mentions){
+										if (mentionJson.has("bestEntity")){
+											JsonNode bestEntity = mentionJson.get("bestEntity");
+											String identifier = bestEntity.get("kbIdentifier").asText();
+											identifier = StringEscapeUtils.unescapeJava(identifier);
+											Annotation annotation = new Annotation();
+											AnnotationAdmin administrative = new AnnotationAdmin();
+											administrative.setWithCreator(aidaUser);	
+											Date createdDate = new Date();
+											try {
+												createdDate = sdf.parse(createdString);
+												administrative.setCreated(createdDate);
+											}
+											catch(Exception e){}
+											String nowString = sdf.format(new Date());
+											Date nowDate = new Date();
+											try {
+												nowDate = sdf.parse(nowString);
+												administrative.setGenerated(nowDate);
+												administrative.setLastModified(nowDate);								
+											}
+											catch(Exception e){}
+											administrative.setGenerator("AIDA");
+											administrative.setConfidence(0.0);
+											PropertyTextFragmentSelector selector = new PropertyTextFragmentSelector();
+
+											selector.setOrigValue(text);
+											selector.setProperty(property);
+									
+											if (mentionJson.has("offset") && mentionJson.has("length")){
+												Integer AidaStart = mentionJson.get("offset").asInt();
+												selector.setStart(AidaStart);
+
+												Integer AidaLength = mentionJson.get("length").asInt();
+												selector.setEnd(AidaLength + AidaStart);
+												if (AidaLength + AidaStart > limit){
+													continue;
+												}
+											}
+											
+											if (bestEntity.has("disambiguationScore")){
+												Double AidaConfidence = bestEntity.get("disambiguationScore").asDouble();
+												administrative.setConfidence(AidaConfidence);
+											}
+											AnnotationBodyTagging body = new AnnotationBodyTagging();
+											AnnotationBodyGeoTagging geoBody = new AnnotationBodyGeoTagging();
+											boolean isGeo = false;
+											String AidaUri = "";
+											String AidaLabel = "";
+											if (entityMetadata.has(identifier))
+											{
+												JsonNode objNode = entityMetadata.get(identifier);
+												if (objNode.has("readableRepr")){
+													AidaLabel = objNode.get("readableRepr").asText();
+													MultiLiteral labels = new MultiLiteral(Language.EN, AidaLabel);
+													labels.addLiteral(Language.DEFAULT, AidaLabel);
+													body.setLabel(labels);
+													geoBody.setLabel(labels);
+												}
+												if (objNode.has("url")){
+													AidaUri = objNode.get("url").asText();
+													body.setUri(AidaUri);
+													if (AidaUri.contains("wikipedia")){
+														body.setUriVocabulary("Wikipedia");
+													}
+												}
+											}
+											geoBody.setUriVocabulary("Geonames");
+											// If the annotation is a place, use GeoNames
+
+											String wikidataId = "";
+											HttpClient client2;
+											HttpGet req2;
+											HttpResponse response2;
+											String json2;
+											JsonNode responseJson2;
+											if (AidaUri != ""){
+												String WikipediaToWikidata = "";
+												if (AidaUri.contains("wikipedia")){
+													String[] temp = AidaUri.split("/");
+													if (temp.length > 0){
+														WikipediaToWikidata = "https://en.wikipedia.org/w/api.php?action=query&prop=pageprops&format=json&titles=" + temp[temp.length - 1];
+													}
+													client2 = HttpClientBuilder.create().build();
+													req2 = new HttpGet(WikipediaToWikidata);
+													req2.setHeader("content-type", "application/json");
+													response2 = client2.execute(req2);
+													if (response2.getStatusLine().getStatusCode() == 200) {
+														json2 = EntityUtils.toString(response2.getEntity(), "UTF-8"); 
+														responseJson2 = new ObjectMapper().readTree(json2);
+														if (responseJson2.has("query")){
+															if(responseJson2.get("query").has("pages")){
+																JsonNode pages = responseJson2.get("query").get("pages");
+																for (JsonNode item : pages) {
+																	if (item.has("pageprops")){
+																		if (item.get("pageprops").has("wikibase_item")){
+																			wikidataId = item.get("pageprops").get("wikibase_item").asText();
+																		}
+																	}
+																}
+															}
+														}
+													}
+												}
+											}
+											String geonameId = "";
+											if (wikidataId != ""){
+												String query = "SELECT ?geoNamesID ?coordinates WHERE {?place wdt:P1566 ?geoNamesID.  ?place wdt:P625 ?coordinates VALUES (?place)  {(wd:" + wikidataId + ")} }";
+												String WikiQueryService = "https://query.wikidata.org/bigdata/namespace/wdq/sparql?format=json&query=" + URLEncoder.encode(query, "UTF-8");
+												client2 = HttpClientBuilder.create().build();
+												req2 = new HttpGet(WikiQueryService);
+												req2.setHeader("content-type", "application/json");
+												response2 = client2.execute(req2);
+												if (response2.getStatusLine().getStatusCode() == 200) {
+													json2 = EntityUtils.toString(response2.getEntity(), "UTF-8");
+													responseJson2 = new ObjectMapper().readTree(json2);
+													if (responseJson2.has("results")){
+														if (responseJson2.get("results").has("bindings")){
+															for (JsonNode item : responseJson2.get("results").get("bindings")){
+																if (item.has("geoNamesID")){
+																	if (item.get("geoNamesID").has("value")){
+																		geonameId = item.get("geoNamesID").get("value").asText();
+																		geoBody.setUri("http://sws.geonames.org/" + geonameId + "/");
+																		isGeo = true;
+																	}
+																}
+																if (item.has("coordinates")){
+																	if (item.get("coordinates").has("value")){
+																		String inputPoint = item.get("coordinates").get("value").asText();
+																		String[] coordinates = ((inputPoint.split("\\(")[1]).split("\\)")[0]).split(" ");
+																		Double lat = Double.parseDouble(coordinates[0]);
+																		Double lng = Double.parseDouble(coordinates[1]);
+																		if (lat != null && lng != null){
+																			Point point = GeoJson.point(lat, lng);
+																			geoBody.setCoordinates(point);
+																		}	
+																	}
+																}
+															}
+														}
+													}
+												}
+											}
+											
+									
+											selector.setOrigLang(Language.EN);
+											annotation.setAnnotators(new ArrayList(Arrays.asList(administrative)));
+											if (isGeo){
+												annotation.setMotivation(MotivationType.GeoTagging);
+											}
+											else{
+												annotation.setMotivation(MotivationType.Tagging);
+											}
+											annotation.getTarget().setRecordId(record.getDbId());
+											annotation.getTarget().setWithURI("/record/" + record.getDbId());
+											annotation.getTarget().setSelector(selector);
+											annotation.setPublish(false);
+											if (isGeo){
+												annotation.setBody(geoBody);
+											}
+											else{
+												annotation.setBody(body);
+											}
+											/* If annotation already exists add a new annotator, else create the new annotation*/
+											Annotation existingAnnotation = DB.getAnnotationDAO().getExistingAnnotation(annotation);
+											if (existingAnnotation == null) {
+												DB.getAnnotationDAO().makePermanent(annotation);
+												annotation.setAnnotationWithURI("/annotation/" + annotation.getDbId());
+												DB.getAnnotationDAO().makePermanent(annotation); // is this needed for a second time?
+												DB.getRecordResourceDAO().addAnnotation(annotation.getTarget().getRecordId(), annotation.getDbId(), aidaUser.toString());
+											} else {
+												ArrayList<AnnotationAdmin> annotators = existingAnnotation.getAnnotators();
+												for (AnnotationAdmin a : annotators) {
+													if (a.getWithCreator().equals(aidaUser)) {
+														return "";
+													}
+												}
+												DB.getAnnotationDAO().addAnnotators(existingAnnotation.getDbId(), annotation.getAnnotators());
+												annotation = DB.getAnnotationDAO().get(existingAnnotation.getDbId());
+											}
+										}
+									}
+								}
+							}
+						}
+						
+						return "";
+					}
+					else{
+						return "Error";
+					}	
+				} catch (Exception e) {
+					e.printStackTrace();
+					return "Error";
+				}
+			};
+
+			/***** GEEK API Call *****/
+			Function<String[],String> GeekAPICall = (String[] input) -> {
+				try {
+					String text = input[0];
+					String property = input[1];
+					int limit = input[0].length();
+					String text2 = text;
+					if (property == "provider"){
+						text2 = text + " is the provider of this piece of art or cultural heritage item.";
+					}
+					else if (property == "country"){
+						text2 = text + " is in the country field of this piece of art or cultural heritage item.";
+					}
+					else if (property == "city"){
+						text2 = text + " is in the city field of this piece of art or cultural heritage item.";
+					}
+					else if (property == "label"){
+						text2 = text + " is in the label field of this piece of art or cultural heritage item.";
+					}
+					else if (property == "creator"){
+						text2 = text + " is in the creator of this piece of art or cultural heritage item.";
+					}
+					HttpClient client = HttpClientBuilder.create().build();
+					HttpPost req = new HttpPost("http://spock.deep.islab.ntua.gr:25000");
+					req.setHeader("content-type", "application/json");
+					ObjectNode requestJson = Json.newObject();
+					requestJson.put("text", text2);
+					req.setEntity(new StringEntity(requestJson.toString(), "UTF-8")); //setting the body for POST request
+					HttpResponse response = client.execute(req);
+					if (response.getStatusLine().getStatusCode() == 200) {
+						String json = EntityUtils.toString(response.getEntity(), "UTF-8"); 
+						JsonNode responseJson = new ObjectMapper().readTree(json);
+						if (responseJson.isArray()) {
+							for (final JsonNode objNode : responseJson) {
+								Annotation annotation = new Annotation();
+								AnnotationAdmin administrative = new AnnotationAdmin();
+								administrative.setWithCreator(geekUser);	
+								Date createdDate = new Date();
+								try {
+									createdDate = sdf.parse(createdString);
+									administrative.setCreated(createdDate);
+								}
+								catch(Exception e){}
+								String nowString = sdf.format(new Date());
+								Date nowDate = new Date();
+								try {
+									nowDate = sdf.parse(nowString);
+									administrative.setGenerated(nowDate);
+									administrative.setLastModified(nowDate);								
+								}
+								catch(Exception e){}
+								administrative.setGenerator("GEEK");
+								administrative.setConfidence(0.0);
+								PropertyTextFragmentSelector selector = new PropertyTextFragmentSelector();
+
+								selector.setOrigValue(text);
+								selector.setProperty(property);
+						
+								if (objNode.has("start_offset") && objNode.has("end_offset")){
+									Integer GeekStart = objNode.get("start_offset").asInt();
+									selector.setStart(GeekStart);
+
+									Integer GeekEnd = objNode.get("end_offset").asInt();
+									selector.setEnd(GeekEnd);
+									if (GeekStart > limit || GeekEnd > limit){
+										continue;
+									}
+								}
+								
+								if (objNode.has("confidence")){
+									Double GeekConfidence = objNode.get("confidence").asDouble();
+									administrative.setConfidence(GeekConfidence);
+								}
+								AnnotationBodyTagging body = new AnnotationBodyTagging();
+								AnnotationBodyGeoTagging geoBody = new AnnotationBodyGeoTagging();
+								boolean isGeo = false;
+								String GeekUri = "";
+								String GeekLabel = "";
+								String wikidataId = "";
+								HttpClient client2;
+								HttpGet req2;
+								HttpResponse response2;
+								String json2;
+								JsonNode responseJson2;
+								if (objNode.has("wiki_url"))
+								{
+									GeekUri = objNode.get("wiki_url").asText();
+									body.setUri(GeekUri);
+									body.setUriVocabulary("Wikidata");
+									String[] splits = GeekUri.split("/");
+									wikidataId = splits[splits.length-1];
+									String query = "SELECT DISTINCT * WHERE {wd:" + wikidataId + " rdfs:label ?label . FILTER (langMatches( lang(?label), \"EN\"))}";
+									String WikiQueryService = "https://query.wikidata.org/bigdata/namespace/wdq/sparql?format=json&query=" + URLEncoder.encode(query, "UTF-8");
+									client2 = HttpClientBuilder.create().build();
+									req2 = new HttpGet(WikiQueryService);
+									req2.setHeader("content-type", "application/json");
+									response2 = client2.execute(req2);
+									if (response2.getStatusLine().getStatusCode() == 200) {
+										json2 = EntityUtils.toString(response2.getEntity(), "UTF-8");
+										responseJson2 = new ObjectMapper().readTree(json2);
+										if (responseJson2.has("results")){
+											if (responseJson2.get("results").has("bindings")){
+												JsonNode items = responseJson2.get("results").get("bindings");
+												if (items.isArray()){
+													for (final JsonNode item : items){
+														if (item.has("label")){
+															if (item.get("label").has("value")){
+																GeekLabel = item.get("label").get("value").asText();
+																MultiLiteral labels = new MultiLiteral(Language.EN, GeekLabel);
+																labels.addLiteral(Language.DEFAULT, GeekLabel);
+																body.setLabel(labels);
+																geoBody.setLabel(labels);
+																break;
+															}
+														}
+													}
+												}
+											}
+										}
+									}	
+								}
+								geoBody.setUriVocabulary("Geonames");
+								// If the annotation is a place, use GeoNames
+
+								String geonameId = "";
+								if (wikidataId != ""){
+									String query = "SELECT ?geoNamesID ?coordinates WHERE {?place wdt:P1566 ?geoNamesID.  ?place wdt:P625 ?coordinates VALUES (?place)  {(wd:" + wikidataId + ")} }";
+									String WikiQueryService = "https://query.wikidata.org/bigdata/namespace/wdq/sparql?format=json&query=" + URLEncoder.encode(query, "UTF-8");
+									client2 = HttpClientBuilder.create().build();
+									req2 = new HttpGet(WikiQueryService);
+									req2.setHeader("content-type", "application/json");
+									response2 = client2.execute(req2);
+									if (response2.getStatusLine().getStatusCode() == 200) {
+										json2 = EntityUtils.toString(response2.getEntity(), "UTF-8");
+										responseJson2 = new ObjectMapper().readTree(json2);
+										if (responseJson2.has("results")){
+											if (responseJson2.get("results").has("bindings")){
+												for (JsonNode item : responseJson2.get("results").get("bindings")){
+													if (item.has("geoNamesID")){
+														if (item.get("geoNamesID").has("value")){
+															geonameId = item.get("geoNamesID").get("value").asText();
+															geoBody.setUri("http://sws.geonames.org/" + geonameId + "/");
+															isGeo = true;
+														}
+													}
+													if (item.has("coordinates")){
+														if (item.get("coordinates").has("value")){
+															String inputPoint = item.get("coordinates").get("value").asText();
+															String[] coordinates = ((inputPoint.split("\\(")[1]).split("\\)")[0]).split(" ");
+															Double lat = Double.parseDouble(coordinates[0]);
+															Double lng = Double.parseDouble(coordinates[1]);
+															if (lat != null && lng != null){
+																Point point = GeoJson.point(lat, lng);
+																geoBody.setCoordinates(point);
+															}	
+														}
+													}
+												}
+											}
+										}
+									}
+								}
+							
+								selector.setOrigLang(Language.EN);
+								annotation.setAnnotators(new ArrayList(Arrays.asList(administrative)));
+								if (isGeo){
+									annotation.setMotivation(MotivationType.GeoTagging);
+								}
+								else{
+									annotation.setMotivation(MotivationType.Tagging);
+								}
+								annotation.getTarget().setRecordId(record.getDbId());
+								annotation.getTarget().setWithURI("/record/" + record.getDbId());
+								annotation.getTarget().setSelector(selector);
+								annotation.setPublish(false);
+								if (isGeo){
+									annotation.setBody(geoBody);
+								}
+								else{
+									annotation.setBody(body);
+								}
+								/* If annotation already exists add a new annotator, else create the new annotation*/
+								Annotation existingAnnotation = DB.getAnnotationDAO().getExistingAnnotation(annotation);
+								if (existingAnnotation == null) {
+									DB.getAnnotationDAO().makePermanent(annotation);
+									annotation.setAnnotationWithURI("/annotation/" + annotation.getDbId());
+									DB.getAnnotationDAO().makePermanent(annotation); // is this needed for a second time?
+									DB.getRecordResourceDAO().addAnnotation(annotation.getTarget().getRecordId(), annotation.getDbId(), geekUser.toString());
+								} else {
+									ArrayList<AnnotationAdmin> annotators = existingAnnotation.getAnnotators();
+									for (AnnotationAdmin a : annotators) {
+										if (a.getWithCreator().equals(geekUser)) {
+											return "";
+										}
+									}
+									DB.getAnnotationDAO().addAnnotators(existingAnnotation.getDbId(), annotation.getAnnotators());
+									annotation = DB.getAnnotationDAO().get(existingAnnotation.getDbId());
+								}
+							}
+						}
+						
+						return "";
+					}
+					else{
+						return "Error";
+					}	
+				} catch (Exception e) {
+					e.printStackTrace();
+					return "Error";
+				}
+			};
+
+
+			String[] myRequest;
+
+			List<ProvenanceInfo> provenanceList = record.getProvenance();
+			List<String> providers = new ArrayList<String>();
+			/***** PROVIDERS *****/
+			if (provenanceList != null){
+				int counter = 0;
+				for (ProvenanceInfo prov : provenanceList){
+					if (prov.getProvider() != null){
+						myRequest = new String[2];
+						myRequest[0] = prov.getProvider();
+						myRequest[1] = "provider";
+						ParallelAPICall.createPromise(GeekAPICall,myRequest);
+
+					}
+				}
+			}
+			DescriptiveData dd = record.getDescriptiveData();
+			String description,label,country,city,creator;
+			List<String> altLabels;
+			description = null;
+			label = null;
+			country = null;
+			city = null;
+			creator = null;
+			List<String> multiliterals;
+			Set<Language> languages;
+			if (dd != null){
+				/***** DESCRIPTION *****/
+				if (dd.getDescription() != null){
+					languages = dd.getDescription().getLanguages();
+					if (languages.contains(Language.EN)){
+						multiliterals = dd.getDescription().get(Language.EN);
+						description = multiliterals.get(0);
+					}
+					else if(languages.contains(Language.DEFAULT)){
+						multiliterals = dd.getDescription().get(Language.DEFAULT);
+						description = multiliterals.get(0);
+					}
+					if (description != null){
+						myRequest = new String[2];
+						myRequest[0] = description;
+						myRequest[1] = "description";
+						ParallelAPICall.createPromise(AidaAPICall,myRequest);
+					}
+				}
+				/***** LABEL *****/
+				if (dd.getLabel() != null){
+					languages = dd.getLabel().getLanguages();
+					if (languages.contains(Language.EN)){
+						multiliterals = dd.getLabel().get(Language.EN);
+						label = multiliterals.toString();
+						label = label.substring(1, label.length() - 1); 
+					}
+					else if(languages.contains(Language.DEFAULT)){
+						multiliterals = dd.getLabel().get(Language.DEFAULT);
+						label = multiliterals.toString();
+						label = label.substring(1, label.length() - 1);
+					}
+					if (label != null){
+						myRequest = new String[2];
+						myRequest[0] = label;
+						myRequest[1] = "label";
+						ParallelAPICall.createPromise(AidaAPICall,myRequest);
+					}
+				}				
+				/***** COUNTRY *****/
+				if (dd.getCountry() != null){
+					languages = dd.getCountry().getLanguages();
+					if (languages.contains(Language.EN)){
+						multiliterals = dd.getCountry().get(Language.EN);
+						country = multiliterals.toString();
+						country = country.substring(1, country.length() - 1); 
+					}
+					else if(languages.contains(Language.DEFAULT)){
+						multiliterals = dd.getCountry().get(Language.DEFAULT);
+						country = multiliterals.toString();
+						country = country.substring(1, country.length() - 1);
+					}
+					if (country != null){
+						myRequest = new String[2];
+						myRequest[0] = country;
+						myRequest[1] = "country";
+						ParallelAPICall.createPromise(AidaAPICall,myRequest);
+					}
+				}	
+				/***** CITY *****/
+				if (dd.getCity() != null){
+					languages = dd.getCity().getLanguages();
+					if (languages.contains(Language.EN)){
+						multiliterals = dd.getCity().get(Language.EN);
+						city = multiliterals.toString();
+						city = city.substring(1, city.length() - 1); 
+					}
+					else if(languages.contains(Language.DEFAULT)){
+						multiliterals = dd.getCity().get(Language.DEFAULT);
+						city = multiliterals.toString();
+						city = city.substring(1, city.length() - 1);
+					}
+					if (city != null){
+						myRequest = new String[2];
+						myRequest[0] = city;
+						myRequest[1] = "city";
+						ParallelAPICall.createPromise(AidaAPICall,myRequest);
+					}
+				}
+				/***** CREATOR *****/
+				/* There is Creator in the CulturalObject but not in the DescriptiveData*/
+				// if (dd.getDccreator() != null){
+				// 	languages = dd.getDccreator().getLanguages();
+				// 	if (languages.contains(Language.EN)){
+				// 		multiliterals = dd.getDccreator().get(Language.EN);
+				// 		creator = multiliterals.toString();
+				// 		creator = creator.substring(1, creator.length() - 1);
+				// 	}
+				// 	else if(languages.contains(Language.DEFAULT)){
+				// 		multiliterals = dd.getDccreator().get(Language.DEFAULT);
+				// 		creator = multiliterals.toString();
+				// 		creator = creator.substring(1, creator.length() - 1);						
+				// 	}
+				// 	if (creator != null){
+				//		myRequest = new String[2];
+				// 		myRequest[0] = creator;
+				// 		myRequest[1] = "creator";
+				// 		ParallelAPICall.createPromise(AidaAPICall,myRequest);
+				// 	}
+				// }
+				
+			}
+			return ok();
+		}
+		else{
+			return notFound();
+		}
+		
+	}
+
+	
+	public static Result artStyleRecord(String recordId, String myType, String model) {
+		ObjectNode request = Json.newObject();
+		RecordResource record = DB.getRecordResourceDAO().get(new ObjectId(recordId));
+		if (record != null){
+			if ((record.getMedia() != null) && (record.getMedia().size() > 0)){
+				HashMap<MediaVersion, EmbeddedMediaObject> media = (HashMap<MediaVersion, EmbeddedMediaObject>)(record.getMedia()).get(0);
+				EmbeddedMediaObject original = media.get(MediaVersion.Original);
+				if (original == null){
+					original = media.get(MediaVersion.Thumbnail);
+				}
+				if ((original != null) && (original.getUrl() != null)){
+					String url = original.getUrl();
+					if (url.startsWith("/media/")){
+						url = "https://api.withculture.eu" + url;
+					}
+					request.put("url", url);
+					request.put("type", myType);
+					request.put("model", model);
+					SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+					String createdString = sdf.format(new Date());
+					Function<ObjectNode,String> ArtStyleAPI = (ObjectNode MyJson) -> {
+						try {
+							HttpClient client = HttpClientBuilder.create().build();
+							HttpPost req = new HttpPost("http://pinkfloyd.deep.islab.ntua.gr:5000");
+							req.setHeader("content-type", "application/json");
+							req.setEntity(new StringEntity(MyJson.toString())); //setting the body for POST request
+							HttpResponse response = client.execute(req);
+							if (response.getStatusLine().getStatusCode() == 200) {
+								String json = EntityUtils.toString(response.getEntity()); 
+								if (!myType.equals("fuzzy")){
+									JsonNode resp = Json.parse(json); 
+									String ArtStyle = resp.get("ArtStyle").toString();
+									ArtStyle = ArtStyle.substring(1, ArtStyle.length() - 1);
+									String confidence = "0.0";
+									if (resp.has("confidence")){
+										confidence = resp.get("confidence").toString();
+										confidence = confidence.substring(1, confidence.length() - 1);
+									}
+									ThesaurusObject thesaurusStyle = ThesaurusController.getThesaurusArtStyle(ArtStyle);
+									if (thesaurusStyle != null){
+										String uri = thesaurusStyle.getSemantic().getUri();
+										User user = DB.getUserDAO().getUniqueByFieldAndValue("username", "ASARS");
+										ObjectId ASARSUser = user.getDbId();
+										Annotation annotation = new Annotation();
+										AnnotationAdmin administrative = new AnnotationAdmin();
+										administrative.setWithCreator(ASARSUser);	
+										Date createdDate = new Date();
+										try {
+											createdDate = sdf.parse(createdString);
+											administrative.setCreated(createdDate);
+										}
+										catch(Exception e){}
+										String nowString = sdf.format(new Date());
+										Date nowDate = new Date();
+										try {
+											nowDate = sdf.parse(nowString);
+											administrative.setGenerated(nowDate);
+											administrative.setLastModified(nowDate);								
+										}
+										catch(Exception e){}
+										administrative.setGenerator("ASARS");
+										try{
+											administrative.setConfidence(Double.parseDouble(confidence));
+										}
+										catch(Exception e){
+											administrative.setConfidence(0.0);
+										}
+										AnnotationBodyTagging body = new AnnotationBodyTagging();
+										body.setUri(uri);
+										Literal labels = thesaurusStyle.getSemantic().getPrefLabel();
+										MultiLiteral labels2 = new MultiLiteral();
+										for (Map.Entry<String, String> label : labels.entrySet()){
+											labels2.add(label.getKey(), label.getValue());
+										}
+										body.setLabel(labels2);
+										body.setUriVocabulary(thesaurusStyle.getSemantic().getVocabulary().getName());
+										annotation.setAnnotators(new ArrayList(Arrays.asList(administrative)));
+										annotation.setMotivation(MotivationType.Tagging);
+										annotation.getTarget().setRecordId(record.getDbId());
+										annotation.getTarget().setWithURI("/record/" + record.getDbId());
+										annotation.setPublish(false);
+										annotation.setBody(body);
+										Annotation existingAnnotation = DB.getAnnotationDAO().getExistingAnnotation(annotation);
+										if (existingAnnotation == null) {
+											DB.getAnnotationDAO().makePermanent(annotation);
+											annotation.setAnnotationWithURI("/annotation/" + annotation.getDbId());
+											DB.getAnnotationDAO().makePermanent(annotation); // is this needed for a second time?
+											DB.getRecordResourceDAO().addAnnotation(annotation.getTarget().getRecordId(), annotation.getDbId(), ASARSUser.toString());
+										} else {
+											ArrayList<AnnotationAdmin> annotators = existingAnnotation.getAnnotators();
+											for (AnnotationAdmin a : annotators) {
+												if (a.getWithCreator().equals(ASARSUser)) {
+													return "";
+												}
+											}
+											DB.getAnnotationDAO().addAnnotators(existingAnnotation.getDbId(), annotation.getAnnotators());
+											annotation = DB.getAnnotationDAO().get(existingAnnotation.getDbId());
+										}
+									}
+								}
+								return json;
+							}
+							else{
+								return "Error";
+							}
+						} catch (Exception e) {
+							e.printStackTrace();
+							return "Error";
+						}
+					};
+					ParallelAPICall.createPromise(ArtStyleAPI,request);
+					return ok();
+				}
+				else{
+					return notFound();
+				}
+			}
+			else{
+				return notFound();
+			}
+		}
+		else{
+			return notFound();
 		}
 	}
 

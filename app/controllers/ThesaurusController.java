@@ -222,6 +222,24 @@ public class ThesaurusController extends Controller {
 		}
 	}
 
+	public static ThesaurusObject getThesaurusArtStyle(String name) {
+		try {
+			if (name == null) {
+				return null;
+			} else {
+				ThesaurusObject to = DB.getThesaurusDAO().getByPrefLabel(name);
+				if(to.getSemantic().getVocabulary().getName().equals("wikidata")){
+					return to;
+				}
+				else{
+					return null;
+				}
+			}
+		} catch (Exception e) {
+			return null;
+		}
+	}
+
 	public static Result listVocabularies() {
 		ObjectNode result = Json.newObject();
 
@@ -494,102 +512,100 @@ public class ThesaurusController extends Controller {
 							vocabNameQuery.should(QueryBuilders.termQuery("vocabulary.name", voc));
 						}
 						query.must(vocabNameQuery);
+					}		
+				}
+				if (campaignId != null) {
+					Campaign campaign = DB.getCampaignDAO().getById(new ObjectId(campaignId));
+					if (campaign !=null && campaign.getUsername().equals("garment-type"))
+						query.must(QueryBuilders.termQuery("broaderTransitive.uri.string", "http://thesaurus.europeanafashion.eu/thesaurus/10000"));
+				}
+				// System.out.println("QUERY" + query);
+				SearchOptions so = new SearchOptions(0, 1000);
+				so.isPublic = false;
+				so.scroll = true;
+				so.searchFields = retrievedFields;
+
+				ArrayList<SearchSuggestion> suggestions = new ArrayList<SearchSuggestion>();
+
+				ElasticSearcher searcher = new ElasticSearcher();
+				searcher.setTypes(new ArrayList<String>() {
+					{
+						add(WithResourceType.ThesaurusObject.toString().toLowerCase());
 					}
+				});
+				SearchRequestBuilder srb = searcher.getSearchRequestBuilder(query, so);
 
-						
-					}
-					if (campaignId != null) {
-						Campaign campaign = DB.getCampaignDAO().getById(new ObjectId(campaignId));
-						if (campaign !=null && campaign.getUsername().equals("garment-type"))
-							query.must(QueryBuilders.termQuery("broaderTransitive.uri.string", "http://thesaurus.europeanafashion.eu/thesaurus/10000"));
-					}
-					// System.out.println("QUERY" + query);
-					SearchOptions so = new SearchOptions(0, 1000);
-					so.isPublic = false;
-					so.scroll = true;
-					so.searchFields = retrievedFields;
+				SearchResponse sr = srb.execute().actionGet();
+				while (true) {
+					for (SearchHit hit : sr.getHits().getHits()) {
+						SearchHitField categories = hit.field("broader.prefLabel.en");
 
-					ArrayList<SearchSuggestion> suggestions = new ArrayList<SearchSuggestion>();
+						SearchHitField props = hit.field("properties.values.prefLabel.en");
 
-					ElasticSearcher searcher = new ElasticSearcher();
-					searcher.setTypes(new ArrayList<String>() {
-						{
-							add(WithResourceType.ThesaurusObject.toString().toLowerCase());
-						}
-					});
-					SearchRequestBuilder srb = searcher.getSearchRequestBuilder(query, so);
-
-					SearchResponse sr = srb.execute().actionGet();
-					while (true) {
-						for (SearchHit hit : sr.getHits().getHits()) {
-							SearchHitField categories = hit.field("broader.prefLabel.en");
-
-							SearchHitField props = hit.field("properties.values.prefLabel.en");
-
-							List<String> labels = new ArrayList<>();
-							for (int i = 0; i < searchLangCodes.length; i++) {
-								SearchHitField label = hit.field("prefLabel." + searchLangCodes[i]);
-								if (label != null) {
-									labels.add((String) label.getValues().get(0));
-								}
-							}
-
-							suggestions.add(new SearchSuggestion(word, hit.getId(),
-									(String) hit.field("prefLabel." + (language.equalsIgnoreCase("all") ? "en" : language.toLowerCase()))
-									.getValues().get(0),
-									labels.toArray(new String[labels.size()]),
-									(String) hit.field("uri").getValues().get(0),
-									(String) hit.field("vocabulary.name").getValues().get(0),
-									categories != null ? categories.getValues().toArray(new String[] {}) : null,
-									props != null ? props.getValues().toArray(new String[] {}) : null));
-
-						}
-						sr = Elastic.getTransportClient().prepareSearchScroll(sr.getScrollId())
-								.setScroll(new TimeValue(60000)).execute().actionGet();
-
-						if (sr.getHits().getHits().length == 0) {
-							break;
-						}
-					}
-
-					Collections.sort(suggestions);
-
-					int limit = Math.min(100, suggestions.size());
-					for (int i = 0; i < limit; i++) {
-						SearchSuggestion ss = suggestions.get(i);
-
-						ObjectNode element = Json.newObject();
-						element.put("id", ss.id);
-
-						element.put("label", ss.langLabel);
-						element.put("matchedLabel", ss.getSelectedLabel());
-						element.put("uri", ss.uri);
-						element.put("vocabulary", ss.vocabulary);
-
-						ArrayNode array = Json.newObject().arrayNode();
-						if (ss.categories != null) {
-							for (String c : ss.categories) {
-								array.add(c);
+						List<String> labels = new ArrayList<>();
+						for (int i = 0; i < searchLangCodes.length; i++) {
+							SearchHitField label = hit.field("prefLabel." + searchLangCodes[i]);
+							if (label != null) {
+								labels.add((String) label.getValues().get(0));
 							}
 						}
 
-						if (ss.properties != null) {
-							for (String c : ss.properties) {
-								array.add(c);
-							}
-						}
+						suggestions.add(new SearchSuggestion(word, hit.getId(),
+								(String) hit.field("prefLabel." + (language.equalsIgnoreCase("all") ? "en" : language.toLowerCase()))
+								.getValues().get(0),
+								labels.toArray(new String[labels.size()]),
+								(String) hit.field("uri").getValues().get(0),
+								(String) hit.field("vocabulary.name").getValues().get(0),
+								categories != null ? categories.getValues().toArray(new String[] {}) : null,
+								props != null ? props.getValues().toArray(new String[] {}) : null));
 
-						if (array.size() > 0) {
-							element.put("categories", array);
-						}
+					}
+					sr = Elastic.getTransportClient().prepareSearchScroll(sr.getScrollId())
+							.setScroll(new TimeValue(60000)).execute().actionGet();
 
-						// element.put("exact", ss.getSelectedLabel().equals(word) && prefix != null &&
-						// prefix.equals(ss.vocabulary));
-						element.put("exact", ss.getSelectedLabel().equals(word));
-
-						terms.add(element);
+					if (sr.getHits().getHits().length == 0) {
+						break;
 					}
 				}
+
+				Collections.sort(suggestions);
+
+				int limit = Math.min(100, suggestions.size());
+				for (int i = 0; i < limit; i++) {
+					SearchSuggestion ss = suggestions.get(i);
+
+					ObjectNode element = Json.newObject();
+					element.put("id", ss.id);
+
+					element.put("label", ss.langLabel);
+					element.put("matchedLabel", ss.getSelectedLabel());
+					element.put("uri", ss.uri);
+					element.put("vocabulary", ss.vocabulary);
+
+					ArrayNode array = Json.newObject().arrayNode();
+					if (ss.categories != null) {
+						for (String c : ss.categories) {
+							array.add(c);
+						}
+					}
+
+					if (ss.properties != null) {
+						for (String c : ss.properties) {
+							array.add(c);
+						}
+					}
+
+					if (array.size() > 0) {
+						element.put("categories", array);
+					}
+
+					// element.put("exact", ss.getSelectedLabel().equals(word) && prefix != null &&
+					// prefix.equals(ss.vocabulary));
+					element.put("exact", ss.getSelectedLabel().equals(word));
+
+					terms.add(element);
+				}
+			}
 			List<String> namespaceArrayList = Arrays.asList(namespaceArray);
 			ArrayNode allTerms = Json.newObject().arrayNode();
 			if (namespaceArrayList.contains("wikidata")) {

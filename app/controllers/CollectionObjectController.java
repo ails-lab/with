@@ -2070,4 +2070,39 @@ public class CollectionObjectController extends WithResourceController {
 			return internalServerError(result);
 		}
 	}
+
+	public static Result nerdCollection(String colId) {
+		List<RecordResource> records = DB.getRecordResourceDAO().getByCollection(new ObjectId(colId));	
+		if (records != null){
+			Function<String,Result> nerdRecord = (String recId) -> {
+				return RecordResourceController.nerdRecord(recId);
+			};
+			for (RecordResource rec: records){
+				ParallelAPICall.createPromise(nerdRecord, rec.getDbId().toString());
+			}
+			return ok();
+		}
+		else{
+			return notFound();
+		}
+	}
+
+	public static Result artStyleCollection(String colId, String myType, String model) {
+		List<RecordResource> records = DB.getRecordResourceDAO().getByCollection(new ObjectId(colId));	
+		if (records != null){
+			Function<String,Result> artStyleRecord = (String recId) -> {
+				return RecordResourceController.artStyleRecord(recId, myType, model);
+			};
+			for (RecordResource rec: records){
+				ParallelAPICall.createPromise(artStyleRecord, rec.getDbId().toString());
+			}
+			return ok();
+		}
+		else{
+			return notFound();
+		}
+	}
 }
+
+
+

@@ -556,6 +556,16 @@ public class AnnotationController extends Controller {
 							}
 						}
 					}
+					else if (current.getScore().getRejectedBy() != null){
+						if (current.getAnnotators() != null) {
+							if ((AnnotationAdmin) (current.getAnnotators()).get(0) != null) {
+								creatorId = ((AnnotationAdmin) (current.getAnnotators()).get(0)).getWithCreator();
+								if (creatorId.equals(withUser)) {
+									karmaPoints++;
+								}
+							}
+						}
+					}
 				}
 			}
 		}
