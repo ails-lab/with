@@ -66,6 +66,7 @@ import java.util.function.Function;
 import db.DB;
 import model.Campaign;
 import model.Campaign.AnnotationCount;
+import model.Campaign.BadgePrizes;
 import model.Campaign.CampaignTerm;
 import model.Campaign.CampaignTermWithInfo;
 import model.annotations.Annotation;
@@ -127,6 +128,14 @@ public class CampaignController extends WithController {
 			}
 		}
 	}
+	
+	public static void updateLiteralField(Campaign c1, Campaign c2, Function<Campaign, Literal> f, BiConsumer<Campaign, Literal> bc) {
+		if (f.apply(c1) == null && f.apply(c2) != null) {
+			bc.accept(c1, f.apply(c2));
+		} else {
+			updateLiteralField(c1, c2, f);
+		}
+	}
 
 	public static void updateListField(Campaign c1, Campaign c2, Function<Campaign, List<ObjectId>> f) {
 		f.apply(c1).clear();
@@ -154,6 +163,10 @@ public class CampaignController extends WithController {
 		Campaign newCampaign = (Campaign) Json.fromJson(json, clazz);
 		updateLiteralField(campaign, newCampaign, Campaign::getTitle);
 		updateLiteralField(campaign, newCampaign, Campaign::getDescription);
+		updateLiteralField(campaign, newCampaign, Campaign::getInstructions, Campaign::setInstructions);
+		if (newCampaign.getPrizes() != null) {
+				campaign.setPrizes(newCampaign.getPrizes());
+		}
 		if (newCampaign.getStartDate() != null)
 			campaign.setStartDate(newCampaign.getStartDate());
 		if (newCampaign.getEndDate() != null)
@@ -163,6 +176,9 @@ public class CampaignController extends WithController {
 		else
 			campaign.setBanner(null);
 		updateListField(campaign, newCampaign, Campaign::getTargetCollections);
+		campaign.setAnnotationTarget(newCampaign.getAnnotationTarget());
+		campaign.setVocabularies(newCampaign.getVocabularies());
+		campaign.setMotivation(newCampaign.getMotivation());
 		DB.getCampaignDAO().makePermanent(campaign);
 		return ok(Json.toJson(DB.getCampaignDAO().get(campaignDbId)));
 	}

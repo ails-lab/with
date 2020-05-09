@@ -16,15 +16,14 @@
 
 package controllers;
 
+import java.io.FileReader;
 import java.io.IOException;
-import java.net.HttpURLConnection;
-import java.net.URL;
+import java.io.Reader;
 import java.sql.SQLException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -35,13 +34,14 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVRecord;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.bson.types.ObjectId;
-import org.junit.Assert;
 import org.mongodb.morphia.geo.GeoJson;
 import org.mongodb.morphia.geo.Point;
 
@@ -903,9 +903,56 @@ public class AnnotationController extends Controller {
 		AnnotationBodyTagging body = (AnnotationBodyTagging) ann.getBody();
 		if (body.getUri().equals("http://wordnet-rdf.princeton.edu/wn30/13645812-n"))
 			body.setUri("http://thesaurus.europeanafashion.eu/thesaurus/10405");
+		if (body.getUri().startsWith("https://www.wikidata.org")) {
+			body.setUri(body.getUri().replace("https://", "http://"));
+		}
+		if (body.getUri().startsWith("http://www.wikidata.org/wiki/")) {
+			body.setUri(body.getUri().replace("http://www.wikidata.org/wiki/", "http://www.wikidata.org/entity/"));
+		}
+		if (body.getUri().equals("http://www.mimo-db.eu/InstrumentsKeywords")) {
+			body.setUri("http://www.mimo-db.eu/InstrumentsKeywords/2204");
+		}
+		if (body.getUri().contains("http://bib.arts.kuleuven.be/")) {
+			String[] s = body.getUri().split("/");
+			String photoId = s[s.length - 1];
+			String alternativeURI = getGettyOrWikidataUri(photoId);
+			if (alternativeURI != null) {
+				System.out.println(
+						"Alternative URI found for http://bib.arts.kuleuven.be/photoVocabulary/en/concepts/-photoVocabulary-"
+								+ photoId + " : " + alternativeURI);
+				body.setUri(alternativeURI);
+			} else {
+				System.out.println(
+						"No alternative URI found: hhttp://bib.arts.kuleuven.be/photoVocabulary/en/concepts/-photoVocabulary-"
+								+ photoId);
+			}
+
+		}
 		europeanaAnnotation.put("body", body.getUri());
 		europeanaAnnotation.put("target", getEuropeanaRecord(ann.getTarget()));
 		return europeanaAnnotation;
+	}
+
+	private static String getGettyOrWikidataUri(String photoId) {
+		try {
+			Reader in = new FileReader("kal.csv");
+			Iterable<CSVRecord> records = CSVFormat.DEFAULT.withDelimiter(',').withHeader().parse(in);
+			for (CSVRecord record : records) {
+				if (record.get("photoId").equals(photoId)) {
+					if (record.get("gettyId") != null && (record.get("gettyId").trim().equals("") == false)) {
+						return "http://vocab.getty.edu/aat/" + record.get("gettyId");
+					} else if (record.get("wiki") != null) {
+						return record.get("wiki");
+					} else {
+						return null;
+					}
+				}
+			}
+			return null;
+		} catch (Exception e) {
+			e.printStackTrace();
+			return null;
+		}
 	}
 
 	private static class Score {
@@ -984,7 +1031,10 @@ public class AnnotationController extends Controller {
 
 	public static Result exportAnnotationsForEuropeanaApi(String project, String campaignName, int maxRanking,
 			boolean mark) {
-		List<Annotation> annotations = DB.getAnnotationDAO().getCampaignAnnotations(project + " " + campaignName);
+		List<Annotation> annotations = DB.getAnnotationDAO().getCampaignAnnotations(project + " transport-travel");
+		annotations.addAll(DB.getAnnotationDAO().getCampaignAnnotations(project + " style-design"));
+		annotations.addAll(DB.getAnnotationDAO().getCampaignAnnotations(project + " film-theatre"));
+		annotations.addAll(DB.getAnnotationDAO().getCampaignAnnotations(project + " ladies"));
 		List<Annotation> published = annotations;
 		if (campaignName.equals("colours-catwalk")) {
 			annotations.addAll(DB.getAnnotationDAO().getCampaignAnnotations("Image Analysis"));
@@ -996,7 +1046,7 @@ public class AnnotationController extends Controller {
 		}
 		if (mark) {
 			published.stream().filter(a -> getFinalScore(a).finalScore < 1)
-			.forEach(a -> DB.getAnnotationDAO().unmarkAnnotationForPublish(a.getDbId()));
+					.forEach(a -> DB.getAnnotationDAO().unmarkAnnotationForPublish(a.getDbId()));
 			published.stream().filter(a -> getFinalScore(a).finalScore > 0)
 					.forEach(a -> DB.getAnnotationDAO().markAnnotationForPublish(a.getDbId()));
 		}

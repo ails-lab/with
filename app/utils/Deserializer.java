@@ -44,6 +44,7 @@ import com.fasterxml.jackson.databind.node.TextNode;
 import com.google.common.net.MediaType;
 
 import db.DB;
+import model.Campaign.BadgePrizes;
 import model.annotations.ContextData;
 import model.annotations.ContextData.ContextDataType;
 import model.annotations.selectors.ImageSVGSelector;
@@ -259,6 +260,21 @@ public class Deserializer {
 			}
 			return out;
 		}
+	}
+	
+	public static class BadgePrizesDeserializer extends JsonDeserializer<BadgePrizes> {
+
+		@Override
+		public BadgePrizes deserialize(JsonParser jp, DeserializationContext ctxt) {
+			BadgePrizes badgePrizes = new BadgePrizes();
+			try {
+				badgePrizes = jp.readValueAs(BadgePrizes.class);
+			} catch (Exception e) {
+				return null;
+			}
+			return badgePrizes;
+		}
+		
 	}
 
 	public static class LiteralOrResourceDesiarilizer extends JsonDeserializer<LiteralOrResource> {

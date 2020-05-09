@@ -21,6 +21,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -40,6 +41,7 @@ import model.basicDataTypes.Language;
 import model.resources.RecordResource;
 import model.resources.WithResourceType;
 import model.resources.collection.CollectionObject;
+import play.Logger;
 
 import org.apache.commons.beanutils.BeanToPropertyValueTransformer;
 import org.apache.commons.collections.CollectionUtils;
@@ -54,10 +56,8 @@ import org.elasticsearch.search.aggregations.AggregationBuilder;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
 import org.elasticsearch.search.aggregations.Aggregations;
 
-
 import org.elasticsearch.search.aggregations.bucket.terms.Terms;
 import org.elasticsearch.search.aggregations.metrics.tophits.TopHits;
-
 
 import org.mongodb.morphia.query.Query;
 import org.mongodb.morphia.query.UpdateOperations;
@@ -100,52 +100,45 @@ public class AnnotationDAO extends DAO<Annotation> {
 			return new ArrayList<Annotation>();
 		}
 	}
-	
+
 	public List<Annotation> getByLabel(List<String> generators, String label) {
 		if (generators.size() > 0) {
 			Query<Annotation> q = this.createQuery().disableValidation();
-			q.or(
-				q.criteria("body.label.en").equal(label),
-				q.criteria("body.label.default").equal(label)
-			);
-			q.field("annotators.generator").in(generators)
-				.order("score.approvedBy");
+			q.or(q.criteria("body.label.en").equal(label), q.criteria("body.label.default").equal(label));
+			q.field("annotators.generator").in(generators).order("score.approvedBy");
 			List<Annotation> anns = this.find(q).asList();
 			return anns;
-		}
-		else {
+		} else {
 			return new ArrayList<Annotation>();
 		}
 	}
-	
+
 	public Map<String, Integer> getByCampaign(String campaignName, String term, int offset, int count) {
 		BoolQueryBuilder query = QueryBuilders.boolQuery();
 		BoolQueryBuilder langQuery = QueryBuilders.boolQuery();
 		langQuery.should(QueryBuilders.regexpQuery("body.label.default", term + ".*"));
 		langQuery.should(QueryBuilders.regexpQuery("body.label.en", term + ".*"));
 		query.must(langQuery);
-		query.must(QueryBuilders.regexpQuery("annotators.generator", campaignName.split("-")[0] + ".*" ));
+		query.must(QueryBuilders.regexpQuery("annotators.generator", campaignName.split("-")[0] + ".*"));
 		SearchOptions so = new SearchOptions(offset, count);
-		so.searchFields = new String[]{ "annlabel" };
-		
+		so.searchFields = new String[] { "annlabel" };
+
 		ElasticSearcher searcher = new ElasticSearcher();
 		searcher.setTypes(new ArrayList<String>() {
 			{
 				add("annotation");
 			}
 		});
-		AggregationBuilder aggregation =
-			    AggregationBuilders
-			        .terms("agg").field("annlabel.raw").size(count);
+		AggregationBuilder aggregation = AggregationBuilders.terms("agg").field("annlabel.raw").size(count);
 		SearchRequestBuilder srb = searcher.getSearchRequestBuilder(query, so).addAggregation(aggregation);
 		SearchResponse sr = srb.execute().actionGet();
 		HashMap<String, Integer> result = new HashMap<String, Integer>();
 		Terms agg = sr.getAggregations().get("agg");
 		for (Terms.Bucket entry : agg.getBuckets()) {
-		    String key = (String) entry.getKey();
-		    long docCount = entry.getDocCount();
-		    result.put(key, Integer.valueOf((int) docCount));
-		}	
+			String key = (String) entry.getKey();
+			long docCount = entry.getDocCount();
+			result.put(key, Integer.valueOf((int) docCount));
+		}
 		return result;
 	}
 
@@ -207,20 +200,19 @@ public class AnnotationDAO extends DAO<Annotation> {
 		return this.findOne(q);
 	}
 
-	public List<Annotation> getUserAnnotations(ObjectId userId, String project, String campaign, int offset, int count) {
+	public List<Annotation> getUserAnnotations(ObjectId userId, String project, String campaign, int offset,
+			int count) {
 		Query<Annotation> q = this.createQuery().field("annotators.withCreator").equal(userId)
-												.field("annotators.generator").equal(project+' '+campaign)
-												.offset(offset)
-												.limit(count);
+				.field("annotators.generator").equal(project + ' ' + campaign).offset(offset).limit(count);
 		return this.find(q).asList();
 	}
 
-	public List<Annotation> getUserAnnotations(ObjectId userId, String project, String campaign, List<String> retrievedFields) {
+	public List<Annotation> getUserAnnotations(ObjectId userId, String project, String campaign,
+			List<String> retrievedFields) {
 		Query<Annotation> q = this.createQuery().field("annotators.generator").equal(project + " " + campaign);
-		q.or(q.criteria("annotators.withCreator").equal(userId), 
-		    q.criteria("score.approvedBy.withCreator").equal(userId),
-			q.criteria("score.rejectedBy.withCreator").equal(userId)
-		);
+		q.or(q.criteria("annotators.withCreator").equal(userId),
+				q.criteria("score.approvedBy.withCreator").equal(userId),
+				q.criteria("score.rejectedBy.withCreator").equal(userId));
 		q.retrievedFields(true, retrievedFields.toArray(new String[retrievedFields.size()]));
 		return this.find(q).asList();
 	}
@@ -232,36 +224,42 @@ public class AnnotationDAO extends DAO<Annotation> {
 	}
 
 	public long countUserCreatedAnnotations(ObjectId userId, String project, String campaign) {
-		Query<Annotation> q = this.createQuery().field("annotators.generator").equal(project+' '+campaign);
+		Query<Annotation> q = this.createQuery().field("annotators.generator").equal(project + ' ' + campaign);
 		q.criteria("annotators.withCreator").equal(userId);
 		long count = q.countAll();
 		return count;
 	}
 
 	public long countUserUpvotedAnnotations(ObjectId userId, String project, String campaign) {
-		Query<Annotation> q = this.createQuery().field("annotators.generator").equal(project+' '+campaign);
+		Query<Annotation> q = this.createQuery().field("annotators.generator").equal(project + ' ' + campaign);
 		q.criteria("score.approvedBy.withCreator").equal(userId);
 		long count = q.countAll();
 		return count;
 	}
 
 	public long countUserDownvotedAnnotations(ObjectId userId, String project, String campaign) {
-		Query<Annotation> q = this.createQuery().field("annotators.generator").equal(project+' '+campaign);
+		Query<Annotation> q = this.createQuery().field("annotators.generator").equal(project + ' ' + campaign);
 		q.criteria("score.rejectedBy.withCreator").equal(userId);
 		long count = q.countAll();
 		return count;
 	}
 
+	public long countAnnotatedRecordsByLabel(String project, String campaign, String label) {
+		Query<Annotation> q = this.createQuery().disableValidation()
+				.field("annotators.generator").equal(project + ' ' + campaign);
+		q.or(q.criteria("body.label.en").equal(label), q.criteria("body.label.default").equal(label));
+		return this.find(q, "target").map(a -> a.getTarget().getRecordId()).distinct().count();
+	}
+
 	// TODO: Mongo distinct count
 	@SuppressWarnings("unchecked")
 	public long countUserAnnotatedRecords(ObjectId userId, String project, String campaign) {
-		Query<Annotation> q = this.createQuery().field("annotators.generator").equal(project+' '+campaign);
-		q.or(q.criteria("annotators.withCreator").equal(userId), 
-			 q.criteria("score.approvedBy.withCreator").equal(userId),
-			 q.criteria("score.rejectedBy.withCreator").equal(userId)
-			);
+		Query<Annotation> q = this.createQuery().field("annotators.generator").equal(project + ' ' + campaign);
+		q.or(q.criteria("annotators.withCreator").equal(userId),
+				q.criteria("score.approvedBy.withCreator").equal(userId),
+				q.criteria("score.rejectedBy.withCreator").equal(userId));
 		q.retrievedFields(true, new String[] { "target.recordId" });
-		
+
 		List<Annotation> annotations = this.find(q).asList();
 		List<ObjectId> recordIds = (List<ObjectId>) CollectionUtils.collect(annotations,
 				new BeanToPropertyValueTransformer("target.recordId"));
@@ -346,21 +344,21 @@ public class AnnotationDAO extends DAO<Annotation> {
 		updateOps.set("lastModified", new Date());
 		this.update(q, updateOps);
 	}
-	
+
 	public void markAnnotationForPublish(ObjectId dbId) {
 		Query<Annotation> q = this.createQuery().field("_id").equal(dbId);
 		UpdateOperations<Annotation> updateOps = this.createUpdateOperations();
 		updateOps.set("publish", true);
 		this.updateFirst(q, updateOps);
 	}
-	
+
 	public void unmarkAnnotationForPublish(ObjectId dbId) {
 		Query<Annotation> q = this.createQuery().field("_id").equal(dbId);
 		UpdateOperations<Annotation> updateOps = this.createUpdateOperations();
 		updateOps.set("publish", false);
 		this.updateFirst(q, updateOps);
 	}
-	
+
 	public void deleteCampaignAnnotations(ObjectId campaignId) {
 		String campaignName = DB.getCampaignDAO().getById(campaignId).getUsername();
 		Query<Annotation> q = this.createQuery().field("annotators.generator").endsWith(campaignName);
@@ -378,16 +376,24 @@ public class AnnotationDAO extends DAO<Annotation> {
 
 	public List<Annotation> getCampaignAnnotations(String campaignName) {
 		Query<Annotation> q = this.createQuery().field("annotators.generator").endsWith(campaignName);
-		return this.find(q).asList();
+		Iterator<Annotation> i = this.find(q).iterator();
+		List<Annotation> a = new ArrayList<Annotation>();
+		while (i.hasNext()) {
+			try {
+				a.add(i.next());
+			} catch (Exception e) {
+				Logger.error(e.getMessage());
+			}
+		}
+		return a;
 	}
-	
+
 	public void unscoreAutomaticAnnotations() {
 		Query<Annotation> q = this.createQuery().field("annotators.generator").equal("Image Analysis");
 		UpdateOperations<Annotation> updateOps = this.createUpdateOperations();
 		updateOps.unset("score");
 		this.update(q, updateOps);
 	}
-	
 
 	public void deleteAnnotation(ObjectId annotationId) {
 		Annotation annotation = this.get(annotationId);

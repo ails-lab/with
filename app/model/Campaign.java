@@ -153,33 +153,37 @@ public class Campaign {
 	}
 	
 	public static class BadgePrizes {
-		private Map<String, String> bronze;
-		private Map<String, String> silver;
-		private Map<String, String> gold;
-		private Map<String, String> rookie;
+		@JsonDeserialize(using = Deserializer.LiteralEnglishDefaultDesiarilizer.class)
+		private Literal bronze;
+		@JsonDeserialize(using = Deserializer.LiteralEnglishDefaultDesiarilizer.class)
+		private Literal silver;
+		@JsonDeserialize(using = Deserializer.LiteralEnglishDefaultDesiarilizer.class)
+		private Literal gold;
+		@JsonDeserialize(using = Deserializer.LiteralEnglishDefaultDesiarilizer.class)
+		private Literal rookie;
 		
-		public Map<String, String> getBronze() {
+		public Literal getBronze() {
 			return bronze;
 		}
-		public void setBronze(Map<String, String> bronze) {
+		public void setBronze(Literal bronze) {
 			this.bronze = bronze;
 		}
-		public Map<String, String> getSilver() {
+		public Literal getSilver() {
 			return silver;
 		}
-		public void setSilver(Map<String, String> silver) {
+		public void setSilver(Literal silver) {
 			this.silver = silver;
 		}
-		public Map<String, String> getGold() {
+		public Literal getGold() {
 			return gold;
 		}
-		public void setGold(Map<String, String> gold) {
+		public void setGold(Literal gold) {
 			this.gold = gold;
 		}
 		public Map<String, String> getRookie() {
 			return rookie;
 		}
-		public void setRookie(Map<String, String> rookie) {
+		public void setRookie(Literal rookie) {
 			this.rookie = rookie;
 		}
 	}
@@ -235,6 +239,7 @@ public class Campaign {
 	
 	private BadgeRanges badges;
 	
+	@JsonDeserialize(using = Deserializer.BadgePrizesDeserializer.class)
 	private BadgePrizes prizes;
 
 	
@@ -450,7 +455,7 @@ public class Campaign {
 		return prizes;
 	}
 
-	public void setPrices(BadgePrizes prizes) {
+	public void setPrizes(BadgePrizes prizes) {
 		this.prizes = prizes;
 	}
 
