@@ -51,7 +51,6 @@ public class DDBSpaceSource extends ISpaceSource {
 	
 	public DDBSpaceSource() {
 		super(Sources.DDB);
-		apiKey = "SECRET_KEY";
 		formatreader = new DDBRecordFormatter();
 		
 		addDefaultWriter(FiltersFields.TYPE.getFilterId(), fwriter("type_fct"));

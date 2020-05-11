@@ -16,20 +16,16 @@
 
 package sources;
 
-import model.EmbeddedMediaObject.WithMediaRights;
-import model.EmbeddedMediaObject.WithMediaType;
-import model.resources.WithResource;
-import search.FiltersFields;
 import search.Sources;
-import sources.core.CommonFilterLogic;
 import sources.core.CommonQuery;
+import sources.core.ISpaceSource;
 import sources.core.SourceResponse;
 import sources.core.Utils;
 import sources.formatreaders.FlickrRecordFormatter;
 
 public class BritishLibrarySpaceSource extends FlickrSpaceSource {
 	public BritishLibrarySpaceSource() {
-		super(Sources.BritishLibrary,"SECRET_KEY");
+		super(Sources.BritishLibrary, ISpaceSource.getUserIdFromConfig(Sources.BritishLibrary));
 		formatreader = new FlickrRecordFormatter.BritishLibraryRecordFormatter();
 	}
 	

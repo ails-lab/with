@@ -16,7 +16,6 @@
 
 package sources.core;
 
-import java.nio.channels.Pipe.SourceChannel;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -24,7 +23,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.function.Function;
 
-import akka.actor.dsl.Inbox.Query;
+import com.typesafe.config.Config;
+import com.typesafe.config.ConfigFactory;
+
 import model.resources.RecordResource;
 import search.FiltersFields;
 import search.Sources;
@@ -33,6 +34,9 @@ import sources.core.Utils.Pair;
 import utils.ListUtils;
 
 public abstract class ISpaceSource {
+
+	private static Config conf;
+
 	protected List<FiltersFields> filtersSupportedBySource = new ArrayList<FiltersFields>();
 	protected HashMap<String, FiltersFields> sourceToFiltersMappings = new HashMap<String, FiltersFields>();
 	protected HashMap<FiltersFields, String> filtersToSourceMappings = new HashMap<FiltersFields, String>();
@@ -44,6 +48,7 @@ public abstract class ISpaceSource {
 	public ISpaceSource(Sources source) {
 		this.sourceLABEL = source;
 		vmap = FilterValuesMap.getMap(source);
+		setApiKey();
 	}
 	
 	public HttpConnector getHttpConnector() {
@@ -54,7 +59,30 @@ public abstract class ISpaceSource {
 	public Sources getSourceName() {
 		return sourceLABEL;
 	}
+
+	public void setApiKey() {
+		this.apiKey = getApiKeyFromConfig(sourceLABEL);
+	}
+
+	public static String getUserIdFromConfig(Sources source) {
+		return getFromConfig("userid", source);
+	}
+
+	public static String getApiKeyFromConfig(Sources source) {
+		return getFromConfig("apikey", source);
+	}
 	
+	public static String getFromConfig(String key, Sources source) {
+		if (conf == null) {
+			conf = ConfigFactory.load();
+		}
+		if (conf.hasPath(key + "." + source.name())) {
+			return conf.getString(key + "." + source.name());
+		} else {
+			return "UNKNOWN";
+		}
+	}
+
 	public String getHttpQuery(CommonQuery q) {
 		return "";
 	};

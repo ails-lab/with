@@ -57,7 +57,6 @@ public class DigitalNZSpaceSource extends ISpaceSource {
 
 	public DigitalNZSpaceSource() {
 		super(Sources.DigitalNZ);
-		apiKey = "SECRET_KEY";
 		addDefaultWriter(FiltersFields.TYPE.getFilterId(), fwriter("and[category][]"));
 		addDefaultWriter(FiltersFields.CREATOR.getFilterId(), fwriter("and[creator][]"));
 		addDefaultWriter(FiltersFields.YEAR.getFilterId(), qfwriterYEAR());

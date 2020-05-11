@@ -50,7 +50,6 @@ public class DPLASpaceSource extends ISpaceSource {
 	public static final ALogger log = Logger.of( DPLASpaceSource.class);
 	
 	public String getHttpQuery(CommonQuery q) {
-		// q=zeus&api_key=SECRET_KEY&sourceResource.creator=Zeus
 		QueryBuilder builder = new QueryBuilder("http://api.dp.la/v2/items");
 		builder.addSearchParam("api_key", apiKey);
 		builder.setQuery("q", q.searchTerm);
@@ -63,7 +62,6 @@ public class DPLASpaceSource extends ISpaceSource {
 
 	public DPLASpaceSource() {
 		super(Sources.DPLA);
-		apiKey = "SECRET_KEY";
 
 		addDefaultWriter(FiltersFields.TYPE.getFilterId(), fwriter("sourceResource.type"));
 		addDefaultWriter(FiltersFields.COUNTRY.getFilterId(), fwriter("sourceResource.spatial.country"));

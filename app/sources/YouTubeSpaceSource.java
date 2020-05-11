@@ -68,7 +68,7 @@ public class YouTubeSpaceSource extends ISpaceSource {
 				+ Utils.spacesPlusFormatQuery(q.searchTerm == null ? "*"
 						: q.searchTerm) + "&maxResults=" + q.pageSize
 				+ (token == null ? "" : ("&pageToken=" + token))
-				+ "&type=video&key=" + getKey();
+				+ "&type=video&key=" + apiKey;
 	}
 
 	private String getPageInfo(String q, String page, String pageSize) {
@@ -77,10 +77,6 @@ public class YouTubeSpaceSource extends ISpaceSource {
 		}
 		String string = roots.get(getPrevKey(q, page, pageSize));
 		return string;
-	}
-
-	private static String getKey() {
-		return "SECRET_KEY";
 	}
 
 	private String getBaseURL() {
@@ -239,7 +235,7 @@ public class YouTubeSpaceSource extends ISpaceSource {
 	public String autocompleteQuery(String term, int limit) {
 		autoCompleteLimit = limit;
 		return "http://suggestqueries.google.com/complete/search?hl=en&ds=yt&client=youtube&json=t"
-				+ "&key=" + getKey() + "&q=" + term;
+				+ "&key=" + apiKey + "&q=" + term;
 	}
 
 	public AutocompleteResponse autocompleteResponse(String response) {
@@ -276,7 +272,7 @@ public class YouTubeSpaceSource extends ISpaceSource {
 		try {
 			response = getHttpConnector()
 					.getURLContent("https://www.googleapis.com/youtube/v3/videos?id="
-							+ recordId + "&part=snippet&key=" + getKey());
+							+ recordId + "&part=snippet&key=" + apiKey);
 			
 			
 			if (response != null) {

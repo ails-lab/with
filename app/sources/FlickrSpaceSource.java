@@ -60,7 +60,7 @@ public abstract class FlickrSpaceSource extends ISpaceSource {
 	protected synchronized static void setLicences() {
 		if (licences==null){
 			String url = "https://api.flickr.com/services/rest/?method=flickr.photos.licenses.getInfo&"
-					+ "api_key=SECRET_KEY&format=json&nojsoncallback=1";
+					+ "api_key=" + ISpaceSource.getApiKeyFromConfig(Sources.BritishLibrary) + "format=json&nojsoncallback=1";
 			licences = new HashMap<String, String>();
 			licencesId = new HashMap<String, String>();
 			JsonNode response;
@@ -86,7 +86,6 @@ public abstract class FlickrSpaceSource extends ISpaceSource {
 
 	public FlickrSpaceSource(Sources source, String userID) {
 		super(source);
-		apiKey = "SECRET_KEY";
 //		this.vmap = FilterValuesMap.getFlickrMap();
 		this.userID = userID;
 		addDefaultWriter(FiltersFields.TYPE.getFilterId(), fwriter("media"));
@@ -210,7 +209,7 @@ public abstract class FlickrSpaceSource extends ISpaceSource {
 	public static class InternetArchiveSpaceSource extends FlickrSpaceSource{
 
 		public InternetArchiveSpaceSource() {
-			super(Sources.InternetArchive,"126377022@N07");
+			super(Sources.InternetArchive,ISpaceSource.getUserIdFromConfig(Sources.InternetArchive));
 			formatreader = new FlickrRecordFormatter.InternetArchiveRecordFormatter();
 		}
 		

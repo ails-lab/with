@@ -82,11 +82,12 @@ import play.libs.F.Some;
 import play.libs.Json;
 import play.mvc.Controller;
 import play.mvc.Result;
+import sources.core.ISpaceSource;
 import sources.core.ParallelAPICall;
 import utils.Tuple;
 
 @SuppressWarnings({ "rawtypes", "unchecked" })
-public class AnnotationController extends Controller {
+public class AnnotationController extends WithController {
 
 	public static final ALogger log = Logger.of(AnnotationController.class);
 
@@ -106,7 +107,7 @@ public class AnnotationController extends Controller {
 			AnnotationBodyGeoTagging body = (AnnotationBodyGeoTagging) annotation.getBody();
 			String geonameId = body.getUri();
 			String url = "http://api.geonames.org/getJSON?geonameId=" + geonameId
-					+ "&maxRows=10&type=json&username=SECRET_KEY";
+					+ "&maxRows=10&type=json&username=" + getFromConfig("userid.geonames");
 			HttpClient client = HttpClientBuilder.create().build();
 			HttpGet request = new HttpGet(url);
 			HttpResponse response = client.execute(request);

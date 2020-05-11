@@ -52,6 +52,7 @@ import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.services.plus.Plus;
 import com.google.api.services.plus.PlusScopes;
 import com.google.api.services.plus.model.Person;
+import com.typesafe.config.Config;
 
 import actors.ApiKeyManager.Create;
 import akka.actor.ActorSelection;
@@ -81,16 +82,16 @@ import utils.Serializer;
 public class UserManager extends WithController {
 
 	public static final ALogger log = Logger.of(UserManager.class);
+
 	private static final long TOKENTIMEOUT = 10 * 1000l /* 10 sec */;
 	private static final String facebookAccessTokenUrl = "https://graph.facebook.com/v2.8/oauth/access_token";
-	private static final String facebookSecretWith =   "SECRET_KEY";
-	private static final String facebookSecretEspace = "SECRET_KEY";
-	//private static final String facebookSecretLocalhost = "SECRET_KEY"; //ORIGINAL
-	private static final String facebookSecretLocalhost = "SECRET_KEY";
-	private static final String facebookSecretWITHcrowd = "SECRET_KEY";
-	private static final String facebookSecretCrowdHeritage = "SECRET_KEY";
+	private static final String facebookSecretWith = getFromConfig("facebook.with");
+	private static final String facebookSecretEspace = getFromConfig("facebook.espace");
+	private static final String facebookSecretLocalhost = getFromConfig("facebook.local");
+	private static final String facebookSecretWITHcrowd = getFromConfig("facebook.withcrowd");
+	private static final String facebookSecretCrowdHeritage = getFromConfig("facebook.crowdheritage");
 	
-	private static final String googleSecret = "SECRET_KEY";
+	private static final String googleSecret = getFromConfig("google.secret");
 
 	/**
 	 * Propose new username when it is already in use.

@@ -57,7 +57,6 @@ public class RijksmuseumSpaceSource extends ISpaceSource {
 
 	public RijksmuseumSpaceSource() {
 		super(Sources.Rijksmuseum);
-		apiKey = "SECRET_KEY";
 		formatreader = new RijksmuseumRecordFormatter(vmap);
 	}
 

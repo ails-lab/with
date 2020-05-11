@@ -76,7 +76,6 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 		super(Sources.Europeana);
 		profile = "rich facets";
 //		profile = "rich";
-		apiKey = "SECRET_KEY";
 		
 		addDefaultWriter(FiltersFields.MIME_TYPE.getFilterId(), qfwriter("MIME_TYPE"));
 		addDefaultWriter(FiltersFields.IMAGE_SIZE.getFilterId(), qfwriter("IMAGE_SIZE"));
@@ -397,12 +396,11 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 	@Override
 	public ArrayList<RecordJSONMetadata> getRecordFromSource(String recordId, RecordResource fullRecord) {
 		recordId = clean(recordId);
-		String key = "SECRET_KEY";
 		ArrayList<RecordJSONMetadata> jsonMetadata = new ArrayList<RecordJSONMetadata>();
 		JsonNode response;
 		try {
 			response = getHttpConnector()
-					.getURLContent("http://www.europeana.eu/api/v2/record/" + recordId + ".json?wskey=" + key);
+					.getURLContent("http://www.europeana.eu/api/v2/record/" + recordId + ".json?wskey=" + apiKey);
 			// todo read the other format;
 			JsonNode record = response.get("object");
 			if (response != null) {
@@ -414,7 +412,7 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 //				q.compute(new JsonContextRecord(json));
 			}
 			response = getHttpConnector()
-					.getURLContent("http://www.europeana.eu/api/v2/record/" + recordId + ".jsonld?wskey=" + key);
+					.getURLContent("http://www.europeana.eu/api/v2/record/" + recordId + ".jsonld?wskey=" + apiKey);
 			if (response != null) {
 				record = response;
 				jsonMetadata.add(new RecordJSONMetadata(Format.JSONLD_EDM, record.toString()));

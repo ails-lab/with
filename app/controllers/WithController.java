@@ -25,8 +25,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.mail.Session;
+import org.bson.types.ObjectId;
 
+import com.typesafe.config.Config;
+import com.typesafe.config.ConfigFactory;
+
+import db.DB;
 import model.DescriptiveData;
 import model.basicDataTypes.Language;
 import model.basicDataTypes.Literal;
@@ -37,10 +41,6 @@ import model.basicDataTypes.WithAccess;
 import model.basicDataTypes.WithAccess.Access;
 import model.resources.WithResource;
 import model.usersAndGroups.User;
-
-import org.bson.types.ObjectId;
-
-import db.DB;
 import play.Logger;
 import play.Logger.ALogger;
 import play.libs.F.Option;
@@ -51,10 +51,22 @@ public abstract class WithController extends Controller {
 	public enum Profile {FULL, BASIC, MEDIUM};
 
 	public static final ALogger log = Logger.of(WithController.class);
+	private static Config conf;
 
 	public static enum Action {
 		READ, EDIT, DELETE
 	};
+
+	public static String getFromConfig(String path) {
+		if (conf == null) {
+			conf = ConfigFactory.load();
+		}
+		if (conf.hasPath(path)) {
+			return conf.getString(path);
+		} else {
+			return "UNKNOWN";
+		}
+	}
 
 	public static boolean isSuperUser() {
 		if (effectiveUserIds().isEmpty())

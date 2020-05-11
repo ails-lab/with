@@ -27,6 +27,8 @@ import java.util.function.Function;
 
 import play.Logger;
 import play.Logger.ALogger;
+import search.Sources;
+import sources.core.ISpaceSource;
 import sources.core.QueryBuilder;
 import sources.core.Utils;
 import sources.utils.JsonContextRecord;
@@ -53,7 +55,7 @@ public class EuropeanaTermsCount {
 	   }
 	
 	
-	static String apiKey = "SECRET_KEY";
+	static String apiKey = ISpaceSource.getApiKeyFromConfig(Sources.Europeana);
 	public static void main(String[] args) throws Exception {
 		Scanner s = new Scanner(System.in);
 		while (s.hasNextLine()){

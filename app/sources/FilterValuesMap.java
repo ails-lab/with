@@ -61,7 +61,7 @@ public class FilterValuesMap {
 	}
 
 	private String getKey(String filterID, Object value) {
-		return filterID + "-" + value.toString();
+		return filterID + "-" + (value == null ? "" : value.toString());
 	}
 
 	private <T> List<T> getOrset(HashMap<String, List<T>> map, String key, boolean addNew) {

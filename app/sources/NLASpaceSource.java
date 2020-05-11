@@ -52,7 +52,6 @@ public class NLASpaceSource extends ISpaceSource {
 	
 	public NLASpaceSource() {
 		super(Sources.NLA);
-		apiKey = "SECRET_KEY";
 		addDefaultQueryModifier(FiltersFields.TYPE.getFilterId(), qfwriter("format"));
 		addDefaultQueryModifier(FiltersFields.YEAR.getFilterId(), qfwriterYEAR());
 
