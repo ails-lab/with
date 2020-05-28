@@ -48,7 +48,6 @@ libraryDependencies ++= Seq(
  "org.im4java" % "im4java" % "1.4.0",
 "io.dropwizard.metrics" % "metrics-core" % "3.1.2",
 "io.dropwizard.metrics" % "metrics-graphite" % "3.1.2",
-"org.elasticsearch" % "metrics-elasticsearch-reporter" % "2.0",
  "net.coobird" % "thumbnailator" % "0.4.8",
   "org.apache.opennlp" % "opennlp-tools" % "1.6.0",
  "edu.stanford.nlp" % "stanford-corenlp" % "3.6.0",

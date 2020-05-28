@@ -17,16 +17,9 @@
 package utils;
 
 import java.io.File;
+import java.net.InetSocketAddress;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
-import java.io.IOException;
-import java.net.InetSocketAddress;
-
-import org.apache.jena.atlas.logging.Log;
-import org.elasticsearch.metrics.ElasticsearchReporter;
-
-import play.Logger;
-import play.Logger.ALogger;
 
 import com.codahale.metrics.Counter;
 import com.codahale.metrics.CsvReporter;
@@ -36,7 +29,8 @@ import com.codahale.metrics.graphite.Graphite;
 import com.codahale.metrics.graphite.GraphiteReporter;
 
 import db.DB;
-import elastic.Elastic;
+import play.Logger;
+import play.Logger.ALogger;
 
 public class MetricsUtils {
 
@@ -48,20 +42,6 @@ public class MetricsUtils {
             .convertRatesTo(TimeUnit.SECONDS)
             .convertDurationsTo(TimeUnit.MILLISECONDS)
             .build(new File(DB.getConf().getString("metrics.csv.directory")));
-
-
-	public static ElasticsearchReporter getESReporter() {
-	ElasticsearchReporter es_reporter = null;
-	try {
-		es_reporter = ElasticsearchReporter.forRegistry(registry)
-				.hosts(Elastic.host+":"+ (Elastic.port-100))
-				.timeout(3000)
-				.build();
-	} catch (IOException e) {
-		log.error(e.getMessage());
-	}
-	return es_reporter;
-	}
 
 	public static void dummyESMeter() {
 		final Counter incomingRequestsMeter = registry.counter("dummy");
