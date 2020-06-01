@@ -66,6 +66,7 @@ GET		/record/:id							    controllers.RecordResourceController.getRecordResourc
 PUT		/record/:id								controllers.RecordResourceController.editRecordResource(id)
 
 GET		/annotation/importAutomatic				controllers.AnnotationController.importAutomaticColourAnnotations()
+GET		/annotation/importAuto  				controllers.AnnotationController.ImportAutoAnnotations()
 GET		/annotation/export						controllers.AnnotationController.exportAnnotationsForEuropeanaApi(project: String ?= "CrowdHeritage", campaignName: String, maxRanking: Integer ?= -1, mark: Boolean ?= false)
 GET 	/annotation/leaderboard					controllers.AnnotationController.leaderboard( groupId: String )
 GET		/annotation/approveMultiple				controllers.AnnotationController.approveMultipleAnnotations( id: java.util.List[String])
@@ -215,9 +216,10 @@ GET /api/collection/:id/reindex							controllers.ReindexController.reindexColle
 POST	/thesaurus/addTerm	        			    controllers.ThesaurusController.addThesaurusTerm()
 DELETE  /thesaurus/deleteThesaurus/:name	        controllers.ThesaurusController.deleteThesaurus(name)
 GET 	/thesaurus/getTerm		   					controllers.ThesaurusController.getThesaurusTerm(uri: String)
-GET 	/thesaurus/listVocabularies		   				controllers.ThesaurusController.listVocabularies()
-GET 	/thesaurus/listAnnotators		   				controllers.ThesaurusController.listAnnotators()
+GET 	/thesaurus/listVocabularies		   			controllers.ThesaurusController.listVocabularies()
+GET 	/thesaurus/listAnnotators		   			controllers.ThesaurusController.listAnnotators()
 GET 	/thesaurus/suggestions						controllers.ThesaurusController.getSuggestions(word: String, namespaces: String ?= "", campaignId: String ?= null, geotagging: Boolean ?= false, language : String ?= "all")
+GET 	/thesaurus/smartStringMatch					controllers.ThesaurusController.smartStringMatch(word: String, language : String ?= "all")
 
 #Thesaurus gui
 POST	/collection/:id/facets 	        			controllers.CollectionIndexController.getCollectionFacets(id)
@@ -239,8 +241,12 @@ POST    /annotation/annotateRequestResult			controllers.AnnotationRequestControl
 GET		/collection/api/removeIdsOfDeletedRecords	controllers.WithResourceController.removeIdsOfDeletedRecords()		
 GET	    /collection/:id/annotations 	        	controllers.CollectionObjectController.getAnnotations(id)
 
-GET	    /record/:id/nerd	    					controllers.RecordResourceController.nerdRecord(id)
-GET 	/collection/:id/nerd						controllers.CollectionObjectController.nerdCollection(id)
+GET	    /record/:id/aida	    					controllers.RecordResourceController.nerdRecord(id,tool: String?="AIDA")
+GET	    /record/:id/geek	    					controllers.RecordResourceController.nerdRecord(id,tool: String?="GEEK")
+GET	    /record/:id/wikidata	    				controllers.RecordResourceController.wikidataLabelMatch(id)
+GET 	/collection/:id/aida						controllers.CollectionObjectController.nerdCollection(id, tool: String?="AIDA")
+GET 	/collection/:id/geek						controllers.CollectionObjectController.nerdCollection(id, tool: String?="GEEK")
+GET 	/collection/:id/wikidata						controllers.CollectionObjectController.wikidataCollection(id)
 
 #GET	     /collection/:id/annotationSummary 	        			controllers.CollectionObjectController.getAnnotationSummary(id, mode: String ?="FLAT")
 

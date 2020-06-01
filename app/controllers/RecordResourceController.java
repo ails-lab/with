@@ -81,6 +81,7 @@ import model.basicDataTypes.Language;
 import model.basicDataTypes.Literal;
 import model.basicDataTypes.MultiLiteral;
 import model.basicDataTypes.ProvenanceInfo;
+import model.resources.CulturalObject;
 import model.resources.RecordResource;
 import model.resources.collection.CollectionObject;
 import model.resources.collection.CollectionObject.CollectionAdmin;
@@ -494,9 +495,9 @@ public class RecordResourceController extends WithResourceController {
 		}
 	}
 
-	public static Result nerdRecord(String recordId) {
+	public static Result nerdRecord(String recordId, String tool) {
 		ObjectNode request = Json.newObject();
-		RecordResource record = DB.getRecordResourceDAO().get(new ObjectId(recordId));
+		CulturalObject record = (CulturalObject)DB.getRecordResourceDAO().get(new ObjectId(recordId));
 		if (record != null){
 			User user = DB.getUserDAO().getUniqueByFieldAndValue("username", "AIDA");
 			ObjectId aidaUser = user.getDbId();
@@ -602,10 +603,6 @@ public class RecordResourceController extends WithResourceController {
 												}
 												if (objNode.has("url")){
 													AidaUri = objNode.get("url").asText();
-													body.setUri(AidaUri);
-													if (AidaUri.contains("wikipedia")){
-														body.setUriVocabulary("Wikipedia");
-													}
 												}
 											}
 											geoBody.setUriVocabulary("Geonames");
@@ -648,6 +645,7 @@ public class RecordResourceController extends WithResourceController {
 											}
 											String geonameId = "";
 											if (wikidataId != ""){
+												AidaUri = "http://www.wikidata.org/entity/" + wikidataId;
 												String query = "SELECT ?geoNamesID ?coordinates WHERE {?place wdt:P1566 ?geoNamesID.  ?place wdt:P625 ?coordinates VALUES (?place)  {(wd:" + wikidataId + ")} }";
 												String WikiQueryService = "https://query.wikidata.org/bigdata/namespace/wdq/sparql?format=json&query=" + URLEncoder.encode(query, "UTF-8");
 												client2 = HttpClientBuilder.create().build();
@@ -684,8 +682,13 @@ public class RecordResourceController extends WithResourceController {
 													}
 												}
 											}
-											
-									
+											body.setUri(AidaUri);
+											if (AidaUri.contains("wikipedia")){
+												body.setUriVocabulary("Wikipedia");
+											}
+											else if (AidaUri.contains("wikidata")){
+												body.setUriVocabulary("Wikidata");
+											}
 											selector.setOrigLang(Language.EN);
 											annotation.setAnnotators(new ArrayList(Arrays.asList(administrative)));
 											if (isGeo){
@@ -955,20 +958,26 @@ public class RecordResourceController extends WithResourceController {
 
 			List<ProvenanceInfo> provenanceList = record.getProvenance();
 			List<String> providers = new ArrayList<String>();
-			/***** PROVIDERS *****/
-			if (provenanceList != null){
-				int counter = 0;
-				for (ProvenanceInfo prov : provenanceList){
-					if (prov.getProvider() != null){
-						myRequest = new String[2];
-						myRequest[0] = prov.getProvider();
-						myRequest[1] = "provider";
-						ParallelAPICall.createPromise(GeekAPICall,myRequest);
-
-					}
-				}
-			}
-			DescriptiveData dd = record.getDescriptiveData();
+			// /***** PROVIDERS *****/
+			// if (provenanceList != null){
+			// 	int counter = 0;
+			// 	for (ProvenanceInfo prov : provenanceList){
+			// 		if (prov.getProvider() != null){
+			// 			myRequest = new String[2];
+			// 			myRequest[0] = prov.getProvider();
+			// 			myRequest[1] = "provider";
+			// 			if (tool.equals("AIDA")){
+			// 				AidaAPICall.apply(myRequest);
+			// 				// ParallelAPICall.createPromise(AidaAPICall,myRequest);
+			// 			}
+			// 			else if(tool.equals("GEEK")){
+			// 				GeekAPICall.apply(myRequest);
+			// 				// ParallelAPICall.createPromise(GeekAPICall,myRequest);
+			// 			}	
+			// 		}
+			// 	}
+			// }
+			CulturalObjectData dd = (CulturalObjectData)record.getDescriptiveData();
 			String description,label,country,city,creator;
 			List<String> altLabels;
 			description = null;
@@ -979,105 +988,140 @@ public class RecordResourceController extends WithResourceController {
 			List<String> multiliterals;
 			Set<Language> languages;
 			if (dd != null){
-				/***** DESCRIPTION *****/
-				if (dd.getDescription() != null){
-					languages = dd.getDescription().getLanguages();
-					if (languages.contains(Language.EN)){
-						multiliterals = dd.getDescription().get(Language.EN);
-						description = multiliterals.get(0);
-					}
-					else if(languages.contains(Language.DEFAULT)){
-						multiliterals = dd.getDescription().get(Language.DEFAULT);
-						description = multiliterals.get(0);
-					}
-					if (description != null){
-						myRequest = new String[2];
-						myRequest[0] = description;
-						myRequest[1] = "description";
-						ParallelAPICall.createPromise(AidaAPICall,myRequest);
-					}
-				}
-				/***** LABEL *****/
-				if (dd.getLabel() != null){
-					languages = dd.getLabel().getLanguages();
-					if (languages.contains(Language.EN)){
-						multiliterals = dd.getLabel().get(Language.EN);
-						label = multiliterals.toString();
-						label = label.substring(1, label.length() - 1); 
-					}
-					else if(languages.contains(Language.DEFAULT)){
-						multiliterals = dd.getLabel().get(Language.DEFAULT);
-						label = multiliterals.toString();
-						label = label.substring(1, label.length() - 1);
-					}
-					if (label != null){
-						myRequest = new String[2];
-						myRequest[0] = label;
-						myRequest[1] = "label";
-						ParallelAPICall.createPromise(AidaAPICall,myRequest);
-					}
-				}				
-				/***** COUNTRY *****/
-				if (dd.getCountry() != null){
-					languages = dd.getCountry().getLanguages();
-					if (languages.contains(Language.EN)){
-						multiliterals = dd.getCountry().get(Language.EN);
-						country = multiliterals.toString();
-						country = country.substring(1, country.length() - 1); 
-					}
-					else if(languages.contains(Language.DEFAULT)){
-						multiliterals = dd.getCountry().get(Language.DEFAULT);
-						country = multiliterals.toString();
-						country = country.substring(1, country.length() - 1);
-					}
-					if (country != null){
-						myRequest = new String[2];
-						myRequest[0] = country;
-						myRequest[1] = "country";
-						ParallelAPICall.createPromise(AidaAPICall,myRequest);
-					}
-				}	
-				/***** CITY *****/
-				if (dd.getCity() != null){
-					languages = dd.getCity().getLanguages();
-					if (languages.contains(Language.EN)){
-						multiliterals = dd.getCity().get(Language.EN);
-						city = multiliterals.toString();
-						city = city.substring(1, city.length() - 1); 
-					}
-					else if(languages.contains(Language.DEFAULT)){
-						multiliterals = dd.getCity().get(Language.DEFAULT);
-						city = multiliterals.toString();
-						city = city.substring(1, city.length() - 1);
-					}
-					if (city != null){
-						myRequest = new String[2];
-						myRequest[0] = city;
-						myRequest[1] = "city";
-						ParallelAPICall.createPromise(AidaAPICall,myRequest);
-					}
-				}
+			// 	/***** DESCRIPTION *****/
+			// 	if (dd.getDescription() != null){
+			// 		languages = dd.getDescription().getLanguages();
+			// 		if (languages.contains(Language.EN)){
+			// 			multiliterals = dd.getDescription().get(Language.EN);
+			// 			description = multiliterals.get(0);
+			// 		}
+			// 		else if(languages.contains(Language.DEFAULT)){
+			// 			multiliterals = dd.getDescription().get(Language.DEFAULT);
+			// 			description = multiliterals.get(0);
+			// 		}
+			// 		if (description != null){
+			// 			myRequest = new String[2];
+			// 			myRequest[0] = description;
+			// 			myRequest[1] = "description";
+			// 			if (tool.equals("AIDA")){
+			// 				AidaAPICall.apply(myRequest);
+			// 				// ParallelAPICall.createPromise(AidaAPICall,myRequest);
+			// 			}
+			// 			else if(tool.equals("GEEK")){
+			// 				GeekAPICall.apply(myRequest);
+			// 				// ParallelAPICall.createPromise(GeekAPICall,myRequest);
+			// 			}
+
+			// 		}
+			// 	}
+			// 	/***** LABEL *****/
+			// 	if (dd.getLabel() != null){
+			// 		languages = dd.getLabel().getLanguages();
+			// 		if (languages.contains(Language.EN)){
+			// 			multiliterals = dd.getLabel().get(Language.EN);
+			// 			label = multiliterals.toString();
+			// 			label = label.substring(1, label.length() - 1); 
+			// 		}
+			// 		else if(languages.contains(Language.DEFAULT)){
+			// 			multiliterals = dd.getLabel().get(Language.DEFAULT);
+			// 			label = multiliterals.toString();
+			// 			label = label.substring(1, label.length() - 1);
+			// 		}
+			// 		if (label != null){
+			// 			myRequest = new String[2];
+			// 			myRequest[0] = label;
+			// 			myRequest[1] = "label";
+			// 			if (tool.equals("AIDA")){
+			// 				AidaAPICall.apply(myRequest);
+			// 				// ParallelAPICall.createPromise(AidaAPICall,myRequest);
+			// 			}
+			// 			else if(tool.equals("GEEK")){
+			// 				GeekAPICall.apply(myRequest);
+			// 				// ParallelAPICall.createPromise(GeekAPICall,myRequest);
+			// 			}
+			// 		}
+			// 	}				
+			// 	/***** COUNTRY *****/
+			// 	if (dd.getCountry() != null){
+			// 		languages = dd.getCountry().getLanguages();
+			// 		if (languages.contains(Language.EN)){
+			// 			multiliterals = dd.getCountry().get(Language.EN);
+			// 			country = multiliterals.toString();
+			// 			country = country.substring(1, country.length() - 1); 
+			// 		}
+			// 		else if(languages.contains(Language.DEFAULT)){
+			// 			multiliterals = dd.getCountry().get(Language.DEFAULT);
+			// 			country = multiliterals.toString();
+			// 			country = country.substring(1, country.length() - 1);
+			// 		}
+			// 		if (country != null){
+			// 			myRequest = new String[2];
+			// 			myRequest[0] = country;
+			// 			myRequest[1] = "country";
+			// 			if (tool.equals("AIDA")){
+			// 				AidaAPICall.apply(myRequest);
+			// 				// ParallelAPICall.createPromise(AidaAPICall,myRequest);
+			// 			}
+			// 			else if(tool.equals("GEEK")){
+			// 				GeekAPICall.apply(myRequest);
+			// 				// ParallelAPICall.createPromise(GeekAPICall,myRequest);
+			// 			}
+			// 		}
+			// 	}	
+			// 	/***** CITY *****/
+			// 	if (dd.getCity() != null){
+			// 		languages = dd.getCity().getLanguages();
+			// 		if (languages.contains(Language.EN)){
+			// 			multiliterals = dd.getCity().get(Language.EN);
+			// 			city = multiliterals.toString();
+			// 			city = city.substring(1, city.length() - 1); 
+			// 		}
+			// 		else if(languages.contains(Language.DEFAULT)){
+			// 			multiliterals = dd.getCity().get(Language.DEFAULT);
+			// 			city = multiliterals.toString();
+			// 			city = city.substring(1, city.length() - 1);
+			// 		}
+			// 		if (city != null){
+			// 			myRequest = new String[2];
+			// 			myRequest[0] = city;
+			// 			myRequest[1] = "city";
+			// 			if (tool.equals("AIDA")){
+			// 				AidaAPICall.apply(myRequest);
+			// 				// ParallelAPICall.createPromise(AidaAPICall,myRequest);
+			// 			}
+			// 			else if(tool.equals("GEEK")){
+			// 				GeekAPICall.apply(myRequest);
+			// 				// ParallelAPICall.createPromise(GeekAPICall,myRequest);
+			// 			}
+			// 		}
+			// 	}
 				/***** CREATOR *****/
-				/* There is Creator in the CulturalObject but not in the DescriptiveData*/
-				// if (dd.getDccreator() != null){
-				// 	languages = dd.getDccreator().getLanguages();
-				// 	if (languages.contains(Language.EN)){
-				// 		multiliterals = dd.getDccreator().get(Language.EN);
-				// 		creator = multiliterals.toString();
-				// 		creator = creator.substring(1, creator.length() - 1);
-				// 	}
-				// 	else if(languages.contains(Language.DEFAULT)){
-				// 		multiliterals = dd.getDccreator().get(Language.DEFAULT);
-				// 		creator = multiliterals.toString();
-				// 		creator = creator.substring(1, creator.length() - 1);						
-				// 	}
-				// 	if (creator != null){
-				//		myRequest = new String[2];
-				// 		myRequest[0] = creator;
-				// 		myRequest[1] = "creator";
-				// 		ParallelAPICall.createPromise(AidaAPICall,myRequest);
-				// 	}
-				// }
+				if (dd.getDccreator() != null){
+					languages = dd.getDccreator().getLanguages();
+					if (languages.contains(Language.EN)){
+						multiliterals = dd.getDccreator().get(Language.EN);
+						creator = multiliterals.toString();
+						creator = creator.substring(1, creator.length() - 1);
+					}
+					else if(languages.contains(Language.DEFAULT)){
+						multiliterals = dd.getDccreator().get(Language.DEFAULT);
+						creator = multiliterals.toString();
+						creator = creator.substring(1, creator.length() - 1);						
+					}
+					if (creator != null){
+						myRequest = new String[2];
+						myRequest[0] = creator;
+						myRequest[1] = "creator";
+						if (tool.equals("AIDA")){
+							AidaAPICall.apply(myRequest);
+							// ParallelAPICall.createPromise(AidaAPICall,myRequest);
+						}
+						else if(tool.equals("GEEK")){
+							GeekAPICall.apply(myRequest);
+							// ParallelAPICall.createPromise(GeekAPICall,myRequest);
+						}
+					}
+				}
 				
 			}
 			return ok();
@@ -1088,7 +1132,192 @@ public class RecordResourceController extends WithResourceController {
 		
 	}
 
-	
+	public static Result wikidataLabelMatch(String recordId) {
+		ObjectNode request = Json.newObject();
+		CulturalObject record = (CulturalObject)DB.getRecordResourceDAO().get(new ObjectId(recordId));
+		if (record != null){
+			User user = DB.getUserDAO().getUniqueByFieldAndValue("username", "WikiData");
+			ObjectId wikiUser = user.getDbId();
+			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+			String createdString = sdf.format(new Date());
+			/***** WikiData API Call *****/
+			Function<String[],String> WikiAPICall = (String[] input) -> {
+				try {
+					String text = input[0];
+					String property = input[1];
+					int limit = input[0].length();
+					HttpClient client = HttpClientBuilder.create().build();
+					/* We search for people that their occupation is either artist, or designer, or fashion deisgner, or creator.	*/
+					String occupation = "{?item wdt:P106 wd:Q3501317.}	UNION {?item wdt:P106 wd:Q483501.} UNION {?item wdt:P106 wd:Q5322166.} UNION {?item wdt:P106 wd:Q2500638.}";
+					String query = "SELECT ?item ?itemLabel WHERE { ?item rdfs:label ?itemLabel. ?item ?label \"" + text +"\"@en." + occupation + " FILTER (langMatches( lang(?itemLabel), \"EN\")) }";
+					String WikiQueryService = "https://query.wikidata.org/bigdata/namespace/wdq/sparql?format=json&query=" + URLEncoder.encode(query, "UTF-8");
+					HttpGet req = new HttpGet(WikiQueryService);
+					req.setHeader("content-type", "application/json");
+
+					HttpResponse response = client.execute(req);
+
+					/* If there is no person with the required occupations, we try without occupation limitation. */
+					if (response.getStatusLine().getStatusCode() == 200) {
+						String json = EntityUtils.toString(response.getEntity(), "UTF-8");
+						JsonNode responseJson = new ObjectMapper().readTree(json);
+						if (responseJson.has("results")){
+							if (responseJson.get("results").has("bindings")){
+								Boolean flag = true;
+								for (JsonNode entity : responseJson.get("results").get("bindings")){
+									flag = false;
+								}
+								if (flag){
+									query = "SELECT ?item ?itemLabel WHERE { ?item rdfs:label ?itemLabel. ?item ?label \"" + text +"\"@en. FILTER (langMatches( lang(?itemLabel), \"EN\")) }";
+									WikiQueryService = "https://query.wikidata.org/bigdata/namespace/wdq/sparql?format=json&query=" + URLEncoder.encode(query, "UTF-8");
+									req = new HttpGet(WikiQueryService);
+									req.setHeader("content-type", "application/json");
+									response = client.execute(req);
+								}
+							}
+						}
+					}
+
+					if (response.getStatusLine().getStatusCode() == 200) {
+						String json = EntityUtils.toString(response.getEntity(), "UTF-8");
+						JsonNode responseJson = new ObjectMapper().readTree(json);
+						if (responseJson.has("results")){
+							if (responseJson.get("results").has("bindings")){
+								for (JsonNode entity : responseJson.get("results").get("bindings")){
+									if (entity.has("item")){
+										JsonNode item = entity.get("item");
+										String uri = "";
+										if (item.has("type") && item.has("value")){
+											if (!item.get("type").asText().equals("uri")){
+												continue;
+											}
+											else{
+												uri = item.get("value").asText();
+												if (!uri.contains("wikidata.org/entity")){
+													uri = "";
+												}
+											}
+										}
+										if (uri.equals("")){
+											continue;
+										}
+										Annotation annotation = new Annotation();
+										AnnotationAdmin administrative = new AnnotationAdmin();
+										administrative.setWithCreator(wikiUser);	
+										Date createdDate = new Date();
+										try {
+											createdDate = sdf.parse(createdString);
+											administrative.setCreated(createdDate);
+										}
+										catch(Exception e){}
+										String nowString = sdf.format(new Date());
+										Date nowDate = new Date();
+										try {
+											nowDate = sdf.parse(nowString);
+											administrative.setGenerated(nowDate);
+											administrative.setLastModified(nowDate);								
+										}
+										catch(Exception e){}
+										administrative.setGenerator("WikidataLabelMatch");
+										administrative.setConfidence(0.0);
+										PropertyTextFragmentSelector selector = new PropertyTextFragmentSelector();
+										selector.setOrigValue(text);
+										selector.setProperty(property);
+										selector.setStart(0);
+										selector.setEnd(limit);
+										AnnotationBodyTagging body = new AnnotationBodyTagging();
+										String myLabel = text;
+										if (entity.has("itemLabel")){
+											JsonNode itemLabel = entity.get("itemLabel");
+											if (itemLabel.has("value")){
+												myLabel = itemLabel.get("value").asText();
+											}
+										}
+										MultiLiteral labels = new MultiLiteral(Language.EN, myLabel);
+										labels.addLiteral(Language.DEFAULT, myLabel);
+										body.setLabel(labels);
+
+										body.setUri(uri);
+
+										body.setUriVocabulary("Wikidata");
+										selector.setOrigLang(Language.EN);
+										annotation.setAnnotators(new ArrayList(Arrays.asList(administrative)));
+										annotation.setMotivation(MotivationType.Tagging);
+										annotation.getTarget().setRecordId(record.getDbId());
+										annotation.getTarget().setWithURI("/record/" + record.getDbId());
+										annotation.getTarget().setSelector(selector);
+										annotation.setPublish(false);
+										annotation.setBody(body);
+										/* If annotation already exists add a new annotator, else create the new annotation*/
+										Annotation existingAnnotation = DB.getAnnotationDAO().getExistingAnnotation(annotation);
+										if (existingAnnotation == null) {
+											DB.getAnnotationDAO().makePermanent(annotation);
+											annotation.setAnnotationWithURI("/annotation/" + annotation.getDbId());
+											DB.getAnnotationDAO().makePermanent(annotation); // is this needed for a second time?
+											DB.getRecordResourceDAO().addAnnotation(annotation.getTarget().getRecordId(), annotation.getDbId(), wikiUser.toString());
+										} else {
+											ArrayList<AnnotationAdmin> annotators = existingAnnotation.getAnnotators();
+											for (AnnotationAdmin a : annotators) {
+												if (a.getWithCreator().equals(wikiUser)) {
+													return "";
+												}
+											}
+											DB.getAnnotationDAO().addAnnotators(existingAnnotation.getDbId(), annotation.getAnnotators());
+											annotation = DB.getAnnotationDAO().get(existingAnnotation.getDbId());
+										}
+									}
+								}
+							}
+						}
+						return "";
+					}
+					else{
+						return "Error";
+					}	
+				} catch (Exception e) {
+					e.printStackTrace();
+					return "Error";
+				}
+			};
+
+
+			String[] myRequest;
+			CulturalObjectData dd = (CulturalObjectData)record.getDescriptiveData();
+			String creator;
+			creator = null;
+			List<String> multiliterals;
+			Set<Language> languages;
+			if (dd != null){
+				/***** CREATOR *****/
+				if (dd.getDccreator() != null){
+					languages = dd.getDccreator().getLanguages();
+					if (languages.contains(Language.EN)){
+						multiliterals = dd.getDccreator().get(Language.EN);
+						creator = multiliterals.toString();
+						creator = creator.substring(1, creator.length() - 1);
+					}
+					else if(languages.contains(Language.DEFAULT)){
+						multiliterals = dd.getDccreator().get(Language.DEFAULT);
+						creator = multiliterals.toString();
+						creator = creator.substring(1, creator.length() - 1);						
+					}
+					if (creator != null){
+						myRequest = new String[2];
+						myRequest[0] = creator;
+						myRequest[1] = "creator";
+						WikiAPICall.apply(myRequest);
+						// ParallelAPICall.createPromise(WikiAPICall,myRequest);
+					}
+				}
+				
+			}
+			return ok();
+		}
+		else{
+			return notFound();
+		}
+		
+	}
+
 	public static Result artStyleRecord(String recordId, String myType, String model) {
 		ObjectNode request = Json.newObject();
 		RecordResource record = DB.getRecordResourceDAO().get(new ObjectId(recordId));

@@ -18,6 +18,7 @@ package controllers;
 
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.BufferedReader;
 import java.io.Reader;
 import java.sql.SQLException;
 import java.text.ParseException;
@@ -1056,4 +1057,73 @@ public class AnnotationController extends WithController {
 				.collect(Collectors.toList());
 		return ok(Json.toJson(res));
 	}
+
+	public static Result ImportAutoAnnotations() {
+		try{
+			BufferedReader csvReader = new BufferedReader(new FileReader("result.csv"));
+			String row;
+			while ((row = csvReader.readLine()) != null) {
+				String[] data = row.split(",");
+				RecordResource record = DB.getRecordResourceDAO().get(new ObjectId(data[8]));
+				if (record != null){
+					User user = DB.getUserDAO().getUniqueByFieldAndValue("username", "IMEC");
+					ObjectId imecUser = user.getDbId();
+					SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+					String createdString = sdf.format(new Date());
+					for(int i=0; i<4; i++){
+						if(Double.parseDouble(data[2*i+1]) > 0.5){
+							Annotation annotation = new Annotation();
+							AnnotationAdmin administrative = new AnnotationAdmin();
+							administrative.setWithCreator(imecUser);	
+							Date createdDate = new Date();
+							try {
+								createdDate = sdf.parse(createdString);
+								administrative.setCreated(createdDate);
+								administrative.setGenerated(createdDate);
+								administrative.setLastModified(createdDate);
+							}
+							catch(Exception e){}							
+							administrative.setGenerator("IMEC");
+							administrative.setConfidence(Double.parseDouble(data[2*i+1]));
+							AnnotationBodyTagging body = new AnnotationBodyTagging();
+							String title = data[2*i];
+							MultiLiteral labels = new MultiLiteral(Language.EN, title);
+							labels.addLiteral(Language.DEFAULT, title);
+							body.setLabel(labels);
+							annotation.setAnnotators(new ArrayList(Arrays.asList(administrative)));
+							annotation.setMotivation(MotivationType.Tagging);
+							annotation.getTarget().setRecordId(record.getDbId());
+							annotation.getTarget().setWithURI("/record/" + record.getDbId());
+							annotation.setPublish(false);
+							annotation.setBody(body);
+							Annotation existingAnnotation = DB.getAnnotationDAO().getExistingAnnotation(annotation);
+							if (existingAnnotation == null) {
+								DB.getAnnotationDAO().makePermanent(annotation);
+								annotation.setAnnotationWithURI("/annotation/" + annotation.getDbId());
+								DB.getAnnotationDAO().makePermanent(annotation); // is this needed for a second time?
+								DB.getRecordResourceDAO().addAnnotation(annotation.getTarget().getRecordId(), annotation.getDbId(), imecUser.toString());
+							} else {
+								ArrayList<AnnotationAdmin> annotators = existingAnnotation.getAnnotators();
+								boolean flag = true;
+								for (AnnotationAdmin a : annotators) {
+									if (a.getWithCreator().equals(imecUser)) {
+										flag = false;
+									}
+								}
+								if (flag){
+									DB.getAnnotationDAO().addAnnotators(existingAnnotation.getDbId(), annotation.getAnnotators());
+									annotation = DB.getAnnotationDAO().get(existingAnnotation.getDbId());
+								}
+							}
+						}
+					}
+				}
+			}
+			csvReader.close();
+		}
+		catch(Exception e){}
+		return ok();
+	}
+
+
 }

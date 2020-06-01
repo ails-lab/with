@@ -2070,14 +2070,35 @@ public class CollectionObjectController extends WithResourceController {
 		}
 	}
 
-	public static Result nerdCollection(String colId) {
+	public static Result nerdCollection(String colId, String tool) {
 		List<RecordResource> records = DB.getRecordResourceDAO().getByCollection(new ObjectId(colId));	
 		if (records != null){
 			Function<String,Result> nerdRecord = (String recId) -> {
-				return RecordResourceController.nerdRecord(recId);
+				return RecordResourceController.nerdRecord(recId, tool);
 			};
 			for (RecordResource rec: records){
-				ParallelAPICall.createPromise(nerdRecord, rec.getDbId().toString());
+				if (tool.equals("AIDA") || tool.equals("GEEK")){
+					nerdRecord.apply(rec.getDbId().toString());
+					// ParallelAPICall.createPromise(nerdRecord, rec.getDbId().toString());
+				}
+			}
+			return ok();
+		}
+		else{
+			return notFound();
+		}
+	}
+
+
+	public static Result wikidataCollection(String colId) {
+		List<RecordResource> records = DB.getRecordResourceDAO().getByCollection(new ObjectId(colId));	
+		if (records != null){
+			Function<String,Result> wikiRecord = (String recId) -> {
+				return RecordResourceController.wikidataLabelMatch(recId);
+			};
+			for (RecordResource rec: records){
+				wikiRecord.apply(rec.getDbId().toString());
+				// ParallelAPICall.createPromise(nerdRecord, rec.getDbId().toString());
 			}
 			return ok();
 		}
