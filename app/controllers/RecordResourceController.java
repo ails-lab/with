@@ -1148,6 +1148,7 @@ public class RecordResourceController extends WithResourceController {
 					int limit = input[0].length();
 					HttpClient client = HttpClientBuilder.create().build();
 					/* We search for people that their occupation is either artist, or designer, or fashion deisgner, or creator.	*/
+					/* Maybe add photographers since there are in some records of fashion aggregator. */
 					String occupation = "{?item wdt:P106 wd:Q3501317.}	UNION {?item wdt:P106 wd:Q483501.} UNION {?item wdt:P106 wd:Q5322166.} UNION {?item wdt:P106 wd:Q2500638.}";
 					String query = "SELECT ?item ?itemLabel WHERE { ?item rdfs:label ?itemLabel. ?item ?label \"" + text +"\"@en." + occupation + " FILTER (langMatches( lang(?itemLabel), \"EN\")) }";
 					String WikiQueryService = "https://query.wikidata.org/bigdata/namespace/wdq/sparql?format=json&query=" + URLEncoder.encode(query, "UTF-8");

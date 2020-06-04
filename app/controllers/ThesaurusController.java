@@ -723,6 +723,7 @@ public class ThesaurusController extends Controller {
 				Language lang = Language.getLanguage(language);
 				searchLanguages = new Language[] { lang };
 			}
+			//To Do: fix for option all(?) maybe get all available languages from a thesauri if possible
 			for (Language lang : searchLanguages) {
 				BoolQueryBuilder ilangQuery = QueryBuilders.boolQuery();	//The query for each language
 				String s = word;
