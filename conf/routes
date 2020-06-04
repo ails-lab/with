@@ -246,7 +246,7 @@ GET	    /record/:id/geek	    					controllers.RecordResourceController.nerdRecor
 GET	    /record/:id/wikidata	    				controllers.RecordResourceController.wikidataLabelMatch(id)
 GET 	/collection/:id/aida						controllers.CollectionObjectController.nerdCollection(id, tool: String?="AIDA")
 GET 	/collection/:id/geek						controllers.CollectionObjectController.nerdCollection(id, tool: String?="GEEK")
-GET 	/collection/:id/wikidata						controllers.CollectionObjectController.wikidataCollection(id)
+GET 	/collection/:id/wikidata					controllers.CollectionObjectController.wikidataCollection(id)
 
 #GET	     /collection/:id/annotationSummary 	        			controllers.CollectionObjectController.getAnnotationSummary(id, mode: String ?="FLAT")
 
