@@ -1144,24 +1144,28 @@ public class RecordResourceController extends WithResourceController {
 			Function<String[],String> WikiAPICall = (String[] input) -> {
 				try {
 					String text = input[0];
+					String initialInput = text;
 					String property = input[1];
-					int limit = input[0].length();
 					// Delete the parentheses after the name if any 
 					int parenthesisIndex = text.indexOf('(');
 					if (parenthesisIndex > 0){
 						text = text.substring(0,parenthesisIndex-1);
 					}
 					text = text.trim();
+					int limit = text.length();
 					HttpClient client = HttpClientBuilder.create().build();
 					/* We search for people that their occupation is either artist, or designer, or fashion deisgner, photographers or creator.	*/
 					String occupation = "{?item wdt:P106 wd:Q3501317.}	UNION {?item wdt:P106 wd:Q483501.} UNION {?item wdt:P106 wd:Q5322166.} UNION {?item wdt:P106 wd:Q2500638.} UNION {?item wdt:P106 wd:Q33231.}";
 					/* We are also interested in fashion houses.*/
 					String instanceOf = "{?item wdt:P31 wd:Q3661311.}";
+					/* We are only interested in people or Businesses, not general terms etc. (When we search without the occupation and instanceOF filters) */
+					String personOrBusiness = "{?item wdt:P31 wd:Q5.} UNION  {?item wdt:P31 wd:Q4830453.}.";
 					String query = "SELECT ?item ?itemLabel WHERE { ?item rdfs:label ?itemLabel. ?item ?label \"" + text +"\"@en." + occupation + "UNION" + instanceOf + " FILTER (langMatches( lang(?itemLabel), \"EN\")) }";
 					String WikiQueryService = "https://query.wikidata.org/bigdata/namespace/wdq/sparql?format=json&query=" + URLEncoder.encode(query, "UTF-8");
 					HttpGet req = new HttpGet(WikiQueryService);
 					req.setHeader("content-type", "application/json");
-
+					/* if we find a person that matches the label and the occupation/instanceOf we set a high confidence. */
+					Double confidence = 0.9;
 					HttpResponse response = client.execute(req);
 
 					/* If there is no person with the required occupations, we try without occupation limitation. */
@@ -1180,7 +1184,9 @@ public class RecordResourceController extends WithResourceController {
 									flag = false;
 								}
 								if (flag){
-									query = "SELECT ?item ?itemLabel WHERE { ?item rdfs:label ?itemLabel. ?item ?label \"" + text +"\"@en. FILTER (langMatches( lang(?itemLabel), \"EN\")) }";
+									/* if we only match the label and not the occupation we set a low confidence. */
+									confidence = 0.1;
+									query = "SELECT ?item ?itemLabel WHERE { ?item rdfs:label ?itemLabel. ?item ?label \"" + text +"\"@en." + personOrBusiness + " FILTER (langMatches( lang(?itemLabel), \"EN\")) }";
 									WikiQueryService = "https://query.wikidata.org/bigdata/namespace/wdq/sparql?format=json&query=" + URLEncoder.encode(query, "UTF-8");
 									req = new HttpGet(WikiQueryService);
 									req.setHeader("content-type", "application/json");
@@ -1231,9 +1237,9 @@ public class RecordResourceController extends WithResourceController {
 										}
 										catch(Exception e){}
 										administrative.setGenerator("WikidataLabelMatch");
-										administrative.setConfidence(0.0);
+										administrative.setConfidence(confidence);
 										PropertyTextFragmentSelector selector = new PropertyTextFragmentSelector();
-										selector.setOrigValue(text);
+										selector.setOrigValue(initialInput);
 										selector.setProperty(property);
 										selector.setStart(0);
 										selector.setEnd(limit);
