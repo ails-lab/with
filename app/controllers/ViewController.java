@@ -22,9 +22,13 @@ import play.mvc.Result;
 
 public class ViewController extends Controller {
 
-	public static Result devLite() {
-		return ok( views.html.swaggerEntry.render( DB.getConf().getString("with.api")+"/assets/apispecs.json"));
+	public static Result swagger() {
+		try {
+			return redirect("/assets/lib/swagger-ui-dist/index.html?url=" +
+					java.net.URLEncoder.encode(DB.getConf().getString("with.api"), "UTF-8") + "/assets/apispecs.json");
+		} catch( Exception e ) {
+			return badRequest( "Exception in redirect building." );
+		}
 	}
-
 }
 

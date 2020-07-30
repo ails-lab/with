@@ -39,7 +39,7 @@ GET		/api/autocompleteExt		controllers.AutocompleteController.autocompleteExt(te
 
 # Map static resources from the /public folder to the /assets URL path
 GET 	/assets/headers.js						filters.FilterUtils.withAjaxScript
-GET     /assets/developers-lite.html			controllers.ViewController.devLite()
+GET     /swagger                    			controllers.ViewController.swagger()
 GET     /assets/*file               			controllers.Assets.at(path="/public", file)
 
 

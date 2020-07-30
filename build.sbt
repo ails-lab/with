@@ -61,6 +61,8 @@ libraryDependencies ++= Seq(
  "org.apache.commons" % "commons-compress" % "1.12",
  "org.apache.commons" % "commons-lang3" % "3.0" withSources() withJavadoc(),
  "commons-io" % "commons-io" % "2.2",
+ "org.webjars.npm" % "swagger-ui-dist" % "3.20.5",
+ "org.webjars" %% "webjars-play" % "2.3.0",
  "com.hermit-reasoner" % "org.semanticweb.hermit" % "1.3.8.4",
  "mysql" % "mysql-connector-java" % "5.1.12"
 )
