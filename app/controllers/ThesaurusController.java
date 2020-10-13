@@ -384,7 +384,7 @@ public class ThesaurusController extends Controller {
 							&& !e.getKey().equalsIgnoreCase("uri")) {
 						ObjectNode resInfo = Json.newObject();
 						resInfo.put("label", e.getValue());
-						if (((CampaignTermWithInfo) term).description.get(e.getKey()) != null) {
+						if ( (term instanceof CampaignTermWithInfo) && (((CampaignTermWithInfo) term).description.get(e.getKey()) != null) ) {
 							resInfo.put("description", ((CampaignTermWithInfo) term).description.get(e.getKey()));
 						}
 						resInfo.put("uri", term.labelAndUri.getURI());
