@@ -90,7 +90,7 @@ public class CampaignController extends WithController {
 	public static final Map<String, String> termsFile = Stream
 			.of(new String[][] { { "sports", "Sport_Vocabulary.csv" },
 					{ "cities-landscapes", "Cities_Landscapes_Means_of_Transport_Vocabulary.csv" },
-					{ "instruments", "MIMO-Thesaurus for-campaign.csv" }, { "opera", "Opera_entities.csv" } })
+					{ "instruments", "MIMO-Thesaurus for-campaign.csv" }, { "opera", "Opera_entities.csv" }, { "china", "China-terms.csv" } })
 			.collect(Collectors.toMap(data -> data[0], data -> data[1]));
 
 	public static Result getCampaignCount(String group, String project, String state) {
@@ -369,23 +369,28 @@ public class CampaignController extends WithController {
 			HttpGet request = new HttpGet(term.labelAndUri.getURI() + ".json");
 			HttpResponse response = client.execute(request);
 			InputStream jsonStream = response.getEntity().getContent();
-			JsonNode json = Json.parse(jsonStream);
-			for (String lang : langs) {
-				JsonNode langNode = json.get("entities").fields().next().getValue().get("labels").get(lang);
-				if (langNode != null) {
-					String langTerm = langNode.get("value").asText();
-					term.labelAndUri.addLiteral(Language.getLanguage(lang), langTerm);
-				} else {
-					String englishTerm = term.labelAndUri.getLiteral(Language.EN);
-					term.labelAndUri.addLiteral(Language.getLanguage(lang), englishTerm);
-				}
-				if (term instanceof CampaignTermWithInfo) {
-					JsonNode descNode = json.get("entities").fields().next().getValue().get("descriptions").get(lang);
-					if (descNode != null) {
-						String desc = descNode.get("value").asText();
-						((CampaignTermWithInfo) term).description.addLiteral(Language.getLanguage(lang), desc);
+			try {
+				JsonNode json = Json.parse(jsonStream);
+				for (String lang : langs) {
+					JsonNode langNode = json.get("entities").fields().next().getValue().get("labels").get(lang);
+					if (langNode != null) {
+						String langTerm = langNode.get("value").asText();
+						term.labelAndUri.addLiteral(Language.getLanguage(lang), langTerm);
+					} else {
+						String englishTerm = term.labelAndUri.getLiteral(Language.EN);
+						term.labelAndUri.addLiteral(Language.getLanguage(lang), englishTerm);
+					}
+					if (term instanceof CampaignTermWithInfo) {
+						JsonNode descNode = json.get("entities").fields().next().getValue().get("descriptions").get(lang);
+						if (descNode != null) {
+							String desc = descNode.get("value").asText();
+							((CampaignTermWithInfo) term).description.addLiteral(Language.getLanguage(lang), desc);
+						}
 					}
 				}
+			}
+			catch (Exception e) {
+				Logger.error(e.getMessage());
 			}
 		} else {
 			try {
@@ -490,13 +495,19 @@ public class CampaignController extends WithController {
 		CampaignTerm lastOfLevel[];
 		lastOfLevel = new CampaignTerm[3];
 		for (CSVRecord record : records) {
+			System.out.println("Processing line of CSV: " + record.getRecordNumber());
 			if (lastOfLevel[0] == null || !record.get(0).equals(lastOfLevel[0].labelAndUri.getLiteral(Language.EN))) {
 				CampaignTerm term = new CampaignTermWithInfo();
 				term.labelAndUri.addLiteral(Language.EN, record.get(0));
-				String uri = record.get(1).length() == 0 ? UUID.randomUUID().toString() : record.get(1);
-				term.labelAndUri.addURI(uri);
-				term.selectable = true;
-				addLangs(term);
+				if (!StringUtils.isEmpty(record.get(1))) {
+					String uri = record.get(1).length() == 0 ? UUID.randomUUID().toString() : record.get(1);
+					term.labelAndUri.addURI(uri);
+					term.selectable = true;
+					addLangs(term);
+				}
+				else {
+					term.selectable = false;
+				}
 				terms.add(term);
 				lastOfLevel[0] = term;
 			}
@@ -504,9 +515,14 @@ public class CampaignController extends WithController {
 				if (!record.get(i).equals("")) {
 					CampaignTerm term = new CampaignTerm();
 					term.labelAndUri.addLiteral(Language.EN, record.get(i));
-					term.labelAndUri.addURI(record.get(3));
-					term.selectable = true;
-					addLangs(term);
+					if (!StringUtils.isEmpty(record.get(3))) {
+						term.labelAndUri.addURI(record.get(3));
+						term.selectable = true;
+						addLangs(term);
+					}
+					else {
+						term.selectable = false;
+					}
 					lastOfLevel[i - 1].addChild(term);
 					lastOfLevel[i] = term;
 				}
