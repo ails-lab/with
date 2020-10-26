@@ -419,6 +419,7 @@ public class ThesaurusController extends Controller {
 
 		try {
 			ArrayNode terms = Json.newObject().arrayNode();
+			ArrayNode campaignResults = Json.newObject().arrayNode();
 
 			// Matcher m = p.matcher(word);
 
@@ -446,10 +447,11 @@ public class ThesaurusController extends Controller {
 				if (!geotagging && campaign.getCampaignTerms() != null && campaign.getCampaignTerms().size() > 0) {
 					List<CampaignTerm> campaignTerms = campaign.getCampaignTerms();
 					ArrayNode res = searchCampaignTerms(word, campaignTerms, language);
+					campaignResults = res;
 					ObjectNode result = Json.newObject();
 					result.put("request", word);
 					result.set("results", res);
-					return ok(result);
+//					return ok(result);
 				}
 				List<String> vocabularyList = campaign.getVocabularies();
 				namespaceArray = vocabularyList.toArray(new String[vocabularyList.size()]);
@@ -614,7 +616,13 @@ public class ThesaurusController extends Controller {
 			} else {
 				allTerms = terms;
 			}
-			response.put("results", allTerms);
+			
+			if (campaignId != null) {
+				campaignResults.addAll(allTerms);
+				response.put("results", campaignResults);
+			} else {
+				response.put("results", allTerms);
+			}
 
 			return ok(response);
 
