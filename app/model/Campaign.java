@@ -222,6 +222,9 @@ public class Campaign {
 	
 	private String logo;
 	
+	@JsonDeserialize(using = Deserializer.LiteralEnglishDefaultDesiarilizer.class)
+	private Literal disclaimer;
+	
 	@JsonSerialize(using = Serializer.ObjectIdArraySerializer.class)
 //	@JsonDeserialize(using = Deserializer.ObjectIdArraySerializer.class)
 	private Set<ObjectId> creators = new HashSet<ObjectId>();
@@ -433,6 +436,13 @@ public class Campaign {
 
 	public void setLogo(String logo) {
 		this.logo = logo;
+	}
+	
+	public Literal getDisclaimer() {
+		return disclaimer;
+	}
+	public void setDisclaimer(Literal disclaimer) {
+		this.disclaimer = disclaimer;
 	}
 
 	public List<CampaignTerm> getCampaignTerms() {
