@@ -229,7 +229,7 @@ GET 	/collection/:id/similarlist		   			controllers.CollectionObjectController.s
 GET     /source/dbpedia/lookup						controllers.DBPediaController.dbpediaLookup(type: java.lang.String, query: java.lang.String, start: Integer ?=0, count: Integer ?=10)
 
 #Annotations
-GET		/record/:id/listAnnotations				    controllers.RecordResourceController.getAnnotations(id, motivation: String ?="Tagging")
+GET		/record/:id/listAnnotations				    controllers.RecordResourceController.getAnnotations(id, motivation: String ?="Tagging", generator: String ?="")
 POST	/record/:id/annotate						controllers.RecordResourceController.annotateRecord(id)
 GET		/record/:id/deleteRejectedAnnotations		controllers.RecordResourceController.deleteRejectedAnnotations(id)
 POST	/collection/:id/annotate					controllers.CollectionObjectController.annotateCollection(id)

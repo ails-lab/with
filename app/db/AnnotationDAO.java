@@ -151,9 +151,12 @@ public class AnnotationDAO extends DAO<Annotation> {
 		return this.find(q).asList();
 	}
 
-	public List<Annotation> getByRecordId(ObjectId recordId, List<Annotation.MotivationType> motivations) {
+	public List<Annotation> getByRecordId(ObjectId recordId, List<Annotation.MotivationType> motivations, List<String> generators) {
 		Query<Annotation> q = this.createQuery().disableValidation().field("target.recordId").equal(recordId)
 				.field("motivation").hasAnyOf(motivations);
+		if (generators != null && generators.size()>0) {
+			q = q.field("annotators.generator").hasAnyOf(generators);
+		}
 		return this.find(q).asList();
 	}
 

@@ -1344,7 +1344,7 @@ public class RecordResourceController extends WithResourceController {
 		int totalRecordsCount = 0;
 	}
 
-	public static Result getAnnotations(String id, String motivation) {
+	public static Result getAnnotations(String id, String motivation, String generator) {
 		ObjectNode result = Json.newObject();
 		try {
 //			RecordResource record = DB.getRecordResourceDAO().get(new ObjectId(id));
@@ -1365,8 +1365,19 @@ public class RecordResourceController extends WithResourceController {
 					}
 				}
 			}
+			
+			List<String> generators = new ArrayList<>();
+			if (generator != null && generator.length() > 0) {
+				for (String s : generator.split(",")) {
+					try {
+						generators.add(s.trim());
+					} catch (Exception ex) {
 
-			List<Annotation> anns = DB.getAnnotationDAO().getByRecordId(new ObjectId(id), motivations);
+					}
+				}
+			}
+
+			List<Annotation> anns = DB.getAnnotationDAO().getByRecordId(new ObjectId(id), motivations, generators);
 
 			for (Annotation ann : anns) {
 
