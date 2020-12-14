@@ -32,6 +32,10 @@ import play.api.Logger
 import play.api.mvc.Headers
 import play.api.mvc.Headers
 
+import play.libs.Crypto;
+import play.libs.Json;
+import controllers.UserManager
+
 
 
 /**
@@ -49,8 +53,22 @@ class SessionFilter extends Filter {
     }
   }
   
-  def apply(next: (RequestHeader) => Future[Result])(rh: RequestHeader) = {
+  def apply(next: (RequestHeader) => Future[Result])(rh: RequestHeader):Future[Result] = {
     var ignoreRequest = false
+    val bearerRegexp = "Bearer (.*)".r
+    rh.headers.get( "Authorization" ) match {
+      case Some( bearerRegexp( token ))  => {
+        val optUser = UserManager.useridFromToken( token )
+        if( optUser.isPresent()) {
+          val newRh = FilterUtils.withSession( rh, Map(("user", optUser.get())))
+          return (next( newRh ).map { result => 
+            result.withSession( Session())
+          } )
+        }
+      } 
+
+    } 
+      
     if( DB.getConf().hasPath( "session.ignore")) {
       val ignore = DB.getConf().getString( "session.ignore").r.unanchored
       ignore findFirstIn( rh.path ) match {

@@ -24,6 +24,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Random;
 import java.util.Set;
 import java.util.regex.Matcher;
@@ -644,6 +645,15 @@ public class UserManager extends WithController {
 		return badRequest();
 	}
 
+	public static Optional<String> useridFromToken( String token ) {
+		JsonNode input = Json.parse(Crypto.decryptAES(token));
+		String userId = input.get("user").asText();
+		long timestamp = input.get("timestamp").asLong();
+		if (new Date().getTime() < (timestamp + TOKENTIMEOUT)) 
+			return Optional.ofNullable( userId );
+		return Optional.empty();
+	}
+	
 	private static String encryptToken(String id) {
 
 		ObjectNode result = Json.newObject();
