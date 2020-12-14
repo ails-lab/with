@@ -231,7 +231,7 @@ public class UserManager extends WithController {
 		try {
 			User user = effectiveUser();
 			if (user != null) {
-				return ok(Json.toJson(user));
+				return ok(addTokenToUser(user));
 			}
 			return badRequest();
 		} catch (Exception e) {
@@ -352,7 +352,7 @@ public class UserManager extends WithController {
 		session().put("username", user.getUsername());
 		session().put("sourceIp", request().remoteAddress());
 		session().put("lastAccessTime", Long.toString(System.currentTimeMillis()));
-		return ok(Json.toJson(user));
+		return ok(addTokenToUser(user));
 	}
 
 	private static Result facebookLogin(String facebookId, String accessToken) {
@@ -537,7 +537,7 @@ public class UserManager extends WithController {
 				session().put("username", u.getUsername());
 				session().put("sourceIp", request().remoteAddress());
 				session().put("lastAccessTime", Long.toString(System.currentTimeMillis()));
-				return ok(Json.toJson(u));
+				return ok(addTokenToUser(u));
 			} else {
 				if (!json.has("accessToken")) {
 					result.put("error", "facebookId is not valid.");
@@ -556,7 +556,7 @@ public class UserManager extends WithController {
 				session().put("username", u.getUsername());
 				session().put("sourceIp", request().remoteAddress());
 				session().put("lastAccessTime", Long.toString(System.currentTimeMillis()));
-				return ok(Json.toJson(u));
+				return ok(addTokenToUser(u));
 			} else {
 				String accessToken = json.get("accessToken").asText();
 				return googleLogin(googleId, accessToken);
@@ -594,7 +594,7 @@ public class UserManager extends WithController {
 			session().put("sourceIp", request().remoteAddress());
 			session().put("lastAccessTime", Long.toString(System.currentTimeMillis()));
 			// return ok(lightUserSerialization(u));
-			return ok(Json.toJson(u));
+			return ok(addTokenToUser(u));
 		} else {
 			error.put("password", "Invalid Password");
 			result.put("error", error);
@@ -663,7 +663,6 @@ public class UserManager extends WithController {
 		result.put("random", new Random().nextInt());
 		String enc = Crypto.encryptAES(result.toString());
 		return enc;
-
 	}
 
 	public static Result getToken() {
@@ -672,6 +671,12 @@ public class UserManager extends WithController {
 			return badRequest();
 		String enc = encryptToken(userId);
 		return ok(enc);
+	}
+	
+	public static JsonNode addTokenToUser(User u) {
+		JsonNode res = Json.toJson(u);
+		((ObjectNode) res).put("userToken", encryptToken(u.getDbId().toHexString()));
+		return res;
 	}
 
 	/**
