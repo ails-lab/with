@@ -58,15 +58,18 @@ class SessionFilter extends Filter {
     val bearerRegexp = "Bearer (.*)".r
     rh.headers.get( "Authorization" ) match {
       case Some( bearerRegexp( token ))  => {
+        log.info( "Received token " + token )
         val optUser = UserManager.useridFromToken( token )
         if( optUser.isPresent()) {
+          log.info( "Userid in header is " + optUser.get())
           val newRh = FilterUtils.withSession( rh, Map(("user", optUser.get())))
-          return (next( newRh ).map { result => 
-            result.withSession( Session())
-          } )
+          return next( newRh )
+        } else {
+          log.warn( "Invalid token received" )
         }
       } 
-
+      case Some( _ ) => log.info( "Authorization header no Bearer" )
+      case None => log.info( "Unmatched header" )
     } 
       
     if( DB.getConf().hasPath( "session.ignore")) {

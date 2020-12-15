@@ -40,13 +40,18 @@ object FilterUtils {
     }
     // remove the old cookies
     oldHeaders -= COOKIE
-    val newCookies = cookies.map { c =>
-      if (c.name == Session.COOKIE_NAME) {
+    
+    val ( otherCookies, sessionCookies ) = cookies.partition(c => c.name != Session.COOKIE_NAME)
+    
+    val newSessionCookie = if( sessionCookies.length >0 ) {
+        val c = sessionCookies(0)
         new Cookie(c.name, newCookie, c.maxAge, c.path, c.domain, c.secure, c.httpOnly)
-      } else c
+    } else {
+        new Cookie(Session.COOKIE_NAME, newCookie, None, "/", None, false, false)      
     }
-    oldHeaders += ((COOKIE, Seq(Cookies.encode(newCookies))))
 
+    oldHeaders += ((COOKIE, Seq(Cookies.encode((otherCookies :+ newSessionCookie )))))
+    
     rh.copy(headers = new Headers { val data: Seq[(String, Seq[String])] = (oldHeaders.toSeq) })
   }
 

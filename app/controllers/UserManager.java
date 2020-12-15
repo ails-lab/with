@@ -84,7 +84,7 @@ public class UserManager extends WithController {
 
 	public static final ALogger log = Logger.of(UserManager.class);
 
-	private static final long TOKENTIMEOUT = 10 * 1000l /* 10 sec */;
+	private static final long TOKENTIMEOUT = 10 * 60 * 1000l /* 10 min */;
 	private static final String facebookAccessTokenUrl = "https://graph.facebook.com/v2.8/oauth/access_token";
 	private static final String facebookSecretWith = getFromConfig("facebook.with");
 	private static final String facebookSecretEspace = getFromConfig("facebook.espace");
@@ -647,6 +647,7 @@ public class UserManager extends WithController {
 
 	public static Optional<String> useridFromToken( String token ) {
 		JsonNode input = Json.parse(Crypto.decryptAES(token));
+		log.info( "token json " + input.toString() );
 		String userId = input.get("user").asText();
 		long timestamp = input.get("timestamp").asLong();
 		if (new Date().getTime() < (timestamp + TOKENTIMEOUT)) 
