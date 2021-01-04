@@ -1,6 +1,5 @@
 import sbt._
 import Keys._
-import EclipseKeys._
 import IO._
 import Seq._
 import scala.xml._
@@ -13,14 +12,14 @@ version := "1.0-SNAPSHOT"
 
 lazy val root = (project in file(".")).enablePlugins(PlayJava)
 
-scalaVersion := "2.11.1"
+scalaVersion := "2.12.12"
 
 dependencyOverrides += "io.netty" % "netty" % "3.9.9.Final"
 
 libraryDependencies ++= Seq(
 //  javaJdbc,
 //  javaEbean,
-  cache,
+  ehcache,
   filters,
   javaWs,
  "org.mongodb.morphia" % "morphia" % "1.0.1",
@@ -62,11 +61,12 @@ libraryDependencies ++= Seq(
  "org.apache.commons" % "commons-lang3" % "3.0" withSources() withJavadoc(),
  "commons-io" % "commons-io" % "2.2",
  "org.webjars.npm" % "swagger-ui-dist" % "3.20.5",
- "org.webjars" %% "webjars-play" % "2.3.0",
+ "org.webjars" %% "webjars-play" % "2.6.+",
  "com.hermit-reasoner" % "org.semanticweb.hermit" % "1.3.8.4",
  "mysql" % "mysql-connector-java" % "5.1.12"
 )
 
 sources in doc in Compile := List()
 
-EclipseKeys.withSource := true 
+// EclipseKeys.withSource := true
+ 
