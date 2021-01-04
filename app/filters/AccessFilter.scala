@@ -34,6 +34,8 @@ import scala.collection.JavaConversions._
 import play.api.http.HeaderNames._
 import scala.collection.mutable.ArrayBuffer
 import java.nio.charset.StandardCharsets
+import com.google.inject.Inject
+import akka.actor.ActorSystem
 
 /**
  * The AccessFilter should
@@ -41,7 +43,7 @@ import java.nio.charset.StandardCharsets
  *  - check the apikey and find if the call is allowed
  *
  */
-class AccessFilter extends Filter {
+class AccessFilter @Inject()(actorSystem:ActorSystem,  sessionCookieBaker:SessionCookieBaker) extends Filter {
   val log = Logger(this.getClass())
 
   
@@ -136,7 +138,7 @@ class AccessFilter extends Filter {
         .getOrElse( null )
     }
 
-    val apiActor = Akka.system.actorSelection("user/apiKeyManager");
+    val apiActor = actorSystem.actorSelection("user/apiKeyManager");
     
     // 4 options . Allowed call, Allowed with proxy, Access not allowed, failed request for some reason
     (apiActor ? access).flatMap {
@@ -144,13 +146,10 @@ class AccessFilter extends Filter {
         response match {
           case proxy: ObjectId => {
         	  val sessionData = rh.session + (("proxy", proxy.toString()))
-            val newRh = FilterUtils.withSession(rh, sessionData.data)
+            val newRh = FilterUtils.withSession(rh, sessionData, sessionCookieBaker)
           
             next(newRh).map { result =>
-              FilterUtils.outsession(result) match {
-                case Some(session) => result.withSession(Session(session) - ("proxy"))
-                case None => result
-              }
+              result.withSession(Session(FilterUtils.outsession(result)) - ("proxy"))
             }
           }
           case ApiKey.Response.ALLOWED => next( rh )

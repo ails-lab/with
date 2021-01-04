@@ -32,9 +32,12 @@ import play.api.Logger
 import play.api.mvc.Headers
 import play.api.mvc.Headers
 
-import play.libs.Crypto;
 import play.libs.Json;
 import controllers.UserManager
+import akka.stream.Materializer
+import com.typesafe.config.Config
+import com.google.inject.Inject
+import scala.concurrent.ExecutionContext
 
 
 
@@ -44,7 +47,7 @@ import controllers.UserManager
  *  - check the apikey and find if the call is allowed
  *  
  */
-class SessionFilter extends Filter {
+class SessionFilter @Inject()(implicit val mat: Materializer, implicit val ec:ExecutionContext, config: Config, sessionCookieBaker:SessionCookieBaker ) extends Filter {
   val log = Logger(this.getClass())
   val sessionTimeout = { if( DB.getConf().hasPath("session.timeout")) {
       DB.getConf().getLong( "session.timeout")
@@ -62,7 +65,7 @@ class SessionFilter extends Filter {
         val optUser = UserManager.useridFromToken( token )
         if( optUser.isPresent()) {
           log.info( "Userid in header is " + optUser.get())
-          val newRh = FilterUtils.withSession( rh, Map(("user", optUser.get())))
+          val newRh = FilterUtils.withSession( rh, Session(Map(("user", optUser.get()))), sessionCookieBaker)
           return next( newRh )
         } else {
           log.warn( "Invalid token received" )
@@ -95,18 +98,15 @@ class SessionFilter extends Filter {
            // timeout, remove user from incoming session
            case Some( true ) => {
         	   val sessionData = rh.session - ("user") + ("lastAccessTime" -> System.currentTimeMillis().toString())
-        		 val newRh = FilterUtils.withSession( rh, sessionData.data )
+        		 val newRh = FilterUtils.withSession( rh, sessionData, sessionCookieBaker )
         		 next(newRh)
            }
            
            // no timeout, update the lastAccessTime in the cookie
            case Some( false ) => {
               next( rh ).map { result => 
-                FilterUtils.outsession(result) match {
-                  case Some( session ) => result.withSession( Session(session) + ("lastAccessTime" -> System.currentTimeMillis().toString()))
-                  case None => result.withSession( rh.session + ("lastAccessTime" -> System.currentTimeMillis().toString()))
-                }
-              } 
+                result.withSession( Session( FilterUtils.outsession( result )+ ("lastAccessTime" -> System.currentTimeMillis().toString())))
+              } (ec)
            }
          }
      }  

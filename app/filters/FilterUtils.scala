@@ -25,39 +25,39 @@ object FilterUtils {
   /**
    * Add a new session to the requestHeader, make a new one and return it.
    */
-  def withSession(rh: RequestHeader, sessionData: Map[String, String]): RequestHeader = {
+ /**
+   * Add a new session to the requestHeader, make a new one and return it.
+   */
+  def withSession(rh: RequestHeader, session:Session, baker:SessionCookieBaker ): RequestHeader = {
     // make a new session cookie
-    val newCookie = Session.encode(sessionData)
+    
+    val newCookie = baker.encodeAsCookie(session)
+    
+    val cookies = ArrayBuffer.empty[Cookie]
 
     // replace cookie in header
-    val oldHeaders = scala.collection.mutable.Map.empty ++ rh.headers.toMap
-    val cookies = ArrayBuffer.empty[Cookie]
-    for (headerlines <- oldHeaders.get(COOKIE); header <- headerlines) {
-      val headerCookies = Cookies.decode(header)
+    for (header <- rh.headers.getAll(COOKIE)) {
+      val headerCookies = Cookies.decodeCookieHeader(header)
       for (cookie <- headerCookies) {
         cookies += cookie
       }
     }
-    // remove the old cookies
-    oldHeaders -= COOKIE
     
-    val ( otherCookies, sessionCookies ) = cookies.partition(c => c.name != Session.COOKIE_NAME)
+    // exchange the session cookie or create a new one 
+    val newCookies = ( cookies.filter{ c => c.name != baker.COOKIE_NAME }) += newCookie
     
-    val newSessionCookie = if( sessionCookies.length >0 ) {
-        val c = sessionCookies(0)
-        new Cookie(c.name, newCookie, c.maxAge, c.path, c.domain, c.secure, c.httpOnly)
-    } else {
-        new Cookie(Session.COOKIE_NAME, newCookie, None, "/", None, false, false)      
-    }
-
-    oldHeaders += ((COOKIE, Seq(Cookies.encode((otherCookies :+ newSessionCookie )))))
+    val allHeaders = ArrayBuffer.empty[(String, String)]
+    allHeaders ++= rh.headers.remove(COOKIE).headers
+    allHeaders += (( COOKIE, Cookies.encodeCookieHeader(newCookies)))
     
-    rh.copy(headers = new Headers { val data: Seq[(String, Seq[String])] = (oldHeaders.toSeq) })
+    rh.withHeaders( new Headers( allHeaders.toSeq ))
   }
 
-  def outsession(result: Result): Option[Map[String, String]] = {
-    Cookies(result.header.headers.get(SET_COOKIE))
-      .get(Session.COOKIE_NAME).map(_.value).map(Session.decode)
+  def outsession(result: Result): Map[String, String] = {
+    val cookieHeader = result.header.headers.get( SET_COOKIE );
+    val cookies = Cookies.fromSetCookieHeader(cookieHeader);
+    val sessionCookie = cookies.get( Session.COOKIE_NAME );
+    Session.decodeFromCookie(sessionCookie).data;
   }
   
   def withAjaxScript =  Action {

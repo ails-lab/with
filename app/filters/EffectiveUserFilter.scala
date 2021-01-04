@@ -34,6 +34,7 @@ import scala.collection.JavaConversions._
 import play.api.http.HeaderNames._
 import scala.collection.mutable.ArrayBuffer
 import java.nio.charset.StandardCharsets
+import com.google.inject.Inject
 
 /**
  * The AccessFilter should
@@ -41,7 +42,7 @@ import java.nio.charset.StandardCharsets
  *  - check the apikey and find if the call is allowed
  *
  */
-class EffektiveUserFilter extends Filter {
+class EffektiveUserFilter @Inject()(sessionCookieBaker:SessionCookieBaker ) extends Filter {
   val log = Logger(this.getClass())
 
   /**
@@ -103,14 +104,11 @@ class EffektiveUserFilter extends Filter {
 
 					  val userIds = effectiveUserIds(userId, proxyId).mkString(",")
 					  val sessionData = rh.session + (("effectiveUserIds", userIds))
-					  val newRh = FilterUtils.withSession(rh, sessionData.data)
+					  val newRh = FilterUtils.withSession(rh, sessionData, sessionCookieBaker)
 
-					  next(newRh).map { result =>
-					  FilterUtils.outsession(result) match {
-					  case Some(session) => result.withSession(Session(session) - ("effectiveUserIds"))
-					  case None => result
+					  next(newRh).map { result =>  
+					    result.withSession(Session(FilterUtils.outsession(result)) - ("effectiveUserIds"))
 					  }
-			  }
 		  }
   }
 }
