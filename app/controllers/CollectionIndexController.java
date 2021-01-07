@@ -72,7 +72,7 @@ public class CollectionIndexController extends WithResourceController	{
 		"semantic.annotations.all.string",
 	};
 	
-	public static Result getCollectionFacets(String id) {
+	public Result getCollectionFacets(String id) {
 		ObjectNode result = Json.newObject();
 		
 		try {
@@ -149,75 +149,7 @@ public class CollectionIndexController extends WithResourceController	{
 		}
 	}
 
-
-//	public static Result getCollectionAnnotations(String cid) {
-//		ObjectNode result = Json.newObject();
-//		
-//		try {
-//			Result response = errorIfNoAccessToCollection(Action.READ, new ObjectId(cid));
-//			
-//			if (!response.toString().equals(ok().toString())) {
-//				return response;
-//			}
-//			
-//			List<ContextData<ContextDataBody>> rr = DB.getCollectionObjectDAO().getById(new ObjectId(cid)).getCollectedResources();
-//			
-//			Map<BodyClass, Counter> annMap = new HashMap<>();
-//			
-//			for (ContextData<ContextDataBody> cd : rr) {
-//				ObjectId rid = cd.getTarget().getRecordId();
-//
-//				RecordResource<RecordResource.RecordDescriptiveData> rec = DB.getRecordResourceDAO().getById(rid);
-//				rec.fillAnnotations();
-//					
-//				Set<BodyClass> uris = new HashSet<>();
-//					
-//				for (Annotation ann : rec.getAnnotations()) {
-//					AnnotationBodyTagging body = (AnnotationBodyTagging)ann.getBody();
-//					if (body.getUri() != null) {
-//						uris.add(new BodyClass(body.getUri(), body.getLabel()));
-//					}
-//				}
-//				
-//				for (BodyClass bc : uris) {
-//					Counter cc = annMap.get(bc);
-//					if (cc == null) {
-//						cc = new Counter(0);
-//						annMap.put(bc, cc);
-//					}
-//					
-//					cc.increase();
-//				}
-//			}
-//			
-//			Set<SortClass> sorted = new TreeSet<>();
-//			
-//			for (Map.Entry<BodyClass, Counter> entry : annMap.entrySet()) {
-//				sorted.add(new SortClass(entry.getKey().uri, entry.getKey().label, entry.getValue().getValue()));
-//			}
-//			
-//			ArrayNode array = Json.newObject().arrayNode();
-//
-//			for (SortClass sc : sorted) {
-//				ObjectNode entry = Json.newObject();
-//				entry.put("uri", sc.uri);
-//				entry.put("label", Json.toJson(sc.label));
-//				entry.put("count", sc.count);
-//				
-//				array.add(entry);
-//			}
-//
-//			result.put("annotations", array);
-//			
-//			return ok(result);
-//			
-//		} catch (Exception e) {
-//			result.put("error", e.getMessage());
-//			return internalServerError(result);
-//		}
-//	}
-	
-	public static QueryBuilder getSimilarItemsIndexCollectionQuery(ObjectId colId, DescriptiveData dd) {
+	public QueryBuilder getSimilarItemsIndexCollectionQuery(ObjectId colId, DescriptiveData dd) {
 		BoolQueryBuilder query = QueryBuilders.boolQuery();
 		query.must(QueryBuilders.termQuery("collectedIn", colId));
 
@@ -287,7 +219,7 @@ public class CollectionIndexController extends WithResourceController	{
 		return query;
 	}
 	
-	private static void addMultiLiteralOrResource(MultiLiteralOrResource source, String field, ThesaurusObjectDAO thesaurusDAO, BoolQueryBuilder query) {
+	private void addMultiLiteralOrResource(MultiLiteralOrResource source, String field, ThesaurusObjectDAO thesaurusDAO, BoolQueryBuilder query) {
 		if (source != null) {
 			List<String> uris = source.get(LiteralOrResource.URI);
 			if (uris != null) {
@@ -372,7 +304,7 @@ public class CollectionIndexController extends WithResourceController	{
 		}
 	}
 	
-	public static QueryBuilder getIndexCollectionQuery(ObjectId colId, JsonNode json) {
+	public QueryBuilder getIndexCollectionQuery(ObjectId colId, JsonNode json) {
 		BoolQueryBuilder query = QueryBuilders.boolQuery();
 		query.must(QueryBuilders.termQuery("collectedIn", colId));
 

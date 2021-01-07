@@ -18,31 +18,37 @@ package sources.core;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
+import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.function.BiFunction;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 import akka.dispatch.ExecutionContexts;
-import play.libs.F.Function0;
-import play.libs.F.Promise;
+import play.Logger;
 import play.libs.Json;
 import play.mvc.Result;
-import scala.concurrent.ExecutionContext;
 
 public class ParallelAPICall {
 
+	
 	public enum Priority {
-		BACKEND(ExecutionContexts.fromExecutorService(Executors
-				.newFixedThreadPool(4))),
-		FRONTEND(ExecutionContexts.global());
-		private ExecutionContext excon;
-
-		private Priority(ExecutionContext excon) {
-			this.excon = excon;
+		
+		BACKEND( Executors.newFixedThreadPool(4) ),
+				
+				
+		FRONTEND(  Executors.newFixedThreadPool(4) );
+		private Executor executor;
+		
+		private Priority( Executor ex ) {
+			this.executor = ex;
+			
 		}
-
-		public ExecutionContext getExcecutionContext() {
-			return excon;
+		
+		public Executor getExecutor() {
+			return executor;
 		}
 	}
 
@@ -54,52 +60,41 @@ public class ParallelAPICall {
 	 *            method
 	 * @return a Promise with result <R>
 	 */
-	public static <I, U, R> Promise<R> createPromise(
+	public static <I, U, R> CompletionStage<R> createPromise(
 			final BiFunction<I, U, R> methodQuery, final I input1,
 			final U input2) {
 		return createPromise(methodQuery, input1, input2, Priority.BACKEND);
 
 	}
 
-	public static <I, U, R> Promise<R> createPromiseWithTimeout(
-			final BiFunction<I, U, R> methodQuery, final I input1,
-			final U input2, long delay) {
-		Promise<R> p = (Promise<R>) createPromise(methodQuery, input1, input2)
-				.timeout(delay);
-		return p;
-	}
-
-	public static <I, U, R> Promise<R> createPromise(
+	public static <I, U, R> CompletionStage<R> createPromise(
 			final Function<I, R> methodQuery, final I input) {
 		return createPromise(methodQuery, input, Priority.BACKEND);
 	}
 	
 
-	public static <I, U, R> Promise<R> createPromise(
+	public static <I, U, R> CompletionStage<R> createPromise(
 			final Function<I, R> methodQuery, final I input, Priority priority) {
-		Promise<R> p = Promise.promise(new Function0<R>() {
-			public R apply() throws Throwable {
-				return methodQuery.apply(input);
-			}
-		}, priority.getExcecutionContext());
+		CompletionStage<R> p = CompletableFuture.supplyAsync( ()->methodQuery.apply(input)
+				, priority.getExecutor());
 		return p;
 	}
 	
-	public static <U, R> Promise<R> createPromise(
-			final Function0<R> methodQuery, Priority priority) {
-		Promise<R> p = Promise.promise(methodQuery, priority.getExcecutionContext());
+	public static <U, R> CompletionStage<R> createPromise(
+			final Supplier<R> methodQuery, Priority priority) {
+		CompletionStage<R> p = CompletableFuture.supplyAsync( () ->
+			methodQuery.get(), priority.getExecutor() );
 		return p;
 	}
 
-	public static <I, U, R> Promise<R> createPromise(
+	public static <I, U, R> CompletionStage<R> createPromise(
 			final BiFunction<I, U, R> methodQuery, final I input1,
 			final U input2, Priority priority) {
 
-		Promise<R> p = Promise.promise(new Function0<R>() {
-			public R apply() throws Throwable {
-				return methodQuery.apply(input1, input2);
-			}
-		}, priority.getExcecutionContext());
+		CompletionStage<R> p = CompletableFuture.supplyAsync( 
+				() -> methodQuery.apply(input1, input2)
+				, priority.getExecutor()
+			);
 		return p;
 	}
 
@@ -111,40 +106,66 @@ public class ParallelAPICall {
 	 *            list of Promises
 	 * @return a Promise with Result
 	 */
-	public static <R> Promise<Result> combineResponses(
+	public static <R> CompletionStage<Result> combineResponses(
 			final Function<R, Boolean> responseCollectionMethod,
-			Iterable<Promise<R>> promises, Priority priority) {
-		Promise<List<R>> promisesSequence = Promise.sequence(promises, priority.getExcecutionContext());
-		Promise<Result> promiseResult = promisesSequence
-				.map(new play.libs.F.Function<Iterable<R>, Result>() {
+			Iterable<CompletionStage<R>> promises, Priority priority) {
+		final ArrayList<CompletableFuture<R>> tmpProm = new ArrayList<>();
+		for( CompletionStage<R> cs: promises) tmpProm.add( cs.toCompletableFuture() );
+		
+		CompletionStage<Void> promisesSequence = CompletableFuture.allOf(tmpProm.toArray( new CompletableFuture[0]));
+
+		CompletionStage<Result> promiseResult = promisesSequence
+				.thenApplyAsync(new Function<Void, Result>() {
 					List<R> finalResponses = new ArrayList<R>();
 
-					public Result apply(Iterable<R> responses) {
-						finalResponses.addAll(iterateResponses(
-								responseCollectionMethod, responses));
+					public Result apply(Void v) {
+						for( CompletableFuture<R> cf: tmpProm ) {
+							try {
+								if( responseCollectionMethod.apply(cf.get()))
+									finalResponses.add( cf.get());
+							} catch( Exception e ) {
+								Logger.error("", e);
+							}
+						}
 						// Logger.debug("Total time for all sources to respond: "
 						// + (System.currentTimeMillis()- initTime));
 						return toStatus(finalResponses);
 					}
-				}, priority.getExcecutionContext());
+				}, priority.getExecutor());
 		return promiseResult;
 	}
 
-	public static <R> Promise<Result> combineResponses(
+	public static <R> CompletionStage<Result> combineResponses(
 			final Function<R, Boolean> responseCollectionMethod,
-			Iterable<Promise<R>> promises,
+			Iterable<CompletionStage<R>> promises,
 			final Function<List<R>, List<R>> filter) {
-		Promise<List<R>> promisesSequence = Promise.sequence(promises);
-        Promise<Result> promiseResult = promisesSequence.map(
-    		new play.libs.F.Function<Iterable<R>, Result>() {
-    			public Result apply(Iterable<R> responses) {
-    				List<R> combinedResponses = iterateResponses(responseCollectionMethod, responses);
-					List<R> finalResponses = filter.apply(combinedResponses);
-    				return toStatus(finalResponses);
-    			}
-    		}
-        );
-        return promiseResult;
+
+		final ArrayList<CompletableFuture<R>> tmpProm = new ArrayList<>();
+		for( CompletionStage<R> cs: promises) tmpProm.add( cs.toCompletableFuture() );
+		
+		CompletionStage<Void> promisesSequence = CompletableFuture.allOf(tmpProm.toArray( new CompletableFuture[0]));
+
+		CompletionStage<Result> promiseResult = promisesSequence
+				.thenApplyAsync(new Function<Void, Result>() {
+					List<R> finalResponses = new ArrayList<R>();
+
+					public Result apply(Void v) {
+						for( CompletableFuture<R> cf: tmpProm ) {
+							try {
+								if( responseCollectionMethod.apply(cf.get()))
+									finalResponses.add( cf.get());
+							} catch( Exception e ) {
+								Logger.error("", e);
+							}
+						}
+						
+						
+						// Logger.debug("Total time for all sources to respond: "
+						// + (System.currentTimeMillis()- initTime));
+						return toStatus(filter.apply( finalResponses));
+					}
+				}, Priority.BACKEND.getExecutor());
+		return promiseResult;
 	}
 
 	public static <R> List<R> iterateResponses(

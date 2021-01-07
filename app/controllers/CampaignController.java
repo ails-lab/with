@@ -98,24 +98,24 @@ public class CampaignController extends WithController {
 		return ok(Json.toJson(count));
 	}
 
-	public static Result getCampaign(String campaignId) {
+	public Result getCampaign(String campaignId) {
 		ObjectId campaignDbId = new ObjectId(campaignId);
 		Campaign campaign = DB.getCampaignDAO().getCampaign(campaignDbId);
 		return ok(Json.toJson(campaign));
 	}
 
-	public static Result getCampaignByName(String cname) {
+	public Result getCampaignByName(String cname) {
 		Campaign campaign = DB.getCampaignDAO().getCampaignByName(cname);
 		return ok(Json.toJson(campaign));
 	}
 
-	public static Result deleteCampaign(String campaignId) {
+	public Result deleteCampaign(String campaignId) {
 		ObjectId campaignDbId = new ObjectId(campaignId);
 		DB.getCampaignDAO().deleteById(campaignDbId);
 		return ok();
 	}
 
-	public static void updateLiteralField(Campaign c1, Campaign c2, Function<Campaign, Literal> f) {
+	public void updateLiteralField(Campaign c1, Campaign c2, Function<Campaign, Literal> f) {
 		Literal newVal = f.apply(c2);
 		if (newVal == null) {
 			return;
@@ -129,7 +129,7 @@ public class CampaignController extends WithController {
 		}
 	}
 	
-	public static void updateLiteralField(Campaign c1, Campaign c2, Function<Campaign, Literal> f, BiConsumer<Campaign, Literal> bc) {
+	public void updateLiteralField(Campaign c1, Campaign c2, Function<Campaign, Literal> f, BiConsumer<Campaign, Literal> bc) {
 		if (f.apply(c1) == null && f.apply(c2) != null) {
 			bc.accept(c1, f.apply(c2));
 		} else {
@@ -137,7 +137,7 @@ public class CampaignController extends WithController {
 		}
 	}
 
-	public static void updateListField(Campaign c1, Campaign c2, Function<Campaign, List<ObjectId>> f) {
+	public void updateListField(Campaign c1, Campaign c2, Function<Campaign, List<ObjectId>> f) {
 		f.apply(c1).clear();
 		if (f.apply(c2) == null)
 			return;
@@ -145,7 +145,7 @@ public class CampaignController extends WithController {
 		f.apply(c1).addAll(newList);
 	}
 
-	public static Result editCampaign(String id) throws ClassNotFoundException, JsonProcessingException, IOException {
+	public Result editCampaign(String id) throws ClassNotFoundException, JsonProcessingException, IOException {
 		JsonNode json = request().body().asJson();
 		ObjectNode result = Json.newObject();
 		ObjectId user = effectiveUserDbId();
@@ -183,7 +183,7 @@ public class CampaignController extends WithController {
 		return ok(Json.toJson(DB.getCampaignDAO().get(campaignDbId)));
 	}
 
-	public static Result getCampaigns(String group, String project, String state, String sortBy, int offset,
+	public Result getCampaigns(String group, String project, String state, String sortBy, int offset,
 			int count) {
 		ObjectNode result = Json.newObject();
 		List<Campaign> campaigns = new ArrayList<Campaign>();
@@ -195,7 +195,7 @@ public class CampaignController extends WithController {
 		return ok(Json.toJson(campaigns));
 	}
 
-	public static Result getUserCampaigns(String userId, int offset, int count) {
+	public Result getUserCampaigns(String userId, int offset, int count) {
 		ObjectNode result = Json.newObject();
 		List<Campaign> campaigns = new ArrayList<Campaign>();
 		campaigns = DB.getCampaignDAO().getUserCampaigns(new ObjectId(userId), offset, count);
@@ -209,7 +209,7 @@ public class CampaignController extends WithController {
 		return ok(result);
 	}
 
-	public static Result incUserPoints(String campaignId, String userId, String annotationType) {
+	public Result incUserPoints(String campaignId, String userId, String annotationType) {
 		ObjectId campaignDbId = null;
 		if (StringUtils.isNotEmpty(campaignId)) {
 			campaignDbId = new ObjectId(campaignId);
@@ -219,7 +219,7 @@ public class CampaignController extends WithController {
 		return ok();
 	}
 
-	public static Result decUserPoints(String campaignId, String userId, String annotationType) {
+	public Result decUserPoints(String campaignId, String userId, String annotationType) {
 		ObjectId campaignDbId = null;
 		if (StringUtils.isNotEmpty(campaignId)) {
 			campaignDbId = new ObjectId(campaignId);
@@ -228,18 +228,18 @@ public class CampaignController extends WithController {
 		return ok();
 	}
 
-	private static boolean uniqueCampaignName(String name) {
+	private boolean uniqueCampaignName(String name) {
 		return (DB.getCampaignDAO().getCampaignByName(name) == null);
 	}
 
-	public static Result resetCampaign(String campaignId) {
+	public Result resetCampaign(String campaignId) {
 		DB.getCampaignDAO().resetCampaignPoints(new ObjectId(campaignId));
 //		DB.getAnnotationDAO().deleteCampaignAnnotations(new ObjectId(campaignId));
 //		DB.getAnnotationDAO().unscoreAutomaticAnnotations();
 		return ok();
 	}
 
-	public static Result createCampaign() {
+	public Result createCampaign() {
 		Campaign newCampaign = null;
 		ArrayNode errors = Json.newObject().arrayNode();
 		ObjectNode error = Json.newObject();
@@ -361,7 +361,7 @@ public class CampaignController extends WithController {
 	//
 	// }
 
-	public static void addLangs(CampaignTerm term) throws ClientProtocolException, IOException {
+	public void addLangs(CampaignTerm term) throws ClientProtocolException, IOException {
 		String[] langs = new String[] { "en", "it", "fr" };
 		if (term.labelAndUri.getURI().contains("wikidata")) {
 			term.labelAndUri.addURI(term.labelAndUri.getURI().replace("/wiki/", "/entity/"));
@@ -427,7 +427,7 @@ public class CampaignController extends WithController {
 
 	}
 
-	public static List<CampaignTerm> createMIMOCampaignTerm(String uri, int level) {
+	public List<CampaignTerm> createMIMOCampaignTerm(String uri, int level) {
 		ArrayList<CampaignTerm> terms = new ArrayList<CampaignTerm>();
 		ThesaurusObject thes = DB.getThesaurusDAO().getByUri(uri);
 		CampaignTerm term = new CampaignTerm();
@@ -454,7 +454,7 @@ public class CampaignController extends WithController {
 
 	}
 
-	public static void readMIMO() throws Exception {
+	public void readMIMO() throws Exception {
 		Reader in = new FileReader(vocabularyPath + termsFile.get("instruments"));
 		Iterable<CSVRecord> records = CSVFormat.DEFAULT.withDelimiter(',').withHeader().parse(in);
 		ArrayList<CampaignTerm> terms = new ArrayList<CampaignTerm>();
@@ -479,12 +479,12 @@ public class CampaignController extends WithController {
 		}
 	}
 
-	public static Result getPopularAnnotations(String campaignName, String term, int offset, int count) {
+	public Result getPopularAnnotations(String campaignName, String term, int offset, int count) {
 		Map<String, Integer> res = DB.getAnnotationDAO().getByCampaign(campaignName, term, offset, count);
 		return ok(Json.toJson(res));
 	}
 
-	public static Result readCampaignTerms(String cname) throws Exception {
+	public Result readCampaignTerms(String cname) throws Exception {
 		if (cname.equals("instruments")) {
 			readMIMO();
 			return ok();
@@ -570,7 +570,7 @@ public class CampaignController extends WithController {
 	 * 
 	 * return result; }
 	 */
-	public static Result getUserPoints(String userId, String pointType) throws Exception {
+	public Result getUserPoints(String userId, String pointType) throws Exception {
 		ObjectId withUser = null;
 		String type;
 		long points = 0;
@@ -612,7 +612,7 @@ public class CampaignController extends WithController {
 		return ok(result);
 	}
 
-	public static Result updateKarma(String campaignId) throws Exception {
+	public Result updateKarma(String campaignId) throws Exception {
 		ObjectId campaignDbId = new ObjectId(campaignId);
 		ObjectId creatorId;
 		Campaign campaign = DB.getCampaignDAO().getCampaign(campaignDbId);
@@ -651,7 +651,7 @@ public class CampaignController extends WithController {
 		return ok();
 	}
 
-	public static Result getContributors(String cname) {
+	public Result getContributors(String cname) {
 		ObjectNode result = Json.newObject();
 		ArrayList<ObjectNode> contributors = new ArrayList<ObjectNode>();
 		contributors = DB.getCampaignDAO().getContributors(cname);

@@ -24,6 +24,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.bson.types.ObjectId;
 
@@ -43,7 +44,6 @@ import model.resources.WithResource;
 import model.usersAndGroups.User;
 import play.Logger;
 import play.Logger.ALogger;
-import play.libs.F.Option;
 import play.mvc.Controller;
 
 public abstract class WithController extends Controller {
@@ -185,9 +185,9 @@ public abstract class WithController extends Controller {
 	}
 
 
-	public static String getLocale(Option<String> lang) {
+	public static String getLocale(Optional<String> lang) {
 		String locale = Language.DEFAULT.toString();
-		if (!lang.isDefined()) {
+		if (!lang.isPresent()) {
 			String sessionLocale = session().get("locale");
 			if (sessionLocale != null)
 				locale = sessionLocale;
@@ -204,7 +204,7 @@ public abstract class WithController extends Controller {
 		return locale;
 	}
 
-	public static void filterResourceByLocale(Option<String> locale, WithResource resource) {
+	public void filterResourceByLocale(Optional<String> locale, WithResource resource) {
 		String localeString = getLocale(locale);
 		//assume only descriptiveData has literal type of fields
 		DescriptiveData descriptiveData = resource.getDescriptiveData();

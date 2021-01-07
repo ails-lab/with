@@ -44,7 +44,7 @@ public class CodeController extends Controller {
 	 * Make a list of all the jars and serve it here, so actors can download them and use them.
 	 * @return
 	 */
-	public static Result jarList() {
+	public Result jarList() {
 		try {
 			// String strClassPath = System.getProperty("java.class.path");
 			File libDir = new File( Play.application().path(), LIBDIR );
@@ -63,14 +63,14 @@ public class CodeController extends Controller {
 	 * @param filename
 	 * @return
 	 */
-	public static Result downloadJar( String filename ) {
+	public Result downloadJar( String filename ) {
 		File libDir = new File( Play.application().path(), LIBDIR );
 		File toServe = new File( libDir, filename );
 		if( toServe.exists() && toServe.canRead()) return ok( toServe );
 		else return badRequest( "Can't serve " + filename );
 	}
 	
-	private static JsonNode buildResultJson( List<String> jars, String baseUrl ) {
+	private JsonNode buildResultJson( List<String> jars, String baseUrl ) {
 		ObjectMapper om = new ObjectMapper();
 		ObjectNode root = om.createObjectNode();
 		ArrayNode jarNodes = om.createArrayNode();
@@ -112,7 +112,7 @@ public class CodeController extends Controller {
 	 * @param directory
 	 * @return
 	 */
-	private static List<String> fileChecksum( File directory ) {
+	private List<String> fileChecksum( File directory ) {
 		ArrayList<String> nameChecksum = new ArrayList<String>();
 		try {
 			if( directory.exists() && directory.canRead() && directory.isDirectory()) {

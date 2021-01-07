@@ -21,9 +21,18 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 
+import org.apache.commons.codec.binary.Base64;
+import org.bson.types.ObjectId;
+
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+
+import db.DB;
 import model.EmbeddedMediaObject.MediaVersion;
 import model.MediaObject;
 import model.basicDataTypes.WithAccess.Access;
@@ -34,18 +43,8 @@ import model.usersAndGroups.UserOrGroup;
 import notifications.GroupNotification;
 import notifications.Notification;
 import notifications.Notification.Activity;
-
-import org.apache.commons.codec.binary.Base64;
-import org.bson.types.ObjectId;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-
-import db.DB;
-import model.EmbeddedMediaObject;
 import play.Logger;
 import play.Logger.ALogger;
-import play.libs.F.Option;
-import play.libs.F.RedeemablePromise;
 import play.libs.Json;
 import play.mvc.Result;
 import utils.NotificationCenter;
@@ -67,8 +66,8 @@ public class UserAndGroupManager extends WithController {
 	 * @return JSON document with an array of matching usernames or groupnames
 	 *         (or all of them)
 	 */
-	public static Result listNames(String prefix, Boolean onlyParents,
-			Boolean forUsers, Option<String> forGroupType) {
+	public Result listNames(String prefix, Boolean onlyParents,
+			Boolean forUsers, Optional<String> forGroupType) {
 		try {
 			ArrayNode suggestions = Json.newObject().arrayNode();
 
@@ -85,7 +84,7 @@ public class UserAndGroupManager extends WithController {
 					suggestions.add(node);
 				}
 			}
-			if (forGroupType.isDefined()) {
+			if (forGroupType.isPresent()) {
 				Class<?> clazz = Class.forName("model.usersAndGroups."
 						+ forGroupType.get());
 				List<UserGroup> groups = DB.getUserGroupDAO()
@@ -128,9 +127,9 @@ public class UserAndGroupManager extends WithController {
 	 * @param userOrGroupnameOrEmail
 	 * @return User and image
 	 */
-	public static Result findByUserOrGroupNameOrEmail(
+	public  Result findByUserOrGroupNameOrEmail(
 			String userOrGroupnameOrEmail, String collectionId) {
-		Function<UserOrGroup, Status> getUserJson = (UserOrGroup u) -> {
+		Function<UserOrGroup, Result> getUserJson = (UserOrGroup u) -> {
 			ObjectNode userJSON = Json.newObject();
 			userJSON.put("userId", u.getDbId().toString());
 			userJSON.put("username", u.getUsername());
@@ -179,7 +178,7 @@ public class UserAndGroupManager extends WithController {
 		}
 	}
 
-	public static Result getUserOrGroupThumbnail(String id) {
+	public Result getUserOrGroupThumbnail(String id) {
 		try {
 			User user = DB.getUserDAO().getById(new ObjectId(id), null);
 			if (user != null) {
@@ -216,7 +215,7 @@ public class UserAndGroupManager extends WithController {
 	 * @return success message
 	 */
 	// TODO: Implement with updates, not make permanent!
-	public static Result addUserOrGroupToGroup(String id, String groupId) {
+	public Result addUserOrGroupToGroup(String id, String groupId) {
 		ObjectNode result = Json.newObject();
 		try {
 			String adminId = effectiveUserId();
@@ -323,7 +322,7 @@ public class UserAndGroupManager extends WithController {
 
 	}
 
-	public static Result removeUserOrGroupFromGroup(String id, String groupId) {
+	public Result removeUserOrGroupFromGroup(String id, String groupId) {
 		ObjectNode result = Json.newObject();
 		try {
 			String adminId = effectiveUserId();
@@ -433,7 +432,7 @@ public class UserAndGroupManager extends WithController {
 		}
 	}
 
-	public static Result joinGroup(String groupId) {
+	public Result joinGroup(String groupId) {
 		ObjectNode result = Json.newObject();
 		try {
 			String userId = effectiveUserId();
@@ -488,7 +487,7 @@ public class UserAndGroupManager extends WithController {
 		}
 	}
 
-	public static Result leaveGroup(String groupId) {
+	public Result leaveGroup(String groupId) {
 		ObjectNode result = Json.newObject();
 		try {
 			String userId = effectiveUserId();
@@ -558,7 +557,7 @@ public class UserAndGroupManager extends WithController {
 		return null;
 	}
 
-	public static Result addAdminToGroup(String id, String groupId) {
+	public Result addAdminToGroup(String id, String groupId) {
 		ObjectNode result = Json.newObject();
 		try {
 			String adminId = effectiveUserId();
@@ -606,7 +605,7 @@ public class UserAndGroupManager extends WithController {
 
 	}
 
-	public static Result removeAdminFromGroup(String id, String groupId) {
+	public Result removeAdminFromGroup(String id, String groupId) {
 		ObjectNode result = Json.newObject();
 		try {
 			String adminId = effectiveUserId();
@@ -658,7 +657,7 @@ public class UserAndGroupManager extends WithController {
 
 	}
 
-	public static ObjectId findUserByUsername(String username, RedeemablePromise<Result> err) {
+	public static ObjectId findUserByUsername(String username, CompletableFuture<Result> err) {
 		ObjectId result = null;
 		
 		if (username != null) {
@@ -673,7 +672,7 @@ public class UserAndGroupManager extends WithController {
 			}
 		}
 		if (result == null) {
-			err.success( badRequest(Json.parse("{\"error\":\"No user or userGroup with given username\"}")));
+			err.complete( badRequest(Json.parse("{\"error\":\"No user or userGroup with given username\"}")));
 		}
 		return result;
 	}

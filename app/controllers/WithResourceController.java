@@ -25,6 +25,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -54,7 +55,6 @@ import org.mongodb.morphia.query.UpdateOperations;
 
 import play.Logger;
 import play.Logger.ALogger;
-import play.libs.F.Option;
 import play.libs.Json;
 import play.mvc.Result;
 import search.Sources;
@@ -85,7 +85,7 @@ public class WithResourceController extends WithController {
 
 	public static final ALogger log = Logger.of(WithResourceController.class);
 
-	public static Status errorIfNoAccessToWithResource(
+	public static Result errorIfNoAccessToWithResource(
 			WithResourceDAO resourceDAO, Action action, ObjectId id) {
 
 		ObjectNode result = Json.newObject();
@@ -106,13 +106,13 @@ public class WithResourceController extends WithController {
 		}
 	}
 
-	public static Status errorIfNoAccessToCollection(Action action,
+	public Result errorIfNoAccessToCollection(Action action,
 			ObjectId collectionDbId) {
 		return errorIfNoAccessToWithResource(DB.getCollectionObjectDAO(),
 				action, collectionDbId);
 	}
 
-	public static Status errorIfNoAccessToRecord(Action action,
+	public Result errorIfNoAccessToRecord(Action action,
 			ObjectId recordId) {
 		return errorIfNoAccessToWithResource(DB.getRecordResourceDAO(), action,
 				recordId);
@@ -130,15 +130,15 @@ public class WithResourceController extends WithController {
 	// have to remove first. This way, do not have to check if colId-position
 	// already exists
 	// in collectedIn and remove it (2 update operations).
-	public static Result addRecordToCollection(String colId,
-			Option<Integer> position, Boolean noDouble) {
+	public Result addRecordToCollection(String colId,
+			Optional<Integer> position, Boolean noDouble) {
 		JsonNode json = request().body().asJson();
 		ObjectNode result = Json.newObject();
 		ObjectId collectionDbId = new ObjectId(colId);
 		Locks locks = null;
 		try {
 			locks = Locks.create().write("Collection #" + colId).acquire();
-			Status response = errorIfNoAccessToCollection(Action.EDIT,
+			Result response = errorIfNoAccessToCollection(Action.EDIT,
 					collectionDbId);
 			if (!response.toString().equals(ok().toString())) {
 				return response;
@@ -159,14 +159,14 @@ public class WithResourceController extends WithController {
 		}
 	}
 
-	public static Result internalAddRecordToCollection(String colId,
-			RecordResource record, Option<Integer> position, ObjectNode result) {
+	public Result internalAddRecordToCollection(String colId,
+			RecordResource record, Optional<Integer> position, ObjectNode result) {
 		return addRecordToCollection(Json.toJson(record), new ObjectId(colId),
 				position, false);
 	}
 
-	public static Result internalAddRecordToCollection(String colId,
-			RecordResource record, Option<Integer> position, ObjectNode result,
+	public Result internalAddRecordToCollection(String colId,
+			RecordResource record, Optional<Integer> position, ObjectNode result,
 			boolean noRepeated) {
 		return addRecordToCollection(Json.toJson(record), new ObjectId(colId),
 				position, noRepeated);
@@ -184,8 +184,8 @@ public class WithResourceController extends WithController {
 	// Since the provenance info is some kind of audit, it makes sense to document
 	// the uploading user, even if the source is a mint instance
 	// PS: provenance should potentially contain dates...
-	public static Result addRecordToCollection(JsonNode json,
-			ObjectId collectionDbId, Option<Integer> position, Boolean noDouble) {
+	public Result addRecordToCollection(JsonNode json,
+			ObjectId collectionDbId, Optional<Integer> position, Boolean noDouble) {
 		ObjectNode result = Json.newObject();
 		String resourceType = null;
 		ObjectId userId = effectiveUserDbIds().get(0);
@@ -234,7 +234,7 @@ public class WithResourceController extends WithController {
 								externalId,
 								new ArrayList<String>(Arrays.asList("_id")));
 				recordId = resource.getDbId();
-				Status response = errorIfNoAccessToRecord(Action.READ, recordId);
+				Result response = errorIfNoAccessToRecord(Action.READ, recordId);
 				if (!response.toString().equals(ok().toString())) {
 					return response;
 				} else {// In case the record already exists we overwrite
@@ -382,14 +382,14 @@ public class WithResourceController extends WithController {
 	
 	
 
-	public static Result addRecordsToCollection(String colId, Boolean noDouble) {
+	public Result addRecordsToCollection(String colId, Boolean noDouble) {
 		JsonNode json = request().body().asJson();
 		ObjectNode result = Json.newObject();
 		ObjectId collectionDbId = new ObjectId(colId);
 		Locks locks = null;
 		try {
 			locks = Locks.create().write("Collection #" + colId).acquire();
-			Status response = errorIfNoAccessToCollection(Action.EDIT,
+			Result response = errorIfNoAccessToCollection(Action.EDIT,
 					collectionDbId);
 			if (!response.toString().equals(ok().toString())) {
 				return response;
@@ -402,7 +402,7 @@ public class WithResourceController extends WithController {
 					while (iterator.hasNext()) {
 						JsonNode recordJson = iterator.next();
 						Result r = addRecordToCollection(recordJson,
-								new ObjectId(colId), Option.None(), noDouble);
+								new ObjectId(colId), Optional.empty(), noDouble);
 						if (!r.toString().equals(ok().toString())) {
 							return r;
 						}
@@ -425,9 +425,9 @@ public class WithResourceController extends WithController {
 	// and collectedIn. The rights of all collections the resource
 	// belongs to are merged and are copied to the record
 	// only if the user OWNs the resource.
-	public static void addToCollection(Option<Integer> position,
+	public static void addToCollection(Optional<Integer> position,
 			ObjectId recordId, ObjectId colId, boolean owns, boolean existsInSameCollection) {
-		if (position.isDefined() && (recordId != null)) {
+		if (position.isPresent() && (recordId != null)) {
 			Integer pos = position.get();
 			DB.getRecordResourceDAO().addToCollection(recordId, colId, pos,
 					owns, existsInSameCollection);
@@ -569,8 +569,8 @@ public class WithResourceController extends WithController {
 	 * @param position
 	 * @return
 	 */
-	public static Result removeRecordFromCollection(String id, String recordId,
-			Option<Integer> position, boolean all) {
+	public Result removeRecordFromCollection(String id, String recordId,
+			Optional<Integer> position, boolean all) {
 		ObjectNode result = Json.newObject();
 		Locks locks = null;
 		try {
@@ -584,7 +584,7 @@ public class WithResourceController extends WithController {
 				return response;
 			int pos;
 			boolean first = false;
-			if (position.isDefined()) {
+			if (position.isPresent()) {
 				pos = position.get();
 			} else {
 				pos = -1;
@@ -608,7 +608,7 @@ public class WithResourceController extends WithController {
 	}
 
 	// TODO: update collection's media
-	public static Result moveRecordInCollection(String id, String recordId,
+	public Result moveRecordInCollection(String id, String recordId,
 			int oldPosition, int newPosition) {
 		ObjectNode result = Json.newObject();
 		Locks locks = null;
@@ -697,18 +697,18 @@ public class WithResourceController extends WithController {
 	/**
 	 * @return
 	 */
-	public static Result addToFavorites() {
+	public Result addToFavorites() {
 		ObjectId userId = new ObjectId(session().get("user"));
 		String fav = DB.getCollectionObjectDAO()
 				.getByOwnerAndLabel(userId, null, "_favorites").getDbId()
 				.toString();
-		return addRecordToCollection(fav, Option.None(), true);
+		return addRecordToCollection(fav, Optional.empty(), true);
 	}
 
 	/**
 	 * @return
 	 */
-	public static Result removeFromFavorites(String externalId) {
+	public Result removeFromFavorites(String externalId) {
 		ObjectId userId = new ObjectId(session().get("user"));
 		String fav = DB.getCollectionObjectDAO()
 				.getByOwnerAndLabel(userId, null, "_favorites").getDbId()
@@ -723,10 +723,10 @@ public class WithResourceController extends WithController {
 		 * Option.Some(c.getPosition()), false); } }
 		 */
 		return removeRecordFromCollection(fav, record.getDbId().toString(),
-				Option.None(), true);
+				Optional.empty(), true);
 	}
 
-	public static Result removeFromFavorites() {
+	public Result removeFromFavorites() {
 		JsonNode json = request().body().asJson();
 		JsonNode externalIdNode = json.get("externalId");
 		if (externalIdNode == null) {
@@ -743,10 +743,10 @@ public class WithResourceController extends WithController {
 		RecordResource record = DB.getRecordResourceDAO().getByExternalId(
 				externalId);
 		return removeRecordFromCollection(fav, record.getDbId().toString(),
-				Option.None(), false);
+				Optional.empty(), false);
 	}
 	
-	public static Result removeIdsOfDeletedRecords() {
+	public Result removeIdsOfDeletedRecords() {
 		Iterator<RecordResource> recordIterator = DB.getRecordResourceDAO().createQuery().iterator();
 		int i = 1;
 		Set recordIds = new HashSet<>();

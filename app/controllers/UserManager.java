@@ -72,12 +72,9 @@ import model.usersAndGroups.UserGroup;
 import play.Logger;
 import play.Logger.ALogger;
 import play.libs.Akka;
-import play.libs.Crypto;
+
 import play.libs.Json;
 import play.mvc.Result;
-import scala.concurrent.Await;
-import scala.concurrent.Future;
-import scala.concurrent.duration.Duration;
 import utils.Serializer;
 
 public class UserManager extends WithController {
@@ -212,7 +209,7 @@ public class UserManager extends WithController {
 		return result;
 	}
 
-	public static Result getUser(String id) {
+	public Result getUser(String id) {
 		try {
 			// User user = DB.getUserDAO().getById(new ObjectId(id), new
 			// ArrayList<String>() {{ add("firstName"); add("lastName"); }});
@@ -227,7 +224,7 @@ public class UserManager extends WithController {
 		}
 	}
 
-	public static Result getMyUser() {
+	public Result getMyUser() {
 		try {
 			User user = effectiveUser();
 			if (user != null) {
@@ -244,7 +241,7 @@ public class UserManager extends WithController {
 	 *
 	 * @return the user JSON object (without the password) or JSON error
 	 */
-	public static Result register() {
+	public Result register() {
 
 		JsonNode json = request().body().asJson();
 		ObjectNode result = Json.newObject();
@@ -271,11 +268,11 @@ public class UserManager extends WithController {
 	 *
 	 * @return success or JSON error
 	 */
-	public static Result deleteUser(String id) {
+	public Result deleteUser(String id) {
 		try {
 			ObjectId userId = new ObjectId(id);
 			ObjectId currentUserId = WithController.effectiveUserDbId();
-			Status errorMessage = badRequest(Json.parse("{'error':'User cannot be deleted due to ownership of "
+			Result errorMessage = badRequest(Json.parse("{'error':'User cannot be deleted due to ownership of "
 					+ "shared collections or groups. Please contact the developers'}"));
 			if ((currentUserId == null) || (!currentUserId.equals(userId) && !WithController.isSuperUser()))
 				return forbidden(Json.parse("{'error' : 'No rights for user deletion'}"));
@@ -310,7 +307,7 @@ public class UserManager extends WithController {
 		}
 	}
 
-	private static Result googleLogin(String googleId, String accessToken) {
+	private Result googleLogin(String googleId, String accessToken) {
 		log.info(accessToken);
 		User u = null;
 		try {
@@ -347,7 +344,7 @@ public class UserManager extends WithController {
 		}
 	}
 
-	private static Result login(User user) {
+	private Result login(User user) {
 		session().put("user", user.getDbId().toHexString());
 		session().put("username", user.getUsername());
 		session().put("sourceIp", request().remoteAddress());
@@ -355,7 +352,7 @@ public class UserManager extends WithController {
 		return ok(addTokenToUser(user));
 	}
 
-	private static Result facebookLogin(String facebookId, String accessToken) {
+	private Result facebookLogin(String facebookId, String accessToken) {
 		log.info(accessToken);
 		User u = null;
 		try {
@@ -394,7 +391,7 @@ public class UserManager extends WithController {
 		}
 	}
 
-	public static Result facebookLogin() {
+	public Result facebookLogin() {
 		try {
 			JsonNode json = request().body().asJson();
 			String facebookSecret;
@@ -449,7 +446,7 @@ public class UserManager extends WithController {
 		}
 	}
 
-	private static Result register(Person profile) {
+	private Result register(Person profile) {
 		User user = new User();
 		user.setFirstName(profile.getName().getGivenName());
 		user.setLastName(profile.getName().getFamilyName());
@@ -465,7 +462,7 @@ public class UserManager extends WithController {
 		return login(user);
 	}
 	
-	private static Result register(facebook4j.User facebookUser) {
+	private Result register(facebook4j.User facebookUser) {
 		User user = new User();
 		log.error(facebookUser.toString());
 		log.error(facebookUser.getId());
@@ -486,7 +483,7 @@ public class UserManager extends WithController {
 		return login(user);
 	}
 
-	public static Result googleLogin() {
+	public Result googleLogin() {
 		try {
 			JsonNode json = request().body().asJson();
 			GoogleAuthorizationCodeFlow flow = new GoogleAuthorizationCodeFlow.Builder(new NetHttpTransport(),
@@ -523,7 +520,7 @@ public class UserManager extends WithController {
 	 *
 	 * @return OK status and the cookie or JSON error
 	 */
-	public static Result login() {
+	public Result login() {
 		JsonNode json = request().body().asJson();
 		ObjectNode result = Json.newObject();
 		ObjectNode error = Json.newObject();
@@ -602,7 +599,7 @@ public class UserManager extends WithController {
 		}
 	}
 	
-	public static Result getUserByUsername(String username) {
+	public Result getUserByUsername(String username) {
 		try {
 			User user = DB.getUserDAO().getUniqueByFieldAndValue("username", username);
 			return ok(Json.toJson(user));
@@ -616,12 +613,12 @@ public class UserManager extends WithController {
 	 *
 	 * @return OK status
 	 */
-	public static Result logout() {
+	public Result logout() {
 		session().clear();
 		return ok();
 	}
 
-	public static Result loginWithToken(String token) {
+	public Result loginWithToken(String token) {
 		try {
 			JsonNode input = Json.parse(Crypto.decryptAES(token));
 			String userId = input.get("user").asText();
@@ -666,7 +663,7 @@ public class UserManager extends WithController {
 		return enc;
 	}
 
-	public static Result getToken() {
+	public Result getToken() {
 		String userId = session().get("user");
 		if (userId == null)
 			return badRequest();
@@ -687,7 +684,7 @@ public class UserManager extends WithController {
 	 *            the email
 	 * @return OK if the email is available or error if not
 	 */
-	public static Result emailAvailable(String email) {
+	public Result emailAvailable(String email) {
 		User user = DB.getUserDAO().getByEmail(email);
 		if (user != null) {
 			return badRequest(Json.parse("{\"error\":\"Email not available\"}"));
@@ -696,7 +693,7 @@ public class UserManager extends WithController {
 		}
 	}
 
-	public static Result editUser(String id) throws JsonProcessingException, IOException {
+	public Result editUser(String id) throws JsonProcessingException, IOException {
 
 		// Only changes first and last name for testing purposes
 		//
@@ -777,7 +774,7 @@ public class UserManager extends WithController {
 
 	}
 
-	public static Result apikey() {
+	public Result apikey() {
 
 		// need to limit calls like this and reset password to 3 times per day
 		// maximum!
@@ -904,7 +901,7 @@ public class UserManager extends WithController {
 	 * @return OK status
 	 */
 
-	public static Result resetPassword(String emailOrUserName) {
+	public Result resetPassword(String emailOrUserName) {
 
 		ObjectNode result = Json.newObject();
 		ObjectNode error = Json.newObject();
@@ -1028,7 +1025,7 @@ public class UserManager extends WithController {
 	 * @return OK and user data
 	 ***/
 
-	public static Result changePassword() {
+	public Result changePassword() {
 
 		ObjectNode result = Json.newObject();
 

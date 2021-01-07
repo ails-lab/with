@@ -61,7 +61,7 @@ public class ExhibitionObjectController extends WithResourceController {
 		return ok(result);
 	}
 				
-	public static Status errorMsg() {
+	public static Result errorMsg() {
 		return badRequest("Input should have the format {media: [mediaType: {url: url}, ...]}, "
 				+ "where mediaType one of (Original, Medium, Thumbnail, Square, Tiny).");
 	}

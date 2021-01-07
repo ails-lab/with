@@ -28,10 +28,14 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Random;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 import javax.validation.ConstraintViolation;
 
@@ -133,10 +137,10 @@ public class CollectionObjectController extends WithResourceController {
 
 	public static final ALogger log = Logger.of(CollectionObjectController.class);
 
-	public static Promise<Result> importSearch() {
+	public  CompletionStage<Result> importSearch() {
 		JsonNode json = request().body().asJson();
 		if (json == null) {
-			return Promise.pure((Result) badRequest("Expecting Json query"));
+			return CompletableFuture.completedFuture((Result) badRequest("Expecting Json query"));
 		} else {
 			// Parse the query.
 			try {
@@ -152,7 +156,7 @@ public class CollectionObjectController extends WithResourceController {
 					boolean success = internalAddCollection(collection, WithResourceType.SimpleCollection, creatorDbId,
 							resultInfo);
 					if (!success)
-						return Promise.pure((Result) badRequest("Expecting Json query"));
+						return CompletableFuture.completedFuture((Result) badRequest("Expecting Json query"));
 					ccid = collection;
 				} else {
 					List<CollectionObject> col = DB.getCollectionObjectDAO().getByLabel(Language.DEFAULT, cname);
@@ -166,24 +170,24 @@ public class CollectionObjectController extends WithResourceController {
 
 			} catch (Exception e) {
 				log.error("", e);
-				return Promise.pure((Result) badRequest(e.getMessage()));
+				return CompletableFuture.completedFuture((Result) badRequest(e.getMessage()));
 			}
 		}
 	}
 
-	public static Result importOmeka(String colid) {
+	public Result importOmeka(String colid) {
 		OmekaExhibitionReader r = new OmekaExhibitionReader();
 		ObjectId creatorDbId = new ObjectId(loggedInUser());
 		r.importOmeka(creatorDbId, colid);
 		return ok("Collections from Omeka imported");
 	}
 
-	public static Result importExhibition(String source) {
+	public Result importExhibition(String source) {
 		Object res = importExhibitionInternal(source);
 		return ok(Json.toJson(res));
 	}
 
-	public static Object importExhibitionInternal(String source) {
+	public Object importExhibitionInternal(String source) {
 		ObjectId creatorDbId = new ObjectId(loggedInUser());
 		JsonNode json = request().body().asJson();
 		Object res;
@@ -201,7 +205,7 @@ public class CollectionObjectController extends WithResourceController {
 		return res;
 	}
 
-	public static Result importIDs(String cname, String source, String ids) {
+	public Result importIDs(String cname, String source, String ids) {
 		System.out.println("----------------check collection");
 		ObjectNode resultInfo = Json.newObject();
 		System.out.println("----------------check collection");
@@ -215,7 +219,7 @@ public class CollectionObjectController extends WithResourceController {
 			descriptiveData.setLabel(new MultiLiteral(oid).fillDEF());
 			record.setDescriptiveData(descriptiveData);
 			record.addToProvenance(new ProvenanceInfo(source, null, oid));
-			internalAddRecordToCollection(ccid.getDbId().toString(), record, F.Option.None(), resultInfo);
+			internalAddRecordToCollection(ccid.getDbId().toString(), record, Optional.empty(), resultInfo);
 		}
 		return ok(resultInfo);
 	}
@@ -247,21 +251,21 @@ public class CollectionObjectController extends WithResourceController {
 	 * @param id
 	 * @return
 	 */
-	public static Promise<Result> createAndFillEuropeanaCollection(String id, int limit) {
+	public CompletionStage<Result> createAndFillEuropeanaCollection(String id, int limit) {
 		CollectionObject collection = new SimpleCollection();
 		collection.getDescriptiveData().setLabel(new MultiLiteral(id).fillDEF());
 		ObjectNode resultInfo = Json.newObject();
 		ObjectId creatorDbId = new ObjectId(loggedInUser());
 		boolean success = internalAddCollection(collection, WithResourceType.SimpleCollection, creatorDbId, resultInfo);
 		if (!success)
-			return Promise.pure((Result) badRequest(resultInfo));
+			return CompletableFuture.completedFuture((Result) badRequest(resultInfo));
 		CommonQuery q = new CommonQuery();
 
 		EuropeanaCollectionSpaceSource src = new EuropeanaCollectionSpaceSource(id);
 		return internalImport(src, collection, q, limit, resultInfo, false, false);
 	}
 
-	private static Promise<Result> internalImport(EuropeanaSpaceSource src, CollectionObject collection, CommonQuery q,
+	private CompletionStage<Result> internalImport(EuropeanaSpaceSource src, CollectionObject collection, CommonQuery q,
 			int limit, ObjectNode resultInfo, boolean dontDuplicate, boolean waitToFinish) {
 		q.page = 1 + "";
 		q.pageSize = "20";
@@ -272,9 +276,8 @@ public class CollectionObjectController extends WithResourceController {
 		int firstPageCount1 = addResultToCollection(result, collection.getDbId().toString(), mylimit, resultInfo,
 				dontDuplicate);
 
-		Function0<Result> function0 = new Function0<Result>() {
-			public Result apply() {
-				SourceResponse result;
+		Supplier<Result> supplier = () -> {
+				SourceResponse innerResult;
 				int page = 1;
 				int itemsCount = firstPageCount1;
 				while (itemsCount < mylimit) {
@@ -282,7 +285,7 @@ public class CollectionObjectController extends WithResourceController {
 					q.page = page + "";
 					result = src.getResults(q);
 					if (result.error == null) {
-						int c = addResultToCollection(result, collection.getDbId().toString(), mylimit - itemsCount,
+						int c = addResultToCollection(innerResult, collection.getDbId().toString(), mylimit - itemsCount,
 								resultInfo, dontDuplicate);
 						itemsCount = itemsCount + c;
 					} else {
@@ -290,22 +293,21 @@ public class CollectionObjectController extends WithResourceController {
 					}
 				}
 				return ok(Json.toJson(
-						collectionWithMyAccessData(collection, effectiveUserIds(), "BASIC", Option.Some("DEFAULT"))));
-			}
+						collectionWithMyAccessData(collection, effectiveUserIds(), "BASIC", Optional.of("DEFAULT"))));
 		};
-		Promise<Result> promiseOfInt = Promise.promise(function0);
+		CompletableFuture<Result> promiseOfInt = CompletableFuture.supplyAsync(supplier);
 		// Promise<Result> promiseOfInt =
 		// ParallelAPICall.createPromise(function0, Priority.MINE);
 		if (resultInfo.has("error"))
-			return Promise.pure((Result) badRequest(resultInfo));
+			return CompletableFuture.completedFuture((Result) badRequest(resultInfo));
 		if (waitToFinish)
 			return promiseOfInt;
 		else
-			return Promise.pure(ok(Json.toJson(
-					collectionWithMyAccessData(collection, effectiveUserIds(), "BASIC", Option.Some("DEFAULT")))));
+			return CompletableFuture.completedFuture(ok(Json.toJson(
+					collectionWithMyAccessData(collection, effectiveUserIds(), "BASIC", Optional.of("DEFAULT")))));
 	}
 
-	public static Result uploadCollection() {
+	public Result uploadCollection() {
 		ObjectNode resultInfo = Json.newObject();
 		MultipartFormData body = request().body().asMultipartFormData();
 		FilePart picture = body.getFile("items");
@@ -342,14 +344,14 @@ public class CollectionObjectController extends WithResourceController {
 		for (Iterator<WithResource<?, ?>> iterator = items.iterator(); iterator.hasNext()
 				&& ((limit < 0) || (itemsCount < limit));) {
 			WithResource<?, ?> item = iterator.next();
-			WithResourceController.internalAddRecordToCollection(collectionID, (RecordResource) item, F.Option.None(),
+			WithResourceController.internalAddRecordToCollection(collectionID, (RecordResource) item, Optional.empty(),
 					resultInfo, dontRepeat);
 			itemsCount++;
 		}
 		return itemsCount;
 	}
 
-	public static Result sortCollectionObject(String collectionId) {
+	public Result sortCollectionObject(String collectionId) {
 		ObjectNode result = Json.newObject();
 		try {
 			ObjectId collectionDbId = new ObjectId(collectionId);
