@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.CompletionStage;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -45,7 +46,7 @@ public class AutocompleteController extends WithController {
 
 	public static final ALogger log = Logger.of(AutocompleteController.class);
 
-	public static Promise<Result> autocompleteExt(String term, Integer limit, List<String> sourceFromUI) {
+	public  CompletionStage<Result> autocompleteExt(String term, Integer limit, List<String> sourceFromUI) {
 		List<ISpaceSource> sourcesForAutocomplete = new ArrayList<ISpaceSource>();
 		if (sourceFromUI.isEmpty())
 			sourcesForAutocomplete = ESpaceSources.getESources();
@@ -61,7 +62,7 @@ public class AutocompleteController extends WithController {
 	//the union of the suggestions collected from the sources APIs is returned
 	//if no source returns suggestions, then empty content is returned
 	@BodyParser.Of(BodyParser.Json.class)
-	private static Promise<Result> getSuggestionsResponse(List<ISpaceSource> sourcesWithAutocomplete, final String term, int limit) {
+	private CompletionStage<Result> getSuggestionsResponse(List<ISpaceSource> sourcesWithAutocomplete, final String term, int limit) {
 		BiFunction<String, ISpaceSource, AutocompleteResponse> methodQuery = (String autocompleteQuery, ISpaceSource src) -> {
 				try {
 					URL url = new URL(autocompleteQuery.replace(" ", "%20"));
@@ -90,11 +91,11 @@ public class AutocompleteController extends WithController {
 				}
 		};
 
-		Iterable<Promise<AutocompleteResponse>> promises = new ArrayList<Promise<AutocompleteResponse>>();
+		Iterable<CompletionStage<AutocompleteResponse>> promises = new ArrayList<CompletionStage<AutocompleteResponse>>();
 		for (final ISpaceSource source: sourcesWithAutocomplete) {
 			final String autocompleteQuery = source.autocompleteQuery(term, limit);
 			if (!autocompleteQuery.isEmpty()) {
-				((ArrayList<Promise<AutocompleteResponse>>) promises).add(
+				((ArrayList<CompletionStage<AutocompleteResponse>>) promises).add(
 					ParallelAPICall.createPromise(methodQuery, autocompleteQuery, source)
 				);
 			}

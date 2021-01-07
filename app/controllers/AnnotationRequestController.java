@@ -16,26 +16,35 @@
 
 package controllers;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.google.inject.Inject;
+
+import actors.annotation.AnnotationControlActor;
+import akka.actor.ActorRef;
+import akka.actor.ActorSelection;
+import akka.actor.ActorSystem;
 import play.Logger;
 import play.Logger.ALogger;
 import play.libs.Akka;
 import play.libs.Json;
 import play.mvc.Controller;
 import play.mvc.Result;
-import actors.annotation.AnnotationControlActor;
-import akka.actor.ActorRef;
-import akka.actor.ActorSelection;
-
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 
 @SuppressWarnings({ "rawtypes", "unchecked", "deprecation" })
-public class AnnotationRequestController extends Controller {
+
+public class AnnotationRequestController  extends Controller {
 
 	public static final ALogger log = Logger.of(AnnotationRequestController.class);
-
-	public static Result newAnnotations() {
+	public ActorSystem actorSystem;
+	
+	@Inject()
+	public AnnotationRequestController( ActorSystem actorSystem ) {
+		this.actorSystem = actorSystem;
+	}
+	
+	public Result newAnnotations() {
 		ObjectNode error = Json.newObject();
 		JsonNode json = request().body().asJson();
 		if (json == null) {
@@ -50,7 +59,7 @@ public class AnnotationRequestController extends Controller {
 			int pos = requestId.lastIndexOf("Z");
 			String acrequestId = requestId.substring(0, pos); 
 
-			ActorSelection ac = Akka.system().actorSelection("user/" + acrequestId);
+			ActorSelection ac = actorSystem.actorSelection("user/" + acrequestId);
 			
 			for (JsonNode annotation : (ArrayNode)json.get("data")) {
 				ac.tell(new AnnotationControlActor.AnnotateRequestPartialResult(annotation), ActorRef.noSender());

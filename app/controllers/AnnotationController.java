@@ -31,7 +31,9 @@ import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.CompletionStage;
 import java.util.stream.Collectors;
 
 import org.apache.commons.csv.CSVFormat;
@@ -50,7 +52,6 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import controllers.RecordResourceController.CollectionAndRecordsCounts;
-import controllers.WithController.Profile;
 import db.DB;
 import elastic.ElasticSearcher;
 import elastic.ElasticSearcher.SearchOptions;
@@ -77,12 +78,8 @@ import model.usersAndGroups.User;
 import play.Logger;
 import play.Logger.ALogger;
 import play.cache.Cached;
-import play.libs.F.Promise;
-import play.libs.F.Some;
 import play.libs.Json;
-import play.mvc.Controller;
 import play.mvc.Result;
-import sources.core.ISpaceSource;
 import sources.core.ParallelAPICall;
 import utils.Tuple;
 
@@ -373,7 +370,7 @@ public class AnnotationController extends WithController {
 
 	// caching 5 minutes should be ok
 	@Cached(key = "annotationCounts", duration = 300)
-	public static Promise<Result> getDeepAnnotationCount(String groupId) {
+	public CompletionStage<Result> getDeepAnnotationCount(String groupId) {
 		ObjectNode result = Json.newObject();
 		// everything on the frontend thread queue
 		return ParallelAPICall.createPromise(() -> {
@@ -414,7 +411,7 @@ public class AnnotationController extends WithController {
 	}
 
 	@Cached(key = "leaderBoard", duration = 300)
-	public static Promise<Result> leaderboard(String groupId) {
+	public CompletionStage<Result> leaderboard(String groupId) {
 		ArrayNode result = Json.newObject().arrayNode();
 
 		// everything on the frontend thread queue
@@ -512,7 +509,7 @@ public class AnnotationController extends WithController {
 		}, ParallelAPICall.Priority.FRONTEND);
 	}
 
-	public static Result getUserAnnotations(String userId, String project, String campaign, int offset, int count) {
+	public Result getUserAnnotations(String userId, String project, String campaign, int offset, int count) {
 		ObjectId withUser = null;
 
 		if (userId != null)
@@ -575,15 +572,15 @@ public class AnnotationController extends WithController {
 		return ok(recordsWithCount);
 	}
 
-	public static JsonNode getUserAnnotatedRecords(ObjectId withUser, String project, String campaign, int offset,
+	public JsonNode getUserAnnotatedRecords(ObjectId withUser, String project, String campaign, int offset,
 			int count) {
 		ArrayNode recordsList = Json.newObject().arrayNode();
 		List<RecordResource> records = DB.getRecordResourceDAO().getAnnotatedRecords(withUser, project, campaign,
 				offset, count);
 		for (RecordResource record : records) {
-			Some<String> locale = new Some(Language.DEFAULT.toString());
+			Optional<String> locale = Optional.of(Language.DEFAULT.toString());
 			RecordResource profiledRecord = record.getRecordProfile(Profile.MEDIUM.toString());
-			WithController.filterResourceByLocale(locale, profiledRecord);
+			filterResourceByLocale(locale, profiledRecord);
 			recordsList.add(Json.toJson(profiledRecord));
 		}
 		return recordsList;
