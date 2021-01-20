@@ -245,13 +245,13 @@ GET 	/collection/:id/nerd						controllers.CollectionObjectController.nerdCollec
 #GET	     /collection/:id/annotationSummary 	        			controllers.CollectionObjectController.getAnnotationSummary(id, mode: String ?="FLAT")
 
 #Campaign Controller
-GET		/campaign/count								controllers.CampaignController.getCampaignCount(group: String ?= "", project: String ?= "WITHcrowd", state: String ?= "all")
+GET		/campaign/count								controllers.CampaignController.getCampaignCount(group: String ?= "", project: String ?= "CrowdHeritage", state: String ?= "all")
 GET		/campaign/getCampaign						controllers.CampaignController.getCampaign(campaignId: String)
 DELETE	/campaign/:id								controllers.CampaignController.deleteCampaign(id)
 GET		/campaign/reset/:id							controllers.CampaignController.resetCampaign(id)
 PUT		/campaign/:id								controllers.CampaignController.editCampaign(id)
 GET		/campaign/getCampaignByName					controllers.CampaignController.getCampaignByName(cname: String)
-GET		/campaign/campaigns							controllers.CampaignController.getCampaigns(group: String ?= "", project: String ?= "WITHcrowd", state: String ?="all", sortBy: String ?= "Alphabetical", offset: Integer ?=0, count: Integer ?=10)
+GET		/campaign/campaigns							controllers.CampaignController.getCampaigns(group: String ?= "", project: String ?= "CrowdHeritage", state: String ?="all", sortBy: String ?= "Date_desc", offset: Integer ?=0, count: Integer ?=10)
 GET		/campaign/incUserPoints						controllers.CampaignController.incUserPoints(campaignId: String, userId: String, annotationType: String)
 GET		/campaign/decUserPoints						controllers.CampaignController.decUserPoints(campaignId: String, userId: String, annotationType: String)
 POST	/campaign/createCampaign					controllers.CampaignController.createCampaign()

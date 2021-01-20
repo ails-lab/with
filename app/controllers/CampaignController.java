@@ -189,7 +189,7 @@ public class CampaignController extends WithController {
 		List<Campaign> campaigns = new ArrayList<Campaign>();
 		campaigns = DB.getCampaignDAO().getCampaigns(group, project, state, sortBy, offset, count);
 		if (campaigns == null) {
-			result.put("error", "There are not any campaigns for this UserGroup.");
+			result.put("error", "There are not any campaigns for this Project.");
 			return internalServerError(result);
 		}
 		return ok(Json.toJson(campaigns));

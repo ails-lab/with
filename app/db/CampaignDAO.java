@@ -114,8 +114,10 @@ public class CampaignDAO extends DAO<Campaign> {
 			q = q.field("startDate").exists().field("endDate").exists();
 		}
 				
-		if (sortBy.equals("Date")) {
+		if (sortBy.equals("Date_asc")) {
 			q = q.order("startDate").offset(offset).limit(count);
+		} else if (sortBy.equals("Date_desc")) {
+			q = q.order("-startDate").offset(offset).limit(count);
 		} else if (sortBy.equals("Alphabetical")) {
 			q = q.order("title").offset(offset).limit(count);
 		} else {
