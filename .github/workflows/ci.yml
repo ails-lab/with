@@ -27,7 +27,7 @@ jobs:
         echo TAG_REF=${GITHUB_SHA::8} >> $GITHUB_ENV              
 
     - name: Set env for development
-      if: endsWith(github.ref, '/development')
+      #if: endsWith(github.ref, '/development')
       run: |
         echo DEPLOY_SERVER=hotwheels.ails.ece.ntua.gr >> $GITHUB_ENV              
     - name: Set env for production
