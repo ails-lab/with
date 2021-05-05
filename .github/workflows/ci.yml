@@ -38,20 +38,6 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v2
 
-    - name: Local cache sbt
-      id: sbt-cache
-      uses: MasterworksIO/action-local-cache@main
-      with:
-        path: ~/.sbt
-        key: sbt-${{ hashFiles('build.sbt') }}
-
-    - name: Local cache sbt
-      id: ivy-cache
-      uses: MasterworksIO/action-local-cache@main
-      with:
-        path: ~/.ivy2
-        key: ivy2-${{ hashFiles('build.sbt') }}
-
     # - uses: actions/cache@v2
     #   with:
     #     path: |
