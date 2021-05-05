@@ -11,7 +11,7 @@ jobs:
     env:
       REPOSITORY_URL: with.docker.ails.ece.ntua.gr/with-backend
       CONTAINER_NAME: with-backend
-      DEPLOY_USER: Deploy
+      DEPLOY_USER: deploy
       JAVA_OPTS: -Xms2048M -Xmx2048M -Xss6M -XX:ReservedCodeCacheSize=256M -Dfile.encoding=UTF-8
       JVM_OPTS:  -Xms2048M -Xmx2048M -Xss6M -XX:ReservedCodeCacheSize=256M -Dfile.encoding=UTF-8
     
@@ -54,10 +54,6 @@ jobs:
     - name: Build app
       run: sbt -v stage   
 
-    - name: Build app
-      run: sbt -v stage         
-
-
     - name: Set up QEMU
       uses: docker/setup-qemu-action@v1
     - name: Set up Docker Buildx
@@ -76,9 +72,9 @@ jobs:
         context: .
         push: true
         tags: |
-          ${{ env.REPOSITORY_ }}:latest
-          ${{ env.REPOSITORY_ }}:${{ env.TAG_REF }}
-          ${{ env.REPOSITORY_ }}:${{ steps.extract_branch.outputs.branch }}
+          ${{ env.REPOSITORY_URL }}:latest
+          ${{ env.REPOSITORY_URL }}:${{ env.TAG_REF }}
+          ${{ env.REPOSITORY_URL }}:${{ steps.extract_branch.outputs.branch }}
      
 
     - name: Deploy to Server
