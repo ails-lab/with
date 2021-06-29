@@ -361,6 +361,21 @@ public class AnnotationDAO extends DAO<Annotation> {
 		updateOps.set("publish", false);
 		this.updateFirst(q, updateOps);
 	}
+	
+	public void initializeAnnotationsForPublish(ObjectId campaignId, Boolean allowRejected, int minScore) {
+		String campaignName = DB.getCampaignDAO().getById(campaignId).getUsername();
+		Query<Annotation> q = this.createQuery().field("annotators.generator").endsWith(campaignName);
+		if (!allowRejected) {
+			q = q.field("score.rejectedBy").doesNotExist();
+		}		
+		
+		this.find(q).asList().stream()
+			.forEach(ann -> {
+				if (ann.getScore().getApprovedBy().size() >= minScore) {
+					this.markAnnotationForPublish(ann.getDbId());
+				}
+			});
+	}
 
 	public void deleteCampaignAnnotations(ObjectId campaignId) {
 		String campaignName = DB.getCampaignDAO().getById(campaignId).getUsername();

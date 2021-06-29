@@ -670,5 +670,16 @@ public class CampaignController extends WithController {
 		contributors.sort(compareByPoints);
 		return ok(Json.toJson(contributors));
 	}
+	
+	public static Result initiateValidation(String campaignId, Boolean allowRejected, int minScore) {
+		ObjectId campaignDbId = null;
+		if (StringUtils.isNotEmpty(campaignId)) {
+			campaignDbId = new ObjectId(campaignId);
+		}
+		DB.getCampaignDAO().initiateValidation(campaignDbId, allowRejected, minScore);
+		DB.getAnnotationDAO().initializeAnnotationsForPublish(campaignDbId, allowRejected, minScore);
+
+		return ok();
+	}
 
 }

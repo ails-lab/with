@@ -28,12 +28,15 @@ import org.bson.types.ObjectId;
 import org.mongodb.morphia.query.Query;
 import org.mongodb.morphia.query.UpdateOperations;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import controllers.CampaignController;
 import model.Campaign;
 import model.Campaign.AnnotationCount;
+import model.Campaign.PublishCriteria;
 import model.usersAndGroups.User;
 import play.Logger;
 import play.Logger.ALogger;
@@ -222,6 +225,17 @@ public class CampaignDAO extends DAO<Campaign> {
         }
         
         return contributors;
+	}
+	
+	public void initiateValidation(ObjectId campaignId, Boolean allowRejected, int minScore) {
+		Query<Campaign> q = this.createQuery().field("_id").equal(campaignId);
+		
+		UpdateOperations<Campaign> updateOps1 = this.createUpdateOperations();
+		PublishCriteria value = new Campaign.PublishCriteria();
+		value.setAllowRejected(allowRejected);
+		value.setMinScore(minScore);
+		updateOps1.set("publishCriteria", value);
+		this.update(q, updateOps1);
 	}
 
 }

@@ -188,6 +188,36 @@ public class Campaign {
 		}
 	}
 	
+	public static class PublishCriteria {
+		private Date validationStarted;
+		private Boolean allowRejected;
+		private int minScore;
+
+		public PublishCriteria() {
+			this.validationStarted = new Date();
+			this.allowRejected = false;
+			this.minScore = 1;
+		}
+		
+		public Boolean allowRejected() {
+			return allowRejected;
+		}
+		public void setAllowRejected(Boolean allowRejected) {
+			this.allowRejected = allowRejected;
+		}
+		public int getMinScore() {
+			return minScore;
+		}
+		public void setMinScore(int minScore) {
+			this.minScore = minScore;
+		}
+		public Date getValidationStarted() {
+			return validationStarted;
+		}
+		public void setValidationStarted(Date validationStarted) {
+			this.validationStarted = validationStarted;
+		}
+	}	
 	
 	@Id
 	@JsonSerialize(using = Serializer.ObjectIdSerializer.class)
@@ -276,6 +306,10 @@ public class Campaign {
 	 */
 	private String project;
 	
+	/**
+	 * Parameters about accepting campaign annotations for publishing
+	 */
+	private String publishCriteria;
 	
 
 	public BadgeType getBadge(int points) {
@@ -474,6 +508,12 @@ public class Campaign {
 	}
 	public void setInstructions(Literal instructions) {
 		this.instructions = instructions;
+	}
+	public String getPublishCriteria() {
+		return publishCriteria;
+	}
+	public void setPublishCriteria(String publishCriteria) {
+		this.publishCriteria = publishCriteria;
 	}
 
 }
