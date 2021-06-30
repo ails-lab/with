@@ -79,6 +79,7 @@ GET		/annotation/:id/reject					controllers.AnnotationController.rejectAnnotatio
 POST	/annotation/:id/rejectObj				controllers.AnnotationController.rejectAnnotationObject(id)
 GET		/annotation/:id/unscore					controllers.AnnotationController.unscoreAnnotation(id)
 GET		/annotation/:id/unscoreObj				controllers.AnnotationController.unscoreAnnotationObject(id)
+GET     /annotation/:id/markForPublish          controllers.AnnotationController.markForPublish(id, publish: Boolean ?= true)
 
 # Collection Controller
 #GET 	 /collection/list 						controllers.CollectionObjectController.list(directlyAccessedByUserOrGroup: play.libs.F.Option[controllers.parameterTypes.MyPlayList], recursivelyAccessedByUserOrGroup: play.libs.F.Option[controllers.parameterTypes.MyPlayList], creator: play.libs.F.Option[String], isPublic: play.libs.F.Option[java.lang.Boolean], isExhibition: play.libs.F.Option[java.lang.Boolean], collectionHits:Boolean ?= false, offset: Integer ?=0, count: Integer ?=10)

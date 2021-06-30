@@ -36,6 +36,7 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVRecord;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
@@ -1055,5 +1056,19 @@ public class AnnotationController extends WithController {
 				.map(a -> tranformToEuropeanaModel(a)).filter(a -> (a.get("target") != null))
 				.collect(Collectors.toList());
 		return ok(Json.toJson(res));
+	}
+	
+	public static Result markForPublish(String id, Boolean publish) {
+		ObjectId dbId = null;
+		if (StringUtils.isNotEmpty(id)) {
+			dbId = new ObjectId(id);
+		}
+		if (publish) {
+			DB.getAnnotationDAO().markAnnotationForPublish(dbId);
+		} else {
+			DB.getAnnotationDAO().unmarkAnnotationForPublish(dbId);
+		}
+		
+		return ok();
 	}
 }

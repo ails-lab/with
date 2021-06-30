@@ -30,6 +30,7 @@ import java.util.stream.Stream;
 
 import model.annotations.Annotation;
 import model.annotations.Annotation.AnnotationAdmin;
+import model.annotations.Annotation.AnnotationScore;
 import model.annotations.Annotation.MotivationType;
 import model.annotations.bodies.AnnotationBodyGeoTagging;
 import model.annotations.bodies.AnnotationBodyTagging;
@@ -361,18 +362,27 @@ public class AnnotationDAO extends DAO<Annotation> {
 		updateOps.set("publish", false);
 		this.updateFirst(q, updateOps);
 	}
-	
+		
 	public void initializeAnnotationsForPublish(ObjectId campaignId, Boolean allowRejected, int minScore) {
 		String campaignName = DB.getCampaignDAO().getById(campaignId).getUsername();
 		Query<Annotation> q = this.createQuery().field("annotators.generator").endsWith(campaignName);
-		if (!allowRejected) {
-			q = q.field("score.rejectedBy").doesNotExist();
-		}		
 		
 		this.find(q).asList().stream()
 			.forEach(ann -> {
-				if (ann.getScore().getApprovedBy().size() >= minScore) {
+				AnnotationScore score = ann.getScore();
+				if (score == null) {
+					this.unmarkAnnotationForPublish(ann.getDbId());
+					return;
+				}
+				int app = score.getApprovedBy() == null ? 0 : score.getApprovedBy().size();
+				int rej = score.getRejectedBy() == null ? 0 : score.getRejectedBy().size();
+				if (app-rej >= minScore) {
 					this.markAnnotationForPublish(ann.getDbId());
+				} else {
+					this.unmarkAnnotationForPublish(ann.getDbId());
+				}
+				if (!allowRejected && rej > 0) {
+					this.unmarkAnnotationForPublish(ann.getDbId());
 				}
 			});
 	}
