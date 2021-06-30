@@ -629,7 +629,7 @@ public class CampaignController extends WithController {
 		// creator
 		List<Annotation> annotations;
 		Annotation current;
-		annotations = DB.getAnnotationDAO().getCampaignAnnotations(campaignDbId);
+		annotations = DB.getAnnotationDAO().getCampaignAnnotations(campaignDbId, false);
 		for (i = 0; i < annotations.size(); i++) {
 			current = annotations.get(i);
 			if (current.getScore() != null) {

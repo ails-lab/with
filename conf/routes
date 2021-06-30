@@ -67,6 +67,7 @@ PUT		/record/:id								controllers.RecordResourceController.editRecordResource(
 
 GET		/annotation/importAutomatic				controllers.AnnotationController.importAutomaticColourAnnotations()
 GET		/annotation/export						controllers.AnnotationController.exportAnnotationsForEuropeanaApi(project: String ?= "CrowdHeritage", campaignName: String, maxRanking: Integer ?= -1, mark: Boolean ?= false)
+GET		/annotation/exportCampaignAnnotations	controllers.AnnotationController.exportCampaignAnnotations(campaignName: String)
 GET 	/annotation/leaderboard					controllers.AnnotationController.leaderboard( groupId: String )
 GET		/annotation/approveMultiple				controllers.AnnotationController.approveMultipleAnnotations( id: java.util.List[String])
 GET		/annotation/rejectMultiple				controllers.AnnotationController.rejectMultipleAnnotations( id: java.util.List[String])

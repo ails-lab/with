@@ -396,24 +396,27 @@ public class AnnotationDAO extends DAO<Annotation> {
 		this.deleteByQuery(q);
 	}
 
-	public List<Annotation> getCampaignAnnotations(ObjectId campaignId) {
+	public List<Annotation> getCampaignAnnotations(ObjectId campaignId, Boolean filterPublish) {
 		String campaignName = DB.getCampaignDAO().getById(campaignId).getUsername();
 		Query<Annotation> q = this.createQuery().field("annotators.generator").endsWith(campaignName);
 		return this.find(q).asList();
 	}
 
-	public List<Annotation> getCampaignAnnotations(String campaignName) {
+	public List<Annotation> getCampaignAnnotations(String campaignName, Boolean filterPublish) {
 		Query<Annotation> q = this.createQuery().field("annotators.generator").endsWith(campaignName);
+		if (filterPublish) {
+			q = q.field("publish").equal(true);
+		}
 		Iterator<Annotation> i = this.find(q).iterator();
-		List<Annotation> a = new ArrayList<Annotation>();
+		List<Annotation> annotations = new ArrayList<Annotation>();
 		while (i.hasNext()) {
 			try {
-				a.add(i.next());
+				annotations.add(i.next());
 			} catch (Exception e) {
 				Logger.error(e.getMessage());
 			}
 		}
-		return a;
+		return annotations;
 	}
 
 	public void unscoreAutomaticAnnotations() {
