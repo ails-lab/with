@@ -36,6 +36,7 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVRecord;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
@@ -540,7 +541,7 @@ public class AnnotationController extends WithController {
 			ObjectId creatorId;
 			List<Annotation> annotations;
 			Annotation current;
-			annotations = DB.getAnnotationDAO().getCampaignAnnotations(campaign);
+			annotations = DB.getAnnotationDAO().getCampaignAnnotations(campaign, false);
 			int i;
 			for (i = 0; i < annotations.size(); i++) {
 				current = annotations.get(i);
@@ -1032,13 +1033,13 @@ public class AnnotationController extends WithController {
 
 	public static Result exportAnnotationsForEuropeanaApi(String project, String campaignName, int maxRanking,
 			boolean mark) {
-		List<Annotation> annotations = DB.getAnnotationDAO().getCampaignAnnotations(project + " transport-travel");
-		annotations.addAll(DB.getAnnotationDAO().getCampaignAnnotations(project + " style-design"));
-		annotations.addAll(DB.getAnnotationDAO().getCampaignAnnotations(project + " film-theatre"));
-		annotations.addAll(DB.getAnnotationDAO().getCampaignAnnotations(project + " ladies"));
+		List<Annotation> annotations = DB.getAnnotationDAO().getCampaignAnnotations(project + " transport-travel", false);
+		annotations.addAll(DB.getAnnotationDAO().getCampaignAnnotations(project + " style-design", false));
+		annotations.addAll(DB.getAnnotationDAO().getCampaignAnnotations(project + " film-theatre", false));
+		annotations.addAll(DB.getAnnotationDAO().getCampaignAnnotations(project + " ladies", false));
 		List<Annotation> published = annotations;
 		if (campaignName.equals("colours-catwalk")) {
-			annotations.addAll(DB.getAnnotationDAO().getCampaignAnnotations("Image Analysis"));
+			annotations.addAll(DB.getAnnotationDAO().getCampaignAnnotations("Image Analysis", false));
 			HashMap<ObjectId, List<Annotation>> annotationsPerRecord = new HashMap<ObjectId, List<Annotation>>();
 			for (Annotation annotation : annotations) {
 				prepareAnnotationForPublish(annotationsPerRecord, annotation);
@@ -1055,5 +1056,28 @@ public class AnnotationController extends WithController {
 				.map(a -> tranformToEuropeanaModel(a)).filter(a -> (a.get("target") != null))
 				.collect(Collectors.toList());
 		return ok(Json.toJson(res));
+	}
+	
+	public static Result exportCampaignAnnotations(String campaignName) {
+		List<Annotation> published = DB.getAnnotationDAO().getCampaignAnnotations(campaignName, true);
+		List<JsonNode> res = published.stream()
+			.map(a -> tranformToEuropeanaModel(a)).filter(a -> (a.get("target") != null))
+			.collect(Collectors.toList());
+
+		return ok(Json.toJson(res));
+	}
+	
+	public static Result markForPublish(String id, Boolean publish) {
+		ObjectId dbId = null;
+		if (StringUtils.isNotEmpty(id)) {
+			dbId = new ObjectId(id);
+		}
+		if (publish) {
+			DB.getAnnotationDAO().markAnnotationForPublish(dbId);
+		} else {
+			DB.getAnnotationDAO().unmarkAnnotationForPublish(dbId);
+		}
+		
+		return ok();
 	}
 }

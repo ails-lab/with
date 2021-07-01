@@ -30,6 +30,7 @@ import java.util.stream.Stream;
 
 import model.annotations.Annotation;
 import model.annotations.Annotation.AnnotationAdmin;
+import model.annotations.Annotation.AnnotationScore;
 import model.annotations.Annotation.MotivationType;
 import model.annotations.bodies.AnnotationBodyGeoTagging;
 import model.annotations.bodies.AnnotationBodyTagging;
@@ -361,6 +362,30 @@ public class AnnotationDAO extends DAO<Annotation> {
 		updateOps.set("publish", false);
 		this.updateFirst(q, updateOps);
 	}
+		
+	public void initializeAnnotationsForPublish(ObjectId campaignId, Boolean allowRejected, int minScore) {
+		String campaignName = DB.getCampaignDAO().getById(campaignId).getUsername();
+		Query<Annotation> q = this.createQuery().field("annotators.generator").endsWith(campaignName);
+		
+		this.find(q).asList().stream()
+			.forEach(ann -> {
+				AnnotationScore score = ann.getScore();
+				if (score == null) {
+					this.unmarkAnnotationForPublish(ann.getDbId());
+					return;
+				}
+				int app = score.getApprovedBy() == null ? 0 : score.getApprovedBy().size();
+				int rej = score.getRejectedBy() == null ? 0 : score.getRejectedBy().size();
+				if (app-rej >= minScore) {
+					this.markAnnotationForPublish(ann.getDbId());
+				} else {
+					this.unmarkAnnotationForPublish(ann.getDbId());
+				}
+				if (!allowRejected && rej > 0) {
+					this.unmarkAnnotationForPublish(ann.getDbId());
+				}
+			});
+	}
 
 	public void deleteCampaignAnnotations(ObjectId campaignId) {
 		String campaignName = DB.getCampaignDAO().getById(campaignId).getUsername();
@@ -371,24 +396,27 @@ public class AnnotationDAO extends DAO<Annotation> {
 		this.deleteByQuery(q);
 	}
 
-	public List<Annotation> getCampaignAnnotations(ObjectId campaignId) {
+	public List<Annotation> getCampaignAnnotations(ObjectId campaignId, Boolean filterPublish) {
 		String campaignName = DB.getCampaignDAO().getById(campaignId).getUsername();
 		Query<Annotation> q = this.createQuery().field("annotators.generator").endsWith(campaignName);
 		return this.find(q).asList();
 	}
 
-	public List<Annotation> getCampaignAnnotations(String campaignName) {
+	public List<Annotation> getCampaignAnnotations(String campaignName, Boolean filterPublish) {
 		Query<Annotation> q = this.createQuery().field("annotators.generator").endsWith(campaignName);
+		if (filterPublish) {
+			q = q.field("publish").equal(true);
+		}
 		Iterator<Annotation> i = this.find(q).iterator();
-		List<Annotation> a = new ArrayList<Annotation>();
+		List<Annotation> annotations = new ArrayList<Annotation>();
 		while (i.hasNext()) {
 			try {
-				a.add(i.next());
+				annotations.add(i.next());
 			} catch (Exception e) {
 				Logger.error(e.getMessage());
 			}
 		}
-		return a;
+		return annotations;
 	}
 
 	public void unscoreAutomaticAnnotations() {

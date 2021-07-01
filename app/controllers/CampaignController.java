@@ -629,7 +629,7 @@ public class CampaignController extends WithController {
 		// creator
 		List<Annotation> annotations;
 		Annotation current;
-		annotations = DB.getAnnotationDAO().getCampaignAnnotations(campaignDbId);
+		annotations = DB.getAnnotationDAO().getCampaignAnnotations(campaignDbId, false);
 		for (i = 0; i < annotations.size(); i++) {
 			current = annotations.get(i);
 			if (current.getScore() != null) {
@@ -669,6 +669,17 @@ public class CampaignController extends WithController {
 		};
 		contributors.sort(compareByPoints);
 		return ok(Json.toJson(contributors));
+	}
+	
+	public static Result initiateValidation(String campaignId, Boolean allowRejected, int minScore) {
+		ObjectId campaignDbId = null;
+		if (StringUtils.isNotEmpty(campaignId)) {
+			campaignDbId = new ObjectId(campaignId);
+		}
+		DB.getCampaignDAO().initiateValidation(campaignDbId, allowRejected, minScore);
+		DB.getAnnotationDAO().initializeAnnotationsForPublish(campaignDbId, allowRejected, minScore);
+
+		return ok();
 	}
 
 }

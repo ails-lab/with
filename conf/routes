@@ -67,6 +67,7 @@ PUT		/record/:id								controllers.RecordResourceController.editRecordResource(
 
 GET		/annotation/importAutomatic				controllers.AnnotationController.importAutomaticColourAnnotations()
 GET		/annotation/export						controllers.AnnotationController.exportAnnotationsForEuropeanaApi(project: String ?= "CrowdHeritage", campaignName: String, maxRanking: Integer ?= -1, mark: Boolean ?= false)
+GET		/annotation/exportCampaignAnnotations	controllers.AnnotationController.exportCampaignAnnotations(campaignName: String)
 GET 	/annotation/leaderboard					controllers.AnnotationController.leaderboard( groupId: String )
 GET		/annotation/approveMultiple				controllers.AnnotationController.approveMultipleAnnotations( id: java.util.List[String])
 GET		/annotation/rejectMultiple				controllers.AnnotationController.rejectMultipleAnnotations( id: java.util.List[String])
@@ -79,6 +80,7 @@ GET		/annotation/:id/reject					controllers.AnnotationController.rejectAnnotatio
 POST	/annotation/:id/rejectObj				controllers.AnnotationController.rejectAnnotationObject(id)
 GET		/annotation/:id/unscore					controllers.AnnotationController.unscoreAnnotation(id)
 GET		/annotation/:id/unscoreObj				controllers.AnnotationController.unscoreAnnotationObject(id)
+GET     /annotation/:id/markForPublish          controllers.AnnotationController.markForPublish(id, publish: Boolean ?= true)
 
 # Collection Controller
 #GET 	 /collection/list 						controllers.CollectionObjectController.list(directlyAccessedByUserOrGroup: play.libs.F.Option[controllers.parameterTypes.MyPlayList], recursivelyAccessedByUserOrGroup: play.libs.F.Option[controllers.parameterTypes.MyPlayList], creator: play.libs.F.Option[String], isPublic: play.libs.F.Option[java.lang.Boolean], isExhibition: play.libs.F.Option[java.lang.Boolean], collectionHits:Boolean ?= false, offset: Integer ?=0, count: Integer ?=10)
@@ -260,4 +262,4 @@ GET		/campaign/readCampaignTerms					controllers.CampaignController.readCampaign
 GET		/campaign/popularAnnotations				controllers.CampaignController.getPopularAnnotations(campaignName: String, term : String ?= "", offset : Integer ?= 0, count: Integer ?= 10)
 GET     /campaign/updateKarma/:id                   controllers.CampaignController.updateKarma(id)
 GET     /campaign/contributors		                controllers.CampaignController.getContributors(cname: String)
-
+POST    /campaign/initiateValidation                controllers.CampaignController.initiateValidation(campaignId: String, allowRejected: Boolean ?= false, minScore: Integer ?= 1)
