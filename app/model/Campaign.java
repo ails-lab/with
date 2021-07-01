@@ -187,24 +187,19 @@ public class Campaign {
 			this.rookie = rookie;
 		}
 	}
-	
+
 	public static class PublishCriteria {
+		@JsonSerialize(using = Serializer.DateSerializer.class)
 		private Date validationStarted;
 		private Boolean allowRejected;
 		private int minScore;
 
 		public PublishCriteria() {
 			this.validationStarted = new Date();
-			this.allowRejected = false;
+			this.setAllowRejected(false);
 			this.minScore = 1;
 		}
 		
-		public Boolean allowRejected() {
-			return allowRejected;
-		}
-		public void setAllowRejected(Boolean allowRejected) {
-			this.allowRejected = allowRejected;
-		}
 		public int getMinScore() {
 			return minScore;
 		}
@@ -216,6 +211,12 @@ public class Campaign {
 		}
 		public void setValidationStarted(Date validationStarted) {
 			this.validationStarted = validationStarted;
+		}
+		public Boolean getAllowRejected() {
+			return allowRejected;
+		}
+		public void setAllowRejected(Boolean allowRejected) {
+			this.allowRejected = allowRejected;
 		}
 	}	
 	
@@ -309,7 +310,7 @@ public class Campaign {
 	/**
 	 * Parameters about accepting campaign annotations for publishing
 	 */
-	private String publishCriteria;
+	private PublishCriteria publishCriteria;
 	
 
 	public BadgeType getBadge(int points) {
@@ -509,10 +510,10 @@ public class Campaign {
 	public void setInstructions(Literal instructions) {
 		this.instructions = instructions;
 	}
-	public String getPublishCriteria() {
+	public PublishCriteria getPublishCriteria() {
 		return publishCriteria;
 	}
-	public void setPublishCriteria(String publishCriteria) {
+	public void setPublishCriteria(PublishCriteria publishCriteria) {
 		this.publishCriteria = publishCriteria;
 	}
 
