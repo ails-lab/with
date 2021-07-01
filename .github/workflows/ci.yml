@@ -4,6 +4,7 @@ on:
   push:
     branches:
      - pgeor/citest
+     - dev
 
 jobs:
   build:
