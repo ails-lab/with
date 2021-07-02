@@ -263,3 +263,4 @@ GET		/campaign/popularAnnotations				controllers.CampaignController.getPopularAn
 GET     /campaign/updateKarma/:id                   controllers.CampaignController.updateKarma(id)
 GET     /campaign/contributors		                controllers.CampaignController.getContributors(cname: String)
 POST    /campaign/initiateValidation                controllers.CampaignController.initiateValidation(campaignId: String, allowRejected: Boolean ?= false, minScore: Integer ?= 1)
+GET     /campaign/statistics                        controllers.CampaignController.campaignStatistics(cname: String)

@@ -682,4 +682,10 @@ public class CampaignController extends WithController {
 		return ok();
 	}
 
+	public static Result campaignStatistics(String cname) {
+		ObjectNode statistics = DB.getCampaignDAO().campaignStatistics(cname);
+
+		return ok(Json.toJson(statistics));
+	}
+
 }

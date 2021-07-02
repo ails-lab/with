@@ -614,4 +614,10 @@ public class CollectionObjectDAO extends WithResourceDAO<CollectionObject> {
 		colUpdate.set("backgroundImg", media);
 		this.update(cq, colUpdate);
 	}
+	
+	public int countCollectionItems(ObjectId dbId) {
+		Query<CollectionObject> q = this.createQuery().field("_id").equal(dbId);
+		CollectionObject collection = this.findOne(q);
+		return collection.getCollectedResources().size();
+	}
 }

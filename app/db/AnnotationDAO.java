@@ -43,6 +43,7 @@ import model.resources.RecordResource;
 import model.resources.WithResourceType;
 import model.resources.collection.CollectionObject;
 import play.Logger;
+import play.libs.Json;
 
 import org.apache.commons.beanutils.BeanToPropertyValueTransformer;
 import org.apache.commons.collections.CollectionUtils;
@@ -64,6 +65,7 @@ import org.mongodb.morphia.query.Query;
 import org.mongodb.morphia.query.UpdateOperations;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.mongodb.WriteResult;
 
 import elastic.ElasticSearcher;
@@ -374,8 +376,8 @@ public class AnnotationDAO extends DAO<Annotation> {
 					this.unmarkAnnotationForPublish(ann.getDbId());
 					return;
 				}
-				int app = score.getApprovedBy() == null ? 0 : score.getApprovedBy().size();
-				int rej = score.getRejectedBy() == null ? 0 : score.getRejectedBy().size();
+				int app = (score == null || score.getApprovedBy() == null) ? 0 : score.getApprovedBy().size();
+				int rej = (score == null || score.getRejectedBy() == null) ? 0 : score.getRejectedBy().size();
 				if (app-rej >= minScore) {
 					this.markAnnotationForPublish(ann.getDbId());
 				} else {
@@ -417,6 +419,44 @@ public class AnnotationDAO extends DAO<Annotation> {
 			}
 		}
 		return annotations;
+	}
+	
+	public ObjectNode getCampaignAnnotationsStatistics(String cname) {
+		ObjectNode statistics = Json.newObject();
+		
+		Query<Annotation> q1 = this.createQuery().field("annotators.generator").endsWith(cname).field("publish").equal(true);
+		Query<Annotation> q2 = this.createQuery().field("annotators.generator").endsWith(cname).field("publish").equal(false);
+		Query<Annotation> q3 = this.createQuery().field("annotators.generator").endsWith(cname);
+		
+		long publishAnns = q1.countAll();
+		long unpublishAnns = q2.countAll();
+		long totalAnns = q3.countAll();
+		List<String> recordIds = new ArrayList<String>();
+		List<Integer> votes = new ArrayList<Integer>();
+		votes.add(0);
+		votes.add(0);
+		this.find(q3).asList().stream()
+			.forEach(ann -> {
+				recordIds.add(ann.getTarget().getRecordId().toString());
+				AnnotationScore score = ann.getScore();
+				int up = (score == null || score.getApprovedBy() == null) ? votes.get(0) : votes.get(0) + score.getApprovedBy().size();
+				int down = (score == null || score.getRejectedBy() == null) ? votes.get(1) : votes.get(1) + score.getRejectedBy().size();
+				votes.clear();
+				votes.add(0, up);
+				votes.add(1, down);
+			});
+		Set<String> set = new HashSet<>(recordIds);
+		recordIds.clear();
+		recordIds.addAll(set);		
+		
+		statistics.put("annotations-total", totalAnns);
+		statistics.put("annotations-accepted", publishAnns);
+		statistics.put("annotations-rejected", unpublishAnns);
+		statistics.put("items-annotated", recordIds.size());
+		statistics.put("upvotes", votes.get(0));
+		statistics.put("downvotes", votes.get(1));
+		
+		return statistics;
 	}
 
 	public void unscoreAutomaticAnnotations() {

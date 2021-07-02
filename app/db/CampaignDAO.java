@@ -37,6 +37,7 @@ import controllers.CampaignController;
 import model.Campaign;
 import model.Campaign.AnnotationCount;
 import model.Campaign.PublishCriteria;
+import model.annotations.Annotation;
 import model.usersAndGroups.User;
 import play.Logger;
 import play.Logger.ALogger;
@@ -236,6 +237,28 @@ public class CampaignDAO extends DAO<Campaign> {
 		value.setMinScore(minScore);
 		updateOps1.set("publishCriteria", value);
 		this.update(q, updateOps1);
+	}
+	
+	public ObjectNode campaignStatistics(String cname) {
+		Query<Campaign> q1 = this.createQuery().field("username").equal(cname);
+		Campaign campaign = this.findOne(q1);
+		
+		ObjectNode statistics = DB.getAnnotationDAO().getCampaignAnnotationsStatistics(cname);
+		
+		List<Integer> items = new ArrayList<Integer>();
+		items.add(0);
+		campaign.getTargetCollections().forEach(dbId -> {
+			int count = items.get(0) + DB.getCollectionObjectDAO().countCollectionItems(dbId);
+			items.clear();
+			items.add(count);
+		});
+		
+		statistics.put("campaign", campaign.getUsername());
+		statistics.put("collections", campaign.getTargetCollections().size());
+		statistics.put("contributors", campaign.getContributorsPoints().size());
+		statistics.put("items-total", items.get(0));
+		
+		return statistics;
 	}
 
 }
