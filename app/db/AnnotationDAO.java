@@ -25,6 +25,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -65,6 +66,7 @@ import org.mongodb.morphia.query.Query;
 import org.mongodb.morphia.query.UpdateOperations;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.mongodb.WriteResult;
 
@@ -423,6 +425,7 @@ public class AnnotationDAO extends DAO<Annotation> {
 	
 	public ObjectNode getCampaignAnnotationsStatistics(String cname) {
 		ObjectNode statistics = Json.newObject();
+		ObjectMapper mapper = new ObjectMapper();
 		
 		Query<Annotation> q1 = this.createQuery().field("annotators.generator").endsWith(cname).field("publish").equal(true);
 		Query<Annotation> q2 = this.createQuery().field("annotators.generator").endsWith(cname).field("publish").equal(false);
@@ -431,13 +434,22 @@ public class AnnotationDAO extends DAO<Annotation> {
 		long publishAnns = q1.countAll();
 		long unpublishAnns = q2.countAll();
 		long totalAnns = q3.countAll();
-		List<String> recordIds = new ArrayList<String>();
+		Map<String, Integer> recordAnnCount = new HashMap<String, Integer>();
+		Map<String, Integer> annDateCount = new HashMap<String, Integer>();
 		List<Integer> votes = new ArrayList<Integer>();
 		votes.add(0);
 		votes.add(0);
 		this.find(q3).asList().stream()
 			.forEach(ann -> {
-				recordIds.add(ann.getTarget().getRecordId().toString());
+				String recId = ann.getTarget().getRecordId().toString();
+				Integer annCount = recordAnnCount.get(recId);
+				recordAnnCount.put(recId, (annCount == null) ? 1 : annCount + 1);
+
+				AnnotationAdmin createdAdmin = (AnnotationAdmin) ann.getAnnotators().get(0);
+				String creationDate = createdAdmin.getCreated().toInstant().toString().substring(0, 10);
+				Integer dateCount = annDateCount.get(creationDate);
+				annDateCount.put(creationDate, (dateCount == null) ? 1 : dateCount + 1);
+				
 				AnnotationScore score = ann.getScore();
 				int up = (score == null || score.getApprovedBy() == null) ? votes.get(0) : votes.get(0) + score.getApprovedBy().size();
 				int down = (score == null || score.getRejectedBy() == null) ? votes.get(1) : votes.get(1) + score.getRejectedBy().size();
@@ -445,14 +457,20 @@ public class AnnotationDAO extends DAO<Annotation> {
 				votes.add(0, up);
 				votes.add(1, down);
 			});
-		Set<String> set = new HashSet<>(recordIds);
-		recordIds.clear();
-		recordIds.addAll(set);		
-		
+		Map<Integer, Integer> annCountFreq = new HashMap<Integer, Integer>();
+		for (Integer count : recordAnnCount.values()) {
+			Integer countFreq = annCountFreq.get(count);
+			annCountFreq.put(count, (countFreq == null) ? 1 : countFreq + 1);
+		}
+		TreeMap<String, Integer> sortedAnnDateCount = new TreeMap<>();
+		sortedAnnDateCount.putAll(annDateCount);
+
 		statistics.put("annotations-total", totalAnns);
 		statistics.put("annotations-accepted", publishAnns);
 		statistics.put("annotations-rejected", unpublishAnns);
-		statistics.put("items-annotated", recordIds.size());
+		statistics.put("items-annotated", recordAnnCount.size());
+		statistics.put("annotation-count-frequency", mapper.valueToTree(annCountFreq));
+		statistics.put("annotation-date-frequency", mapper.valueToTree(sortedAnnDateCount));
 		statistics.put("upvotes", votes.get(0));
 		statistics.put("downvotes", votes.get(1));
 		
