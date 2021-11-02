@@ -42,7 +42,6 @@ GET 	/assets/headers.js						filters.FilterUtils.withAjaxScript
 GET     /swagger                    			controllers.ViewController.swagger()
 GET     /assets/*file               			controllers.Assets.at(path="/public", file)
 
-
 GET		/code									controllers.CodeController.jarList()
 GET		/code/*file								controllers.CodeController.downloadJar( file )
 
