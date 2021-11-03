@@ -131,11 +131,11 @@ public class AnnotationController extends WithController {
 		}
 
 		Annotation existingAnnotation;
-		if (!annotation.getMotivation().equals(MotivationType.Commenting)) {
+//		if (!annotation.getMotivation().equals(MotivationType.Commenting)) {
 			existingAnnotation = DB.getAnnotationDAO().getExistingAnnotation(annotation);
-		} else {
-			existingAnnotation = null;
-		}
+//		} else {
+//			existingAnnotation = null;
+//		}
 
 		if (existingAnnotation == null) {
 			DB.getAnnotationDAO().makePermanent(annotation);

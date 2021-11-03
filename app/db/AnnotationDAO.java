@@ -33,10 +33,7 @@ import model.annotations.Annotation;
 import model.annotations.Annotation.AnnotationAdmin;
 import model.annotations.Annotation.AnnotationScore;
 import model.annotations.Annotation.MotivationType;
-import model.annotations.bodies.AnnotationBodyGeoTagging;
-import model.annotations.bodies.AnnotationBodyTagging;
-import model.annotations.bodies.AnnotationBodyColorTagging;
-import model.annotations.bodies.AnnotationBodyPolling;
+import model.annotations.bodies.*;
 import model.annotations.selectors.SelectorType;
 import model.annotations.targets.AnnotationTarget;
 import model.basicDataTypes.Language;
@@ -196,6 +193,11 @@ public class AnnotationDAO extends DAO<Annotation> {
 			AnnotationBodyGeoTagging body = (AnnotationBodyGeoTagging) annotation.getBody();
 
 			q.field("body.coordinates").equal(body.getCoordinates());
+		}
+		else if (annotation.getMotivation().equals(MotivationType.Commenting)) {
+			AnnotationBodyCommenting body = (AnnotationBodyCommenting) annotation.getBody();
+
+			q.field("body.label.default").equal(body.getLabel().get(Language.DEFAULT));
 		}
 
 		SelectorType selector = target.getSelector();
