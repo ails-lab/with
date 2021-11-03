@@ -118,7 +118,8 @@ public class User extends UserOrGroup {
 
 	// @JsonIgnore
 	// private int exhibitionsCreated;
-	@JsonIgnore
+//	@JsonIgnore
+	@JsonSerialize(using = Serializer.ObjectIdArraySerializer.class)
 	private final Set<ObjectId> userGroupsIds = new HashSet<ObjectId>();
 
 	@JsonSerialize(using = Serializer.ObjectIdArraySerializer.class)
