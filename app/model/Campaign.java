@@ -262,9 +262,9 @@ public class Campaign {
 	
 	@JsonSerialize(using = Serializer.ObjectIdSerializer.class)
 	@JsonDeserialize(using = Deserializer.ObjectIdDeserializer.class)	
-	private ObjectId space;
+	private List<ObjectId> userGroupIds;
 	
-	private String spacename;
+//	private String spacename;
 	
 	/**
 	 * The purpose of campaign's annotations [Tagging, GeoTagging, Linking, Commenting, Editing, Polling].
@@ -358,11 +358,11 @@ public class Campaign {
 		this.description = description;
 	}
 	
-	public ObjectId getSpace() {
-		return space;
+	public List<ObjectId> getUserGroupIds() {
+		return userGroupIds;
 	}
-	public void setSpace(ObjectId space) {
-		this.space = space;
+	public void setUserGroupIds(List<ObjectId> userGroupIds) {
+		this.userGroupIds = userGroupIds;
 	}
 	
 	public List<MotivationType> getMotivation() {
@@ -447,14 +447,6 @@ public class Campaign {
 
 	public void setUsername(String username) {
 		this.username = username;
-	}
-
-	public String getSpacename() {
-		return spacename;
-	}
-
-	public void setSpacename(String spacename) {
-		this.spacename = spacename;
 	}
 
 	public Set<ObjectId> getCreators() {
