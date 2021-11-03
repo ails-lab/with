@@ -430,6 +430,7 @@ public class GroupManager extends WithController {
 			List<User> users = DB.getUserDAO().getByGroupId(group.getDbId());
 			for (User user : users) {
 				user.removeUserGroups(ancestorGroups);
+				user.removeAdminUserGroupIds(ancestorGroups);
 				DB.getUserDAO().makePermanent(user);
 			}
 			DB.getUserGroupDAO().deleteById(new ObjectId(groupId));

@@ -265,6 +265,11 @@ public class User extends UserOrGroup {
 		this.userGroupsIds.removeAll(groups);
 	}
 
+	public void removeAdminUserGroupIds(Set<ObjectId> groups) {
+		this.adminInGroups.removeAll(groups);
+	}
+
+
 	public void addUserGroup(ObjectId group) {
 		this.userGroupsIds.add(group);
 	}
