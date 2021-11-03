@@ -129,7 +129,14 @@ public class AnnotationController extends WithController {
 			annotation.getTarget().setRecordId(record.getDbId());
 			annotation.getTarget().setWithURI("/record/" + record.getDbId());
 		}
-		Annotation existingAnnotation = DB.getAnnotationDAO().getExistingAnnotation(annotation);
+
+		Annotation existingAnnotation;
+		if (!annotation.getMotivation().equals(MotivationType.Commenting)) {
+			existingAnnotation = DB.getAnnotationDAO().getExistingAnnotation(annotation);
+		} else {
+			existingAnnotation = null;
+		}
+
 		if (existingAnnotation == null) {
 			DB.getAnnotationDAO().makePermanent(annotation);
 			annotation.setAnnotationWithURI("/annotation/" + annotation.getDbId());
@@ -147,6 +154,8 @@ public class AnnotationController extends WithController {
 			DB.getAnnotationDAO().addAnnotators(existingAnnotation.getDbId(), annotation.getAnnotators());
 			annotation = DB.getAnnotationDAO().get(existingAnnotation.getDbId());
 		}
+
+
 		return ok(Json.toJson(annotation));
 	}
 
