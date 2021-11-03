@@ -260,10 +260,11 @@ public class Campaign {
 //	@JsonDeserialize(using = Deserializer.ObjectIdArraySerializer.class)
 	private Set<ObjectId> creators = new HashSet<ObjectId>();
 	
-	@JsonSerialize(using = Serializer.ObjectIdSerializer.class)
-	@JsonDeserialize(using = Deserializer.ObjectIdDeserializer.class)	
+	@JsonSerialize(using = Serializer.ObjectIdArraySerializer.class)
+//	@JsonDeserialize(using = Deserializer.ObjectIdArrayDeserializer.class)
 	private List<ObjectId> userGroupIds;
-	
+
+
 //	private String spacename;
 	
 	/**
