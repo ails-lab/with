@@ -262,8 +262,8 @@ public class CampaignDAO extends DAO<Campaign> {
 	}
 
 	public List<Campaign> getByGroupId(ObjectId groupId) {
-		Query<Campaign> q = this.createQuery().field("userGroupsIds")
-				.hasThisOne(groupId);
+		Query<Campaign> q = this.createQuery().field("userGroupIds").exists()
+				.field("userGroupIds").hasThisOne(groupId);
 		return find(q).asList();
 	}
 
