@@ -324,7 +324,12 @@ public class Campaign {
 		else
 			return  BadgeType.None;		
 	}
-	
+
+	public void removeUserGroup(ObjectId group) {
+		this.userGroupIds.remove(group);
+	}
+
+
 	public Boolean getActive() {
 		Date today = new Date();
 		return ( (today.compareTo(this.startDate)>0) && (today.compareTo(this.endDate)<0) );

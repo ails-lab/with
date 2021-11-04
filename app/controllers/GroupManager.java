@@ -24,6 +24,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 
+import model.Campaign;
 import org.apache.commons.lang3.StringUtils;
 import org.bson.types.ObjectId;
 import org.mongodb.morphia.geo.GeoJson;
@@ -433,12 +434,23 @@ public class GroupManager extends WithController {
 				user.removeAdminUserGroupIds(ancestorGroups);
 				DB.getUserDAO().makePermanent(user);
 			}
+
+			// Check the campaign objects to see if removed user group is part of the list
+			// If yes, remove it.
+			List<Campaign> campaigns  = DB.getCampaignDAO().getByGroupId(group.getDbId());
+			for (Campaign cmp : campaigns) {
+				ancestorGroups.forEach(cmp::removeUserGroup);
+				DB.getCampaignDAO().makePermanent(cmp);
+			}
+
+			// Finally, delete the campaign
 			DB.getUserGroupDAO().deleteById(new ObjectId(groupId));
 		} catch (Exception e) {
 			log.error("Cannot delete group from database!", e);
 			result.put("error", "Cannot delete group from database!");
 			return internalServerError(result);
 		}
+
 		result.put("message", "Group deleted succesfully from database");
 		return ok(result);
 	}
