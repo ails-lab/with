@@ -32,10 +32,12 @@ import java.util.Random;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import javax.validation.ConstraintViolation;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.jayway.jsonpath.TypeRef;
 import org.bson.types.ObjectId;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.index.query.QueryBuilder;
@@ -133,21 +135,41 @@ import vocabularies.Vocabulary;
 public class CollectionObjectController extends WithResourceController {
 
 	public static final ALogger log = Logger.of(CollectionObjectController.class);
+	final static int BATCH_SIZE = 35;
 
 	public static Result importGallery(String userGalleryId, String collectionName) {
-		final int BATCH_SIZE = 35;
+//		final int BATCH_SIZE = 35;
 		EuropeanaSpaceSource esr = new EuropeanaSpaceSource();
 
 		ObjectMapper om = new ObjectMapper();
 		JsonNode userGalleryServiceResponse = esr.getUserGalleryResponse(userGalleryId);
 		List<String> ids = new ArrayList<String>();
-		String query = "";
 
 		for(JsonNode jn : userGalleryServiceResponse.get("items")) {
-			ids.add(jn.toString().split("http://data.europeana.eu/item")[1]);
+			ids.add(jn.textValue().split("http://data.europeana.eu/item")[1]);
 		}
-		System.out.println(ids.size());
+		System.out.println(ids);
+
+		List<CommonQuery> queries = batchAndPrepareQueries(ids, collectionName);
+		queries.forEach(query -> executeImportBySearchQuery(collectionName, query, -1));
+
+		return ok();
+	}
+
+	/**
+	 * This function gets a list of ids as input and
+	 * returns a list of CommonQuery to be executed.
+	 * Each query contains up to BATCH_SIZE items.
+	 *
+	 * @param ids
+	 * @param collectionName
+	 * @return
+	 */
+	public static List<CommonQuery> batchAndPrepareQueries(List<String> ids, String collectionName) {
+
 		int batches = (int)Math.ceil((double)ids.size() / BATCH_SIZE);
+		String query = "";
+		List<CommonQuery> response = new ArrayList<>();
 
 		for (int batch = 0; batch < batches; batch++) {
 			System.out.println("Started processing batch: "+(batch+1)+"/"+batches);
@@ -160,13 +182,12 @@ public class CollectionObjectController extends WithResourceController {
 				end = start + BATCH_SIZE;
 			}
 
-			query += String.join(" OR \"", ids.subList(start,end));
-			query += ")";
+			query += String.join("\" OR \"", ids.subList(start,end));
+			query += "\")";
 			System.out.println("Will run query: "+query);
-
-			importImplementation(collectionName, new CommonQuery(query), -1);
+			response.add(new CommonQuery(query));
 		}
-		return ok(query);
+		return response;
 	}
 
 	public static Promise<Result> importSearch() {
@@ -179,7 +200,7 @@ public class CollectionObjectController extends WithResourceController {
 				final CommonQuery q = Utils.parseJson(json.get("query"));
 				final String cname = json.get("collectionName").textValue();
 				final int limit = (json.has("limit")) ? json.get("limit").asInt() : -1;
-				return importImplementation(cname, q, limit);
+				return executeImportBySearchQuery(cname, q, limit);
 			} catch (Exception e) {
 				log.error("", e);
 				return Promise.pure((Result) badRequest(e.getMessage()));
@@ -187,8 +208,34 @@ public class CollectionObjectController extends WithResourceController {
 		}
 	}
 
-	public static Promise<Result> importImplementation(String cname, CommonQuery q, int limit) {
-		System.out.println(cname);
+	public static Result importItemsToCollection() {
+		JsonNode json = request().body().asJson();
+		ObjectMapper om = new ObjectMapper();
+
+		if (json == null) {
+			return badRequest();
+		}
+		else {
+//			ArrayNode myList = (ArrayNode) ;
+			List<String> ids = om.convertValue(json.get("itemIds"), om.getTypeFactory().constructCollectionType(List.class, String.class));
+			final String cname = json.get("collectionName").textValue();
+			List<CommonQuery> queries = batchAndPrepareQueries(ids, cname);
+			queries.forEach(query -> executeImportBySearchQuery(cname, query, -1));
+			return ok();
+		}
+	}
+
+	/**
+	 *
+	 * This function gets a query, a collection name, and a limit
+	 * and executes this query. Checks for colleciton existance, creates
+	 * the collection if it does not exist
+	 * @param cname
+	 * @param q
+	 * @param limit
+	 * @return
+	 */
+	public static Promise<Result> executeImportBySearchQuery(String cname, CommonQuery q, int limit) {
 		ObjectNode resultInfo = Json.newObject();
 		ObjectId creatorDbId = new ObjectId(loggedInUser());
 
