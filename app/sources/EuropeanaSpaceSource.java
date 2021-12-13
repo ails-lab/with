@@ -324,6 +324,18 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 		return items;
 	}
 
+	public JsonNode getUserGalleryResponse(String userGalleryId) {
+		String httpQuery = "https://api.europeana.eu/set/" + userGalleryId + "?wskey="+apiKey+"&profile=standard";
+		try {
+			JsonNode response = getHttpConnector().getURLContent(httpQuery);
+			return response;
+		}
+		catch (Exception e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
+
 	@Override
 	public SourceResponse getResults(CommonQuery q) {
 		SourceResponse res = new SourceResponse();

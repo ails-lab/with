@@ -35,6 +35,7 @@ import java.util.function.Function;
 
 import javax.validation.ConstraintViolation;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import org.bson.types.ObjectId;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.index.query.QueryBuilder;
@@ -133,6 +134,41 @@ public class CollectionObjectController extends WithResourceController {
 
 	public static final ALogger log = Logger.of(CollectionObjectController.class);
 
+	public static Result importGallery(String userGalleryId, String collectionName) {
+		final int BATCH_SIZE = 35;
+		EuropeanaSpaceSource esr = new EuropeanaSpaceSource();
+
+		ObjectMapper om = new ObjectMapper();
+		JsonNode userGalleryServiceResponse = esr.getUserGalleryResponse(userGalleryId);
+		List<String> ids = new ArrayList<String>();
+		String query = "";
+
+		for(JsonNode jn : userGalleryServiceResponse.get("items")) {
+			ids.add(jn.toString().split("http://data.europeana.eu/item")[1]);
+		}
+		System.out.println(ids.size());
+		int batches = (int)Math.ceil((double)ids.size() / BATCH_SIZE);
+
+		for (int batch = 0; batch < batches; batch++) {
+			System.out.println("Started processing batch: "+(batch+1)+"/"+batches);
+			query = "europeana_id:(\"";
+			int start = batch *	BATCH_SIZE;
+			int end;
+			if (start + BATCH_SIZE > ids.size()) {
+				end = ids.size();
+			} else {
+				end = start + BATCH_SIZE;
+			}
+
+			query += String.join(" OR \"", ids.subList(start,end));
+			query += ")";
+			System.out.println("Will run query: "+query);
+
+			importImplementation(collectionName, new CommonQuery(query), -1);
+		}
+		return ok(query);
+	}
+
 	public static Promise<Result> importSearch() {
 		JsonNode json = request().body().asJson();
 		if (json == null) {
@@ -140,35 +176,40 @@ public class CollectionObjectController extends WithResourceController {
 		} else {
 			// Parse the query.
 			try {
-				ObjectNode resultInfo = Json.newObject();
-				ObjectId creatorDbId = new ObjectId(loggedInUser());
 				final CommonQuery q = Utils.parseJson(json.get("query"));
-				final String cname = json.get("collectionName").toString();
+				final String cname = json.get("collectionName").textValue();
 				final int limit = (json.has("limit")) ? json.get("limit").asInt() : -1;
-				CollectionObject ccid = null;
-				if (!isCollectionCreated(creatorDbId, cname)) {
-					CollectionObject collection = new SimpleCollection();
-					collection.getDescriptiveData().setLabel(new MultiLiteral(cname).fillDEF());
-					boolean success = internalAddCollection(collection, WithResourceType.SimpleCollection, creatorDbId,
-							resultInfo);
-					if (!success)
-						return Promise.pure((Result) badRequest("Expecting Json query"));
-					ccid = collection;
-				} else {
-					List<CollectionObject> col = DB.getCollectionObjectDAO().getByLabel(Language.DEFAULT, cname);
-					ccid = col.get(0);
-				}
-
-				EuropeanaSpaceSource src = new EuropeanaSpaceSource();
-				src.setUsingCursor(true);
-
-				return internalImport(src, ccid, q, limit, resultInfo, true, false);
-
+				return importImplementation(cname, q, limit);
 			} catch (Exception e) {
 				log.error("", e);
 				return Promise.pure((Result) badRequest(e.getMessage()));
 			}
 		}
+	}
+
+	public static Promise<Result> importImplementation(String cname, CommonQuery q, int limit) {
+		System.out.println(cname);
+		ObjectNode resultInfo = Json.newObject();
+		ObjectId creatorDbId = new ObjectId(loggedInUser());
+
+		CollectionObject ccid = null;
+		if (!isCollectionCreated(creatorDbId, cname)) {
+			CollectionObject collection = new SimpleCollection();
+			collection.getDescriptiveData().setLabel(new MultiLiteral(cname).fillDEF());
+			boolean success = internalAddCollection(collection, WithResourceType.SimpleCollection, creatorDbId,
+					resultInfo);
+			if (!success)
+				return Promise.pure((Result) badRequest("Expecting Json query"));
+			ccid = collection;
+		} else {
+			List<CollectionObject> col = DB.getCollectionObjectDAO().getByLabel(Language.DEFAULT, cname);
+			ccid = col.get(0);
+		}
+
+		EuropeanaSpaceSource src = new EuropeanaSpaceSource();
+		src.setUsingCursor(true);
+
+		return internalImport(src, ccid, q, limit, resultInfo, true, false);
 	}
 
 	public static Result importOmeka(String colid) {
