@@ -136,6 +136,7 @@ public class CollectionObjectController extends WithResourceController {
 
 	public static final ALogger log = Logger.of(CollectionObjectController.class);
 	final static int BATCH_SIZE = 35;
+	final static int IMPORT_ITEMS_LIMIT = 100;
 
 	public static Result importGallery(String userGalleryId, String collectionName) {
 //		final int BATCH_SIZE = 35;
@@ -199,7 +200,7 @@ public class CollectionObjectController extends WithResourceController {
 			try {
 				final CommonQuery q = Utils.parseJson(json.get("query"));
 				final String cname = json.get("collectionName").textValue();
-				final int limit = (json.has("limit")) ? json.get("limit").asInt() : -1;
+				final int limit = (json.has("limit")) ? json.get("limit").asInt() : IMPORT_ITEMS_LIMIT;
 				return executeImportBySearchQuery(cname, q, limit);
 			} catch (Exception e) {
 				log.error("", e);

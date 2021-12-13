@@ -115,7 +115,7 @@ POST     /collection/importGallery              controllers.CollectionObjectCont
 POST     /collection/importItems            controllers.CollectionObjectController.importItemsToCollection()
 POST     /collection/uploadCollection		    controllers.CollectionObjectController.uploadCollection()
 POST     /collection/importIDs 					controllers.CollectionObjectController.importIDs(cname, source, ids)
-GET     /collection/importEuropeanaCollection	controllers.CollectionObjectController.createAndFillEuropeanaCollection(id: String, limit:Integer ?=-1)
+GET     /collection/importEuropeanaCollection	controllers.CollectionObjectController.createAndFillEuropeanaCollection(id: String, limit:Integer ?= 100)
 GET     /collection/importOmeka					controllers.CollectionObjectController.importOmeka(colid?=".*")
 POST     /collection/importExhibition 					controllers.CollectionObjectController.importExhibition(source)
 
