@@ -90,7 +90,7 @@ public class CampaignController extends WithController {
 	public static final Map<String, String> termsFile = Stream
 			.of(new String[][] { { "sports", "Sport_Vocabulary.csv" },
 					{ "cities-landscapes", "Cities_Landscapes_Means_of_Transport_Vocabulary.csv" },
-					{ "instruments", "MIMO-Thesaurus for-campaign.csv" }, { "opera", "Opera_entities.csv" }, { "china", "China-terms.csv" } })
+					{ "instruments", "MIMO-Thesaurus for-campaign.csv" }, { "opera", "Opera_entities.csv" }, { "china", "China-terms.csv" }, { "test", "test.csv" } })
 			.collect(Collectors.toMap(data -> data[0], data -> data[1]));
 
 	public static Result getCampaignCount(String group, String project, String state) {
@@ -515,7 +515,7 @@ public class CampaignController extends WithController {
 			}
 			for (int i = 1; i < (record.size() - 1); i++) {
 				if (!record.get(i).equals("")) {
-					CampaignTerm term = new CampaignTerm();
+					CampaignTermWithInfo term = new CampaignTermWithInfo();
 					term.labelAndUri.addLiteral(Language.EN, record.get(i));
 					if (!StringUtils.isEmpty(record.get(3))) {
 						term.labelAndUri.addURI(record.get(3));
