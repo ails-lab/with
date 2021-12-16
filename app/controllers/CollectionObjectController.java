@@ -1044,7 +1044,7 @@ public class CollectionObjectController extends WithResourceController {
 		} else {
 			favoritesId = favorite.getDbId();
 		}
-		return getCollectionObject(favoritesId.toString(), profile, locale);
+		return getCollectionObject(favoritesId.toString(), profile, locale, false);
 
 	}
 
