@@ -538,7 +538,7 @@ public class CollectionObjectController extends WithResourceController {
 	 * @param id the resource id
 	 * @return the resource metadata
 	 */
-	public static Result getCollectionObject(String id, String profile, Option<String> locale) {
+	public static Result getCollectionObject(String id, String profile, Option<String> locale, boolean filterForLocale) {
 		ObjectNode result = Json.newObject();
 		try {
 			ObjectId collectionDbId = new ObjectId(id);
@@ -553,7 +553,9 @@ public class CollectionObjectController extends WithResourceController {
 							}
 						});
 				CollectionObject profiledCollection = collection.getCollectionProfile(profile);
-				filterResourceByLocale(locale, profiledCollection);
+				if (filterForLocale) {
+					filterResourceByLocale(locale, profiledCollection);
+				}
 				return ok(Json.toJson(profiledCollection));
 			}
 		} catch (Exception e) {
