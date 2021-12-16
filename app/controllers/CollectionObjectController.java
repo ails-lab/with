@@ -538,7 +538,7 @@ public class CollectionObjectController extends WithResourceController {
 	 * @param id the resource id
 	 * @return the resource metadata
 	 */
-	public static Result getCollectionObject(String id, String profile, Option<String> locale) {
+	public static Result getCollectionObject(String id, String profile, Option<String> locale, boolean filterForLocale) {
 		ObjectNode result = Json.newObject();
 		try {
 			ObjectId collectionDbId = new ObjectId(id);
@@ -553,7 +553,9 @@ public class CollectionObjectController extends WithResourceController {
 							}
 						});
 				CollectionObject profiledCollection = collection.getCollectionProfile(profile);
-				filterResourceByLocale(locale, profiledCollection);
+				if (filterForLocale) {
+					filterResourceByLocale(locale, profiledCollection);
+				}
 				return ok(Json.toJson(profiledCollection));
 			}
 		} catch (Exception e) {
@@ -562,7 +564,7 @@ public class CollectionObjectController extends WithResourceController {
 		}
 	}
 
-	public static Result getMultipleCollectionObjects(List<String> id, String profile, Option<String> locale) {
+	public static Result getMultipleCollectionObjects(List<String> id, String profile, Option<String> locale, boolean filterForLocale) {
 		ArrayNode result = Json.newObject().arrayNode();
 		for (String singleId : id) {
 			try {
@@ -577,7 +579,9 @@ public class CollectionObjectController extends WithResourceController {
 								}
 							});
 					CollectionObject profiledCollection = collection.getCollectionProfile(profile);
-					filterResourceByLocale(locale, profiledCollection);
+					if (filterForLocale) {
+						filterResourceByLocale(locale, profiledCollection);
+					}
 					result.add(Json.toJson(profiledCollection));
 				}
 			} catch (Exception e) {
@@ -586,30 +590,30 @@ public class CollectionObjectController extends WithResourceController {
 		}
 		return ok(result);
 	}
-
-	public static Result getMultipleCollectionObjectsAllLanguages(List<String> id, String profile) {
-		ArrayNode result = Json.newObject().arrayNode();
-		for (String singleId : id) {
-			try {
-				ObjectId collectionDbId = new ObjectId(singleId);
-				Result response = errorIfNoAccessToCollection(Action.READ, collectionDbId);
-
-				if (response.toString().equals(ok().toString())) {
-					CollectionObject collection = DB.getCollectionObjectDAO().getByIdAndExclude(new ObjectId(singleId),
-							new ArrayList<String>() {
-								{
-									add("collectedResources");
-								}
-							});
-					CollectionObject profiledCollection = collection.getCollectionProfile(profile);
-					result.add(Json.toJson(profiledCollection));
-				}
-			} catch (Exception e) {
-				log.error(e.getMessage(), e);
-			}
-		}
-		return ok(result);
-	}
+//
+//	public static Result getMultipleCollectionObjectsAllLanguages(List<String> id, String profile) {
+//		ArrayNode result = Json.newObject().arrayNode();
+//		for (String singleId : id) {
+//			try {
+//				ObjectId collectionDbId = new ObjectId(singleId);
+//				Result response = errorIfNoAccessToCollection(Action.READ, collectionDbId);
+//
+//				if (response.toString().equals(ok().toString())) {
+//					CollectionObject collection = DB.getCollectionObjectDAO().getByIdAndExclude(new ObjectId(singleId),
+//							new ArrayList<String>() {
+//								{
+//									add("collectedResources");
+//								}
+//							});
+//					CollectionObject profiledCollection = collection.getCollectionProfile(profile);
+//					result.add(Json.toJson(profiledCollection));
+//				}
+//			} catch (Exception e) {
+//				log.error(e.getMessage(), e);
+//			}
+//		}
+//		return ok(result);
+//	}
 
 	/**
 	 * Deletes all resource metadata
