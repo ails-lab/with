@@ -90,7 +90,7 @@ public class CampaignController extends WithController {
 	public static final Map<String, String> termsFile = Stream
 			.of(new String[][] { { "sports", "Sport_Vocabulary.csv" },
 					{ "cities-landscapes", "Cities_Landscapes_Means_of_Transport_Vocabulary.csv" },
-					{ "instruments", "MIMO-Thesaurus for-campaign.csv" }, { "opera", "Opera_entities.csv" }, { "china", "China-terms.csv" } })
+					{ "instruments", "MIMO-Thesaurus for-campaign.csv" }, { "opera", "Opera_entities.csv" }, { "china", "China-terms.csv" }, { "test", "test.csv" } })
 			.collect(Collectors.toMap(data -> data[0], data -> data[1]));
 
 	public static Result getCampaignCount(String group, String project, String state) {
@@ -362,9 +362,9 @@ public class CampaignController extends WithController {
 	// }
 
 	public static void addLangs(CampaignTerm term) throws ClientProtocolException, IOException {
-		String[] langs = new String[] { "en", "it", "fr" };
+		String[] langs = new String[] { "en", "it", "fr", "pl", "es" };
 		if (term.labelAndUri.getURI().contains("wikidata")) {
-			term.labelAndUri.addURI(term.labelAndUri.getURI().replace("/wiki/", "/entity/"));
+			term.labelAndUri.addURI(term.labelAndUri.getURI().replace("/wiki/", "/entity/").replace("https", "http"));
 			HttpClient client = HttpClientBuilder.create().build();
 			HttpGet request = new HttpGet(term.labelAndUri.getURI() + ".json");
 			HttpResponse response = client.execute(request);
@@ -402,10 +402,12 @@ public class CampaignController extends WithController {
 					while (it.hasNext()) {
 						JsonNode node = it.next();
 						if (node.get("Object").get("xml:lang") != null
+								&& node.get("Predicate").get("value").textValue().contains("skos/core#prefLabel")
 								&& Arrays.asList(langs).contains(node.get("Object").get("xml:lang").asText())) {
 							String langTerm = node.get("Object").get("value").asText();
 							String lan = node.get("Object").get("xml:lang").asText();
 							term.labelAndUri.addLiteral(Language.getLanguage(lan), langTerm);
+							break;
 						}
 					}
 				}
@@ -513,7 +515,7 @@ public class CampaignController extends WithController {
 			}
 			for (int i = 1; i < (record.size() - 1); i++) {
 				if (!record.get(i).equals("")) {
-					CampaignTerm term = new CampaignTerm();
+					CampaignTermWithInfo term = new CampaignTermWithInfo();
 					term.labelAndUri.addLiteral(Language.EN, record.get(i));
 					if (!StringUtils.isEmpty(record.get(3))) {
 						term.labelAndUri.addURI(record.get(3));
