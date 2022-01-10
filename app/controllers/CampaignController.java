@@ -176,15 +176,13 @@ public class CampaignController extends WithController {
 			campaign.setEndDate(newCampaign.getEndDate());
 		if (newCampaign.getBanner() != null)
 			campaign.setBanner(newCampaign.getBanner());
-//		else
-//			campaign.setBanner(null);
+
 		if (newCampaign.getLogo() != null)
 			campaign.setLogo(newCampaign.getLogo());
-//		else
-//			campaign.setLogo(null);
+
 		updateListField(campaign, newCampaign, Campaign::getTargetCollections, Campaign::setTargetCollections);
 		updateListField(campaign, newCampaign, Campaign::getUserGroupIds, Campaign::setUserGroupIds);
-		if (newCampaign.getCreators() != null) {
+		if (newCampaign.getCreators().size() != 0) {
 			campaign.setCreators(newCampaign.getCreators());
 		}
 		if (newCampaign.getAnnotationTarget() != 0L) {
@@ -278,7 +276,16 @@ public class CampaignController extends WithController {
 		newCampaign.setAnnotationCurrent(new Campaign.AnnotationCount());
 		newCampaign.setContributorsPoints(new Hashtable<ObjectId, AnnotationCount>());
 		newCampaign.setCreated(new Date());
+		newCampaign.setStartDate(new Date());
+		newCampaign.setEndDate(new Date());
 
+		newCampaign.setProject("CrowdHeritage");
+
+		newCampaign.setTitle(new Literal("campaign title"));
+		newCampaign.setDescription(new Literal("campaign description"));
+		newCampaign.setInstructions(new Literal("campaign instructions"));
+		newCampaign.setDisclaimer(new Literal("campaign disclaimer"));
+		
 		try {
 			DB.getCampaignDAO().makePermanent(newCampaign);
 		} catch (Exception e) {
