@@ -18,6 +18,8 @@
 
 FROM openjdk:8-slim-buster
 
+WORKDIR /app
+
 ENV _JAVA_OPTS=""
 ENV PORT=80
 ENV CONFIG_FILE=/app/conf/local.conf
