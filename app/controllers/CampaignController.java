@@ -115,34 +115,35 @@ public class CampaignController extends WithController {
 		return ok();
 	}
 
-	public static void updateLiteralField(Campaign c1, Campaign c2, Function<Campaign, Literal> f) {
-		Literal newVal = f.apply(c2);
-		if (newVal == null) {
-			return;
-		}
-		Set<String> langs = newVal.keySet();
-		for (String lang : langs) {
-			String newLang = newVal.getLiteral(Language.getLanguageByCode(lang));
-			if (newLang != null && (newLang.isEmpty() == false)) {
-				f.apply(c1).addLiteral(Language.getLanguageByCode(lang), newLang);
-			}
-		}
-	}
 	
 	public static void updateLiteralField(Campaign c1, Campaign c2, Function<Campaign, Literal> f, BiConsumer<Campaign, Literal> bc) {
 		if (f.apply(c1) == null && f.apply(c2) != null) {
 			bc.accept(c1, f.apply(c2));
 		} else {
-			updateLiteralField(c1, c2, f);
+			Literal newVal = f.apply(c2);
+			if (newVal == null) {
+				return;
+			}
+			Set<String> langs = newVal.keySet();
+			for (String lang : langs) {
+				String newLang = newVal.getLiteral(Language.getLanguageByCode(lang));
+				if (newLang != null && (newLang.isEmpty() == false)) {
+					f.apply(c1).addLiteral(Language.getLanguageByCode(lang), newLang);
+				}
+			}
 		}
 	}
 
-	public static void updateListField(Campaign c1, Campaign c2, Function<Campaign, List<ObjectId>> f) {
-		f.apply(c1).clear();
-		if (f.apply(c2) == null)
-			return;
-		List<ObjectId> newList = f.apply(c2).stream().distinct().collect(Collectors.toList());
-		f.apply(c1).addAll(newList);
+	public static <T> void updateListField(Campaign c1, Campaign c2, Function<Campaign, List<T>> f, BiConsumer<Campaign, List<T>> bc) {
+		if (f.apply(c1) == null && f.apply(c2) != null) {
+			bc.accept(c1, f.apply(c2));
+		} else {
+			if (f.apply(c2) == null)
+				return;
+			f.apply(c1).clear();
+			List<T> newList = f.apply(c2).stream().distinct().collect(Collectors.toList());
+			f.apply(c1).addAll(newList);
+		}
 	}
 
 	public static Result editCampaign(String id) throws ClassNotFoundException, JsonProcessingException, IOException {
@@ -161,9 +162,11 @@ public class CampaignController extends WithController {
 		}
 		Class<?> clazz = Class.forName("model.Campaign");
 		Campaign newCampaign = (Campaign) Json.fromJson(json, clazz);
-		updateLiteralField(campaign, newCampaign, Campaign::getTitle);
-		updateLiteralField(campaign, newCampaign, Campaign::getDescription);
+		updateLiteralField(campaign, newCampaign, Campaign::getTitle, Campaign::setTitle);
+		updateLiteralField(campaign, newCampaign, Campaign::getDescription, Campaign::setDescription);
 		updateLiteralField(campaign, newCampaign, Campaign::getInstructions, Campaign::setInstructions);
+		updateLiteralField(campaign, newCampaign, Campaign::getDisclaimer, Campaign::setDisclaimer);
+
 		if (newCampaign.getPrizes() != null) {
 				campaign.setPrizes(newCampaign.getPrizes());
 		}
@@ -173,12 +176,20 @@ public class CampaignController extends WithController {
 			campaign.setEndDate(newCampaign.getEndDate());
 		if (newCampaign.getBanner() != null)
 			campaign.setBanner(newCampaign.getBanner());
-		else
-			campaign.setBanner(null);
-		updateListField(campaign, newCampaign, Campaign::getTargetCollections);
-		campaign.setAnnotationTarget(newCampaign.getAnnotationTarget());
-		campaign.setVocabularies(newCampaign.getVocabularies());
-		campaign.setMotivation(newCampaign.getMotivation());
+
+		if (newCampaign.getLogo() != null)
+			campaign.setLogo(newCampaign.getLogo());
+
+		updateListField(campaign, newCampaign, Campaign::getTargetCollections, Campaign::setTargetCollections);
+		updateListField(campaign, newCampaign, Campaign::getUserGroupIds, Campaign::setUserGroupIds);
+		if (newCampaign.getCreators().size() != 0) {
+			campaign.setCreators(newCampaign.getCreators());
+		}
+		if (newCampaign.getAnnotationTarget() != 0L) {
+			campaign.setAnnotationTarget(newCampaign.getAnnotationTarget());
+		}
+		updateListField(campaign, newCampaign, Campaign::getVocabularies, Campaign::setVocabularies);
+		updateListField(campaign, newCampaign, Campaign::getMotivation, Campaign::setMotivation);
 		DB.getCampaignDAO().makePermanent(campaign);
 		return ok(Json.toJson(DB.getCampaignDAO().get(campaignDbId)));
 	}
@@ -239,6 +250,53 @@ public class CampaignController extends WithController {
 		return ok();
 	}
 
+	public static Result createEmptyCampaign(String campaignUserName) {
+//		ArrayNode errors = Json.newObject().arrayNode();
+		ObjectNode error = Json.newObject();
+		if (campaignUserName == null) {
+			error.put("error", "Please define a name for the campaign");
+			return forbidden(error);
+		}
+		if  (!uniqueCampaignName(campaignUserName)) {
+			error.put("error", "Campaign name already exists in DB. Use a different one");
+			return forbidden(error);
+		}
+
+		ObjectId creator = effectiveUserDbId();
+		if (creator == null || !DB.getUserDAO().getById(creator).isCampaignCreationAccess()) {
+			error.put("error", "No rights for campaign creation");
+			return forbidden(error);
+		}
+
+		Campaign newCampaign = new Campaign();
+		newCampaign.setCreators(new HashSet<ObjectId>(Arrays.asList(creator)));
+		newCampaign.setUsername(campaignUserName);
+		newCampaign.setBanner("http://withculture.eu/assets/img/content/background-space.png");
+		newCampaign.setAnnotationTarget(1000);
+		newCampaign.setAnnotationCurrent(new Campaign.AnnotationCount());
+		newCampaign.setContributorsPoints(new Hashtable<ObjectId, AnnotationCount>());
+		newCampaign.setCreated(new Date());
+		newCampaign.setStartDate(new Date());
+		newCampaign.setEndDate(new Date());
+
+		newCampaign.setProject("CrowdHeritage");
+
+		newCampaign.setTitle(new Literal("campaign title"));
+		newCampaign.setDescription(new Literal("campaign description"));
+		newCampaign.setInstructions(new Literal("campaign instructions"));
+		newCampaign.setDisclaimer(new Literal("campaign disclaimer"));
+		
+		try {
+			DB.getCampaignDAO().makePermanent(newCampaign);
+		} catch (Exception e) {
+			log.error("Cannot save campaign to database!", e.getMessage());
+			error.put("error", "Cannot save campaign to database!");
+			return internalServerError(error);
+		}
+		return ok();
+
+	}
+
 	public static Result createCampaign() {
 		Campaign newCampaign = null;
 		ArrayNode errors = Json.newObject().arrayNode();
@@ -253,7 +311,7 @@ public class CampaignController extends WithController {
 			newCampaign = (Campaign) Json.fromJson(json, clazz);
 			// Set Campaign.creator
 			ObjectId creator = effectiveUserDbId();
-			if (creator == null) {
+			if (creator == null || !DB.getUserDAO().getById(creator).isCampaignCreationAccess()) {
 				error.put("error", "No rights for campaign creation");
 				return forbidden(error);
 			} else {
