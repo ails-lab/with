@@ -260,7 +260,7 @@ GET		/campaign/incUserPoints						controllers.CampaignController.incUserPoints(c
 GET		/campaign/decUserPoints						controllers.CampaignController.decUserPoints(campaignId: String, userId: String, annotationType: String)
 POST	/campaign/createCampaign					controllers.CampaignController.createCampaign()
 POST	/campaign/createEmptyCampaign			    controllers.CampaignController.createEmptyCampaign(campaignUserName:String)
-GET		/campaign/userCampaigns						controllers.CampaignController.getUserCampaigns(userId: String, offset: Integer ?=0, count: Integer ?=10)
+GET		/campaign/userCampaigns						controllers.CampaignController.getUserCampaigns(offset: Integer ?=0, count: Integer ?=10)
 GET		/campaign/readCampaignTerms					controllers.CampaignController.readCampaignTerms(cname: String)
 GET		/campaign/popularAnnotations				controllers.CampaignController.getPopularAnnotations(campaignName: String, term : String ?= "", offset : Integer ?= 0, count: Integer ?= 10)
 GET     /campaign/updateKarma/:id                   controllers.CampaignController.updateKarma(id)

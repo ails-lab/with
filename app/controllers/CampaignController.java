@@ -42,6 +42,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import model.usersAndGroups.User;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.lang3.StringUtils;
@@ -225,16 +226,20 @@ public class CampaignController extends WithController {
 	 *
 	 * Get the campaigns that a specific user is creator of. Supports pagination via offset, count
 	 *
-	 * @param userId
+	 *
 	 * @param offset
 	 * @param count
 	 * @return
 	 */
-	public static Result getUserCampaigns(String userId, int offset, int count) {
+	public static Result getUserCampaigns(int offset, int count) {
 		ObjectNode result = Json.newObject();
 		List<Campaign> campaigns = new ArrayList<Campaign>();
-		campaigns = DB.getCampaignDAO().getUserCampaigns(new ObjectId(userId), offset, count);
-		long total = DB.getCampaignDAO().countUserCampaigns(new ObjectId(userId));
+		ObjectId userId = effectiveUserDbId();
+		if (userId == null) {
+			return badRequest("User not logged in");
+		}
+		campaigns = DB.getCampaignDAO().getUserCampaigns(userId, offset, count);
+		long total = DB.getCampaignDAO().countUserCampaigns(userId);
 		if (campaigns == null) {
 			result.put("error", "There are not any campaigns for this user");
 			return internalServerError(result);
