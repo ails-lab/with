@@ -65,7 +65,7 @@ public class CampaignDAO extends DAO<Campaign> {
 			q = q.field("project").equal(project);
 		}
 
-		q.field("isPublic").equal(true);
+		q = q.field("isPublic").equal(true);
 
 		Date today = new Date();
 		if (state.equals("active")) {
@@ -109,7 +109,7 @@ public class CampaignDAO extends DAO<Campaign> {
 			q = q.field("project").equal(project);
 		}
 
-		q.field("isPublic").equal(true);
+		q = q.field("isPublic").equal(true);
 		
 		Date today = new Date();
 		if (state.equals("active")) {
