@@ -255,6 +255,8 @@ public class Campaign {
 	
 	@JsonDeserialize(using = Deserializer.LiteralEnglishDefaultDesiarilizer.class)
 	private Literal disclaimer;
+
+	private boolean isPublic;
 	
 	@JsonSerialize(using = Serializer.ObjectIdArraySerializer.class)
 //	@JsonDeserialize(using = Deserializer.ObjectIdArraySerializer.class)
@@ -329,6 +331,14 @@ public class Campaign {
 		this.userGroupIds.remove(group);
 	}
 
+
+	public boolean getIsPublic() {
+		return isPublic;
+	}
+
+	public void setIsPublic(boolean aPublic) {
+		isPublic = aPublic;
+	}
 
 	public Boolean getActive() {
 		Date today = new Date();

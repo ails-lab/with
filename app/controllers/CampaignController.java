@@ -177,8 +177,9 @@ public class CampaignController extends WithController {
 		if (newCampaign.getBanner() != null)
 			campaign.setBanner(newCampaign.getBanner());
 
-		if (newCampaign.getLogo() != null)
-			campaign.setLogo(newCampaign.getLogo());
+		if (json.has("isPublic")) {
+			campaign.setIsPublic(json.get("isPublic").asBoolean());
+		}
 
 		updateListField(campaign, newCampaign, Campaign::getTargetCollections, Campaign::setTargetCollections);
 		updateListField(campaign, newCampaign, Campaign::getUserGroupIds, Campaign::setUserGroupIds);
@@ -278,6 +279,7 @@ public class CampaignController extends WithController {
 		newCampaign.setCreated(new Date());
 		newCampaign.setStartDate(new Date());
 		newCampaign.setEndDate(new Date());
+		newCampaign.setIsPublic(false);
 
 		newCampaign.setProject("CrowdHeritage");
 
