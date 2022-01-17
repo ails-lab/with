@@ -94,15 +94,20 @@ public class CampaignDAO extends DAO<Campaign> {
 		return this.findOne(q);
 	}
 
+	/**
+		Get public campaigns of a specific project, group, state
+	 */
 	public List<Campaign> getCampaigns(String groupName, String project, String state, String sortBy, int offset, int count) {
 		Query<Campaign> q = this.createQuery();
-		
+
 		if (!groupName.isEmpty()) {
 			q = q.field("spacename").equal(groupName);
 		}
 		if (!project.isEmpty()) {
 			q = q.field("project").equal(project);
 		}
+
+		q.field("isPublic").equal(true);
 		
 		Date today = new Date();
 		if (state.equals("active")) {

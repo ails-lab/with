@@ -195,11 +195,25 @@ public class CampaignController extends WithController {
 		return ok(Json.toJson(DB.getCampaignDAO().get(campaignDbId)));
 	}
 
+	/**
+	 * Call to get all campaigns of a project (e.g. CrowdHeritage)
+	 * WIll return only public campaigns.
+	 * Does not get into account a specific user.
+	 *
+	 * @param group
+	 * @param project
+	 * @param state
+	 * @param sortBy
+	 * @param offset
+	 * @param count
+	 * @return
+	 */
 	public static Result getCampaigns(String group, String project, String state, String sortBy, int offset,
 			int count) {
 		ObjectNode result = Json.newObject();
 		List<Campaign> campaigns = new ArrayList<Campaign>();
 		campaigns = DB.getCampaignDAO().getCampaigns(group, project, state, sortBy, offset, count);
+
 		if (campaigns == null) {
 			result.put("error", "There are not any campaigns for this Project.");
 			return internalServerError(result);
@@ -207,6 +221,15 @@ public class CampaignController extends WithController {
 		return ok(Json.toJson(campaigns));
 	}
 
+	/**
+	 *
+	 * Get the campaigns that a specific user is creator of. Supports pagination via offset, count
+	 *
+	 * @param userId
+	 * @param offset
+	 * @param count
+	 * @return
+	 */
 	public static Result getUserCampaigns(String userId, int offset, int count) {
 		ObjectNode result = Json.newObject();
 		List<Campaign> campaigns = new ArrayList<Campaign>();
