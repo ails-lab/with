@@ -323,7 +323,7 @@ public class CampaignController extends WithController {
 			error.put("error", "Cannot save campaign to database!");
 			return internalServerError(error);
 		}
-		return ok();
+		return ok(Json.toJson(newCampaign));
 
 	}
 
