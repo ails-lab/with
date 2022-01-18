@@ -105,7 +105,7 @@ public class User extends UserOrGroup {
 	private String md5Password;
 	@JsonIgnore
 	private boolean superUser;
-	@JsonIgnore
+
 	private boolean campaignCreationAccess = false;
 	@JsonSerialize(using = Serializer.ObjectIdSerializer.class)
 	private ObjectId favorites;
@@ -182,7 +182,7 @@ public class User extends UserOrGroup {
 		return "";
 	}
 
-	public boolean isCampaignCreationAccess() {
+	public boolean getCampaignCreationAccess() {
 		return campaignCreationAccess;
 	}
 

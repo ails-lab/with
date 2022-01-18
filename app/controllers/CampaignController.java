@@ -292,7 +292,7 @@ public class CampaignController extends WithController {
 		}
 
 		ObjectId creator = effectiveUserDbId();
-		if (creator == null || !DB.getUserDAO().getById(creator).isCampaignCreationAccess()) {
+		if (creator == null || !DB.getUserDAO().getById(creator).getCampaignCreationAccess()) {
 			error.put("error", "No rights for campaign creation");
 			return forbidden(error);
 		}
@@ -341,7 +341,7 @@ public class CampaignController extends WithController {
 			newCampaign = (Campaign) Json.fromJson(json, clazz);
 			// Set Campaign.creator
 			ObjectId creator = effectiveUserDbId();
-			if (creator == null || !DB.getUserDAO().getById(creator).isCampaignCreationAccess()) {
+			if (creator == null || !DB.getUserDAO().getById(creator).getCampaignCreationAccess()) {
 				error.put("error", "No rights for campaign creation");
 				return forbidden(error);
 			} else {
