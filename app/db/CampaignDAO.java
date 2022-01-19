@@ -141,8 +141,7 @@ public class CampaignDAO extends DAO<Campaign> {
 
 	public List<Campaign> getUserCampaigns(ObjectId userId, int offset, int count) {
 		Query<Campaign> q = this.createQuery();
-		q.field("creators").equal(userId);
-		q = q.offset(offset).limit(count);
+		q.field("creators").equal(userId).order("-created").offset(offset).limit(count);
 		List<Campaign> campaigns = new ArrayList<Campaign>();
 		campaigns = this.find(q).asList();
 		return campaigns;
