@@ -20,6 +20,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.List;
 
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import model.EmbeddedMediaObject;
 import model.EmbeddedMediaObject.MediaVersion;
 import model.EmbeddedMediaObject.WithMediaRights;
@@ -79,25 +80,63 @@ public class EuropeanaItemRecordFormatter extends CulturalRecordFormatter {
 		model.setDates(rec.getWithDateArrayValue("year"));
 
 		model.setDctermsspatial(rec.getMultiLiteralOrResourceValue("proxies[0].dctermsSpatial","places[.*].about","places[.*].about","places[.*].prefLabel"));
-		rec.enterContext("proxies[0]");
-		
-		model.setAltLabels(rec.getMultiLiteralValue("dctermsAlternative"));
-		model.setDclanguage(StringUtils.getLiteralLanguages(language));
-		model.setDcidentifier(rec.getMultiLiteralOrResourceValue("dcIdentifier"));
-		model.setDccoverage(rec.getMultiLiteralOrResourceValue("dcCoverage"));
-		model.setDcrights(rec.getMultiLiteralOrResourceValue("dcRights"));
-		model.setDccreator(rec.getMultiLiteralOrResourceValue("dcCreator"));
-		model.setDccreated(rec.getWithDateArrayValue("dctermsCreated"));
-		model.setDcformat(rec.getMultiLiteralOrResourceValue("dcFormat"));
-		model.setDctermsmedium(rec.getMultiLiteralOrResourceValue("dctermsMedium"));
-		model.setIsRelatedTo(rec.getMultiLiteralOrResourceValue("edmIsRelatedTo"));
-		model.setLabel(rec.getMultiLiteralValue("dcTitle","title"));
-		model.setDescription(rec.getMultiLiteralValue("dcDescription"));
-		model.getDates().addAll(rec.getWithDateArrayValue("dcDate"));
-		model.setDctype(rec.getMultiLiteralOrResourceValue("dcType"));
-		model.setDccontributor(rec.getMultiLiteralOrResourceValue("dcContributor"));
 
-		rec.exitContext();
+		int proxiesSize = ((ArrayNode) rec.getRootInformation().get("proxies")).size();
+
+		for (int i = 0; i < proxiesSize; i++) {
+			rec.enterContext("proxies["+i+"]");
+			if (rec.getMultiLiteralValue("dctermsAlternative") != null) {
+				model.setAltLabels(rec.getMultiLiteralValue("dctermsAlternative"));
+			}
+			if (StringUtils.getLiteralLanguages(language) != null) {
+				model.setDclanguage(StringUtils.getLiteralLanguages(language));
+			}
+			if ( rec.getMultiLiteralOrResourceValue("dcIdentifier")!= null) {
+				model.setDcidentifier(rec.getMultiLiteralOrResourceValue("dcIdentifier"));
+			}
+			if ( rec.getMultiLiteralOrResourceValue("dcCoverage")!= null) {
+				model.setDccoverage(rec.getMultiLiteralOrResourceValue("dcCoverage"));
+			}
+			if ( rec.getMultiLiteralOrResourceValue("dcRights")!= null) {
+				model.setDcrights(rec.getMultiLiteralOrResourceValue("dcRights"));
+			}
+			if (rec.getMultiLiteralOrResourceValue("dcCreator") != null) {
+				model.setDccreator(rec.getMultiLiteralOrResourceValue("dcCreator"));
+			}
+			if (rec.getWithDateArrayValue("dctermsCreated") != null) {
+				model.setDccreated(rec.getWithDateArrayValue("dctermsCreated"));
+			}
+			if ( rec.getMultiLiteralOrResourceValue("dcFormat")!= null) {
+				model.setDcformat(rec.getMultiLiteralOrResourceValue("dcFormat"));
+			}
+			if ( rec.getMultiLiteralOrResourceValue("dctermsMedium")!= null) {
+				model.setDctermsmedium(rec.getMultiLiteralOrResourceValue("dctermsMedium"));
+			}
+			if ( rec.getMultiLiteralOrResourceValue("edmIsRelatedTo")!= null) {
+				model.setIsRelatedTo(rec.getMultiLiteralOrResourceValue("edmIsRelatedTo"));
+			}
+			if ( rec.getMultiLiteralValue(false,"dcTitleLangAware","title", "dcTitle")!= null) {
+				model.setLabel(rec.getMultiLiteralValue(false,"dcTitleLangAware","title", "dcTitle"));
+			}
+			if ( rec.getMultiLiteralValue(false,"dcDescriptionLangAware","dcDescription")!= null) {
+				model.setDescription(rec.getMultiLiteralValue(false,"dcDescriptionLangAware","dcDescription"));
+			}
+			if (rec.getWithDateArrayValue("dcDate") != null) {
+				model.getDates().addAll(rec.getWithDateArrayValue("dcDate"));
+			}
+			if ( rec.getMultiLiteralOrResourceValue("dcType")!= null) {
+				model.setDctype(rec.getMultiLiteralOrResourceValue("dcType"));
+			}
+			if ( rec.getMultiLiteralOrResourceValue("dcContributor")!= null) {
+				model.setDccontributor(rec.getMultiLiteralOrResourceValue("dcContributor"));
+			}
+			rec.exitContext();
+		}
+
+		
+
+
+
 		rec.enterContext("proxies[1]");
 		
 		model.getDates().addAll(rec.getWithDateArrayValue("dcDate"));
