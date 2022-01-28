@@ -147,7 +147,7 @@ public class CampaignController extends WithController {
 		}
 	}
 
-	public static Result editCampaign(String id) throws ClassNotFoundException, JsonProcessingException, IOException {
+	public static Result editCampaign(String id) throws ClassNotFoundException, JsonProcessingException, IOException, ParseException {
 		JsonNode json = request().body().asJson();
 		ObjectNode result = Json.newObject();
 		ObjectId user = effectiveUserDbId();
@@ -163,6 +163,10 @@ public class CampaignController extends WithController {
 		}
 		Class<?> clazz = Class.forName("model.Campaign");
 		Campaign newCampaign = (Campaign) Json.fromJson(json, clazz);
+
+		newCampaign.setStartDate(new SimpleDateFormat("yyyy/MM/dd").parse(json.get("startDate").textValue()));
+		newCampaign.setEndDate(new SimpleDateFormat("yyyy/MM/dd").parse(json.get("endDate").textValue()));
+
 		updateLiteralField(campaign, newCampaign, Campaign::getTitle, Campaign::setTitle);
 		updateLiteralField(campaign, newCampaign, Campaign::getDescription, Campaign::setDescription);
 		updateLiteralField(campaign, newCampaign, Campaign::getInstructions, Campaign::setInstructions);
@@ -177,6 +181,8 @@ public class CampaignController extends WithController {
 			campaign.setEndDate(newCampaign.getEndDate());
 		if (newCampaign.getBanner() != null)
 			campaign.setBanner(newCampaign.getBanner());
+		if (newCampaign.getLogo() != null)
+			campaign.setLogo(newCampaign.getLogo());
 
 		if (json.has("isPublic")) {
 			campaign.setIsPublic(json.get("isPublic").asBoolean());
@@ -315,7 +321,14 @@ public class CampaignController extends WithController {
 		newCampaign.setDescription(new Literal("campaign description"));
 		newCampaign.setInstructions(new Literal("campaign instructions"));
 		newCampaign.setDisclaimer(new Literal("campaign disclaimer"));
-		
+
+		Campaign.BadgePrizes prizes = new Campaign.BadgePrizes();
+		prizes.setGold(new Literal(Language.EN, "Congratulations!<br/>Now you've got the <strong>Gold</strong> badge!"));
+		prizes.setSilver(new Literal(Language.EN, "Congratulations!<br/>Now you've got the <strong>Silver</strong> badge!"));
+		prizes.setBronze(new Literal(Language.EN, "Congratulations!<br/>Now you've got the <strong>Bronze</strong> badge!"));
+		prizes.setRookie(new Literal(Language.EN, "Keep annotating to win your badge!"));
+		newCampaign.setPrizes(prizes);
+
 		try {
 			DB.getCampaignDAO().makePermanent(newCampaign);
 		} catch (Exception e) {
