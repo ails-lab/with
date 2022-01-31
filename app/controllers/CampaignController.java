@@ -196,6 +196,9 @@ public class CampaignController extends WithController {
 		updateListField(campaign, newCampaign, Campaign::getUserGroupIds, Campaign::setUserGroupIds);
 		if (newCampaign.getCreators().size() != 0) {
 			campaign.setCreators(newCampaign.getCreators());
+			/**
+			 * TODO: Add - remove access from extra campaign creators
+			 */
 		}
 		if (newCampaign.getAnnotationTarget() != 0L) {
 			campaign.setAnnotationTarget(newCampaign.getAnnotationTarget());
