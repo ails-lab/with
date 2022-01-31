@@ -30,6 +30,7 @@ import db.DB;
 public class Vocabulary {
 
 	public static enum VocabularyType {
+		CUSTOM_THESAURUS,
 		THESAURUS,
 		REFERENCE,
 		DATA

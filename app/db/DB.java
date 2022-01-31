@@ -19,6 +19,7 @@ package db;
 import java.util.HashMap;
 import java.util.Map;
 
+import model.resources.ThesaurusAdmin;
 import org.mongodb.morphia.Datastore;
 import org.mongodb.morphia.Morphia;
 
@@ -161,6 +162,10 @@ public class DB {
 
 	public static UserGroupDAO getUserGroupDAO() {
 		return (UserGroupDAO) getDAO(UserGroup.class);
+	}
+
+	public static ThesaurusAdminDAO getThesaurusAdminDAO() {
+		return (ThesaurusAdminDAO) getDAO(ThesaurusAdmin.class);
 	}
 
 	public static ThesaurusObjectDAO getThesaurusDAO() {

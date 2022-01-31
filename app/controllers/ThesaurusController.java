@@ -69,9 +69,7 @@ import model.resources.WithResourceType;
 import play.Logger;
 import play.Logger.ALogger;
 import play.libs.Json;
-import play.mvc.Controller;
 import play.mvc.Result;
-import play.mvc.With;
 import vocabularies.Vocabulary;
 import vocabularies.Vocabulary.VocabularyType;
 
@@ -84,12 +82,13 @@ public class ThesaurusController extends WithController {
 
 	public static final ALogger log = Logger.of(ThesaurusController.class);
 
-	public static Result createEmptyThesaurus(String name, String version) {
+	public static Result createEmptyThesaurus(String name, String version, String label) {
 		User loggedInUser = effectiveUser();
 		if (loggedInUser == null) {
 			return badRequest("You should be signed in as a user.");
 		}
-		ThesaurusAdmin thesaurus = new ThesaurusAdmin(name, version, loggedInUser.getDbId());
+		ThesaurusAdmin thesaurus = new ThesaurusAdmin(name, version, label, VocabularyType.CUSTOM_THESAURUS, loggedInUser.getDbId());
+		DB.getThesaurusAdminDAO().makePermanent(thesaurus);
 		return ok(Json.toJson(thesaurus));
 
 	}
@@ -254,26 +253,12 @@ public class ThesaurusController extends WithController {
 	}
 
 	public static Result listVocabularies() {
-		ObjectNode result = Json.newObject();
-
-		try {
-			ArrayNode aresult = Json.newObject().arrayNode();
-			for (Vocabulary voc : Vocabulary.getVocabularies()) {
-
-				ObjectNode json = Json.newObject();
-				json.put("name", voc.getName());
-				json.put("label", voc.getLabel());
-				json.put("type", voc.getType().toString().toLowerCase());
-
-				aresult.add(json);
-			}
-
-			return ok(Json.toJson(aresult));
-
-		} catch (Exception e) {
-			result.put("error", e.getMessage());
-			return internalServerError(result);
+		User loggedInUser = effectiveUser();
+		if (loggedInUser == null) {
+			return badRequest("You should be signed in as a user.");
 		}
+		List<ThesaurusAdmin> thesaurusList = DB.getThesaurusAdminDAO().getUserAccessibleThesaurusAdminObjects(effectiveUser().getDbId());
+		return ok(Json.toJson(thesaurusList));
 	}
 
 	public static Result listAnnotators() {

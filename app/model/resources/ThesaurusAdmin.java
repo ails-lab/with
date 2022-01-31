@@ -7,9 +7,9 @@ import model.basicDataTypes.WithAccess;
 import org.bson.types.ObjectId;
 import org.mongodb.morphia.annotations.Entity;
 import org.mongodb.morphia.annotations.Id;
-import org.mongodb.morphia.annotations.Version;
 import utils.Deserializer;
 import utils.Serializer;
+import vocabularies.Vocabulary;
 
 import java.util.Date;
 
@@ -25,8 +25,10 @@ public class ThesaurusAdmin {
     @JsonSerialize(using = Serializer.ObjectIdSerializer.class)
     private ObjectId creator;
 
-    private String vocabularyName;
-    private String vocabularyVersion;
+    private String name;
+    private String version;
+    private String label;
+    private Vocabulary.VocabularyType type;
 
     @JsonSerialize(using = Serializer.DateSerializer.class)
     @JsonDeserialize(using = Deserializer.DateDeserializer.class)
@@ -34,23 +36,40 @@ public class ThesaurusAdmin {
 
     @JsonSerialize(using = Serializer.DateSerializer.class)
     @JsonDeserialize(using = Deserializer.DateDeserializer.class)
-    @Version
     private Date lastModified;
 
     public ThesaurusAdmin() {}
 
-    public ThesaurusAdmin(String name, String version, ObjectId creatorId) {
-        this.vocabularyName = name;
-        this.vocabularyVersion = version;
+    public ThesaurusAdmin(String name, String version, String label, Vocabulary.VocabularyType type, ObjectId creatorId) {
+        this.name = name;
+        this.version = version;
         this.creator = creatorId;
         this.created = new Date();
         this.lastModified = new Date();
+        this.label = label;
+        this.type = type;
 
         WithAccess acs = new WithAccess();
         acs.setIsPublic(false);
         acs.addToAcl(new WithAccess.AccessEntry(creatorId, WithAccess.Access.OWN));
         this.access = acs;
 
+    }
+
+    public String getLabel() {
+        return label;
+    }
+
+    public void setLabel(String label) {
+        this.label = label;
+    }
+
+    public Vocabulary.VocabularyType getType() {
+        return type;
+    }
+
+    public void setType(Vocabulary.VocabularyType type) {
+        this.type = type;
     }
 
     public ObjectId getDbId() {
@@ -73,20 +92,20 @@ public class ThesaurusAdmin {
         this.creator = creator;
     }
 
-    public String getVocabularyName() {
-        return vocabularyName;
+    public String getName() {
+        return name;
     }
 
-    public void setVocabularyName(String vocabularyName) {
-        this.vocabularyName = vocabularyName;
+    public void setName(String name) {
+        this.name = name;
     }
 
-    public String getVocabularyVersion() {
-        return vocabularyVersion;
+    public String getVersion() {
+        return version;
     }
 
-    public void setVocabularyVersion(String vocabularyVersion) {
-        this.vocabularyVersion = vocabularyVersion;
+    public void setVersion(String version) {
+        this.version = version;
     }
 
     public Date getCreated() {
