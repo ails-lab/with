@@ -28,6 +28,8 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.regex.Pattern;
 
+import model.resources.ThesaurusAdmin;
+import model.usersAndGroups.User;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
@@ -69,6 +71,7 @@ import play.Logger.ALogger;
 import play.libs.Json;
 import play.mvc.Controller;
 import play.mvc.Result;
+import play.mvc.With;
 import vocabularies.Vocabulary;
 import vocabularies.Vocabulary.VocabularyType;
 
@@ -77,9 +80,19 @@ import vocabularies.Vocabulary.VocabularyType;
  *
  */
 @SuppressWarnings({ "rawtypes", "unchecked" })
-public class ThesaurusController extends Controller {
+public class ThesaurusController extends WithController {
 
 	public static final ALogger log = Logger.of(ThesaurusController.class);
+
+	public static Result createEmptyThesaurus(String name, String version) {
+		User loggedInUser = effectiveUser();
+		if (loggedInUser == null) {
+			return badRequest("You should be signed in as a user.");
+		}
+		ThesaurusAdmin thesaurus = new ThesaurusAdmin(name, version, loggedInUser.getDbId());
+		return ok(Json.toJson(thesaurus));
+
+	}
 
 	public static Result addThesaurusTerm() {
 		JsonNode json = request().body().asJson();
