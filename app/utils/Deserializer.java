@@ -355,7 +355,7 @@ public class Deserializer {
 				throws IOException, JsonProcessingException {
 			try {
 				Date d = DateUtils.parseDateStrictly(date.getValueAsString(), "yyyy/MM/dd'T'HH:mm:ss.SSS'Z'",
-						"yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", "yyyy-MM-dd");
+						"yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", "yyyy-MM-dd", "yyyy/MM/dd");
 				return d;
 			} catch (ParseException e) {
 				return null;

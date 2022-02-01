@@ -164,9 +164,6 @@ public class CampaignController extends WithController {
 		Class<?> clazz = Class.forName("model.Campaign");
 		Campaign newCampaign = (Campaign) Json.fromJson(json, clazz);
 
-		newCampaign.setStartDate(new SimpleDateFormat("yyyy/MM/dd").parse(json.get("startDate").textValue()));
-		newCampaign.setEndDate(new SimpleDateFormat("yyyy/MM/dd").parse(json.get("endDate").textValue()));
-
 		updateLiteralField(campaign, newCampaign, Campaign::getTitle, Campaign::setTitle);
 		updateLiteralField(campaign, newCampaign, Campaign::getDescription, Campaign::setDescription);
 		updateLiteralField(campaign, newCampaign, Campaign::getInstructions, Campaign::setInstructions);
