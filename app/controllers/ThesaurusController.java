@@ -427,12 +427,16 @@ public class ThesaurusController extends WithController {
 			// word = m.group(2);
 			// }
 
-			boolean ok = false;
+			boolean searchForSuggestions = false;
 
+			/*
+				Split word on . , : - so that you can
+				search with multiple words on the same call
+			 */
 			String[] words = word.split("[ ,\\.\\-:]");
 			for (String s : words) {
 				if (s.length() > 2) {
-					ok = true;
+					searchForSuggestions = true;
 				}
 			}
 			String[] namespaceArray = new String[0];
@@ -440,6 +444,7 @@ public class ThesaurusController extends WithController {
 				namespaceArray = namespaces.split(",");
 			}
 
+			// TODO: To be removed from code. Campaign terms are obsolete.
 			if (campaignId != null) {
 				Campaign campaign = DB.getCampaignDAO().getById(new ObjectId(campaignId));
 				if (!geotagging && campaign.getCampaignTerms() != null && campaign.getCampaignTerms().size() > 0) {
@@ -455,7 +460,10 @@ public class ThesaurusController extends WithController {
 				namespaceArray = vocabularyList.toArray(new String[vocabularyList.size()]);
 			}
 
-			if (ok) {
+			if (searchForSuggestions) {
+				/*
+					Normalize word for elastic search
+				 */
 				for (int i = 0; i < words.length; i++) {
 					StringBuffer trWord = new StringBuffer();
 
@@ -514,11 +522,7 @@ public class ThesaurusController extends WithController {
 						query.must(vocabNameQuery);
 					}		
 				}
-				if (campaignId != null) {
-					Campaign campaign = DB.getCampaignDAO().getById(new ObjectId(campaignId));
-					if (campaign !=null && campaign.getUsername().equals("garment-type"))
-						query.must(QueryBuilders.termQuery("broaderTransitive.uri.string", "http://thesaurus.europeanafashion.eu/thesaurus/10000"));
-				}
+
 				// System.out.println("QUERY" + query);
 				SearchOptions so = new SearchOptions(0, 1000);
 				so.isPublic = false;
@@ -614,7 +618,8 @@ public class ThesaurusController extends WithController {
 			} else {
 				allTerms = terms;
 			}
-			
+
+			// TODO: To be removed from code. Campaign terms are obsolete.
 			if (campaignId != null) {
 				campaignResults.addAll(allTerms);
 				response.put("results", campaignResults);
