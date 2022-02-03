@@ -16,20 +16,24 @@
 
 package controllers;
 
-import java.io.IOException;
-import java.net.URLEncoder;
+import java.io.*;
+import java.net.*;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Date;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 import java.util.Map.Entry;
 import java.util.regex.Pattern;
 
+import actors.MediaCheckerActor;
+import akka.actor.ActorRef;
+import akka.actor.ActorSelection;
+import com.github.jsonldjava.utils.Obj;
+import model.EmbeddedMediaObject;
+import model.basicDataTypes.Literal;
+import model.basicDataTypes.WithAccess;
 import model.resources.ThesaurusAdmin;
 import model.usersAndGroups.User;
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
@@ -68,7 +72,9 @@ import model.resources.ThesaurusObject;
 import model.resources.WithResourceType;
 import play.Logger;
 import play.Logger.ALogger;
+import play.libs.Akka;
 import play.libs.Json;
+import play.mvc.Http;
 import play.mvc.Result;
 import vocabularies.Vocabulary;
 import vocabularies.Vocabulary.VocabularyType;
@@ -87,12 +93,223 @@ public class ThesaurusController extends WithController {
 		if (loggedInUser == null) {
 			return badRequest("You should be signed in as a user.");
 		}
+
+		if (DB.getThesaurusAdminDAO().findThesaurusAdminByName(name) != null) {
+			return badRequest("Thesaurus already exists with given name");
+		}
+
 		ThesaurusAdmin thesaurus = new ThesaurusAdmin(name, version, label, VocabularyType.CUSTOM_THESAURUS, loggedInUser.getDbId());
 		DB.getThesaurusAdminDAO().makePermanent(thesaurus);
 		return ok(Json.toJson(thesaurus));
 
 	}
 
+	public static Result populateCustomThesaurus(String thesaurusName, String thesaurusVersion) {
+
+		String[] langs = new String[] { "en", "it", "fr", "pl", "es", "el", "de", "nl" };
+
+		User loggedInUser = effectiveUser();
+		if (loggedInUser == null || !loggedInUser.getCampaignCreationAccess()) {
+			return badRequest("You should be signed in as a user.");
+		}
+
+		final Http.MultipartFormData multipartBody = request().body().asMultipartFormData();
+
+		if (multipartBody != null) {
+			try {
+				if (!multipartBody.getFiles().isEmpty()) {
+					Http.MultipartFormData.FilePart fp = multipartBody.getFiles().get(0);
+					File x = fp.getFile();
+
+					Reader in = new FileReader(x);
+					Iterable<CSVRecord> records = CSVFormat.DEFAULT.withDelimiter(',').parse(in);
+					ThesaurusObject term;
+
+					for (CSVRecord record : records) {
+						String recordUri = record.get(0);
+						try {
+							URI uri = new URI(recordUri);
+						}
+						catch (Exception e) {
+							return badRequest();
+						}
+						String recordLabel = record.get(record.size()-1);
+
+						term = new ThesaurusObject(recordUri, recordLabel, "term_description");
+
+						if (term.getSemantic().getUri().contains("wikidata")) {
+							term.getSemantic().setUri(term.getSemantic().getUri().replace("/wiki/", "/entity/"));
+							term.getSemantic().setUri(term.getSemantic().getUri().replace("https", "http"));
+							HttpClient client = HttpClientBuilder.create().build();
+							HttpGet request = new HttpGet(term.getSemantic().getUri() + ".json");
+
+							try {
+								HttpResponse response = client.execute(request);
+								InputStream jsonStream = response.getEntity().getContent();
+								JsonNode json = Json.parse(jsonStream);
+								for (String lang : langs) {
+									JsonNode langNode = json.get("entities").fields().next().getValue().get("labels").get(lang);
+									if (langNode != null) {
+										String langTerm = langNode.get("value").asText();
+										term.getSemantic().getPrefLabel().addLiteral(Language.getLanguage(lang), langTerm);
+									}
+									else {
+										String englishTerm = term.getSemantic().getPrefLabel().getLiteral(Language.EN);
+										term.getSemantic().getPrefLabel().addLiteral(Language.getLanguage(lang), englishTerm);
+									}
+									JsonNode descNode = json.get("entities").fields().next().getValue().get("descriptions").get(lang);
+									if (descNode != null) {
+										String desc = descNode.get("value").asText();
+										term.getSemantic().getDescription().addLiteral(Language.getLanguage(lang), desc);
+									}
+								}
+							}
+							catch (Exception e) {
+								e.printStackTrace();
+								return badRequest();
+							}
+						}
+						else {
+							try {
+								URL u = new URL(term.getSemantic().getUri() + ".json");
+								InputStream jsonStream = u.openStream();
+								JsonNode json = Json.parse(jsonStream);
+								for (String lang : langs) {
+									Iterator<JsonNode> it = json.get("results").get("bindings").iterator();
+									while (it.hasNext()) {
+										JsonNode node = it.next();
+										if (node.get("Object").get("xml:lang") != null
+												&& node.get("Predicate").get("value").textValue().contains("skos/core#prefLabel")
+												&& Arrays.asList(langs).contains(node.get("Object").get("xml:lang").asText())) {
+											String langTerm = node.get("Object").get("value").asText();
+											String lan = node.get("Object").get("xml:lang").asText();
+											term.getSemantic().getDescription().addLiteral(Language.getLanguage(lan), langTerm);
+											break;
+										}
+									}
+								}
+							} catch (MalformedURLException e) {
+								String englishTerm = term.getSemantic().getPrefLabel().getLiteral(Language.EN);
+								String[] s = englishTerm.split(",");
+								if (s.length > 2) {
+									Logger.info("Cannot create name");
+								} else if (s.length == 2) {
+									englishTerm = s[1].trim() + " " + s[0].trim();
+								}
+								for (String lang : langs) {
+									term.getSemantic().getPrefLabel().addLiteral(Language.getLanguage(lang), englishTerm);
+								}
+								Logger.error(e.getMessage());
+								;
+							}
+						}
+
+						term.getSemantic().setVocabulary(new ThesaurusObject.SKOSVocabulary(thesaurusName, thesaurusVersion));
+						term.getSemantic().setType("CUSTOM_THESAURUS_TERM");
+						DB.getThesaurusDAO().makePermanent(term);
+					}
+
+					return ok();
+
+				} else {
+					return badRequest();
+				}
+			} catch (Exception e) {
+				log.debug("CSV upload error", e);
+				e.printStackTrace();
+				return badRequest();
+			}
+		}
+		return badRequest();
+	}
+
+
+	public static Result emptyThesaurus(String id) {
+		ObjectNode result = Json.newObject();
+		try {
+			User loggedInUser = effectiveUser();
+			if (loggedInUser == null || !loggedInUser.getCampaignCreationAccess()) {
+				return badRequest("You should be signed in as a user.");
+			}
+
+			ThesaurusAdmin adm = DB.getThesaurusAdminDAO().findThesaurusAdminById(new ObjectId(id));
+			if (adm == null || (!adm.getAccess().canDelete(loggedInUser.getDbId()))) {
+				return badRequest();
+			}
+
+			DB.getThesaurusDAO().removeAllTermsFromThesaurus(adm.getName());
+			result.put("message", "Thesaurus was deleted successfully");
+			return ok(result);
+		}
+		catch (Exception e) {
+			result.put("error", e.getMessage());
+			return internalServerError(result);
+		}
+	}
+
+	public static Result deleteThesaurusAdminObject(String id) {
+		ObjectNode result = Json.newObject();
+
+		try {
+			User loggedInUser = effectiveUser();
+
+			if (loggedInUser == null || !loggedInUser.getCampaignCreationAccess()) {
+				return badRequest("You should be signed in as a user.");
+			}
+
+			ThesaurusAdmin adm = DB.getThesaurusAdminDAO().findThesaurusAdminById(new ObjectId(id));
+			if (adm == null || (!adm.getAccess().canDelete(loggedInUser.getDbId()))) {
+				return badRequest();
+			}
+
+			DB.getThesaurusDAO().removeAllTermsFromThesaurus(adm.getName());
+			DB.getThesaurusAdminDAO().removeThesaurusAdmin(new ObjectId(id));
+			result.put("meggage", "Thesaurus deleted successfuly");
+			return ok(Json.toJson(result));
+		}
+		catch (Exception e) {
+			result.put("error", e.getMessage());
+			return internalServerError(result);		}
+
+	}
+
+	public static Result removeThesaurusTerm(String id) {
+		ObjectNode result = Json.newObject();
+
+		try {
+			User loggedInUser = effectiveUser();
+			if (loggedInUser == null || !loggedInUser.getCampaignCreationAccess()) {
+				return badRequest("You should be signed in as a user.");
+			}
+			ThesaurusObject term = DB.getThesaurusDAO().getById(new ObjectId(id));
+
+			if (term == null) {
+				result.put("error", "Term does not exist");
+				return badRequest(Json.toJson(result));
+			}
+
+			ThesaurusAdmin adm = DB.getThesaurusAdminDAO().findThesaurusAdminByName(term.getSemantic().getVocabulary().getName());
+
+			if (adm == null) {
+				result.put("error", "Server Error in DB");
+				return internalServerError(Json.toJson(result));
+			}
+
+			if (!adm.getAccess().canDelete(loggedInUser.getDbId())) {
+				result.put("error", "No DELETE access");
+				return badRequest(Json.toJson(result));
+			}
+
+			DB.getThesaurusDAO().removeById(new ObjectId(id));
+			result.put("message", "Term Deleted Successfully");
+			return ok(Json.toJson(ok()));
+
+		}
+		catch (Exception e) {
+			result.put("error", e.getMessage());
+			return internalServerError(result);
+		}
+	}
 	public static Result addThesaurusTerm() {
 		JsonNode json = request().body().asJson();
 		ObjectNode result = Json.newObject();
@@ -194,19 +411,6 @@ public class ThesaurusController extends WithController {
 				result.put("message", count + "/" + total + "terms successfully added.");
 				return ok(result);
 			}
-		} catch (Exception e) {
-			result.put("error", e.getMessage());
-			return internalServerError(result);
-		}
-	}
-
-	public static Result deleteThesaurus(String thesaurus) {
-		ObjectNode result = Json.newObject();
-		try {
-			DB.getThesaurusDAO().removeAllTermsFromThesaurus(thesaurus);
-
-			result.put("message", "Thesaurus was deleted successfully");
-			return ok(result);
 		} catch (Exception e) {
 			result.put("error", e.getMessage());
 			return internalServerError(result);

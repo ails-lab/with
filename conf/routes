@@ -217,13 +217,15 @@ GET /api/collection/:id/reindex							controllers.ReindexController.reindexColle
 
 #Thesaurus management
 POST	/thesaurus/addTerm	        			    controllers.ThesaurusController.addThesaurusTerm()
-POST    /thesaurus/createEmptyThesaurus             controllers.ThesaurusController.createEmptyThesaurus(name: String, version: String)
-DELETE  /thesaurus/deleteThesaurus/:name	        controllers.ThesaurusController.deleteThesaurus(name)
+POST    /thesaurus/createEmptyThesaurus             controllers.ThesaurusController.createEmptyThesaurus(name: String, version: String, label: String)
+DELETE  /thesaurus/deleteThesaurus/:name	        controllers.ThesaurusController.emptyThesaurus(name)
+DELETE  /thesaurus/:id                              controllers.ThesaurusController.deleteThesaurusAdminObject(id: String)
+DELETE  /thesaurus/term/:id                         controllers.ThesaurusController.removeThesaurusTerm(id: String)
 GET 	/thesaurus/getTerm		   					controllers.ThesaurusController.getThesaurusTerm(uri: String)
 GET 	/thesaurus/listVocabularies		   				controllers.ThesaurusController.listVocabularies()
 GET 	/thesaurus/listAnnotators		   				controllers.ThesaurusController.listAnnotators()
 GET 	/thesaurus/suggestions						controllers.ThesaurusController.getSuggestions(word: String, namespaces: String ?= "", campaignId: String ?= null, geotagging: Boolean ?= false, language : String ?= "all")
-
+POST    /thesaurus/populateCustomThesaurus          controllers.ThesaurusController.populateCustomThesaurus(thesaurusName: String, thesaurusVersion:String)
 #Thesaurus gui
 POST	/collection/:id/facets 	        			controllers.CollectionIndexController.getCollectionFacets(id)
 POST	/collection/:id/selectionlist		   			controllers.CollectionObjectController.facetedListRecordResources(id, format: String ?="noContent", start: Integer ?=0, count: Integer ?=10, profile: String ?="MEDIUM", locale: play.libs.F.Option[java.lang.String])
