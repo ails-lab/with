@@ -117,6 +117,28 @@ public class ThesaurusController extends WithController {
 
 	}
 
+	public static Result getThesaurusAdmin(String name) {
+		ObjectNode result = Json.newObject();
+
+		User loggedInUser = effectiveUser();
+		if (loggedInUser == null) {
+			result.put("error", "You should be signed in as a user.");
+			return badRequest(Json.toJson(result));
+		}
+
+		ThesaurusAdmin thesaurusAdm = DB.getThesaurusAdminDAO().findThesaurusAdminByName(name);
+		if (thesaurusAdm == null) {
+			result.put("error", "No thesaurus found with that name.");
+			return badRequest(Json.toJson(result));
+		}
+		if (!thesaurusAdm.getAccess().canRead(loggedInUser.getDbId())) {
+			result.put("error", "You don't have READ access in this thesaurus.");
+			return badRequest(Json.toJson(result));
+		}
+
+		return ok(Json.toJson(thesaurusAdm));
+	}
+
 	public static Result populateCustomThesaurus(String thesaurusName, String thesaurusVersion) {
 
 		String[] langs = new String[] { "en", "it", "fr", "pl", "es", "el", "de", "nl" };

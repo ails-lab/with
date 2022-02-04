@@ -228,6 +228,7 @@ GET 	/thesaurus/suggestions						controllers.ThesaurusController.getSuggestions(
 POST    /thesaurus/populateCustomThesaurus          controllers.ThesaurusController.populateCustomThesaurus(thesaurusName: String, thesaurusVersion:String)
 POST    /thesaurus/:id/assignAccess                 controllers.ThesaurusController.assignAccessToThesaurus(userId: String, id: String, accessLevel: play.libs.F.Option[String])
 GET     /thesaurus/listTerms                    controllers.ThesaurusController.getThesaurusTerms(thesaurusName: String)
+GET     /thesaurus/:name                        controllers.ThesaurusController.getThesaurusAdmin(name: String)
 
 #Thesaurus gui
 POST	/collection/:id/facets 	        			controllers.CollectionIndexController.getCollectionFacets(id)
