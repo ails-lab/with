@@ -236,18 +236,62 @@ public class ThesaurusController extends WithController {
 		return badRequest();
 	}
 
+	public static Result assignAccessToThesaurus(String userId, String thesaurusId, F.Option<String> accessLevel) {
+		ObjectNode result = Json.newObject();
+		try {
+			User loggedInUser = effectiveUser();
+			if (loggedInUser == null || !loggedInUser.getCampaignCreationAccess()) {
+				result.put("error", "You should be signed in as a user.");
+				return badRequest(Json.toJson(result));
+			}
+
+			ThesaurusAdmin thesaurusAdmin = DB.getThesaurusAdminDAO().findThesaurusAdminById(new ObjectId(thesaurusId));
+
+			// Check if i have OWN permissions to the thesaurus
+			if (thesaurusAdmin == null || (!thesaurusAdmin.getAccess().canDelete(loggedInUser.getDbId()))) {
+				result.put("error", "Thesaurus not found or no access");
+				return badRequest(Json.toJson(result));
+			}
+
+			User targetUser = DB.getUserDAO().getById(new ObjectId(userId));
+			if (targetUser == null) {
+				result.put("error", "Could not find user to give access to");
+				return badRequest(Json.toJson(result));
+			}
+
+			if (accessLevel.isDefined()) {
+				WithAccess.Access access = WithAccess.Access.valueOf(accessLevel.get().toUpperCase());
+				thesaurusAdmin.getAccess().addToAcl(new WithAccess.AccessEntry(targetUser.getDbId(), access));
+			}
+			// If no access level is provided, assign the lower (read)
+			else {
+				thesaurusAdmin.getAccess().addToAcl(new WithAccess.AccessEntry(targetUser.getDbId(), WithAccess.Access.READ));
+			}
+			DB.getThesaurusAdminDAO().makePermanent(thesaurusAdmin);
+
+			result.put("message", "Access assigned successfully");
+			return ok(Json.toJson(result));
+		}
+		catch (Exception e) {
+			result.put("error", e.getMessage());
+			return internalServerError(result);
+		}
+
+	}
 
 	public static Result emptyThesaurus(String id) {
 		ObjectNode result = Json.newObject();
 		try {
 			User loggedInUser = effectiveUser();
 			if (loggedInUser == null || !loggedInUser.getCampaignCreationAccess()) {
-				return badRequest("You should be signed in as a user.");
+				result.put("error", "You should be signed in as a user.");
+				return badRequest(Json.toJson(result));
 			}
 
 			ThesaurusAdmin adm = DB.getThesaurusAdminDAO().findThesaurusAdminById(new ObjectId(id));
 			if (adm == null || (!adm.getAccess().canDelete(loggedInUser.getDbId()))) {
-				return badRequest();
+				result.put("error", "Thesaurus not found or no access");
+				return badRequest(Json.toJson(result));
 			}
 
 			DB.getThesaurusDAO().removeAllTermsFromThesaurus(adm.getName());
