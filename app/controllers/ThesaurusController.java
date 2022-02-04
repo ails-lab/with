@@ -73,6 +73,7 @@ import model.resources.WithResourceType;
 import play.Logger;
 import play.Logger.ALogger;
 import play.libs.Akka;
+import play.libs.F;
 import play.libs.Json;
 import play.mvc.Http;
 import play.mvc.Result;
@@ -88,7 +89,11 @@ public class ThesaurusController extends WithController {
 
 	public static final ALogger log = Logger.of(ThesaurusController.class);
 
-	public static Result createEmptyThesaurus(String name, String version, String label) {
+	// This call is for creating a doc in the ThesaurusAdmin collection
+	// It is also used for creating the WITH supported thesauri (by providing vocType)
+	// This is a "hack", since we dont want any user to create WITH supported thesauri
+	// Should consider how to properly implement that.
+	public static Result createEmptyThesaurus(String name, String version, String label, F.Option<String> vocType) {
 		User loggedInUser = effectiveUser();
 		if (loggedInUser == null) {
 			return badRequest("You should be signed in as a user.");
@@ -97,8 +102,16 @@ public class ThesaurusController extends WithController {
 		if (DB.getThesaurusAdminDAO().findThesaurusAdminByName(name) != null) {
 			return badRequest("Thesaurus already exists with given name");
 		}
-
-		ThesaurusAdmin thesaurus = new ThesaurusAdmin(name, version, label, VocabularyType.CUSTOM_THESAURUS, loggedInUser.getDbId());
+		ThesaurusAdmin thesaurus;
+		if (vocType.isDefined()) {
+			thesaurus = new ThesaurusAdmin(name, version, label, VocabularyType.valueOf(vocType.get().toUpperCase()), loggedInUser.getDbId());
+			if (!vocType.get().equals(VocabularyType.CUSTOM_THESAURUS)) {
+				thesaurus.getAccess().setIsPublic(true);
+			}
+		}
+		else {
+			thesaurus = new ThesaurusAdmin(name, version, label, VocabularyType.CUSTOM_THESAURUS, loggedInUser.getDbId());
+		}
 		DB.getThesaurusAdminDAO().makePermanent(thesaurus);
 		return ok(Json.toJson(thesaurus));
 

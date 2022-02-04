@@ -217,7 +217,7 @@ GET /api/collection/:id/reindex							controllers.ReindexController.reindexColle
 
 #Thesaurus management
 POST	/thesaurus/addTerm	        			    controllers.ThesaurusController.addThesaurusTerm()
-POST    /thesaurus/createEmptyThesaurus             controllers.ThesaurusController.createEmptyThesaurus(name: String, version: String, label: String)
+POST    /thesaurus/createEmptyThesaurus             controllers.ThesaurusController.createEmptyThesaurus(name: String, version: String, label: String, vocType: play.libs.F.Option[String])
 DELETE  /thesaurus/deleteThesaurus/:name	        controllers.ThesaurusController.emptyThesaurus(name)
 DELETE  /thesaurus/:id                              controllers.ThesaurusController.deleteThesaurusAdminObject(id: String)
 DELETE  /thesaurus/term/:id                         controllers.ThesaurusController.removeThesaurusTerm(id: String)
