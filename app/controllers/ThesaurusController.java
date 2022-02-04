@@ -277,7 +277,7 @@ public class ThesaurusController extends WithController {
 
 			DB.getThesaurusDAO().removeAllTermsFromThesaurus(adm.getName());
 			DB.getThesaurusAdminDAO().removeThesaurusAdmin(new ObjectId(id));
-			result.put("meggage", "Thesaurus deleted successfuly");
+			result.put("message", "Thesaurus deleted successfuly");
 			return ok(Json.toJson(result));
 		}
 		catch (Exception e) {
