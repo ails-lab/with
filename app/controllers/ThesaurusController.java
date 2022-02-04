@@ -279,6 +279,32 @@ public class ThesaurusController extends WithController {
 
 	}
 
+	public static Result getThesaurusTerms(String thesaurusName) {
+		ObjectNode result = Json.newObject();
+
+		User loggedInUser = effectiveUser();
+		if (loggedInUser == null) {
+			result.put("error", "You should be signed in as a user.");
+			return badRequest(Json.toJson(result));
+		}
+
+		ThesaurusAdmin adm = DB.getThesaurusAdminDAO().findThesaurusAdminByName(thesaurusName);
+
+		if (adm == null) {
+			result.put("error", "Thesaurus does not exist");
+			return badRequest(Json.toJson(result));
+		}
+
+		if (adm.getAccess().getIsPublic() || adm.getAccess().canRead(loggedInUser.getDbId())) {
+			List<ThesaurusObject> terms = DB.getThesaurusDAO().getALlByVocabularyName(thesaurusName);
+			return ok(Json.toJson(terms));
+		}
+		else {
+			result.put("error", "No access to thesaurus");
+			return badRequest(Json.toJson(result));
+		}
+	}
+
 	public static Result emptyThesaurus(String id) {
 		ObjectNode result = Json.newObject();
 		try {
