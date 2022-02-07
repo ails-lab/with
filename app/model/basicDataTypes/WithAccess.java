@@ -162,6 +162,10 @@ public class WithAccess  {
 	public boolean canDelete( ObjectId... users ) {
 		return ( accessByUsers( users ) == Access.OWN ); 
 	}
+
+	public boolean canWrite( ObjectId... users ) {
+		return ( accessByUsers( users ) == Access.OWN || accessByUsers( users ) == Access.WRITE);
+	}
 	
 	
 	
