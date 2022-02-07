@@ -209,30 +209,37 @@ public class ThesaurusController extends WithController {
 								URL u = new URL(term.getSemantic().getUri() + ".json");
 								InputStream jsonStream = u.openStream();
 								JsonNode json = Json.parse(jsonStream);
-								for (String lang : langs) {
-									Iterator<JsonNode> it = json.get("results").get("bindings").iterator();
-									while (it.hasNext()) {
 
-										JsonNode node = it.next();
-										if (node.get("Object").get("xml:lang") != null
-												&& node.get("Predicate").get("value").textValue().contains("skos/core#prefLabel")
-												&& Arrays.asList(langs).contains(node.get("Object").get("xml:lang").asText())) {
-											String langTerm = node.get("Object").get("value").asText();
-											String lan = node.get("Object").get("xml:lang").asText();
-											term.getSemantic().getPrefLabel().addLiteral(Language.getLanguage(lan), langTerm);
-											continue;
+								Iterator<JsonNode> it = json.get("results").get("bindings").iterator();
+								// support both us and gb english
+								List<String> lang = new ArrayList<>(Arrays.asList(langs));
+								lang.add("en-us");
+								lang.add("en-gb");
+								while (it.hasNext()) {
+									JsonNode node = it.next();
+									if (node.get("Object").get("xml:lang") != null
+											&& node.get("Predicate").get("value").textValue().contains("skos/core#prefLabel")
+											&& lang.contains(node.get("Object").get("xml:lang").asText())) {
+										String langTerm = node.get("Object").get("value").asText();
+										String lan = node.get("Object").get("xml:lang").asText();
+										if (lan.equals("en-us") || lan.equals("en-gb")) {
+											lan = "en";
 										}
-										else if (node.get("Object").get("xml:lang") != null
-												&& node.get("Predicate").get("value").textValue().contains("http://www.w3.org/1999/02/22-rdf-syntax-ns#value")
-												&& Arrays.asList(langs).contains(node.get("Object").get("xml:lang").asText())) {
-											String langTerm = node.get("Object").get("value").asText();
-											String lan = node.get("Object").get("xml:lang").asText();
-											term.getSemantic().getDescription().addLiteral(Language.getLanguage(lan), langTerm);
-											continue;
-										}
-
+										term.getSemantic().getPrefLabel().addLiteral(Language.getLanguage(lan), langTerm);
 									}
+									else if (node.get("Object").get("xml:lang") != null
+											&& node.get("Predicate").get("value").textValue().contains("http://www.w3.org/1999/02/22-rdf-syntax-ns#value")
+											&& lang.contains(node.get("Object").get("xml:lang").asText())) {
+										String langTerm = node.get("Object").get("value").asText();
+										String lan = node.get("Object").get("xml:lang").asText();
+										if (lan.equals("en-us") || lan.equals("en-gb")) {
+											lan = "en";
+										}
+										term.getSemantic().getDescription().addLiteral(Language.getLanguage(lan), langTerm);
+									}
+
 								}
+
 							} catch (MalformedURLException e) {
 								String englishTerm = term.getSemantic().getPrefLabel().getLiteral(Language.EN);
 								String[] s = englishTerm.split(",");
