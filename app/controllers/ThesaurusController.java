@@ -212,15 +212,25 @@ public class ThesaurusController extends WithController {
 								for (String lang : langs) {
 									Iterator<JsonNode> it = json.get("results").get("bindings").iterator();
 									while (it.hasNext()) {
+
 										JsonNode node = it.next();
 										if (node.get("Object").get("xml:lang") != null
 												&& node.get("Predicate").get("value").textValue().contains("skos/core#prefLabel")
 												&& Arrays.asList(langs).contains(node.get("Object").get("xml:lang").asText())) {
 											String langTerm = node.get("Object").get("value").asText();
 											String lan = node.get("Object").get("xml:lang").asText();
-											term.getSemantic().getDescription().addLiteral(Language.getLanguage(lan), langTerm);
-											break;
+											term.getSemantic().getPrefLabel().addLiteral(Language.getLanguage(lan), langTerm);
+											continue;
 										}
+										else if (node.get("Object").get("xml:lang") != null
+												&& node.get("Predicate").get("value").textValue().contains("http://www.w3.org/1999/02/22-rdf-syntax-ns#value")
+												&& Arrays.asList(langs).contains(node.get("Object").get("xml:lang").asText())) {
+											String langTerm = node.get("Object").get("value").asText();
+											String lan = node.get("Object").get("xml:lang").asText();
+											term.getSemantic().getDescription().addLiteral(Language.getLanguage(lan), langTerm);
+											continue;
+										}
+
 									}
 								}
 							} catch (MalformedURLException e) {
