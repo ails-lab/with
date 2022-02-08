@@ -27,7 +27,7 @@ public class ThesaurusAdminDAO extends DAO<ThesaurusAdmin> {
                 continue;
             }
             if (!adm.getAccess().canRead(id)) {
-                all.remove(adm);
+                thesaurusIterator.remove();
             }
         }
         return all;
