@@ -5,6 +5,7 @@ import model.resources.ThesaurusObject;
 import org.bson.types.ObjectId;
 import org.mongodb.morphia.query.Query;
 
+import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -19,7 +20,9 @@ public class ThesaurusAdminDAO extends DAO<ThesaurusAdmin> {
 //                                    .field("access.isPublic").equal(true)
 
         List<ThesaurusAdmin> all = this.findAll().collect(Collectors.toList());
-        for (ThesaurusAdmin adm : all) {
+        Iterator<ThesaurusAdmin> thesaurusIterator = all.iterator();
+        while(thesaurusIterator.hasNext()) {
+            ThesaurusAdmin adm = thesaurusIterator.next();
             if (adm.getAccess().getIsPublic()) {
                 continue;
             }
