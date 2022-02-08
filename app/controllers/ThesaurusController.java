@@ -787,11 +787,11 @@ public class ThesaurusController extends WithController {
 				if (namespaceArray.length > 0) {
 
 					if (namespaceArray.length == 1) {
-						query.must(QueryBuilders.termQuery("vocabulary.name", namespaceArray[0]));
+						query.must(QueryBuilders.termQuery("vocabulary.name.string", namespaceArray[0]));
 					} else {
 						BoolQueryBuilder vocabNameQuery = QueryBuilders.boolQuery();
 						for (String voc : namespaceArray) {
-							vocabNameQuery.should(QueryBuilders.termQuery("vocabulary.name", voc));
+							vocabNameQuery.should(QueryBuilders.termQuery("vocabulary.name.string", voc));
 						}
 						query.must(vocabNameQuery);
 					}		
