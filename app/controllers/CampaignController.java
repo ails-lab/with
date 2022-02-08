@@ -185,10 +185,17 @@ public class CampaignController extends WithController {
 			campaign.setIsPublic(json.get("isPublic").asBoolean());
 		}
 
+		if (json.has("vocabularyMapping")) {
+			campaign.setVocabularyMapping(newCampaign.getVocabularyMapping());
+		}
+
 		updateListField(campaign, newCampaign, Campaign::getTargetCollections, Campaign::setTargetCollections);
 		updateListField(campaign, newCampaign, Campaign::getUserGroupIds, Campaign::setUserGroupIds);
 		if (newCampaign.getCreators().size() != 0) {
 			campaign.setCreators(newCampaign.getCreators());
+			/**
+			 * TODO: Add - remove access from extra campaign creators
+			 */
 		}
 		if (newCampaign.getAnnotationTarget() != 0L) {
 			campaign.setAnnotationTarget(newCampaign.getAnnotationTarget());

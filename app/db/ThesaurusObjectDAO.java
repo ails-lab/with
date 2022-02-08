@@ -57,6 +57,12 @@ public class ThesaurusObjectDAO extends DAO<ThesaurusObject> {
 		return this.find(q).asList();
 	}
 
+	public List<ThesaurusObject> getALlByVocabularyName(String vocabularyName) {
+		Query<ThesaurusObject> q = this.createQuery().disableValidation()
+				.field("semantic.vocabulary.name").equal(vocabularyName);
+		return this.find(q).asList();
+	}
+
 	public void editRecord(String root, ObjectId dbId, JsonNode json) {
 		Query<ThesaurusObject> q = this.createQuery().field("_id").equal(dbId);
 		UpdateOperations<ThesaurusObject> updateOps = this.createUpdateOperations();

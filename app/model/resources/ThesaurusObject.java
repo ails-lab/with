@@ -205,11 +205,21 @@ public class ThesaurusObject implements Indexable {
 		private List<String> inSchemes;
 		private List<String> exactMatch;
 		private List<String> closeMatch;
+
+		private Literal description;
 		
 		private List<ObjectProperty> properties;
 		
 		private SKOSVocabulary vocabulary;
-		
+
+		public Literal getDescription() {
+			return description;
+		}
+
+		public void setDescription(Literal description) {
+			this.description = description;
+		}
+
 		public String getUri() {
 			return uri;
 		}
@@ -420,6 +430,15 @@ public class ThesaurusObject implements Indexable {
 		this.administrative = new SKOSAdmin();
 		this.semantic = new SKOSSemantic();
 		this.setDbId(id);
+	}
+
+	public ThesaurusObject(String uri, String label, String description) {
+		super();
+		this.administrative = new SKOSAdmin(new Date(), new Date(), uri);
+		this.semantic = new SKOSSemantic();
+		this.semantic.setUri(uri);
+		this.semantic.setPrefLabel(new Literal(label));
+		this.semantic.setDescription(new Literal(description));
 	}
 
 	public ObjectId getDbId() {
