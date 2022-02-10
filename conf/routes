@@ -224,7 +224,7 @@ DELETE  /thesaurus/term/:id                         controllers.ThesaurusControl
 GET 	/thesaurus/getTerm		   					controllers.ThesaurusController.getThesaurusTerm(uri: String)
 GET 	/thesaurus/listVocabularies		   				controllers.ThesaurusController.listVocabularies()
 GET 	/thesaurus/listAnnotators		   				controllers.ThesaurusController.listAnnotators()
-GET 	/thesaurus/suggestions						controllers.ThesaurusController.getSuggestions(word: String, namespaces: String ?= "", campaignId: String ?= null, geotagging: Boolean ?= false, language : String ?= "all")
+GET 	/thesaurus/suggestions						controllers.ThesaurusController.getSuggestions(word: play.libs.F.Option[java.lang.String], namespaces: String ?= "", campaignId: String ?= null, geotagging: Boolean ?= false, language : String ?= "all")
 POST    /thesaurus/populateCustomThesaurus          controllers.ThesaurusController.populateCustomThesaurus(thesaurusName: String, thesaurusVersion:String)
 POST    /thesaurus/:id/assignAccess                 controllers.ThesaurusController.assignAccessToThesaurus(userId: String, id: String, accessLevel: play.libs.F.Option[String])
 GET     /thesaurus/listTerms                    controllers.ThesaurusController.getThesaurusTerms(thesaurusName: String)

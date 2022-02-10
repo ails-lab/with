@@ -684,9 +684,16 @@ public class ThesaurusController extends WithController {
 		return sortedResults;
 	}
 
-	public static Result getSuggestions(String word, String namespaces, String campaignId, Boolean geotagging,
+	public static Result getSuggestions(F.Option<String> wrd, String namespaces, String campaignId, Boolean geotagging,
 			String language) throws ClientProtocolException, IOException {
 		ObjectNode response = Json.newObject();
+		String word;
+		if (wrd.isDefined()) {
+			word = wrd.get();
+		}
+		else {
+			word = "";
+		}
 		response.put("request", word);
 
 		try {
@@ -732,6 +739,25 @@ public class ThesaurusController extends WithController {
 				}
 				List<String> vocabularyList = campaign.getVocabularies();
 				namespaceArray = vocabularyList.toArray(new String[vocabularyList.size()]);
+			}
+
+			// If called with word = "", show a list of terms in the vocabulary
+			if (word.equals("")) {
+				ObjectNode res = Json.newObject();
+				ArrayNode arr = Json.newObject().arrayNode();
+				for (String namespace : namespaceArray) {
+					List<ThesaurusObject> thesaurusObjectList = DB.getThesaurusDAO().getALlByVocabularyName(namespace);
+					for (ThesaurusObject to : thesaurusObjectList) {
+						ObjectNode t = Json.newObject();
+						t.put("uri", to.getSemantic().getUri());
+						t.put("vocabulary", to.getSemantic().getVocabulary().getName());
+						t.put("id", to.getDbId().toString());
+						t.put("label", to.getSemantic().getPrefLabel().get("en"));
+						arr.add(t);
+					}
+				}
+				res.set("results", arr);
+				return ok(res);
 			}
 
 			if (searchForSuggestions) {
