@@ -20,20 +20,14 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.Reader;
 import java.sql.SQLException;
+import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Hashtable;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
+import model.annotations.bodies.*;
+import model.annotations.selectors.PropertySelector;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.lang3.StringUtils;
@@ -62,10 +56,6 @@ import model.annotations.Annotation;
 import model.annotations.Annotation.AnnotationAdmin;
 import model.annotations.Annotation.AnnotationScore;
 import model.annotations.Annotation.MotivationType;
-import model.annotations.bodies.AnnotationBody;
-import model.annotations.bodies.AnnotationBodyColorTagging;
-import model.annotations.bodies.AnnotationBodyGeoTagging;
-import model.annotations.bodies.AnnotationBodyTagging;
 import model.annotations.targets.AnnotationTarget;
 import model.basicDataTypes.Language;
 import model.basicDataTypes.MultiLiteral;
@@ -909,37 +899,64 @@ public class AnnotationController extends WithController {
 		ObjectNode generator = Json.newObject().put("type", "Software").put("name", "CrowdHeritage").put("homepage",
 				"https://crowdheritage.eu");
 		europeanaAnnotation.put("generator", generator);
+
 		// Motivation, Body and Target
-		europeanaAnnotation.put("motivation", "tagging");
-		AnnotationBodyTagging body = (AnnotationBodyTagging) ann.getBody();
-		if (body.getUri().equals("http://wordnet-rdf.princeton.edu/wn30/13645812-n"))
-			body.setUri("http://thesaurus.europeanafashion.eu/thesaurus/10405");
-		if (body.getUri().startsWith("https://www.wikidata.org")) {
-			body.setUri(body.getUri().replace("https://", "http://"));
-		}
-		if (body.getUri().startsWith("http://www.wikidata.org/wiki/")) {
-			body.setUri(body.getUri().replace("http://www.wikidata.org/wiki/", "http://www.wikidata.org/entity/"));
-		}
-		if (body.getUri().equals("http://www.mimo-db.eu/InstrumentsKeywords")) {
-			body.setUri("http://www.mimo-db.eu/InstrumentsKeywords/2204");
-		}
-		if (body.getUri().contains("http://bib.arts.kuleuven.be/")) {
-			String[] s = body.getUri().split("/");
-			String photoId = s[s.length - 1];
-			String alternativeURI = getGettyOrWikidataUri(photoId);
-			if (alternativeURI != null) {
-				System.out.println(
-						"Alternative URI found for http://bib.arts.kuleuven.be/photoVocabulary/en/concepts/-photoVocabulary-"
-								+ photoId + " : " + alternativeURI);
-				body.setUri(alternativeURI);
-			} else {
-				System.out.println(
-						"No alternative URI found: hhttp://bib.arts.kuleuven.be/photoVocabulary/en/concepts/-photoVocabulary-"
-								+ photoId);
+		europeanaAnnotation.put("motivation", ann.getMotivation().toString().toLowerCase(Locale.ROOT));
+		if (ann.getBody().getClass() == AnnotationBodyTagging.class) {
+
+			AnnotationBodyTagging body = (AnnotationBodyTagging) ann.getBody();
+			if (body.getUri().equals("http://wordnet-rdf.princeton.edu/wn30/13645812-n"))
+				body.setUri("http://thesaurus.europeanafashion.eu/thesaurus/10405");
+			if (body.getUri().startsWith("https://www.wikidata.org")) {
+				body.setUri(body.getUri().replace("https://", "http://"));
+			}
+			if (body.getUri().startsWith("http://www.wikidata.org/wiki/")) {
+				body.setUri(body.getUri().replace("http://www.wikidata.org/wiki/", "http://www.wikidata.org/entity/"));
+			}
+			if (body.getUri().equals("http://www.mimo-db.eu/InstrumentsKeywords")) {
+				body.setUri("http://www.mimo-db.eu/InstrumentsKeywords/2204");
+			}
+			if (body.getUri().contains("http://bib.arts.kuleuven.be/")) {
+				String[] s = body.getUri().split("/");
+				String photoId = s[s.length - 1];
+				String alternativeURI = getGettyOrWikidataUri(photoId);
+				if (alternativeURI != null) {
+					System.out.println(
+							"Alternative URI found for http://bib.arts.kuleuven.be/photoVocabulary/en/concepts/-photoVocabulary-"
+									+ photoId + " : " + alternativeURI);
+					body.setUri(alternativeURI);
+				} else {
+					System.out.println(
+							"No alternative URI found: hhttp://bib.arts.kuleuven.be/photoVocabulary/en/concepts/-photoVocabulary-"
+									+ photoId);
+				}
+
 			}
 
+			europeanaAnnotation.put("body", body.getUri());
+
 		}
-		europeanaAnnotation.put("body", body.getUri());
+		else if (ann.getBody().getClass() == AnnotationBodyCommenting.class) {
+			AnnotationBodyCommenting body = (AnnotationBodyCommenting) ann.getBody();
+			europeanaAnnotation.put("body", Json.toJson(body.getLabel().remove(Language.DEFAULT)));
+		}
+
+		ObjectNode score = Json.newObject();
+		score.put("upvotes", ann.getScore().getApprovedBy().size());
+		int rejections = 0;
+		if (ann.getScore().getRejectedBy() != null) {
+			rejections = ann.getScore().getRejectedBy().size();
+		}
+		score.put("downvotes", rejections);
+		DecimalFormat df = new DecimalFormat("#.###");
+
+		score.put("confidence", Math.round(((float) ann.getScore().getApprovedBy().size() / (ann.getScore().getApprovedBy().size() + rejections)) * 1000.0) / 1000.0);
+		europeanaAnnotation.put("score", score);
+
+		if (ann.getTarget().getSelector() != null && (ann.getTarget().getSelector().getClass() == PropertySelector.class)) {
+			europeanaAnnotation.put("tagCategory", ((PropertySelector) ann.getTarget().getSelector()).getProperty());
+		}
+
 		europeanaAnnotation.put("target", getEuropeanaRecord(ann.getTarget()));
 		return europeanaAnnotation;
 	}
