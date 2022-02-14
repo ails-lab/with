@@ -769,8 +769,8 @@ public class CampaignController extends WithController {
 		Comparator<ObjectNode> compareByPoints = new Comparator<ObjectNode>() {
 			@Override
 			public int compare(ObjectNode o1, ObjectNode o2) {
-				Long p1 = o1.get("Points").asLong();
-				Long p2 = o2.get("Points").asLong();
+				Long p1 = o1.get("Total User Contributions").asLong();
+				Long p2 = o2.get("Total User Contributions").asLong();
 				return p2.compareTo(p1);
 			}
 		};

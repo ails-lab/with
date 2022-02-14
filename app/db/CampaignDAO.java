@@ -24,6 +24,9 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import model.resources.RecordResource;
+import model.resources.collection.CollectionObject;
 import org.bson.types.ObjectId;
 import org.mongodb.morphia.query.Query;
 import org.mongodb.morphia.query.UpdateOperations;
@@ -227,7 +230,33 @@ public class CampaignDAO extends DAO<Campaign> {
         	entry.put("Last Name", u.getLastName());
         	entry.put("E-Mail", u.getEmail());
         	entry.put("Username", u.getUsername());
-        	entry.put("Points", points.get(key).getCreated() + points.get(key).getApproved() + points.get(key).getRejected());
+
+			long annotatedRecords = DB.getAnnotationDAO().countUserAnnotatedRecords(key, "CrowdHeritage", cname);
+			long createdCount = DB.getAnnotationDAO().countUserCreatedAnnotations(key, "CrowdHeritage", cname);
+			long approvedCount = DB.getAnnotationDAO().countUserUpvotedAnnotations(key, "CrowdHeritage", cname);
+			long rejectedCount = DB.getAnnotationDAO().countUserDownvotedAnnotations(key, "CrowdHeritage", cname);
+			long annotationCount = createdCount + approvedCount + rejectedCount;
+
+			entry.put("Annotated Records", annotatedRecords);
+			entry.put("Total User Contributions", annotationCount);
+			entry.put("Inserted Tags", createdCount);
+			entry.put("Upvotes", approvedCount);
+			entry.put("Downvotes", rejectedCount);
+
+			ArrayNode favorites = Json.newObject().arrayNode();
+
+			CollectionObject favoriteCol = DB.getCollectionObjectDAO().getByOwnerAndLabel(key, null, "_favorites");
+			if (favoriteCol != null) {
+				List<RecordResource> records = DB.getRecordResourceDAO().getByCollection(favoriteCol.getDbId());
+				if (records != null) {
+					for (RecordResource record : records) {
+
+						favorites.add(record.getAdministrative().getExternalId());
+					}
+				}
+				entry.put("Favorites", favorites);
+			}
+
         	contributors.add(entry);
         }
         
