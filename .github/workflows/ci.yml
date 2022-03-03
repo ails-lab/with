@@ -5,6 +5,7 @@ on:
     branches:
      - pgeor/citest
      - dev
+     - master
 
 jobs:
   build:
