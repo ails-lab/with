@@ -105,6 +105,8 @@ public class User extends UserOrGroup {
 	private String md5Password;
 	@JsonIgnore
 	private boolean superUser;
+
+	private boolean campaignCreationAccess = false;
 	@JsonSerialize(using = Serializer.ObjectIdSerializer.class)
 	private ObjectId favorites;
 	// we should experiment here with an array of fixed-size
@@ -178,6 +180,14 @@ public class User extends UserOrGroup {
 			log.error("MD5 problem.", e);
 		}
 		return "";
+	}
+
+	public boolean getCampaignCreationAccess() {
+		return campaignCreationAccess;
+	}
+
+	public void setCampaignCreationAccess(boolean campaignCreationAccess) {
+		this.campaignCreationAccess = campaignCreationAccess;
 	}
 
 	public String getEmail() {

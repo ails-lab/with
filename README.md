@@ -3,6 +3,7 @@
 WITHCulture is a service that provides access to digital cultural heritage items from different repositories
 and offers a number of added-value services for the creative reuse and intelligent exploitation of that content.
 
+
 * Federated and faceted search.
 * API mashup from different digital CH resources, such as Europeana, the Digital Public Library of America, Rijksmuseum,
 the British Library, National Library of Australia, YouTube, Historypin etc.

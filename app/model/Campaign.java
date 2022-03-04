@@ -16,14 +16,7 @@
 
 package model;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Hashtable;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import org.bson.types.ObjectId;
 import org.mongodb.morphia.annotations.Entity;
@@ -50,6 +43,7 @@ public class Campaign {
 
 	public Campaign() {
 		this.contributorsPoints = new Hashtable<ObjectId, AnnotationCount>();
+		this.vocabularyMapping = new ArrayList<>();
 	}
 
 	/**
@@ -218,7 +212,36 @@ public class Campaign {
 		public void setAllowRejected(Boolean allowRejected) {
 			this.allowRejected = allowRejected;
 		}
-	}	
+	}
+
+	public static class VocabularyMapping {
+		private String labelName;
+		private List<String> vocabularies;
+
+		public VocabularyMapping() {
+			vocabularies = new ArrayList<>();
+		}
+
+		public String getLabelName() {
+			return labelName;
+		}
+
+		public void setLabelName(String labelName) {
+			this.labelName = labelName;
+		}
+
+		public List<String> getVocabularies() {
+			return vocabularies;
+		}
+
+		public void setVocabularies(List<String> vocabularies) {
+			this.vocabularies = vocabularies;
+		}
+
+		public void addToVocabularies(String... vocabulary) {
+			this.vocabularies.addAll(Arrays.asList(vocabulary));
+		}
+	}
 	
 	@Id
 	@JsonSerialize(using = Serializer.ObjectIdSerializer.class)
@@ -255,6 +278,8 @@ public class Campaign {
 	
 	@JsonDeserialize(using = Deserializer.LiteralEnglishDefaultDesiarilizer.class)
 	private Literal disclaimer;
+
+	private boolean isPublic;
 	
 	@JsonSerialize(using = Serializer.ObjectIdArraySerializer.class)
 //	@JsonDeserialize(using = Deserializer.ObjectIdArraySerializer.class)
@@ -291,6 +316,8 @@ public class Campaign {
 	 * The list of supported thesauri for the annotations.
 	 */
 	private List<String> vocabularies;
+
+	private List<VocabularyMapping> vocabularyMapping;
 	
 	/**
 	 * The list of item collections to be annotated in this campaign.
@@ -329,6 +356,21 @@ public class Campaign {
 		this.userGroupIds.remove(group);
 	}
 
+	public List<VocabularyMapping> getVocabularyMapping() {
+		return vocabularyMapping;
+	}
+
+	public void setVocabularyMapping(List<VocabularyMapping> vocabularyMapping) {
+		this.vocabularyMapping = vocabularyMapping;
+	}
+
+	public boolean getIsPublic() {
+		return isPublic;
+	}
+
+	public void setIsPublic(boolean aPublic) {
+		isPublic = aPublic;
+	}
 
 	public Boolean getActive() {
 		Date today = new Date();

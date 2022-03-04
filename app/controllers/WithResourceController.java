@@ -189,73 +189,77 @@ public class WithResourceController extends WithController {
 		ObjectNode result = Json.newObject();
 		String resourceType = null;
 		ObjectId userId = effectiveUserDbIds().get(0);
-		if (json.has("resourceType"))
+		if (json.has("resourceType")) {
 			resourceType = json.get("resourceType").asText();
-		if ((resourceType == null)
-				|| (WithResourceType.valueOf(resourceType) == null))
+		}
+		if ((resourceType == null) || (WithResourceType.valueOf(resourceType) == null)) {
 			resourceType = WithResourceType.CulturalObject.toString();
+
+		}
 		try {
-			if (json.has("contextData"))
+			if (json.has("contextData")) {
 				((ObjectNode) json).remove("contextData");
+			}
 			Class<?> clazz = Class.forName("model.resources." + resourceType);
 			RecordResource record = (RecordResource) Json.fromJson(json, clazz);
 			MultiLiteral label = record.getDescriptiveData().getLabel();
-			if ((label == null) || (label.get(Language.DEFAULT) == null)
-					|| label.get(Language.DEFAULT).isEmpty()
-					|| (label.get(Language.DEFAULT).get(0) == "")){
+			if ((label == null) || (label.get(Language.DEFAULT) == null) || label.get(Language.DEFAULT).isEmpty() || (label.get(Language.DEFAULT).get(0) == "")) {
 				log.error("A label for the record has to be provided");
 				return badRequest("A label for the record has to be provided");
 			}
 			int last = 0;
 			// Sources source = Sources.UploadedByUser;
 			String source = "Upload by User " + effectiveUser().getUsername();
-			if ((record.getProvenance() != null)
-					&& !record.getProvenance().isEmpty()) {
+			if ((record.getProvenance() != null) && !record.getProvenance().isEmpty()) {
 				last = record.getProvenance().size() - 1;
 				source = (((ProvenanceInfo) record
 						.getProvenance().get(last)).getProvider());
-			} else
-				record.setProvenance(new ArrayList<ProvenanceInfo>(Arrays
-						.asList(new ProvenanceInfo(source))));
+			} else {
+				record.setProvenance(new ArrayList<ProvenanceInfo>(Arrays.asList(new ProvenanceInfo(source))));
+			}
+
 			String externalId = ((ProvenanceInfo) record.getProvenance().get(
 					last)).getResourceId();
-			if (externalId == null)
+			if (externalId == null){
 				externalId = record.getAdministrative().getExternalId();
-			if (record.getDescriptiveData().getDates() != null && !record.getDescriptiveData().getDates().isEmpty())
+			}
+			if (record.getDescriptiveData().getDates() != null && !record.getDescriptiveData().getDates().isEmpty()) {
 				record.getDescriptiveData().getDates().forEach((date) -> date.sanitizeDates());
+			}
 			ObjectId recordId = null;
+
+			// TODO WTF does this do
 			boolean owns = DB.getRecordResourceDAO().hasAccess(
 					effectiveUserDbIds(), Action.DELETE, recordId);
-			if ((externalId != null)// get dbId of existring resource
-					&& DB.getRecordResourceDAO().existsWithExternalId(
-							externalId)) {
-				RecordResource resource = DB.getRecordResourceDAO()
-						.getUniqueByFieldAndValue("administrative.externalId",
-								externalId,
-								new ArrayList<String>(Arrays.asList("_id")));
+
+			if ((externalId != null) && DB.getRecordResourceDAO().existsWithExternalId(externalId))
+			{
+				RecordResource resource = DB.getRecordResourceDAO().getUniqueByFieldAndValue("administrative.externalId", externalId, new ArrayList<String>(Arrays.asList("_id")));
 				recordId = resource.getDbId();
 				Status response = errorIfNoAccessToRecord(Action.READ, recordId);
 				if (!response.toString().equals(ok().toString())) {
 					return response;
-				} else {// In case the record already exists we overwrite
+				}
+				else {// In case the record already exists we overwrite
 						// the existing record's descriptive data for the fields
 						// included in the json, if the user has WRITE access.
 					boolean existsInSameCollection = DB.getRecordResourceDAO()
 							.existsSameExternaIdInCollection(externalId,
 									collectionDbId);
+
+//					if (DB.getRecordResourceDAO().hasAccess(effectiveUserDbIds(), Action.EDIT, recordId) && (json.get("descriptiveData") != null)) {
+					if ((!source.startsWith("Upload by User") && (json.get("descriptiveData") != null)) ||
+						(source.startsWith("Upload by User") && DB.getRecordResourceDAO().hasAccess(effectiveUserDbIds(), Action.EDIT, recordId) && (json.get("descriptiveData") != null))) {
+							addContentToRecord(resource.getDbId(), source.toString(), externalId, true);
+							DB.getRecordResourceDAO().editRecord("descriptiveData", resource.getDbId(), json.get("descriptiveData"));
+					}
+
 					if (noDouble && existsInSameCollection) {
 						result.put("error", "double");
 						log.error("Record is in the collection already "+externalId);
 						return forbidden(result);
 					}
-					if (DB.getRecordResourceDAO()
-							.hasAccess(effectiveUserDbIds(),
-									Action.EDIT, recordId)
-							&& (json.get("descriptiveData") != null))
-						DB.getRecordResourceDAO()
-								.editRecord("descriptiveData",
-										resource.getDbId(),
-										json.get("descriptiveData"));
+
 					addToCollection(position, recordId, collectionDbId, owns, existsInSameCollection);
 				}
 			} else { // create new record in db
@@ -635,26 +639,26 @@ public class WithResourceController extends WithController {
 	}
 
 	/**
+	 * This method calls record API to retrieve extra info on a record.
+	 * Uses EuropeanaItemRecordFormatter to parse stuff.
+	 *
 	 * @param recordId
 	 * @param source
 	 * @param sourceId
 	 */
 	private static void addContentToRecord(ObjectId recordId, String source,
 			String sourceId, boolean later) {
-		BiFunction<RecordResource, String, Boolean> methodQuery = (
+			BiFunction<RecordResource, String, Boolean> methodQuery = (
 				RecordResource record, String sourceClassName) -> {
 			try {
 				Class<?> sourceClass = Class.forName(sourceClassName);
 				ISpaceSource s = (ISpaceSource) sourceClass.newInstance();
-				RecordResource fullRecord = DB.getRecordResourceDAO().get(
-						recordId);
-				List<RecordJSONMetadata> recordsData = s.getRecordFromSource(
-						sourceId, fullRecord);
-				
+				RecordResource fullRecord = DB.getRecordResourceDAO().get(recordId);
+				List<RecordJSONMetadata> recordsData = s.getRecordFromSource(sourceId, fullRecord);
 				
 				for (RecordJSONMetadata data : recordsData) {
 					if (data.getFormat().equals("JSON-WITH")) {
-						
+
 						ObjectMapper mapper = new ObjectMapper();
 						JsonNode json = mapper.readTree(data.getJsonContent());
 						CulturalObject cho = Json.fromJson(json, CulturalObject.class);

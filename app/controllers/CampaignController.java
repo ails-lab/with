@@ -42,6 +42,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import model.usersAndGroups.User;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.lang3.StringUtils;
@@ -90,7 +91,7 @@ public class CampaignController extends WithController {
 	public static final Map<String, String> termsFile = Stream
 			.of(new String[][] { { "sports", "Sport_Vocabulary.csv" },
 					{ "cities-landscapes", "Cities_Landscapes_Means_of_Transport_Vocabulary.csv" },
-					{ "instruments", "MIMO-Thesaurus for-campaign.csv" }, { "opera", "Opera_entities.csv" }, { "china", "China-terms.csv" } })
+					{ "instruments", "MIMO-Thesaurus for-campaign.csv" }, { "opera", "Opera_entities.csv" }, { "china", "China-terms.csv" }, { "test", "test.csv" } })
 			.collect(Collectors.toMap(data -> data[0], data -> data[1]));
 
 	public static Result getCampaignCount(String group, String project, String state) {
@@ -115,37 +116,38 @@ public class CampaignController extends WithController {
 		return ok();
 	}
 
-	public static void updateLiteralField(Campaign c1, Campaign c2, Function<Campaign, Literal> f) {
-		Literal newVal = f.apply(c2);
-		if (newVal == null) {
-			return;
-		}
-		Set<String> langs = newVal.keySet();
-		for (String lang : langs) {
-			String newLang = newVal.getLiteral(Language.getLanguageByCode(lang));
-			if (newLang != null && (newLang.isEmpty() == false)) {
-				f.apply(c1).addLiteral(Language.getLanguageByCode(lang), newLang);
-			}
-		}
-	}
 	
 	public static void updateLiteralField(Campaign c1, Campaign c2, Function<Campaign, Literal> f, BiConsumer<Campaign, Literal> bc) {
 		if (f.apply(c1) == null && f.apply(c2) != null) {
 			bc.accept(c1, f.apply(c2));
 		} else {
-			updateLiteralField(c1, c2, f);
+			Literal newVal = f.apply(c2);
+			if (newVal == null) {
+				return;
+			}
+			Set<String> langs = newVal.keySet();
+			for (String lang : langs) {
+				String newLang = newVal.getLiteral(Language.getLanguageByCode(lang));
+				if (newLang != null && (newLang.isEmpty() == false)) {
+					f.apply(c1).addLiteral(Language.getLanguageByCode(lang), newLang);
+				}
+			}
 		}
 	}
 
-	public static void updateListField(Campaign c1, Campaign c2, Function<Campaign, List<ObjectId>> f) {
-		f.apply(c1).clear();
-		if (f.apply(c2) == null)
-			return;
-		List<ObjectId> newList = f.apply(c2).stream().distinct().collect(Collectors.toList());
-		f.apply(c1).addAll(newList);
+	public static <T> void updateListField(Campaign c1, Campaign c2, Function<Campaign, List<T>> f, BiConsumer<Campaign, List<T>> bc) {
+		if (f.apply(c1) == null && f.apply(c2) != null) {
+			bc.accept(c1, f.apply(c2));
+		} else {
+			if (f.apply(c2) == null)
+				return;
+			f.apply(c1).clear();
+			List<T> newList = f.apply(c2).stream().distinct().collect(Collectors.toList());
+			f.apply(c1).addAll(newList);
+		}
 	}
 
-	public static Result editCampaign(String id) throws ClassNotFoundException, JsonProcessingException, IOException {
+	public static Result editCampaign(String id) throws ClassNotFoundException, JsonProcessingException, IOException, ParseException {
 		JsonNode json = request().body().asJson();
 		ObjectNode result = Json.newObject();
 		ObjectId user = effectiveUserDbId();
@@ -161,9 +163,12 @@ public class CampaignController extends WithController {
 		}
 		Class<?> clazz = Class.forName("model.Campaign");
 		Campaign newCampaign = (Campaign) Json.fromJson(json, clazz);
-		updateLiteralField(campaign, newCampaign, Campaign::getTitle);
-		updateLiteralField(campaign, newCampaign, Campaign::getDescription);
+
+		updateLiteralField(campaign, newCampaign, Campaign::getTitle, Campaign::setTitle);
+		updateLiteralField(campaign, newCampaign, Campaign::getDescription, Campaign::setDescription);
 		updateLiteralField(campaign, newCampaign, Campaign::getInstructions, Campaign::setInstructions);
+		updateLiteralField(campaign, newCampaign, Campaign::getDisclaimer, Campaign::setDisclaimer);
+
 		if (newCampaign.getPrizes() != null) {
 				campaign.setPrizes(newCampaign.getPrizes());
 		}
@@ -173,21 +178,53 @@ public class CampaignController extends WithController {
 			campaign.setEndDate(newCampaign.getEndDate());
 		if (newCampaign.getBanner() != null)
 			campaign.setBanner(newCampaign.getBanner());
-		else
-			campaign.setBanner(null);
-		updateListField(campaign, newCampaign, Campaign::getTargetCollections);
-		campaign.setAnnotationTarget(newCampaign.getAnnotationTarget());
-		campaign.setVocabularies(newCampaign.getVocabularies());
-		campaign.setMotivation(newCampaign.getMotivation());
+		if (newCampaign.getLogo() != null)
+			campaign.setLogo(newCampaign.getLogo());
+
+		if (json.has("isPublic")) {
+			campaign.setIsPublic(json.get("isPublic").asBoolean());
+		}
+
+		if (json.has("vocabularyMapping")) {
+			campaign.setVocabularyMapping(newCampaign.getVocabularyMapping());
+		}
+
+		updateListField(campaign, newCampaign, Campaign::getTargetCollections, Campaign::setTargetCollections);
+		updateListField(campaign, newCampaign, Campaign::getUserGroupIds, Campaign::setUserGroupIds);
+		if (newCampaign.getCreators().size() != 0) {
+			campaign.setCreators(newCampaign.getCreators());
+			/**
+			 * TODO: Add - remove access from extra campaign creators
+			 */
+		}
+		if (newCampaign.getAnnotationTarget() != 0L) {
+			campaign.setAnnotationTarget(newCampaign.getAnnotationTarget());
+		}
+		updateListField(campaign, newCampaign, Campaign::getVocabularies, Campaign::setVocabularies);
+		updateListField(campaign, newCampaign, Campaign::getMotivation, Campaign::setMotivation);
 		DB.getCampaignDAO().makePermanent(campaign);
 		return ok(Json.toJson(DB.getCampaignDAO().get(campaignDbId)));
 	}
 
+	/**
+	 * Call to get all campaigns of a project (e.g. CrowdHeritage)
+	 * WIll return only public campaigns.
+	 * Does not get into account a specific user.
+	 *
+	 * @param group
+	 * @param project
+	 * @param state
+	 * @param sortBy
+	 * @param offset
+	 * @param count
+	 * @return
+	 */
 	public static Result getCampaigns(String group, String project, String state, String sortBy, int offset,
 			int count) {
 		ObjectNode result = Json.newObject();
 		List<Campaign> campaigns = new ArrayList<Campaign>();
 		campaigns = DB.getCampaignDAO().getCampaigns(group, project, state, sortBy, offset, count);
+
 		if (campaigns == null) {
 			result.put("error", "There are not any campaigns for this Project.");
 			return internalServerError(result);
@@ -195,11 +232,24 @@ public class CampaignController extends WithController {
 		return ok(Json.toJson(campaigns));
 	}
 
-	public static Result getUserCampaigns(String userId, int offset, int count) {
+	/**
+	 *
+	 * Get the campaigns that a specific user is creator of. Supports pagination via offset, count
+	 *
+	 *
+	 * @param offset
+	 * @param count
+	 * @return
+	 */
+	public static Result getUserCampaigns(int offset, int count) {
 		ObjectNode result = Json.newObject();
 		List<Campaign> campaigns = new ArrayList<Campaign>();
-		campaigns = DB.getCampaignDAO().getUserCampaigns(new ObjectId(userId), offset, count);
-		long total = DB.getCampaignDAO().countUserCampaigns(new ObjectId(userId));
+		ObjectId userId = effectiveUserDbId();
+		if (userId == null) {
+			return badRequest("User not logged in");
+		}
+		campaigns = DB.getCampaignDAO().getUserCampaigns(userId, offset, count);
+		long total = DB.getCampaignDAO().countUserCampaigns(userId);
 		if (campaigns == null) {
 			result.put("error", "There are not any campaigns for this user");
 			return internalServerError(result);
@@ -239,6 +289,61 @@ public class CampaignController extends WithController {
 		return ok();
 	}
 
+	public static Result createEmptyCampaign(String campaignUserName) {
+//		ArrayNode errors = Json.newObject().arrayNode();
+		ObjectNode error = Json.newObject();
+		if (campaignUserName == null) {
+			error.put("error", "Please define a name for the campaign");
+			return forbidden(error);
+		}
+		if  (!uniqueCampaignName(campaignUserName)) {
+			error.put("error", "Campaign name already exists in DB. Use a different one");
+			return forbidden(error);
+		}
+
+		ObjectId creator = effectiveUserDbId();
+		if (creator == null || !DB.getUserDAO().getById(creator).getCampaignCreationAccess()) {
+			error.put("error", "No rights for campaign creation");
+			return forbidden(error);
+		}
+
+		Campaign newCampaign = new Campaign();
+		newCampaign.setCreators(new HashSet<ObjectId>(Arrays.asList(creator)));
+		newCampaign.setUsername(campaignUserName);
+		newCampaign.setBanner("http://withculture.eu/assets/img/content/background-space.png");
+		newCampaign.setAnnotationTarget(1000);
+		newCampaign.setAnnotationCurrent(new Campaign.AnnotationCount());
+		newCampaign.setContributorsPoints(new Hashtable<ObjectId, AnnotationCount>());
+		newCampaign.setCreated(new Date());
+		newCampaign.setStartDate(new Date());
+		newCampaign.setEndDate(new Date());
+		newCampaign.setIsPublic(false);
+
+		newCampaign.setProject("CrowdHeritage");
+
+		newCampaign.setTitle(new Literal("campaign title"));
+		newCampaign.setDescription(new Literal("campaign description"));
+		newCampaign.setInstructions(new Literal("campaign instructions"));
+		newCampaign.setDisclaimer(new Literal("campaign disclaimer"));
+
+		Campaign.BadgePrizes prizes = new Campaign.BadgePrizes();
+		prizes.setGold(new Literal(Language.EN, "Congratulations!<br/>Now you've got the <strong>Gold</strong> badge!"));
+		prizes.setSilver(new Literal(Language.EN, "Congratulations!<br/>Now you've got the <strong>Silver</strong> badge!"));
+		prizes.setBronze(new Literal(Language.EN, "Congratulations!<br/>Now you've got the <strong>Bronze</strong> badge!"));
+		prizes.setRookie(new Literal(Language.EN, "Keep annotating to win your badge!"));
+		newCampaign.setPrizes(prizes);
+
+		try {
+			DB.getCampaignDAO().makePermanent(newCampaign);
+		} catch (Exception e) {
+			log.error("Cannot save campaign to database!", e.getMessage());
+			error.put("error", "Cannot save campaign to database!");
+			return internalServerError(error);
+		}
+		return ok(Json.toJson(newCampaign));
+
+	}
+
 	public static Result createCampaign() {
 		Campaign newCampaign = null;
 		ArrayNode errors = Json.newObject().arrayNode();
@@ -253,7 +358,7 @@ public class CampaignController extends WithController {
 			newCampaign = (Campaign) Json.fromJson(json, clazz);
 			// Set Campaign.creator
 			ObjectId creator = effectiveUserDbId();
-			if (creator == null) {
+			if (creator == null || !DB.getUserDAO().getById(creator).getCampaignCreationAccess()) {
 				error.put("error", "No rights for campaign creation");
 				return forbidden(error);
 			} else {
@@ -362,9 +467,9 @@ public class CampaignController extends WithController {
 	// }
 
 	public static void addLangs(CampaignTerm term) throws ClientProtocolException, IOException {
-		String[] langs = new String[] { "en", "it", "fr" };
+		String[] langs = new String[] { "en", "it", "fr", "pl", "es" };
 		if (term.labelAndUri.getURI().contains("wikidata")) {
-			term.labelAndUri.addURI(term.labelAndUri.getURI().replace("/wiki/", "/entity/"));
+			term.labelAndUri.addURI(term.labelAndUri.getURI().replace("/wiki/", "/entity/").replace("https", "http"));
 			HttpClient client = HttpClientBuilder.create().build();
 			HttpGet request = new HttpGet(term.labelAndUri.getURI() + ".json");
 			HttpResponse response = client.execute(request);
@@ -402,10 +507,12 @@ public class CampaignController extends WithController {
 					while (it.hasNext()) {
 						JsonNode node = it.next();
 						if (node.get("Object").get("xml:lang") != null
+								&& node.get("Predicate").get("value").textValue().contains("skos/core#prefLabel")
 								&& Arrays.asList(langs).contains(node.get("Object").get("xml:lang").asText())) {
 							String langTerm = node.get("Object").get("value").asText();
 							String lan = node.get("Object").get("xml:lang").asText();
 							term.labelAndUri.addLiteral(Language.getLanguage(lan), langTerm);
+							break;
 						}
 					}
 				}
@@ -513,7 +620,7 @@ public class CampaignController extends WithController {
 			}
 			for (int i = 1; i < (record.size() - 1); i++) {
 				if (!record.get(i).equals("")) {
-					CampaignTerm term = new CampaignTerm();
+					CampaignTermWithInfo term = new CampaignTermWithInfo();
 					term.labelAndUri.addLiteral(Language.EN, record.get(i));
 					if (!StringUtils.isEmpty(record.get(3))) {
 						term.labelAndUri.addURI(record.get(3));
@@ -662,8 +769,8 @@ public class CampaignController extends WithController {
 		Comparator<ObjectNode> compareByPoints = new Comparator<ObjectNode>() {
 			@Override
 			public int compare(ObjectNode o1, ObjectNode o2) {
-				Long p1 = o1.get("Points").asLong();
-				Long p2 = o2.get("Points").asLong();
+				Long p1 = o1.get("Total User Contributions").asLong();
+				Long p2 = o2.get("Total User Contributions").asLong();
 				return p2.compareTo(p1);
 			}
 		};
