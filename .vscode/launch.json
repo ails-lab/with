@@ -1,0 +1,81 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+
+    
+        {
+            "type": "java",
+            "name": "Debug (Attach)",
+            "projectName": "with",
+            "request": "attach",
+            "hostName": "localhost",
+            "port": 9999
+        },
+    
+        {
+            "type": "java",
+            "name": "Launch Current File",
+            "request": "launch",
+            "mainClass": "${file}"
+        },
+        {
+            "type": "java",
+            "name": "Launch EuropeanaTermsCount",
+            "request": "launch",
+            "mainClass": "sources.EuropeanaTermsCount",
+            "projectName": "with_1e357f54"
+        },
+        {
+            "type": "java",
+            "name": "Launch FashionSparqlEndpoint",
+            "request": "launch",
+            "mainClass": "sources.core.FashionSparqlEndpoint",
+            "projectName": "with_1e357f54"
+        },
+        {
+            "type": "java",
+            "name": "Launch JsonContextRecord",
+            "request": "launch",
+            "mainClass": "sources.utils.JsonContextRecord",
+            "projectName": "with_1e357f54"
+        },
+        {
+            "type": "java",
+            "name": "Launch JsonNodeUtils",
+            "request": "launch",
+            "mainClass": "sources.utils.JsonNodeUtils",
+            "projectName": "with_1e357f54"
+        },
+        {
+            "type": "java",
+            "name": "Launch SKOSParser",
+            "request": "launch",
+            "mainClass": "sources.utils.SKOSParser",
+            "projectName": "with_1e357f54"
+        },
+        {
+            "type": "java",
+            "name": "Launch SimpleTest",
+            "request": "launch",
+            "mainClass": "sources.utils.SimpleTest",
+            "projectName": "with_1e357f54"
+        },
+        {
+            "type": "java",
+            "name": "Launch StringUtils",
+            "request": "launch",
+            "mainClass": "sources.utils.StringUtils",
+            "projectName": "with_1e357f54"
+        },
+        {
+            "type": "java",
+            "name": "Launch SortedList",
+            "request": "launch",
+            "mainClass": "utils.SortedList",
+            "projectName": "with_1e357f54"
+        }
+    ]
+}
