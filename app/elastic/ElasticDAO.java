@@ -62,6 +62,14 @@ public class ElasticDAO {
 	public List<String> findAllCollectionIds() {
 		return findAllIdsByType( "simplecollection");
 	}
+
+	/**
+	 * Return all Collection Ids
+	 * @return
+	 */
+	public List<String> findAllThesaurusObjectIds() {
+		return findAllIdsByType( "thesaurusobject");
+	}
 	
 	/**
 	 * Return all _id s from a certain type

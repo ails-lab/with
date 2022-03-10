@@ -309,25 +309,35 @@ public class ElasticUtils {
 		try {
 			// make a mongo record id set and check all existing elastic ids against it
 			// make a list of the ones that are not in mongo
-			Set<String> mongoIds = DB.getRecordResourceDAO().listIds()
-					.collect( Collectors.toCollection(()->new HashSet<String>() ));
+			// Set<String> mongoIds = DB.getRecordResourceDAO().listIds()
+			// 		.collect( Collectors.toCollection(()->new HashSet<String>() ));
 
 			ElasticDAO e = ElasticDAO.instance();
-			Set<String> elasticIds = new HashSet<String>(e.findAllRecordIds());
+			// Set<String> elasticIds = new HashSet<String>(e.findAllRecordIds());
 
-			elasticIds.removeAll(mongoIds);
-			log.info( "Found " + elasticIds.size() + " orphaned elastic culturalobject, removing ...");
-			e.removeById(elasticIds, "culturalobject" );
+			// elasticIds.removeAll(mongoIds);
+			// log.info( "Found " + elasticIds.size() + " orphaned elastic culturalobject, removing ...");
+			// e.removeById(elasticIds, "culturalobject" );
 
-			mongoIds = DB.getCollectionObjectDAO().listIds()
+			// mongoIds = DB.getCollectionObjectDAO().listIds()
+			// 		.collect( Collectors.toCollection(()->new HashSet<String>() ));
+
+			// elasticIds = new HashSet<String>(e.findAllCollectionIds());
+			// elasticIds.addAll( e.findAllIdsByType("exhibition"));
+
+			// elasticIds.removeAll(mongoIds);
+			// log.info( "Found " + elasticIds.size() + " orphaned elastic simplecollection, removing ...");
+			// e.removeById(elasticIds, "simplecollection", "exhibition" );
+
+			Set<String> mongoIds = DB.getThesaurusDAO().listIds()
 					.collect( Collectors.toCollection(()->new HashSet<String>() ));
 
-			elasticIds = new HashSet<String>(e.findAllCollectionIds());
-			elasticIds.addAll( e.findAllIdsByType("exhibition"));
+			Set<String> elasticIds = new HashSet<String>(e.findAllThesaurusObjectIds());
+			elasticIds.addAll( e.findAllIdsByType("thesaurusobject"));
 
 			elasticIds.removeAll(mongoIds);
-			log.info( "Found " + elasticIds.size() + " orphaned elastic simplecollection, removing ...");
-			e.removeById(elasticIds, "simplecollection", "exhibition" );
+			log.info( "Found " + elasticIds.size() + " orphaned elastic thesaurusobjects, removing ...");
+			e.removeById(elasticIds, "thesaurusobject" );
 
 			log.info( "Finished purging elastic");
 		} catch( Exception e ) {
