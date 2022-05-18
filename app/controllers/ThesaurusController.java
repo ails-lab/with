@@ -752,7 +752,7 @@ public class ThesaurusController extends WithController {
 						t.put("uri", to.getSemantic().getUri());
 						t.put("vocabulary", to.getSemantic().getVocabulary().getName());
 						t.put("id", to.getDbId().toString());
-						t.put("label", to.getSemantic().getPrefLabel().get("en"));
+						t.put("label", to.getSemantic().getPrefLabel().get(language));
 						arr.add(t);
 					}
 				}
