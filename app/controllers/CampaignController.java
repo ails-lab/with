@@ -200,6 +200,8 @@ public class CampaignController extends WithController {
 		if (newCampaign.getAnnotationTarget() != 0L) {
 			campaign.setAnnotationTarget(newCampaign.getAnnotationTarget());
 		}
+		if (newCampaign.getContributorFeedbackMethod() != null)
+			campaign.setContributorFeedbackMethod(newCampaign.getContributorFeedbackMethod());
 		updateListField(campaign, newCampaign, Campaign::getVocabularies, Campaign::setVocabularies);
 		updateListField(campaign, newCampaign, Campaign::getMotivation, Campaign::setMotivation);
 		DB.getCampaignDAO().makePermanent(campaign);

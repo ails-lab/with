@@ -56,6 +56,10 @@ public class Campaign {
 	public static enum CampaignPurpose {
 		Annotate, Validate
 	}
+
+	public static enum CampaignContributorFeedbackMethod {
+		UPVOTE, RATE
+	}
 	
 	public static class CampaignTerm {
 		public List<CampaignTerm> children;
@@ -339,6 +343,8 @@ public class Campaign {
 	 * Parameters about accepting campaign annotations for publishing
 	 */
 	private PublishCriteria publishCriteria;
+
+	private CampaignContributorFeedbackMethod contributorFeedbackMethod;
 	
 
 	public BadgeType getBadge(int points) {
@@ -354,6 +360,14 @@ public class Campaign {
 
 	public void removeUserGroup(ObjectId group) {
 		this.userGroupIds.remove(group);
+	}
+
+	public CampaignContributorFeedbackMethod getContributorFeedbackMethod() {
+		return contributorFeedbackMethod;
+	}
+
+	public void setContributorFeedbackMethod(CampaignContributorFeedbackMethod contributorFeedbackMethod) {
+		this.contributorFeedbackMethod = contributorFeedbackMethod;
 	}
 
 	public List<VocabularyMapping> getVocabularyMapping() {
