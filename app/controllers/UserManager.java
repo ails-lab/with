@@ -464,7 +464,7 @@ public class UserManager extends WithController {
 		user.setFavorites(fav);
 		return login(user);
 	}
-	
+
 	private static Result register(facebook4j.User facebookUser) {
 		User user = new User();
 		log.error(facebookUser.toString());
@@ -948,24 +948,18 @@ public class UserManager extends WithController {
 		String enc = encryptToken(u.getDbId().toString());
 
 		// String resetURL = APPLICATION_URL;
-		String resetURL = "http://with.image.ntua.gr/assets/index.html#reset";
-
+		String resetURL = "https://crowdheritage.eu/en/resetPassword";
 		// This will retrieve line separator dependent on OS.
 		String newLine = System.getProperty("line.separator");
 
-		// more complex email are schemes available - want to discuss first
-
-		// I use this account for some other sites as well but we can use it for
-		// testing
 		try {
-			String subject = "WITH password reset";
+			String subject = "CrowdHeritage password reset";
 
 			String msg = "Dear user: " + u.getFirstName() + " " + u.getLastName() + "," + newLine + newLine
 					+ "We received a request for a password reset. Please click on the "
-					+ "following link to confirm this request:" + newLine + newLine + resetURL + "/" + enc
+					+ "following link to confirm this request:" + newLine + newLine + resetURL + "/?token=" + enc
 					// token URL here
-					+ newLine + newLine + "Sincerely yours," + newLine + "The WITH team.";
-
+					+ newLine + newLine + "Sincerely yours," + newLine + "The CrowdHeritage team.";
 			sendEmail(u, "", msg, subject);
 		} catch (EmailException e) {
 			error.put("email", "Email server error");
@@ -975,12 +969,7 @@ public class UserManager extends WithController {
 		}
 
 		result.put("message", "Email succesfully sent to user");
-
-		// used for testing
-		// result.put("url", resetURL + "/" + enc);
-
 		return ok(result);
-
 	}
 
 	/**
@@ -993,18 +982,18 @@ public class UserManager extends WithController {
 	 */
 	public static void sendEmail(User u, String mailAdress, String message, String subject) throws EmailException {
 		Email email = new SimpleEmail();
-		email.setSmtpPort(25);
-		email.setHostName("smtp.image.ece.ntua.gr");
-		email.setDebug(false);
-		email.setAuthenticator(new DefaultAuthenticator("mikegiatzi", "tempforwith"));
-		email.setStartTLSEnabled(true);
-		email.setSSLOnConnect(false);
-		email.setFrom("with-no-reply@image.ece.ntua.gr", "WITH"); // check if
-																	// this can
-																	// be
-		// whatever
-		email.addBcc("mikegiatzi@image.ece.ntua.gr");
-		email.setBounceAddress("mikegiatzi@image.ece.ntua.gr.com");
+		int port = DB.getConf().getInt("mail.smtp.port");
+		String host = DB.getConf().getString("mail.smtp.host");
+		String username = DB.getConf().getString("mail.smtp.user");
+		String password = DB.getConf().getString("mail.smtp.password");
+		String fromAddress = DB.getConf().getString("mail.passwordReset.from");
+
+		email.setSmtpPort(port);
+		email.setHostName(host);
+		email.setDebug(true);
+		email.setAuthentication(username, password);
+
+		email.setFrom(fromAddress, "CrowdHeritage"); 
 		email.setSubject(subject);
 
 		if (u == null) {
@@ -1015,9 +1004,7 @@ public class UserManager extends WithController {
 		}
 
 		email.setMsg(message);
-
 		email.send();
-
 	}
 
 	/***
