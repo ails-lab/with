@@ -54,7 +54,7 @@ public class Campaign {
 	}
 	
 	public static enum CampaignPurpose {
-		Annotate, Validate
+		ANNOTATE, VALIDATE
 	}
 	
 	public static class CampaignTerm {
