@@ -60,7 +60,7 @@ public class Campaign {
 	}
 	
 	public static enum CampaignPurpose {
-		Annotate, Validate
+		ANNOTATE, VALIDATE
 	}
 	
 	public static enum CampaignOrientation {
