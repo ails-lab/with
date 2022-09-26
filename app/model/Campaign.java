@@ -379,6 +379,7 @@ public class Campaign {
 
 	public void setContributorFeedbackMethod(CampaignContributorFeedbackMethod contributorFeedbackMethod) {
 		this.contributorFeedbackMethod = contributorFeedbackMethod;
+	}
 	
 	public CampaignOrientation getOrientation() {
 		return orientation;
