@@ -16,7 +16,14 @@
 
 package model;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.Hashtable;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import org.bson.types.ObjectId;
 import org.mongodb.morphia.annotations.Entity;
@@ -33,7 +40,6 @@ import model.basicDataTypes.Language;
 import model.basicDataTypes.Literal;
 import model.basicDataTypes.LiteralOrResource;
 import utils.Deserializer;
-import utils.Deserializer.LiteralDesiarilizer;
 import utils.Serializer;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -54,13 +60,16 @@ public class Campaign {
 	}
 	
 	public static enum CampaignPurpose {
-		Annotate, Validate
+		ANNOTATE, VALIDATE
 	}
 
 	public static enum CampaignContributorFeedbackMethod {
 		UPVOTE, RATE
 	}
 	
+	public static enum CampaignOrientation {
+		METADATA, DATA
+	}
 	public static class CampaignTerm {
 		public List<CampaignTerm> children;
 		public LiteralOrResource labelAndUri = new LiteralOrResource();
@@ -269,6 +278,8 @@ public class Campaign {
 	
 	@JsonDeserialize(using = Deserializer.LiteralEnglishDefaultDesiarilizer.class)
 	private Literal title;
+
+	private CampaignOrientation orientation;
 	
 	@JsonDeserialize(using = Deserializer.LiteralEnglishDefaultDesiarilizer.class)
 	private Literal description;
@@ -368,6 +379,13 @@ public class Campaign {
 
 	public void setContributorFeedbackMethod(CampaignContributorFeedbackMethod contributorFeedbackMethod) {
 		this.contributorFeedbackMethod = contributorFeedbackMethod;
+	
+	public CampaignOrientation getOrientation() {
+		return orientation;
+	}
+
+	public void setOrientation(CampaignOrientation orientation) {
+		this.orientation = orientation;
 	}
 
 	public List<VocabularyMapping> getVocabularyMapping() {
