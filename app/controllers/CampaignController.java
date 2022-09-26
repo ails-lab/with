@@ -180,7 +180,9 @@ public class CampaignController extends WithController {
 			campaign.setBanner(newCampaign.getBanner());
 		if (newCampaign.getLogo() != null)
 			campaign.setLogo(newCampaign.getLogo());
-
+		if (newCampaign.getOrientation() != null) {
+			campaign.setOrientation(newCampaign.getOrientation());
+		}
 		if (json.has("isPublic")) {
 			campaign.setIsPublic(json.get("isPublic").asBoolean());
 		}
