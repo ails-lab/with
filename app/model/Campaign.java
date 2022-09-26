@@ -62,6 +62,10 @@ public class Campaign {
 	public static enum CampaignPurpose {
 		ANNOTATE, VALIDATE
 	}
+
+	public static enum CampaignContributorFeedbackMethod {
+		UPVOTE, RATE
+	}
 	
 	public static enum CampaignOrientation {
 		METADATA, DATA
@@ -350,6 +354,8 @@ public class Campaign {
 	 * Parameters about accepting campaign annotations for publishing
 	 */
 	private PublishCriteria publishCriteria;
+
+	private CampaignContributorFeedbackMethod contributorFeedbackMethod;
 	
 
 	public BadgeType getBadge(int points) {
@@ -367,6 +373,12 @@ public class Campaign {
 		this.userGroupIds.remove(group);
 	}
 
+	public CampaignContributorFeedbackMethod getContributorFeedbackMethod() {
+		return contributorFeedbackMethod;
+	}
+
+	public void setContributorFeedbackMethod(CampaignContributorFeedbackMethod contributorFeedbackMethod) {
+		this.contributorFeedbackMethod = contributorFeedbackMethod;
 	
 	public CampaignOrientation getOrientation() {
 		return orientation;
