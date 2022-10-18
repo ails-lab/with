@@ -109,7 +109,25 @@ public class AnnotationController extends WithController {
 			body.setUri("http://sws.geonames.org/" + geonameId + "/");
 			body.setCoordinates(point);
 			body.setCountryName(jsonRes.get("countryName").asText());
-			body.setLabel(new MultiLiteral(Language.DEFAULT, jsonRes.get("asciiName").asText()));
+			MultiLiteral label = new MultiLiteral(Language.DEFAULT, jsonRes.get("asciiName").asText());
+			label.addLiteral(Language.EN, jsonRes.get("asciiName").asText());
+			List<String> langs = Arrays.asList(new String[] { "it", "fr", "pl", "es", "el", "de", "nl" });
+			
+			if (jsonRes.get("alternateNames").isArray()) {
+				ArrayNode alternateNames = (ArrayNode) jsonRes.get("alternateNames");
+				for (JsonNode name : alternateNames) {
+					if (!name.has("lang")) continue;
+					if (langs.contains(name.get("lang").asText())) {
+						label.addLiteral(Language.getLanguageByCode(name.get("lang").asText()), name.get("name").asText());
+						// 7 langs + default + en = 9
+						if (label.size() >= 9) {
+							break;
+						}
+					}
+				}
+			}
+			
+			body.setLabel(label);
 		}
 
 		if (annotation.getTarget().getRecordId() == null) {
