@@ -92,6 +92,9 @@ public class Annotation<T extends AnnotationBody> {
 		Tagging, GeoTagging, Linking, Commenting, Editing, ColorTagging, Polling
 	}
 
+	public static enum CreatorType {
+		Person, Software
+	}
 	/**
 	 * The motivation why this annotation has been created. This takes values from
 	 * an enumerated list that currently includes Tagging, Linking, Commenting,
@@ -114,6 +117,25 @@ public class Annotation<T extends AnnotationBody> {
 	 */
 	@Embedded
 	private AnnotationTarget target;
+	private String externalId;
+
+	private String scope;
+
+	public String getScope() {
+		return scope;
+	}
+
+	public void setScope(String scope) {
+		this.scope = scope;
+	}
+
+	public String getExternalId() {
+		return externalId;
+	}
+
+	public void setExternalId(String externalId) {
+		this.externalId = externalId;
+	}
 
 	public ObjectId getDbId() {
 		return dbId;
@@ -181,6 +203,24 @@ public class Annotation<T extends AnnotationBody> {
 
 	@JsonInclude(value = JsonInclude.Include.NON_NULL)
 	public static class AnnotationAdmin {
+
+		/* Europeana Translate specific stuff
+		   Error type enumeration
+		 */
+		public static enum TranslationErrorType {
+			NAMED_REFERENCES_INCORRECT_TRANSLATION,
+			MISTRANSLATION_IDIOMATIC_EXPRESSIONS,
+			INCOMPLETE_TRANSLATIONS,
+			UNDESIRED_TRANSLATIONS_QUOTED_TEXT,
+			TRANSLATION_BIAS,
+			BAD_WORD_SELECTION,
+			INCONSISTENT_TRANSLATIONS,
+			SPELLING_MISTAKE_SOURCE_CORRECT,
+			GRAMMAR_MISTAKE,
+			WRONG_ENCODING,
+			VARIATION_WORDS_ORDER,
+			MISSING_PUNCTUATION
+		}
 		/**
 		 * The with user who created this annotation.
 		 */
@@ -213,7 +253,67 @@ public class Annotation<T extends AnnotationBody> {
 		@JsonDeserialize(using = Deserializer.DateDeserializer.class)
 		private Date lastModified;
 
+		private String externalCreatorId;
+		private CreatorType externalCreatorType;
+		private String externalCreatorName;
+
+		/*
+			Europeana Translate relevant stuff. This aims to be used when annotationAdmin
+			is used to score ratings by user. This is irrelevant to any other usecases.
+		 */
+		private TranslationErrorType errorType;
+		private String translationComment;
+		private String correctedTranslation;
+
 		private double confidence;
+
+		public TranslationErrorType getErrorType() {
+			return errorType;
+		}
+
+		public void setErrorType(TranslationErrorType errorType) {
+			this.errorType = errorType;
+		}
+
+		public String getTranslationComment() {
+			return translationComment;
+		}
+
+		public void setTranslationComment(String translationComment) {
+			this.translationComment = translationComment;
+		}
+
+		public String getCorrectedTranslation() {
+			return correctedTranslation;
+		}
+
+		public void setCorrectedTranslation(String correctedTranslation) {
+			this.correctedTranslation = correctedTranslation;
+		}
+
+		public String getExternalCreatorName() {
+			return externalCreatorName;
+		}
+
+		public void setExternalCreatorName(String externalCreatorName) {
+			this.externalCreatorName = externalCreatorName;
+		}
+
+		public String getExternalCreatorId() {
+			return externalCreatorId;
+		}
+
+		public void setExternalCreatorId(String externalCreatorId) {
+			this.externalCreatorId = externalCreatorId;
+		}
+
+		public Annotation.CreatorType getExternalCreatorType() {
+			return externalCreatorType;
+		}
+
+		public void setExternalCreatorType(Annotation.CreatorType externalCreatorType) {
+			this.externalCreatorType = externalCreatorType;
+		}
 
 		public ObjectId getWithCreator() {
 			return withCreator;
@@ -263,6 +363,20 @@ public class Annotation<T extends AnnotationBody> {
 			this.confidence = confidence;
 		}
 
+		@Override
+		public String toString() {
+			return "AnnotationAdmin{" +
+					"withCreator=" + withCreator +
+					", generator='" + generator + '\'' +
+					", created=" + created +
+					", generated=" + generated +
+					", lastModified=" + lastModified +
+					", externalCreatorId='" + externalCreatorId + '\'' +
+					", externalCreatorType=" + externalCreatorType +
+					", externalCreatorName='" + externalCreatorName + '\'' +
+					", confidence=" + confidence +
+					'}';
+		}
 	}
 
 	@JsonInclude(value = JsonInclude.Include.NON_NULL)
@@ -339,4 +453,19 @@ public class Annotation<T extends AnnotationBody> {
 
 	}
 
+	@java.lang.Override
+	public java.lang.String toString() {
+		return "Annotation{" +
+				"dbId=" + dbId +
+				", annotationWithURI='" + annotationWithURI + '\'' +
+				", annotators=" + annotators +
+				", motivation=" + motivation +
+				", score=" + score +
+				", publish=" + publish +
+				", body=" + body +
+				", target=" + target +
+				", externalId='" + externalId + '\'' +
+				", scope='" + scope + '\'' +
+				'}';
+	}
 }

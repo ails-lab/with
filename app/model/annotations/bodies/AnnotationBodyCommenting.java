@@ -16,4 +16,11 @@ public class AnnotationBodyCommenting extends AnnotationBody {
     public void setLabel(MultiLiteral label) {
         this.label = label;
     }
+
+    @Override
+    public String toString() {
+        return "AnnotationBodyCommenting{" +
+                "label=" + label +
+                '}';
+    }
 }
