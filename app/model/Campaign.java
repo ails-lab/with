@@ -255,6 +255,36 @@ public class Campaign {
 			this.vocabularies.addAll(Arrays.asList(vocabulary));
 		}
 	}
+
+	public static class ValidationErrorType {
+		String tokenizedVersion;
+		String shortDescription;
+		String longDescription;
+
+		public String getTokenizedVersion() {
+			return tokenizedVersion;
+		}
+
+		public void setTokenizedVersion(String tokenizedVersion) {
+			this.tokenizedVersion = tokenizedVersion;
+		}
+
+		public String getShortDescription() {
+			return shortDescription;
+		}
+
+		public void setShortDescription(String shortDescription) {
+			this.shortDescription = shortDescription;
+		}
+
+		public String getLongDescription() {
+			return longDescription;
+		}
+
+		public void setLongDescription(String longDescription) {
+			this.longDescription = longDescription;
+		}
+	}
 	
 	@Id
 	@JsonSerialize(using = Serializer.ObjectIdSerializer.class)
@@ -356,7 +386,16 @@ public class Campaign {
 	private PublishCriteria publishCriteria;
 
 	private CampaignContributorFeedbackMethod contributorFeedbackMethod;
-	
+
+	private List<ValidationErrorType> validationErrorType;
+
+	public List<ValidationErrorType> getValidationErrorType() {
+		return validationErrorType;
+	}
+
+	public void setValidationErrorType(List<ValidationErrorType> validationErrorType) {
+		this.validationErrorType = validationErrorType;
+	}
 
 	public BadgeType getBadge(int points) {
 		if (points >= badges.gold)

@@ -203,6 +203,9 @@ public class CampaignController extends WithController {
 		if (newCampaign.getPurpose() != null) {
 			campaign.setPurpose(newCampaign.getPurpose());
 		}
+		if (newCampaign.getValidationErrorType() != null) {
+			campaign.setValidationErrorType(newCampaign.getValidationErrorType());
+		}
 
 		updateListField(campaign, newCampaign, Campaign::getTargetCollections, Campaign::setTargetCollections);
 		updateListField(campaign, newCampaign, Campaign::getUserGroupIds, Campaign::setUserGroupIds);

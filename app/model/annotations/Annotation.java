@@ -204,23 +204,6 @@ public class Annotation<T extends AnnotationBody> {
 	@JsonInclude(value = JsonInclude.Include.NON_NULL)
 	public static class AnnotationAdmin {
 
-		/* Europeana Translate specific stuff
-		   Error type enumeration
-		 */
-		public static enum TranslationErrorType {
-			NAMED_REFERENCES_INCORRECT_TRANSLATION,
-			MISTRANSLATION_IDIOMATIC_EXPRESSIONS,
-			INCOMPLETE_TRANSLATIONS,
-			UNDESIRED_TRANSLATIONS_QUOTED_TEXT,
-			TRANSLATION_BIAS,
-			BAD_WORD_SELECTION,
-			INCONSISTENT_TRANSLATIONS,
-			SPELLING_MISTAKE_SOURCE_CORRECT,
-			GRAMMAR_MISTAKE,
-			WRONG_ENCODING,
-			VARIATION_WORDS_ORDER,
-			MISSING_PUNCTUATION
-		}
 		/**
 		 * The with user who created this annotation.
 		 */
@@ -257,38 +240,35 @@ public class Annotation<T extends AnnotationBody> {
 		private CreatorType externalCreatorType;
 		private String externalCreatorName;
 
-		/*
-			Europeana Translate relevant stuff. This aims to be used when annotationAdmin
-			is used to score ratings by user. This is irrelevant to any other usecases.
-		 */
-		private TranslationErrorType errorType;
-		private String translationComment;
-		private String correctedTranslation;
+
+		private ArrayList<String> validationErrorType;
+		private String validationComment;
+		private String validationCorrection;
 
 		private double confidence;
 
-		public TranslationErrorType getErrorType() {
-			return errorType;
+		public ArrayList<String> getValidationErrorType() {
+			return validationErrorType;
 		}
 
-		public void setErrorType(TranslationErrorType errorType) {
-			this.errorType = errorType;
+		public void setValidationErrorType(ArrayList<String> validationErrorType) {
+			this.validationErrorType = validationErrorType;
 		}
 
-		public String getTranslationComment() {
-			return translationComment;
+		public String getValidationComment() {
+			return validationComment;
 		}
 
-		public void setTranslationComment(String translationComment) {
-			this.translationComment = translationComment;
+		public void setValidationComment(String validationComment) {
+			this.validationComment = validationComment;
 		}
 
-		public String getCorrectedTranslation() {
-			return correctedTranslation;
+		public String getValidationCorrection() {
+			return validationCorrection;
 		}
 
-		public void setCorrectedTranslation(String correctedTranslation) {
-			this.correctedTranslation = correctedTranslation;
+		public void setValidationCorrection(String validationCorrection) {
+			this.validationCorrection = validationCorrection;
 		}
 
 		public String getExternalCreatorName() {
@@ -394,9 +374,22 @@ public class Annotation<T extends AnnotationBody> {
 		private ArrayList<AnnotationAdmin> rejectedBy;
 
 		/**
+		 * An arrayList with the users who rated this annotation body.
+		 */
+		private ArrayList<AnnotationAdmin> ratedBy;
+
+		/**
 		 * An arrayList with the users who didn't comment on this annotation body.
 		 */
 		private ArrayList<AnnotationAdmin> dontKnowBy;
+
+		public ArrayList<AnnotationAdmin> getRatedBy() {
+			return ratedBy;
+		}
+
+		public void setRatedBy(ArrayList<AnnotationAdmin> ratedBy) {
+			this.ratedBy = ratedBy;
+		}
 
 		public ArrayList<AnnotationAdmin> getApprovedBy() {
 			return approvedBy;
