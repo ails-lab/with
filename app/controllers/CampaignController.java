@@ -928,7 +928,9 @@ public class CampaignController extends WithController {
 			}
 			else {
 				AnnotationBodyCommenting annotationBody = new AnnotationBodyCommenting();
-				annotationBody.setLabel(new MultiLiteral(Language.getLanguageByCode(body.get("language").textValue()),body.get("value").textValue()));
+				MultiLiteral label = new MultiLiteral(Language.getLanguageByCode(body.get("language").textValue()), body.get("value").textValue());
+				label.fillDEF();
+				annotationBody.setLabel(label);
 				newAnnotation.setBody(annotationBody);
 				newAnnotation.setMotivation(MotivationType.Commenting);
 			}
