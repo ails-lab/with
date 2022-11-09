@@ -73,6 +73,16 @@ public class AnnotationTarget implements Cloneable {
 		return selector;
 	}
 
+	@Override
+	public String toString() {
+		return "AnnotationTarget{" +
+				"recordId=" + recordId +
+				", withURI='" + withURI + '\'' +
+				", externalId='" + externalId + '\'' +
+				", selector=" + selector +
+				'}';
+	}
+
 	public void setSelector(SelectorType selector) {
 		this.selector = selector;
 		

@@ -119,5 +119,15 @@ public class AnnotationBodyTagging extends AnnotationBody {
 		}
 		
 	}
-	
+
+	@Override
+	public String toString() {
+		return "AnnotationBodyTagging{" +
+				"uri='" + uri + '\'' +
+				", tagType='" + tagType + '\'' +
+				", label=" + label +
+				", uriType=" + uriType +
+				", uriVocabulary='" + uriVocabulary + '\'' +
+				'}';
+	}
 }

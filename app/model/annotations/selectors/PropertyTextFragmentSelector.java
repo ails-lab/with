@@ -72,7 +72,17 @@ public class PropertyTextFragmentSelector extends PropertySelector {
 
 		return c;
     }
-	
+
+	@Override
+	public java.lang.String toString() {
+		return "PropertyTextFragmentSelector{" +
+				"origValue='" + origValue + '\'' +
+				", origLang=" + origLang +
+				", start=" + start +
+				", end=" + end +
+				'}';
+	}
+
 	@Override
 	public void addToQuery(Query<Annotation> q) {
 		super.addToQuery(q);

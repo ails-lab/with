@@ -304,6 +304,13 @@ public class AnnotationDAO extends DAO<Annotation> {
 		this.update(q, updateOps);
 	}
 
+	public void addRateObject(ObjectId id, ObjectId userId, AnnotationAdmin user) {
+		Query<Annotation> q = this.createQuery().field("_id").equal(id);
+		UpdateOperations<Annotation> updateOps = this.createUpdateOperations();
+		updateOps.add("score.ratedBy", user, false);
+		this.update(q, updateOps);
+	}
+
 	public void removeScore(ObjectId id, ObjectId userId) {
 		Query<Annotation> q = this.createQuery().field("_id").equal(id);
 		UpdateOperations<Annotation> updateOps = this.createUpdateOperations();

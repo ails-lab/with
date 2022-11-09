@@ -207,6 +207,60 @@ public class AnnotationController extends WithController {
 		}
 	}
 
+	public static Result rateAnnotationObject(String id) {
+		try {
+			ObjectNode error = Json.newObject();
+
+			JsonNode json = request().body().asJson();
+			if (json == null) {
+				error.put("error", "Invalid JSON");
+				return badRequest(error);
+			}
+			if (WithController.effectiveUserDbId() == null) {
+				error.put("error", "User not logged in");
+				return badRequest(error);
+			}
+			AnnotationAdmin administrative = getAnnotationAdminFromJson(json, WithController.effectiveUserDbId());
+			ObjectId oid = new ObjectId(id);
+			Annotation ann = DB.getAnnotationDAO().getById(oid);
+
+			// We need to check if user already did rate
+			if (ann.getScore() != null && ann.getScore().getRatedBy() != null) {
+				ArrayList<AnnotationAdmin> rates = ann.getScore().getRatedBy();
+				AnnotationAdmin userRate = null;
+				for (AnnotationAdmin rate : rates) {
+					if (rate.getWithCreator().equals(WithController.effectiveUserDbId())
+							&& rate.getGenerator().equals(administrative.getGenerator())) {
+						userRate = rate;
+						break;
+					}
+				}
+				if (userRate != null) {
+					rates.remove(userRate);
+				} else {
+					// it is the first user's rating so add him to annotators (increment)
+					ObjectId recordId = DB.getRecordResourceDAO().getByAnnotationId(oid).getDbId();
+					DB.getRecordResourceDAO().addAnnotator(recordId, WithController.effectiveUserId());
+					ElasticUtils.update(DB.getRecordResourceDAO().getByAnnotationId(oid));
+				}
+				rates.add(administrative);
+				ann.getScore().setRatedBy(rates);
+				DB.getAnnotationDAO().makePermanent(ann);
+			} else {
+				DB.getAnnotationDAO().addRateObject(oid, WithController.effectiveUserDbId(), administrative);
+
+				// it is the first user's rating so add him to annotators (increment)
+				ObjectId recordId = DB.getRecordResourceDAO().getByAnnotationId(oid).getDbId();
+				DB.getRecordResourceDAO().addAnnotator(recordId, WithController.effectiveUserId());
+				ElasticUtils.update(DB.getRecordResourceDAO().getByAnnotationId(oid));
+			}
+			return ok();
+		} catch (Exception e) {
+			log.error("", e);
+			return internalServerError();
+		}
+	}
+
 	public static Result rejectAnnotation(String id) {
 		try {
 			ObjectId oid = new ObjectId(id);
@@ -682,6 +736,19 @@ public class AnnotationController extends WithController {
 			administrative.setGenerator(json.get("generator").asText());
 		if (json.has("confidence")) {
 			administrative.setConfidence(json.get("confidence").asDouble());
+		}
+		if (json.has("validationComment")) {
+			administrative.setValidationComment(json.get("validationComment").asText());
+		}
+		if (json.has("validationCorrection")) {
+			administrative.setValidationCorrection(json.get("validationCorrection").asText());
+		}
+		if (json.has("validationErrorType") && json.get("validationErrorType").isArray()) {
+			ArrayList<String> validationErrorType = new ArrayList<String>();
+			for (JsonNode valError : json.get("validationErrorType")) {
+				validationErrorType.add(valError.asText());
+			}
+			administrative.setValidationErrorType(validationErrorType);
 		}
 
 		return administrative;

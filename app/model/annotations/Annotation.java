@@ -92,6 +92,9 @@ public class Annotation<T extends AnnotationBody> {
 		Tagging, GeoTagging, Linking, Commenting, Editing, ColorTagging, Polling
 	}
 
+	public static enum CreatorType {
+		Person, Software
+	}
 	/**
 	 * The motivation why this annotation has been created. This takes values from
 	 * an enumerated list that currently includes Tagging, Linking, Commenting,
@@ -114,6 +117,25 @@ public class Annotation<T extends AnnotationBody> {
 	 */
 	@Embedded
 	private AnnotationTarget target;
+	private String externalId;
+
+	private String scope;
+
+	public String getScope() {
+		return scope;
+	}
+
+	public void setScope(String scope) {
+		this.scope = scope;
+	}
+
+	public String getExternalId() {
+		return externalId;
+	}
+
+	public void setExternalId(String externalId) {
+		this.externalId = externalId;
+	}
 
 	public ObjectId getDbId() {
 		return dbId;
@@ -181,6 +203,7 @@ public class Annotation<T extends AnnotationBody> {
 
 	@JsonInclude(value = JsonInclude.Include.NON_NULL)
 	public static class AnnotationAdmin {
+
 		/**
 		 * The with user who created this annotation.
 		 */
@@ -213,7 +236,64 @@ public class Annotation<T extends AnnotationBody> {
 		@JsonDeserialize(using = Deserializer.DateDeserializer.class)
 		private Date lastModified;
 
+		private String externalCreatorId;
+		private CreatorType externalCreatorType;
+		private String externalCreatorName;
+
+
+		private ArrayList<String> validationErrorType;
+		private String validationComment;
+		private String validationCorrection;
+
 		private double confidence;
+
+		public ArrayList<String> getValidationErrorType() {
+			return validationErrorType;
+		}
+
+		public void setValidationErrorType(ArrayList<String> validationErrorType) {
+			this.validationErrorType = validationErrorType;
+		}
+
+		public String getValidationComment() {
+			return validationComment;
+		}
+
+		public void setValidationComment(String validationComment) {
+			this.validationComment = validationComment;
+		}
+
+		public String getValidationCorrection() {
+			return validationCorrection;
+		}
+
+		public void setValidationCorrection(String validationCorrection) {
+			this.validationCorrection = validationCorrection;
+		}
+
+		public String getExternalCreatorName() {
+			return externalCreatorName;
+		}
+
+		public void setExternalCreatorName(String externalCreatorName) {
+			this.externalCreatorName = externalCreatorName;
+		}
+
+		public String getExternalCreatorId() {
+			return externalCreatorId;
+		}
+
+		public void setExternalCreatorId(String externalCreatorId) {
+			this.externalCreatorId = externalCreatorId;
+		}
+
+		public Annotation.CreatorType getExternalCreatorType() {
+			return externalCreatorType;
+		}
+
+		public void setExternalCreatorType(Annotation.CreatorType externalCreatorType) {
+			this.externalCreatorType = externalCreatorType;
+		}
 
 		public ObjectId getWithCreator() {
 			return withCreator;
@@ -263,6 +343,20 @@ public class Annotation<T extends AnnotationBody> {
 			this.confidence = confidence;
 		}
 
+		@Override
+		public String toString() {
+			return "AnnotationAdmin{" +
+					"withCreator=" + withCreator +
+					", generator='" + generator + '\'' +
+					", created=" + created +
+					", generated=" + generated +
+					", lastModified=" + lastModified +
+					", externalCreatorId='" + externalCreatorId + '\'' +
+					", externalCreatorType=" + externalCreatorType +
+					", externalCreatorName='" + externalCreatorName + '\'' +
+					", confidence=" + confidence +
+					'}';
+		}
 	}
 
 	@JsonInclude(value = JsonInclude.Include.NON_NULL)
@@ -280,9 +374,22 @@ public class Annotation<T extends AnnotationBody> {
 		private ArrayList<AnnotationAdmin> rejectedBy;
 
 		/**
+		 * An arrayList with the users who rated this annotation body.
+		 */
+		private ArrayList<AnnotationAdmin> ratedBy;
+
+		/**
 		 * An arrayList with the users who didn't comment on this annotation body.
 		 */
 		private ArrayList<AnnotationAdmin> dontKnowBy;
+
+		public ArrayList<AnnotationAdmin> getRatedBy() {
+			return ratedBy;
+		}
+
+		public void setRatedBy(ArrayList<AnnotationAdmin> ratedBy) {
+			this.ratedBy = ratedBy;
+		}
 
 		public ArrayList<AnnotationAdmin> getApprovedBy() {
 			return approvedBy;
@@ -339,4 +446,19 @@ public class Annotation<T extends AnnotationBody> {
 
 	}
 
+	@java.lang.Override
+	public java.lang.String toString() {
+		return "Annotation{" +
+				"dbId=" + dbId +
+				", annotationWithURI='" + annotationWithURI + '\'' +
+				", annotators=" + annotators +
+				", motivation=" + motivation +
+				", score=" + score +
+				", publish=" + publish +
+				", body=" + body +
+				", target=" + target +
+				", externalId='" + externalId + '\'' +
+				", scope='" + scope + '\'' +
+				'}';
+	}
 }

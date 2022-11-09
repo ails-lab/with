@@ -82,6 +82,11 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 		super(RecordResource.class);
 	}
 
+	public RecordResource getByAnnotationExternalId(String annotationExternalId) {
+		Query<RecordResource> q = this.createQuery().disableValidation().field("provenance.resourceId").equal(annotationExternalId);
+		return this.findOne(q);
+	}
+
 	public List<RecordResource> getByCollectionBetweenPositions(ObjectId collectionId, int lowerBound, int upperBound) {
 		if (upperBound < lowerBound)
 			return new ArrayList<RecordResource>();
