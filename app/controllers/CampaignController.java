@@ -731,6 +731,8 @@ public class CampaignController extends WithController {
 					points = points + ((myCampaign.getContributorsPoints()).get(withUser)).getApproved();
 				else if (type.equals("rejected"))
 					points = points + ((myCampaign.getContributorsPoints()).get(withUser)).getRejected();
+				else if (type.equals("rated"))
+					points = points + ((myCampaign.getContributorsPoints()).get(withUser)).getRated();
 				else
 					points = points + ((myCampaign.getContributorsPoints()).get(withUser)).getKarmaPoints();
 			}

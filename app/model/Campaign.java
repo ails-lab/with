@@ -91,6 +91,7 @@ public class Campaign {
 		private long created = 0;
 		private long approved = 0;
 		private long rejected = 0;
+		private long rated = 0;
 		private long records = 0;
 		private long karmaPoints = 0;
 
@@ -98,6 +99,7 @@ public class Campaign {
 			this.created = 0;
 			this.approved = 0;
 			this.rejected = 0;
+			this.rated = 0;
 			this.records = 0;
 			this.karmaPoints = 0;
 		}
@@ -119,6 +121,12 @@ public class Campaign {
 		}
 		public void setRejected(long rejected) {
 			this.rejected = rejected;
+		}
+		public long getRated() {
+			return rated;
+		}
+		public void setRated(long rated) {
+			this.rated = rated;
 		}
 		public long getRecords() {
 			return records;
