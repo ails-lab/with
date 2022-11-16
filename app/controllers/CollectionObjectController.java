@@ -653,6 +653,28 @@ public class CollectionObjectController extends WithResourceController {
 		}
 	}
 
+	public static Result getCollectionRecordIds(String collectionId) {
+		ObjectNode result = Json.newObject();
+		try {
+			ObjectId collectionDbId = new ObjectId(collectionId);
+			Result response = errorIfNoAccessToCollection(Action.READ, collectionDbId);
+			if (!response.toString().equals(ok().toString()))
+				return response;
+			CollectionObject collection = DB.getCollectionObjectDAO().getById(collectionDbId);
+			List<ContextData<ContextDataBody>> collectedResources = collection.getCollectedResources();
+			List<String> colIds = new ArrayList<String>();
+			for (ContextData<ContextDataBody> item : collectedResources) {
+				colIds.add(item.getTarget().getRecordId().toString());
+			}
+			result.put("collectedRecordsIds", (ArrayNode) Json.toJson(colIds));
+			return ok(result);
+		}
+		catch (Exception e) {
+			result.put("error", e.getMessage());
+			return internalServerError(result);
+		}
+	}
+
 	public static Result getMultipleCollectionObjects(List<String> id, String profile, Option<String> locale, boolean filterForLocale) {
 		ArrayNode result = Json.newObject().arrayNode();
 		for (String singleId : id) {

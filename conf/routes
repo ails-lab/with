@@ -126,6 +126,7 @@ GET      /collection/update 			    	controllers.CollectionObjectController.updat
 GET      /collection/multiple                   controllers.CollectionObjectController.getMultipleCollectionObjects( id: java.util.List[String],profile: String ?="MEDIUM", locale: play.libs.F.Option[java.lang.String], filterForLocale: Boolean ?= true)
 #GET      /collection/multipleWithAllLangs       controllers.CollectionObjectController.getMultipleCollectionObjectsAllLanguages( id: java.util.List[String],profile: String ?="MEDIUM")
 GET	     /collection/:id 	        			controllers.CollectionObjectController.getCollectionObject(id, profile: String ?="MEDIUM", locale: play.libs.F.Option[java.lang.String], filterForLocale: Boolean ?= true)
+GET      /collection/:id/getCollectedRecordIds  controllers.CollectionObjectController.getCollectionRecordIds(id)
 PUT		 /collection/:id 						controllers.CollectionObjectController.editCollectionObject(id)
 DELETE   /collection/:id	                    controllers.CollectionObjectController.deleteCollectionObject(id)
 
