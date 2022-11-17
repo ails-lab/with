@@ -228,6 +228,17 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 		return getByCollection(collection.getCollectedResources(), q);
 	}
 
+	public List<RecordResource> getByIds(Collection<ObjectId> recordIds) {
+		if (recordIds == null || recordIds.isEmpty())
+			return new ArrayList<RecordResource>();
+		try {
+			Query<RecordResource> q = this.createQuery().field("_id").in(recordIds);
+			return this.find(q).asList();
+		} catch (Exception e) {
+			return new ArrayList<RecordResource>();
+		}
+	}
+
 	public RecordResource getByAnnotationId(ObjectId annId) {
 		Query<RecordResource> q = this.createQuery().disableValidation().field("annotationIds").equal(annId);
 

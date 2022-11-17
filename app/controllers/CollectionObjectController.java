@@ -1168,6 +1168,75 @@ public class CollectionObjectController extends WithResourceController {
 		return fav.getDbId();
 	}
 
+	public static Result listRecordResourcesBasedOnCampaignContributions(String collectionId, String contentFormat, int start, int count,
+																		 String profile, Option<String> locale, Option<String> sortingCriteria, boolean hideMine) {
+		ObjectNode result = Json.newObject();
+//		long notMine = DB.getRecordResourceDAO().countRecordsWithNoContributions(effectiveUserId(), new ObjectId(collectionId));
+		ObjectId colId = new ObjectId(collectionId);
+		Locks locks = null;
+		try {
+			locks = Locks.create().read("Collection #" + collectionId).acquire();
+			Result response = errorIfNoAccessToCollection(Action.READ, colId);
+			if (!response.toString().equals(ok().toString()))
+				return response;
+			else {
+				List<RecordResource> records = DB.getRecordResourceDAO().getByCollection(colId, Arrays.asList("dbId", "annotationIds"));
+				List<ObjectId> annIds = new ArrayList<>();
+
+				records.forEach(record -> {
+					if (record.getAnnotationIds() != null )
+						annIds.addAll(record.getAnnotationIds());
+				});
+
+				ArrayList<String> retrievedFields = new ArrayList<String>(Arrays.asList("target", "score"));
+				List<Annotation> annotations = DB.getAnnotationDAO().getByIdsWithRetrievedFields(annIds, retrievedFields);
+				Map<ObjectId, List<Annotation>> annotationMap = annotations.stream().collect(Collectors.groupingBy(ann -> ann.getTarget().getRecordId()));
+
+				ArrayList<ObjectNode> recordsList = new ArrayList<>();
+				for (RecordResource r : records) {
+					r.setAnnotations(annotationMap.getOrDefault(r.getDbId(), Collections.emptyList()));
+					ObjectNode tmp = (ObjectNode) Json.toJson(r);
+					int contributions = 0;
+
+					List<Annotation> annotationList = r.getAnnotations();
+					for (Annotation a : annotationList) {
+						if (a.getScore() == null) {
+							continue;
+						}
+						AnnotationScore score = a.getScore();
+						if (score.getApprovedBy() != null) {
+							contributions += score.getApprovedBy().size();
+						}
+						if (score.getRejectedBy() != null) {
+							contributions += score.getRejectedBy().size();
+						}
+						if (score.getRatedBy() != null) {
+							contributions += score.getRatedBy().size();
+						}
+					}
+					tmp.put("recordAnnotationContributions", String.valueOf(contributions));
+					recordsList.add(tmp);
+				}
+				recordsList.sort(Comparator.comparingInt(record -> record.get("recordAnnotationContributions").asInt()));
+				ArrayNode ids = Json.newObject().arrayNode();
+
+				for (ObjectNode r : recordsList) {
+					ids.add(r.get("dbId"));
+				}
+				result.put("recordIds", Json.toJson(ids));
+				return ok(result);
+			}
+		}
+		catch (Exception e1) {
+			e1.printStackTrace();
+			result.put("error", e1.getMessage());
+			return internalServerError(result);
+		} finally {
+			if (locks != null)
+				locks.release();
+		}
+	}
+
 	/**
 	 * List all Records from a Collection using a start item and a page size
 	 */
@@ -2241,6 +2310,3 @@ public class CollectionObjectController extends WithResourceController {
 		}
 	}
 }
-
-
-

@@ -55,6 +55,7 @@ GET     /record/updateRights					controllers.RecordResourceController.updateRigh
 GET     /record/randomRecords					controllers.RecordResourceController.getRandomRecords(groupId: String, batchCount: Integer)
 GET		/record/randomAnnotatedRecords			controllers.RecordResourceController.getRandomAnnotatedRecords( groupId: String, count: Integer, minimum:Integer ?= 3 )
 GET		/record/randomRecordsFromCollections	controllers.RecordResourceController.getRandomRecordsFromCollections( collectionIds: java.util.List[String], count: Integer, hideMyAnnotated:Boolean ?= false)
+GET     /record/getRecordsByIds                 controllers.RecordResourceController.getRecordsByIds( id: java.util.List[String])
 GET		/record/annotationCount					controllers.AnnotationController.getAnnotationCount(groupId: String)
 GET		/record/deepAnnotationCount				controllers.AnnotationController.getDeepAnnotationCount(groupId: String)
 POST 	/record/annotation						controllers.AnnotationController.addAnnotation()
@@ -99,6 +100,7 @@ GET 	 /collection/featured					controllers.CollectionObjectController.getFeature
 GET		 /collection/favorites					controllers.RecordResourceController.getFavorites()
 GET      /collection/:id/listUsers				controllers.CollectionObjectController.listUsersWithRights(id)
 GET      /collection/:id/list		   	        controllers.CollectionObjectController.listRecordResources(id, format: String ?="noContent", start: Integer ?=0, count: Integer ?=10,  profile: String ?="MEDIUM", locale: play.libs.F.Option[java.lang.String], sortingCriteria: play.libs.F.Option[java.lang.String], hideMyAnnotated:Boolean ?= false)
+GET      /collection/:id/listSortedByContributions                controllers.CollectionObjectController.listRecordResourcesBasedOnCampaignContributions(id, format: String ?="noContent", start: Integer ?=0, count: Integer ?=10,  profile: String ?="MEDIUM", locale: play.libs.F.Option[java.lang.String], sortingCriteria: play.libs.F.Option[java.lang.String], hideMyAnnotated:Boolean ?= false)
 GET		 /collection/favoriteCollection			controllers.CollectionObjectController.getFavoriteCollection(profile: String ?="BASIC", locale: play.libs.F.Option[java.lang.String])
 PUT		 /collection/sort/:id					controllers.CollectionObjectController.sortCollectionObject(id)
 

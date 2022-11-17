@@ -28,6 +28,7 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import java.util.Collection;
 
 import model.annotations.Annotation;
 import model.annotations.Annotation.AnnotationAdmin;
@@ -77,7 +78,7 @@ public class AnnotationDAO extends DAO<Annotation> {
 		super(Annotation.class);
 	}
 
-	public List<Annotation> getByIds(Set<ObjectId> annotationIds) {
+	public List<Annotation> getByIds(Collection<ObjectId> annotationIds) {
 		if (annotationIds == null || annotationIds.isEmpty())
 			return new ArrayList<Annotation>();
 		try {
@@ -87,6 +88,19 @@ public class AnnotationDAO extends DAO<Annotation> {
 			return new ArrayList<Annotation>();
 		}
 	}
+
+	public List<Annotation> getByIdsWithRetrievedFields(Collection<ObjectId> annotationIds, List<String> retrievedFields) {
+		if (annotationIds == null || annotationIds.isEmpty())
+			return new ArrayList<Annotation>();
+		try {
+			Query<Annotation> q = this.createQuery().field("_id").in(annotationIds)
+													.retrievedFields(true, retrievedFields.toArray(new String[retrievedFields.size()]));
+			return this.find(q).asList();
+		} catch (Exception e) {
+			return new ArrayList<Annotation>();
+		}
+	}
+
 
 	public List<Annotation> getByCollection(ObjectId collectionId) {
 		CollectionObject collection = DB.getCollectionObjectDAO().getById(collectionId,
