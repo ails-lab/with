@@ -1168,8 +1168,7 @@ public class CollectionObjectController extends WithResourceController {
 		return fav.getDbId();
 	}
 
-	public static Result listRecordResourcesBasedOnCampaignContributions(String collectionId, String contentFormat, int start, int count,
-																		 String profile, Option<String> locale, Option<String> sortingCriteria, boolean hideMine) {
+	public static Result listRecordResourcesBasedOnCampaignContributions(String collectionId, Option<String> sortingCriteria, boolean hideMine) {
 		ObjectNode result = Json.newObject();
 //		long notMine = DB.getRecordResourceDAO().countRecordsWithNoContributions(effectiveUserId(), new ObjectId(collectionId));
 		ObjectId colId = new ObjectId(collectionId);
@@ -1180,7 +1179,23 @@ public class CollectionObjectController extends WithResourceController {
 			if (!response.toString().equals(ok().toString()))
 				return response;
 			else {
-				List<RecordResource> records = DB.getRecordResourceDAO().getByCollection(colId, Arrays.asList("dbId", "annotationIds"));
+				List<RecordResource> records;
+				if (hideMine) {
+					records = DB.getRecordResourceDAO().getByCollectionExcludingUserContributions(colId, Arrays.asList("dbId", "annotationIds"), effectiveUserId());
+				} else {
+					records = DB.getRecordResourceDAO().getByCollection(colId, Arrays.asList("dbId", "annotationIds"));
+				}
+
+				// if no sorting is needed, then that's it, return.
+				if (!sortingCriteria.isDefined()) {
+					List<String> recordIds = new ArrayList<>();
+					for (RecordResource r : records) {
+						recordIds.add(r.getDbId().toString());
+					}
+					result.put("recordIds", Json.toJson(recordIds));
+					return ok(result);
+				}
+
 				List<ObjectId> annIds = new ArrayList<>();
 
 				records.forEach(record -> {

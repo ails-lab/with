@@ -228,6 +228,14 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 		return getByCollection(collection.getCollectedResources(), q);
 	}
 
+	public List<RecordResource> getByCollectionExcludingUserContributions(ObjectId collectionId, List<String> retrievedFields, String userId) {
+		CollectionObject collection = DB.getCollectionObjectDAO().getById(collectionId,
+				new ArrayList<String>(Arrays.asList("collectedResources")));
+		Query<RecordResource> q = this.createQuery().retrievedFields(true,
+				retrievedFields.toArray(new String[retrievedFields.size()]));
+		return getByCollectionNoContribution(collection.getCollectedResources(), q, userId);
+	}
+
 	public List<RecordResource> getByIds(Collection<ObjectId> recordIds) {
 		if (recordIds == null || recordIds.isEmpty())
 			return new ArrayList<RecordResource>();
@@ -270,6 +278,20 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 			List<ObjectId> recordIds = (List<ObjectId>) CollectionUtils.collect(collectedResources,
 					new BeanToPropertyValueTransformer("target.recordId"));
 			q.field("_id").in(recordIds);
+			return this.find(q).asList();
+		} catch (Exception e) {
+			return new ArrayList<RecordResource>();
+		}
+	}
+
+	public List<RecordResource> getByCollectionNoContribution(List<ContextData<ContextDataBody>> collectedResources,
+												Query<RecordResource> q, String userId) {
+		try {
+			List<ObjectId> recordIds = (List<ObjectId>) CollectionUtils.collect(collectedResources,
+					new BeanToPropertyValueTransformer("target.recordId"));
+			q.field("_id").in(recordIds);
+			q.or(q.criteria("administrative.annotators." + userId).doesNotExist(),
+					q.criteria("administrative.annotators." + userId).lessThan(1));
 			return this.find(q).asList();
 		} catch (Exception e) {
 			return new ArrayList<RecordResource>();
