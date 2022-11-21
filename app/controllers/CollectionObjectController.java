@@ -1248,7 +1248,6 @@ public class CollectionObjectController extends WithResourceController {
 			}
 		}
 		catch (Exception e1) {
-			e1.printStackTrace();
 			result.put("error", e1.getMessage());
 			return internalServerError(result);
 		} finally {
