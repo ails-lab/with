@@ -1168,7 +1168,7 @@ public class CollectionObjectController extends WithResourceController {
 		return fav.getDbId();
 	}
 
-	public static Result listRecordResourcesBasedOnCampaignContributions(String collectionId, Option<String> sortingCriteria, boolean hideMine) {
+	public static Result listRecordResourcesBasedOnCampaignContributions(String collectionId, Option<String> sortingCriteria, String fetch) {
 		ObjectNode result = Json.newObject();
 //		long notMine = DB.getRecordResourceDAO().countRecordsWithNoContributions(effectiveUserId(), new ObjectId(collectionId));
 		ObjectId colId = new ObjectId(collectionId);
@@ -1180,10 +1180,15 @@ public class CollectionObjectController extends WithResourceController {
 				return response;
 			else {
 				List<RecordResource> records;
-				if (hideMine) {
+				if (fetch.equals("HIDE_USER_CONTRIBUTIONS")) {
 					records = DB.getRecordResourceDAO().getByCollectionExcludingUserContributions(colId, Arrays.asList("dbId", "annotationIds"), effectiveUserId());
-				} else {
+				} else if (fetch.equals("ALL")){
 					records = DB.getRecordResourceDAO().getByCollection(colId, Arrays.asList("dbId", "annotationIds"));
+				} else if (fetch.equals("FILTER_ONLY_USER_CONTRIBUTIONS")){
+					records = DB.getRecordResourceDAO().getByCollectionFilterOnlyUserContributions(colId, Arrays.asList("dbId", "annotationIds"), effectiveUserId());
+				} else {
+					result.put("error", "Fetch type is not supported");
+					return badRequest(result);
 				}
 
 				// if no sorting is needed, then that's it, return.

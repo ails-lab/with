@@ -100,7 +100,7 @@ GET 	 /collection/featured					controllers.CollectionObjectController.getFeature
 GET		 /collection/favorites					controllers.RecordResourceController.getFavorites()
 GET      /collection/:id/listUsers				controllers.CollectionObjectController.listUsersWithRights(id)
 GET      /collection/:id/list		   	        controllers.CollectionObjectController.listRecordResources(id, format: String ?="noContent", start: Integer ?=0, count: Integer ?=10,  profile: String ?="MEDIUM", locale: play.libs.F.Option[java.lang.String], sortingCriteria: play.libs.F.Option[java.lang.String], hideMyAnnotated:Boolean ?= false)
-GET      /collection/:id/listRecordIds          controllers.CollectionObjectController.listRecordResourcesBasedOnCampaignContributions(id, sortingCriteria: play.libs.F.Option[java.lang.String], hideMyAnnotated:Boolean ?= false)
+GET      /collection/:id/listRecordIds          controllers.CollectionObjectController.listRecordResourcesBasedOnCampaignContributions(id, sortingCriteria: play.libs.F.Option[java.lang.String], fetch:String ?= "ALL")
 GET		 /collection/favoriteCollection			controllers.CollectionObjectController.getFavoriteCollection(profile: String ?="BASIC", locale: play.libs.F.Option[java.lang.String])
 PUT		 /collection/sort/:id					controllers.CollectionObjectController.sortCollectionObject(id)
 
