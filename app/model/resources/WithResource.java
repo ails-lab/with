@@ -481,6 +481,10 @@ public class WithResource<T extends DescriptiveData, U extends WithAdmin> {
 		return annotations;
 	}
 
+	public void setAnnotations(List<Annotation> annotations) {
+		this.annotations = annotations;
+	}
+
 	public void fillAnnotations() {
 		//TODO: group further the annotations returned if needed
 		this.annotations = DB.getAnnotationDAO().getByIds(this.annotationIds);
