@@ -1168,7 +1168,7 @@ public class CollectionObjectController extends WithResourceController {
 		return fav.getDbId();
 	}
 
-	public static Result listRecordResourcesBasedOnCampaignContributions(String collectionId, Option<String> sortingCriteria, String fetch) {
+	public static Result listRecordResourcesBasedOnCampaignContributions(String collectionId, Option<String> sortingCriteria, String fetch, Option<String> cname) {
 		ObjectNode result = Json.newObject();
 //		long notMine = DB.getRecordResourceDAO().countRecordsWithNoContributions(effectiveUserId(), new ObjectId(collectionId));
 		ObjectId colId = new ObjectId(collectionId);
@@ -1200,6 +1200,11 @@ public class CollectionObjectController extends WithResourceController {
 					result.put("recordIds", Json.toJson(recordIds));
 					return ok(result);
 				}
+				if(!cname.isDefined()) {
+					result.put("error", "To sort by campaign contributions, you must provide campaign name");
+					return badRequest(result);
+				}
+				String campaignUsername = cname.get();
 
 				List<ObjectId> annIds = new ArrayList<>();
 
@@ -1225,13 +1230,25 @@ public class CollectionObjectController extends WithResourceController {
 						}
 						AnnotationScore score = a.getScore();
 						if (score.getApprovedBy() != null) {
-							contributions += score.getApprovedBy().size();
+							for (AnnotationAdmin approval : score.getApprovedBy()) {
+								if (approval.getGenerator().equals("CrowdHeritage "+campaignUsername)) {
+									contributions += 1;
+								}
+							}
 						}
 						if (score.getRejectedBy() != null) {
-							contributions += score.getRejectedBy().size();
+							for (AnnotationAdmin rejection : score.getRejectedBy()) {
+								if (rejection.getGenerator().equals("CrowdHeritage "+campaignUsername)) {
+									contributions += 1;
+								}
+							}
 						}
 						if (score.getRatedBy() != null) {
-							contributions += score.getRatedBy().size();
+							for (AnnotationAdmin rating : score.getRatedBy()) {
+								if (rating.getGenerator().equals("CrowdHeritage "+campaignUsername)) {
+									contributions += 1;
+								}
+							}
 						}
 					}
 					tmp.put("recordAnnotationContributions", String.valueOf(contributions));
