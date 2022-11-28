@@ -264,10 +264,24 @@ public class Campaign {
 		}
 	}
 
+	public static enum ValidationErrorTypeSeverity {
+		Severe, High, Medium, Low
+	}
+
 	public static class ValidationErrorType {
-		String tokenizedVersion;
-		String shortDescription;
-		String longDescription;
+
+		private String tokenizedVersion;
+		private String shortDescription;
+		private String longDescription;
+		private ValidationErrorTypeSeverity severity;
+
+		public ValidationErrorTypeSeverity getSeverity() {
+			return severity;
+		}
+
+		public void setSeverity(ValidationErrorTypeSeverity severity) {
+			this.severity = severity;
+		}
 
 		public String getTokenizedVersion() {
 			return tokenizedVersion;
