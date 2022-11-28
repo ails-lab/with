@@ -827,18 +827,21 @@ public class CampaignController extends WithController {
 		String destinationValue = destination.get("value").textValue();
 		String destinationLang = destination.get("language").textValue();
 
-		JsonNode refinedBy = selector.get("refinedBy");
-		int start = refinedBy.get("start").asInt();
-		int end = refinedBy.get("end").asInt();
-
 		AnnotationTarget annotationTarget = new AnnotationTarget();
 		annotationTarget.setExternalId(source);
 
 		PropertyTextFragmentSelector targetSelector = new PropertyTextFragmentSelector();
 		targetSelector.setOrigValue(destinationValue);
 		targetSelector.setOrigLang(Language.getLanguageByCode(destinationLang));
-		targetSelector.setStart(start);
-		targetSelector.setEnd(end);
+
+		if (selector.has("refinedBy")) {
+			JsonNode refinedBy = selector.get("refinedBy");
+			int start = refinedBy.get("start").asInt();
+			int end = refinedBy.get("end").asInt();
+			targetSelector.setStart(start);
+			targetSelector.setEnd(end);
+		}
+
 		targetSelector.setProperty(property);
 
 		annotationTarget.setSelector(targetSelector);
@@ -889,7 +892,6 @@ public class CampaignController extends WithController {
 
 	public static void findCorrespondingRecordResource(AnnotationTarget target) {
 		RecordResource r = DB.getRecordResourceDAO().getByAnnotationExternalId(target.getExternalId());
-		System.out.println(r);
 		target.setRecordId(r.getDbId());
 		target.setWithURI("/record/" + r.getDbId());
 	}
