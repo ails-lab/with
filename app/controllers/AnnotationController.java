@@ -253,8 +253,10 @@ public class AnnotationController extends WithController {
 				ObjectId recordId = DB.getRecordResourceDAO().getByAnnotationId(oid).getDbId();
 				DB.getRecordResourceDAO().addAnnotator(recordId, WithController.effectiveUserId());
 				ElasticUtils.update(DB.getRecordResourceDAO().getByAnnotationId(oid));
+
+				ann = DB.getAnnotationDAO().getById(oid);
 			}
-			return ok();
+			return ok(Json.toJson(ann.getScore()));
 		} catch (Exception e) {
 			log.error("", e);
 			return internalServerError();
