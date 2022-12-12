@@ -71,10 +71,20 @@ import model.Campaign.BadgePrizes;
 import model.Campaign.CampaignTerm;
 import model.Campaign.CampaignTermWithInfo;
 import model.annotations.Annotation;
+import model.annotations.selectors.PropertyTextFragmentSelector;
 import model.annotations.Annotation.AnnotationAdmin;
+import model.annotations.Annotation.CreatorType;
+import model.annotations.Annotation.MotivationType;
+import model.annotations.bodies.AnnotationBody;
+import model.annotations.bodies.AnnotationBodyTagging;
+import model.annotations.bodies.AnnotationBodyCommenting;
+import model.annotations.targets.AnnotationTarget;
+
 import model.basicDataTypes.Language;
 import model.basicDataTypes.Literal;
+import model.basicDataTypes.MultiLiteral;
 import model.resources.ThesaurusObject;
+import model.resources.RecordResource;
 import model.usersAndGroups.UserGroup;
 import play.Logger;
 import play.Logger.ALogger;
@@ -192,6 +202,9 @@ public class CampaignController extends WithController {
 		}
 		if (newCampaign.getPurpose() != null) {
 			campaign.setPurpose(newCampaign.getPurpose());
+		}
+		if (newCampaign.getValidationErrorType() != null) {
+			campaign.setValidationErrorType(newCampaign.getValidationErrorType());
 		}
 
 		updateListField(campaign, newCampaign, Campaign::getTargetCollections, Campaign::setTargetCollections);
@@ -718,6 +731,8 @@ public class CampaignController extends WithController {
 					points = points + ((myCampaign.getContributorsPoints()).get(withUser)).getApproved();
 				else if (type.equals("rejected"))
 					points = points + ((myCampaign.getContributorsPoints()).get(withUser)).getRejected();
+				else if (type.equals("rated"))
+					points = points + ((myCampaign.getContributorsPoints()).get(withUser)).getRated();
 				else
 					points = points + ((myCampaign.getContributorsPoints()).get(withUser)).getKarmaPoints();
 			}
@@ -800,6 +815,145 @@ public class CampaignController extends WithController {
 		ObjectNode statistics = DB.getCampaignDAO().campaignStatistics(cname);
 
 		return ok(Json.toJson(statistics));
+	}
+
+	public static AnnotationTarget parseAnnotationTarget(JsonNode annotation) {
+		JsonNode target = annotation.get("target");
+		String source = target.get("source").textValue();
+		JsonNode selector = target.get("selector");
+
+		String property = selector.get("property").textValue();
+		JsonNode destination = selector.get("destination");
+		String destinationValue = destination.get("value").textValue();
+		String destinationLang = destination.get("language").textValue();
+
+		AnnotationTarget annotationTarget = new AnnotationTarget();
+		annotationTarget.setExternalId(source);
+
+		PropertyTextFragmentSelector targetSelector = new PropertyTextFragmentSelector();
+		targetSelector.setOrigValue(destinationValue);
+		targetSelector.setOrigLang(Language.getLanguageByCode(destinationLang));
+
+		if (selector.has("refinedBy")) {
+			JsonNode refinedBy = selector.get("refinedBy");
+			int start = refinedBy.get("start").asInt();
+			int end = refinedBy.get("end").asInt();
+			targetSelector.setStart(start);
+			targetSelector.setEnd(end);
+		}
+
+		targetSelector.setProperty(property);
+
+		annotationTarget.setSelector(targetSelector);
+		return annotationTarget;
+	}
+
+	public static AnnotationAdmin parseAnnotationAdmin(String campaignName, JsonNode annotation) {
+		AnnotationAdmin administrative = new AnnotationAdmin();
+		administrative.setWithCreator(WithController.effectiveUserDbId());
+		if (annotation.has("created")) {
+			try {
+				SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+				Date created = sdf.parse(annotation.get("created").asText());
+				administrative.setGenerated(created);
+				administrative.setCreated(created);
+				administrative.setLastModified(new Date());
+			}
+			catch (ParseException e) {
+				administrative.setGenerated(new Date());
+				administrative.setCreated(new Date());
+				administrative.setLastModified(new Date());
+			}
+		}
+		else {
+			administrative.setGenerated(new Date());
+			administrative.setCreated(new Date());
+			administrative.setLastModified(new Date());
+		}
+		administrative.setGenerator("CrowdHeritage " + campaignName);
+
+		if (annotation.has("creator")) {
+			JsonNode creator = annotation.get("creator");
+			if (creator.has("id")) {
+				administrative.setExternalCreatorId(creator.get("id").asText());
+			}
+			if (creator.has("type")) {
+				administrative.setExternalCreatorType(CreatorType.valueOf(creator.get("type").asText()));
+			}
+			if (creator.has("name")) {
+				administrative.setExternalCreatorName(creator.get("name").asText());
+			}
+		}
+		if (annotation.has("confidence")) {
+			administrative.setConfidence(annotation.get("confidence").asDouble());
+		}
+		return administrative;
+	}
+
+	public static void findCorrespondingRecordResource(AnnotationTarget target) {
+		RecordResource r = DB.getRecordResourceDAO().getByAnnotationExternalId(target.getExternalId());
+		target.setRecordId(r.getDbId());
+		target.setWithURI("/record/" + r.getDbId());
+	}
+
+	public static Result importAnnotationsFromNtuaModel(String campaignName) throws ParseException {
+		ObjectNode error = Json.newObject();
+		JsonNode json = request().body().asJson();
+
+		if (json == null) {
+			error.put("error", "Invalid JSON");
+			return badRequest(error);
+		}
+		if (WithController.effectiveUserDbId() == null) {
+			error.put("error", "User not logged in");
+			return badRequest(error);
+		}
+
+		JsonNode annotations = json.get("annotations");
+		for (JsonNode annotation : annotations) {
+			Annotation newAnnotation = new Annotation();
+
+			if (annotation.has("id")) {
+				String annotationExternalId = annotation.get("id").asText();
+				newAnnotation.setExternalId(annotationExternalId);
+			}
+			AnnotationAdmin annotationAdmin = parseAnnotationAdmin(campaignName, annotation);
+			newAnnotation.setAnnotators(new ArrayList(Arrays.asList(annotationAdmin)));
+			/*
+				Now we need to parse the body which will either be text (e.g. "body": "http://wikidata.org/entity/Q23"
+				or string containing a uri, or an Array (TODO: we will deal with that later).
+			 */
+			JsonNode body = annotation.get("body");
+			if (!body.isObject()) {
+				AnnotationBodyTagging annotationBody = new AnnotationBodyTagging();
+				annotationBody.setUri(body.asText());
+				newAnnotation.setBody(annotationBody);
+				newAnnotation.setMotivation(MotivationType.Tagging);
+			}
+			else {
+				AnnotationBodyCommenting annotationBody = new AnnotationBodyCommenting();
+				MultiLiteral label = new MultiLiteral(Language.getLanguageByCode(body.get("language").textValue()), body.get("value").textValue());
+				label.fillDEF();
+				annotationBody.setLabel(label);
+				newAnnotation.setBody(annotationBody);
+				newAnnotation.setMotivation(MotivationType.Commenting);
+			}
+
+			AnnotationTarget annotationTarget = parseAnnotationTarget(annotation);
+			findCorrespondingRecordResource(annotationTarget);
+
+			newAnnotation.setTarget(annotationTarget);
+
+			String scope = annotation.get("scope").asText();
+			newAnnotation.setScope(scope);
+			DB.getAnnotationDAO().makePermanent(newAnnotation);
+			newAnnotation.setAnnotationWithURI("/annotation/" + newAnnotation.getDbId());
+			DB.getAnnotationDAO().makePermanent(newAnnotation); // is this needed for a second time?
+			DB.getRecordResourceDAO().addAnnotation(newAnnotation.getTarget().getRecordId(), newAnnotation.getDbId(),
+					WithController.effectiveUserId());
+
+		}
+		return badRequest(error);
 	}
 
 }

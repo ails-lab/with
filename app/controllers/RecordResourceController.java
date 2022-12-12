@@ -110,6 +110,23 @@ public class RecordResourceController extends WithResourceController {
 
 	public static final ALogger log = Logger.of(RecordResourceController.class);
 
+	public static Result getRecordsByIds(List<String> ids) {
+		ObjectNode result = Json.newObject();
+
+		try {
+			List<ObjectId> idsList = new ArrayList<>();
+			ids.forEach(id -> idsList.add(new ObjectId(id)));
+ 			List<RecordResource> records = DB.getRecordResourceDAO().getByIds(idsList);
+			result.put("records", Json.toJson(records));
+			return ok(result);
+		}
+		catch (Exception e) {
+			result.put("error", e.getMessage());
+			return internalServerError(result);
+		}
+	}
+
+
 	/**
 	 * Retrieve a resource metadata. If the format is defined the specific
 	 * serialization of the object is returned

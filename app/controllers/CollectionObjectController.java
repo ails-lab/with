@@ -653,6 +653,28 @@ public class CollectionObjectController extends WithResourceController {
 		}
 	}
 
+	public static Result getCollectionRecordIds(String collectionId) {
+		ObjectNode result = Json.newObject();
+		try {
+			ObjectId collectionDbId = new ObjectId(collectionId);
+			Result response = errorIfNoAccessToCollection(Action.READ, collectionDbId);
+			if (!response.toString().equals(ok().toString()))
+				return response;
+			CollectionObject collection = DB.getCollectionObjectDAO().getById(collectionDbId);
+			List<ContextData<ContextDataBody>> collectedResources = collection.getCollectedResources();
+			List<String> colIds = new ArrayList<String>();
+			for (ContextData<ContextDataBody> item : collectedResources) {
+				colIds.add(item.getTarget().getRecordId().toString());
+			}
+			result.put("collectedRecordsIds", (ArrayNode) Json.toJson(colIds));
+			return ok(result);
+		}
+		catch (Exception e) {
+			result.put("error", e.getMessage());
+			return internalServerError(result);
+		}
+	}
+
 	public static Result getMultipleCollectionObjects(List<String> id, String profile, Option<String> locale, boolean filterForLocale) {
 		ArrayNode result = Json.newObject().arrayNode();
 		for (String singleId : id) {
@@ -1144,6 +1166,111 @@ public class CollectionObjectController extends WithResourceController {
 		fav.getDescriptiveData().setLabel(new MultiLiteral(Language.DEFAULT, "_favorites"));
 		DB.getCollectionObjectDAO().makePermanent(fav);
 		return fav.getDbId();
+	}
+
+	public static Result listRecordResourcesBasedOnCampaignContributions(String collectionId, Option<String> sortingCriteria, String fetch, Option<String> cname) {
+		ObjectNode result = Json.newObject();
+//		long notMine = DB.getRecordResourceDAO().countRecordsWithNoContributions(effectiveUserId(), new ObjectId(collectionId));
+		ObjectId colId = new ObjectId(collectionId);
+		Locks locks = null;
+		try {
+			locks = Locks.create().read("Collection #" + collectionId).acquire();
+			Result response = errorIfNoAccessToCollection(Action.READ, colId);
+			if (!response.toString().equals(ok().toString()))
+				return response;
+			else {
+				List<RecordResource> records;
+				if (fetch.equals("HIDE_USER_CONTRIBUTIONS")) {
+					records = DB.getRecordResourceDAO().getByCollectionExcludingUserContributions(colId, Arrays.asList("dbId", "annotationIds"), effectiveUserId());
+				} else if (fetch.equals("ALL")){
+					records = DB.getRecordResourceDAO().getByCollection(colId, Arrays.asList("dbId", "annotationIds"));
+				} else if (fetch.equals("FILTER_ONLY_USER_CONTRIBUTIONS")){
+					records = DB.getRecordResourceDAO().getByCollectionFilterOnlyUserContributions(colId, Arrays.asList("dbId", "annotationIds"), effectiveUserId());
+				} else {
+					result.put("error", "Fetch type is not supported");
+					return badRequest(result);
+				}
+
+				// if no sorting is needed, then that's it, return.
+				if (!sortingCriteria.isDefined()) {
+					List<String> recordIds = new ArrayList<>();
+					for (RecordResource r : records) {
+						recordIds.add(r.getDbId().toString());
+					}
+					result.put("recordIds", Json.toJson(recordIds));
+					return ok(result);
+				}
+				if(!cname.isDefined()) {
+					result.put("error", "To sort by campaign contributions, you must provide campaign name");
+					return badRequest(result);
+				}
+				String campaignUsername = cname.get();
+
+				List<ObjectId> annIds = new ArrayList<>();
+
+				records.forEach(record -> {
+					if (record.getAnnotationIds() != null )
+						annIds.addAll(record.getAnnotationIds());
+				});
+
+				ArrayList<String> retrievedFields = new ArrayList<String>(Arrays.asList("target", "score"));
+				List<Annotation> annotations = DB.getAnnotationDAO().getByIdsWithRetrievedFields(annIds, retrievedFields);
+				Map<ObjectId, List<Annotation>> annotationMap = annotations.stream().collect(Collectors.groupingBy(ann -> ann.getTarget().getRecordId()));
+
+				ArrayList<ObjectNode> recordsList = new ArrayList<>();
+				for (RecordResource r : records) {
+					r.setAnnotations(annotationMap.getOrDefault(r.getDbId(), Collections.emptyList()));
+					ObjectNode tmp = (ObjectNode) Json.toJson(r);
+					int contributions = 0;
+
+					List<Annotation> annotationList = r.getAnnotations();
+					for (Annotation a : annotationList) {
+						if (a.getScore() == null) {
+							continue;
+						}
+						AnnotationScore score = a.getScore();
+						if (score.getApprovedBy() != null) {
+							for (AnnotationAdmin approval : score.getApprovedBy()) {
+								if (approval.getGenerator().equals("CrowdHeritage "+campaignUsername)) {
+									contributions += 1;
+								}
+							}
+						}
+						if (score.getRejectedBy() != null) {
+							for (AnnotationAdmin rejection : score.getRejectedBy()) {
+								if (rejection.getGenerator().equals("CrowdHeritage "+campaignUsername)) {
+									contributions += 1;
+								}
+							}
+						}
+						if (score.getRatedBy() != null) {
+							for (AnnotationAdmin rating : score.getRatedBy()) {
+								if (rating.getGenerator().equals("CrowdHeritage "+campaignUsername)) {
+									contributions += 1;
+								}
+							}
+						}
+					}
+					tmp.put("recordAnnotationContributions", String.valueOf(contributions));
+					recordsList.add(tmp);
+				}
+				recordsList.sort(Comparator.comparingInt(record -> record.get("recordAnnotationContributions").asInt()));
+				ArrayNode ids = Json.newObject().arrayNode();
+
+				for (ObjectNode r : recordsList) {
+					ids.add(r.get("dbId"));
+				}
+				result.put("recordIds", Json.toJson(ids));
+				return ok(result);
+			}
+		}
+		catch (Exception e1) {
+			result.put("error", e1.getMessage());
+			return internalServerError(result);
+		} finally {
+			if (locks != null)
+				locks.release();
+		}
 	}
 
 	/**
@@ -2219,6 +2346,3 @@ public class CollectionObjectController extends WithResourceController {
 		}
 	}
 }
-
-
-

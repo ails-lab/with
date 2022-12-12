@@ -91,6 +91,7 @@ public class Campaign {
 		private long created = 0;
 		private long approved = 0;
 		private long rejected = 0;
+		private long rated = 0;
 		private long records = 0;
 		private long karmaPoints = 0;
 
@@ -98,6 +99,7 @@ public class Campaign {
 			this.created = 0;
 			this.approved = 0;
 			this.rejected = 0;
+			this.rated = 0;
 			this.records = 0;
 			this.karmaPoints = 0;
 		}
@@ -119,6 +121,12 @@ public class Campaign {
 		}
 		public void setRejected(long rejected) {
 			this.rejected = rejected;
+		}
+		public long getRated() {
+			return rated;
+		}
+		public void setRated(long rated) {
+			this.rated = rated;
 		}
 		public long getRecords() {
 			return records;
@@ -255,6 +263,50 @@ public class Campaign {
 			this.vocabularies.addAll(Arrays.asList(vocabulary));
 		}
 	}
+
+	public static enum ValidationErrorTypeSeverity {
+		Severe, High, Medium, Low
+	}
+
+	public static class ValidationErrorType {
+
+		private String tokenizedVersion;
+		private String shortDescription;
+		private String longDescription;
+		private ValidationErrorTypeSeverity severity;
+
+		public ValidationErrorTypeSeverity getSeverity() {
+			return severity;
+		}
+
+		public void setSeverity(ValidationErrorTypeSeverity severity) {
+			this.severity = severity;
+		}
+
+		public String getTokenizedVersion() {
+			return tokenizedVersion;
+		}
+
+		public void setTokenizedVersion(String tokenizedVersion) {
+			this.tokenizedVersion = tokenizedVersion;
+		}
+
+		public String getShortDescription() {
+			return shortDescription;
+		}
+
+		public void setShortDescription(String shortDescription) {
+			this.shortDescription = shortDescription;
+		}
+
+		public String getLongDescription() {
+			return longDescription;
+		}
+
+		public void setLongDescription(String longDescription) {
+			this.longDescription = longDescription;
+		}
+	}
 	
 	@Id
 	@JsonSerialize(using = Serializer.ObjectIdSerializer.class)
@@ -356,7 +408,16 @@ public class Campaign {
 	private PublishCriteria publishCriteria;
 
 	private CampaignContributorFeedbackMethod contributorFeedbackMethod;
-	
+
+	private List<ValidationErrorType> validationErrorType;
+
+	public List<ValidationErrorType> getValidationErrorType() {
+		return validationErrorType;
+	}
+
+	public void setValidationErrorType(List<ValidationErrorType> validationErrorType) {
+		this.validationErrorType = validationErrorType;
+	}
 
 	public BadgeType getBadge(int points) {
 		if (points >= badges.gold)
