@@ -235,7 +235,7 @@ public class MediaController extends WithController {
 
 	// Make a thumbnail for a specific media object
 	public static MediaObject makeThumbnail(MediaObject media) {
-		if (media.getType() != WithMediaType.IMAGE)
+		if (media.getType() == WithMediaType.IMAGE)
 			try {
 				MediaObject thumbnail = makeThumbNew(media, MediaVersion.Thumbnail);
 				thumbnail.setMediaVersion(MediaVersion.Thumbnail);
