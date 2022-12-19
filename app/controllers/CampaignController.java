@@ -904,12 +904,13 @@ public class CampaignController extends WithController {
 			error.put("error", "Invalid JSON");
 			return badRequest(error);
 		}
+
 		if (WithController.effectiveUserDbId() == null) {
 			error.put("error", "User not logged in");
 			return badRequest(error);
 		}
 
-		JsonNode annotations = json.get("annotations");
+		JsonNode annotations = json.get("@graph");
 		for (JsonNode annotation : annotations) {
 			Annotation newAnnotation = new Annotation();
 
@@ -949,9 +950,14 @@ public class CampaignController extends WithController {
 			DB.getAnnotationDAO().makePermanent(newAnnotation);
 			newAnnotation.setAnnotationWithURI("/annotation/" + newAnnotation.getDbId());
 			DB.getAnnotationDAO().makePermanent(newAnnotation); // is this needed for a second time?
-			DB.getRecordResourceDAO().addAnnotation(newAnnotation.getTarget().getRecordId(), newAnnotation.getDbId(),
+			try {
+				DB.getRecordResourceDAO().addAnnotation(newAnnotation.getTarget().getRecordId(), newAnnotation.getDbId(),
 					WithController.effectiveUserId());
-
+			}
+			catch (Exception e) {
+				Logger.error("Failed ingesting an annotation with external id: " + newAnnotation.getExternalId());
+			}
+			
 		}
 		return badRequest(error);
 	}
