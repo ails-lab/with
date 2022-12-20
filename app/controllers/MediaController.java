@@ -152,8 +152,8 @@ public class MediaController extends WithController {
 
 	public static MediaObject downloadMedia(String url, MediaVersion version) {
 		try {
-			MediaObject media = new MediaObject();
-			if ((media = DB.getMediaObjectDAO().getByUrlAndVersion(url, version)) != null)
+			MediaObject media = DB.getMediaObjectDAO().getByUrlAndVersion(url, version);
+			if ( media != null && media.getType() != null)
 				return media;
 			media = new MediaObject();
 			log.info("Downloading " + url);
@@ -176,7 +176,7 @@ public class MediaController extends WithController {
 			}
 			return media;
 		} catch (Exception e) {
-			log.debug("Couldn't download image at '" + url + "' version " + version, e);
+			log.error("Couldn't download image at '" + url + "' version " + version, e);
 			return null;
 		}
 	}
@@ -235,7 +235,7 @@ public class MediaController extends WithController {
 
 	// Make a thumbnail for a specific media object
 	public static MediaObject makeThumbnail(MediaObject media) {
-		if (media.getType() != WithMediaType.IMAGE)
+		if (media.getType() == WithMediaType.IMAGE)
 			try {
 				MediaObject thumbnail = makeThumbNew(media, MediaVersion.Thumbnail);
 				thumbnail.setMediaVersion(MediaVersion.Thumbnail);
