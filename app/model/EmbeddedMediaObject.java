@@ -520,6 +520,9 @@ public class EmbeddedMediaObject {
 
 	public void setMimeType(MediaType mimeType) {
 		this.mimeType = mimeType;
+		if(mimeType.is(MediaType.ANY_IMAGE_TYPE)) {
+			this.type = WithMediaType.IMAGE;
+		}
 	}
 
 	public int getWidth() {

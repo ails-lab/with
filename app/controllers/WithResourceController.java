@@ -378,7 +378,7 @@ public class WithResourceController extends WithController {
 			rec.setValue("administrative.withURI","/record/" + recordId);
 			return ok(result);
 		} catch (Exception e) {
-			log.error(e.getMessage());
+			log.error(e.getMessage(), e);
 			result.put("error", e.getMessage());
 			return internalServerError(result);
 		}
@@ -545,21 +545,29 @@ public class WithResourceController extends WithController {
 			int i = 0;
 			for (HashMap<MediaVersion, EmbeddedMediaObject> embeddedMedia : (List<HashMap<MediaVersion, EmbeddedMediaObject>>) record
 					.getMedia()) {
-				if (embeddedMedia.containsKey(MediaVersion.Original)
-						&& !embeddedMedia.containsKey(MediaVersion.Thumbnail)
-						&& embeddedMedia.get(MediaVersion.Original).getType()
-								.equals(WithMediaType.IMAGE)) {
-					String originalUrl = embeddedMedia.get(
-							MediaVersion.Original).getUrl();
-					MediaObject original = MediaController.downloadMedia(
-							originalUrl, MediaVersion.Original);
-					MediaObject thumbnail = MediaController
-							.makeThumbnail(original);
-					DB.getRecordResourceDAO().updateMedia(recId, i,
-							MediaVersion.Thumbnail,
-							new EmbeddedMediaObject(thumbnail));
+				try {
+					if (embeddedMedia.containsKey(MediaVersion.Original)
+							&& !embeddedMedia.containsKey(MediaVersion.Thumbnail)
+							&& embeddedMedia.get(MediaVersion.Original).getType()
+									.equals(WithMediaType.IMAGE)) {
+						String originalUrl = embeddedMedia.get(
+								MediaVersion.Original).getUrl();
+						MediaObject original = MediaController.downloadMedia(
+								originalUrl, MediaVersion.Original);
+						MediaObject thumbnail = MediaController
+								.makeThumbnail(original);
+						if (thumbnail != null) {
+							DB.getRecordResourceDAO().updateMedia(recId, i,
+								MediaVersion.Thumbnail,
+								new EmbeddedMediaObject(thumbnail));
+						}
+					}
+					i++;
+				} 
+				catch (Throwable thr) {
+					log.error("Thumbnail generation failed "+ recId.toString(), thr);
+					throw thr;
 				}
-				i++;
 			}
 			DB.getWithResourceDAO().computeAndUpdateQuality(recordId);
 			return true;
