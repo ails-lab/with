@@ -81,6 +81,46 @@ public class Campaign {
 			this.children.add(child);
 		}
 	}
+
+	public static class ColorInfo {
+		@JsonDeserialize(using = Deserializer.LiteralEnglishDefaultDesiarilizer.class)
+		private Literal label;
+		private String uri;
+		private String cssHexCode;
+		private String style;
+
+		public Literal getLabel() {
+			return label;
+		}
+
+		public void setLabel(Literal label) {
+			this.label = label;
+		}
+
+		public String getUri() {
+			return uri;
+		}
+
+		public void setUri(String uri) {
+			this.uri = uri;
+		}
+
+		public String getCssHexCode() {
+			return cssHexCode;
+		}
+
+		public void setCssHexCode(String cssHexCode) {
+			this.cssHexCode = cssHexCode;
+		}
+
+		public String getStyle() {
+			return style;
+		}
+
+		public void setStyle(String style) {
+			this.style = style;
+		}	
+	}
 	
 	public static class CampaignTermWithInfo extends CampaignTerm {
 		public String imageUrl;
@@ -410,6 +450,16 @@ public class Campaign {
 	private CampaignContributorFeedbackMethod contributorFeedbackMethod;
 
 	private List<ValidationErrorType> validationErrorType;
+
+	private List<ColorInfo> colorTaggingColorsTerminology;
+
+	public List<ColorInfo> getColorTaggingColorsTerminology() {
+		return colorTaggingColorsTerminology;
+	}
+
+	public void setColorTaggingColorsTerminology(List<ColorInfo> colorTaggingColorsTerminology) {
+		this.colorTaggingColorsTerminology = colorTaggingColorsTerminology;
+	}
 
 	public List<ValidationErrorType> getValidationErrorType() {
 		return validationErrorType;
