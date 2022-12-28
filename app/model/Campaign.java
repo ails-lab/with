@@ -87,6 +87,7 @@ public class Campaign {
 		private Literal label;
 		private String uri;
 		private String cssHexCode;
+		private String style;
 
 		public Literal getLabel() {
 			return label;
@@ -111,6 +112,14 @@ public class Campaign {
 		public void setCssHexCode(String cssHexCode) {
 			this.cssHexCode = cssHexCode;
 		}
+
+		public String getStyle() {
+			return style;
+		}
+
+		public void setStyle(String style) {
+			this.style = style;
+		}	
 	}
 	
 	public static class CampaignTermWithInfo extends CampaignTerm {
