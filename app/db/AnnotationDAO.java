@@ -450,20 +450,26 @@ public class AnnotationDAO extends DAO<Annotation> {
 		ObjectNode statistics = Json.newObject();
 		ObjectMapper mapper = new ObjectMapper();
 		
-		Query<Annotation> q1 = this.createQuery().field("annotators.generator").endsWith(cname).field("publish").equal(true);
-		Query<Annotation> q2 = this.createQuery().field("annotators.generator").endsWith(cname).field("publish").equal(false);
-		Query<Annotation> q3 = this.createQuery().field("annotators.generator").endsWith(cname);
-		
-		long publishAnns = q1.countAll();
-		long unpublishAnns = q2.countAll();
-		long totalAnns = q3.countAll();
+		Query<Annotation> queryAnnotationsMarkedForPublish = this.createQuery().field("annotators.generator").endsWith(cname).field("publish").equal(true);
+		Query<Annotation> queryAnnotationsNotMarkedForPublish = this.createQuery().field("annotators.generator").endsWith(cname).field("publish").equal(false);
+		Query<Annotation> queryTotalAnnotations = this.createQuery().field("annotators.generator").endsWith(cname);
+		Query<Annotation> queryComputerGeneratedAnnotations = this.createQuery().field("annotators.generator").endsWith(cname).field("annotators.externalCreatorType").equal("Software");
+
+		long publishAnns = queryAnnotationsMarkedForPublish.countAll();
+		long unpublishAnns = queryAnnotationsNotMarkedForPublish.countAll();
+		long totalAnns = queryTotalAnnotations.countAll();
+		long softwareGeneratedAnnotations = queryComputerGeneratedAnnotations.countAll();
+		long humanGeneratedAnnotations = totalAnns - softwareGeneratedAnnotations;
+
 		Map<String, Integer> recordAnnCount = new HashMap<String, Integer>();
 		Map<String, Integer> annDateCount = new HashMap<String, Integer>();
 		List<Integer> votes = new ArrayList<Integer>();
 		votes.add(0);
 		votes.add(0);
-		this.find(q3).asList().stream()
+		votes.add(0);
+		this.find(queryTotalAnnotations).asList().stream()
 			.forEach(ann -> {
+
 				String recId = ann.getTarget().getRecordId().toString();
 				Integer annCount = recordAnnCount.get(recId);
 				recordAnnCount.put(recId, (annCount == null) ? 1 : annCount + 1);
@@ -476,9 +482,11 @@ public class AnnotationDAO extends DAO<Annotation> {
 				AnnotationScore score = ann.getScore();
 				int up = (score == null || score.getApprovedBy() == null) ? votes.get(0) : votes.get(0) + score.getApprovedBy().size();
 				int down = (score == null || score.getRejectedBy() == null) ? votes.get(1) : votes.get(1) + score.getRejectedBy().size();
+				int rate = (score == null || score.getRatedBy() == null) ? votes.get(2) : votes.get(2) + score.getRatedBy().size();
 				votes.clear();
 				votes.add(0, up);
 				votes.add(1, down);
+				votes.add(2, rate);
 			});
 		Map<Integer, Integer> annCountFreq = new HashMap<Integer, Integer>();
 		for (Integer count : recordAnnCount.values()) {
@@ -489,6 +497,8 @@ public class AnnotationDAO extends DAO<Annotation> {
 		sortedAnnDateCount.putAll(annDateCount);
 
 		statistics.put("annotations-total", totalAnns);
+		statistics.put("annotations-software", softwareGeneratedAnnotations);
+		statistics.put("annotations-human", humanGeneratedAnnotations);
 		statistics.put("annotations-accepted", publishAnns);
 		statistics.put("annotations-rejected", unpublishAnns);
 		statistics.put("items-annotated", recordAnnCount.size());
@@ -496,6 +506,7 @@ public class AnnotationDAO extends DAO<Annotation> {
 		statistics.put("annotation-date-frequency", mapper.valueToTree(sortedAnnDateCount));
 		statistics.put("upvotes", votes.get(0));
 		statistics.put("downvotes", votes.get(1));
+		statistics.put("rates", votes.get(2));
 		
 		return statistics;
 	}

@@ -305,7 +305,7 @@ public class Campaign {
 	}
 
 	public static enum ValidationErrorTypeSeverity {
-		Severe, High, Medium, Low
+		Severe, High, MediumHigh, Medium, MediumLow, Low
 	}
 
 	public static class ValidationErrorType {
