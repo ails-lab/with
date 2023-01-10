@@ -463,14 +463,20 @@ public class AnnotationDAO extends DAO<Annotation> {
 
 		Map<String, Integer> recordAnnCount = new HashMap<String, Integer>();
 		Map<String, Integer> annDateCount = new HashMap<String, Integer>();
+		Map<String, Boolean> recordsWithFullyRatedAnnotations = new HashMap<>();
+
 		List<Integer> votes = new ArrayList<Integer>();
 		votes.add(0);
 		votes.add(0);
 		votes.add(0);
 		this.find(queryTotalAnnotations).asList().stream()
 			.forEach(ann -> {
-
 				String recId = ann.getTarget().getRecordId().toString();
+
+				if (!recordsWithFullyRatedAnnotations.containsKey(recId)) {
+					recordsWithFullyRatedAnnotations.put(recId, true);
+				}
+
 				Integer annCount = recordAnnCount.get(recId);
 				recordAnnCount.put(recId, (annCount == null) ? 1 : annCount + 1);
 
@@ -483,6 +489,9 @@ public class AnnotationDAO extends DAO<Annotation> {
 				int up = (score == null || score.getApprovedBy() == null) ? votes.get(0) : votes.get(0) + score.getApprovedBy().size();
 				int down = (score == null || score.getRejectedBy() == null) ? votes.get(1) : votes.get(1) + score.getRejectedBy().size();
 				int rate = (score == null || score.getRatedBy() == null) ? votes.get(2) : votes.get(2) + score.getRatedBy().size();
+				if (score == null || score.getRatedBy() == null) {
+					recordsWithFullyRatedAnnotations.put(recId, false);
+				}
 				votes.clear();
 				votes.add(0, up);
 				votes.add(1, down);
@@ -495,6 +504,7 @@ public class AnnotationDAO extends DAO<Annotation> {
 		}
 		TreeMap<String, Integer> sortedAnnDateCount = new TreeMap<>();
 		sortedAnnDateCount.putAll(annDateCount);
+		long fullyRatedItems = recordsWithFullyRatedAnnotations.values().stream().filter(v -> v.equals(true)).count();
 
 		statistics.put("annotations-total", totalAnns);
 		statistics.put("annotations-software", softwareGeneratedAnnotations);
@@ -502,6 +512,7 @@ public class AnnotationDAO extends DAO<Annotation> {
 		statistics.put("annotations-accepted", publishAnns);
 		statistics.put("annotations-rejected", unpublishAnns);
 		statistics.put("items-annotated", recordAnnCount.size());
+		statistics.put("items-with-fully-rated-annotations", fullyRatedItems);
 		statistics.put("annotation-count-frequency", mapper.valueToTree(annCountFreq));
 		statistics.put("annotation-date-frequency", mapper.valueToTree(sortedAnnDateCount));
 		statistics.put("upvotes", votes.get(0));
