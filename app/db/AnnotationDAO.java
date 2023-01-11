@@ -268,6 +268,13 @@ public class AnnotationDAO extends DAO<Annotation> {
 		return count;
 	}
 
+	public long countUserRatedAnnotations(ObjectId userId, String project, String campaign) {
+		Query<Annotation> q = this.createQuery().field("annotators.generator").equal(project + ' ' + campaign);
+		q.criteria("score.ratedBy.withCreator").equal(userId);
+		long count = q.countAll();
+		return count;
+	}
+
 	public long countAnnotatedRecordsByLabel(String project, String campaign, String label) {
 		Query<Annotation> q = this.createQuery().disableValidation()
 				.field("annotators.generator").equal(project + ' ' + campaign);
