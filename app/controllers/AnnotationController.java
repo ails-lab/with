@@ -586,6 +586,7 @@ public class AnnotationController extends WithController {
 		}, ParallelAPICall.Priority.FRONTEND);
 	}
 
+
 	public static Result getUserAnnotations(String userId, String project, String campaign, int offset, int count) {
 		ObjectId withUser = null;
 
@@ -599,7 +600,8 @@ public class AnnotationController extends WithController {
 		long createdCount = DB.getAnnotationDAO().countUserCreatedAnnotations(withUser, project, campaign);
 		long approvedCount = DB.getAnnotationDAO().countUserUpvotedAnnotations(withUser, project, campaign);
 		long rejectedCount = DB.getAnnotationDAO().countUserDownvotedAnnotations(withUser, project, campaign);
-		long annotationCount = createdCount + approvedCount + rejectedCount;
+		long ratedCount = DB.getAnnotationDAO().countUserRatedAnnotations(withUser, project, campaign);
+		long annotationCount = createdCount + approvedCount + rejectedCount + ratedCount;
 		JsonNode recordsList = getUserAnnotatedRecords(withUser, project, campaign, offset, count);
 		ObjectNode recordsWithCount = Json.newObject();
 		recordsWithCount.set("records", recordsList);
@@ -607,6 +609,7 @@ public class AnnotationController extends WithController {
 		recordsWithCount.put("createdCount", createdCount);
 		recordsWithCount.put("approvedCount", approvedCount);
 		recordsWithCount.put("rejectedCount", rejectedCount);
+		recordsWithCount.put("ratedCount", ratedCount);
 		recordsWithCount.put("annotatedRecordsCount", annotatedRecords);
 
 		long karmaPoints = 0;
