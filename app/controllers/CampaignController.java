@@ -903,6 +903,11 @@ public class CampaignController extends WithController {
 		JsonNode json = request().body().asJson();
 		MotivationType motivationType = Annotation.MotivationType.valueOf(motivation);
 
+		List<Campaign.ColorInfo> colorTerminology = null;
+		if (motivationType.equals(MotivationType.ColorTagging)) {
+			colorTerminology = DB.getCampaignDAO().getCampaignByName(campaignName).getColorTaggingColorsTerminology();
+		}
+
 		if (json == null) {
 			error.put("error", "Invalid JSON");
 			return badRequest(error);
@@ -933,6 +938,9 @@ public class CampaignController extends WithController {
 				return annotationBody;
 			};
 
+			/* First case: body is an object, so based on NTUA annotation model
+			   we have the free text annotation option, which translates to Commenting
+			*/
 			if (body.isObject()) {
 				AnnotationBodyCommenting annotationBody = new AnnotationBodyCommenting();
 				MultiLiteral label = new MultiLiteral(Language.getLanguageByCode(body.get("language").textValue()), body.get("value").textValue());
@@ -940,16 +948,36 @@ public class CampaignController extends WithController {
 				annotationBody.setLabel(label);
 				bodies.add(annotationBody);
 			}
+			/* Second case: body is an array, so it is some variation of tagging. In this approach,
+			   we check to see if it is either plain tagging or ColorTagging
+			*/
 			else if (body.isArray()) {
 				for (JsonNode bdy : body) {
 					AnnotationBodyTagging annotationBody = annotationBodyFactory.apply(motivationType);
 					annotationBody.setUri(bdy.asText());
+					if (motivationType.equals(MotivationType.ColorTagging) && colorTerminology != null) {
+						String uri = bdy.asText();
+						colorTerminology.stream()
+							.filter(color -> uri.equals(color.getUri()))
+							.findAny()
+							.ifPresent(color -> annotationBody.setLabel(new MultiLiteral(color.getLabel()).fillDEF()));
+					}
 					bodies.add(annotationBody);
 				}
-			} 
+			}
+			/* Third case: body is a string, so it is some variation of tagging. In this approach,
+			   we check to see if it is either plain tagging or ColorTagging
+			*/ 
 			else {
 				AnnotationBodyTagging annotationBody = annotationBodyFactory.apply(motivationType);				
 				annotationBody.setUri(body.asText());
+				if (motivationType.equals(MotivationType.ColorTagging) && colorTerminology != null) {
+						String uri = body.asText();
+						colorTerminology.stream()
+							.filter(color -> uri.equals(color.getUri()))
+							.findAny()
+							.ifPresent(color -> annotationBody.setLabel(new MultiLiteral(color.getLabel()).fillDEF()));
+				}
 				bodies.add(annotationBody);
 			}
 
