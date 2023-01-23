@@ -523,6 +523,27 @@ public class AnnotationDAO extends DAO<Annotation> {
 		Map<String, Integer> recordAnnCount = new HashMap<String, Integer>();
 		Map<String, Integer> annDateCount = new HashMap<String, Integer>();
 		Map<String, Boolean> recordsWithFullyRatedAnnotations = new HashMap<>();
+		if (softwareGeneratedAnnotations != 0) {
+			List<Annotation> computerGeneratedAnnotations = this.find(queryComputerGeneratedAnnotations).asList();
+			long contributedAnnotations = 0;
+			for (Annotation ann :  computerGeneratedAnnotations) {
+				if (ann.getScore() == null)
+					continue;
+				if (ann.getScore().getApprovedBy() != null && ann.getScore().getApprovedBy().size() > 0) {
+					contributedAnnotations += 1;
+					continue;
+				}
+				if (ann.getScore().getRejectedBy() != null && ann.getScore().getRejectedBy().size() > 0) { 
+					contributedAnnotations += 1;
+					continue;
+				}
+				if (ann.getScore().getRatedBy() != null && ann.getScore().getRatedBy().size() > 0) {
+					contributedAnnotations += 1;
+					continue;
+				}
+			}
+			statistics.put("softwareAnnotationsContributionPercentage", String.format("%.2f", (double) contributedAnnotations / (double) softwareGeneratedAnnotations * 100));
+		}
 
 		List<Integer> votes = new ArrayList<Integer>();
 		votes.add(0);
