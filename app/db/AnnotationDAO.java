@@ -34,8 +34,11 @@ import model.annotations.Annotation;
 import model.annotations.Annotation.AnnotationAdmin;
 import model.annotations.Annotation.AnnotationScore;
 import model.annotations.Annotation.MotivationType;
+import model.annotations.ContextData;
+import model.annotations.ContextData.ContextDataBody;
 import model.annotations.bodies.*;
 import model.annotations.selectors.SelectorType;
+import model.Campaign;
 import model.annotations.targets.AnnotationTarget;
 import model.basicDataTypes.Language;
 import model.resources.RecordResource;
@@ -66,6 +69,8 @@ import org.mongodb.morphia.query.UpdateOperations;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+
 import com.mongodb.WriteResult;
 
 import elastic.ElasticSearcher;
@@ -175,6 +180,13 @@ public class AnnotationDAO extends DAO<Annotation> {
 		}
 		return this.find(q).asList();
 	}
+
+	public List<Annotation> getByRecordIds(List<ObjectId> recordIds, String cname) {
+		Query<Annotation> q = this.createQuery().disableValidation().field("target.recordId").in(recordIds)
+				.field("annotators.generator").endsWith(cname);
+		return this.find(q).asList();
+	}
+	
 
 	public Annotation getExistingAnnotation(Annotation annotation) {
 		if (annotation.getDbId() != null)
@@ -456,7 +468,54 @@ public class AnnotationDAO extends DAO<Annotation> {
 	public ObjectNode getCampaignAnnotationsStatistics(String cname) {
 		ObjectNode statistics = Json.newObject();
 		ObjectMapper mapper = new ObjectMapper();
-		
+
+		Campaign campaign = DB.getCampaignDAO().getCampaignByName(cname);
+		if (campaign == null) {
+			statistics.put("error", "Campaign does not exist");
+			return statistics;
+		}
+
+		List<ObjectId> targetCollectionIds = campaign.getTargetCollections();
+		List<CollectionObject> targetCollections = DB.getCollectionObjectDAO().getByIds(targetCollectionIds);
+		Map<String, List<ObjectId>> collectionRecordIds = new HashMap<>();
+		ArrayNode statisticsByCollection = mapper.createArrayNode();
+		for (CollectionObject col :  targetCollections) {
+			ObjectNode collectionStats = Json.newObject();
+			List<ObjectId> recIds = new ArrayList<>();
+			for (ContextData<ContextDataBody> cd : (List<ContextData<ContextDataBody>>) col.getCollectedResources()) {
+				recIds.add(cd.getTarget().getRecordId());
+			}
+			collectionRecordIds.put(col.getDbId().toString(), recIds);
+			collectionStats.put("collectionName", mapper.valueToTree(col.getDescriptiveData().getLabel().get(Language.DEFAULT).get(0)));
+			collectionStats.put("collectionDbId", col.getDbId().toString());
+			collectionStats.put("collectionItemCount", col.getCollectedResources().size());
+
+			List<Annotation> collectionAnnotations = getByRecordIds(recIds, cname);
+			collectionStats.put("collectionAnnotationsCount", collectionAnnotations.size());
+			long collectionUpvotes = 0;
+			long collectionDownvotes = 0;
+			long collectionRatings = 0;
+			for (Annotation ann : collectionAnnotations) {
+				if (ann.getScore() == null)
+					continue;
+				if (ann.getScore().getApprovedBy() != null) {
+					collectionUpvotes += ann.getScore().getApprovedBy().size();
+				}
+				if (ann.getScore().getRejectedBy() != null) {
+					collectionDownvotes += ann.getScore().getRejectedBy().size();
+				}
+				if (ann.getScore().getRatedBy() != null) {
+					collectionRatings += ann.getScore().getRatedBy().size();
+				}
+			}
+			collectionStats.put("collectionTotalContributions", collectionUpvotes + collectionDownvotes + collectionRatings);
+			collectionStats.put("collectionUpvotes", collectionUpvotes);
+			collectionStats.put("collectionDownvotes", collectionDownvotes);
+			collectionStats.put("collectionRatings", collectionRatings);
+
+			statisticsByCollection.add(collectionStats);
+		}
+
 		Query<Annotation> queryAnnotationsMarkedForPublish = this.createQuery().field("annotators.generator").endsWith(cname).field("publish").equal(true);
 		Query<Annotation> queryAnnotationsNotMarkedForPublish = this.createQuery().field("annotators.generator").endsWith(cname).field("publish").equal(false);
 		Query<Annotation> queryTotalAnnotations = this.createQuery().field("annotators.generator").endsWith(cname);
@@ -525,7 +584,7 @@ public class AnnotationDAO extends DAO<Annotation> {
 		statistics.put("upvotes", votes.get(0));
 		statistics.put("downvotes", votes.get(1));
 		statistics.put("rates", votes.get(2));
-		
+		statistics.put("collectionStatistics", statisticsByCollection);
 		return statistics;
 	}
 
