@@ -277,8 +277,15 @@ public class CampaignDAO extends DAO<Campaign> {
 	public ObjectNode campaignStatistics(String cname) {
 		Query<Campaign> q1 = this.createQuery().field("username").equal(cname);
 		Campaign campaign = this.findOne(q1);
+		ObjectNode statistics;
+
+		if (campaign == null) {
+			statistics = Json.newObject();
+			statistics.put("error", "Requested Campaign does not exist");
+			return statistics;
+		}
 		
-		ObjectNode statistics = DB.getAnnotationDAO().getCampaignAnnotationsStatistics(cname);
+		statistics = DB.getAnnotationDAO().getCampaignAnnotationsStatistics(cname);
 		
 		List<Integer> items = new ArrayList<Integer>();
 		items.add(0);
