@@ -186,7 +186,7 @@ public class AnnotationDAO extends DAO<Annotation> {
 				.field("annotators.generator").endsWith(cname);
 		return this.find(q).asList();
 	}
-	
+
 
 	public Annotation getExistingAnnotation(Annotation annotation) {
 		if (annotation.getDbId() != null)
@@ -475,6 +475,8 @@ public class AnnotationDAO extends DAO<Annotation> {
 			return statistics;
 		}
 
+		// Statistics per collection
+
 		List<ObjectId> targetCollectionIds = campaign.getTargetCollections();
 		List<CollectionObject> targetCollections = DB.getCollectionObjectDAO().getByIds(targetCollectionIds);
 		Map<String, List<ObjectId>> collectionRecordIds = new HashMap<>();
@@ -495,7 +497,10 @@ public class AnnotationDAO extends DAO<Annotation> {
 			long collectionUpvotes = 0;
 			long collectionDownvotes = 0;
 			long collectionRatings = 0;
-			for (Annotation ann : collectionAnnotations) {
+			long humanCollectionAnnotations = 0;
+			long softwareCollectionAnnotations = 0;
+
+			for (Annotation ann : collectionAnnotations) {		
 				if (ann.getScore() == null)
 					continue;
 				if (ann.getScore().getApprovedBy() != null) {
@@ -508,6 +513,35 @@ public class AnnotationDAO extends DAO<Annotation> {
 					collectionRatings += ann.getScore().getRatedBy().size();
 				}
 			}
+
+			Query<Annotation> queryCollectionSoftwareAnnotations = this.createQuery().field("annotators.generator").endsWith(cname).field("annotators.externalCreatorType").equal("Software").field("target.recordId").in(recIds); 
+			softwareCollectionAnnotations = queryCollectionSoftwareAnnotations.countAll();
+			humanCollectionAnnotations = collectionAnnotations.size() - softwareCollectionAnnotations;
+			collectionStats.put("collectionSoftwareAnnotationsCount", softwareCollectionAnnotations);
+			collectionStats.put("collectionHumanAnnotationsCount", humanCollectionAnnotations);
+			if (softwareCollectionAnnotations != 0) {
+				List<Annotation> computerGeneratedAnnotations = this.find(queryCollectionSoftwareAnnotations).asList();
+				long contributedAnnotations = 0;
+				for (Annotation ann :  computerGeneratedAnnotations) {
+					if (ann.getScore() == null)
+						continue;
+					if (ann.getScore().getApprovedBy() != null && ann.getScore().getApprovedBy().size() > 0) {
+						contributedAnnotations += 1;
+						continue;
+					}
+					if (ann.getScore().getRejectedBy() != null && ann.getScore().getRejectedBy().size() > 0) { 
+						contributedAnnotations += 1;
+						continue;
+					}
+					if (ann.getScore().getRatedBy() != null && ann.getScore().getRatedBy().size() > 0) {
+						contributedAnnotations += 1;
+						continue;
+					}
+				}
+				collectionStats.put("softwareCollectionAnnotationsContributionPercentage", String.format("%.2f", (double) contributedAnnotations / (double) softwareCollectionAnnotations * 100));
+			}
+			
+			
 			collectionStats.put("collectionTotalContributions", collectionUpvotes + collectionDownvotes + collectionRatings);
 			collectionStats.put("collectionUpvotes", collectionUpvotes);
 			collectionStats.put("collectionDownvotes", collectionDownvotes);
@@ -515,6 +549,8 @@ public class AnnotationDAO extends DAO<Annotation> {
 
 			statisticsByCollection.add(collectionStats);
 		}
+
+		// general statistics
 
 		Query<Annotation> queryAnnotationsMarkedForPublish = this.createQuery().field("annotators.generator").endsWith(cname).field("publish").equal(true);
 		Query<Annotation> queryAnnotationsNotMarkedForPublish = this.createQuery().field("annotators.generator").endsWith(cname).field("publish").equal(false);
