@@ -97,3 +97,7 @@ public/.idea/workspace.xml
 /.cache-tests
 bower_modules
 temp
+
+/.vscode
+/.metals
+pom.xml
