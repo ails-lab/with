@@ -1174,13 +1174,19 @@ public class AnnotationController extends WithController {
 		return ok(Json.toJson(res));
 	}
 	
-	public static Result exportCampaignAnnotations(String campaignName) {
-		List<Annotation> published = DB.getAnnotationDAO().getCampaignAnnotations(campaignName, true);
-		List<JsonNode> res = published.stream()
-			.map(a -> tranformToEuropeanaModel(a)).filter(a -> (a.get("target") != null))
-			.collect(Collectors.toList());
-
-		return ok(Json.toJson(res));
+	public static Result exportCampaignAnnotations(String campaignName, boolean europeanaModelExport, boolean filterForPublish) {
+		if (europeanaModelExport) {
+			List<Annotation> published = DB.getAnnotationDAO().getCampaignAnnotations(campaignName, filterForPublish);
+			List<JsonNode> res = published.stream()
+				.map(a -> tranformToEuropeanaModel(a)).filter(a -> (a.get("target") != null))
+				.collect(Collectors.toList());
+	
+			return ok(Json.toJson(res));
+		}
+		else {
+			List<Annotation> annotations = DB.getAnnotationDAO().getCampaignAnnotations(campaignName, filterForPublish);
+			return ok(Json.toJson(annotations));
+		}
 	}
 	
 	public static Result markForPublish(String id, Boolean publish) {
