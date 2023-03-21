@@ -89,7 +89,7 @@ public class Annotation<T extends AnnotationBody> {
 	 * currently includes includes Tagging, Linking, Commenting, Editing
 	 */
 	public static enum MotivationType {
-		Tagging, GeoTagging, Linking, Commenting, Editing, ColorTagging, Polling
+		Tagging, GeoTagging, Linking, Commenting, Editing, ColorTagging, Polling, ImageTagging
 	}
 
 	public static enum CreatorType {
