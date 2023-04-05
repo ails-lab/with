@@ -78,6 +78,7 @@ import model.annotations.Annotation.MotivationType;
 import model.annotations.bodies.AnnotationBody;
 import model.annotations.bodies.AnnotationBodyTagging;
 import model.annotations.bodies.AnnotationBodyCommenting;
+import model.annotations.bodies.AnnotationBodyImageTagging;
 import model.annotations.bodies.AnnotationBodyColorTagging;
 import model.annotations.targets.AnnotationTarget;
 
@@ -932,8 +933,11 @@ public class CampaignController extends WithController {
 				if (requestedMotivation.equals(MotivationType.Tagging)) {
 					annotationBody = new AnnotationBodyTagging();
 				}
-				else {
+				else if (requestedMotivation.equals(MotivationType.ColorTagging)) {
 					annotationBody = new AnnotationBodyColorTagging();
+				}
+				else {
+					annotationBody = new AnnotationBodyImageTagging();
 				}
 				return annotationBody;
 			};
