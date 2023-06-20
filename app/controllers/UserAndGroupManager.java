@@ -20,6 +20,7 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Function;
@@ -73,13 +74,21 @@ public class UserAndGroupManager extends WithController {
 			ArrayNode suggestions = Json.newObject().arrayNode();
 
 			if (forUsers) {
-				List<User> users = DB.getUserDAO().getByUsernamePrefix(prefix);
+				List<User> usersByUsername = DB.getUserDAO().getByUsernamePrefix(prefix);
+				List<User> usersByEmail = DB.getUserDAO().getByEmailPrefix(prefix);
+				
+				// Use LinkedHashSet to remove duplicates from the two lists
+				Set<User> usersSet = new LinkedHashSet<>(usersByUsername);
+				usersSet.addAll(usersByEmail);
+				List<User> users = new ArrayList<User>(usersSet);	
+
 				for (User user : users) {
 					ObjectNode node = Json.newObject();
 					ObjectNode data = Json.newObject().objectNode();
 					data.put("category", "user");
 					// costly?
-					node.put("value", user.getUsername());
+					node.put("email", user.getEmail());
+					node.put("username", user.getUsername());
 					node.put("data", data);
 				//	node.put("id", user.getDbId().toString());
 					suggestions.add(node);
