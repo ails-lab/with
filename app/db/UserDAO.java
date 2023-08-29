@@ -100,6 +100,11 @@ public class UserDAO extends DAO<User> {
 
 	}
 
+	public List<User> getByEmailPrefix(String prefix) {
+		Query<User> q = this.createQuery().field("email").startsWithIgnoreCase(prefix);
+		return find(q).asList();
+	}
+
 	public List<String> getAllUsernames() {
 		ArrayList<String> res = new ArrayList<String>();
 		withCollection(res, "", "username");
