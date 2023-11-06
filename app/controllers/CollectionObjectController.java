@@ -241,27 +241,39 @@ public class CollectionObjectController extends WithResourceController {
 			return Promise.pure((Result) badRequest("Expecting Json query"));
 		}
 
-		final String cid = json.get("collectionId").textValue();
+		final String cid = json.get("cid").textValue();
 		final String mintUrl = json.get("mintUrl").textValue();
 
 		File f = File.createTempFile("mintUrlDownload", ".tgz");
 		FileUtils.copyURLToFile(new URL(mintUrl), f);
-		TarArchiveInputStream tarIn = null;
-		tarIn = new TarArchiveInputStream(new GzipCompressorInputStream(new BufferedInputStream(new FileInputStream(f))));
+		TarArchiveInputStream tarIn =  new TarArchiveInputStream(new GzipCompressorInputStream(new BufferedInputStream(new FileInputStream(f))));
 		
-		TarArchiveEntry tarEntry = tarIn.getNextTarEntry();
-		// tarIn is a TarArchiveInputStream
-		while (tarEntry != null) {// create a file with the same name as the tarEntry
-			if (!tarEntry.isDirectory()) {
-				StringWriter stringWriter = new StringWriter();
-				IOUtils.copy(tarIn, stringWriter, "UTF-8");
-				String recordJson = stringWriter.getBuffer().toString();
-				JsonNode record = om.readTree(recordJson);
-				RecordResourceController.addRecordToCollection(record, new ObjectId(cid), Option.None(),true);
+		Function0<Result> func = new Function0<Result>() {
+			public Result apply() {
+				try {
+					TarArchiveEntry tarEntry = tarIn.getNextTarEntry();
+						
+					while (tarEntry != null) {// create a file with the same name as the tarEntry
+						if (!tarEntry.isDirectory()) {
+							StringWriter stringWriter = new StringWriter();
+							IOUtils.copy(tarIn, stringWriter, "UTF-8");
+							String recordJson = stringWriter.getBuffer().toString();
+							JsonNode record = om.readTree(recordJson);
+							RecordResourceController.addRecordToCollection(record, new ObjectId(cid), Option.None(),true);
+						}
+						tarEntry = tarIn.getNextTarEntry();
+					}
+					tarIn.close();
+					return ok();
+				}
+				catch (Exception e) {
+					e.printStackTrace();
+					return internalServerError();
+				}
 			}
-			tarEntry = tarIn.getNextTarEntry();
-		}
-		tarIn.close();
+		};		
+
+		Promise.promise(func);
 		return Promise.pure(ok());
 	}
 
