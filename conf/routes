@@ -115,7 +115,9 @@ POST     /collection/unliked    			    controllers.WithResourceController.remove
 POST     /collection		                    controllers.CollectionObjectController.createCollectionObject()
 POST     /collection/importSearch		        controllers.CollectionObjectController.importSearch()
 POST     /collection/importGallery              controllers.CollectionObjectController.importGallery(userGalleryId: String, collectionName: String)
-POST     /collection/importItems            controllers.CollectionObjectController.importItemsToCollection()
+POST     /collection/importItems                controllers.CollectionObjectController.importItemsToCollection()
+POST     /collection/importMintUrl              controllers.CollectionObjectController.importItemsByMintUrl()
+
 POST     /collection/uploadCollection		    controllers.CollectionObjectController.uploadCollection()
 POST     /collection/importIDs 					controllers.CollectionObjectController.importIDs(cname, source, ids)
 GET     /collection/importEuropeanaCollection	controllers.CollectionObjectController.createAndFillEuropeanaCollection(id: String, limit:Integer ?= 100)

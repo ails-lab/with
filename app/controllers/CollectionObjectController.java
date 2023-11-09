@@ -16,7 +16,12 @@
 
 package controllers;
 
+import org.apache.commons.io.IOUtils;
+import java.io.BufferedInputStream;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.StringWriter;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -36,8 +41,10 @@ import java.util.stream.Collectors;
 
 import javax.validation.ConstraintViolation;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.jayway.jsonpath.TypeRef;
+import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
+import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
+import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream;
+import org.apache.commons.io.FileUtils;
 import org.bson.types.ObjectId;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.index.query.QueryBuilder;
@@ -224,6 +231,50 @@ public class CollectionObjectController extends WithResourceController {
 			queries.forEach(query -> executeImportBySearchQuery(cname, query, -1));
 			return ok();
 		}
+	}
+
+	public static Promise<Result> importItemsByMintUrl() throws Exception {
+		JsonNode json = request().body().asJson();
+		ObjectMapper om = new ObjectMapper();
+
+		if (json == null) {
+			return Promise.pure((Result) badRequest("Expecting Json query"));
+		}
+
+		final String cid = json.get("cid").textValue();
+		final String mintUrl = json.get("mintUrl").textValue();
+
+		File f = File.createTempFile("mintUrlDownload", ".tgz");
+		FileUtils.copyURLToFile(new URL(mintUrl), f);
+		TarArchiveInputStream tarIn =  new TarArchiveInputStream(new GzipCompressorInputStream(new BufferedInputStream(new FileInputStream(f))));
+		
+		Function0<Result> func = new Function0<Result>() {
+			public Result apply() {
+				try {
+					TarArchiveEntry tarEntry = tarIn.getNextTarEntry();
+						
+					while (tarEntry != null) {// create a file with the same name as the tarEntry
+						if (!tarEntry.isDirectory()) {
+							StringWriter stringWriter = new StringWriter();
+							IOUtils.copy(tarIn, stringWriter, "UTF-8");
+							String recordJson = stringWriter.getBuffer().toString();
+							JsonNode record = om.readTree(recordJson);
+							RecordResourceController.addRecordToCollection(record, new ObjectId(cid), Option.None(),true);
+						}
+						tarEntry = tarIn.getNextTarEntry();
+					}
+					tarIn.close();
+					return ok();
+				}
+				catch (Exception e) {
+					e.printStackTrace();
+					return internalServerError();
+				}
+			}
+		};		
+
+		Promise.promise(func);
+		return Promise.pure(ok());
 	}
 
 	/**
