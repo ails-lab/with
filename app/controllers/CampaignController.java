@@ -17,9 +17,8 @@
 package controllers;
 
 
-import java.io.FileNotFoundException;
+
 import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
@@ -36,13 +35,12 @@ import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import model.usersAndGroups.User;
+import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.lang3.StringUtils;
@@ -60,14 +58,12 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import java.util.function.BiConsumer;
-import java.util.function.BiFunction;
-import java.util.function.Consumer;
 import java.util.function.Function;
 
 import db.DB;
+import edu.stanford.nlp.io.IOUtils;
 import model.Campaign;
 import model.Campaign.AnnotationCount;
-import model.Campaign.BadgePrizes;
 import model.Campaign.CampaignTerm;
 import model.Campaign.CampaignTermWithInfo;
 import model.annotations.Annotation;
@@ -87,13 +83,11 @@ import model.basicDataTypes.Literal;
 import model.basicDataTypes.MultiLiteral;
 import model.resources.ThesaurusObject;
 import model.resources.RecordResource;
-import model.usersAndGroups.UserGroup;
 import play.Logger;
 import play.Logger.ALogger;
 import play.libs.Json;
 import play.mvc.Result;
-import model.annotations.Annotation;
-import model.annotations.Annotation.AnnotationAdmin;
+import sources.core.ParallelAPICall;
 
 
 public class CampaignController extends WithController {
@@ -851,9 +845,9 @@ public class CampaignController extends WithController {
 		return annotationTarget;
 	}
 
-	public static AnnotationAdmin parseAnnotationAdmin(String campaignName, JsonNode annotation) {
+	public static AnnotationAdmin parseAnnotationAdmin(String campaignName, JsonNode annotation, String userId) {
 		AnnotationAdmin administrative = new AnnotationAdmin();
-		administrative.setWithCreator(WithController.effectiveUserDbId());
+		administrative.setWithCreator(new ObjectId(userId));
 		if (annotation.has("created")) {
 			try {
 				SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
@@ -899,27 +893,14 @@ public class CampaignController extends WithController {
 		target.setWithURI("/record/" + r.getDbId());
 	}
 
-	public static Result importAnnotationsFromNtuaModel(String campaignName, String motivation) throws ParseException {
-		ObjectNode error = Json.newObject();
-		JsonNode json = request().body().asJson();
-		MotivationType motivationType = Annotation.MotivationType.valueOf(motivation);
+	public static void internalNtuaModelAnnotationsImport(String campaignName, MotivationType motivationType, JsonNode json, String userId) {
+		JsonNode annotations = json.get("@graph");
 
 		List<Campaign.ColorInfo> colorTerminology = null;
 		if (motivationType.equals(MotivationType.ColorTagging)) {
 			colorTerminology = DB.getCampaignDAO().getCampaignByName(campaignName).getColorTaggingColorsTerminology();
 		}
 
-		if (json == null) {
-			error.put("error", "Invalid JSON");
-			return badRequest(error);
-		}
-
-		if (WithController.effectiveUserDbId() == null) {
-			error.put("error", "User not logged in");
-			return badRequest(error);
-		}
-
-		JsonNode annotations = json.get("@graph");
 		for (JsonNode annotation : annotations) {
 			JsonNode body = annotation.get("body");
 			/*
@@ -994,7 +975,7 @@ public class CampaignController extends WithController {
 					String annotationExternalId = annotation.get("id").asText();
 					newAnnotation.setExternalId(annotationExternalId);
 				}
-				AnnotationAdmin annotationAdmin = parseAnnotationAdmin(campaignName, annotation);
+				AnnotationAdmin annotationAdmin = parseAnnotationAdmin(campaignName, annotation, userId);
 				newAnnotation.setAnnotators(new ArrayList(Arrays.asList(annotationAdmin)));
 				
 				AnnotationTarget annotationTarget = parseAnnotationTarget(annotation);
@@ -1009,14 +990,63 @@ public class CampaignController extends WithController {
 				DB.getAnnotationDAO().makePermanent(newAnnotation); // is this needed for a second time?
 				try {
 					DB.getRecordResourceDAO().addAnnotation(newAnnotation.getTarget().getRecordId(), newAnnotation.getDbId(),
-						WithController.effectiveUserId());
+						userId);
 				}
 				catch (Exception e) {
 					Logger.error("Failed ingesting an annotation with external id: " + newAnnotation.getExternalId());
 				}
 			}
 		}
-		return ok(error);
+	}
+
+	public static Result importAnnotationsFromNtuaModel(String campaignName, String motivation) throws ParseException {
+		ObjectNode error = Json.newObject();
+		JsonNode json = request().body().asJson();
+		MotivationType motivationType = Annotation.MotivationType.valueOf(motivation);
+		String userId = WithController.effectiveUserId();
+		if (json == null) {
+			error.put("error", "Invalid JSON");
+			return badRequest(error);
+		}
+
+		if (userId == null) {
+			error.put("error", "User not logged in");
+			return badRequest(error);
+		}
+		ParallelAPICall.Priority.BACKEND.getExcecutionContext().execute(() -> 
+			internalNtuaModelAnnotationsImport(campaignName, motivationType, json, userId)
+		);
+		return ok();
+	}
+
+	public static Result importAnnotationsFromMint(String campaignName, String motivation, String mintUrl) {
+		ObjectMapper om = new ObjectMapper();
+		MotivationType motivationType = Annotation.MotivationType.valueOf(motivation);
+		String userId = WithController.effectiveUserId();
+		ObjectNode error = Json.newObject();
+
+		if (userId == null) {
+			error.put("error", "User not logged in");
+			return badRequest(error);
+		}
+
+		// parse request parts, unzip, have a json
+		try (GzipCompressorInputStream gzIn =  new GzipCompressorInputStream(IOUtils.getInputStreamFromURLOrClasspathOrFileSystem(mintUrl))){
+			final JsonNode json = om.readTree(gzIn);
+			ParallelAPICall.Priority.BACKEND.getExcecutionContext().execute(() -> 
+						internalNtuaModelAnnotationsImport(campaignName, motivationType, json, userId)
+			);
+		}
+		catch (JsonProcessingException e) {
+			Logger.error("Failed to read mint json", e);
+			return badRequest(e.getMessage());
+		}
+		catch (IOException e) {
+			Logger.error("Failed to read mint json", e);
+			return internalServerError(e.getMessage());
+		}
+		
+		return ok();
 	}
 
 }
