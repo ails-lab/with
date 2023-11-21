@@ -17,11 +17,17 @@
 package model.annotations;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import model.annotations.bodies.AnnotationBody;
+import model.annotations.bodies.AnnotationBodyCommenting;
+import model.annotations.bodies.AnnotationBodyTagging;
+import model.annotations.selectors.PropertyTextFragmentSelector;
 import model.annotations.targets.AnnotationTarget;
+import model.basicDataTypes.Language;
 import model.basicDataTypes.Literal;
 import model.basicDataTypes.MultiLiteral;
 import model.basicDataTypes.MultiLiteralOrResource;
@@ -245,7 +251,7 @@ public class Annotation<T extends AnnotationBody> {
 		private String validationComment;
 		private String validationCorrection;
 
-		private double confidence;
+		private double confidence = -1;
 
 		public ArrayList<String> getValidationErrorType() {
 			return validationErrorType;
@@ -460,5 +466,130 @@ public class Annotation<T extends AnnotationBody> {
 				", externalId='" + externalId + '\'' +
 				", scope='" + scope + '\'' +
 				'}';
+	}
+
+	public ObjectNode toNtuaModel(String campaignName) throws Exception {
+		ObjectMapper om = new ObjectMapper();
+		ObjectNode result = om.createObjectNode();
+		// result.put("id", this.dbId.toString());
+		result.put("type", "Annotation");
+
+		ArrayList<AnnotationAdmin> adminList = this.getAnnotators();
+		AnnotationAdmin campaignRelevantAdmin = adminList.stream().filter(adm -> adm.getGenerator().equals("CrowdHeritage "+ campaignName)).findFirst().orElseThrow(()->new Exception());
+		result.put("created", campaignRelevantAdmin.getCreated().toString());
+		ObjectNode creator = om.createObjectNode();
+		if (campaignRelevantAdmin.getExternalCreatorId() != null)
+			creator.put("id", campaignRelevantAdmin.getExternalCreatorId());
+		if (campaignRelevantAdmin.getExternalCreatorName() != null)
+			creator.put("name", campaignRelevantAdmin.getExternalCreatorName());
+		if (campaignRelevantAdmin.getExternalCreatorType() != null)
+			creator.put("type", campaignRelevantAdmin.getExternalCreatorType().toString());
+		result.set("creator", creator);
+		if (campaignRelevantAdmin.getConfidence() != -1)
+			result.put("confidence", campaignRelevantAdmin.getConfidence());
+		
+		AnnotationBody annBody = this.getBody();
+		if (annBody instanceof AnnotationBodyCommenting) {
+			AnnotationBodyCommenting annBodyCommenting = (AnnotationBodyCommenting) annBody;
+			ObjectNode body = om.createObjectNode();
+			body.put("type", "TextualBody");
+			body.put("value", annBodyCommenting.getLabel().get(Language.DEFAULT).get(0));
+			body.put("language", annBodyCommenting.getLabel().getLanguages().stream()
+																.filter(lang -> lang.getName() != Language.DEFAULT.getName())
+																.findFirst()
+																.orElse(Language.DEFAULT).toString().toLowerCase());
+			result.set("body", body);
+		} else if (annBody instanceof AnnotationBodyTagging) {
+			String uri = ((AnnotationBodyTagging) annBody).getUri();
+			result.put("body", uri);
+		}
+
+		ObjectNode target = om.createObjectNode();
+		AnnotationTarget tgt = this.getTarget();
+		if ( tgt.getExternalId()!= null) {
+			target.put("source", this.getExternalId().toString());
+		}
+		if (tgt.getSelector() != null) {
+			// right now when ingesting annotations, we use only PropertyTextFragmentSelector
+			PropertyTextFragmentSelector slct = (PropertyTextFragmentSelector) tgt.getSelector();
+			ObjectNode selector = om.createObjectNode();
+			selector.put("type", "RDFPropertySelector");
+			selector.put("property", slct.getProperty());
+			if (slct.getOrigValue() != null) {
+				ObjectNode destination = om.createObjectNode();
+				destination.put("type", "Literal");
+				destination.put("value", slct.getOrigValue());
+				destination.put("language", slct.getOrigLang().toString().toLowerCase());
+				selector.set("destination", destination);
+			} 
+
+			if (slct.getStart() != 0 && slct.getEnd() != 0) {
+				ObjectNode refinedBy = om.createObjectNode();
+				refinedBy.put("type", "TextPositionSelector");
+				refinedBy.put("start", slct.getStart());
+				refinedBy.put("end", slct.getEnd());
+				selector.set("refinedBy", refinedBy);
+			}
+
+			target.set("selector", selector);
+		}
+		result.set("target", target);
+		
+		if (this.getScope() != null)
+			result.put("scope", this.getScope());
+		
+		if (this.getScore() != null) {
+			AnnotationScore score = this.getScore();
+			
+			if (score.getApprovedBy() != null || score.getRejectedBy() != null) {
+				int approvals = 0;
+				int rejections = 0;
+				if (score.getApprovedBy() != null)
+					approvals = score.getApprovedBy().stream()
+									.filter(a -> a.getGenerator().equals("CrowdHeritage "+campaignName))
+									.collect(Collectors.toList())
+									.size();
+				if (score.getRejectedBy() != null)
+					rejections = score.getRejectedBy().stream()
+									.filter(a -> a.getGenerator().equals("CrowdHeritage "+campaignName))
+									.collect(Collectors.toList())
+									.size();
+				int finalScore = approvals - rejections;
+				ObjectNode review = om.createObjectNode();
+				review.put("type", "Validation");
+				if (finalScore > 0) {
+					review.put("recommendation", "accept");
+					result.set("review", review);
+				}
+				else if (finalScore < 0) {
+					review.put("recommendation", "reject");
+					result.set("review", review);
+				}
+			}
+			// if we have ratings, calculate the median
+			else if (score.getRatedBy() != null && score.getRatedBy().size() > 0 ) {
+				ArrayList<Double> ratings = new ArrayList<>();
+				score.getRatedBy().stream().forEach(rating -> {
+					if (rating.getGenerator().equals("CrowdHeritage "+campaignName)) {
+						ratings.add(rating.getConfidence());
+					}
+				});
+				Collections.sort(ratings);
+				double median = 0.0;
+				if (ratings.size() % 2 == 1)
+					median =  ratings.get((ratings.size() + 1) / 2 - 1);
+				else {
+					double lower = ratings.get(ratings.size() / 2 - 1);
+					double upper = ratings.get(ratings.size() / 2);
+
+					median = (lower + upper) / 2.0;
+        		}
+				ObjectNode review = om.createObjectNode();
+				review.put("type", "Rating");
+				review.put("score", median);
+				result.set("review", review);
+			}
+		}	
+		return result;
 	}
 }
