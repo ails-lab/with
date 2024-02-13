@@ -79,6 +79,7 @@ import model.annotations.bodies.AnnotationBody;
 import model.annotations.bodies.AnnotationBodyTagging;
 import model.annotations.bodies.AnnotationBodyCommenting;
 import model.annotations.bodies.AnnotationBodyImageTagging;
+import model.annotations.bodies.AnnotationBodySubTagging;
 import model.annotations.bodies.AnnotationBodyColorTagging;
 import model.annotations.targets.AnnotationTarget;
 
