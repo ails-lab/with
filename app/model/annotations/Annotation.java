@@ -512,8 +512,9 @@ public class Annotation<T extends AnnotationBody> {
 		}
 		else {
 			if (tgt.getRecordId() != null) {
-			String externalId = DB.getRecordResourceDAO().getById(tgt.getRecordId()).getAdministrative().getExternalId();
-			target.put("source", externalId);
+				String externalId = DB.getRecordResourceDAO().getById(tgt.getRecordId()).getAdministrative().getExternalId();
+				target.put("source", externalId);
+			}
 			
 		}
 		if (tgt.getSelector() != null) {
@@ -599,4 +600,5 @@ public class Annotation<T extends AnnotationBody> {
 		}	
 		return result;
 	}
+	
 }
