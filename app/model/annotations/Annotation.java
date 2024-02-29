@@ -54,6 +54,7 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import db.DB;
 import com.fasterxml.jackson.databind.node.NullNode;
 
 @SuppressWarnings("unchecked")
@@ -508,6 +509,12 @@ public class Annotation<T extends AnnotationBody> {
 		AnnotationTarget tgt = this.getTarget();
 		if ( tgt.getExternalId()!= null) {
 			target.put("source", this.getExternalId().toString());
+		}
+		else {
+			if (tgt.getRecordId() != null) {
+			String externalId = DB.getRecordResourceDAO().getById(tgt.getRecordId()).getAdministrative().getExternalId();
+			target.put("source", externalId);
+			
 		}
 		if (tgt.getSelector() != null) {
 			// right now when ingesting annotations, we use only PropertyTextFragmentSelector
