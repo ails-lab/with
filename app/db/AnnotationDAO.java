@@ -209,8 +209,13 @@ public class AnnotationDAO extends DAO<Annotation> {
 			if (body.getUri() != null) {
 				q.field("body.uri").equal(body.getUri());
 			}
-		} 
-		
+		}  else if (annotation.getMotivation().equals(MotivationType.SubTagging)) {
+			AnnotationBodySubTagging body = (AnnotationBodySubTagging) annotation.getBody();
+
+			if (body.getUri() != null) {
+				q.field("body.uri").equal(body.getUri());
+			}
+		}
 		else if (annotation.getMotivation().equals(MotivationType.ColorTagging)) {
 			AnnotationBodyColorTagging body = (AnnotationBodyColorTagging) annotation.getBody();
 

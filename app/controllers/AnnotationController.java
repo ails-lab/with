@@ -41,11 +41,12 @@ import org.mongodb.morphia.geo.GeoJson;
 import org.mongodb.morphia.geo.Point;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import controllers.RecordResourceController.CollectionAndRecordsCounts;
-import controllers.WithController.Profile;
 import db.DB;
 import elastic.ElasticSearcher;
 import elastic.ElasticSearcher.SearchOptions;
@@ -1173,20 +1174,110 @@ public class AnnotationController extends WithController {
 				.collect(Collectors.toList());
 		return ok(Json.toJson(res));
 	}
+
+	public static ObjectNode generateContextForJsonLdAnnotationResponse() {
+		ObjectMapper om = new ObjectMapper();
+		ObjectNode result = om.createObjectNode();
+
+		result.put("as", "https://www.w3.org/ns/activitystreams#");
+        result.put("dc", "http://purl.org/dc/terms/");
+        result.put("dce", "http://purl.org/dc/elements/1.1/");
+        result.put("foaf", "http://xmlns.com/foaf/0.1/");
+        result.put("oa", "http://www.w3.org/ns/oa#");
+        result.put("rdf", "http://www.w3.org/1999/02/22-rdf-syntax-ns#");
+        result.put("xsd", "http://www.w3.org/2001/XMLSchema#");
+        result.put("soa", "http://sw.islab.ntua.gr/annotation/");
+
+        ObjectNode idNode = JsonNodeFactory.instance.objectNode();
+        idNode.put("@id", "@id");
+        idNode.put("@type", "@id");
+        result.set("id", idNode);
+
+        ObjectNode typeNode = JsonNodeFactory.instance.objectNode();
+        typeNode.put("@id", "@type");
+        typeNode.put("@type", "@id");
+        result.set("type", typeNode);
+
+        result.put("value", "rdf:value");
+
+        ObjectNode createdNode = JsonNodeFactory.instance.objectNode();
+        createdNode.put("@id", "dc:created");
+        createdNode.put("@type", "xsd:dateTime");
+        result.set("created", createdNode);
+
+        ObjectNode creatorNode = JsonNodeFactory.instance.objectNode();
+        creatorNode.put("@id", "dc:creator");
+        creatorNode.put("@type", "@id");
+        result.set("creator", creatorNode);
+
+        result.put("language", "dc:language");
+        result.put("Software", "as:Application");
+        result.put("name", "foaf:name");
+        result.put("Annotation", "oa:Annotation");
+        result.put("TextPositionSelector", "oa:TextPositionSelector");
+        result.put("TextualBody", "oa:TextualBody");
+
+        ObjectNode bodyNode = JsonNodeFactory.instance.objectNode();
+        bodyNode.put("@id", "oa:hasBody");
+        bodyNode.put("@type", "@id");
+        result.set("body", bodyNode);
+
+        ObjectNode scopeNode = JsonNodeFactory.instance.objectNode();
+        scopeNode.put("@id", "oa:hasScope");
+        scopeNode.put("@type", "@id");
+        result.set("scope", scopeNode);
+
+        ObjectNode selectorNode = JsonNodeFactory.instance.objectNode();
+        selectorNode.put("@id", "oa:hasSelector");
+        selectorNode.put("@type", "@id");
+        result.set("selector", selectorNode);
+
+        ObjectNode sourceNode = JsonNodeFactory.instance.objectNode();
+        sourceNode.put("@id", "oa:hasSource");
+        sourceNode.put("@type", "@id");
+        result.set("source", sourceNode);
+
+        ObjectNode targetNode = JsonNodeFactory.instance.objectNode();
+        targetNode.put("@id", "oa:hasTarget");
+        targetNode.put("@type", "@id");
+        result.set("target", targetNode);
+
+        result.put("Literal", "soa:Literal");
+
+		return result;
+
+	}
 	
 	public static Result exportCampaignAnnotations(String campaignName, boolean europeanaModelExport, boolean filterForPublish) {
-		if (europeanaModelExport) {
-			List<Annotation> published = DB.getAnnotationDAO().getCampaignAnnotations(campaignName, filterForPublish);
-			List<JsonNode> res = published.stream()
-				.map(a -> tranformToEuropeanaModel(a)).filter(a -> (a.get("target") != null))
-				.collect(Collectors.toList());
-	
-			return ok(Json.toJson(res));
+		try {
+			if (europeanaModelExport) {
+				List<Annotation> published = DB.getAnnotationDAO().getCampaignAnnotations(campaignName, filterForPublish);
+				List<JsonNode> res = published.stream()
+					.map(a -> tranformToEuropeanaModel(a)).filter(a -> (a.get("target") != null))
+					.collect(Collectors.toList());
+		
+				return ok(Json.toJson(res));
+			}
+			else {
+				List<Annotation> annotations = DB.getAnnotationDAO().getCampaignAnnotations(campaignName, filterForPublish);
+				ObjectMapper om = new ObjectMapper();
+				ArrayNode arr = om.createArrayNode();
+				for (Annotation annotation : annotations) {
+					arr.add(annotation.toNtuaModel(campaignName));
+				}
+
+				ObjectNode result = om.createObjectNode();
+				result.set("@context", generateContextForJsonLdAnnotationResponse());
+				result.set("@graph", arr);
+
+				return ok(result);
+			}
 		}
-		else {
-			List<Annotation> annotations = DB.getAnnotationDAO().getCampaignAnnotations(campaignName, filterForPublish);
-			return ok(Json.toJson(annotations));
+		catch (Exception e) {
+			e.printStackTrace();
+			return internalServerError();
 		}
+		
 	}
 	
 	public static Result markForPublish(String id, Boolean publish) {
