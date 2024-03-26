@@ -281,3 +281,4 @@ GET     /campaign/contributors		                controllers.CampaignController.g
 POST    /campaign/initiateValidation                controllers.CampaignController.initiateValidation(campaignId: String, allowRejected: Boolean ?= false, minScore: Integer ?= 1)
 GET     /campaign/statistics                        controllers.CampaignController.campaignStatistics(cname: String)
 POST    /campaign/:cname/importAnnotations          controllers.CampaignController.importAnnotationsFromNtuaModel(cname, motivation: String)
+POST    /campaign/:cname/importMintAnnotations      controllers.CampaignController.importAnnotationsFromMint(cname, motivation: String, mintUrl: String)
