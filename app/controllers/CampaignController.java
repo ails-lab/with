@@ -210,6 +210,10 @@ public class CampaignController extends WithController {
 			campaign.setValidationErrorType(newCampaign.getValidationErrorType());
 		}
 
+		if (newCampaign.getColorTaggingColorsTerminology() != null) {
+			campaign.setColorTaggingColorsTerminology(newCampaign.getColorTaggingColorsTerminology());
+		}
+		
 		updateListField(campaign, newCampaign, Campaign::getTargetCollections, Campaign::setTargetCollections);
 		updateListField(campaign, newCampaign, Campaign::getUserGroupIds, Campaign::setUserGroupIds);
 		if (newCampaign.getCreators().size() != 0) {
