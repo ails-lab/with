@@ -64,6 +64,7 @@ import db.DB;
 import edu.stanford.nlp.io.IOUtils;
 import model.Campaign;
 import model.Campaign.AnnotationCount;
+import model.Campaign.CampaignBaseAnnotationsObject;
 import model.Campaign.CampaignTerm;
 import model.Campaign.CampaignTermWithInfo;
 import model.annotations.Annotation;
@@ -893,14 +894,16 @@ public class CampaignController extends WithController {
 		target.setWithURI("/record/" + r.getDbId());
 	}
 
-	public static void internalNtuaModelAnnotationsImport(String campaignName, MotivationType motivationType, JsonNode json, String userId) {
+	public static void internalNtuaModelAnnotationsImport(String campaignName, MotivationType motivationType, JsonNode json, String userId, String baseAnnotationsUUID) {
 		JsonNode annotations = json.get("@graph");
+		Campaign campaign = DB.getCampaignDAO().getCampaignByName(campaignName);
 
 		List<Campaign.ColorInfo> colorTerminology = null;
 		if (motivationType.equals(MotivationType.ColorTagging)) {
-			colorTerminology = DB.getCampaignDAO().getCampaignByName(campaignName).getColorTaggingColorsTerminology();
+			colorTerminology = campaign.getColorTaggingColorsTerminology();
 		}
 
+		int successfulAnnotationImports = 0;
 		for (JsonNode annotation : annotations) {
 			JsonNode body = annotation.get("body");
 			/*
@@ -982,21 +985,37 @@ public class CampaignController extends WithController {
 				findCorrespondingRecordResource(annotationTarget);
 
 				newAnnotation.setTarget(annotationTarget);
-
-				String scope = annotation.get("scope").asText();
-				newAnnotation.setScope(scope);
+				if (annotation.has("scope")) {
+					String scope = annotation.get("scope").asText();
+					newAnnotation.setScope(scope);
+				}
 				DB.getAnnotationDAO().makePermanent(newAnnotation);
 				newAnnotation.setAnnotationWithURI("/annotation/" + newAnnotation.getDbId());
 				DB.getAnnotationDAO().makePermanent(newAnnotation); // is this needed for a second time?
 				try {
 					DB.getRecordResourceDAO().addAnnotation(newAnnotation.getTarget().getRecordId(), newAnnotation.getDbId(),
 						userId);
+					successfulAnnotationImports++;
+
 				}
 				catch (Exception e) {
 					Logger.error("Failed ingesting an annotation with external id: " + newAnnotation.getExternalId());
 				}
+
 			}
 		}
+		final int successfulAnnotationImportsFinal = successfulAnnotationImports;
+
+		campaign.getBaseAnnotations().stream()
+			.filter(baseAnnotations -> baseAnnotations.uuid.equals(baseAnnotationsUUID))
+			.findFirst()
+			.ifPresent(baseAnnotations -> {
+				
+				baseAnnotations.status = Campaign.BaseAnnotationsImportStatus.COMPLETED;
+				baseAnnotations.uploadedAt = new Date();
+				baseAnnotations.count = successfulAnnotationImportsFinal;
+				DB.getCampaignDAO().makePermanent(campaign);
+			});
 	}
 
 	public static Result importAnnotationsFromNtuaModel(String campaignName, String motivation) throws ParseException {
@@ -1013,8 +1032,16 @@ public class CampaignController extends WithController {
 			error.put("error", "User not logged in");
 			return badRequest(error);
 		}
+		CampaignBaseAnnotationsObject baseAnnotations = new CampaignBaseAnnotationsObject();
+		baseAnnotations.source = Campaign.BaseAnnotationsSource.FILE;
+		baseAnnotations.status = Campaign.BaseAnnotationsImportStatus.IMPORTING;
+		Campaign campaign = DB.getCampaignDAO().getCampaignByName(campaignName);
+		List<CampaignBaseAnnotationsObject> campaignBaseAnnotationsList = campaign.getBaseAnnotations();
+		campaignBaseAnnotationsList.add(baseAnnotations);
+		campaign.setBaseAnnotations(campaignBaseAnnotationsList);
+		DB.getCampaignDAO().makePermanent(campaign);
 		ParallelAPICall.Priority.BACKEND.getExcecutionContext().execute(() -> 
-			internalNtuaModelAnnotationsImport(campaignName, motivationType, json, userId)
+			internalNtuaModelAnnotationsImport(campaignName, motivationType, json, userId, baseAnnotations.uuid)
 		);
 		return ok();
 	}
@@ -1033,8 +1060,17 @@ public class CampaignController extends WithController {
 		// parse request parts, unzip, have a json
 		try (GzipCompressorInputStream gzIn =  new GzipCompressorInputStream(IOUtils.getInputStreamFromURLOrClasspathOrFileSystem(mintUrl))){
 			final JsonNode json = om.readTree(gzIn);
+
+			CampaignBaseAnnotationsObject baseAnnotations = new CampaignBaseAnnotationsObject();
+			baseAnnotations.source = Campaign.BaseAnnotationsSource.MINT;
+			baseAnnotations.status = Campaign.BaseAnnotationsImportStatus.IMPORTING;
+			Campaign campaign = DB.getCampaignDAO().getCampaignByName(campaignName);
+			List<CampaignBaseAnnotationsObject> campaignBaseAnnotationsList = campaign.getBaseAnnotations();
+			campaignBaseAnnotationsList.add(baseAnnotations);
+			campaign.setBaseAnnotations(campaignBaseAnnotationsList);
+			DB.getCampaignDAO().makePermanent(campaign);
 			ParallelAPICall.Priority.BACKEND.getExcecutionContext().execute(() -> 
-						internalNtuaModelAnnotationsImport(campaignName, motivationType, json, userId)
+						internalNtuaModelAnnotationsImport(campaignName, motivationType, json, userId, baseAnnotations.uuid)
 			);
 		}
 		catch (JsonProcessingException e) {

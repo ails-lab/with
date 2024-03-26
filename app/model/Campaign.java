@@ -24,6 +24,7 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 
 import org.bson.types.ObjectId;
 import org.mongodb.morphia.annotations.Entity;
@@ -52,6 +53,23 @@ public class Campaign {
 		this.vocabularyMapping = new ArrayList<>();
 	}
 
+	public static enum BaseAnnotationsSource {
+		FILE, MINT
+	}
+
+	public static enum BaseAnnotationsImportStatus {
+		IMPORTING, FAILED, COMPLETED
+	}
+
+	public static class CampaignBaseAnnotationsObject {
+		public String uuid = UUID.randomUUID().toString();
+		public BaseAnnotationsSource source;
+		public long count;
+		public Date uploadedAt;
+		public BaseAnnotationsImportStatus status;
+
+	}
+	
 	/**
 	 * The badge that each user is awarded, depending on his earned points (based on the number/type of his annotations).
 	 */
@@ -452,6 +470,16 @@ public class Campaign {
 	private List<ValidationErrorType> validationErrorType;
 
 	private List<ColorInfo> colorTaggingColorsTerminology;
+
+	private List<CampaignBaseAnnotationsObject> baseAnnotations = new ArrayList<>();
+
+	public List<CampaignBaseAnnotationsObject> getBaseAnnotations() {
+		return baseAnnotations;
+	}
+
+	public void setBaseAnnotations(List<CampaignBaseAnnotationsObject> baseAnnotations) {
+		this.baseAnnotations = baseAnnotations;
+	}
 
 	public List<ColorInfo> getColorTaggingColorsTerminology() {
 		return colorTaggingColorsTerminology;
