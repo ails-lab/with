@@ -58,14 +58,16 @@ public class Campaign {
 	}
 
 	public static enum BaseAnnotationsImportStatus {
-		IMPORTING, FAILED, COMPLETED
+		IMPORTING, COMPLETED, FAILED
 	}
 
 	public static class CampaignBaseAnnotationsObject {
 		public String uuid = UUID.randomUUID().toString();
 		public BaseAnnotationsSource source;
-		public long count;
+		public long successCount;
+		public long failedCount;
 		public Date uploadedAt;
+		public Date startedAt;
 		public BaseAnnotationsImportStatus status;
 
 	}
