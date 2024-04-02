@@ -77,6 +77,7 @@ import model.annotations.bodies.AnnotationBody;
 import model.annotations.bodies.AnnotationBodyTagging;
 import model.annotations.bodies.AnnotationBodyCommenting;
 import model.annotations.bodies.AnnotationBodyImageTagging;
+import model.annotations.bodies.AnnotationBodySubTagging;
 import model.annotations.bodies.AnnotationBodyColorTagging;
 import model.annotations.targets.AnnotationTarget;
 
@@ -205,6 +206,10 @@ public class CampaignController extends WithController {
 			campaign.setValidationErrorType(newCampaign.getValidationErrorType());
 		}
 
+		if (newCampaign.getColorTaggingColorsTerminology() != null) {
+			campaign.setColorTaggingColorsTerminology(newCampaign.getColorTaggingColorsTerminology());
+		}
+		
 		updateListField(campaign, newCampaign, Campaign::getTargetCollections, Campaign::setTargetCollections);
 		updateListField(campaign, newCampaign, Campaign::getUserGroupIds, Campaign::setUserGroupIds);
 		if (newCampaign.getCreators().size() != 0) {
