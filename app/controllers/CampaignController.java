@@ -37,6 +37,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -897,123 +898,127 @@ public class CampaignController extends WithController {
 	public static void internalNtuaModelAnnotationsImport(String campaignName, MotivationType motivationType, JsonNode json, String userId, String baseAnnotationsUUID) {
 		JsonNode annotations = json.get("@graph");
 		Campaign campaign = DB.getCampaignDAO().getCampaignByName(campaignName);
-
+		
 		List<Campaign.ColorInfo> colorTerminology = null;
 		if (motivationType.equals(MotivationType.ColorTagging)) {
 			colorTerminology = campaign.getColorTaggingColorsTerminology();
 		}
 
-		int successfulAnnotationImports = 0;
+		AtomicInteger successfulAnnotationImports = new AtomicInteger();
+		AtomicInteger failedAnnotationImports = new AtomicInteger();
 		for (JsonNode annotation : annotations) {
-			JsonNode body = annotation.get("body");
-			/*
-				We need to parse the body which will either be text (e.g. "body": "http://wikidata.org/entity/Q23"
-				or string containing a uri, or an Array (TODO: we will deal with that later).
-			 */
-			List<AnnotationBody> bodies = new ArrayList<>();
+			try {
+				JsonNode body = annotation.get("body");
+				/*
+					We need to parse the body which will either be text (e.g. "body": "http://wikidata.org/entity/Q23"
+					or string containing a uri, or an Array (TODO: we will deal with that later).
+				*/
+				List<AnnotationBody> bodies = new ArrayList<>();
 
-			Function<MotivationType, AnnotationBodyTagging> annotationBodyFactory = (requestedMotivation) -> {
-				AnnotationBodyTagging annotationBody;
-				if (requestedMotivation.equals(MotivationType.Tagging)) {
-					annotationBody = new AnnotationBodyTagging();
+				Function<MotivationType, AnnotationBodyTagging> annotationBodyFactory = (requestedMotivation) -> {
+					AnnotationBodyTagging annotationBody;
+					if (requestedMotivation.equals(MotivationType.Tagging)) {
+						annotationBody = new AnnotationBodyTagging();
+					}
+					else if (requestedMotivation.equals(MotivationType.ColorTagging)) {
+						annotationBody = new AnnotationBodyColorTagging();
+					}
+					else {
+						annotationBody = new AnnotationBodyImageTagging();
+					}
+					return annotationBody;
+				};
+
+				/* First case: body is an object, so based on NTUA annotation model
+				we have the free text annotation option, which translates to Commenting
+				*/
+				if (body.isObject()) {
+					AnnotationBodyCommenting annotationBody = new AnnotationBodyCommenting();
+					MultiLiteral label = new MultiLiteral(Language.getLanguageByCode(body.get("language").textValue()), body.get("value").textValue());
+					label.fillDEF();
+					annotationBody.setLabel(label);
+					bodies.add(annotationBody);
 				}
-				else if (requestedMotivation.equals(MotivationType.ColorTagging)) {
-					annotationBody = new AnnotationBodyColorTagging();
+				/* Second case: body is an array, so it is some variation of tagging. In this approach,
+				we check to see if it is either plain tagging or ColorTagging
+				*/
+				else if (body.isArray()) {
+					for (JsonNode bdy : body) {
+						AnnotationBodyTagging annotationBody = annotationBodyFactory.apply(motivationType);
+						annotationBody.setUri(bdy.asText());
+						if (motivationType.equals(MotivationType.ColorTagging) && colorTerminology != null) {
+							String uri = bdy.asText();
+							colorTerminology.stream()
+								.filter(color -> uri.equals(color.getUri()))
+								.findAny()
+								.ifPresent(color -> annotationBody.setLabel(new MultiLiteral(color.getLabel()).fillDEF()));
+						}
+						bodies.add(annotationBody);
+					}
 				}
+				/* Third case: body is a string, so it is some variation of tagging. In this approach,
+				we check to see if it is either plain tagging or ColorTagging
+				*/ 
 				else {
-					annotationBody = new AnnotationBodyImageTagging();
-				}
-				return annotationBody;
-			};
-
-			/* First case: body is an object, so based on NTUA annotation model
-			   we have the free text annotation option, which translates to Commenting
-			*/
-			if (body.isObject()) {
-				AnnotationBodyCommenting annotationBody = new AnnotationBodyCommenting();
-				MultiLiteral label = new MultiLiteral(Language.getLanguageByCode(body.get("language").textValue()), body.get("value").textValue());
-				label.fillDEF();
-				annotationBody.setLabel(label);
-				bodies.add(annotationBody);
-			}
-			/* Second case: body is an array, so it is some variation of tagging. In this approach,
-			   we check to see if it is either plain tagging or ColorTagging
-			*/
-			else if (body.isArray()) {
-				for (JsonNode bdy : body) {
-					AnnotationBodyTagging annotationBody = annotationBodyFactory.apply(motivationType);
-					annotationBody.setUri(bdy.asText());
+					AnnotationBodyTagging annotationBody = annotationBodyFactory.apply(motivationType);				
+					annotationBody.setUri(body.asText());
 					if (motivationType.equals(MotivationType.ColorTagging) && colorTerminology != null) {
-						String uri = bdy.asText();
-						colorTerminology.stream()
-							.filter(color -> uri.equals(color.getUri()))
-							.findAny()
-							.ifPresent(color -> annotationBody.setLabel(new MultiLiteral(color.getLabel()).fillDEF()));
+							String uri = body.asText();
+							colorTerminology.stream()
+								.filter(color -> uri.equals(color.getUri()))
+								.findAny()
+								.ifPresent(color -> annotationBody.setLabel(new MultiLiteral(color.getLabel()).fillDEF()));
 					}
 					bodies.add(annotationBody);
 				}
-			}
-			/* Third case: body is a string, so it is some variation of tagging. In this approach,
-			   we check to see if it is either plain tagging or ColorTagging
-			*/ 
-			else {
-				AnnotationBodyTagging annotationBody = annotationBodyFactory.apply(motivationType);				
-				annotationBody.setUri(body.asText());
-				if (motivationType.equals(MotivationType.ColorTagging) && colorTerminology != null) {
-						String uri = body.asText();
-						colorTerminology.stream()
-							.filter(color -> uri.equals(color.getUri()))
-							.findAny()
-							.ifPresent(color -> annotationBody.setLabel(new MultiLiteral(color.getLabel()).fillDEF()));
-				}
-				bodies.add(annotationBody);
-			}
 
-			for (AnnotationBody annBody : bodies) {
-				Annotation newAnnotation = new Annotation();
-				newAnnotation.setMotivation(motivationType);
-				newAnnotation.setBody(annBody);
+				for (AnnotationBody annBody : bodies) {
+					Annotation newAnnotation = new Annotation();
+					newAnnotation.setMotivation(motivationType);
+					newAnnotation.setBody(annBody);
 
-				if (annotation.has("id")) {
-					String annotationExternalId = annotation.get("id").asText();
-					newAnnotation.setExternalId(annotationExternalId);
-				}
-				AnnotationAdmin annotationAdmin = parseAnnotationAdmin(campaignName, annotation, userId);
-				newAnnotation.setAnnotators(new ArrayList(Arrays.asList(annotationAdmin)));
-				
-				AnnotationTarget annotationTarget = parseAnnotationTarget(annotation);
-				findCorrespondingRecordResource(annotationTarget);
+					if (annotation.has("id")) {
+						String annotationExternalId = annotation.get("id").asText();
+						newAnnotation.setExternalId(annotationExternalId);
+					}
+					AnnotationAdmin annotationAdmin = parseAnnotationAdmin(campaignName, annotation, userId);
+					newAnnotation.setAnnotators(new ArrayList(Arrays.asList(annotationAdmin)));
+					
+					AnnotationTarget annotationTarget = parseAnnotationTarget(annotation);
+					findCorrespondingRecordResource(annotationTarget);
 
-				newAnnotation.setTarget(annotationTarget);
-				if (annotation.has("scope")) {
-					String scope = annotation.get("scope").asText();
-					newAnnotation.setScope(scope);
-				}
-				DB.getAnnotationDAO().makePermanent(newAnnotation);
-				newAnnotation.setAnnotationWithURI("/annotation/" + newAnnotation.getDbId());
-				DB.getAnnotationDAO().makePermanent(newAnnotation); // is this needed for a second time?
-				try {
+					newAnnotation.setTarget(annotationTarget);
+					if (annotation.has("scope")) {
+						String scope = annotation.get("scope").asText();
+						newAnnotation.setScope(scope);
+					}
+					DB.getAnnotationDAO().makePermanent(newAnnotation);
+					newAnnotation.setAnnotationWithURI("/annotation/" + newAnnotation.getDbId());
+					DB.getAnnotationDAO().makePermanent(newAnnotation); // is this needed for a second time?
 					DB.getRecordResourceDAO().addAnnotation(newAnnotation.getTarget().getRecordId(), newAnnotation.getDbId(),
-						userId);
-					successfulAnnotationImports++;
-
+							userId);
+					successfulAnnotationImports.getAndIncrement();
 				}
-				catch (Exception e) {
-					Logger.error("Failed ingesting an annotation with external id: " + newAnnotation.getExternalId());
-				}
-
 			}
+			catch (Exception e) {
+				failedAnnotationImports.getAndIncrement();
+			}
+			
 		}
-		final int successfulAnnotationImportsFinal = successfulAnnotationImports;
+		final int successfulAnnotationImportsFinal = successfulAnnotationImports.get();
+		final int failedAnnotationImportsFinal = failedAnnotationImports.get();
 
 		campaign.getBaseAnnotations().stream()
 			.filter(baseAnnotations -> baseAnnotations.uuid.equals(baseAnnotationsUUID))
 			.findFirst()
 			.ifPresent(baseAnnotations -> {
 				
-				baseAnnotations.status = Campaign.BaseAnnotationsImportStatus.COMPLETED;
+				baseAnnotations.status = successfulAnnotationImportsFinal == 0 
+											? Campaign.BaseAnnotationsImportStatus.FAILED 
+											: Campaign.BaseAnnotationsImportStatus.COMPLETED;
 				baseAnnotations.uploadedAt = new Date();
-				baseAnnotations.count = successfulAnnotationImportsFinal;
+				baseAnnotations.successCount = successfulAnnotationImportsFinal;
+				baseAnnotations.failedCount = failedAnnotationImportsFinal;
 				DB.getCampaignDAO().makePermanent(campaign);
 			});
 	}
@@ -1035,6 +1040,7 @@ public class CampaignController extends WithController {
 		CampaignBaseAnnotationsObject baseAnnotations = new CampaignBaseAnnotationsObject();
 		baseAnnotations.source = Campaign.BaseAnnotationsSource.FILE;
 		baseAnnotations.status = Campaign.BaseAnnotationsImportStatus.IMPORTING;
+		baseAnnotations.startedAt = new Date();
 		Campaign campaign = DB.getCampaignDAO().getCampaignByName(campaignName);
 		List<CampaignBaseAnnotationsObject> campaignBaseAnnotationsList = campaign.getBaseAnnotations();
 		campaignBaseAnnotationsList.add(baseAnnotations);
@@ -1064,6 +1070,7 @@ public class CampaignController extends WithController {
 			CampaignBaseAnnotationsObject baseAnnotations = new CampaignBaseAnnotationsObject();
 			baseAnnotations.source = Campaign.BaseAnnotationsSource.MINT;
 			baseAnnotations.status = Campaign.BaseAnnotationsImportStatus.IMPORTING;
+			baseAnnotations.startedAt = new Date();
 			Campaign campaign = DB.getCampaignDAO().getCampaignByName(campaignName);
 			List<CampaignBaseAnnotationsObject> campaignBaseAnnotationsList = campaign.getBaseAnnotations();
 			campaignBaseAnnotationsList.add(baseAnnotations);
