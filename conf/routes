@@ -80,7 +80,7 @@ POST    /annotation/:id/rateObj                 controllers.AnnotationController
 GET		/annotation/:id/reject					controllers.AnnotationController.rejectAnnotation(id)
 POST	/annotation/:id/rejectObj				controllers.AnnotationController.rejectAnnotationObject(id)
 GET		/annotation/:id/unscore					controllers.AnnotationController.unscoreAnnotation(id)
-GET		/annotation/:id/unscoreObj				controllers.AnnotationController.unscoreAnnotationObject(id)
+POST	/annotation/:id/unscoreObj				controllers.AnnotationController.unscoreAnnotationObject(id)
 GET     /annotation/:id/markForPublish          controllers.AnnotationController.markForPublish(id, publish: Boolean ?= true)
 
 # Collection Controller
