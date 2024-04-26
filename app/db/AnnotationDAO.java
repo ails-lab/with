@@ -365,13 +365,13 @@ public class AnnotationDAO extends DAO<Annotation> {
 		this.update(q, updateOps);
 	}
 
-	public void removeScoreObject(ObjectId id, ObjectId userId) {
+	public void removeScoreObject(ObjectId id, AnnotationAdmin admin) {
 		Query<Annotation> q = this.createQuery().field("_id").equal(id);
 		UpdateOperations<Annotation> updateOps = this.createUpdateOperations();
-		AnnotationAdmin u = new AnnotationAdmin();
-		u.setWithCreator(userId);
-		updateOps.removeAll("score.approvedBy", u);
-		updateOps.removeAll("score.rejectedBy", u);
+		updateOps.removeAll("score.approvedBy", admin);
+		updateOps.removeAll("score.rejectedBy", admin);
+		updateOps.removeAll("score.ratedBy", admin);
+
 		this.update(q, updateOps);
 	}
 
