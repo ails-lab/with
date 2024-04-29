@@ -328,7 +328,13 @@ public class AnnotationController extends WithController {
 			if (WithController.effectiveUserDbId() == null) {
 				return badRequest();
 			}
-			AnnotationAdmin administrative = getAnnotationAdminFromJson(json, WithController.effectiveUserDbId());
+			AnnotationAdmin administrative = new AnnotationAdmin();
+			administrative.setWithCreator(WithController.effectiveUserDbId());
+			if (json.has("generator"))
+				administrative.setGenerator(json.get("generator").asText());
+			if (json.has("confidence")) {
+				administrative.setConfidence(json.get("confidence").asDouble());
+			}
 
 			DB.getAnnotationDAO().removeScoreObject(oid, administrative);
 			ObjectId recordId = DB.getRecordResourceDAO().getByAnnotationId(oid).getDbId();
