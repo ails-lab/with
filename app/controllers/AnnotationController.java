@@ -320,7 +320,23 @@ public class AnnotationController extends WithController {
 	public static Result unscoreAnnotationObject(String id) {
 		try {
 			ObjectId oid = new ObjectId(id);
-			DB.getAnnotationDAO().removeScoreObject(oid, WithController.effectiveUserDbId());
+
+			JsonNode json = request().body().asJson();
+			if (json == null) {
+				return badRequest();
+			}
+			if (WithController.effectiveUserDbId() == null) {
+				return badRequest();
+			}
+			AnnotationAdmin administrative = new AnnotationAdmin();
+			administrative.setWithCreator(WithController.effectiveUserDbId());
+			if (json.has("generator"))
+				administrative.setGenerator(json.get("generator").asText());
+			if (json.has("confidence")) {
+				administrative.setConfidence(json.get("confidence").asDouble());
+			}
+
+			DB.getAnnotationDAO().removeScoreObject(oid, administrative);
 			ObjectId recordId = DB.getRecordResourceDAO().getByAnnotationId(oid).getDbId();
 			DB.getRecordResourceDAO().removeAnnotator(recordId, WithController.effectiveUserId());
 			ElasticUtils.update(DB.getRecordResourceDAO().getByAnnotationId(oid));
