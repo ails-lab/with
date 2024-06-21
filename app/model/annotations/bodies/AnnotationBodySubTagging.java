@@ -1,5 +1,7 @@
 package model.annotations.bodies;
 
+import model.basicDataTypes.MultiLiteral;
+
 public class AnnotationBodySubTagging extends AnnotationBodyTagging {
 
     /**
