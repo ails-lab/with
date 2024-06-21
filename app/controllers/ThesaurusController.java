@@ -266,11 +266,29 @@ public class ThesaurusController extends WithController {
 
 					Reader in = new FileReader(x);
 					Iterable<CSVRecord> records = CSVFormat.DEFAULT.withDelimiter(',').parse(in);
-					ThesaurusObject term;
 
 					for (CSVRecord record : records) {
-						String recordUri = record.get(0);
-						insertTerm(recordUri,thesaurusName, thesaurusVersion);
+						// Case with only urls
+						if (record.size() == 1) {
+							String recordUri = record.get(0);
+							insertTerm(recordUri,thesaurusName, thesaurusVersion);
+						}
+						// Case with url, label, description
+						else if (record.size() == 3) {
+                            String recordUri = record.get(0);
+                            String recordLabel = record.get(1);
+							String recordDescription = record.get(2);
+							ThesaurusObject term = new ThesaurusObject(recordUri, recordLabel, recordDescription);
+							term.getSemantic().setVocabulary(new ThesaurusObject.SKOSVocabulary(thesaurusName, thesaurusVersion));
+							term.getSemantic().setType("CUSTOM_THESAURUS_TERM");
+							DB.getThesaurusDAO().makePermanent(term);
+
+                        }
+						// In any other case, fail
+						else {
+							throw new Exception();
+						}
+						
 					}
 					return ok();
 
