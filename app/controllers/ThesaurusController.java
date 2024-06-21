@@ -279,6 +279,11 @@ public class ThesaurusController extends WithController {
                             String recordLabel = record.get(1);
 							String recordDescription = record.get(2);
 							ThesaurusObject term = new ThesaurusObject(recordUri, recordLabel, recordDescription);
+							Literal lit;
+							lit = term.getSemantic().getPrefLabel();
+							term.getSemantic().setPrefLabel(lit.fillDEF());
+							lit = term.getSemantic().getDescription();
+							term.getSemantic().setDescription(lit.fillDEF());
 							term.getSemantic().setVocabulary(new ThesaurusObject.SKOSVocabulary(thesaurusName, thesaurusVersion));
 							term.getSemantic().setType("CUSTOM_THESAURUS_TERM");
 							DB.getThesaurusDAO().makePermanent(term);
