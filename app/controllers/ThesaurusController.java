@@ -250,6 +250,7 @@ public class ThesaurusController extends WithController {
 
 	public static Result populateCustomThesaurus(String thesaurusName, String thesaurusVersion) {
 
+		String[] langs = new String[] { "en", "it", "fr", "pl", "es", "el", "de", "nl" };
 
 		User loggedInUser = effectiveUser();
 		if (loggedInUser == null || !loggedInUser.getCampaignCreationAccess()) {
@@ -266,11 +267,41 @@ public class ThesaurusController extends WithController {
 
 					Reader in = new FileReader(x);
 					Iterable<CSVRecord> records = CSVFormat.DEFAULT.withDelimiter(',').parse(in);
-					ThesaurusObject term;
 
 					for (CSVRecord record : records) {
-						String recordUri = record.get(0);
-						insertTerm(recordUri,thesaurusName, thesaurusVersion);
+						// Case with only urls
+						if (record.size() == 1) {
+							String recordUri = record.get(0);
+							insertTerm(recordUri,thesaurusName, thesaurusVersion);
+						}
+						// Case with url, label, description
+						else if (record.size() == 3) {
+                            String recordUri = record.get(0);
+                            String recordLabel = record.get(1);
+							String recordDescription = record.get(2);
+							ThesaurusObject term = new ThesaurusObject(recordUri, recordLabel, recordDescription);
+							Literal lit;
+							lit = term.getSemantic().getPrefLabel();
+
+							for (String lang: langs) {
+								lit.addLiteral(Language.getLanguage(lang), recordLabel);
+								term.getSemantic().setPrefLabel(lit.fillDEF());
+							}
+							lit = term.getSemantic().getDescription();
+							for (String lang: langs) {
+								lit.addLiteral(Language.getLanguage(lang), recordDescription);
+								term.getSemantic().setDescription(lit.fillDEF());
+							}
+							term.getSemantic().setVocabulary(new ThesaurusObject.SKOSVocabulary(thesaurusName, thesaurusVersion));
+							term.getSemantic().setType("CUSTOM_THESAURUS_TERM");
+							DB.getThesaurusDAO().makePermanent(term);
+
+                        }
+						// In any other case, fail
+						else {
+							throw new Exception();
+						}
+						
 					}
 					return ok();
 
@@ -610,7 +641,7 @@ public class ThesaurusController extends WithController {
 
 	static {
 		searchLanguages = new Language[searchLangCodes.length];
-		retrievedFields = new String[searchLangCodes.length + 5];
+		retrievedFields = new String[searchLangCodes.length * 2  + 5];
 		retrievedFields[0] = "uri";
 		retrievedFields[1] = "vocabulary.name";
 		retrievedFields[2] = "broaderTransitive.uri";
@@ -620,6 +651,9 @@ public class ThesaurusController extends WithController {
 			searchLanguages[i] = Language.getLanguageByCode(searchLangCodes[i]);
 		}
 		retrievedFields[4 + searchLangCodes.length] = "properties.values.prefLabel.en";
+		for (int i = 0; i < searchLangCodes.length; i++) {
+			retrievedFields[5 + searchLangCodes.length + i] = "description." + searchLangCodes[i];
+		}
 	};
 
 	public static ArrayNode getWikidataSuggestions(String word) throws ClientProtocolException, IOException {
@@ -752,7 +786,16 @@ public class ThesaurusController extends WithController {
 						t.put("uri", to.getSemantic().getUri());
 						t.put("vocabulary", to.getSemantic().getVocabulary().getName());
 						t.put("id", to.getDbId().toString());
-						t.put("label", to.getSemantic().getPrefLabel().get(language));
+						String label = to.getSemantic().getPrefLabel().get(language);
+						if (label == null || label.isEmpty()) {
+                            label = to.getSemantic().getPrefLabel().get("default");
+                        }
+						t.put("label", label);
+						String description = to.getSemantic().getDescription().get(language);
+                        if (description == null || description.isEmpty()) {
+                            description = to.getSemantic().getDescription().get("default");
+                        }
+						t.put("description", description);
 						arr.add(t);
 					}
 				}
@@ -861,7 +904,9 @@ public class ThesaurusController extends WithController {
 								(String) hit.field("uri").getValues().get(0),
 								(String) hit.field("vocabulary.name").getValues().get(0),
 								categories != null ? categories.getValues().toArray(new String[] {}) : null,
-								props != null ? props.getValues().toArray(new String[] {}) : null));
+								props != null ? props.getValues().toArray(new String[] {}) : null, 
+								(String) hit.field("description."+ (language.equalsIgnoreCase("all") ? "en" : language.toLowerCase()))
+								.getValues().get(0)));
 
 					}
 					sr = Elastic.getTransportClient().prepareSearchScroll(sr.getScrollId())
@@ -885,6 +930,7 @@ public class ThesaurusController extends WithController {
 					element.put("matchedLabel", ss.getSelectedLabel());
 					element.put("uri", ss.uri);
 					element.put("vocabulary", ss.vocabulary);
+					element.put("description", ss.description);
 
 					ArrayNode array = Json.newObject().arrayNode();
 					if (ss.categories != null) {
@@ -938,6 +984,7 @@ public class ThesaurusController extends WithController {
 	private static class SearchSuggestion implements Comparable<SearchSuggestion> {
 		public String id;
 		public String langLabel;
+		public String description;
 		public String[] labels;
 		public String uri;
 		public String vocabulary;
@@ -950,9 +997,10 @@ public class ThesaurusController extends WithController {
 		private static JaccardDistance jaccard = new JaccardDistance(IndoEuropeanTokenizerFactory.INSTANCE);
 
 		public SearchSuggestion(String reference, String id, String langLabel, String[] labels, String uri,
-				String vocabulary, String[] categories, String[] properties) {
+				String vocabulary, String[] categories, String[] properties, String description) {
 			this.id = id;
 			this.langLabel = langLabel;
+			this.description = description;
 			this.labels = labels;
 			this.uri = uri;
 			this.vocabulary = vocabulary;

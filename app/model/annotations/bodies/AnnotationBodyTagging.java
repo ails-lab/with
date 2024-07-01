@@ -38,8 +38,12 @@ public class AnnotationBodyTagging extends AnnotationBody {
 	 * The pref label of the URI tag, that will be used for display purposes.
 	 */
 	private MultiLiteral label;
-	
-	
+
+	/**
+     * The description of the URI tag, that will be used for display purposes.
+     */
+    private MultiLiteral description;
+
 	/**
 	 * The types of the uri. This value should be a uri of the class to which the tag belongs to.
 	 * i.e. http://dbpedia.org/ontology/Building  etc
@@ -82,6 +86,14 @@ public class AnnotationBodyTagging extends AnnotationBody {
 	public void setLabel(MultiLiteral label) {
 		this.label = label;
 	}
+
+	public MultiLiteral getDescription() {
+        return description;
+    }
+
+    public void setDescription(MultiLiteral description) {
+        this.description = description;
+    }
 
 	public ArrayList<String> getUriType() {
 		return uriType;
@@ -126,6 +138,7 @@ public class AnnotationBodyTagging extends AnnotationBody {
 				"uri='" + uri + '\'' +
 				", tagType='" + tagType + '\'' +
 				", label=" + label +
+				", description=" + description +
 				", uriType=" + uriType +
 				", uriVocabulary='" + uriVocabulary + '\'' +
 				'}';
