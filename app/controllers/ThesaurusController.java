@@ -641,7 +641,7 @@ public class ThesaurusController extends WithController {
 
 	static {
 		searchLanguages = new Language[searchLangCodes.length];
-		retrievedFields = new String[searchLangCodes.length + 5];
+		retrievedFields = new String[searchLangCodes.length * 2  + 5];
 		retrievedFields[0] = "uri";
 		retrievedFields[1] = "vocabulary.name";
 		retrievedFields[2] = "broaderTransitive.uri";
@@ -651,6 +651,9 @@ public class ThesaurusController extends WithController {
 			searchLanguages[i] = Language.getLanguageByCode(searchLangCodes[i]);
 		}
 		retrievedFields[4 + searchLangCodes.length] = "properties.values.prefLabel.en";
+		for (int i = 0; i < searchLangCodes.length; i++) {
+			retrievedFields[5 + searchLangCodes.length + i] = "description." + searchLangCodes[i];
+		}
 	};
 
 	public static ArrayNode getWikidataSuggestions(String word) throws ClientProtocolException, IOException {
@@ -901,7 +904,9 @@ public class ThesaurusController extends WithController {
 								(String) hit.field("uri").getValues().get(0),
 								(String) hit.field("vocabulary.name").getValues().get(0),
 								categories != null ? categories.getValues().toArray(new String[] {}) : null,
-								props != null ? props.getValues().toArray(new String[] {}) : null));
+								props != null ? props.getValues().toArray(new String[] {}) : null, 
+								(String) hit.field("description."+ (language.equalsIgnoreCase("all") ? "en" : language.toLowerCase()))
+								.getValues().get(0)));
 
 					}
 					sr = Elastic.getTransportClient().prepareSearchScroll(sr.getScrollId())
@@ -925,6 +930,7 @@ public class ThesaurusController extends WithController {
 					element.put("matchedLabel", ss.getSelectedLabel());
 					element.put("uri", ss.uri);
 					element.put("vocabulary", ss.vocabulary);
+					element.put("description", ss.description);
 
 					ArrayNode array = Json.newObject().arrayNode();
 					if (ss.categories != null) {
@@ -978,6 +984,7 @@ public class ThesaurusController extends WithController {
 	private static class SearchSuggestion implements Comparable<SearchSuggestion> {
 		public String id;
 		public String langLabel;
+		public String description;
 		public String[] labels;
 		public String uri;
 		public String vocabulary;
@@ -990,9 +997,10 @@ public class ThesaurusController extends WithController {
 		private static JaccardDistance jaccard = new JaccardDistance(IndoEuropeanTokenizerFactory.INSTANCE);
 
 		public SearchSuggestion(String reference, String id, String langLabel, String[] labels, String uri,
-				String vocabulary, String[] categories, String[] properties) {
+				String vocabulary, String[] categories, String[] properties, String description) {
 			this.id = id;
 			this.langLabel = langLabel;
+			this.description = description;
 			this.labels = labels;
 			this.uri = uri;
 			this.vocabulary = vocabulary;
