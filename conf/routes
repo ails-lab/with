@@ -282,3 +282,4 @@ POST    /campaign/initiateValidation                controllers.CampaignControll
 GET     /campaign/statistics                        controllers.CampaignController.campaignStatistics(cname: String)
 POST    /campaign/:cname/importAnnotations          controllers.CampaignController.importAnnotationsFromNtuaModel(cname, motivation: String)
 POST    /campaign/:cname/importMintAnnotations      controllers.CampaignController.importAnnotationsFromMint(cname, motivation: String, mintUrl: String)
+POST    /campaign/:cname/importDebias               controllers.CampaignController.importDebiasAnnotations(cname)

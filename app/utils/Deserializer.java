@@ -398,14 +398,21 @@ public class Deserializer {
 					Object end = map.get("end");
 					Object origValue = map.get("origValue");
 					Object origLang = map.get("origLang");
+					Object prefix = map.get("prefix");
+					Object suffix = map.get("suffix");
+					Object annotatedValue = map.get("annotatedValue");
 
-					if (start != null || end != null || origValue != null || origLang != null) {
+					if (start != null || end != null || origValue != null || origLang != null || prefix != null || suffix != null || annotatedValue != null) {
 						st = new PropertyTextFragmentSelector();
 						((PropertyTextFragmentSelector) st).setProperty((String) property);
 						((PropertyTextFragmentSelector) st).setStart((Integer) start);
 						((PropertyTextFragmentSelector) st).setEnd((Integer) end);
 						((PropertyTextFragmentSelector) st).setOrigValue((String) origValue);
 						((PropertyTextFragmentSelector) st).setOrigLang(Language.getLanguageByCode((String) origLang));
+						((PropertyTextFragmentSelector) st).setPrefix((String) prefix);
+						((PropertyTextFragmentSelector) st).setSuffix((String) suffix);
+						((PropertyTextFragmentSelector) st).setAnnotatedValue((String) annotatedValue);
+
 					} else {
 						st = new PropertySelector();
 						((PropertySelector) st).setProperty((String) property);

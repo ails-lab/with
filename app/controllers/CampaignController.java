@@ -85,6 +85,7 @@ import model.basicDataTypes.Language;
 import model.basicDataTypes.Literal;
 import model.basicDataTypes.MultiLiteral;
 import model.resources.ThesaurusObject;
+import model.resources.CulturalObject.CulturalObjectData;
 import model.resources.RecordResource;
 import play.Logger;
 import play.Logger.ALogger;
@@ -900,6 +901,126 @@ public class CampaignController extends WithController {
 		target.setWithURI("/record/" + r.getDbId());
 	}
 
+	public static void internalDebiasAnnotationsIngestion(String campaignName, JsonNode json, String userId, String baseAnnotationsUUID) {
+		JsonNode annotations = json.get("items");
+		Campaign campaign = DB.getCampaignDAO().getCampaignByName(campaignName);
+
+		for (JsonNode annotation : annotations) {
+			JsonNode body = annotation.get("body");
+			AnnotationBodySubTagging bdy = new AnnotationBodySubTagging();
+			bdy.setUri(body.asText());
+
+			ThesaurusObject term = DB.getThesaurusDAO().getByUri(body.asText());
+			bdy.setLabel(new MultiLiteral(term.getSemantic().getPrefLabel()));
+			bdy.setDescription(new MultiLiteral(term.getSemantic().getDescription()));
+			bdy.setUriVocabulary(term.getSemantic().getVocabulary().getName());
+
+			JsonNode targets = annotation.get("target");
+			for (JsonNode targetJson : targets) {
+				Annotation newAnnotation = new Annotation();
+				newAnnotation.setMotivation(MotivationType.SubTagging);
+				newAnnotation.setBody(bdy);
+				
+				AnnotationAdmin administrative = new AnnotationAdmin();
+				administrative.setWithCreator(new ObjectId(userId));
+				administrative.setGenerated(new Date());
+				administrative.setCreated(new Date());
+				administrative.setLastModified(new Date());
+				administrative.setGenerator("CrowdHeritage " + campaignName);
+				administrative.setExternalCreatorType(CreatorType.Software);
+				administrative.setExternalCreatorName("DE-BIAS TOOL");
+				newAnnotation.setAnnotators(new ArrayList(Arrays.asList(administrative)));
+
+				AnnotationTarget tgt = new AnnotationTarget();
+				String externalId = targetJson.get("source").asText();
+
+				// hugo did not send the / in the europeana id so we need to normalize
+				RecordResource r = DB.getRecordResourceDAO().getByAnnotationExternalId(externalId);
+				if (r == null) {
+					externalId = "/" + externalId;
+					r = DB.getRecordResourceDAO().getByAnnotationExternalId(externalId);
+				}
+				tgt.setExternalId(externalId);
+				tgt.setRecordId(r.getDbId());
+				tgt.setWithURI("/record/" + r.getDbId());
+
+				PropertyTextFragmentSelector selector = new PropertyTextFragmentSelector();
+				JsonNode selectorJson = targetJson.get("selector");
+				JsonNode refinedBy = selectorJson.get("refinedBy");
+				
+				selector.setPrefix(refinedBy.get("prefix").asText());
+				selector.setSuffix(refinedBy.get("suffix").asText());
+				selector.setAnnotatedValue(refinedBy.get("exact").get("@value").asText());
+
+				Language lang = Language.getLanguageByCode(refinedBy.get("exact").get("@language").asText());
+				String property = selectorJson.get("hasPredicate").asText();
+				selector.setOrigLang(lang);
+				// newAnnotation.setScope(scope);
+				selector.setProperty(property);
+				// we could have more than one values for each language.
+				// we check whether the combination of prefix, annotated value and suffix exists as a substring on each candidate value
+				String originalValue = "";
+				String valueToCheck = selector.getPrefix() + selector.getAnnotatedValue() + selector.getSuffix();
+				if (property.equals("dc:title")) {
+					for (String val : r.getDescriptiveData().getLabel().get(lang)) {
+						if (val.contains(valueToCheck)) {
+							originalValue = val;
+                            break;
+						}
+					}
+				}
+				else if (property.equals("dc:description")) {
+					for (String val : r.getDescriptiveData().getDescription().get(lang)) {
+						if (val.contains(valueToCheck)) {
+							originalValue = val;
+                            break;
+						}
+					}				
+				}
+				else if (property.equals("dc:type")) {
+					for (String val : ((CulturalObjectData) r.getDescriptiveData()).getDctype().get(lang)) {
+                        if (val.contains(valueToCheck)) {
+                            originalValue = val;
+                            break;
+                        }
+                    }                
+				}
+				else if (property.equals("dc:subject")) {
+					for (String val : ((CulturalObjectData) r.getDescriptiveData()).getKeywords().get(lang)) {
+                        if (val.contains(valueToCheck)) {
+                            originalValue = val;
+                            break;
+                        }
+                    }  
+				}
+
+				selector.setOrigValue(originalValue);
+
+				String prefix = selector.getPrefix();
+				String annotatedValue = selector.getAnnotatedValue();
+				int start = -1;
+				int end = -1;
+				if (prefix == null || prefix.isEmpty()) {
+					start = 0;
+				}
+				else {
+					start = originalValue.indexOf(prefix) + prefix.length();
+				}
+				end = start + annotatedValue.length();
+
+				selector.setStart(start);
+				selector.setEnd(end);
+				tgt.setSelector(selector);
+				newAnnotation.setTarget(tgt);
+				DB.getAnnotationDAO().makePermanent(newAnnotation);
+				newAnnotation.setAnnotationWithURI("/annotation/" + newAnnotation.getDbId());
+				DB.getAnnotationDAO().makePermanent(newAnnotation); // is this needed for a second time?
+				DB.getRecordResourceDAO().addAnnotation(newAnnotation.getTarget().getRecordId(), newAnnotation.getDbId(),
+						userId);
+			}
+		}
+	}
+
 	public static void internalNtuaModelAnnotationsImport(String campaignName, MotivationType motivationType, JsonNode json, String userId, String baseAnnotationsUUID) {
 		JsonNode annotations = json.get("@graph");
 		Campaign campaign = DB.getCampaignDAO().getCampaignByName(campaignName);
@@ -1026,6 +1147,38 @@ public class CampaignController extends WithController {
 				baseAnnotations.failedCount = failedAnnotationImportsFinal;
 				DB.getCampaignDAO().makePermanent(campaign);
 			});
+	}
+
+	public static Result importDebiasAnnotations(String campaignName) throws ParseException {
+		ObjectNode error = Json.newObject();
+		JsonNode json = request().body().asJson();
+		MotivationType motivationType = MotivationType.SubTagging;
+		String userId = WithController.effectiveUserId();
+		if (json == null) {
+			error.put("error", "Invalid JSON");
+			return badRequest(error);
+		}
+
+		if (userId == null) {
+			error.put("error", "User not logged in");
+			return badRequest(error);
+		}
+
+		CampaignBaseAnnotationsObject baseAnnotations = new CampaignBaseAnnotationsObject();
+		baseAnnotations.source = Campaign.BaseAnnotationsSource.FILE;
+		baseAnnotations.status = Campaign.BaseAnnotationsImportStatus.IMPORTING;
+		baseAnnotations.startedAt = new Date();
+		Campaign campaign = DB.getCampaignDAO().getCampaignByName(campaignName);
+		List<CampaignBaseAnnotationsObject> campaignBaseAnnotationsList = campaign.getBaseAnnotations();
+		campaignBaseAnnotationsList.add(baseAnnotations);
+		campaign.setBaseAnnotations(campaignBaseAnnotationsList);
+		DB.getCampaignDAO().makePermanent(campaign);
+		
+		ParallelAPICall.Priority.BACKEND.getExcecutionContext().execute(() -> 
+			internalDebiasAnnotationsIngestion(campaignName, json, userId, baseAnnotations.uuid)
+		);
+		return ok();
+
 	}
 
 	public static Result importAnnotationsFromNtuaModel(String campaignName, String motivation) throws ParseException {
