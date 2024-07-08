@@ -31,6 +31,34 @@ public class PropertyTextFragmentSelector extends PropertySelector {
 	
 	private int start;
 	private int end;
+
+	private String prefix;
+	private String suffix;
+	private String annotatedValue;
+
+	public String getPrefix() {
+        return prefix;
+    }
+
+	public void setPrefix(String prefix) {
+        this.prefix = prefix;
+    }
+
+	public String getSuffix() {
+        return suffix;
+    }
+
+	public void	setSuffix(String suffix) {
+		this.suffix = suffix;
+	}
+
+	public String getAnnotatedValue() {
+		return annotatedValue;
+	}
+
+	public void setAnnotatedValue(String annotatedValue) {
+        this.annotatedValue = annotatedValue;
+    }
 	
 	public int getStart() {
 		return start;
