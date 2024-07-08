@@ -917,106 +917,113 @@ public class CampaignController extends WithController {
 
 			JsonNode targets = annotation.get("target");
 			for (JsonNode targetJson : targets) {
-				Annotation newAnnotation = new Annotation();
-				newAnnotation.setMotivation(MotivationType.SubTagging);
-				newAnnotation.setBody(bdy);
-				
-				AnnotationAdmin administrative = new AnnotationAdmin();
-				administrative.setWithCreator(new ObjectId(userId));
-				administrative.setGenerated(new Date());
-				administrative.setCreated(new Date());
-				administrative.setLastModified(new Date());
-				administrative.setGenerator("CrowdHeritage " + campaignName);
-				administrative.setExternalCreatorType(CreatorType.Software);
-				administrative.setExternalCreatorName("DE-BIAS TOOL");
-				newAnnotation.setAnnotators(new ArrayList(Arrays.asList(administrative)));
+				try {
 
-				AnnotationTarget tgt = new AnnotationTarget();
-				String externalId = targetJson.get("source").asText();
+					
+					Annotation newAnnotation = new Annotation();
+					newAnnotation.setMotivation(MotivationType.SubTagging);
+					newAnnotation.setBody(bdy);
+					
+					AnnotationAdmin administrative = new AnnotationAdmin();
+					administrative.setWithCreator(new ObjectId(userId));
+					administrative.setGenerated(new Date());
+					administrative.setCreated(new Date());
+					administrative.setLastModified(new Date());
+					administrative.setGenerator("CrowdHeritage " + campaignName);
+					administrative.setExternalCreatorType(CreatorType.Software);
+					administrative.setExternalCreatorName("DE-BIAS TOOL");
+					newAnnotation.setAnnotators(new ArrayList(Arrays.asList(administrative)));
 
-				// hugo did not send the / in the europeana id so we need to normalize
-				RecordResource r = DB.getRecordResourceDAO().getByAnnotationExternalId(externalId);
-				if (r == null) {
-					externalId = "/" + externalId;
-					r = DB.getRecordResourceDAO().getByAnnotationExternalId(externalId);
-				}
-				tgt.setExternalId(externalId);
-				tgt.setRecordId(r.getDbId());
-				tgt.setWithURI("/record/" + r.getDbId());
+					AnnotationTarget tgt = new AnnotationTarget();
+					String externalId = targetJson.get("source").asText();
 
-				PropertyTextFragmentSelector selector = new PropertyTextFragmentSelector();
-				JsonNode selectorJson = targetJson.get("selector");
-				JsonNode refinedBy = selectorJson.get("refinedBy");
-				
-				selector.setPrefix(refinedBy.get("prefix").asText());
-				selector.setSuffix(refinedBy.get("suffix").asText());
-				selector.setAnnotatedValue(refinedBy.get("exact").get("@value").asText());
+					// hugo did not send the / in the europeana id so we need to normalize
+					RecordResource r = DB.getRecordResourceDAO().getByAnnotationExternalId(externalId);
+					if (r == null) {
+						externalId = "/" + externalId;
+						r = DB.getRecordResourceDAO().getByAnnotationExternalId(externalId);
+					}
+					tgt.setExternalId(externalId);
+					tgt.setRecordId(r.getDbId());
+					tgt.setWithURI("/record/" + r.getDbId());
 
-				Language lang = Language.getLanguageByCode(refinedBy.get("exact").get("@language").asText());
-				String property = selectorJson.get("hasPredicate").asText();
-				selector.setOrigLang(lang);
-				// newAnnotation.setScope(scope);
-				selector.setProperty(property);
-				// we could have more than one values for each language.
-				// we check whether the combination of prefix, annotated value and suffix exists as a substring on each candidate value
-				String originalValue = "";
-				String valueToCheck = selector.getPrefix() + selector.getAnnotatedValue() + selector.getSuffix();
-				if (property.equals("dc:title")) {
-					for (String val : r.getDescriptiveData().getLabel().get(lang)) {
-						if (val.contains(valueToCheck)) {
-							originalValue = val;
-                            break;
+					PropertyTextFragmentSelector selector = new PropertyTextFragmentSelector();
+					JsonNode selectorJson = targetJson.get("selector");
+					JsonNode refinedBy = selectorJson.get("refinedBy");
+					
+					selector.setPrefix(refinedBy.get("prefix").asText());
+					selector.setSuffix(refinedBy.get("suffix").asText());
+					selector.setAnnotatedValue(refinedBy.get("exact").get("@value").asText());
+
+					Language lang = Language.getLanguageByCode(refinedBy.get("exact").get("@language").asText());
+					String property = selectorJson.get("hasPredicate").asText();
+					selector.setOrigLang(lang);
+					// newAnnotation.setScope(scope);
+					selector.setProperty(property);
+					// we could have more than one values for each language.
+					// we check whether the combination of prefix, annotated value and suffix exists as a substring on each candidate value
+					String originalValue = "";
+					String valueToCheck = selector.getPrefix() + selector.getAnnotatedValue() + selector.getSuffix();
+					if (property.equals("dc:title")) {
+						for (String val : r.getDescriptiveData().getLabel().get(lang)) {
+							if (val.contains(valueToCheck)) {
+								originalValue = val;
+								break;
+							}
 						}
 					}
-				}
-				else if (property.equals("dc:description")) {
-					for (String val : r.getDescriptiveData().getDescription().get(lang)) {
-						if (val.contains(valueToCheck)) {
-							originalValue = val;
-                            break;
-						}
-					}				
-				}
-				else if (property.equals("dc:type")) {
-					for (String val : ((CulturalObjectData) r.getDescriptiveData()).getDctype().get(lang)) {
-                        if (val.contains(valueToCheck)) {
-                            originalValue = val;
-                            break;
-                        }
-                    }                
-				}
-				else if (property.equals("dc:subject")) {
-					for (String val : ((CulturalObjectData) r.getDescriptiveData()).getKeywords().get(lang)) {
-                        if (val.contains(valueToCheck)) {
-                            originalValue = val;
-                            break;
-                        }
-                    }  
-				}
+					else if (property.equals("dc:description")) {
+						for (String val : r.getDescriptiveData().getDescription().get(lang)) {
+							if (val.contains(valueToCheck)) {
+								originalValue = val;
+								break;
+							}
+						}				
+					}
+					else if (property.equals("dc:type")) {
+						for (String val : ((CulturalObjectData) r.getDescriptiveData()).getDctype().get(lang)) {
+							if (val.contains(valueToCheck)) {
+								originalValue = val;
+								break;
+							}
+						}                
+					}
+					else if (property.equals("dc:subject")) {
+						for (String val : ((CulturalObjectData) r.getDescriptiveData()).getKeywords().get(lang)) {
+							if (val.contains(valueToCheck)) {
+								originalValue = val;
+								break;
+							}
+						}  
+					}
 
-				selector.setOrigValue(originalValue);
+					selector.setOrigValue(originalValue);
 
-				String prefix = selector.getPrefix();
-				String annotatedValue = selector.getAnnotatedValue();
-				int start = -1;
-				int end = -1;
-				if (prefix == null || prefix.isEmpty()) {
-					start = 0;
-				}
-				else {
-					start = originalValue.indexOf(prefix) + prefix.length();
-				}
-				end = start + annotatedValue.length();
+					String prefix = selector.getPrefix();
+					String annotatedValue = selector.getAnnotatedValue();
+					int start = -1;
+					int end = -1;
+					if (prefix == null || prefix.isEmpty()) {
+						start = 0;
+					}
+					else {
+						start = originalValue.indexOf(prefix) + prefix.length();
+					}
+					end = start + annotatedValue.length();
 
-				selector.setStart(start);
-				selector.setEnd(end);
-				tgt.setSelector(selector);
-				newAnnotation.setTarget(tgt);
-				DB.getAnnotationDAO().makePermanent(newAnnotation);
-				newAnnotation.setAnnotationWithURI("/annotation/" + newAnnotation.getDbId());
-				DB.getAnnotationDAO().makePermanent(newAnnotation); // is this needed for a second time?
-				DB.getRecordResourceDAO().addAnnotation(newAnnotation.getTarget().getRecordId(), newAnnotation.getDbId(),
-						userId);
+					selector.setStart(start);
+					selector.setEnd(end);
+					tgt.setSelector(selector);
+					newAnnotation.setTarget(tgt);
+					DB.getAnnotationDAO().makePermanent(newAnnotation);
+					newAnnotation.setAnnotationWithURI("/annotation/" + newAnnotation.getDbId());
+					DB.getAnnotationDAO().makePermanent(newAnnotation); // is this needed for a second time?
+					DB.getRecordResourceDAO().addAnnotation(newAnnotation.getTarget().getRecordId(), newAnnotation.getDbId(),
+							userId);
+				}
+				catch (Exception e) {
+                    e.printStackTrace();
+                }
 			}
 		}
 	}
