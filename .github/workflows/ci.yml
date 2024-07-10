@@ -83,5 +83,5 @@ jobs:
       run: |
         echo "${{ secrets.WITH_CI_SSH_KEY }}" > /tmp/sshkey
         chmod 600 /tmp/sshkey 
-        ssh -i /tmp/sshkey -o StrictHostKeyChecking=no ${DEPLOY_USER}@${DEPLOY_SERVER} "cd /etc/docker && DOCKER_CONFIG=~/.docker  /usr/local/bin/docker-compose pull ${CONTAINER_NAME}-${{ steps.extract_branch.outputs.branch }} && /usr/local/bin/docker-compose up -d ${CONTAINER_NAME}-${{ steps.extract_branch.outputs.branch }} "
+        ssh -i /tmp/sshkey -o StrictHostKeyChecking=no ${DEPLOY_USER}@${DEPLOY_SERVER} "cd /etc/docker && DOCKER_CONFIG=~/.docker  docker compose pull ${CONTAINER_NAME}-${{ steps.extract_branch.outputs.branch }} && docker compose up -d ${CONTAINER_NAME}-${{ steps.extract_branch.outputs.branch }} "
 

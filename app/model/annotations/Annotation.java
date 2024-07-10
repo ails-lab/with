@@ -508,7 +508,7 @@ public class Annotation<T extends AnnotationBody> {
 		ObjectNode target = om.createObjectNode();
 		AnnotationTarget tgt = this.getTarget();
 		if ( tgt.getExternalId()!= null) {
-			target.put("source", this.getExternalId().toString());
+			target.put("source", tgt.getExternalId());
 		}
 		else {
 			if (tgt.getRecordId() != null) {
