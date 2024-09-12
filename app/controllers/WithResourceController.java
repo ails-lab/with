@@ -297,30 +297,28 @@ public class WithResourceController extends WithController {
 											media = new EmbeddedMediaObject(
 													existingMedia);
 									}
-								} else {
-									return badRequest("A media url has to be provided.");
-								}
-								// TODO: careful, the user is allowed to set
-								// the media fields as s/he wishes,
-								// if the media url doesn't already exist.
-								// The first time that a request for caching
-								// that url is issued, the MediaObject that
-								// is created in the db will be filled by
-								// parseMediaURL, possibly with values that
-								// are different from the
-								// embeddedMediaObject.
-								// in the record. In general, each user who
-								// adds a record with the same media url,
-								// before the media is actually saved in the
-								// db, may have a different version of media
-								// info.
-								// The call allows the user to specify
-								// a wrong version, e.g. create a media
-								// which claims
-								// to be thumbnail, but is full size. Can
-								// Marios find out the version (and correct
-								// it) during caching?
-								record.addMedia(version, media);
+									// TODO: careful, the user is allowed to set
+									// the media fields as s/he wishes,
+									// if the media url doesn't already exist.
+									// The first time that a request for caching
+									// that url is issued, the MediaObject that
+									// is created in the db will be filled by
+									// parseMediaURL, possibly with values that
+									// are different from the
+									// embeddedMediaObject.
+									// in the record. In general, each user who
+									// adds a record with the same media url,
+									// before the media is actually saved in the
+									// db, may have a different version of media
+									// info.
+									// The call allows the user to specify
+									// a wrong version, e.g. create a media
+									// which claims
+									// to be thumbnail, but is full size. Can
+									// Marios find out the version (and correct
+									// it) during caching?
+									record.addMedia(version, media);
+								}	
 							}
 						}
 					}
@@ -376,7 +374,7 @@ public class WithResourceController extends WithController {
 			JsonContextRecord rec = new JsonContextRecord(json);
 			rec.setValue("dbId",recordId.toString());
 			rec.setValue("administrative.withURI","/record/" + recordId);
-			return ok(result);
+			return ok(Json.toJson(record));
 		} catch (Exception e) {
 			log.error(e.getMessage(), e);
 			result.put("error", e.getMessage());
