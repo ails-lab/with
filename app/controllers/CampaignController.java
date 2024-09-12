@@ -1056,6 +1056,9 @@ public class CampaignController extends WithController {
 					else if (requestedMotivation.equals(MotivationType.ColorTagging)) {
 						annotationBody = new AnnotationBodyColorTagging();
 					}
+					else if (requestedMotivation.equals(MotivationType.SubTagging)) {
+						annotationBody = new AnnotationBodySubTagging();
+					}
 					else {
 						annotationBody = new AnnotationBodyImageTagging();
 					}
