@@ -1113,7 +1113,7 @@ public class CampaignController extends WithController {
 								.ifPresent(color -> annotationBody.setLabel(new MultiLiteral(color.getLabel()).fillDEF()));
 					}
 					if (motivationType.equals(MotivationType.SubTagging) || motivationType.equals(MotivationType.Tagging)) {
-						ThesaurusObject term = DB.getThesaurusDAO().getByUri(bdy.asText());
+						ThesaurusObject term = DB.getThesaurusDAO().getByUri(body.asText());
 						annotationBody.setLabel(new MultiLiteral(term.getSemantic().getPrefLabel()));
 						annotationBody.setDescription(new MultiLiteral(term.getSemantic().getDescription()));
 						annotationBody.setUriVocabulary(term.getSemantic().getVocabulary().getName());
