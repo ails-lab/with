@@ -12,6 +12,10 @@ and offers a number of added-value services for the creative reuse and intellige
 * Automatic and manual enrichment of cultural data.
 * User and Collection management system.
 
+## Docker
+
+🐳 [Docker Image](https://hub.docker.com/repository/docker/ailslab/crowdheritage-backend/general)
+
 ## Getting Started
 
 [Download sbt](https://www.scala-sbt.org/download.html) and run:
