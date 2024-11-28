@@ -31,7 +31,8 @@ import model.basicDataTypes.Language;
 import model.basicDataTypes.Literal;
 import model.basicDataTypes.MultiLiteral;
 import model.basicDataTypes.MultiLiteralOrResource;
-
+import model.resources.CulturalObject.CulturalObjectData;
+import model.resources.RecordResource;
 import org.bson.types.ObjectId;
 import org.mongodb.morphia.annotations.Embedded;
 import org.mongodb.morphia.annotations.Entity;
@@ -55,7 +56,7 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import db.DB;
-import com.fasterxml.jackson.databind.node.NullNode;
+import org.apache.commons.text.similarity.LevenshteinDistance;
 
 @SuppressWarnings("unchecked")
 @JsonInclude(value = JsonInclude.Include.NON_NULL)
@@ -523,13 +524,64 @@ public class Annotation<T extends AnnotationBody> {
 			ObjectNode selector = om.createObjectNode();
 			selector.put("type", "RDFPropertySelector");
 			selector.put("property", slct.getProperty());
-			if (slct.getOrigValue() != null) {
+			if (slct.getOrigValue() != null && !slct.getOrigValue().isEmpty()) {
 				ObjectNode destination = om.createObjectNode();
 				destination.put("type", "Literal");
 				destination.put("value", slct.getOrigValue());
 				destination.put("language", slct.getOrigLang().toString().toLowerCase());
 				selector.set("destination", destination);
 			} 
+			else {
+				Language lang = slct.getOrigLang();
+				String property = slct.getProperty();
+				RecordResource r = DB.getRecordResourceDAO().getById(tgt.getRecordId());
+				LevenshteinDistance distance = new LevenshteinDistance();
+				String valueToCheck = slct.getPrefix() + slct.getAnnotatedValue() + slct.getSuffix();
+				String closestMatch = null; 
+    			int minDistance = Integer.MAX_VALUE; 
+			
+					if (property.equals("dc:title")) {
+						for (String val : r.getDescriptiveData().getLabel().get(lang)) {
+							int currentDistance = distance.apply(valueToCheck, val);
+							if (currentDistance < minDistance) {
+								minDistance = currentDistance;
+								closestMatch = val;
+							}
+						}
+					}
+					else if (property.equals("dc:description")) {
+						for (String val : r.getDescriptiveData().getDescription().get(lang)) {
+							int currentDistance = distance.apply(valueToCheck, val);
+							if (currentDistance < minDistance) {
+								minDistance = currentDistance;
+								closestMatch = val;
+							}
+						}				
+					}
+					else if (property.equals("dc:type")) {
+						for (String val : ((CulturalObjectData) r.getDescriptiveData()).getDctype().get(lang)) {
+							int currentDistance = distance.apply(valueToCheck, val);
+							if (currentDistance < minDistance) {
+								minDistance = currentDistance;
+								closestMatch = val;
+							}
+						}                
+					}
+					else if (property.equals("dc:subject")) {
+						for (String val : ((CulturalObjectData) r.getDescriptiveData()).getKeywords().get(lang)) {
+							int currentDistance = distance.apply(valueToCheck, val);
+							if (currentDistance < minDistance) {
+								minDistance = currentDistance;
+								closestMatch = val;
+							}
+						}  
+					}
+					ObjectNode destination = om.createObjectNode();
+					destination.put("type", "Literal");
+					destination.put("value", closestMatch);
+					destination.put("language", slct.getOrigLang().toString().toLowerCase());
+					selector.set("destination", destination);
+			}
 
 			if (slct.getStart() != 0 && slct.getEnd() != 0) {
 				ObjectNode refinedBy = om.createObjectNode();
@@ -565,6 +617,8 @@ public class Annotation<T extends AnnotationBody> {
 				int finalScore = approvals - rejections;
 				ObjectNode review = om.createObjectNode();
 				review.put("type", "Validation");
+				review.put("upvotes", approvals);
+				review.put("downvotes", rejections);
 				if (finalScore > 0) {
 					review.put("recommendation", "accept");
 					result.set("review", review);
