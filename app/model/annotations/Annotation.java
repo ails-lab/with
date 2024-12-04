@@ -539,7 +539,9 @@ public class Annotation<T extends AnnotationBody> {
 				String valueToCheck = slct.getPrefix() + slct.getAnnotatedValue() + slct.getSuffix();
 				String closestMatch = null; 
     			int minDistance = Integer.MAX_VALUE; 
-			
+
+				try {
+
 					if (property.equals("dc:title")) {
 						for (String val : r.getDescriptiveData().getLabel().get(lang)) {
 							int currentDistance = distance.apply(valueToCheck, val);
@@ -576,11 +578,19 @@ public class Annotation<T extends AnnotationBody> {
 							}
 						}  
 					}
+
+				}
+				catch (Exception e) {
+					closestMatch = "";
+				}
+				finally {
 					ObjectNode destination = om.createObjectNode();
 					destination.put("type", "Literal");
 					destination.put("value", closestMatch);
 					destination.put("language", slct.getOrigLang().toString().toLowerCase());
 					selector.set("destination", destination);
+				}	
+
 			}
 
 			if (slct.getStart() != 0 && slct.getEnd() != 0) {
