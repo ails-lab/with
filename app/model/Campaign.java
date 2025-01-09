@@ -409,8 +409,8 @@ public class Campaign {
 	private boolean isPublic;
 
 	private boolean hasPublicResults;
-	private boolean allowComments;
-	private boolean allowRating;
+	private boolean hideComments;
+	private boolean hideRating;
 
 	@JsonSerialize(using = Serializer.ObjectIdArraySerializer.class)
 //	@JsonDeserialize(using = Deserializer.ObjectIdArraySerializer.class)
@@ -550,12 +550,12 @@ public class Campaign {
 		isPublic = aPublic;
 	}
 
-	public boolean getAllowComments() {
-		return this.allowComments;
+	public boolean getHideComments() {
+		return this.hideComments;
 	}
 
-	public void setAllowComments( boolean allowComments ) {
-		this.allowComments = allowComments;
+	public void setHideComments( boolean hideComments ) {
+		this.hideComments = hideComments;
 	}
 
 	public boolean getHasPublicResults( ) {
@@ -566,11 +566,11 @@ public class Campaign {
 		this.hasPublicResults = hasPublicResults;
 	}
 
-	public boolean getAllowRating() {
-		return this.allowRating;
+	public boolean getHideRating() {
+		return this.hideRating;
 	}
-	public void setAllowRating( boolean allowRating ) {
-		this.allowRating = allowRating;
+	public void setHideRating( boolean hideRating ) {
+		this.hideRating = hideRating;
 	}
 
 	public Boolean getActive() {
