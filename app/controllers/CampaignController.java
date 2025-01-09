@@ -197,6 +197,18 @@ public class CampaignController extends WithController {
 			campaign.setIsPublic(json.get("isPublic").asBoolean());
 		}
 
+		if( json.has( "allowRating" )) {
+			campaign.setAllowRating( json.get( "allowRating").asBoolean());
+		}
+		if( json.has( "allowComments" )) {
+			campaign.setAllowComments( json.get( "allowComments").asBoolean());
+		}
+		if( json.has( "hasPublicResults" )) {
+			campaign.setHasPublicResults( json.get( "hasPublicResults").asBoolean());
+		}
+
+
+
 		if (json.has("vocabularyMapping")) {
 			campaign.setVocabularyMapping(newCampaign.getVocabularyMapping());
 		}

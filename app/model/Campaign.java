@@ -407,7 +407,11 @@ public class Campaign {
 	private Literal disclaimer;
 
 	private boolean isPublic;
-	
+
+	private boolean hasPublicResults;
+	private boolean allowComments;
+	private boolean allowRating;
+
 	@JsonSerialize(using = Serializer.ObjectIdArraySerializer.class)
 //	@JsonDeserialize(using = Deserializer.ObjectIdArraySerializer.class)
 	private Set<ObjectId> creators = new HashSet<ObjectId>();
@@ -544,6 +548,29 @@ public class Campaign {
 
 	public void setIsPublic(boolean aPublic) {
 		isPublic = aPublic;
+	}
+
+	public boolean getAllowComments() {
+		return this.allowComments;
+	}
+
+	public void setAllowComments( boolean allowComments ) {
+		this.allowComments = allowComments;
+	}
+
+	public boolean getHasPublicResults( ) {
+		return this.hasPublicResults;
+	}
+
+	public void setHasPublicResults( boolean hasPublicResults ) {
+		this.hasPublicResults = hasPublicResults;
+	}
+
+	public boolean getAllowRating() {
+		return this.allowRating;
+	}
+	public void setAllowRating( boolean allowRating ) {
+		this.allowRating = allowRating;
 	}
 
 	public Boolean getActive() {
