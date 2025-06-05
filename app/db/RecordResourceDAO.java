@@ -298,8 +298,10 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 			List<ObjectId> recordIds = (List<ObjectId>) CollectionUtils.collect(collectedResources,
 					new BeanToPropertyValueTransformer("target.recordId"));
 			q.field("_id").in(recordIds);
-			q.or(q.criteria("annotationIds").doesNotExist(),
-					q.criteria("annotationIds").sizeEq(0));
+			q.or(q.criteria("administrative.annotators." + userId).doesNotExist(),
+					q.criteria("administrative.annotators." + userId).lessThan(1));
+			// q.or(q.criteria("annotationIds").doesNotExist(),
+			// 		q.criteria("annotationIds").sizeEq(0));
 			return this.find(q).asList();
 		} catch (Exception e) {
 			return new ArrayList<RecordResource>();
@@ -312,8 +314,10 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 			List<ObjectId> recordIds = (List<ObjectId>) CollectionUtils.collect(collectedResources,
 					new BeanToPropertyValueTransformer("target.recordId"));
 			q.field("_id").in(recordIds);
-			q.and(q.criteria("annotationIds").exists(),
-					q.criteria("annotationIds").not().sizeEq(0));
+			q.or(q.criteria("administrative.annotators." + userId).exists(),
+					q.criteria("administrative.annotators." + userId).greaterThan(0));
+			// q.and(q.criteria("annotationIds").exists(),
+			// 		q.criteria("annotationIds").not().sizeEq(0));
 			return this.find(q).asList();
 		} catch (Exception e) {
 			return new ArrayList<RecordResource>();
