@@ -16,7 +16,7 @@
 # 
 # RUN sbt stage
 
-FROM openjdk:8-slim-buster
+FROM openjdk:8u102-jdk
 
 WORKDIR /app
 
@@ -25,7 +25,7 @@ ENV PORT=80
 ENV CONFIG_FILE=/app/conf/local.conf
 
 COPY .github/files/GEANT_OV_RSA_CA_4.crt /etc/pki/GEANT.crt
-RUN keytool -importcert -noprompt -trustcacerts -alias GEANT_OV_RSA_CA_4 -storepass changeit -keystore /usr/local/openjdk-8/jre/lib/security/cacerts -file /etc/pki/GEANT.crt
+RUN keytool -importcert -noprompt -trustcacerts -alias GEANT_OV_RSA_CA_4 -storepass changeit -keystore /usr/lib/jvm/java-8-openjdk-amd64/jre/lib/security/cacerts -file /etc/pki/GEANT.crt
 COPY ./target/universal/stage /app
 
 

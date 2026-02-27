@@ -6,7 +6,8 @@ on:
      - pgeor/citest
      - dev
      - master
-
+  workflow_dispatch:
+  
 jobs:
   build:
     runs-on: [self-hosted]
