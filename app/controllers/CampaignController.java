@@ -1041,26 +1041,60 @@ public class CampaignController extends WithController {
 	}
 
 	public static void internalNtuaModelAnnotationsImport(String campaignName, MotivationType motivationType, JsonNode json, String userId, String baseAnnotationsUUID) {
-		JsonNode annotations = json.get("@graph");
-		Campaign campaign = DB.getCampaignDAO().getCampaignByName(campaignName);
-		
-		List<Campaign.ColorInfo> colorTerminology = null;
-		if (motivationType.equals(MotivationType.ColorTagging)) {
-			colorTerminology = campaign.getColorTaggingColorsTerminology();
-		}
+		System.out.println("=== Starting internalNtuaModelAnnotationsImport ===");
+		System.out.println("Campaign Name: " + campaignName);
+		System.out.println("Motivation Type: " + motivationType);
+		System.out.println("User ID: " + userId);
+		System.out.println("Base Annotations UUID: " + baseAnnotationsUUID);
 
-		AtomicInteger successfulAnnotationImports = new AtomicInteger();
-		AtomicInteger failedAnnotationImports = new AtomicInteger();
-		for (JsonNode annotation : annotations) {
-			try {
-				JsonNode body = annotation.get("body");
-				/*
-					We need to parse the body which will either be text (e.g. "body": "http://wikidata.org/entity/Q23"
-					or string containing a uri, or an Array (TODO: we will deal with that later).
-				*/
-				List<AnnotationBody> bodies = new ArrayList<>();
+		try {
+			JsonNode annotations = json.get("@graph");
+			System.out.println("Retrieved @graph node from JSON");
 
-				Function<MotivationType, AnnotationBodyTagging> annotationBodyFactory = (requestedMotivation) -> {
+			if (annotations == null) {
+				System.out.println("ERROR: @graph node is null!");
+				return;
+			}
+
+			Campaign campaign = DB.getCampaignDAO().getCampaignByName(campaignName);
+			System.out.println("Retrieved campaign: " + (campaign != null ? campaign.getUsername() : "null"));
+
+			if (campaign == null) {
+				System.out.println("ERROR: Campaign is null!");
+				return;
+			}
+
+			List<Campaign.ColorInfo> colorTerminology = null;
+			if (motivationType.equals(MotivationType.ColorTagging)) {
+				colorTerminology = campaign.getColorTaggingColorsTerminology();
+				System.out.println("Color terminology loaded: " + (colorTerminology != null ? colorTerminology.size() + " items" : "null"));
+			}
+
+			AtomicInteger successfulAnnotationImports = new AtomicInteger();
+			AtomicInteger failedAnnotationImports = new AtomicInteger();
+
+			System.out.println("Processing " + annotations.size() + " annotations");
+
+			int annotationIndex = 0;
+			for (JsonNode annotation : annotations) {
+				annotationIndex++;
+				System.out.println("--- Processing annotation " + annotationIndex + " of " + annotations.size() + " ---");
+				try {
+					JsonNode body = annotation.get("body");
+					System.out.println("  Body node type: " + (body != null ? body.getNodeType() : "null"));
+
+					if (body == null) {
+						System.out.println("  ERROR: Body is null for annotation " + annotationIndex);
+						throw new Exception("Body is null");
+					}
+
+					/*
+						We need to parse the body which will either be text (e.g. "body": "http://wikidata.org/entity/Q23"
+						or string containing a uri, or an Array (TODO: we will deal with that later).
+					*/
+					List<AnnotationBody> bodies = new ArrayList<>();
+
+					Function<MotivationType, AnnotationBodyTagging> annotationBodyFactory = (requestedMotivation) -> {
 					AnnotationBodyTagging annotationBody;
 					if (requestedMotivation.equals(MotivationType.Tagging)) {
 						annotationBody = new AnnotationBodyTagging();
@@ -1077,111 +1111,192 @@ public class CampaignController extends WithController {
 					return annotationBody;
 				};
 
-				/* First case: body is an object, so based on NTUA annotation model
-				we have the free text annotation option, which translates to Commenting
-				*/
-				if (body.isObject()) {
-					AnnotationBodyCommenting annotationBody = new AnnotationBodyCommenting();
-					MultiLiteral label = new MultiLiteral(Language.getLanguageByCode(body.get("language").textValue()), body.get("value").textValue());
-					label.fillDEF();
-					annotationBody.setLabel(label);
-					bodies.add(annotationBody);
-				}
-				/* Second case: body is an array, so it is some variation of tagging. In this approach,
-				we check to see if it is either plain tagging or ColorTagging
-				*/
-				else if (body.isArray()) {
-					for (JsonNode bdy : body) {
-						AnnotationBodyTagging annotationBody = annotationBodyFactory.apply(motivationType);
-						annotationBody.setUri(bdy.asText());
-						if (motivationType.equals(MotivationType.ColorTagging) && colorTerminology != null) {
-							String uri = bdy.asText();
-							colorTerminology.stream()
-								.filter(color -> uri.equals(color.getUri()))
-								.findAny()
-								.ifPresent(color -> annotationBody.setLabel(new MultiLiteral(color.getLabel()).fillDEF()));
+					/* First case: body is an object, so based on NTUA annotation model
+					we have the free text annotation option, which translates to Commenting
+					*/
+					if (body.isObject()) {
+						System.out.println("  Body is an Object - treating as Commenting");
+						try {
+							AnnotationBodyCommenting annotationBody = new AnnotationBodyCommenting();
+							MultiLiteral label = new MultiLiteral(Language.getLanguageByCode(body.get("language").textValue()), body.get("value").textValue());
+							label.fillDEF();
+							annotationBody.setLabel(label);
+							bodies.add(annotationBody);
+							System.out.println("  Successfully created Commenting body");
+						} catch (Exception e) {
+							System.out.println("  ERROR creating Commenting body: " + e.getMessage());
+							e.printStackTrace();
+							throw e;
 						}
-					
-						if (motivationType.equals(MotivationType.SubTagging) || motivationType.equals(MotivationType.Tagging)) {
-							ThesaurusObject term = DB.getThesaurusDAO().getByUri(bdy.asText());
-							annotationBody.setLabel(new MultiLiteral(term.getSemantic().getPrefLabel()));
-							annotationBody.setDescription(new MultiLiteral(term.getSemantic().getDescription()));
-							annotationBody.setUriVocabulary(term.getSemantic().getVocabulary().getName());
+					}
+					/* Second case: body is an array, so it is some variation of tagging. In this approach,
+					we check to see if it is either plain tagging or ColorTagging
+					*/
+					else if (body.isArray()) {
+						System.out.println("  Body is an Array with " + body.size() + " elements - treating as Tagging");
+						try {
+							int bodyIndex = 0;
+							for (JsonNode bdy : body) {
+								bodyIndex++;
+								System.out.println("    Processing body element " + bodyIndex + ": " + bdy.asText());
+								try {
+									AnnotationBodyTagging annotationBody = annotationBodyFactory.apply(motivationType);
+									annotationBody.setUri(bdy.asText());
+									if (motivationType.equals(MotivationType.ColorTagging) && colorTerminology != null) {
+										String uri = bdy.asText();
+										colorTerminology.stream()
+											.filter(color -> uri.equals(color.getUri()))
+											.findAny()
+											.ifPresent(color -> annotationBody.setLabel(new MultiLiteral(color.getLabel()).fillDEF()));
+									}
+
+									if (motivationType.equals(MotivationType.SubTagging) || motivationType.equals(MotivationType.Tagging)) {
+										ThesaurusObject term = DB.getThesaurusDAO().getByUri(bdy.asText());
+										if (term == null) {
+											System.out.println("    ERROR: Thesaurus term not found for URI: " + bdy.asText());
+										} else {
+											annotationBody.setLabel(new MultiLiteral(term.getSemantic().getPrefLabel()));
+											annotationBody.setDescription(new MultiLiteral(term.getSemantic().getDescription()));
+											annotationBody.setUriVocabulary(term.getSemantic().getVocabulary().getName());
+											System.out.println("    Successfully set thesaurus term");
+										}
+									}
+									bodies.add(annotationBody);
+								} catch (Exception e) {
+									System.out.println("    ERROR processing body element " + bodyIndex + ": " + e.getMessage());
+									e.printStackTrace();
+									throw e;
+								}
+							}
+						} catch (Exception e) {
+							System.out.println("  ERROR processing Array body: " + e.getMessage());
+							e.printStackTrace();
+							throw e;
 						}
-						bodies.add(annotationBody);
+					}
+					/* Third case: body is a string, so it is some variation of tagging. In this approach,
+					we check to see if it is either plain tagging or ColorTagging
+					*/
+					else {
+						System.out.println("  Body is a String: " + body.asText());
+						try {
+							AnnotationBodyTagging annotationBody = annotationBodyFactory.apply(motivationType);
+							annotationBody.setUri(body.asText());
+							if (motivationType.equals(MotivationType.ColorTagging) && colorTerminology != null) {
+									String uri = body.asText();
+									colorTerminology.stream()
+										.filter(color -> uri.equals(color.getUri()))
+										.findAny()
+										.ifPresent(color -> annotationBody.setLabel(new MultiLiteral(color.getLabel()).fillDEF()));
+							}
+							if (motivationType.equals(MotivationType.SubTagging) || motivationType.equals(MotivationType.Tagging)) {
+								ThesaurusObject term = DB.getThesaurusDAO().getByUri(body.asText());
+								if (term == null) {
+									System.out.println("  ERROR: Thesaurus term not found for URI: " + body.asText());
+								} else {
+									annotationBody.setLabel(new MultiLiteral(term.getSemantic().getPrefLabel()));
+									annotationBody.setDescription(new MultiLiteral(term.getSemantic().getDescription()));
+									annotationBody.setUriVocabulary(term.getSemantic().getVocabulary().getName());
+									System.out.println("  Successfully set thesaurus term");
+								}
+							}
+							bodies.add(annotationBody);
+							System.out.println("  Successfully created String body");
+						} catch (Exception e) {
+							System.out.println("  ERROR creating String body: " + e.getMessage());
+							e.printStackTrace();
+							throw e;
+						}
+					}
+
+					System.out.println("  Created " + bodies.size() + " annotation bodies");
+
+					int bodyCount = 0;
+					for (AnnotationBody annBody : bodies) {
+						bodyCount++;
+						System.out.println("  -- Creating annotation from body " + bodyCount + " --");
+						try {
+							Annotation newAnnotation = new Annotation();
+							newAnnotation.setMotivation(motivationType);
+							newAnnotation.setBody(annBody);
+
+							if (annotation.has("id")) {
+								String annotationExternalId = annotation.get("id").asText();
+								newAnnotation.setExternalId(annotationExternalId);
+								System.out.println("  External ID: " + annotationExternalId);
+							}
+
+							System.out.println("  Parsing annotation admin...");
+							AnnotationAdmin annotationAdmin = parseAnnotationAdmin(campaignName, annotation, userId);
+							newAnnotation.setAnnotators(new ArrayList(Arrays.asList(annotationAdmin)));
+
+							System.out.println("  Parsing annotation target...");
+							AnnotationTarget annotationTarget = parseAnnotationTarget(annotation);
+
+							System.out.println("  Finding corresponding record resource...");
+							findCorrespondingRecordResource(annotationTarget);
+							System.out.println("  Record ID: " + annotationTarget.getRecordId());
+
+							newAnnotation.setTarget(annotationTarget);
+							if (annotation.has("scope")) {
+								String scope = annotation.get("scope").asText();
+								newAnnotation.setScope(scope);
+								System.out.println("  Scope: " + scope);
+							}
+
+							System.out.println("  Saving annotation to database...");
+							DB.getAnnotationDAO().makePermanent(newAnnotation);
+							newAnnotation.setAnnotationWithURI("/annotation/" + newAnnotation.getDbId());
+							DB.getAnnotationDAO().makePermanent(newAnnotation); // is this needed for a second time?
+
+							System.out.println("  Adding annotation to record resource...");
+							DB.getRecordResourceDAO().addAnnotation(newAnnotation.getTarget().getRecordId(), newAnnotation.getDbId(),
+									userId);
+
+							successfulAnnotationImports.getAndIncrement();
+							System.out.println("  Successfully imported annotation (body " + bodyCount + ")");
+						} catch (Exception e) {
+							System.out.println("  ERROR saving annotation from body " + bodyCount + ": " + e.getMessage());
+							e.printStackTrace();
+							throw e;
+						}
 					}
 				}
-				/* Third case: body is a string, so it is some variation of tagging. In this approach,
-				we check to see if it is either plain tagging or ColorTagging
-				*/ 
-				else {
-					AnnotationBodyTagging annotationBody = annotationBodyFactory.apply(motivationType);				
-					annotationBody.setUri(body.asText());
-					if (motivationType.equals(MotivationType.ColorTagging) && colorTerminology != null) {
-							String uri = body.asText();
-							colorTerminology.stream()
-								.filter(color -> uri.equals(color.getUri()))
-								.findAny()
-								.ifPresent(color -> annotationBody.setLabel(new MultiLiteral(color.getLabel()).fillDEF()));
-					}
-					if (motivationType.equals(MotivationType.SubTagging) || motivationType.equals(MotivationType.Tagging)) {
-						ThesaurusObject term = DB.getThesaurusDAO().getByUri(body.asText());
-						annotationBody.setLabel(new MultiLiteral(term.getSemantic().getPrefLabel()));
-						annotationBody.setDescription(new MultiLiteral(term.getSemantic().getDescription()));
-						annotationBody.setUriVocabulary(term.getSemantic().getVocabulary().getName());
-					}
-					bodies.add(annotationBody);
+				catch (Exception e) {
+					failedAnnotationImports.getAndIncrement();
+					System.out.println("  FAILED to process annotation " + annotationIndex + ": " + e.getMessage());
+					e.printStackTrace();
 				}
 
-				for (AnnotationBody annBody : bodies) {
-					Annotation newAnnotation = new Annotation();
-					newAnnotation.setMotivation(motivationType);
-					newAnnotation.setBody(annBody);
-
-					if (annotation.has("id")) {
-						String annotationExternalId = annotation.get("id").asText();
-						newAnnotation.setExternalId(annotationExternalId);
-					}
-					AnnotationAdmin annotationAdmin = parseAnnotationAdmin(campaignName, annotation, userId);
-					newAnnotation.setAnnotators(new ArrayList(Arrays.asList(annotationAdmin)));
-					
-					AnnotationTarget annotationTarget = parseAnnotationTarget(annotation);
-					findCorrespondingRecordResource(annotationTarget);
-
-					newAnnotation.setTarget(annotationTarget);
-					if (annotation.has("scope")) {
-						String scope = annotation.get("scope").asText();
-						newAnnotation.setScope(scope);
-					}
-					DB.getAnnotationDAO().makePermanent(newAnnotation);
-					newAnnotation.setAnnotationWithURI("/annotation/" + newAnnotation.getDbId());
-					DB.getAnnotationDAO().makePermanent(newAnnotation); // is this needed for a second time?
-					DB.getRecordResourceDAO().addAnnotation(newAnnotation.getTarget().getRecordId(), newAnnotation.getDbId(),
-							userId);
-					successfulAnnotationImports.getAndIncrement();
-				}
 			}
-			catch (Exception e) {
-				failedAnnotationImports.getAndIncrement();
-			}
-			
+
+			final int successfulAnnotationImportsFinal = successfulAnnotationImports.get();
+			final int failedAnnotationImportsFinal = failedAnnotationImports.get();
+
+			System.out.println("=== Annotation import complete ===");
+			System.out.println("Successful: " + successfulAnnotationImportsFinal);
+			System.out.println("Failed: " + failedAnnotationImportsFinal);
+
+			campaign.getBaseAnnotations().stream()
+				.filter(baseAnnotations -> baseAnnotations.uuid.equals(baseAnnotationsUUID))
+				.findFirst()
+				.ifPresent(baseAnnotations -> {
+
+					baseAnnotations.status = successfulAnnotationImportsFinal == 0
+												? Campaign.BaseAnnotationsImportStatus.FAILED
+												: Campaign.BaseAnnotationsImportStatus.COMPLETED;
+					baseAnnotations.uploadedAt = new Date();
+					baseAnnotations.successCount = successfulAnnotationImportsFinal;
+					baseAnnotations.failedCount = failedAnnotationImportsFinal;
+					DB.getCampaignDAO().makePermanent(campaign);
+					System.out.println("Updated campaign base annotations status");
+				});
+		} catch (Exception e) {
+			System.out.println("=== CRITICAL ERROR in internalNtuaModelAnnotationsImport ===");
+			System.out.println("Error: " + e.getMessage());
+			e.printStackTrace();
 		}
-		final int successfulAnnotationImportsFinal = successfulAnnotationImports.get();
-		final int failedAnnotationImportsFinal = failedAnnotationImports.get();
-
-		campaign.getBaseAnnotations().stream()
-			.filter(baseAnnotations -> baseAnnotations.uuid.equals(baseAnnotationsUUID))
-			.findFirst()
-			.ifPresent(baseAnnotations -> {
-				
-				baseAnnotations.status = successfulAnnotationImportsFinal == 0 
-											? Campaign.BaseAnnotationsImportStatus.FAILED 
-											: Campaign.BaseAnnotationsImportStatus.COMPLETED;
-				baseAnnotations.uploadedAt = new Date();
-				baseAnnotations.successCount = successfulAnnotationImportsFinal;
-				baseAnnotations.failedCount = failedAnnotationImportsFinal;
-				DB.getCampaignDAO().makePermanent(campaign);
-			});
+		System.out.println("=== Finished internalNtuaModelAnnotationsImport ===");
 	}
 
 	public static Result importDebiasAnnotations(String campaignName) throws ParseException {
