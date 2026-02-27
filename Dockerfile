@@ -16,7 +16,7 @@
 # 
 # RUN sbt stage
 
-FROM openjdk:8-slim-buster
+FROM openjdk:8u102-jdk
 
 WORKDIR /app
 
