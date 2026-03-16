@@ -16,17 +16,19 @@
 # 
 # RUN sbt stage
 
-FROM openjdk:8u102-jdk
+FROM eclipse-temurin:25-jre AS cacerts-source
+
+# Stage 2: actual application image
+FROM openjdk:8u342-jdk
 
 WORKDIR /app
-
 ENV _JAVA_OPTS=""
 ENV PORT=80
 ENV CONFIG_FILE=/app/conf/local.conf
 
-COPY .github/files/GEANT_OV_RSA_CA_4.crt /etc/pki/GEANT.crt
-RUN keytool -importcert -noprompt -trustcacerts -alias GEANT_OV_RSA_CA_4 -storepass changeit -keystore /usr/lib/jvm/java-8-openjdk-amd64/jre/lib/security/cacerts -file /etc/pki/GEANT.crt
+# Copy the updated cacerts from the modern JRE image
+COPY --from=cacerts-source /opt/java/openjdk/lib/security/cacerts \
+     /usr/lib/jvm/java-8-openjdk-amd64/jre/lib/security/cacerts
+
 COPY ./target/universal/stage /app
-
-
 CMD /app/bin/with -Dhttp.address=0.0.0.0 -Dhttp.port=$PORT -Dconfig.file=$CONFIG_FILE
